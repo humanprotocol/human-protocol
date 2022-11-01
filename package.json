@@ -1,0 +1,12 @@
+{
+  "private": "true",
+  "name": "human-protocol",
+  "version": "1.0.0",
+  "description": "Human Protocol Monorepo",
+  "main": "index.ts",
+  "repository": "https://github.com/humanprotocol/human-protocol",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ]
+}
