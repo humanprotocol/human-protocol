@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
     "format:scripts": "prettier --write '**/*.ts'",
-    "format": "concurrently npm:format:contracts npm:format:scripts"
+    "format": "yarn format:contracts && yarn format:scripts"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -41,7 +41,9 @@
     "xdeployer": "1.1.20"
   },
   "lint-staged": {
-    "*.sol": "yarn format:contracts",
-    "*.ts": "yarn format:scripts && yarn lint:fix"
+    "*.{sol,ts}": [
+      "yarn format",
+      "yarn lint:fix"
+    ]
   }
 }
