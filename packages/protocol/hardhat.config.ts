@@ -54,9 +54,11 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
     },
     hardhat: {
-      forking: {
-        url: process.env.ETH_GOERLI_TESTNET_URL || 'http://localhost:8545',
-      },
+      forking: process.env.FORKING_URL
+        ? {
+            url: process.env.FORKING_URL,
+          }
+        : undefined,
     },
     tenderly: {
       url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
