@@ -42,8 +42,8 @@
   },
   "lint-staged": {
     "*.{sol,ts}": [
-      "yarn format",
-      "yarn lint:fix"
+      "yarn workspace @human-protocol/protocol format",
+      "yarn workspace @human-protocol/protocol lint:fix"
     ]
   }
 }
