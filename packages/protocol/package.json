@@ -39,5 +39,9 @@
     "solidity-coverage": "^0.8.2",
     "typechain": "^8.1.1",
     "xdeployer": "1.1.20"
+  },
+  "lint-staged": {
+    "*.sol": "yarn format:contracts",
+    "*.ts": "yarn format:scripts && yarn lint:fix"
   }
 }

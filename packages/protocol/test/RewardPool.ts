@@ -149,8 +149,10 @@ describe('RewardPool', function () {
       const event = result.events?.[0].args;
 
       expect(event?.eip20).to.equal(token.address, 'token address is correct');
-      expect(event?.escrow).to.not.be.null;
-      expect(event?.counter.toString()).to.equal('1', 'counter is correct');
+      expect(event?.escrow)
+      .to.not.be.null;
+      expect(event?.counter
+        .toString()).to.equal('1', 'counter is correct');
 
       escrowAddress = event?.escrow;
 
