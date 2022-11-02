@@ -1,0 +1,17 @@
+name: Lint
+
+on: [pull_request]
+
+jobs:
+  tests:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: borales/actions-yarn@v3.0.0
+        with:
+          node-version: 16
+          cmd: install
+      - uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: lint
