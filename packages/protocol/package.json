@@ -1,0 +1,43 @@
+{
+  "name": "@human-protocol/protocol",
+  "license": "MIT",
+  "version": "1.0.0",
+  "description": "Human protocol smart contracts",
+  "main": "hardhat.config.ts",
+  "scripts": {
+    "compile": "hardhat compile",
+    "verify": "hardhat verify",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "local": "hardhat node",
+    "deploy": "hardhat run scripts/deploy.ts",
+    "deploy:local": "yarn deploy --network localhost",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format:contracts": "prettier --write '**/*.sol'",
+    "format:scripts": "prettier --write '**/*.ts'",
+    "format": "concurrently npm:format:contracts npm:format:scripts"
+  },
+  "devDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.2.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.2",
+    "@tenderly/hardhat-tenderly": "^1.1.6",
+    "@typechain/ethers-v5": "^10.1.1",
+    "@typechain/hardhat": "^6.1.4",
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^10.0.0",
+    "chai": "^4.3.6",
+    "hardhat": "^2.12.2",
+    "hardhat-abi-exporter": "^2.10.1",
+    "hardhat-contract-sizer": "^2.6.1",
+    "hardhat-gas-reporter": "^1.0.9",
+    "prettier-plugin-solidity": "^1.0.0-beta.24",
+    "solidity-coverage": "^0.8.2",
+    "typechain": "^8.1.1",
+    "xdeployer": "1.1.20"
+  }
+}
