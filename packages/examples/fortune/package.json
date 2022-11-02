@@ -1,0 +1,8 @@
+{
+    "private": "true",
+    "name": "@human-protocol/fortune",
+    "version": "1.0.0",
+    "description": "Human Protocol Fortune Exchange Oracle",
+    "license": "MIT"
+  }
+  

@@ -1,0 +1,8 @@
+{
+    "private": "true",
+    "name": "@human-protocol/reputation-oracle",
+    "version": "1.0.0",
+    "description": "Human Protocol Reputation Oracle",
+    "license": "MIT"
+  }
+  
