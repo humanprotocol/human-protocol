@@ -8,6 +8,7 @@
   "scripts": {
     "protocol:test": "yarn workspace @human-protocol/protocol test",
     "protocol:test:coverage": "yarn workspace @human-protocol/protocol test:coverage",
+    "protocol:lint": "yarn workspace @human-protocol/protocol lint",
     "protocol:local": "yarn workspace @human-protocol/protocol local",
     "protocol:local:deploy": "yarn workspace @human-protocol/protocol deploy:local",
     "test": "concurrently npm:protocol:test",
