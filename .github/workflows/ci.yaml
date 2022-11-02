@@ -3,8 +3,8 @@ name: CI
 on: [pull_request]
 
 jobs:
-  protocol-test:
-    name: Protocol Test
+  core-test:
+    name: Core Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,7 +13,7 @@ jobs:
           cmd: install
       - uses: borales/actions-yarn@v3.0.0
         with:
-          cmd: protocol:test
+          cmd: core:test
   lint:
     name: Lint
     runs-on: ubuntu-latest

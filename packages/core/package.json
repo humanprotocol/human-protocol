@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/protocol",
+  "name": "@human-protocol/core",
   "license": "MIT",
   "version": "1.0.0",
   "description": "Human protocol smart contracts",
@@ -41,9 +41,12 @@
     "xdeployer": "1.1.20"
   },
   "lint-staged": {
-    "*.{sol,ts}": [
-      "yarn workspace @human-protocol/protocol format",
-      "yarn workspace @human-protocol/protocol lint:fix"
+    "*.sol": [
+      "yarn workspace @human-protocol/core format"
+    ],
+    "*.ts": [
+      "yarn workspace @human-protocol/core format",
+      "yarn workspace @human-protocol/core lint:fix"
     ]
   }
 }

@@ -6,13 +6,13 @@
   "repository": "https://github.com/humanprotocol/human-protocol",
   "license": "MIT",
   "scripts": {
-    "protocol:test": "yarn workspace @human-protocol/protocol test",
-    "protocol:test:coverage": "yarn workspace @human-protocol/protocol test:coverage",
-    "protocol:lint": "yarn workspace @human-protocol/protocol lint",
-    "protocol:local": "yarn workspace @human-protocol/protocol local",
-    "protocol:local:deploy": "yarn workspace @human-protocol/protocol deploy:local",
-    "test": "concurrently npm:protocol:test",
-    "lint": "concurrently npm:protocol:lint",
+    "core:test": "yarn workspace @human-protocol/core test",
+    "core:test:coverage": "yarn workspace @human-protocol/core test:coverage",
+    "core:lint": "yarn workspace @human-protocol/core lint",
+    "core:local": "yarn workspace @human-protocol/core local",
+    "core:local:deploy": "yarn workspace @human-protocol/core deploy:local",
+    "test": "concurrently npm:core:test",
+    "lint": "concurrently npm:core:lint",
     "prepare": "husky install"
   },
   "workspaces": [
