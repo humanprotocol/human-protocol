@@ -96,5 +96,5 @@ interface IStaking {
     function getListOfStakers(Stakes.Role _role)
         external
         view
-        returns (address[] memory);
+        returns (address[] memory, Stakes.Staker[] memory);
 }

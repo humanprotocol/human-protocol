@@ -10,11 +10,13 @@ import {
 } from '../typechain-types';
 
 const mineNBlocks = async (n: number) => {
-  Array(n)
-    .fill(0)
-    .forEach(async () => {
-      await ethers.provider.send('evm_mine', []);
-    });
+  await Promise.all(
+    Array(n)
+      .fill(0)
+      .map(async () => {
+        await ethers.provider.send('evm_mine', []);
+      })
+  );
 };
 
 describe('Staking', function () {
@@ -62,24 +64,26 @@ describe('Staking', function () {
     token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
 
     // Send HMT tokens to contract participants
-    [
-      validator,
-      operator,
-      operator2,
-      operator3,
-      exchangeOracle,
-      reputationOracle,
-      recordingOracle,
-    ].forEach(async (account) => {
-      await token.connect(owner).approve(await account.getAddress(), 1000);
-      await token
-        .connect(account)
-        .transferFrom(
-          await owner.getAddress(),
-          await account.getAddress(),
-          1000
-        );
-    });
+    await Promise.all(
+      [
+        validator,
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+      ].map(async (account) => {
+        await token.connect(owner).approve(await account.getAddress(), 1000);
+        await token
+          .connect(account)
+          .transferFrom(
+            await owner.getAddress(),
+            await account.getAddress(),
+            1000
+          );
+      })
+    );
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
@@ -848,36 +852,44 @@ describe('Staking', function () {
     const stakedTokens = 2;
 
     this.beforeEach(async () => {
-      [
-        operator,
-        operator2,
-        operator3,
-        exchangeOracle,
-        reputationOracle,
-        recordingOracle,
-      ].forEach(async (account, index) => {
-        await staking
-          .connect(owner)
-          .setStaker(await account.getAddress(), Role.Operator);
-        await staking.connect(account).stake(stakedTokens * (index + 1));
-      });
+      await Promise.all(
+        [
+          operator,
+          operator2,
+          operator3,
+          exchangeOracle,
+          reputationOracle,
+          recordingOracle,
+        ].map(async (account, index) => {
+          await staking
+            .connect(owner)
+            .setStaker(await account.getAddress(), Role.Operator);
+          await staking.connect(account).stake(stakedTokens * (index + 1));
+        })
+      );
     });
 
     it('Should return list of stakers', async () => {
-      const stakers = await staking.getListOfStakers(Role.Operator);
+      const [stakers, stakes] = await staking.getListOfStakers(Role.Operator);
 
       expect(stakers.length).to.equal(6);
+      expect(stakes.length).to.equal(6);
 
-      [
-        operator,
-        operator2,
-        operator3,
-        exchangeOracle,
-        reputationOracle,
-        recordingOracle,
-      ].forEach(async (account, index) => {
-        expect(stakers[index]).to.equal(await account.getAddress());
-      });
+      await Promise.all(
+        [
+          operator,
+          operator2,
+          operator3,
+          exchangeOracle,
+          reputationOracle,
+          recordingOracle,
+        ].map(async (account, index) => {
+          expect(stakers[index]).to.equal(await account.getAddress());
+          expect(stakes[index].tokensStaked.toString()).to.equal(
+            (stakedTokens * (index + 1)).toString()
+          );
+        })
+      );
     });
   });
 });

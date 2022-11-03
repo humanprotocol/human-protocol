@@ -358,13 +358,27 @@ contract Staking is IStaking {
         return stakes[_staker];
     }
 
+    /**
+     * @dev Get list of stakers per role
+     * @param _role Staker role
+     * @return List of staker's addresses, and stake data
+     */
     function getListOfStakers(Stakes.Role _role)
         external
         view
         override
-        returns (address[] memory)
+        returns (address[] memory, Stakes.Staker[] memory)
     {
-        return stakers[_role];
+        address[] memory _stakerAddresses = stakers[_role];
+        uint256 _stakersCount = _stakerAddresses.length;
+
+        Stakes.Staker[] memory _stakers = new Stakes.Staker[](_stakersCount);
+
+        for (uint256 _i = 0; _i < _stakersCount; _i++) {
+            _stakers[_i] = stakes[_stakerAddresses[_i]];
+        }
+
+        return (_stakerAddresses, _stakers);
     }
 
     /**
