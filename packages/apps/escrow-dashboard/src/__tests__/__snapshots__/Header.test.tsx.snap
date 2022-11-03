@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header component renders correctly, corresponds to the snapshot 1`] = `
+<div
+  className="MuiBox-root css-i9gxme"
+>
+  <header
+    className="MuiPaper-root MuiPaper-elevation MuiPaper-elevation4 MuiAppBar-root MuiAppBar-colorPrimary MuiAppBar-positionFixed mui-fixed css-164jy24-MuiPaper-root-MuiAppBar-root"
+  >
+    <div
+      className="MuiToolbar-root MuiToolbar-regular css-r6ewbb-MuiToolbar-root"
+    >
+      <div
+        className="MuiBox-root css-1qtwkyj"
+      >
+        <div
+          className="MuiBox-root css-70qvj9"
+        >
+          <img
+            alt="logo"
+            src="test-file-stub"
+          />
+          <h6
+            className="MuiTypography-root MuiTypography-h6 css-i6uuzy-MuiTypography-root"
+          >
+            Scan
+          </h6>
+        </div>
+        <div
+          className="MuiBox-root css-84nudp"
+        >
+          <a
+            className="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-q1xa4c-MuiTypography-root-MuiLink-root"
+            href="https://humanprotocol.org"
+            onBlur={[Function]}
+            onFocus={[Function]}
+            target="_blank"
+          >
+            <p
+              className="MuiTypography-root MuiTypography-body2 css-hoiwr4-MuiTypography-root"
+            >
+              HUMAN Website
+            </p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+`;

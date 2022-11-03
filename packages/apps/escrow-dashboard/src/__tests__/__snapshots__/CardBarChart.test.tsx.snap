@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CardBarChart component renders correctly, corresponds to the snapshot 1`] = `
+<div
+  className="MuiBox-root css-1ncz59t"
+>
+  <p
+    className="MuiTypography-root MuiTypography-body2 css-dapz8w-MuiTypography-root"
+  >
+    Title
+  </p>
+  <h2
+    className="MuiTypography-root MuiTypography-h2 css-1ag1ig1-MuiTypography-root"
+  >
+    100
+  </h2>
+  <div
+    className="MuiBox-root css-zgm2l"
+  >
+    <div
+      className="recharts-responsive-container"
+      style={
+        Object {
+          "height": "100%",
+          "maxHeight": undefined,
+          "minHeight": undefined,
+          "minWidth": undefined,
+          "width": "100%",
+        }
+      }
+    />
+  </div>
+</div>
+`;

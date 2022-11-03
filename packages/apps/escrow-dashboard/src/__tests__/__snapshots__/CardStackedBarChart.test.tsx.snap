@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CardBarChart component renders correctly, corresponds to the snapshot 1`] = `
+<div
+  className="MuiBox-root css-1ncz59t"
+>
+  <div
+    className="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+  >
+    <div
+      className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-12 MuiGrid-grid-md-8 css-9drkqd-MuiGrid-root"
+    >
+      <div
+        className="MuiBox-root css-1vykxz6"
+      >
+        <div
+          className="recharts-responsive-container"
+          style={
+            Object {
+              "height": "100%",
+              "maxHeight": undefined,
+              "minHeight": undefined,
+              "minWidth": undefined,
+              "width": "100%",
+            }
+          }
+        />
+      </div>
+    </div>
+    <div
+      className="MuiGrid-root MuiGrid-container MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-12 MuiGrid-grid-md-4 css-tgim99-MuiGrid-root"
+    >
+      <div
+        className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6 MuiGrid-grid-md-12 css-1k1029z-MuiGrid-root"
+      >
+        <p
+          className="MuiTypography-root MuiTypography-body2 css-dapz8w-MuiTypography-root"
+        >
+          Amount of Escrows
+        </p>
+        <h2
+          className="MuiTypography-root MuiTypography-h2 css-1ag1ig1-MuiTypography-root"
+        >
+          100
+        </h2>
+      </div>
+      <div
+        className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 MuiGrid-grid-sm-6 MuiGrid-grid-md-12 css-1k1029z-MuiGrid-root"
+      >
+        <p
+          className="MuiTypography-root MuiTypography-body2 css-t8mj2z-MuiTypography-root"
+        >
+          All Escrows Pending Events
+        </p>
+        <h2
+          className="MuiTypography-root MuiTypography-h2 css-15bms1-MuiTypography-root"
+        >
+          100
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+`;

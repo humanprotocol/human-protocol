@@ -1,0 +1,58 @@
+{
+  "extends": [ 
+    "airbnb",
+    "plugin:prettier/recommended", 
+    "prettier"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"]
+      },
+      "typescript": {}
+    }
+  },
+  "parserOptions": { 
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    "consistent-return": 0,
+    "import/prefer-default-export": 0,
+    "no-case-declarations": 0,
+    "no-alert": 0,
+    "no-console": 0,
+    "no-underscore-dangle": 0,
+    "no-unused-vars": 0,
+    "react/jsx-filename-extension": 0,
+    "react/prop-types": 0,
+    "react/no-unescaped-entities": 0,
+    "react/require-default-props": 0,
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-empty-interface": 0,
+    "@typescript-eslint/no-var-requires": 0
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
+  "env": {
+    "browser": true,
+    "jest": true,
+    "node": true
+  }
+}
