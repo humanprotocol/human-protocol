@@ -1,0 +1,11 @@
+{
+    "job_title": "Requesting fortunes from the fortunes teller",
+    "job_type": "fortune",
+    "fortunes_requested": 2,
+    "recording_oracle_address": "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
+    "reputation_oracle_address": "0xD979105297fB0eee83F7433fC09279cb5B94fFC6",
+    "exchange_oracle_address": "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
+    "recording_oracle_url": "http://localhost/recording/job/results",
+    "reputation_oracle_url": "http://localhost/reputation/job/results",
+    "exchange_oracle_url": "http://localhost/exchange"
+}

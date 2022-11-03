@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "test:e2e-backend": "jest tests/e2e-backend --runInBand"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "dotenv": "^16.0.0",
+    "jest": "^27.5.1",
+    "web3": "^1.7.3"
+  }
+}
