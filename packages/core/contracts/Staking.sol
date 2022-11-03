@@ -358,6 +358,15 @@ contract Staking is IStaking {
         return stakes[_staker];
     }
 
+    function getListOfStakers(Stakes.Role _role)
+        external
+        view
+        override
+        returns (address[] memory)
+    {
+        return stakers[_role];
+    }
+
     /**
      * @dev Deposit tokens on the staker stake.
      * @param _tokens Amount of tokens to stake

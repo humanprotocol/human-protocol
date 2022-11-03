@@ -843,4 +843,41 @@ describe('Staking', function () {
       });
     });
   });
+
+  describe('getListOfStakers', function () {
+    const stakedTokens = 2;
+
+    this.beforeEach(async () => {
+      [
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+      ].forEach(async (account, index) => {
+        await staking
+          .connect(owner)
+          .setStaker(await account.getAddress(), Role.Operator);
+        await staking.connect(account).stake(stakedTokens * (index + 1));
+      });
+    });
+
+    it('Should return list of stakers', async () => {
+      const stakers = await staking.getListOfStakers(Role.Operator);
+
+      expect(stakers.length).to.equal(6);
+
+      [
+        operator,
+        operator2,
+        operator3,
+        exchangeOracle,
+        reputationOracle,
+        recordingOracle,
+      ].forEach(async (account, index) => {
+        expect(stakers[index]).to.equal(await account.getAddress());
+      });
+    });
+  });
 });
