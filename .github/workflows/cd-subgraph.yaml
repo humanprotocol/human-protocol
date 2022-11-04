@@ -17,6 +17,23 @@ jobs:
   subgraph:
     name: Deploy Subgraph
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        network:
+          - name: matic
+            graph: polygon
+          - name: goerli
+            graph: goerli
+          - name: moonbeam
+            graph: moonbeam
+          - name: bsc
+            graph: bsc
+          - name: chapel
+            graph: bsctest
+          - name: mumbai
+            graph: mumbai
+      fail-fast: true
+      max-parallel: 3
     steps:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
@@ -27,57 +44,13 @@ jobs:
         name: Authenticate Graph CLI
         env:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
-
       - run: yarn generate
-        name: Generate Subgraph for Polygon
+        name: Generate Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: matic
-      - run: graph deploy --product hosted-service humanprotocol/polygon
-        name: Deploy Subgraph on Polygon
-        working-directory: ./packages/sdk/typescript/subgraph
-
-      - run: yarn generate
-        name: Generate Subgraph for Goerli
+          NETWORK: ${{ matrix.network.name }}
+      - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
+        name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: goerli
-      - run: graph deploy --product hosted-service humanprotocol/goerli
-        name: Deploy Subgraph on Goreli
-        working-directory: ./packages/sdk/typescript/subgraph
-
-      - run: yarn generate
-        name: Generate Subgraph for Moonbeam
-        working-directory: ./packages/sdk/typescript/subgraph
-        env:
-          NETWORK: moonbeam
-      - run: graph deploy --product hosted-service humanprotocol/moonbeam
-        name: Deploy Subgraph on Moonbeam
-        working-directory: ./packages/sdk/typescript/subgraph
-
-      - run: yarn generate
-        name: Generate Subgraph for Binance Smart Chain
-        working-directory: ./packages/sdk/typescript/subgraph
-        env:
-          NETWORK: bsc
-      - run: graph deploy --product hosted-service humanprotocol/bsc
-        name: Deploy Subgraph on Binance Smart Chain
-        working-directory: ./packages/sdk/typescript/subgraph
-
-      - run: yarn generate
-        name: Generate Subgraph for Binance Smart Chain Testnet
-        working-directory: ./packages/sdk/typescript/subgraph
-        env:
-          NETWORK: chapel
-      - run: graph deploy --product hosted-service humanprotocol/bsctest
-        name: Deploy Subgraph on Binance Smart Chain Testnet
-        working-directory: ./packages/sdk/typescript/subgraph
-
-      - run: yarn generate
-        name: Generate Subgraph for Mumbai Testnet
-        working-directory: ./packages/sdk/typescript/subgraph
-        env:
-          NETWORK: mumbai
-      - run: graph deploy --product hosted-service humanprotocol/mumbai
-        name: Deploy Subgraph on Mumbai Testnet
-        working-directory: ./packages/sdk/typescript/subgraph
+          NETWORK: ${{ matrix.network.graph }}
