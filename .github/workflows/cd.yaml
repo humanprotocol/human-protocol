@@ -18,10 +18,10 @@ jobs:
         name: Install dependencies
       - run: yarn compile
         name: Compile smart contracts
-        working_directory: ./packages/core
+        working-directory: ./packages/core
       - run: yarn publish --access public
         name: Publish NPM package
-        working_directory: ./packages/core
+        working-directory: ./packages/core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   subgraph:
