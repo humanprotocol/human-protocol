@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.2;
-
-import './interfaces/HMTokenInterface.sol';
-import './utils/Ownable.sol';
-import './utils/SafeMath.sol';
+import './HMTokenInterface.sol';
+import './SafeMath.sol';
+import './Ownable.sol';
 
 contract HMToken is HMTokenInterface, Ownable {
     using SafeMath for uint256;

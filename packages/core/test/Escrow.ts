@@ -2,7 +2,7 @@ import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
-import { Escrow, HMToken, RewardPool, Staking } from '../typechain-types';
+import { Escrow, HMToken } from '../typechain-types';
 
 describe('Escrow', function () {
   const MOCK_URL = 'http://google.com/fake';
@@ -26,13 +26,7 @@ describe('Escrow', function () {
     restAccounts: Signer[],
     trustedHandlers: string[];
 
-  let token: HMToken, escrow: Escrow, staking: Staking, rewardPool: RewardPool;
-
-  let escrowFactory: Signer;
-
-  const minimumStake = 2;
-  const lockPeriod = 2;
-  const rewardFee = 2;
+  let token: HMToken, escrow: Escrow;
 
   beforeEach(async () => {
     [
@@ -41,7 +35,6 @@ describe('Escrow', function () {
       reputationOracle,
       recordingOracle,
       externalAddress,
-      escrowFactory,
       ...restAccounts
     ] = await ethers.getSigners();
     trustedHandlers = [
@@ -53,31 +46,10 @@ describe('Escrow', function () {
     const HMToken = await ethers.getContractFactory('HMToken');
     token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
 
-    // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(
-      token.address,
-      await escrowFactory.getAddress(),
-      minimumStake,
-      lockPeriod
-    );
-
-    // Deploy Reward Pool Conract
-    const RewardPool = await ethers.getContractFactory('RewardPool');
-    rewardPool = await RewardPool.deploy(
-      token.address,
-      staking.address,
-      rewardFee
-    );
-
-    // Configure RewardPool in Staking
-    await staking.setRewardPool(rewardPool.address);
-
     // Deploy Escrow Contract
     const Escrow = await ethers.getContractFactory('Escrow');
     escrow = await Escrow.deploy(
       token.address,
-      staking.address,
       await owner.getAddress(),
       5,
       trustedHandlers
@@ -133,8 +105,8 @@ describe('Escrow', function () {
       });
 
       it('Should succeeds when aborting with not trusted address', async function () {
-        //const tx = await escrow.connect(externalAddress).abort()
-        //console.log(`Abort costs: ${tx.receipt.gasUsed} wei.`);
+        // const tx = await escrow.connect(externalAddress).abort()
+        // console.log(`Abort costs: ${tx.receipt.gasUsed} wei.`);
         await expect(
           escrow.connect(externalAddress).abort()
         ).to.be.revertedWith('Address calling not trusted');
@@ -215,6 +187,8 @@ describe('Escrow', function () {
           'IntermediateStorage',
           'IntermediateStorage event was not emitted'
         );
+        // expect(event._url).to.equal(MOCK_URL, "Manifest url is not correct")
+        // expect(event._hash).to.equal(MOCK_HASH, "Manifest hash is not correct")
       });
     });
   });
