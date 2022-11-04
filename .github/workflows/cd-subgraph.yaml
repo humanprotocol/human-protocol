@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ./packages/sdk/typescript/subgraph
+    # paths:
+    #   - ./packages/sdk/typescript/subgraph
   pull_request:
     branches:
       - main
-    paths:
-      - ./packages/sdk/typescript/subgraph
+    # paths:
+    #   - ./packages/sdk/typescript/subgraph
   workflow_dispatch:
 
 jobs:

@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ./packages/core
+    # paths:
+    #   - ./packages/core
   pull_request:
     branches:
       - main
-    paths:
-      - ./packages/core
+    # paths:
+    #   - ./packages/core
   workflow_dispatch:
 
 jobs:
