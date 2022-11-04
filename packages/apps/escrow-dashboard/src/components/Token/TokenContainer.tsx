@@ -11,7 +11,7 @@ export const TokenContainer: React.FC<
   ITokenContainer
 > = (): React.ReactElement => {
   return (
-    <Box mt={{ xs: 4, md: 8 }}>
+    <Box mt={{ xs: 4, md: 8 }} id="token">
       <ViewTitle title="Token" iconUrl="/images/token.svg" />
       <Box mt={{ xs: 4, md: 8 }}>
         <TokenView />

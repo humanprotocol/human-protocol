@@ -34,7 +34,7 @@ export default function BarChart({
       <Typography variant="body2" color="primary" fontWeight={600} mb="4px">
         {title}
       </Typography>
-      {totalValue && (
+      {totalValue !== undefined && (
         <Typography
           variant="h2"
           color="primary"

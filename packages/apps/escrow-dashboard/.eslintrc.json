@@ -1,8 +1,9 @@
 {
-  "extends": [ 
-    "airbnb",
-    "plugin:prettier/recommended", 
-    "prettier"
+  "extends": [
+    "plugin:import/recommended",
+    "plugin:prettier/recommended",
+    "prettier",
+    "react-app"
   ],
   "settings": {
     "import/resolver": {
@@ -12,7 +13,7 @@
       "typescript": {}
     }
   },
-  "parserOptions": { 
+  "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module"
   },

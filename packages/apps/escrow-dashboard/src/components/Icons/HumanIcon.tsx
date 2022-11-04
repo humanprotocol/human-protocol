@@ -1,9 +1,9 @@
-import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
+import SvgIcon from '@mui/material/SvgIcon';
+import type { SvgIconProps } from '@mui/material/SvgIcon';
 import React from 'react';
 
 export default function HumanIcon(props: SvgIconProps) {
   return (
-    // eslint-disable-next-line react/jsx-props-no-spreading
     <SvgIcon width="12" height="16" viewBox="0 0 12 16" fill="none" {...props}>
       <path
         fillRule="evenodd"

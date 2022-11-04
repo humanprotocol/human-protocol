@@ -12,7 +12,7 @@ export const EscrowContainer: React.FC<
   IEscrowContainer
 > = (): React.ReactElement => {
   return (
-    <Box>
+    <Box id="network">
       <ViewTitle title="Network" iconUrl="/images/network.svg" />
       <NetworkTab />
       <EscrowView />

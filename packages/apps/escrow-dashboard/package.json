@@ -5,7 +5,6 @@
   "description": "Human Protocol Escrow Dashboard",
   "license": "MIT",
   "dependencies": {
-    "@apollo/client": "^3.6.5",
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.0",
@@ -19,12 +18,10 @@
     "@types/node": "^17.0.38",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.2",
-    "babel-jest": "26.6.0",
     "classnames": "^2.3.1",
     "dayjs": "^1.11.5",
     "ethers": "^5.7.2",
     "graphql": "^16.5.0",
-    "graphql-tag": "^2.12.6",
     "numeral": "^2.0.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -41,15 +38,13 @@
   "devDependencies": {
     "@types/numeral": "^2.0.2",
     "eslint-config-airbnb": "18.2.1",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-import-resolver-typescript": "^2.7.1",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-react": "7.26.1",
     "eslint-plugin-react-hooks": "4.2.0",
     "identity-obj-proxy": "^3.0.0",
     "resize-observer-polyfill": "^1.5.1"
-  },
-  "optionalDependencies": {
-    "babel-loader": "8.1.0"
   },
   "scripts": {
     "lint": "eslint src",

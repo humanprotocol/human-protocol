@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 
-import { Escrow, Token } from 'src/components';
+import { Escrow, Token, Leaderboard } from 'src/components';
 import { NetworkProvider } from 'src/hooks/useNetwork';
 
 export const Main: React.FC = (): React.ReactElement => {
@@ -28,6 +28,7 @@ export const Main: React.FC = (): React.ReactElement => {
         <NetworkProvider>
           <Escrow />
           <Token />
+          <Leaderboard showAll={false} />
         </NetworkProvider>
       </Box>
     </Box>

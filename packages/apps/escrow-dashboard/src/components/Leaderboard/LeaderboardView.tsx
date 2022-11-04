@@ -12,7 +12,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ROLES } from 'src/constants';
 
 function createData(
@@ -32,26 +32,46 @@ const rows = [
   createData(3, '0x571e1ce87206f9...', ROLES[2], 30000, 4320, 1000),
   createData(4, '0x571e1ce87206f9...', ROLES[3], 30000, 4320, 1000),
   createData(5, '0x571e1ce87206f9...', ROLES[4], 30000, 4320, 1000),
+  createData(6, '0x571e1ce87206f9...', ROLES[1], 30000, 4320, 1000),
+  createData(7, '0x571e1ce87206f9...', ROLES[2], 30000, 4320, 1000),
+  createData(8, '0x571e1ce87206f9...', ROLES[3], 30000, 4320, 1000),
+  createData(9, '0x571e1ce87206f9...', ROLES[4], 30000, 4320, 1000),
+  createData(10, '0x571e1ce87206f9...', ROLES[0], 30000, 4320, 1000),
 ];
 
-export const LeaderboardView: React.FC = (): React.ReactElement => {
+export const LeaderboardView = ({
+  showAll = true,
+}: {
+  showAll?: boolean;
+}): React.ReactElement => {
+  const displayRows = useMemo(
+    () => (showAll ? rows : rows.slice(0, 5)),
+    [showAll]
+  );
+
   return (
     <Grid container>
-      <Grid item xs={12} sm={3} md={2}>
-        <Typography color="textSecondary" variant="body2" sx={{ pl: 5, py: 1 }}>
-          Role
-        </Typography>
-        <FormGroup>
-          {ROLES.map((role) => (
-            <FormControlLabel
-              componentsProps={{ typography: { color: 'textPrimary' } }}
-              control={<Checkbox />}
-              label={role}
-            />
-          ))}
-        </FormGroup>
-      </Grid>
-      <Grid item xs={12} sm={9} md={10}>
+      {showAll && (
+        <Grid item xs={12} sm={3} md={2}>
+          <Typography
+            color="textSecondary"
+            variant="body2"
+            sx={{ pl: 5, py: 1 }}
+          >
+            Role
+          </Typography>
+          <FormGroup>
+            {ROLES.map((role) => (
+              <FormControlLabel
+                componentsProps={{ typography: { color: 'textPrimary' } }}
+                control={<Checkbox />}
+                label={role}
+              />
+            ))}
+          </FormGroup>
+        </Grid>
+      )}
+      <Grid item xs={12} sm={showAll ? 9 : 12} md={showAll ? 10 : 12}>
         <TableContainer
           component={Paper}
           sx={{
@@ -72,7 +92,7 @@ export const LeaderboardView: React.FC = (): React.ReactElement => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
+              {displayRows.map((row) => (
                 <TableRow
                   key={row.id}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

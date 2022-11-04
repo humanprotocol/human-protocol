@@ -3,11 +3,11 @@ import React from 'react';
 import { useNetwork } from 'src/hooks/useNetwork';
 
 import PolygonIcon from '../../Icons/PolygonIcon';
+import MoonbeamIcon from '../../Icons/MoonbeamIcon';
 
 const tabs = [
   { id: 'polygon', title: 'Polygon', icon: <PolygonIcon /> },
-  // { id: 'rinkeby', title: 'Ethereum Rinkeby', icon: <PolygonIcon /> },
-  { id: 'moonbeam', title: 'Moonbeam', icon: <PolygonIcon /> },
+  { id: 'moonbeam', title: 'Moonbeam', icon: <MoonbeamIcon /> },
 ];
 
 export const NetworkTab = () => {
