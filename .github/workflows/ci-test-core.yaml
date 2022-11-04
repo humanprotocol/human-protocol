@@ -1,4 +1,4 @@
-name: CI
+name: Protocol check
 
 on:
   pull_request:
