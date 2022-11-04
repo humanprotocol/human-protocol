@@ -49,11 +49,11 @@ jobs:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
       - run: yarn generate
         name: Generate Subgraph
-        working_direcory: ./packages/sdk/typescript/subgraph
+        working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network }}
       - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
         name: Deploy subgraph
-        working_direcory: ./packages/sdk/typescript/subgraph
+        working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network }}
