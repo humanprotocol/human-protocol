@@ -1,5 +1,8 @@
 function convertUrl(url) {
-  return url.replace('localhost', 'host.docker.internal');
+  if(process.env.DOCKER){
+    return url.replace('localhost', 'host.docker.internal');
+  }
+  return url;
 }
 
 module.exports = convertUrl;

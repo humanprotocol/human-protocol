@@ -2,7 +2,7 @@ const { addresses, urls, stakes, gasLimit, escrowFundAmount} = require('./consta
 const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
-const manifest = require('../../docker-test-manifest.json');
+const manifest = require('../../manifest.json');
 
 const axios = require('axios');
 const Web3 = require('web3');
@@ -54,10 +54,10 @@ const setupEscrow = async(escrowAddress, repOracleAddress, recOracleAddress, reo
 const setupAgents = async() => {
     try {
         const {fortunes_requested: fortunesRequested } = (await axios.get(urls.localManifestUrl)).data;
-        const agents = {};
-
-        for (let i = 1; i <= fortunesRequested; i++) {
-            agents[`agent_${i}`] = await web3.eth.personal.newAccount(`Test: ${i}`);
+        const agents = [];
+        const accounts = await web3.eth.getAccounts();
+        for (let i = 3; i < (fortunesRequested+3); i++) {
+            agents[i-3] = accounts[i];
         }
 
         return agents;

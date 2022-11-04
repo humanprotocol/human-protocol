@@ -6,7 +6,7 @@ const { filterAddressesToReward, calculateRewardForWorker } = require('./service
 const { uploadResults } = require('./services/s3');
 
 const app = express();
-const privKey = process.env.ETH_PRIVATE_KEY || '657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8';
+const privKey = process.env.ETH_PRIVATE_KEY || '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://localhost:8545';
 const port = process.env.PORT || 3006;
 

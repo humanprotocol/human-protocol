@@ -13,12 +13,13 @@
     "minio": "docker compose --env-file=.env.development up minio-mc",
     "minio-test": "docker compose -f docker-compose.test.yml up minio-mc",
     "deploy:contracts": "cd ../../core && yarn && yarn deploy:local",
-    "local": "concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\"",
-    "local:test": "concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio-test\"",
-    "test:e2e-backend": "jest tests/e2e-backend --runInBand"
+    "local": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
+    "local:test": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
+    "test:e2e": "concurrently -k -s first \"yarn local:test\" \"yarn deploy:contracts && jest tests/e2e-backend --runInBand && return 0\"",
+    "test": ""
   },
   "devDependencies": {
-    "@human-protocol/core": "link:../../core",
+    "@human-protocol/core": "^1.0.6",
     "axios": "^1.1.3",
     "concurrently": "^7.5.0",
     "dotenv": "^16.0.3",

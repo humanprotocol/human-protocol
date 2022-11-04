@@ -29,10 +29,12 @@ describe('Cancel escrow', () => {
 
         const agentAddresses = await setupAgents();
 
-        const agent_1_res = await sendFortune(agentAddresses.agent_1, lastEscrowAddr);
+        const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
+
+        const agentOldBalance = await Token.methods.balanceOf(agentAddresses[0]).call();
+        const agent_1_res = await sendFortune(agentAddresses[0], lastEscrowAddr);
         expect(agent_1_res.status).toBe(201);
 
-        const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
         const account = (await web3.eth.getAccounts())[0];
         const cancellerBalance = BigInt(await Token.methods.balanceOf(account).call());
         const res = await Escrow.methods.cancel().send({ from: account });
@@ -49,8 +51,8 @@ describe('Cancel escrow', () => {
         const reputationOracleOldBalance = await Token.methods.balanceOf(addresses.repOracle).call();
         const recordingOracleOldBalance = await Token.methods.balanceOf(addresses.recOracle).call();
 
-        const agent_1_balance = await Token.methods.balanceOf(agentAddresses.agent_1).call();
-        expect(agent_1_balance).toBe(`0`);
+        const agent_1_balance = await Token.methods.balanceOf(agentAddresses[0]).call();
+        expect(agent_1_balance).toBe(agentOldBalance);
         const reputationOracleBalance = await Token.methods.balanceOf(addresses.repOracle).call();
         expect(reputationOracleBalance - reputationOracleOldBalance).toBe(0);
         const recordingOracleBalance = await Token.methods.balanceOf(addresses.recOracle).call();

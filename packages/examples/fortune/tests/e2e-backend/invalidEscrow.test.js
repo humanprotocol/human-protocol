@@ -85,7 +85,7 @@ describe('Invalid escrow', () => {
 
         await setupEscrow(lastEscrowAddr);
         // Send fortune to the escrow not in Pending state
-        let res = await sendFortune(agentAddresses.agent_1);
+        let res = await sendFortune(agentAddresses[0]);
         expect(res.status).toBe(400);
 
         escrowSt = await Escrow.methods.status().call();
@@ -97,18 +97,18 @@ describe('Invalid escrow', () => {
 
 
         // Send fortune with an invalid escrow address to the recording oracle
-        res = await sendFortune(agentAddresses.agent_1, escrowAddress = 'Invalid Address');
+        res = await sendFortune(agentAddresses[0], escrowAddress = 'Invalid Address');
         expect(res.status).toBe(400);
 
         // Send an empty fortuneto the recording oracle
-        res = await sendFortune(agentAddresses.agent_1, fortune = '');
+        res = await sendFortune(agentAddresses[0], fortune = '');
         expect(res.status).toBe(400);
 
         // Send a fortune twice from one account to the recording oracle
-        res = await sendFortune(agentAddresses.agent_1, lastEscrowAddr);
+        res = await sendFortune(agentAddresses[0], lastEscrowAddr);
         expect(res.status).toBe(201);
 
-        res = await sendFortune(agentAddresses.agent_1, lastEscrowAddr);
+        res = await sendFortune(agentAddresses[0], lastEscrowAddr);
         expect(res.status).toBe(400);
     });
 });

@@ -4,8 +4,6 @@ const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const { createEscrowFactory, createEscrow, fundEscrow, setupEscrow, setupAgents, sendFortune, calculateRewardAmount } = require('./fixtures');
 const { urls, statusesMap, addresses, escrowFundAmount } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
-const escrowAbi = escrowFile.abi;
-const hmtokenAbi = hmtokenFile.abi;
 
 describe('Positive flow', () => {
     test('Flow', async () => {
@@ -17,10 +15,9 @@ describe('Positive flow', () => {
 
         expect(statusesMap[escrowSt]).toBe('Launched');
         expect(lastEscrowAddr).not.toBe('0x0000000000000000000000000000000000000000');
-
+        
         await fundEscrow(lastEscrowAddr);
         await setupEscrow(lastEscrowAddr);
-
         escrowSt = await Escrow.methods.status().call();
         expect(statusesMap[escrowSt]).toBe('Pending');
 
@@ -33,27 +30,22 @@ describe('Positive flow', () => {
         const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
         const reputationOracleOldBalance = await Token.methods.balanceOf(addresses.repOracle).call();
         const recordingOracleOldBalance = await Token.methods.balanceOf(addresses.recOracle).call();
-
-        const agent_1_res = await sendFortune(agentAddresses.agent_1, lastEscrowAddr);
-        expect(agent_1_res.status).toBe(201);
-
-        const agent_2_res = await sendFortune(agentAddresses.agent_2, lastEscrowAddr);
-        expect(agent_2_res.status).toBe(201);
-
-        const agent_3_res = await sendFortune(agentAddresses.agent_3, lastEscrowAddr);
-        expect(agent_3_res.status).toBe(201);
+        const agentsOldBalances = [];
+        for (let i = 0; i < agentAddresses.length; i++) {
+            agentsOldBalances[i] = await Token.methods.balanceOf(agentAddresses[i]).call();
+            const agent_res = await sendFortune(agentAddresses[i], lastEscrowAddr);
+            expect(agent_res.status).toBe(201);
+        }
 
         escrowSt = await Escrow.methods.status().call();
         expect(statusesMap[escrowSt]).toBe('Paid');
 
         const rewards = await calculateRewardAmount();
+        for (let i = 0; i < agentAddresses.length; i++) {
+            const agent_balance = await Token.methods.balanceOf(agentAddresses[i]).call();
+            expect(agent_balance-agentsOldBalances[i]).toBe(rewards.totalWorkerReward);
+        }
 
-        const agent_1_balance = await Token.methods.balanceOf(agentAddresses.agent_1).call();
-        expect(agent_1_balance).toBe(`${rewards.totalWorkerReward}`);
-        const agent_2_balance = await Token.methods.balanceOf(agentAddresses.agent_2).call();
-        expect(agent_2_balance).toBe(`${rewards.totalWorkerReward}`);
-        const agent_3_balance = await Token.methods.balanceOf(agentAddresses.agent_3).call();
-        expect(agent_3_balance).toBe(`${rewards.totalWorkerReward}`);
         const reputationOracleBalance = await Token.methods.balanceOf(addresses.repOracle).call();
         expect(reputationOracleBalance - reputationOracleOldBalance).toBe(rewards.totalRepOracleReward);
         const recordingOracleBalance = await Token.methods.balanceOf(addresses.recOracle).call();
