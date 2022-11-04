@@ -21,11 +21,11 @@ jobs:
       - run: yarn compile
         name: Compile smart contracts
         working-directory: ./packages/core
-      - run: npm publish --access public
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+        name: NPM Auth
+      - run: yarn publish --access public
         name: Publish NPM package
         working-directory: ./packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   subgraph:
     name: Deploy Subgraph
     runs-on: ubuntu-latest
