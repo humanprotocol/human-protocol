@@ -17,4 +17,5 @@ jobs:
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
-        working-directory: ./packages/core
+          package: ./packages/core/package.json
+          access: 'public'
