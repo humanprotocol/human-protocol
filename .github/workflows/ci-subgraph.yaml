@@ -2,8 +2,8 @@ name: CI
 
 on:
   pull_request:
-    # paths:
-    #   - ./packages/sdk/typescript/subgraph
+    paths:
+      - packages/sdk/typescript/subgraph/**
   workflow_dispatch:
 
 jobs:
