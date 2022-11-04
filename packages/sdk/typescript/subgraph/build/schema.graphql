@@ -1,0 +1,113 @@
+type LaunchedEscrow @entity {
+  id: ID!
+  eip20: Bytes! # address
+  from: Bytes! # address
+  timestamp: BigInt!
+  count: BigInt
+}
+
+type ISEvent @entity {
+  id: ID!
+  timestamp: BigInt!
+  _url: String! # string
+  _hash: String! # string
+  count: BigInt
+}
+
+type PEvent @entity {
+  id: ID!
+  timestamp: BigInt!
+  _url: String! # string
+  _hash: String! # string
+  count: BigInt
+}
+
+type BulkTransferEvent @entity {
+  id: ID!
+  escrow: Bytes! # address
+  bulkCount: BigInt!
+  txId: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+  count: BigInt
+}
+
+type EscrowStatistics @entity {
+  id: ID!
+  intermediateStorageEventCount: BigInt!
+  pendingEventCount: BigInt!
+  bulkTransferEventCount: BigInt!
+  totalEventCount: BigInt!
+  totalEscrowCount: BigInt!
+}
+
+type HMTransferEvent @entity {
+  id: ID!
+  token: Bytes! # address
+  from: Bytes # address
+  to: Bytes # address
+  value: BigInt
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+  count: BigInt
+}
+
+type HMBulkTransferEvent @entity {
+  id: ID!
+  bulkCount: BigInt!
+  txId: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+  count: BigInt
+}
+
+type HMApprovalEvent @entity {
+  id: ID!
+  token: Bytes! #address
+  owner: Bytes! #address
+  spender: Bytes! #address
+  value: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+  count: BigInt
+}
+
+type HMBulkApprovalEvent @entity {
+  id: ID!
+  bulkCount: BigInt!
+  txId: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+  count: BigInt
+}
+
+type HMTokenStatistics @entity {
+  id: ID!
+  totalTransferEventCount: BigInt!
+  totalApprovalEventCount: BigInt!
+  totalBulkApprovalEventCount: BigInt!
+  totalBulkTransferEventCount: BigInt!
+  totalValueTransfered: BigInt!
+  token: Bytes! # token address
+  holders: BigInt!
+}
+
+type Holder @entity {
+  id: ID!
+  address: Bytes!
+  balance: BigInt!
+}
+
+type EventDayData @entity {
+  id: ID!
+  timestamp: Int!
+  dailyBulkTransferEvents: BigInt!
+  dailyIntermediateStorageEvents: BigInt!
+  dailyPendingEvents: BigInt!
+  dailyEscrowAmounts: BigInt!
+}
