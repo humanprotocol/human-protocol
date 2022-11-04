@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core-test:
+    name: Core Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install dependencies
+      - run: yarn core:test
+        name: Run protocol test
