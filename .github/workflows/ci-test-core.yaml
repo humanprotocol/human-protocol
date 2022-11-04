@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-    paths:
-      - packages/core/**
   workflow_dispatch:
 
 jobs:
@@ -16,12 +14,3 @@ jobs:
         name: Install dependencies
       - run: yarn core:test
         name: Run protocol test
-  core-lint:
-    name: Core Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn core:lint
-        name: Run lint

@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-    paths:
-      - packages/sdk/typescript/subgraph/**
   workflow_dispatch:
 
 jobs:
@@ -16,12 +14,3 @@ jobs:
         name: Install dependencies
       - run: yarn subgraph:test
         name: Run subgraph test
-  subgraph-lint:
-    name: Subgraph Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
-        name: Install dependencies
-      - run: yarn subgraph:lint
-        name: Run lint
