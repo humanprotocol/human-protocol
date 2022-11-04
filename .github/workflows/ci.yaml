@@ -9,18 +9,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
+        name: Install dependencies
       - run: yarn core:test
-  graph-test:
-    name: Graph Test
+        name: Run protocol test
+  subgraph-test:
+    name: Subgraph Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
+        name: Install dependencies
       - run: yarn subgraph:test
+        name: Run subgraph test
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
+        name: Install dependencies
       - run: yarn lint
+        name: Run lint
