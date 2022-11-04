@@ -24,7 +24,7 @@ jobs:
           cmd: install
       - uses: borales/actions-yarn@v3.0.0
         with:
-          cmd: graph:test
+          cmd: subgraph:test
   lint:
     name: Lint
     runs-on: ubuntu-latest
