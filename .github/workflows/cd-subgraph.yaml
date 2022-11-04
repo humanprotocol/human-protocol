@@ -1,4 +1,4 @@
-name: CD
+name: Subgraph deployment
 
 on:
   push:
