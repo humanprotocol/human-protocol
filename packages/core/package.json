@@ -1,9 +1,11 @@
 {
   "name": "@human-protocol/core",
-  "license": "MIT",
-  "version": "1.0.0",
-  "description": "Human protocol smart contracts",
-  "main": "hardhat.config.ts",
+  "description": "Human Protocol Core Smart Contracts",
+  "version": "1.0.3",
+  "files": [
+    "contracts/**/*.sol",
+    "abis/contracts/**/*.json"
+  ],
   "scripts": {
     "compile": "hardhat compile",
     "verify": "hardhat verify",
@@ -18,6 +20,19 @@
     "format:scripts": "prettier --write '**/*.ts'",
     "format": "yarn format:contracts && yarn format:scripts"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "human-protocol",
+    "core",
+    "solidity",
+    "ethereum",
+    "contracts"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -42,11 +57,11 @@
   },
   "lint-staged": {
     "*.sol": [
-      "yarn workspace @human-protocol/core format"
+      "prettier --write"
     ],
     "*.ts": [
-      "yarn workspace @human-protocol/core format",
-      "yarn workspace @human-protocol/core lint:fix"
+      "prettier --write",
+      "eslint --fix"
     ]
   }
 }
