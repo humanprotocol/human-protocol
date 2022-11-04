@@ -19,6 +19,9 @@ jobs:
       - run: yarn compile
         name: Compile smart contracts
         working-directory: ./packages/core
+      - run: echo ${NODE_AUTH_TOKEN}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: yarn publish --access public
         name: Publish NPM package
         working-directory: ./packages/core
