@@ -86,10 +86,10 @@ const config: HardhatUserConfig = {
     path: './abis',
     runOnCompile: true,
     clear: true,
-    flat: false,
+    flat: true,
     only: [],
     spacing: 2,
-    pretty: true,
+    format: 'json',
   },
   etherscan: {
     apiKey: {

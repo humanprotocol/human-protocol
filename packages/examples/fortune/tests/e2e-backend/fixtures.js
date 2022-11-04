@@ -1,11 +1,8 @@
 const { addresses, urls, stakes, gasLimit, escrowFundAmount} = require('./constants');
-const escrowFile = require('./build/contracts/Escrow.json');
-const hmtokenFile = require('./build/contracts/HMToken.json');
-const escrowFactoryFile = require('./build/contracts/EscrowFactory.json');
+const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
+const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
+const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
 const manifest = require('../../docker-test-manifest.json');
-const escrowAbi = escrowFile.abi;
-const hmtokenAbi = hmtokenFile.abi;
-const factoryAbi = escrowFactoryFile.abi;
 
 const axios = require('axios');
 const Web3 = require('web3');

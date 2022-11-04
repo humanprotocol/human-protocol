@@ -29,7 +29,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASS}
     volumes:
-      - ./docker-manifest.json:/tmp/manifests/docker-manifest.json
+      - ./${MANIFEST_FILE}:/tmp/manifests/docker-manifest.json
     entrypoint: 'sh'
     command:
       -c "mkdir -p /data/manifests && cp /tmp/manifests/docker-manifest.json /data/manifests/manifest.json && minio server /data --console-address ':9001'"

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import getWeb3 from "./../web3";
-import factoryFile from "../build/contracts/EscrowFactory.json";
+import factoryAbi from "@human-protocol/core/abis/EscrowFactory.json";
 import { ESCROW_FACTORY_ADDRESS } from "../constants";
 
 export default function CreateEscrow({ onEscrowCreated }) {
-  const factoryAbi = factoryFile.abi;
   const [escrow, setEscrow] = useState("");
   const [lastEscrow, setLastEscrow] = useState("");
   const web3 = getWeb3();
