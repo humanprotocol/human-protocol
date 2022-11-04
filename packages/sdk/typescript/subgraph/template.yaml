@@ -1,0 +1,78 @@
+specVersion: 0.0.5
+description: '{{ description }}'
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: EscrowFactory
+    network: '{{ network }}'
+    source:
+      abi: EscrowFactory
+      address: '{{ EscrowFactory.address }}'
+      startBlock: {{ EscrowFactory.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping/EscrowFactory.ts
+      entities:
+        - Launched
+      abis:
+        - name: EscrowFactory
+          file: ./node_modules/@human-protocol/core/abis/contracts/EscrowFactory.sol/EscrowFactory.json
+      eventHandlers:
+        - event: Launched(address,address)
+          handler: handleLaunched
+  - kind: ethereum
+    name: HMToken
+    network: '{{ network }}'
+    source:
+      abi: HMToken
+      address: '{{ HMToken.address }}'
+      startBlock: {{ HMToken.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - BulkApproval
+        - BulkTransfer
+        - Transfer
+      abis:
+        - name: HMToken
+          file: ./node_modules/@human-protocol/core/abis/contracts/HMToken.sol/HMToken.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: BulkApproval(indexed uint256,uint256)
+          handler: handleBulkApproval
+        - event: BulkTransfer(indexed uint256,uint256)
+          handler: handleBulkTransfer
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/mapping/HMToken.ts
+templates:
+  - name: Escrow
+    kind: ethereum/contract
+    network: '{{ network }}'
+    source:
+      abi: Escrow
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping/Escrow.ts
+      entities:
+        - ISEvent
+        - PEvent
+      abis:
+        - name: Escrow
+          file: ./node_modules/@human-protocol/core/abis/contracts/Escrow.sol/Escrow.json
+      eventHandlers:
+        - event: IntermediateStorage(string,string)
+          handler: handleIntermediateStorage
+        - event: Pending(string,string)
+          handler: handlePending
+        - event: BulkTransfer(indexed uint256,uint256)
+          handler: handleBulkTransfer

@@ -8,20 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
-      - uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: core:test
+      - run: yarn --ignore-scripts
+      - run: yarn core:test
+  graph-test:
+    name: Graph Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+      - run: yarn subgraph:test
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: install
-      - uses: borales/actions-yarn@v3.0.0
-        with:
-          cmd: lint
+      - run: yarn --ignore-scripts
+      - run: yarn lint

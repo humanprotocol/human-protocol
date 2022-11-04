@@ -89,7 +89,7 @@ const config: HardhatUserConfig = {
     flat: false,
     only: [],
     spacing: 2,
-    pretty: true,
+    pretty: false,
   },
   etherscan: {
     apiKey: {
