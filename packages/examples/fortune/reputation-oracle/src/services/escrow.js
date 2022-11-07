@@ -1,5 +1,5 @@
 
-const EscrowFile = require('../build/contracts/Escrow.json');
+const EscrowFile = require('@human-protocol/core/abis/Escrow.json');
 
 module.exports = {
   getBalance: async (web3, escrowAddress) => {

@@ -15,8 +15,12 @@
     "deploy:contracts": "cd ../../core && yarn && yarn deploy:local",
     "local": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
     "local:test": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
-    "test:e2e": "concurrently -k -s first \"yarn local:test\" \"yarn deploy:contracts && jest tests/e2e-backend --runInBand && return 0\"",
-    "test": ""
+    "test:exchange": "cd exchange && yarn test",
+    "test:launcher": "cd launcher && yarn test",
+    "test:recording": "cd recording-oracle && yarn test",
+    "test:reputation": "cd reputation-oracle && yarn test",
+    "test:e2e": "concurrently -k -s first \"yarn local:test\" \"yarn deploy:contracts && jest tests/e2e-backend --runInBand\"",
+    "test:unit": "concurrently \"yarn test:recording\" \"yarn test:reputation\""
   },
   "devDependencies": {
     "@human-protocol/core": "^1.0.6",

@@ -3,9 +3,9 @@ const {
   describe, expect, it, beforeAll,
 } = require('@jest/globals');
 const addFortune = require('./fortune');
-const Escrow = require('../build/contracts/Escrow.json');
-const HMToken = require('../build/contracts/HMToken.json');
-const EscrowFactory = require('../build/contracts/EscrowFactory.json');
+const EscrowAbi = require('@human-protocol/core/abis/Escrow.json');
+const HMTokenAbi = require('@human-protocol/core/abis/HMToken.json');
+const EscrowFactoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
 const manifest = require('./manifest');
 const reputationClient = require('./reputationClient');
 const storage = require('./storage');
@@ -19,7 +19,7 @@ let escrow;
 
 const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
 const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
-const web3 = new Web3('http://localhost:8545');
+const web3 = new Web3('http://localhost:8547');
 const account = web3.eth.accounts.privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
 const recordingAccount = web3.eth.accounts.privateKeyToAccount('0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d');
 web3.eth.defaultAccount = recordingAccount.address;
@@ -28,7 +28,7 @@ jest.mock('./reputationClient');
 
 describe('Fortune', () => {
   beforeAll(async () => {
-    const tokenContract = new web3.eth.Contract(HMToken.abi);
+    const tokenContract = new web3.eth.Contract(HMTokenAbi);
     token = await tokenContract.deploy({
       data: HMToken.bytecode,
       arguments: [web3.utils.toWei('100000', 'ether'), 'Human Token', 18, 'HMT'],
@@ -37,7 +37,7 @@ describe('Fortune', () => {
         from: account.address,
       });
 
-    const escrowFactoryContract = new web3.eth.Contract(EscrowFactory.abi);
+    const escrowFactoryContract = new web3.eth.Contract(EscrowFactoryAbi);
     escrowFactory = await escrowFactoryContract.deploy({
       data: EscrowFactory.bytecode,
       arguments: [token.options.address],
@@ -60,7 +60,7 @@ describe('Fortune', () => {
     await token.methods.transfer(escrowAddress, value).send({ from: account.address });
 
     escrow = new web3.eth.Contract(
-      Escrow.abi,
+      EscrowAbi,
       escrowAddress,
     );
     await escrow.methods.setup(

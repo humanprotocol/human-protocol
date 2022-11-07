@@ -5,9 +5,10 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/index.js",
-    "test": "hardhat node & PID=$! && jest || kill -9 $PID && kill -9 $PID"
+    "test": "concurrently -k -s first \"hardhat node --port 8648\" \"jest\""
   },
   "dependencies": {
+    "@human-protocol/core": "^1.0.6",
     "body-parser": "^1.19.1",
     "express": "^4.17.2",
     "minio": "^7.0.26",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.2.2",
+    "concurrently": "^7.5.0",
     "hardhat": "^2.12.1",
     "jest": "^29.2.2"
   }

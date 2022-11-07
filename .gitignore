@@ -40,3 +40,9 @@ yarn-error.log*
 
 # OS
 .DS_Store
+
+#cache
+cache
+
+#test data
+data

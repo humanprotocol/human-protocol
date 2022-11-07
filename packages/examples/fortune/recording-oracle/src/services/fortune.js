@@ -1,9 +1,7 @@
-const EscrowFile = require('../build/contracts/Escrow.json');
+const EscrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const storage = require('./storage');
 const { getManifest } = require('./manifest');
 const { bulkPayout } = require('./reputationClient');
-
-const EscrowABI = EscrowFile.abi;
 
 const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
@@ -18,7 +16,7 @@ async function addFortune(web3, workerAddress, escrowAddress, fortune) {
   if (!web3.utils.isAddress(escrowAddress)) {
     return { field: 'escrowAddress', message: 'Valid ethereum address required' };
   }
-  const Escrow = new web3.eth.Contract(EscrowABI, escrowAddress);
+  const Escrow = new web3.eth.Contract(EscrowAbi, escrowAddress);
   const escrowRecOracleAddr = await Escrow.methods.recordingOracle().call();
 
   if (web3.utils.toChecksumAddress(escrowRecOracleAddr) !== web3.utils.toChecksumAddress(web3.eth.defaultAccount)) {

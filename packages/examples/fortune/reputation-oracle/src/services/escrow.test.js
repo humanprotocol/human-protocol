@@ -3,9 +3,9 @@ const { getBalance, bulkPayOut, bulkPaid } = require('./escrow');
 const {
   describe, expect, it, beforeAll,
 } = require('@jest/globals');
-const Escrow = require('../build/contracts/Escrow.json');
-const HMToken = require('../build/contracts/HMToken.json');
-const EscrowFactory = require('../build/contracts/EscrowFactory.json');
+const Escrow = require('@human-protocol/core/abis/json');
+const HMToken = require('@human-protocol/core/abis/HMToken.json');
+const EscrowFactory = require('@human-protocol/core/abis/EscrowFactory.json');
 
 let token;
 let escrowFactory;
@@ -16,7 +16,7 @@ const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
 const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
 const worker3 = '0x146D35a6485DbAFF357fB48B3BbA31fCF9E9c787';
 
-const web3 = new Web3('http://localhost:8545');
+const web3 = new Web3('http://localhost:8548');
 const account = web3.eth.accounts.privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
 const recordingAccount = web3.eth.accounts.privateKeyToAccount('0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d');
 web3.eth.defaultAccount = recordingAccount.address;
