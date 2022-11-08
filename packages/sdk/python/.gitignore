@@ -1,1 +1,7 @@
+# Python
 __pycache__
+
+# pipenv
+Pipfile.lock
+pip-log.txt
+pip-wheel-metadata/
