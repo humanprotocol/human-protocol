@@ -9,13 +9,14 @@ from hmt_escrow.eth_bridge import (
 from test.hmt_escrow.utils import create_job, DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
 
 
+@patch("hmt_escrow.storage._connect_s3", MagicMock(), create=True)
 class UtilsTestCase(unittest.TestCase):
     def setUp(self):
         self.credentials = {
             "gas_payer": DEFAULT_GAS_PAYER,
             "gas_payer_priv": DEFAULT_GAS_PAYER_PRIV,
         }
-        self.rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        self.rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         self.job = create_job()
 
     def test_parse_transfer_transaction_with_event_and_balance(self):

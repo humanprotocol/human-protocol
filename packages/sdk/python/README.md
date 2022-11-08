@@ -47,7 +47,7 @@ Credentials must follow the following format:
 ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 ... }
->>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+>>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
 ```
 
 Using only the Manifest and Credentials deploys a new factory to the Ethereum network
@@ -120,7 +120,7 @@ Partial state. It also uploads the final results from the Reputation Oracle to t
 state.
 
 ```
->>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0'))]
+>>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0'))]
 >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
 True
 >>> job.status()
@@ -130,7 +130,7 @@ True
 Draining the escrow contract fully sets the contract to Paid state.
 
 ```
->>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('80.0'))]
+>>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('80.0'))]
 >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
 True
 >>> job.status()

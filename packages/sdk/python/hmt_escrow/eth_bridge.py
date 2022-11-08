@@ -21,7 +21,7 @@ GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 LOG = logging.getLogger("hmt_escrow.eth_bridge")
 HMTOKEN_ADDR = Web3.toChecksumAddress(
-    os.getenv("HMTOKEN_ADDR", "0x4C18A2E51edC5043e9c4B6b0757990A4Ac13797f")
+    os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
 
 ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(
@@ -209,7 +209,7 @@ def get_hmtoken(hmtoken_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contr
     """
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(
+        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(
             ABIS_FOLDER)
     )
     contract = w3.eth.contract(

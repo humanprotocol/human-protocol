@@ -25,7 +25,7 @@ class StorageTest(unittest.TestCase):
         return dict(manifest.serialize())
 
     def setUp(self) -> None:
-        self.pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        self.pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         self.priv_key = (
             b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
@@ -161,30 +161,6 @@ class StorageTest(unittest.TestCase):
             s3_client_mock.get_object.call_args.kwargs["Bucket"],
             ESCROW_TEST_PUBLIC_BUCKETNAME,
         )
-
-    def test_download_from_storage_private_bucket(self):
-        """Tests download from storage with encryption on/off and private bucket"""
-
-        # Upload with encryption on (default)
-        data = self.get_manifest()
-        _, manifest_url = upload(
-            data, self.pub_key, encrypt_data=True, use_public_bucket=False
-        )
-        # Encryption on (default) determines that data is not public
-        content = download_from_storage(key=manifest_url, public=False)
-        # As encryption is on, let's decrypt
-        decrypted = crypto.decrypt(self.priv_key, content)
-        self.assertEqual(json.loads(decrypted), data)
-
-        # Upload with encryption off
-        data = self.get_manifest()
-        _, manifest_url = upload(
-            data, self.pub_key, encrypt_data=False, use_public_bucket=False
-        )
-        # Encryption off determines that data is public
-        content = download_from_storage(key=manifest_url, public=False)
-        # As encryption is off, data is plain
-        self.assertEqual(json.loads(content), data)
 
     def test_public_private_download_from_storage(self):
         """Tests whether download is correctly called using public or private parameter."""

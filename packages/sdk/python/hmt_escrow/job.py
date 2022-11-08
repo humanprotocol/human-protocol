@@ -178,8 +178,8 @@ class Job:
 
         Creating a new Job instance initializes the critical attributes correctly.
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> from test.hmt_escrow.utils import manifest
         >>> job = Job(credentials, manifest)
@@ -198,7 +198,7 @@ class Job:
         >>> job.factory_contract.address == factory_addr
         True
 
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -208,9 +208,9 @@ class Job:
 
         Initializing an existing Job instance with a factory and escrow address succeeds.
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-        ...     "rep_oracle_priv_key": b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5",
+        ...     "rep_oracle_priv_key": b"28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> escrow_addr = job.job_contract.address
         >>> factory_addr = job.factory_contract.address
@@ -228,8 +228,8 @@ class Job:
 
         Creating a new Job instance with falsy credentials fails.
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         ... }
         >>> job = Job(credentials, manifest)
         Traceback (most recent call last):
@@ -294,10 +294,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
 
         Deploying a new Job to the ethereum network succeeds.
@@ -307,13 +307,13 @@ class Job:
         >>> job.status()
         <Status.Launched: 1>
 
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
 
         Inject wrong credentials on purpose to test out raffling
 
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
-        >>> job.multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.status()
@@ -322,9 +322,9 @@ class Job:
         Make sure we launched with raffled credentials
 
         >>> job.gas_payer
-        '0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809'
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC'
         >>> job.gas_payer_priv
-        'f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1'
+        '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
 
         Args:
             pub_key (bytes): the public key of the Reputation Oracle.
@@ -361,10 +361,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
 
         A Job can't be setup without deploying it first.
@@ -372,12 +372,12 @@ class Job:
         >>> job.setup()
         False
 
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
-        >>> job.multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job.setup()
         True
 
@@ -497,10 +497,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -510,10 +510,10 @@ class Job:
         >>> is_trusted_handler(job.job_contract, job.gas_payer, job.gas_payer)
         True
 
-        >>> trusted_handlers = ['0x61F9F0B31eacB420553da8BCC59DC617279731Ac', '0xD979105297fB0eee83F7433fC09279cb5B94fFC6']
+        >>> trusted_handlers = ['0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '0xD979105297fB0eee83F7433fC09279cb5B94fFC6']
         >>> job.add_trusted_handlers(trusted_handlers)
         True
-        >>> is_trusted_handler(job.job_contract, '0x61F9F0B31eacB420553da8BCC59DC617279731Ac', job.gas_payer)
+        >>> is_trusted_handler(job.job_contract, '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', job.gas_payer)
         True
         >>> is_trusted_handler(job.job_contract, '0xD979105297fB0eee83F7433fC09279cb5B94fFC6', job.gas_payer)
         True
@@ -568,16 +568,16 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
         True
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
 
@@ -604,13 +604,13 @@ class Job:
         >>> job.status()
         <Status.Paid: 4>
 
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
         True
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
 
@@ -678,10 +678,10 @@ class Job:
         The contract cannot be aborted if the contract is in Partial, Paid or Complete state.
 
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
 
 
         The escrow contract is in Partial state after a partial bulk payout so it can be aborted.
@@ -695,7 +695,7 @@ class Job:
         True
         >>> job.setup()
         True
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
         >>> job.abort()
@@ -723,7 +723,7 @@ class Job:
 
         Trusted handler should be able to abort an existing contract
 
-        >>> trusted_handler = "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809"
+        >>> trusted_handler = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -733,9 +733,9 @@ class Job:
         True
 
         >>> handler_credentials = {
-        ... 	"gas_payer": "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-        ... 	"gas_payer_priv": "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
-        ...     "rep_oracle_priv_key": b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        ... 	"gas_payer_priv": "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+        ...     "rep_oracle_priv_key": b"28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> access_job = Job(credentials=handler_credentials, factory_addr=job.factory_contract.address, escrow_addr=job.job_contract.address)
         >>> access_job.abort()
@@ -779,10 +779,10 @@ class Job:
         """Returns the HMT back to the gas payer. It's the softer version of abort as the contract is not destroyed.
 
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> from test.hmt_escrow.utils import manifest
         >>> job = Job(credentials, manifest)
 
@@ -809,7 +809,7 @@ class Job:
         True
         >>> job.setup()
         True
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
         >>> job.status()
@@ -863,10 +863,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -878,11 +878,11 @@ class Job:
         >>> results = {"results": True}
         >>> job.store_intermediate_results(results, rep_oracle_pub_key)
         True
-        >>> rep_oracle_priv_key = b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        >>> rep_oracle_priv_key = b"28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         >>> job.intermediate_results(rep_oracle_priv_key)
         {'results': True}
 
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -891,7 +891,7 @@ class Job:
         >>> job.store_intermediate_results(results, rep_oracle_pub_key)
         True
 
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -902,7 +902,7 @@ class Job:
         Inject wrong credentials on purpose to test out raffling
 
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
-        >>> job.multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job.store_intermediate_results(results, rep_oracle_pub_key)
         True
 
@@ -954,16 +954,16 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
         True
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
 
@@ -976,7 +976,7 @@ class Job:
 
         Job completes in paid state correctly.
 
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('80.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('80.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
         >>> job.complete()
@@ -1021,10 +1021,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
 
         After deployment status is "Launched".
@@ -1045,10 +1045,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1075,16 +1075,16 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
         True
-        >>> rep_oracle_priv_key = b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        >>> rep_oracle_priv_key = b"28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         >>> manifest = job.manifest(rep_oracle_priv_key)
         >>> manifest_amount = int(int(manifest["job_total_tasks"]) * Decimal(manifest["task_bid_price"]))
         >>> manifest_amount == job.amount
@@ -1104,10 +1104,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1119,7 +1119,7 @@ class Job:
         >>> results = {"results": True}
         >>> job.store_intermediate_results(results, rep_oracle_pub_key)
         True
-        >>> rep_oracle_false_priv_key = b"486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"
+        >>> rep_oracle_false_priv_key = b"59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         >>> job.intermediate_results(rep_oracle_false_priv_key)
         Traceback (most recent call last):
         p2p.exceptions.DecryptionError: Failed to verify tag
@@ -1138,10 +1138,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1153,7 +1153,7 @@ class Job:
         >>> payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('100.0'))]
         >>> job.bulk_payout(payouts, {'results': 0}, rep_oracle_pub_key)
         True
-        >>> rep_oracle_priv_key = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        >>> rep_oracle_priv_key = "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         >>> job.final_results(rep_oracle_priv_key)
         {'results': 0}
 
@@ -1227,18 +1227,18 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ...     "gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ...     "gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> valid_multi_credentials = [("0x1413862C2B7054CDbfdc181B83962CB0FC11fD92", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e")]
+        >>> valid_multi_credentials = [("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d")]
         >>> job = Job(credentials, manifest, multi_credentials=valid_multi_credentials)
         >>> job.multi_credentials
-        [('0x1413862C2B7054CDbfdc181B83962CB0FC11fD92', 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'), ('0x61F9F0B31eacB420553da8BCC59DC617279731Ac', '486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e')]
+        [('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5'), ('0x70997970C51812dc3A010C7d01b50e0d17dc79C8', '59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d')]
 
-        >>> invalid_multi_credentials = [("0x1413862C2B7054CDbfdc181B83962CB0FC11fD92", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")]
+        >>> invalid_multi_credentials = [("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5")]
         >>> job = Job(credentials, manifest, multi_credentials=invalid_multi_credentials)
         >>> job.multi_credentials
-        [('0x1413862C2B7054CDbfdc181B83962CB0FC11fD92', 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80')]
+        [('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5')]
 
         Args:
             multi_credentials (List[Tuple]): a list of tuples with ethereum address, private key pairs.
@@ -1268,18 +1268,18 @@ class Job:
         Validating right credentials succeeds.
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ...     "gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ...     "gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> job = Job(credentials, manifest)
 
-        >>> multi_credentials = [("0x1413862C2B7054CDbfdc181B83962CB0FC11fD92", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x1413862C2B7054CDbfdc181B83962CB0FC11fD92", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")]
+        >>> multi_credentials = [("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
 
         Validating falsy credentials fails.
         >>> credentials = {
-        ...     "gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"
+        ...     "gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         ... }
         >>> job = Job(credentials, manifest)
         Traceback (most recent call last):
@@ -1303,11 +1303,11 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-        ...     "rep_oracle_priv_key": b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5",
+        ...     "rep_oracle_priv_key": b"28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1347,8 +1347,8 @@ class Job:
         Initializing a new Job instance without a factory address succeeds.
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> job = Job(credentials, manifest)
         >>> type(job.factory_contract)
@@ -1393,10 +1393,10 @@ class Job:
 
         >>> from test.hmt_escrow.utils import manifest
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1408,7 +1408,7 @@ class Job:
         False
 
         Bulk has been paid upon successful bulk payout.
-        >>> payouts = [("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
         >>> job._bulk_paid()
@@ -1429,11 +1429,11 @@ class Job:
         """Launches a new escrow contract to the ethereum network.
 
         >>> from test.hmt_escrow.utils import manifest
-        >>> multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> trusted_handlers = [addr for addr, priv_key in multi_credentials]
         >>> credentials = {
-        ... 	"gas_payer": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> job = Job(credentials, manifest)
         >>> job._create_escrow(trusted_handlers)
@@ -1443,7 +1443,7 @@ class Job:
 
         Inject wrong credentials on purpose to test out raffling
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
-        >>> job.multi_credentials = [("0x61F9F0B31eacB420553da8BCC59DC617279731Ac", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1")]
+        >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job._create_escrow(trusted_handlers)
         True
 

@@ -22,13 +22,15 @@ from test.hmt_escrow.utils.manifest import manifest
 from test.hmt_escrow.utils.job import DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
 
 
+@patch("hmt_escrow.storage._connect_s3", MagicMock(), create=True)
+@patch("hmt_escrow.job.download", MagicMock(return_value=manifest), create=True)
 class JobTestCase(unittest.TestCase):
     def setUp(self):
         self.credentials = {
             "gas_payer": DEFAULT_GAS_PAYER,
             "gas_payer_priv": DEFAULT_GAS_PAYER_PRIV,
         }
-        self.rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
+        self.rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         self.job = Job(self.credentials, manifest)
 
     def test_launch(self):
@@ -97,12 +99,12 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(self.job.status(), Status(1))
         multi_credentials = [
             (
-                "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
-                "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
             ),
             (
-                "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-                "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
         self.job = Job(self.credentials, manifest,
@@ -115,12 +117,12 @@ class JobTestCase(unittest.TestCase):
         )
         self.job.multi_credentials = [
             (
-                "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
                 DEFAULT_GAS_PAYER_PRIV,
             ),
             (
-                "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-                "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
@@ -129,11 +131,11 @@ class JobTestCase(unittest.TestCase):
         # Make sure we launched with raffled credentials
 
         self.assertEqual(
-            self.job.gas_payer, "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809"
+            self.job.gas_payer, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
         )
         self.assertEqual(
             self.job.gas_payer_priv,
-            "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+            "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
         )
 
     def test_job_setup(self):
@@ -142,12 +144,12 @@ class JobTestCase(unittest.TestCase):
         self.assertFalse(self.job.setup())
         multi_credentials = [
             (
-                "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
                 DEFAULT_GAS_PAYER_PRIV,
             ),
             (
-                "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-                "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
         self.job = Job(self.credentials, manifest,
@@ -165,14 +167,14 @@ class JobTestCase(unittest.TestCase):
             )
         )
         trusted_handlers = [
-            "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
             "0xD979105297fB0eee83F7433fC09279cb5B94fFC6",
         ]
         self.assertTrue(self.job.add_trusted_handlers(trusted_handlers))
         self.assertTrue(
             is_trusted_handler(
                 self.job.job_contract,
-                "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
                 self.job.gas_payer,
             )
         )
@@ -189,7 +191,7 @@ class JobTestCase(unittest.TestCase):
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [
-            ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal("20.0")),
+            ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0")),
             ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("50.0")),
         ]
         self.assertTrue(self.job.bulk_payout(
@@ -218,12 +220,12 @@ class JobTestCase(unittest.TestCase):
 
         multi_credentials = [
             (
-                "0x61F9F0B31eacB420553da8BCC59DC617279731Ac",
-                "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e",
+                "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
             ),
             (
-                "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-                "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+                "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
         self.job = Job(self.credentials, manifest,
@@ -231,7 +233,7 @@ class JobTestCase(unittest.TestCase):
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [
-            ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal("20.0")),
+            ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0")),
             ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("50.0")),
         ]
         self.assertTrue(self.job.bulk_payout(
@@ -387,44 +389,47 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
-        # No bulk payout processed to have final results
-        persisted_final_results = job.final_results(
-            self.credentials["gas_payer_priv"].encode("utf-8")
-        )
-        self.assertIsNone(persisted_final_results)
+        with patch("hmt_escrow.job.download") as download_mock:
+            download_mock.return_value = {"results": 0}
 
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+            # No bulk payout processed to have final results
+            persisted_final_results = job.final_results(
+                self.credentials["gas_payer_priv"].encode("utf-8")
+            )
+            self.assertIsNone(persisted_final_results)
 
-        final_results = {"results": 0}
+            payouts = [
+                ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
 
-        # Bulk payout with encryption ON (default)
-        job.bulk_payout(
-            payouts=payouts,
-            results=final_results,
-            pub_key=self.rep_oracle_pub_key,
-            encrypt_final_results=True,
-            store_pub_final_results=False,
-        )
+            final_results = {"results": 0}
 
-        persisted_final_results = job.final_results(
-            self.credentials["gas_payer_priv"].encode("utf-8")
-        )
-        self.assertEqual(persisted_final_results, final_results)
+            # Bulk payout with encryption ON (default)
+            job.bulk_payout(
+                payouts=payouts,
+                results=final_results,
+                pub_key=self.rep_oracle_pub_key,
+                encrypt_final_results=True,
+                store_pub_final_results=False,
+            )
 
-        # Bulk payout with encryption OFF
-        job.bulk_payout(
-            payouts=payouts,
-            results=final_results,
-            pub_key=self.rep_oracle_pub_key,
-            encrypt_final_results=False,
-            store_pub_final_results=False,
-        )
+            persisted_final_results = job.final_results(
+                self.credentials["gas_payer_priv"].encode("utf-8")
+            )
+            self.assertEqual(persisted_final_results, final_results)
 
-        persisted_final_results = job.final_results(
-            self.credentials["gas_payer_priv"].encode("utf-8")
-        )
-        self.assertEqual(persisted_final_results, final_results)
+            # Bulk payout with encryption OFF
+            job.bulk_payout(
+                payouts=payouts,
+                results=final_results,
+                pub_key=self.rep_oracle_pub_key,
+                encrypt_final_results=False,
+                store_pub_final_results=False,
+            )
+
+            persisted_final_results = job.final_results(
+                self.credentials["gas_payer_priv"].encode("utf-8")
+            )
+            self.assertEqual(persisted_final_results, final_results)
 
     def test_job_abort(self):
         """
@@ -448,12 +453,12 @@ class JobTestCase(unittest.TestCase):
         self.job = Job(self.credentials, manifest)
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
-        trusted_handler = "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809"
+        trusted_handler = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
         self.assertTrue(self.job.add_trusted_handlers([trusted_handler]))
 
         handler_credentials = {
-            "gas_payer": "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
-            "gas_payer_priv": "f22d4fc42da79aa5ba839998a0a9f2c2c45f5e55ee7f1504e464d2c71ca199e1",
+            "gas_payer": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+            "gas_payer_priv": "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             "rep_oracle_priv_key": b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
         }
         access_job = Job(
@@ -467,7 +472,7 @@ class JobTestCase(unittest.TestCase):
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [
-            ("0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809", Decimal("20.0"))]
+            ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0"))]
         self.assertTrue(self.job.bulk_payout(
             payouts, {}, self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(3))
@@ -537,7 +542,7 @@ class JobTestCase(unittest.TestCase):
                         txn_mock,
                         gas_payer="1",
                         gas_payer_priv="11",
-                        gas=6700000,
+                        gas=4712388,
                         hmt_server_addr=None,
                     )
                     for i in range(5)
@@ -570,7 +575,7 @@ class JobTestCase(unittest.TestCase):
                         txn_mock,
                         gas_payer="1",
                         gas_payer_priv="11",
-                        gas=6700000,
+                        gas=4712388,
                         hmt_server_addr=None,
                     )
                 ],
@@ -581,7 +586,7 @@ class JobTestCase(unittest.TestCase):
         """Test wallet HMT balance is OK"""
         amount = utils.get_hmt_balance(
             DEFAULT_GAS_PAYER,
-            "0x56B532F1D090E4edb1c92F30d3087771AE6B6992",
+            "0x5FbDB2315678afecb367f032d93F642f64180aa3",
             get_w3(),
         )
 

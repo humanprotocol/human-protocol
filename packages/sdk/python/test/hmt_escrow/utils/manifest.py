@@ -7,7 +7,7 @@ from web3 import Web3
 
 CALLBACK_URL = "http://google.com/webback"
 GAS_PAYER = Web3.toChecksumAddress(
-    "0x1413862c2b7054cdbfdc181b83962cb0fc11fd92")
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 FAKE_URL = "http://google.com/fake"
 IMAGE_LABEL_BINARY = "image_label_binary"
 
