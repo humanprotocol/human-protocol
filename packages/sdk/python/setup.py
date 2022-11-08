@@ -13,7 +13,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
     ],
-    packages=setuptools.find_packages() + ["../../core/artifacts/contracts"],
+    packages=setuptools.find_packages() + ["../../../core/artifacts/contracts"],
     install_requires=[
         "boto3",
         "cryptography",
