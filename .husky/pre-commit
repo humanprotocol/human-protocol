@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-cd packages/sdk/python && make format && cd ../../../
-
 npx lint-staged
+
+cd packages/sdk/python && make format
+git add -u
