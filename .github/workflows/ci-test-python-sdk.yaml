@@ -10,17 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
-        name: Install node dependencies
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: Install dependencies
+      - name: Install Node
+        run: yarn --ignore-scripts
+      - name: Install Python
+        uses: VaultVulp/action-pipenv@v2.0.1
         working-directory: ./packages/sdk/python
-        run: |
-          pip install pipenv
-          pipenv install
+        with:
+          command: install -d
       - name: Python test
         working-directory: ./packages/sdk/python
         run: |
