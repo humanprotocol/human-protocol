@@ -2,15 +2,11 @@ format:
 	pipenv run black .
 
 build-contracts:
-	yarn workspace @human-protocol/core compile
-	cp -r ../../core/artifacts/contracts .
+	./scripts/build-contracts.sh
 
 run-test:
-	yarn workspace @human-protocol/core local &
+	make build-contracts
+	./scripts/run-test.sh
 
-	sleep 5
-	yarn workspace @human-protocol/core deploy:local
-
-	cp -r ../../core/artifacts/contracts .
-
-	pipenv run python -m unittest
+generate-html-docs:
+	./scripts/generate-docs.sh --format html
