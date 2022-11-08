@@ -3,9 +3,9 @@ const { getBalance, bulkPayOut, bulkPaid } = require('./escrow');
 const {
   describe, expect, it, beforeAll,
 } = require('@jest/globals');
-const Escrow = require('@human-protocol/core/abis/json');
-const HMToken = require('@human-protocol/core/abis/HMToken.json');
-const EscrowFactory = require('@human-protocol/core/abis/EscrowFactory.json');
+const Escrow = require('@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json');
+const HMToken = require('@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json');
+const EscrowFactory = require('@human-protocol/core/artifacts/contracts/EscrowFactory.sol/EscrowFactory.json');
 
 let token;
 let escrowFactory;

@@ -30,13 +30,13 @@ services:
       minio-test:
         condition: service_healthy
     volumes:
-      - ./docker-test-manifest.json:/tmp/manifests/docker-manifest.json
+      - ./docker-test-manifest.json:/tmp/manifests/manifest.json
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio-test:9000 dev devdevdev;
       /usr/bin/mc mb myminio/manifests;
       /usr/bin/mc anonymous set public myminio/manifests;
-      /usr/bin/mc cp /tmp/manifests/docker-manifest.json myminio/manifests;
+      /usr/bin/mc cp /tmp/manifests/manifest.json myminio/manifests;
       "
 
   launcher-test:
@@ -64,6 +64,7 @@ services:
       ETH_PRIVATE_KEY: 486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e
       ETH_HTTP_SERVER: http://ganache-test:8545
       PORT: 3005
+      DOCKER: "true"
     command: ["yarn", "start"]
 
   reputation-oracle-test:

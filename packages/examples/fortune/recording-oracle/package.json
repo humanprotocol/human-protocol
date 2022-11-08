@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
-    "@human-protocol/core": "^1.0.6",
+    "@human-protocol/core": "^1.0.7",
     "axios": "^0.25.0",
     "body-parser": "^1.19.1",
     "cors": "^2.8.5",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "concurrently -k -s first \"hardhat node --port 8647\" \"jest\""
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8547\" \"jest\""
   },
   "devDependencies": {
     "@jest/globals": "^29.2.2",

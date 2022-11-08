@@ -3,9 +3,9 @@ const {
   describe, expect, it, beforeAll,
 } = require('@jest/globals');
 const addFortune = require('./fortune');
-const EscrowAbi = require('@human-protocol/core/abis/Escrow.json');
-const HMTokenAbi = require('@human-protocol/core/abis/HMToken.json');
-const EscrowFactoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
+const Escrow= require('@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json');
+const HMToken = require('@human-protocol/core/artifacts/contracts/HMToken.sol/HMToken.json');
+const EscrowFactory = require('@human-protocol/core/artifacts/contracts/EscrowFactory.sol/EscrowFactory.json');
 const manifest = require('./manifest');
 const reputationClient = require('./reputationClient');
 const storage = require('./storage');
@@ -28,7 +28,7 @@ jest.mock('./reputationClient');
 
 describe('Fortune', () => {
   beforeAll(async () => {
-    const tokenContract = new web3.eth.Contract(HMTokenAbi);
+    const tokenContract = new web3.eth.Contract(HMToken.abi);
     token = await tokenContract.deploy({
       data: HMToken.bytecode,
       arguments: [web3.utils.toWei('100000', 'ether'), 'Human Token', 18, 'HMT'],
@@ -37,7 +37,7 @@ describe('Fortune', () => {
         from: account.address,
       });
 
-    const escrowFactoryContract = new web3.eth.Contract(EscrowFactoryAbi);
+    const escrowFactoryContract = new web3.eth.Contract(EscrowFactory.abi);
     escrowFactory = await escrowFactoryContract.deploy({
       data: EscrowFactory.bytecode,
       arguments: [token.options.address],
@@ -60,7 +60,7 @@ describe('Fortune', () => {
     await token.methods.transfer(escrowAddress, value).send({ from: account.address });
 
     escrow = new web3.eth.Contract(
-      EscrowAbi,
+      Escrow.abi,
       escrowAddress,
     );
     await escrow.methods.setup(
