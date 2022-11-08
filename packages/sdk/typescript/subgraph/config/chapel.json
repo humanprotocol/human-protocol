@@ -1,0 +1,12 @@
+{
+  "network": "chapel",
+  "description": "Human subgraph on Binance Smart Chain testnet",
+  "EscrowFactory": {
+    "address": "0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f",
+    "startBlock": 23632686
+  },
+  "HMToken": {
+    "address": "0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317",
+    "startBlock": 23632621
+  }
+}
