@@ -6,8 +6,7 @@ import basemodels
 from web3 import Web3
 
 CALLBACK_URL = "http://google.com/webback"
-GAS_PAYER = Web3.toChecksumAddress(
-    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+GAS_PAYER = Web3.toChecksumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 FAKE_URL = "http://google.com/fake"
 IMAGE_LABEL_BINARY = "image_label_binary"
 

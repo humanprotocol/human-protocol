@@ -9,9 +9,7 @@ from hmt_escrow.eth_bridge import (
     handle_transaction,
     set_pub_key_at_addr,
 )
-from test.hmt_escrow.utils import (
-    create_job, DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
-)
+from test.hmt_escrow.utils import create_job, DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
 
 
 class EthBridgeTestCase(unittest.TestCase):

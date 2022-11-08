@@ -24,8 +24,9 @@ HMTOKEN_ADDR = Web3.toChecksumAddress(
     os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
 
-ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(
-    __file__)), "../../core/artifacts/contracts")
+ABIS_FOLDER = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "../../core/artifacts/contracts"
+)
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
@@ -87,8 +88,7 @@ def get_w3(hmt_server_addr: str = None) -> Web3:
         LOG.error("Using EthereumTesterProvider as we have no HMT_ETH_SERVER")
 
     provider = (
-        load_provider_from_uri(
-            URI(endpoint)) if endpoint else EthereumTesterProvider()
+        load_provider_from_uri(URI(endpoint)) if endpoint else EthereumTesterProvider()
     )
 
     w3 = Web3(provider)
@@ -126,8 +126,7 @@ def handle_transaction(txn_func, *args, **kwargs) -> TxReceipt:
         {"from": gas_payer, "gas": gas, "nonce": nonce}
     )
 
-    signed_txn = w3.eth.account.signTransaction(
-        txn_dict, private_key=gas_payer_priv)
+    signed_txn = w3.eth.account.signTransaction(txn_dict, private_key=gas_payer_priv)
     txn_hash = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     try:
@@ -209,11 +208,9 @@ def get_hmtoken(hmtoken_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contr
     """
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(
-            ABIS_FOLDER)
+        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
     )
-    contract = w3.eth.contract(
-        address=hmtoken_addr, abi=contract_interface["abi"])
+    contract = w3.eth.contract(address=hmtoken_addr, abi=contract_interface["abi"])
     return contract
 
 
@@ -465,8 +462,7 @@ def set_pub_key_at_addr(
         gas = GAS_LIMIT
 
     if not (GAS_PAYER or GAS_PAYER_PRIV):
-        raise ValueError(
-            "environment variable GAS_PAYER AND GAS_PAYER_PRIV required")
+        raise ValueError("environment variable GAS_PAYER AND GAS_PAYER_PRIV required")
 
     w3 = get_w3(hmt_server_addr)
     kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=kvstore_abi)

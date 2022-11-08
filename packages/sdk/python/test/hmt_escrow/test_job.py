@@ -59,8 +59,7 @@ class JobTestCase(unittest.TestCase):
     def test_job_init(self):
         # Creating a new Job instance initializes the critical attributes correctly.
         self.assertEqual(self.job.gas_payer, self.credentials["gas_payer"])
-        self.assertEqual(self.job.gas_payer_priv,
-                         self.credentials["gas_payer_priv"])
+        self.assertEqual(self.job.gas_payer_priv, self.credentials["gas_payer_priv"])
         self.assertEqual(self.job.serialized_manifest["oracle_stake"], "0.05")
         self.assertEqual(self.job.amount, Decimal("100.0"))
 
@@ -71,8 +70,7 @@ class JobTestCase(unittest.TestCase):
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         self.assertTrue(
-            launcher(self.job.job_contract,
-                     self.credentials["gas_payer"]).lower(),
+            launcher(self.job.job_contract, self.credentials["gas_payer"]).lower(),
             self.job.factory_contract.address.lower(),
         )
 
@@ -107,8 +105,7 @@ class JobTestCase(unittest.TestCase):
                 "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
-        self.job = Job(self.credentials, manifest,
-                       multi_credentials=multi_credentials)
+        self.job = Job(self.credentials, manifest, multi_credentials=multi_credentials)
 
         # Inject wrong credentials on purpose to test out raffling
 
@@ -152,8 +149,7 @@ class JobTestCase(unittest.TestCase):
                 "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
-        self.job = Job(self.credentials, manifest,
-                       multi_credentials=multi_credentials)
+        self.job = Job(self.credentials, manifest, multi_credentials=multi_credentials)
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
 
@@ -194,8 +190,7 @@ class JobTestCase(unittest.TestCase):
             ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0")),
             ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("50.0")),
         ]
-        self.assertTrue(self.job.bulk_payout(
-            payouts, {}, self.rep_oracle_pub_key))
+        self.assertTrue(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
 
         # The escrow contract is still in Partial state as there's still balance left.
 
@@ -204,17 +199,13 @@ class JobTestCase(unittest.TestCase):
 
         # Trying to pay more than the contract balance results in failure.
 
-        payouts = [
-            ("0x9d689b8f50Fd2CAec716Cc5220bEd66E03F07B5f", Decimal("40.0"))]
-        self.assertFalse(self.job.bulk_payout(
-            payouts, {}, self.rep_oracle_pub_key))
+        payouts = [("0x9d689b8f50Fd2CAec716Cc5220bEd66E03F07B5f", Decimal("40.0"))]
+        self.assertFalse(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
 
         # Paying the remaining amount empties the escrow and updates the status correctly.
 
-        payouts = [
-            ("0x9d689b8f50Fd2CAec716Cc5220bEd66E03F07B5f", Decimal("30.0"))]
-        self.assertTrue(self.job.bulk_payout(
-            payouts, {}, self.rep_oracle_pub_key))
+        payouts = [("0x9d689b8f50Fd2CAec716Cc5220bEd66E03F07B5f", Decimal("30.0"))]
+        self.assertTrue(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
         self.assertEqual(self.job.balance(), 0)
         self.assertEqual(self.job.status(), Status(4))
 
@@ -228,16 +219,14 @@ class JobTestCase(unittest.TestCase):
                 "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
-        self.job = Job(self.credentials, manifest,
-                       multi_credentials=multi_credentials)
+        self.job = Job(self.credentials, manifest, multi_credentials=multi_credentials)
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [
             ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0")),
             ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("50.0")),
         ]
-        self.assertTrue(self.job.bulk_payout(
-            payouts, {}, self.rep_oracle_pub_key))
+        self.assertTrue(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
 
     def test_job_bulk_payout_with_encryption_option(self):
         """Tests whether final results must be persisted in storage encrypted or plain."""
@@ -245,8 +234,7 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
 
         final_results = {"results": 0}
 
@@ -293,8 +281,7 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
 
         final_results = {"results": 0}
 
@@ -340,8 +327,7 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
 
         final_results = {"results": 0}
 
@@ -398,8 +384,7 @@ class JobTestCase(unittest.TestCase):
             )
             self.assertIsNone(persisted_final_results)
 
-            payouts = [
-                ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+            payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
 
             final_results = {"results": 0}
 
@@ -439,11 +424,9 @@ class JobTestCase(unittest.TestCase):
 
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
         self.assertTrue(
-            self.job.bulk_payout(
-                payouts, {"results": 0}, self.rep_oracle_pub_key)
+            self.job.bulk_payout(payouts, {"results": 0}, self.rep_oracle_pub_key)
         )
         self.assertFalse(self.job.abort())
         self.assertEqual(self.job.status(), Status(4))
@@ -471,19 +454,15 @@ class JobTestCase(unittest.TestCase):
     def test_job_cancel(self):
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
-        payouts = [
-            ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0"))]
-        self.assertTrue(self.job.bulk_payout(
-            payouts, {}, self.rep_oracle_pub_key))
+        payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0"))]
+        self.assertTrue(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(3))
 
         # The escrow contract is in Paid state after the second payout and it can't be cancelled.
 
-        payouts = [
-            ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("80.0"))]
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("80.0"))]
         self.assertTrue(
-            self.job.bulk_payout(
-                payouts, {"results": 0}, self.rep_oracle_pub_key)
+            self.job.bulk_payout(payouts, {"results": 0}, self.rep_oracle_pub_key)
         )
         self.assertFalse(self.job.cancel())
         self.assertEqual(self.job.status(), Status(4))

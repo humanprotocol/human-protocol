@@ -257,21 +257,18 @@ class Job:
             multi_credentials, **credentials
         )
         if not main_credentials_valid:
-            raise ValueError(
-                "Given private key doesn't match the ethereum address.")
+            raise ValueError("Given private key doesn't match the ethereum address.")
 
         self.gas_payer = Web3.toChecksumAddress(credentials["gas_payer"])
         self.gas_payer_priv = credentials["gas_payer_priv"]
-        self.multi_credentials = self._validate_multi_credentials(
-            multi_credentials)
+        self.multi_credentials = self._validate_multi_credentials(multi_credentials)
         self.hmt_server_addr = hmt_server_addr
         self.hmtoken_addr = HMTOKEN_ADDR if hmtoken_addr is None else hmtoken_addr
         self.gas = gas_limit or GAS_LIMIT
 
         # Initialize a new Job.
         if not escrow_addr and escrow_manifest:
-            self.factory_contract = self._init_factory(
-                factory_addr, credentials)
+            self.factory_contract = self._init_factory(factory_addr, credentials)
             self._init_job(escrow_manifest)
 
         # Access an existing Job.
@@ -284,8 +281,7 @@ class Job:
 
         # Handle incorrect usage
         else:
-            raise ValueError(
-                "Job instantiation wrong, double-check arguments.")
+            raise ValueError("Job instantiation wrong, double-check arguments.")
 
     def launch(self, pub_key: bytes) -> bool:
         """Launches an escrow contract to the network, uploads the manifest
@@ -399,10 +395,8 @@ class Job:
         recording_oracle_stake = int(
             Decimal(self.serialized_manifest["oracle_stake"]) * 100
         )
-        reputation_oracle = str(
-            self.serialized_manifest["reputation_oracle_addr"])
-        recording_oracle = str(
-            self.serialized_manifest["recording_oracle_addr"])
+        reputation_oracle = str(self.serialized_manifest["reputation_oracle_addr"])
+        recording_oracle = str(self.serialized_manifest["recording_oracle_addr"])
         hmt_amount = int(self.amount * 10**18)
         hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
 
@@ -472,8 +466,7 @@ class Job:
         ]
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *func_args, **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
             contract_is_setup = True
         except Exception as e:
             LOG.debug(
@@ -536,8 +529,7 @@ class Job:
         func_args = [handlers]
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *func_args, **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
             return True
         except Exception as e:
             LOG.info(
@@ -654,8 +646,7 @@ class Job:
         func_args = [eth_addrs, hmt_amounts, url, hash_, 1]
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *func_args, **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
             return self._bulk_paid() is True
 
         except Exception as e:
@@ -756,8 +747,7 @@ class Job:
         }
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *[], **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             # After abort the contract should be destroyed
             return w3.eth.getCode(self.job_contract.address) == b""
         except Exception as e:
@@ -839,8 +829,7 @@ class Job:
         }
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *[], **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             return self.status() == Status.Cancelled
         except Exception as e:
             LOG.info(
@@ -926,8 +915,7 @@ class Job:
         func_args = [url, hash_]
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *func_args, **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
             return True
         except Exception as e:
             LOG.info(
@@ -998,8 +986,7 @@ class Job:
         }
 
         try:
-            handle_transaction_with_retry(
-                txn_func, self.retry, *[], **txn_info)
+            handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             return self.status() == Status.Complete
         except Exception as e:
             LOG.info(
@@ -1190,10 +1177,8 @@ class Job:
 
         self.factory_contract = get_factory(factory_addr, self.hmt_server_addr)
         self.job_contract = get_escrow(escrow_addr, self.hmt_server_addr)
-        self.manifest_url = manifest_url(
-            self.job_contract, gas_payer, self.gas)
-        self.manifest_hash = manifest_hash(
-            self.job_contract, gas_payer, self.gas)
+        self.manifest_url = manifest_url(self.job_contract, gas_payer, self.gas)
+        self.manifest_hash = manifest_hash(self.job_contract, gas_payer, self.gas)
 
         manifest_dict = self.manifest(rep_oracle_priv_key)
         escrow_manifest = Manifest(manifest_dict)
@@ -1376,8 +1361,7 @@ class Job:
             factory_addr = deploy_factory(
                 gas=self.gas, hmt_server_addr=self.hmt_server_addr, **credentials
             )
-            factory = get_factory(
-                factory_addr, hmt_server_addr=self.hmt_server_addr)
+            factory = get_factory(factory_addr, hmt_server_addr=self.hmt_server_addr)
             if not factory_addr:
                 raise Exception("Unable to get address from factory")
 

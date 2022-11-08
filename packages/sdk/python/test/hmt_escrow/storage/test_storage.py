@@ -49,8 +49,7 @@ class StorageTest(unittest.TestCase):
             )
 
             mock_s3.assert_called()
-            self.assertIn(
-                "Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
+            self.assertIn("Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
 
             # With use_public_bucket False, bucket MUST be the private one
             self.assertEqual(
@@ -75,8 +74,7 @@ class StorageTest(unittest.TestCase):
 
             mock_s3.assert_called()
 
-            self.assertIn(
-                "Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
+            self.assertIn("Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
 
             # With use_public_bucket True, bucket MUST be the public one
             self.assertIn(
@@ -97,15 +95,13 @@ class StorageTest(unittest.TestCase):
             upload(data, self.pub_key, encrypt_data=True)
 
             mock_s3.assert_called()
-            self.assertIn(
-                "Body", s3_client_mock.put_object.call_args.kwargs.keys())
+            self.assertIn("Body", s3_client_mock.put_object.call_args.kwargs.keys())
 
             # Data to be uploaded must be encrypted
             uploaded_content = crypto.decrypt(
                 self.priv_key, s3_client_mock.put_object.call_args.kwargs["Body"]
             )
-            self.assertEqual(json.dumps(
-                data, sort_keys=True), uploaded_content)
+            self.assertEqual(json.dumps(data, sort_keys=True), uploaded_content)
 
     def test_upload_with_disabled_encryption_option(self):
         """
@@ -119,8 +115,7 @@ class StorageTest(unittest.TestCase):
             upload(data, self.pub_key, encrypt_data=False)
 
             mock_s3.assert_called()
-            self.assertIn(
-                "Body", s3_client_mock.put_object.call_args.kwargs.keys())
+            self.assertIn("Body", s3_client_mock.put_object.call_args.kwargs.keys())
 
             # Data to be uploaded must be plain
             uploaded_content = s3_client_mock.put_object.call_args.kwargs["Body"]
@@ -175,8 +170,7 @@ class StorageTest(unittest.TestCase):
             ]
 
             # Encryption is on (default)
-            downloaded = download(
-                key=file_key, private_key=self.priv_key, public=False)
+            downloaded = download(key=file_key, private_key=self.priv_key, public=False)
             self.assertEqual(json.dumps(downloaded), sample_data)
 
             # Download from storage must be called as PRIVATE (public is FALSE)
@@ -185,8 +179,7 @@ class StorageTest(unittest.TestCase):
             download_mock.reset_mock()
 
             # Encryption is on (default)
-            downloaded = download(
-                key=file_key, private_key=self.priv_key, public=True)
+            downloaded = download(key=file_key, private_key=self.priv_key, public=True)
             self.assertEqual(json.dumps(downloaded), sample_data)
 
             # Download from storage must be called as PRIVATE (public is TRUE)
