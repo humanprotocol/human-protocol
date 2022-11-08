@@ -1,5 +1,5 @@
 format:
-	pipenv run black . --check
+	pipenv run black .
 
 run-test:
 	cd ../../../../
