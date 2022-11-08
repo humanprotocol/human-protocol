@@ -1,6 +1,10 @@
 format:
 	pipenv run black .
 
+build-contracts:
+	yarn workspace @human-protocol/core compile
+	cp -r ../../core/artifacts/contracts .
+
 run-test:
 	yarn workspace @human-protocol/core local &
 
