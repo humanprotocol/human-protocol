@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install node dependencies
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -21,4 +23,4 @@ jobs:
       - name: Python test
         working-directory: ./packages/sdk/python
         run: |
-          pip -m unittest
+          make run-test
