@@ -1,3 +1,4 @@
+from glob import glob
 import setuptools
 
 setuptools.setup(
@@ -13,7 +14,8 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
     ],
-    packages=setuptools.find_packages() + ["../../../core/artifacts/contracts"],
+    packages=setuptools.find_packages() + ["contracts"],
+    data_files=[("contracts", glob("*.json", recursive=True))],
     install_requires=[
         "boto3",
         "cryptography",

@@ -5,3 +5,11 @@ __pycache__
 Pipfile.lock
 pip-log.txt
 pip-wheel-metadata/
+
+# Build
+build
+dist
+*.egg-info
+
+# ABIs
+contracts

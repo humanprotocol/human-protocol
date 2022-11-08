@@ -24,9 +24,7 @@ HMTOKEN_ADDR = Web3.toChecksumAddress(
     os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
 
-ABIS_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "../../core/artifacts/contracts"
-)
+ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contracts")
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
