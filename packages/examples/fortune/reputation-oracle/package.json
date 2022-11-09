@@ -8,7 +8,7 @@
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8548\" \"jest\""
   },
   "dependencies": {
-    "@human-protocol/core": "^1.0.7",
+    "@human-protocol/core": "^1.0.8",
     "body-parser": "^1.19.1",
     "express": "^4.17.2",
     "minio": "^7.0.26",
