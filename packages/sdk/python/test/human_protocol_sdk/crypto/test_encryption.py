@@ -3,9 +3,9 @@ import unittest
 
 from eth_keys import keys as eth_keys
 
-from hmt_escrow.crypto.encryption import Encryption
-from hmt_escrow.crypto.exceptions import DecryptionError
-from test.hmt_escrow.utils import manifest
+from human_protocol_sdk.crypto.encryption import Encryption
+from human_protocol_sdk.crypto.exceptions import DecryptionError
+from test.human_protocol_sdk.utils import manifest
 
 
 class EncryptionServiceTest(unittest.TestCase):

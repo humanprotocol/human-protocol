@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from hmt_escrow.eth_bridge import (
+from human_protocol_sdk.eth_bridge import (
     get_hmtoken,
     get_factory,
     get_escrow,
@@ -9,7 +9,11 @@ from hmt_escrow.eth_bridge import (
     handle_transaction,
     set_pub_key_at_addr,
 )
-from test.hmt_escrow.utils import create_job, DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
+from test.human_protocol_sdk.utils import (
+    create_job,
+    DEFAULT_GAS_PAYER,
+    DEFAULT_GAS_PAYER_PRIV,
+)
 
 
 class EthBridgeTestCase(unittest.TestCase):

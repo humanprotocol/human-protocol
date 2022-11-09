@@ -27,7 +27,7 @@ pip install git+https://github.com/iamdefinitelyahuman/py-solc-x@master#egg=py-s
             git+https://github.com/ethereum/trinity@master#egg=trinity \
             git+https://github.com/sphinx-doc/sphinx@master#egg=sphinx
 
-pip install hmt-escrow
+pip install human-protocol-sdk
 ```
 
 ### Getting Started

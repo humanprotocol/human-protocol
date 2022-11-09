@@ -29,9 +29,8 @@ jobs:
       - name: Build and publish
         working-directory: ./packages/sdk/python
         env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          make build-contracts
-          python setup.py sdist bdist_wheel
+          make build-package
           twine upload dist/*

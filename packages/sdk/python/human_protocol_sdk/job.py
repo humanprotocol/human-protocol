@@ -12,8 +12,8 @@ from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt, Wei
 
-from hmt_escrow import utils
-from hmt_escrow.eth_bridge import (
+from human_protocol_sdk import utils
+from human_protocol_sdk.eth_bridge import (
     get_hmtoken,
     get_escrow,
     get_factory,
@@ -23,13 +23,18 @@ from hmt_escrow.eth_bridge import (
     Retry,
     HMTOKEN_ADDR,
 )
-from hmt_escrow.storage import download, upload, get_public_bucket_url, get_key_from_url
+from human_protocol_sdk.storage import (
+    download,
+    upload,
+    get_public_bucket_url,
+    get_key_from_url,
+)
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 # Explicit env variable that will use s3 for storing results.
 
-LOG = logging.getLogger("hmt_escrow.job")
+LOG = logging.getLogger("human_protocol_sdk.job")
 
 Status = Enum("Status", "Launched Pending Partial Paid Complete Cancelled")
 
@@ -181,7 +186,7 @@ class Job:
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> job = Job(credentials, manifest)
         >>> job.gas_payer == credentials["gas_payer"]
         True
@@ -288,7 +293,7 @@ class Job:
         to S3 with the public key of the Reputation Oracle and stores
         the S3 url to the escrow contract.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -355,7 +360,7 @@ class Job:
         """Sets the escrow contract to be ready to receive answers from the Recording Oracle.
         The contract needs to be deployed and funded first.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -488,7 +493,7 @@ class Job:
         """Add trusted handlers that can freely transact with the contract and
          perform aborts and cancels for example.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -558,7 +563,7 @@ class Job:
         final results are uploaded to IPFS and contract's state is updated to Partial or Paid
         depending on contract's balance.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -677,7 +682,7 @@ class Job:
 
         The escrow contract is in Partial state after a partial bulk payout so it can be aborted.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> job = Job(credentials, manifest)
 
         The escrow contract is in Pending state after setup so it can be aborted.
@@ -773,7 +778,7 @@ class Job:
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> job = Job(credentials, manifest)
 
         The escrow contract is in Pending state after setup so it can be cancelled.
@@ -850,7 +855,7 @@ class Job:
         """Recording Oracle stores intermediate results with Reputation Oracle's public key to S3
         and updates the contract's state.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -940,7 +945,7 @@ class Job:
     ) -> bool:
         """Completes the Job if it has been paid.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1006,7 +1011,7 @@ class Job:
     def status(self) -> Enum:
         """Returns the status of the Job.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1030,7 +1035,7 @@ class Job:
     def balance(self) -> int:
         """Retrieve the balance of a Job in HMT.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1060,7 +1065,7 @@ class Job:
     def manifest(self, priv_key: bytes) -> Dict:
         """Retrieves the initial manifest used to setup a Job.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1089,7 +1094,7 @@ class Job:
     def intermediate_results(self, priv_key: bytes) -> Dict:
         """Reputation Oracle retrieves the intermediate results stored by the Recording Oracle.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1123,7 +1128,7 @@ class Job:
     def final_results(self, priv_key: bytes) -> Optional[Dict]:
         """Retrieves the final results stored by the Reputation Oracle.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1210,7 +1215,7 @@ class Job:
         by calculating the checksum address from the private key and comparing that
         to the given address.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ...     "gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1251,7 +1256,7 @@ class Job:
         to the given address.
 
         Validating right credentials succeeds.
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ...     "gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1286,7 +1291,7 @@ class Job:
     def _factory_contains_escrow(self, escrow_addr: str, factory_addr: str) -> bool:
         """Checks whether a given factory address contains a given escrow address.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5",
@@ -1330,7 +1335,7 @@ class Job:
         a new factory is created.
 
         Initializing a new Job instance without a factory address succeeds.
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1375,7 +1380,7 @@ class Job:
     def _bulk_paid(self) -> int:
         """Checks if the last bulk payment has succeeded.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> credentials = {
         ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
         ... 	"gas_payer_priv": "28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5"
@@ -1412,7 +1417,7 @@ class Job:
     def _create_escrow(self, trusted_handlers=[]) -> RaffleTxn:
         """Launches a new escrow contract to the ethereum network.
 
-        >>> from test.hmt_escrow.utils import manifest
+        >>> from test.human_protocol_sdk.utils import manifest
         >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> trusted_handlers = [addr for addr, priv_key in multi_credentials]
         >>> credentials = {

@@ -1,8 +1,8 @@
 import json
 import unittest
 
-from hmt_escrow import crypto
-from test.hmt_escrow.utils import manifest
+from human_protocol_sdk import crypto
+from test.human_protocol_sdk.utils import manifest
 
 
 class EncryptionServiceTest(unittest.TestCase):

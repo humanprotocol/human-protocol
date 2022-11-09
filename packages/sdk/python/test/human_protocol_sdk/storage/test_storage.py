@@ -3,9 +3,9 @@ import logging
 import unittest
 from unittest.mock import MagicMock, patch
 
-from hmt_escrow import crypto
-from hmt_escrow.storage import upload, download, download_from_storage
-from test.hmt_escrow.utils import test_manifest
+from human_protocol_sdk import crypto
+from human_protocol_sdk.storage import upload, download, download_from_storage
+from test.human_protocol_sdk.utils import test_manifest
 
 ESCROW_TEST_BUCKETNAME = "test-escrow-results"
 ESCROW_TEST_PUBLIC_BUCKETNAME = "test-escrow-public-results"
@@ -30,15 +30,18 @@ class StorageTest(unittest.TestCase):
             b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         )
 
-    @patch("hmt_escrow.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_TEST_PUBLIC_BUCKETNAME)
-    @patch("hmt_escrow.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
+        ESCROW_TEST_PUBLIC_BUCKETNAME,
+    )
+    @patch("human_protocol_sdk.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
     def test_upload_to_private_bucket(self):
         """
         Tests uploading file to storage to private bucket when encryption is on.
         """
 
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
 
             upload(
@@ -57,12 +60,15 @@ class StorageTest(unittest.TestCase):
                 ESCROW_TEST_BUCKETNAME,
             )
 
-    @patch("hmt_escrow.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_TEST_PUBLIC_BUCKETNAME)
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
+        ESCROW_TEST_PUBLIC_BUCKETNAME,
+    )
     def test_upload_to_public_bucket(self):
         """Tests uploading file to storage to public bucket only when encryption is off."""
 
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
 
             upload(
@@ -87,7 +93,7 @@ class StorageTest(unittest.TestCase):
         Tests data persisted in storage is encrypted.
         """
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
 
             # Encryption on (default).
@@ -108,7 +114,7 @@ class StorageTest(unittest.TestCase):
         Tests data persisted in storage is plain.
         """
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
             # Encryption off.
             data = self.get_manifest()
@@ -123,12 +129,12 @@ class StorageTest(unittest.TestCase):
                 json.dumps(data, sort_keys=True), uploaded_content.decode()
             )
 
-    @patch("hmt_escrow.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
+    @patch("human_protocol_sdk.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
     def test_download_from_storage_from_private_bucket(self):
         """Tests download of file artifact from storage from private bucket."""
         # Encrypting data is on (default)
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
 
             download_from_storage(key="s3aaaa", public=False)
@@ -140,11 +146,14 @@ class StorageTest(unittest.TestCase):
             s3_client_mock.get_object.call_args.kwargs["Bucket"], ESCROW_TEST_BUCKETNAME
         )
 
-    @patch("hmt_escrow.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_TEST_PUBLIC_BUCKETNAME)
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
+        ESCROW_TEST_PUBLIC_BUCKETNAME,
+    )
     def test_download_from_storage_public_bucket(self):
         """Tests download of file artifact from storage from private bucket."""
         s3_client_mock = MagicMock()
-        with patch("hmt_escrow.storage._connect_s3") as mock_s3:
+        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
             mock_s3.return_value = s3_client_mock
 
             download_from_storage(key="s3aaaa", public=True)
@@ -162,7 +171,7 @@ class StorageTest(unittest.TestCase):
         file_key = "s3aaa"
         sample_data = '{"a": 1, "b": 2}'
 
-        with patch("hmt_escrow.storage.download_from_storage") as download_mock:
+        with patch("human_protocol_sdk.storage.download_from_storage") as download_mock:
             # 2 returns. 1. encrypted and other plain
             download_mock.side_effect = [
                 crypto.encrypt(self.pub_key, sample_data),

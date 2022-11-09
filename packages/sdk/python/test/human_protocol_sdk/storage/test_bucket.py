@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from hmt_escrow.storage import (
+from human_protocol_sdk.storage import (
     _connect_s3,
     get_bucket,
     get_public_bucket_url,
@@ -21,8 +21,11 @@ ESCROW_PUBLIC_BUCKETNAME = "my-public-bucket"
 class BucketTest(unittest.TestCase):
     """Bucket related tests"""
 
-    @patch("hmt_escrow.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
-    @patch("hmt_escrow.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_TEST_PUBLIC_BUCKETNAME)
+    @patch("human_protocol_sdk.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
+        ESCROW_TEST_PUBLIC_BUCKETNAME,
+    )
     def test_retrieving_bucket(self):
         """Tests whether internal bucket is retrieved public/private bucket."""
         bucket_name = get_bucket(public=False)
@@ -31,7 +34,9 @@ class BucketTest(unittest.TestCase):
         bucket_name = get_bucket(public=True)
         self.assertEqual(bucket_name, ESCROW_TEST_PUBLIC_BUCKETNAME)
 
-    @patch("hmt_escrow.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_PUBLIC_BUCKETNAME)
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME", ESCROW_PUBLIC_BUCKETNAME
+    )
     def test_public_bucket_url_retrieval(self):
         """Tests whether bucket public URL is retrieved correctly."""
         key = "s3aaa"
@@ -53,11 +58,14 @@ class BucketTest(unittest.TestCase):
         key = get_key_from_url(key)
         self.assertEqual(key, expected_key)
 
-    @patch("hmt_escrow.storage.ESCROW_AWS_ACCESS_KEY_ID", ESCROW_AWS_ACCESS_KEY_ID)
     @patch(
-        "hmt_escrow.storage.ESCROW_AWS_SECRET_ACCESS_KEY", ESCROW_AWS_SECRET_ACCESS_KEY
+        "human_protocol_sdk.storage.ESCROW_AWS_ACCESS_KEY_ID", ESCROW_AWS_ACCESS_KEY_ID
     )
-    @patch("hmt_escrow.storage.boto3")
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_AWS_SECRET_ACCESS_KEY",
+        ESCROW_AWS_SECRET_ACCESS_KEY,
+    )
+    @patch("human_protocol_sdk.storage.boto3")
     def test_connect_private_bucket_when_param_passed(self, boto3):
         """Tests connection to private bucket with False param."""
 
@@ -71,11 +79,14 @@ class BucketTest(unittest.TestCase):
             ESCROW_AWS_SECRET_ACCESS_KEY,
         )
 
-    @patch("hmt_escrow.storage.ESCROW_AWS_ACCESS_KEY_ID", ESCROW_AWS_ACCESS_KEY_ID)
     @patch(
-        "hmt_escrow.storage.ESCROW_AWS_SECRET_ACCESS_KEY", ESCROW_AWS_SECRET_ACCESS_KEY
+        "human_protocol_sdk.storage.ESCROW_AWS_ACCESS_KEY_ID", ESCROW_AWS_ACCESS_KEY_ID
     )
-    @patch("hmt_escrow.storage.boto3")
+    @patch(
+        "human_protocol_sdk.storage.ESCROW_AWS_SECRET_ACCESS_KEY",
+        ESCROW_AWS_SECRET_ACCESS_KEY,
+    )
+    @patch("human_protocol_sdk.storage.boto3")
     def test_connect_private_bucket_without_param(self, boto3):
         """Tests connection to private bucket without param."""
 
@@ -90,14 +101,14 @@ class BucketTest(unittest.TestCase):
         )
 
     @patch(
-        "hmt_escrow.storage.ESCROW_RESULTS_AWS_S3_ACCESS_KEY_ID",
+        "human_protocol_sdk.storage.ESCROW_RESULTS_AWS_S3_ACCESS_KEY_ID",
         ESCROW_RESULTS_AWS_S3_ACCESS_KEY_ID,
     )
     @patch(
-        "hmt_escrow.storage.ESCROW_RESULTS_AWS_S3_SECRET_ACCESS_KEY",
+        "human_protocol_sdk.storage.ESCROW_RESULTS_AWS_S3_SECRET_ACCESS_KEY",
         ESCROW_RESULTS_AWS_S3_SECRET_ACCESS_KEY,
     )
-    @patch("hmt_escrow.storage.boto3")
+    @patch("human_protocol_sdk.storage.boto3")
     def test_connect_public_bucket(self, boto3):
         """Tests connection to public bucket."""
 

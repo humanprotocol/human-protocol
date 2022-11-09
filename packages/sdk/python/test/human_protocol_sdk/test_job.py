@@ -3,13 +3,13 @@ import unittest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch, call
 
-from hmt_escrow import utils
-from hmt_escrow.eth_bridge import (
+from human_protocol_sdk import utils
+from human_protocol_sdk.eth_bridge import (
     deploy_factory,
     get_w3,
     Retry,
 )
-from hmt_escrow.job import (
+from human_protocol_sdk.job import (
     Job,
     status,
     Status,
@@ -17,13 +17,13 @@ from hmt_escrow.job import (
     launcher,
     is_trusted_handler,
 )
-from hmt_escrow.storage import get_public_bucket_url
-from test.hmt_escrow.utils.manifest import manifest
-from test.hmt_escrow.utils.job import DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
+from human_protocol_sdk.storage import get_public_bucket_url
+from test.human_protocol_sdk.utils.manifest import manifest
+from test.human_protocol_sdk.utils.job import DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
 
 
-@patch("hmt_escrow.storage._connect_s3", MagicMock(), create=True)
-@patch("hmt_escrow.job.download", MagicMock(return_value=manifest), create=True)
+@patch("human_protocol_sdk.storage._connect_s3", MagicMock(), create=True)
+@patch("human_protocol_sdk.job.download", MagicMock(return_value=manifest), create=True)
 class JobTestCase(unittest.TestCase):
     def setUp(self):
         self.credentials = {
@@ -241,7 +241,7 @@ class JobTestCase(unittest.TestCase):
         mock_upload = MagicMock(return_value=("hash", "url"))
 
         # Testing option as: do not encrypt final results: encrypt_final_results=False
-        with patch("hmt_escrow.job.upload", mock_upload):
+        with patch("human_protocol_sdk.job.upload", mock_upload):
             # Bulk payout with final results as plain (not encrypted)
             job.bulk_payout(
                 payouts=payouts,
@@ -287,7 +287,7 @@ class JobTestCase(unittest.TestCase):
 
         mock_upload = MagicMock(return_value=("hash", "url"))
 
-        with patch("hmt_escrow.job.upload", mock_upload):
+        with patch("human_protocol_sdk.job.upload", mock_upload):
             # Bulk payout with with option to store privately
             job.bulk_payout(
                 payouts=payouts,
@@ -332,8 +332,10 @@ class JobTestCase(unittest.TestCase):
         final_results = {"results": 0}
 
         with patch(
-            "hmt_escrow.job.handle_transaction_with_retry"
-        ) as transaction_retry_mock, patch("hmt_escrow.job.upload") as upload_mock:
+            "human_protocol_sdk.job.handle_transaction_with_retry"
+        ) as transaction_retry_mock, patch(
+            "human_protocol_sdk.job.upload"
+        ) as upload_mock:
             key = "abcdefg"
             hash_ = f"s3{key}"
             upload_mock.return_value = hash_, key
@@ -375,7 +377,7 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
-        with patch("hmt_escrow.job.download") as download_mock:
+        with patch("human_protocol_sdk.job.download") as download_mock:
             download_mock.return_value = {"results": 0}
 
             # No bulk payout processed to have final results
@@ -484,7 +486,9 @@ class JobTestCase(unittest.TestCase):
 
         e = None
         with self.assertRaises(Exception) as e:
-            with patch("hmt_escrow.eth_bridge.handle_transaction", handler_mock):
+            with patch(
+                "human_protocol_sdk.eth_bridge.handle_transaction", handler_mock
+            ):
                 self.job.launch(b"")
 
         self.assertIsNotNone(e)
@@ -502,9 +506,9 @@ class JobTestCase(unittest.TestCase):
         handler_mock = MagicMock(side_effect=Exception)
         sleep_mock = MagicMock()
 
-        with patch("hmt_escrow.eth_bridge.handle_transaction", handler_mock), patch(
-            "hmt_escrow.eth_bridge.sleep", sleep_mock
-        ):
+        with patch(
+            "human_protocol_sdk.eth_bridge.handle_transaction", handler_mock
+        ), patch("human_protocol_sdk.eth_bridge.sleep", sleep_mock):
             raffle_txn_res = self.job._raffle_txn(
                 multi_creds=[("1", "11")],
                 txn_func=txn_mock,

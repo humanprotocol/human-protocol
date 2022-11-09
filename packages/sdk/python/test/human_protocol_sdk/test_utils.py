@@ -1,15 +1,19 @@
 import unittest
 from unittest.mock import MagicMock, patch
-import hmt_escrow.utils as utils
-from hmt_escrow.eth_bridge import (
+import human_protocol_sdk.utils as utils
+from human_protocol_sdk.eth_bridge import (
     get_hmtoken,
     handle_transaction,
 )
 
-from test.hmt_escrow.utils import create_job, DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
+from test.human_protocol_sdk.utils import (
+    create_job,
+    DEFAULT_GAS_PAYER,
+    DEFAULT_GAS_PAYER_PRIV,
+)
 
 
-@patch("hmt_escrow.storage._connect_s3", MagicMock(), create=True)
+@patch("human_protocol_sdk.storage._connect_s3", MagicMock(), create=True)
 class UtilsTestCase(unittest.TestCase):
     def setUp(self):
         self.credentials = {

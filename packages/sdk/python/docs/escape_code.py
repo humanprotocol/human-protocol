@@ -1,7 +1,7 @@
 import sys
 
-source = open("hmt_escrow/" + sys.argv[1] + ".py.backup", "r")
-target = open("hmt_escrow/" + sys.argv[1] + ".py", "w")
+source = open("human_protocol_sdk/" + sys.argv[1] + ".py.backup", "r")
+target = open("human_protocol_sdk/" + sys.argv[1] + ".py", "w")
 
 # Comment out the lines which can't be executed when the autodoc imports the file.
 comment = False

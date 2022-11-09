@@ -2,8 +2,8 @@ from typing import Optional
 
 from basemodels import Manifest
 
-from hmt_escrow.job import Job
-from test.hmt_escrow.utils import manifest as sample_manifest
+from human_protocol_sdk.job import Job
+from test.human_protocol_sdk.utils import manifest as sample_manifest
 
 DEFAULT_GAS_PAYER = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 DEFAULT_GAS_PAYER_PRIV = (

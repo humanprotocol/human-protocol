@@ -4,7 +4,7 @@ from typing import Tuple, Optional
 from web3.contract import Contract
 from web3.types import TxReceipt
 
-logger = logging.getLogger("hmt_escrow.job")
+logger = logging.getLogger("human_protocol_sdk.job")
 
 
 def with_retry(fn, retries=3, delay=5, backoff=2):

@@ -7,7 +7,7 @@ from typing import Dict, Tuple, Optional, Union
 import boto3
 from botocore.exceptions import ClientError
 
-from hmt_escrow import crypto
+from human_protocol_sdk import crypto
 
 SHARED_MAC_DATA: bytes = os.getenv(
     "SHARED_MAC", "9da0d3721774843193737244a0f3355191f66ff7321e83eae83f7f746eb34350"
@@ -18,7 +18,7 @@ logging.getLogger("botocore").setLevel(logging.INFO)
 logging.getLogger("boto3").setLevel(logging.INFO)
 
 DEBUG = "true" in os.getenv("DEBUG", "false").lower()
-LOG = logging.getLogger("hmt_escrow.storage")
+LOG = logging.getLogger("human_protocol_sdk.storage")
 LOG.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 
 ESCROW_BUCKETNAME = os.getenv("ESCROW_BUCKETNAME", "escrow-results")

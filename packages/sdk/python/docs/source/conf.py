@@ -15,7 +15,7 @@ import sys
 
 # sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath("../.."))
-sys.path.insert(0, os.path.abspath("../../hmt_escrow"))
+sys.path.insert(0, os.path.abspath("../../human_protocol_sdk"))
 print(sys.path)
 
 # -- Project information -----------------------------------------------------

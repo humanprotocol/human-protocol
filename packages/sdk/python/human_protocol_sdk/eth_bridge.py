@@ -13,13 +13,13 @@ from web3.providers.auto import load_provider_from_uri
 from web3.providers.eth_tester import EthereumTesterProvider
 from web3.types import TxReceipt
 
-from hmt_escrow.kvstore_abi import abi as kvstore_abi
+from human_protocol_sdk.kvstore_abi import abi as kvstore_abi
 
 AttributeDict = Dict[str, Any]
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
-LOG = logging.getLogger("hmt_escrow.eth_bridge")
+LOG = logging.getLogger("human_protocol_sdk.eth_bridge")
 HMTOKEN_ADDR = Web3.toChecksumAddress(
     os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
@@ -397,7 +397,7 @@ def get_pub_key_from_addr(wallet_addr: str, hmt_server_addr: str = None) -> byte
         compileflags, 1), test.globs)
       File "<doctest __main__.get_pub_key_from_addr[2]>", line 1, in <module>
         get_pub_key_from_addr('blah')
-      File "hmt_escrow/eth_bridge.py", line 268, in get_pub_key_from_addr
+      File "human_protocol_sdk/eth_bridge.py", line 268, in get_pub_key_from_addr
         raise ValueError('environment variable GAS_PAYER required')
     ValueError: environment variable GAS_PAYER required
     >>> os.environ['GAS_PAYER'] = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
