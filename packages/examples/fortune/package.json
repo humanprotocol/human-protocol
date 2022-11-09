@@ -5,7 +5,7 @@
   "description": "Human Protocol Fortune Exchange Oracle",
   "license": "MIT",
   "scripts": {
-    "install:all": "concurrently -g \"cd exchange && yarn \" \"cd launcher && yarn\" \"cd recording-oracle && yarn\" \"cd reputation-oracle && yarn\"",
+    "install:all": "cd exchange && yarn && cd ../launcher && yarn && cd ../recording-oracle && yarn && cd ../reputation-oracle && yarn",
     "exchange": "cd exchange && yarn && yarn start",
     "launcher": "cd launcher && yarn && yarn start",
     "recording-oracle": "cd recording-oracle && yarn start",
