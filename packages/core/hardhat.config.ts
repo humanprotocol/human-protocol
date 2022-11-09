@@ -51,7 +51,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      url: 'http://localhost:8545',
+      url: 'http://127.0.0.1:8545',
     },
     hardhat: {
       forking: process.env.FORKING_URL

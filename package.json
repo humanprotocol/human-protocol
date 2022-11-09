@@ -15,14 +15,9 @@
     "lint": "concurrently npm:core:lint npm:subgraph:lint",
     "prepare": "husky install"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
-    "nohoist": [
-      "**/fortune/**"
-    ]
-  },
+  "workspaces": [
+    "packages/**"
+  ],
   "devDependencies": {
     "@types/jest": "^29.2.1",
     "@types/node": "^18.11.9",
