@@ -12,7 +12,7 @@ const addresses = {
 };
 
 const urls = {
-    ethHTTPServer: process.env.ETH_HTTP_SERVER || 'http://localhost:8545',
+    ethHTTPServer: process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545',
     manifestUrl: process.env.MANIFEST_URL || 'http://localhost:9000/manifests/manifest.json',
     localManifestUrl: 'http://localhost:9000/manifests/manifest.json',
 };
