@@ -7,7 +7,7 @@ const { uploadResults } = require('./services/s3');
 
 const app = express();
 const privKey = process.env.ETH_PRIVATE_KEY || '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
-const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://localhost:8545';
+const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
 
 const web3 = new Web3(ethHttpServer);
