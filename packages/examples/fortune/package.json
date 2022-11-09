@@ -10,16 +10,16 @@
     "launcher": "cd launcher && yarn && yarn start",
     "recording-oracle": "cd recording-oracle && yarn start",
     "reputation-oracle": "cd reputation-oracle && yarn start",
-    "minio": "docker compose --env-file=.env.development up minio-mc",
+    "minio": "docker compose --env-file=.env.development up -d minio-mc",
     "deploy:contracts": "cd ../../core && yarn && yarn deploy:local",
-    "local": "docker compose down && (concurrently -g \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
-    "local:test": "docker compose down && (concurrently -g \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
+    "local": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
+    "local:test": "docker compose down && (concurrently \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
     "test:recording": "cd recording-oracle && yarn test",
     "test:reputation": "cd reputation-oracle && yarn test",
     "test:e2e:docker": "cross-env DOCKER=true jest tests/e2e-backend --runInBand",
-    "test:e2e": "(concurrently -k -s first -g \"yarn local:test\" \"yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
-    "test:unit": "concurrently -g \"yarn test:recording\" \"yarn test:reputation\"",
-    "test": "concurrently -g \"yarn test:e2e\" \"yarn test:unit\""
+    "test:e2e": "(concurrently -k -s first \"yarn local:test\" \"yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
+    "test:unit": "concurrently \"yarn test:recording\" \"yarn test:reputation\"",
+    "test": "concurrently \"yarn test:e2e\" \"yarn test:unit\""
   },
   "devDependencies": {
     "@human-protocol/core": "^1.0.8",
@@ -27,7 +27,6 @@
     "concurrently": "^7.5.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
-    "fortune": "link:",
     "hardhat": "^2.12.2",
     "jest": "^29.2.2",
     "web3": "^1.8.0"
