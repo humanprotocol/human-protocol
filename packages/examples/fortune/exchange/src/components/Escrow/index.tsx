@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EscrowABI from '@human-protocol/core/abis/Escrow.json';
-import getWeb3 from '../web3';
-
+import getWeb3 from '../../utils/web3';
 import './index.css';
 
 const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
-function parseQuery(qs) {
-  const result = {};
+function parseQuery(qs: any) {
+  const result : string[] = [];
   if (qs.length === 0) {
     return {};
   }
@@ -44,16 +43,16 @@ export default function Escrow() {
   const [recordingOracleUrl, setRecordingOracleUrl] = useState('');
 
   useEffect(() => {
-    const qs = parseQuery(window.location.search);
+    const qs: any = parseQuery(window.location.search);
     const address = qs.address;
     if (web3.utils.isAddress(address)) {
       setMainEscrow(web3.utils.toChecksumAddress(address));
     }
   }, []);
 
-  const setMainEscrow = async (address) => {
+  const setMainEscrow = async (address: string) => {
     setEscrow(address);
-    const Escrow = new web3.eth.Contract(EscrowABI, address);
+    const Escrow = new web3.eth.Contract(EscrowABI as [], address);
 
     const escrowSt = await Escrow.methods.status().call();
     setEscrowStatus(statusesMap[escrowSt]);
@@ -67,6 +66,7 @@ export default function Escrow() {
 
       setRecordingOracleUrl(manifestContent.recording_oracle_url);
     }
+    return;
   }
 
   const sendFortune = async () => {
@@ -79,6 +79,7 @@ export default function Escrow() {
     await axios.post(recordingOracleUrl, body);
     alert('Your fortune has been submitted');
     setFortune('');
+    return;
   }
 
 

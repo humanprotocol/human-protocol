@@ -1,8 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import getWeb3 from './web3';
-import Escrow from './escrow';
+import React, {useState, useEffect}  from 'react';
+import getWeb3 from './utils/web3';
+import Escrow from './components/Escrow';
 import './App.css';
-
 
 function App() {
   const web3 = getWeb3();
@@ -18,7 +17,6 @@ function App() {
       }
     }
   }
-
   useEffect(() => {
     init();
   }, []);
@@ -43,7 +41,7 @@ function App() {
         }
       </header>
     </div>
-  );
+  )
 }
 
 export default App;
