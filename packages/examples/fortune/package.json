@@ -13,7 +13,7 @@
     "minio": "docker compose --env-file=.env.development up minio-mc",
     "deploy:contracts": "cd ../../core && yarn && yarn deploy:local",
     "local": "docker compose down && (concurrently -g \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
-    "local:test": "docker compose down && (concurrently -g\"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
+    "local:test": "docker compose down && (concurrently -g \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
     "test:recording": "cd recording-oracle && yarn test",
     "test:reputation": "cd reputation-oracle && yarn test",
     "test:e2e:docker": "cross-env DOCKER=true jest tests/e2e-backend --runInBand",
