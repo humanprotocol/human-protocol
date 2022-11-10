@@ -1,8 +1,54 @@
 {
-    "private": "true",
-    "name": "@human-protocol/subgraph",
-    "version": "1.0.0",
-    "description": "Human Protocol Subgraph",
-    "license": "MIT"
+  "name": "@human-protocol/subgraph",
+  "description": "Human Protocol Subgraph",
+  "version": "1.0.0",
+  "files": [
+    "generated"
+  ],
+  "scripts": {
+    "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "build": "graph build",
+    "pretest": "NETWORK=matic yarn generate",
+    "test": "graph test",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ posix4e/humansubgraph",
+    "quickstart:matic": "NETWORK=matic yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "quickstart:goerli": "NETWORK=goerli yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "quickstart:mumbai": "NETWORK=mumbai yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "create-local": "graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ posix4e/humansubgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 posix4e/humansubgraph",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write '**/*.{ts,json,graphql}'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/sdk/typescript/subgraph"
+  },
+  "keywords": [
+    "human-protocol",
+    "sdk",
+    "subgraph",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.35.0",
+    "@graphprotocol/graph-ts": "^0.28.1",
+    "@graphql-eslint/eslint-plugin": "^3.13.0",
+    "@human-protocol/core": "workspace:*",
+    "assemblyscript": "^0.22.0",
+    "matchstick-as": "^0.5.0",
+    "mustache": "^4.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,graphql}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{yaml,json}": [
+      "prettier --write"
+    ]
   }
-  
+}

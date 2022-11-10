@@ -1,0 +1,26 @@
+name: Core NPM publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/core/**
+  workflow_dispatch:
+
+jobs:
+  core-publish:
+    name: Core NPM Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install dependencies
+      - run: yarn compile
+        name: Compile smart contracts
+        working-directory: ./packages/core
+      - uses: JS-DevTools/npm-publish@v1
+        with:
+          package: ./packages/core/package.json
+          access: public
+          token: ${{ secrets.NPM_TOKEN }}

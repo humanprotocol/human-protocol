@@ -1,0 +1,28 @@
+{
+  "overrides": [
+    {
+      "files": ["*.graphql"],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": ["@graphql-eslint"],
+      "parserOptions": {
+        "schema": "./schema.graphql"
+      },
+      // TODO: Add GraphQL ESLint rules here
+      "rules": {}
+    },
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "@typescript-eslint/ban-types": [
+          "error",
+          {
+            "types": {
+              "BigInt": false
+            },
+            "extendDefaults": true
+          }
+        ]
+      }
+    }
+  ]
+}
