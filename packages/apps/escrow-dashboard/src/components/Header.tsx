@@ -10,7 +10,6 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useNavigate } from 'react-router-dom';
 
 import TokenPriceIndicator from './TokenPriceIndicator';
 
@@ -30,7 +29,6 @@ const NAV_LINKS: NavLink[] = [
 const Header: React.FC = (): React.ReactElement => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

@@ -1,0 +1,16 @@
+name: Escrow dashboard check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core-test:
+    name: Escrow Dashboard Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install dependencies
+      - run: yarn escrow-dashboard:test
+        name: Run escrow-dashboard test

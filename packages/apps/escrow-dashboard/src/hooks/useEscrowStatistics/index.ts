@@ -11,8 +11,9 @@ interface IEscrowStatistics {
 
 export default function useEscrowStatistics() {
   const { network } = useNetwork();
-  const [_escrowStatistics, setEscrowStatistics] =
-    useState<IEscrowStatistics>();
+  const [_escrowStatistics, setEscrowStatistics] = useState<
+    IEscrowStatistics
+  >();
 
   useEffect(() => {
     const fetchData = async (url: string) => {

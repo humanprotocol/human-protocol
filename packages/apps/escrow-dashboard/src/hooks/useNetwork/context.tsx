@@ -1,5 +1,6 @@
 import React, { createContext, useState } from 'react';
-import { networkMap, INetwork } from 'src/constants';
+import { networkMap } from 'src/constants';
+import { INetwork } from 'src/constants/networkConstants';
 
 export const NetworkContext = createContext<{
   network: INetwork;

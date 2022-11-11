@@ -10,11 +10,11 @@ type CardTextBlockProps = {
   format?: string;
 };
 
-export const CardTextBlock: React.FC<CardTextBlockProps> = ({
+export default function CardTextBlock({
   title,
   value,
   format = '0,0',
-}): React.ReactElement => {
+}: CardTextBlockProps): React.ReactElement {
   return (
     <CardContainer>
       <Typography variant="body2" color="primary" fontWeight={600} mb="4px">
@@ -29,4 +29,4 @@ export const CardTextBlock: React.FC<CardTextBlockProps> = ({
       </Typography>
     </CardContainer>
   );
-};
+}

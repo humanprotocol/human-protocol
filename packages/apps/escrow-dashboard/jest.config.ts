@@ -1,5 +1,6 @@
-import type { Config } from '@jest/types';
+import { Config } from '@jest/types';
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default async (): Promise<Config.InitialOptions> => {
   return {
     verbose: true,
@@ -13,5 +14,6 @@ export default async (): Promise<Config.InitialOptions> => {
       '/node_modules/(?!d3|d3-array|internmap|delaunator|robust-predicates)',
     ],
     setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+    testEnvironment: 'jsdom',
   };
 };

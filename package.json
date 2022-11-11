@@ -10,8 +10,10 @@
     "core:lint": "yarn workspace @human-protocol/core lint",
     "subgraph:test": "yarn workspace @human-protocol/subgraph test",
     "subgraph:lint": "yarn workspace @human-protocol/subgraph lint",
+    "escrow-dashboard:test": "yarn workspace @human-protocol/escrow-dashboard test",
+    "escrow-dashboard:lint": "yarn workspace @human-protocol/escrow-dashboard lint",
     "test": "concurrently npm:core:test npm:subgraph:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint",
     "prepare": "husky install"
   },
   "workspaces": [
