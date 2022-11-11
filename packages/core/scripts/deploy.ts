@@ -46,6 +46,12 @@ async function main() {
 
   // Configure RewardPool in Staking
   // await stakingContract.setRewardPool(rewardPoolContract.address);
+
+  const KVStore = await ethers.getContractFactory('KVStore');
+  const kvStoreContract = await KVStore.deploy();
+  await kvStoreContract.deployed();
+
+  console.log('KVStore Address: ', kvStoreContract.address);
 }
 
 main().catch((error) => {

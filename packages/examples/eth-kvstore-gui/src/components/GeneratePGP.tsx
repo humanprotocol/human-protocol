@@ -88,6 +88,7 @@ export default function GeneratePGP() {
 
       const someData = new Blob([pubkey]);
       const cid = await client.storeBlob(someData);
+      console.log(cid);
       setCid(cid);
       setLoading(false)
     } catch (e) {
