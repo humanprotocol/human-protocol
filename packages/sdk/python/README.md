@@ -1,5 +1,7 @@
 # Human Protocol Python SDK
 
+Python SDK to launch/manage jobs on [Human Protocol](https://www.humanprotocol.org/)
+
 ## Installation
 
 ### Manual
@@ -23,8 +25,7 @@ pipenv install
 ```
 
 ```
-pip install git+https://github.com/iamdefinitelyahuman/py-solc-x@master#egg=py-solc-x \
-            git+https://github.com/ethereum/trinity@master#egg=trinity \
+pip install git+https://github.com/ethereum/trinity@master#egg=trinity \
             git+https://github.com/sphinx-doc/sphinx@master#egg=sphinx
 
 pip install human-protocol-sdk
