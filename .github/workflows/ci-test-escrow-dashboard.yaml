@@ -1,16 +1,16 @@
-name: Lint check
+name: Escrow dashboard check
 
 on:
   pull_request:
   workflow_dispatch:
 
 jobs:
-  lint:
-    name: Lint
+  core-test:
+    name: Escrow Dashboard Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: yarn
         name: Install dependencies
-      - run: yarn lint
-        name: Run lint
+      - run: yarn escrow-dashboard:test
+        name: Run escrow-dashboard test
