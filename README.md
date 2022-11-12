@@ -9,7 +9,7 @@ Join us on [Discord](https://discord.gg/TEspMGKF)
 
 **What is the HUMAN Network?**
 
-HUMAN is a permissionless protocol to facilitate the exchange of HUMAN work, knowledge, and contribution.  Using the HUMAN, individuals, organizations or businesses can either create or complete tasks.  These are tasks that cannot typically be automated or completed by a machine.  The types of work that are currently being completed using the HUMAN Protocol are:
+HUMAN is a permissionless protocol to facilitate the exchange of HUMAN work, knowledge, and contribution.  Using HUMAN, individuals, organizations or businesses can either create or complete tasks.  These are tasks that cannot typically be automated or completed by a machine.  The types of work that are currently being completed using the HUMAN Protocol are:
 
 
 
