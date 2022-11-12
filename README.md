@@ -1,5 +1,8 @@
 [![CI](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml) [![CD](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml)
 
+![HUMAN-LOGO](https://user-images.githubusercontent.com/104898604/201488028-2b0f29cb-c620-484f-991f-4a8b16efd7cc.png)
+
+
 <h2>**All work on-chain.**</h2>
 
 
