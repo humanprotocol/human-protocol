@@ -1,33 +1,11 @@
 [![CI](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml) [![CD](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml)
 
-<!-----
-
-Yay, no errors, warnings, or alerts!
-
-Conversion time: 0.318 seconds.
-
-
-Using this Markdown file:
-
-1. Paste this output into your source file.
-2. See the notes and action items below regarding this conversion run.
-3. Check the rendered output (headings, lists, code blocks, tables) for proper
-   formatting and use a linkchecker before you publish this page.
-
-Conversion notes:
-
-* Docs to Markdown version 1.0β33
-* Sat Nov 12 2022 09:09:28 GMT-0800 (PST)
-* Source doc: README
------>
-
-
 <h2>**All work on-chain.**</h2>
 
 
 Tokenized, verified, rewarded.
 
-Join us on [Discord](https://discord.gg/TEspMGKF) https://discord.gg/TEspMGKF
+Join us on [Discord](https://discord.gg/TEspMGKF)
 
 **What is the HUMAN Network?**
 
@@ -49,9 +27,9 @@ For a more detailed description of the HUMAN Protocol architecture and vision se
 As part of our efforts to increase open source contributions we are proud to release the HUMAN SDK.  This SDK provides an easy and reliable software development kit for building applications that interact with the HUMAN Protocol.  It has been designed so that it can be extended to meet the requirements of a wide variety of blockchain application use-cases involving human work or contribution.  We have also included various example applications and reference implementations for the core infrastructure components that make up the HUMAN Protocol. \
 
 
-**Contribution to this repository**
+**Contributing to this repository**
 
-The contribution guidelines are as per the guide HERE (Add link to contributing.MD)
+The contribution guidelines are as per the CONTRIBUTING.MD file.
 
 **Project Structure**
 
