@@ -40,7 +40,7 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 	    ├── escrow-dashboard: A UI that queries The Graph for escrow data 
 │   ├── core: EVM compatible smart contracts for HUMAN
 │   ├── examples
-	    ├── cvat: A UI that queries The Graph for escrow data
+	    ├── cvat: An open source annotation tool for labeling video and images
 	    ├── fortune:  An example application that combines all the core 
                       components of HUMAN
 	    ├── launcher: A reference implementation of a Job Launcher 
