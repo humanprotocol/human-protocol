@@ -3,8 +3,7 @@
 ![HUMAN-LOGO](https://user-images.githubusercontent.com/104898604/201488028-2b0f29cb-c620-484f-991f-4a8b16efd7cc.png)
 
 
-<h2>**All work on-chain.**</h2>
-
+<h2>All work on-chain</h2>
 
 Tokenized, verified, rewarded.
 
@@ -27,7 +26,7 @@ For a more detailed description of the HUMAN Protocol architecture and vision se
 
 **Description**
 
-As part of our efforts to increase open source contributions we are proud to release the HUMAN SDK.  This SDK provides an easy and reliable software development kit for building applications that interact with the HUMAN Protocol.  It has been designed so that it can be extended to meet the requirements of a wide variety of blockchain application use-cases involving human work or contribution.  We have also included various example applications and reference implementations for the core infrastructure components that make up the HUMAN Protocol. \
+As part of our efforts to increase open source contributions we have consolidated all our codebase into a single monorepo.  This monorepo provides an easy and reliable way to  build applications that interact with the HUMAN Protocol.  It has been designed so that it can be extended to meet the requirements of a wide variety of blockchain application use-cases involving human work or contribution.  We have also included various example applications and reference implementations for the core infrastructure components that make up the HUMAN Protocol.
 
 
 **Contributing to this repository**
