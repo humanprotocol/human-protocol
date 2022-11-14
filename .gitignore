@@ -41,10 +41,10 @@ yarn-error.log*
 # OS
 .DS_Store
 
+build
+
 #cache
 cache
 
 #test data
 data
-
-build
