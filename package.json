@@ -10,7 +10,7 @@
     "core:lint": "yarn workspace @human-protocol/core lint",
     "subgraph:test": "yarn workspace @human-protocol/subgraph test",
     "subgraph:lint": "yarn workspace @human-protocol/subgraph lint",
-    "fortune:test": "cd packages/examples/fortune && yarn test",
+    "fortune:test": "yarn workspace @human-protocol/fortune test",
     "test": "concurrently npm:core:test npm:subgraph:test",
     "lint": "concurrently npm:core:lint npm:subgraph:lint",
     "prepare": "husky install"

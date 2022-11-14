@@ -1,6 +1,6 @@
 {
   "private": "true",
-  "name": "fortune",
+  "name": "@human-protocol/fortune",
   "version": "1.0.0",
   "description": "Human Protocol Fortune Exchange Oracle",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "recording-oracle": "cd recording-oracle && yarn start",
     "reputation-oracle": "cd reputation-oracle && yarn start",
     "minio": "docker compose --env-file=.env.development up -d minio-mc",
-    "deploy:contracts": "cd ../../core && yarn && yarn deploy:local",
+    "deploy:contracts": "yarn workspace @human-protocol/core install && yarn deploy:local",
     "local": "docker compose down && (concurrently --hide 0 \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
     "local:test": "docker compose down && (concurrently --hide 0 \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
     "test:recording": "cd recording-oracle && yarn test",
