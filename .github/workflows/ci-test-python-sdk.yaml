@@ -1,0 +1,25 @@
+name: Python SDK check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  python-test:
+    name: Python Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Node
+        run: yarn --ignore-scripts
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.10'
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Python test
+        working-directory: ./packages/sdk/python
+        run: |
+          pipenv install --dev
+          make run-test
