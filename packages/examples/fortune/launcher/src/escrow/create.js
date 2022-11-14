@@ -13,14 +13,12 @@ export default function CreateEscrow({ onEscrowCreated }) {
   );
 
   useEffect(() => {
-    const init = async () => {
+    (async function() {
       const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
   
       setLastEscrow(lastEscrowAddr);
-    };
-
-    init();
-  }, []);
+    })();
+  }, [escrowFactory.methods]);
 
   const create = async () => {
     const accounts = await web3.eth.getAccounts();

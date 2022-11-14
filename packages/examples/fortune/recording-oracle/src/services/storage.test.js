@@ -1,6 +1,11 @@
 const { expect } = require('@jest/globals');
 const {
-  newEscrow, getEscrow, putFortune, getWorkerResult, getFortunes, cleanFortunes
+  newEscrow,
+  getEscrow,
+  putFortune,
+  getWorkerResult,
+  getFortunes,
+  cleanFortunes,
 } = require('./storage');
 
 describe('Storage', () => {

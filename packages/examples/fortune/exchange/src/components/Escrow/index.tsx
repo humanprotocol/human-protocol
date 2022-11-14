@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import EscrowABI from '@human-protocol/core/abis/Escrow.json';
 import getWeb3 from '../../utils/web3';
@@ -42,15 +42,7 @@ export default function Escrow() {
   const [balance, setBalance] = useState('');
   const [recordingOracleUrl, setRecordingOracleUrl] = useState('');
 
-  useEffect(() => {
-    const qs: any = parseQuery(window.location.search);
-    const address = qs.address;
-    if (web3.utils.isAddress(address)) {
-      setMainEscrow(web3.utils.toChecksumAddress(address));
-    }
-  }, []);
-
-  const setMainEscrow = async (address: string) => {
+  const setMainEscrow = useCallback(async (address: string) => {
     setEscrow(address);
     const Escrow = new web3.eth.Contract(EscrowABI as [], address);
 
@@ -67,8 +59,16 @@ export default function Escrow() {
       setRecordingOracleUrl(manifestContent.recording_oracle_url);
     }
     return;
-  }
+  }, [web3.eth.Contract, web3.utils])
 
+  useEffect(() => {
+    const qs: any = parseQuery(window.location.search);
+    const address = qs.address;
+    if (web3.utils.isAddress(address)) {
+      setMainEscrow(web3.utils.toChecksumAddress(address));
+    }
+  }, [setMainEscrow, web3.utils]);
+  
   const sendFortune = async () => {
     const account = (await web3.eth.getAccounts())[0];
     const body = {

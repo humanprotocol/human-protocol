@@ -25,7 +25,9 @@ const uploadResults = async (fortunes, escrowAddress) => {
   if (!bucketExists) {
     await minioClient.makeBucket(minioBucketName);
   }
-  await minioClient.fPutObject(minioBucketName, fileName, filePath, { 'Content-Type': 'application/json' });
+  await minioClient.fPutObject(minioBucketName, fileName, filePath, {
+    'Content-Type': 'application/json',
+  });
 
   // the url is available for 7 days since the issue
   const url = await minioClient.presignedUrl('GET', minioBucketName, fileName);

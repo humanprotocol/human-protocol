@@ -8,9 +8,10 @@ module.exports = {
     return escrow;
   },
 
-  getEscrow: address => storage[address],
+  getEscrow: (address) => storage[address],
 
-  getWorkerResult: (escrowAddress, workerAddress) => storage[escrowAddress][workerAddress],
+  getWorkerResult: (escrowAddress, workerAddress) =>
+    storage[escrowAddress][workerAddress],
 
   putFortune: (escrowAddress, workerAddress, value) => {
     storage[escrowAddress][workerAddress] = value;

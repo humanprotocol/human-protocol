@@ -1,4 +1,3 @@
-
 module.exports = {
   filterAddressesToReward: (web3, addressFortunesEntries) => {
     const filteredResults = [];
@@ -14,7 +13,9 @@ module.exports = {
       filteredResults.push(fortuneEntry);
     });
 
-    return filteredResults.map(fortune => fortune.worker).map(web3.utils.toChecksumAddress);
+    return filteredResults
+      .map((fortune) => fortune.worker)
+      .map(web3.utils.toChecksumAddress);
   },
 
   calculateRewardForWorker: (totalReward, workerAddresses) => {
