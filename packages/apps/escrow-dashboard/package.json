@@ -30,6 +30,7 @@
     "serve": "^13.0.2",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.2",
+    "wagmi": "^0.8.3",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
@@ -42,16 +43,19 @@
     "eslint-plugin-react": "7.26.1",
     "eslint-plugin-react-hooks": "4.2.0",
     "identity-obj-proxy": "^3.0.0",
-    "resize-observer-polyfill": "^1.5.1"
+    "process": "^0.11.10",
+    "react-app-rewired": "^2.2.1",
+    "resize-observer-polyfill": "^1.5.1",
+    "svg-url-loader": "^8.0.0",
+    "util": "^0.12.5"
   },
   "scripts": {
     "lint": "eslint src",
-    "start": "react-scripts start",
-    "start-prod": "serve -s build",
-    "build": "react-scripts build",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
     "test": "jest --updateSnapshot",
     "test:watch": "jest --watchAll",
-    "eject": "react-scripts eject",
+    "eject": "react-app-rewired  eject",
     "format": "prettier --write '**/*.{ts,tsx}'"
   },
   "eslintConfig": {
