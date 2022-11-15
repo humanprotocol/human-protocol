@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import EscrowABI from '@human-protocol/core/abis/Escrow.json';
 import getWeb3 from '../../utils/web3';
-import './index.css';
+import sendFortune from '../../services/RecordingOracle/RecordingClient';
+import './Escrow.css';
 
 const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
@@ -34,7 +35,7 @@ function parseQuery(qs: any) {
 
   return result;
 }
-export default function Escrow() {
+export const Escrow = () => {
   const web3 = getWeb3();
   const [escrow, setEscrow] = useState('');
   const [fortune, setFortune] = useState('');
@@ -69,14 +70,8 @@ export default function Escrow() {
     }
   }, [setMainEscrow, web3.utils]);
   
-  const sendFortune = async () => {
-    const account = (await web3.eth.getAccounts())[0];
-    const body = {
-      workerAddress: account,
-      escrowAddress: escrow,
-      fortune
-    };
-    await axios.post(recordingOracleUrl, body);
+  const send = async () => {
+    await sendFortune(escrow, fortune, recordingOracleUrl);
     alert('Your fortune has been submitted');
     setFortune('');
     return;
@@ -96,7 +91,7 @@ export default function Escrow() {
         <span> <b>Balance: </b> {balance}</span>
         <div>
           <input onChange={(e) => setFortune(e.target.value)}/>
-          <button onClick={sendFortune}> Send Fortune </button>
+          <button onClick={send}> Send Fortune </button>
         </div>
       </div>
     </div>

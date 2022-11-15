@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import getWeb3 from './utils/web3';
-import Escrow from './components/Escrow';
+import { Escrow } from './components/Escrow';
 import './App.css';
 
 function App() {
