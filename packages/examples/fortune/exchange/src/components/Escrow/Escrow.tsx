@@ -82,8 +82,8 @@ export const Escrow = () => {
     <div className="escrow-container">
       <div className="escrow-view">
         <div>
-          <input onChange={(e) => setEscrow(e.target.value)} value={escrow} />
-          <button onClick={() => setMainEscrow(web3.utils.toChecksumAddress(escrow))}> Confirm </button>
+          <input onChange={(e) => setEscrow(e.target.value)} value={escrow} data-testid="escrowAddress"/>
+          <button type="button" onClick={() => setMainEscrow(web3.utils.toChecksumAddress(escrow))}> Confirm </button>
         </div>
         <span> Fill the exchange address to pass the fortune to the recording oracle</span>
         <span> <b>Address: </b> {escrow} </span>
@@ -91,7 +91,7 @@ export const Escrow = () => {
         <span> <b>Balance: </b> {balance}</span>
         <div>
           <input onChange={(e) => setFortune(e.target.value)}/>
-          <button onClick={send}> Send Fortune </button>
+          <button type="button" onClick={send}> Send Fortune </button>
         </div>
       </div>
     </div>
