@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`When rendered Escrow component should match snapshot 1`] = `
+<div
+  className="escrow-container"
+>
+  <div
+    className="escrow-view"
+  >
+    <div>
+      <input
+        data-testid="escrowAddress"
+        onChange={[Function]}
+        value=""
+      />
+      <button
+        onClick={[Function]}
+        type="button"
+      >
+         Confirm 
+      </button>
+    </div>
+    <span>
+       Fill the exchange address to pass the fortune to the recording oracle
+    </span>
+    <span>
+       
+      <b>
+        Address: 
+      </b>
+       
+       
+    </span>
+    <span>
+       
+      <b>
+        Status: 
+      </b>
+       
+    </span>
+    <span>
+       
+      <b>
+        Balance: 
+      </b>
+       
+    </span>
+    <div>
+      <input
+        onChange={[Function]}
+      />
+      <button
+        onClick={[Function]}
+        type="button"
+      >
+         Send Fortune 
+      </button>
+    </div>
+  </div>
+</div>
+`;
