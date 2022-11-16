@@ -2,64 +2,42 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { CardBarChart, CardStackedBarChart } from 'src/components/Cards';
-import useEscrowCounter from 'src/hooks/useEscrowCounter';
-import useEscrowStatistics from 'src/hooks/useEscrowStatistics';
-import useEventDayDatas from 'src/hooks/useEventDayDatas';
+import { ChainId } from 'src/constants';
+import { useEscrowDataByChainID } from 'src/state/escrow/hooks';
 
-export const EscrowView = () => {
-  const escrowStatistics = useEscrowStatistics();
-  const eventDayDatas = useEventDayDatas();
-  const escrowCounter = useEscrowCounter();
+export const EscrowView = ({ chainId }: { chainId: ChainId }) => {
+  const escrowData = useEscrowDataByChainID(chainId);
 
   const escrowSeries = useMemo(() => {
-    if (eventDayDatas) {
-      return eventDayDatas.map((item) => ({
-        date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
-        dailyEscrowAmounts: Number(item.dailyEscrowAmounts),
-        dailyPendingEvents: Number(item.dailyPendingEvents),
-      }));
-    }
-    return [];
-  }, [eventDayDatas]);
+    return escrowData.lastMonthEvents.map((item) => ({
+      date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
+      dailyEscrowAmounts: item.dailyEscrowAmounts,
+      dailyPendingEvents: item.dailyPendingEvents,
+    }));
+  }, [escrowData]);
 
   const bulkTransferEvents = useMemo(() => {
-    if (eventDayDatas) {
-      return eventDayDatas.map((item) => ({
-        date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
-        value: Number(item.dailyBulkTransferEvents),
-      }));
-    }
-    return [];
-  }, [eventDayDatas]);
+    return escrowData.lastMonthEvents.map((item) => ({
+      date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
+      value: item.dailyBulkTransferEvents,
+    }));
+  }, [escrowData]);
 
   const intermediateStorageEvents = useMemo(() => {
-    if (eventDayDatas) {
-      return eventDayDatas.map((item) => ({
-        date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
-        value: Number(item.dailyIntermediateStorageEvents),
-      }));
-    }
-    return [];
-  }, [eventDayDatas]);
+    return escrowData.lastMonthEvents.map((item) => ({
+      date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
+      value: item.dailyIntermediateStorageEvents,
+    }));
+  }, [escrowData]);
 
   const totalEscrowEvents = useMemo(() => {
-    if (eventDayDatas) {
-      return eventDayDatas.map((item) => ({
-        date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
-        value:
-          Number(item.dailyBulkTransferEvents) +
-          Number(item.dailyIntermediateStorageEvents) +
-          Number(item.dailyPendingEvents),
-      }));
-    }
-    return [];
-  }, [eventDayDatas]);
+    return escrowData.lastMonthEvents.map((item) => ({
+      date: dayjs(Number(item.timestamp) * 1000).format('DD/MM'),
+      value: item.dailyTotalEvents,
+    }));
+  }, [escrowData]);
 
-  if (escrowCounter === undefined) {
-    return null;
-  }
-
-  if (escrowCounter === 0) {
+  if (escrowData.amount === 0) {
     return (
       <Box
         sx={{
@@ -111,34 +89,28 @@ export const EscrowView = () => {
       <Grid item xs={12}>
         <CardStackedBarChart
           series={escrowSeries}
-          allEscrowAmount={escrowCounter}
-          pendingEventCount={escrowStatistics?.pendingEventCount}
+          allEscrowAmount={escrowData.amount}
+          pendingEventCount={escrowData.stats.pendingEventCount}
         />
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={4}>
         <CardBarChart
           title="BulkTransfer Events"
-          totalValue={escrowStatistics?.bulkTransferEventCount}
+          totalValue={escrowData.stats.bulkTransferEventCount}
           series={bulkTransferEvents}
         />
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={4}>
         <CardBarChart
           title="IntermediateStorage Events"
-          totalValue={escrowStatistics?.intermediateStorageEventCount}
+          totalValue={escrowData.stats.intermediateStorageEventCount}
           series={intermediateStorageEvents}
         />
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={4}>
         <CardBarChart
           title="Total Number Of Escrows Events"
-          totalValue={
-            escrowStatistics
-              ? Number(escrowStatistics.intermediateStorageEventCount) +
-                Number(escrowStatistics.bulkTransferEventCount) +
-                Number(escrowStatistics.pendingEventCount)
-              : 0
-          }
+          totalValue={escrowData.stats.totalEventCount}
           series={totalEscrowEvents}
         />
       </Grid>
