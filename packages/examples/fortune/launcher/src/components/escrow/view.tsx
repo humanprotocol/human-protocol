@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import EscrowABI from '@human-protocol/core/abis/Escrow.json';
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
-import getWeb3 from '../web3';
-import {HMT_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_ADDRESS} from '../constants';
+import getWeb3 from '../../utils/web3';
+import {HMT_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_ADDRESS} from '../../constants/constants';
 
 const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
@@ -26,9 +26,9 @@ export default function Escrow() {
 
   const [exchangeUrl, setExchangeUrl] = useState('');
 
-  const setMainEscrow = async (address) => {
+  const setMainEscrow = async (address: string) => {
     setEscrow(address);
-    const Escrow = new web3.eth.Contract(EscrowABI, address);
+    const Escrow = new web3.eth.Contract(EscrowABI as [], address);
 
     const escrowSt = await Escrow.methods.status().call();
     setEscrowStatus(statusesMap[escrowSt]);
@@ -93,7 +93,7 @@ export default function Escrow() {
 }
 
 
-function EscrowControls({escrowAddr, onUpdate}) {
+function EscrowControls({escrowAddr, onUpdate}: any) {
   const [recOracleAddr, setRecOracleAddr] = useState(REC_ORACLE_ADDRESS)
   const [recOracleStake, setRecOracleStake] = useState(10)
   const [repOracleAddr, setRepOracleAddr] = useState(REP_ORACLE_ADDRESS)
@@ -102,8 +102,8 @@ function EscrowControls({escrowAddr, onUpdate}) {
   const [hmt, setHmt] = useState(0);
 
   const web3 = getWeb3();
-  const Escrow = new web3.eth.Contract(EscrowABI, escrowAddr);
-  const Token = new web3.eth.Contract(HMTokenABI, HMT_ADDRESS);
+  const Escrow = new web3.eth.Contract(EscrowABI as [], escrowAddr);
+  const Token = new web3.eth.Contract(HMTokenABI as [], HMT_ADDRESS);
 
   const fundEscrow = async () => {
     if (hmt <= 0) {
@@ -111,7 +111,7 @@ function EscrowControls({escrowAddr, onUpdate}) {
     }
     const accounts = await web3.eth.getAccounts();
 
-    const value = web3.utils.toWei(hmt, 'ether');
+    const value = web3.utils.toWei(hmt.toString(), 'ether');
     await Token.methods.transfer(escrowAddr, value).send({from: accounts[0]});
 
     onUpdate();
@@ -137,8 +137,8 @@ function EscrowControls({escrowAddr, onUpdate}) {
     <>
       <div>
         <p> Fund the escrow: </p>
-        <input onChange={(e) => setHmt(e.target.value)} />
-        <button onClick={() => fundEscrow(hmt)}> Fund </button>
+        <input onChange={(e) => setHmt(Number(e.target.value))} />
+        <button onClick={() => fundEscrow()}> Fund </button>
       </div>
       <div>
         <div>
@@ -147,7 +147,7 @@ function EscrowControls({escrowAddr, onUpdate}) {
         </div>
         <div>
           <p> Recording Oracle Stake </p>
-          <input onChange={(e) => setRecOracleStake(e.target.value)} value={recOracleStake} />
+          <input onChange={(e) => setRecOracleStake(Number(e.target.value))} value={recOracleStake} />
         </div>
         <div>
           <p> Reputation Oracle </p>
@@ -155,7 +155,7 @@ function EscrowControls({escrowAddr, onUpdate}) {
         </div>
         <div>
           <p> Reputation Oracle Stake </p>
-          <input onChange={(e) => setRepOracleStake(e.target.value)} value={repOracleStake} />
+          <input onChange={(e) => setRepOracleStake(Number(e.target.value))} value={repOracleStake} />
         </div>
         <div>
           <p> Manifest URL </p>
