@@ -2,21 +2,11 @@ import { Grid } from '@mui/material';
 import * as React from 'react';
 import { CardTextBlock } from 'src/components/Cards';
 import useHMTData from 'src/hooks/useHMTData';
-import useTokenStatistics from 'src/hooks/useTokenStatistics';
+import { useTokenStats } from 'src/state/token/hooks';
 
 export const TokenView: React.FC = (): React.ReactElement => {
-  const tokenStatistics = useTokenStatistics();
   const data = useHMTData();
-
-  const totalEvents = React.useMemo(() => {
-    const { totalTransferEventCount, totalApprovalEventCount } =
-      tokenStatistics || {};
-    if (totalApprovalEventCount && totalTransferEventCount) {
-      return Number(totalApprovalEventCount) + Number(totalTransferEventCount);
-    }
-
-    return 'N/A';
-  }, [tokenStatistics]);
+  const tokenStats = useTokenStats();
 
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
@@ -28,10 +18,13 @@ export const TokenView: React.FC = (): React.ReactElement => {
         />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <CardTextBlock title="Amount of transfers" value={totalEvents} />
+        <CardTextBlock
+          title="Amount of transfers"
+          value={tokenStats.totalTransferEventCount}
+        />
       </Grid>
       <Grid item xs={12} sm={4}>
-        <CardTextBlock title="Holders" value={tokenStatistics?.holders} />
+        <CardTextBlock title="Holders" value={tokenStats.holders} />
       </Grid>
       <Grid item xs={12} sm={6}>
         <CardTextBlock

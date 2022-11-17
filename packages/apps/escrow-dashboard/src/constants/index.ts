@@ -22,7 +22,9 @@ export interface IEscrowNetwork {
 export const SUPPORTED_CHAIN_IDS = [
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
+  ChainId.BSC_TESTNET,
   ChainId.POLYGON,
+  ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
 ];
 
@@ -47,8 +49,18 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
     hmtAddress: '0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7',
   },
+  [ChainId.BSC_TESTNET]: {
+    chainId: ChainId.BSC_TESTNET,
+    title: 'Binance Smart Chain (Testnet)',
+    scanUrl: 'https://testnet.bscscan.com',
+    rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
+    factoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
+    hmtAddress: '0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317',
+  },
   [ChainId.POLYGON]: {
-    chainId: ChainId.GOERLI,
+    chainId: ChainId.POLYGON,
     title: 'Polygon',
     scanUrl: 'https://polygonscan.com',
     rpcUrl: 'https://polygon-rpc.com/',
@@ -56,6 +68,15 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     factoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
     hmtAddress: '0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF',
+  },
+  [ChainId.POLYGON_MUMBAI]: {
+    chainId: ChainId.POLYGON_MUMBAI,
+    title: 'Polygon Mumbai',
+    scanUrl: 'https://mumbai.polygonscan.com',
+    rpcUrl: 'https://rpc-mumbai.maticvigil.com',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
+    factoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
+    hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
   },
   [ChainId.MOONBEAM]: {
     chainId: ChainId.MOONBEAM,
@@ -71,8 +92,6 @@ export const ESCROW_NETWORKS: {
 
 export const FAST_INTERVAL = 10_000;
 export const SLOW_INTERVAL = 60_000;
-
-export { networkMap, networks } from './networkConstants';
 
 export const ROLES = [
   'Operator (Job Launcher)',

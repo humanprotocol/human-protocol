@@ -2,10 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
 import escrow from './escrow/reducer';
+import token from './token/reducer';
 
 const store = configureStore({
   reducer: {
     escrow,
+    token,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ thunk: true }),
 });

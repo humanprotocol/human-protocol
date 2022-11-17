@@ -67,11 +67,16 @@ export const useEscrowDataByChainID = (chainId: ChainId): EscrowData => {
             escrowData.lastMonthEvents[index].dailyPendingEvents +=
               e1.dailyPendingEvents;
           } else {
-            escrowData.lastMonthEvents.push(e1);
+            escrowData.lastMonthEvents.push({ ...e1 });
           }
         });
       }
     });
+
+    escrowData.lastMonthEvents = escrowData.lastMonthEvents
+      .sort((x, y) => Number(y.timestamp) - Number(x.timestamp))
+      .slice(0, 30)
+      .reverse();
 
     return escrowData;
   }
