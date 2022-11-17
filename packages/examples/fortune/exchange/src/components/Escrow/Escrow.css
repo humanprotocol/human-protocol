@@ -1,0 +1,26 @@
+.escrow-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.escrow-container-item {
+    margin-left: 40px;
+}
+
+.escrow-create {
+    display: flex;
+    flex-direction: column;
+}
+
+.escrow-create span{
+    margin-bottom: 10px;
+}
+
+.escrow-view span{
+    margin-bottom: 10px;
+}
+
+.escrow-view {
+    display: flex;
+    flex-direction: column;
+}
