@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import { readKey } from "openpgp/lightweight";

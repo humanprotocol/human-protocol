@@ -1,11 +1,10 @@
-import React, { useRef, ChangeEvent, SetStateAction, Dispatch } from "react";
+import React, { ChangeEvent, SetStateAction, Dispatch } from "react";
 import Button from "@mui/material/Button";
 
 import { usePrepareContractWrite, useContractWrite } from "wagmi";
 import KVStore from "../contracts/KVStore.json";
 import Grid from "@mui/material/Grid";
 import { NFTStorage } from "nft.storage";
-import * as openpgp from "openpgp";
 
 const client = new NFTStorage({
   token: process.env.REACT_APP_NFT_STORAGE_API as string,
@@ -49,7 +48,6 @@ export default function ImportButton({
       setError("");
       setOpen(false)
       const pubkey = e.target!.result as string;
-      const fingerprint2 = await openpgp.readKey({ armoredKey: pubkey });
 
       const someData = new Blob([pubkey]);
       const cid2 = await client.storeBlob(someData);
