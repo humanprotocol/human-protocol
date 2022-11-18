@@ -41,7 +41,9 @@ describe('Fortune', () => {
         from: account.address,
       });
 
-    const escrowFactoryContract = new web3.eth.Contract(EscrowFactory.abi as []);
+    const escrowFactoryContract = new web3.eth.Contract(
+      EscrowFactory.abi as []
+    );
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,

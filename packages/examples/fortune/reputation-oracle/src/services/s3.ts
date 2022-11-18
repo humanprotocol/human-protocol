@@ -15,7 +15,7 @@ const minioClient = new Minio.Client({
   useSSL: false,
 });
 
-export async function uploadResults(fortunes: string[], escrowAddress: string){
+export async function uploadResults(fortunes: string[], escrowAddress: string) {
   const fileName = `${escrowAddress}.json`;
   const filePath = `./data/${fileName}`;
   await fs.mkdir('./data', { recursive: true });

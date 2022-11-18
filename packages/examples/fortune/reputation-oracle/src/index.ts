@@ -2,7 +2,10 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import Web3 from 'web3';
 import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
-import { filterAddressesToReward, calculateRewardForWorker } from './services/rewards';
+import {
+  filterAddressesToReward,
+  calculateRewardForWorker,
+} from './services/rewards';
 import { uploadResults } from './services/s3';
 
 const app = express();

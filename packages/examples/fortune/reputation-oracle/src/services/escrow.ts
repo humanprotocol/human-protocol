@@ -1,7 +1,6 @@
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
 import Web3 from 'web3';
 
-
 export async function getBalance(web3: Web3, escrowAddress: string) {
   const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
   return Number(await Escrow.methods.getBalance().call());
@@ -31,4 +30,3 @@ export async function bulkPaid(web3: Web3, escrowAddress: string) {
   const result = await Escrow.methods.bulkPaid().call();
   return result;
 }
-
