@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
+import { ROLES } from 'src/constants';
 import useLeaderboardData from 'src/hooks/useLeaderboardData';
 import { shortenAddress } from 'src/utils';
 
