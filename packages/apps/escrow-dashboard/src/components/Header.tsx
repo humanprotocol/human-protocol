@@ -60,12 +60,19 @@ const Header: React.FC = (): React.ReactElement => {
               },
             }}
           >
-            <Box display="flex" alignItems="center">
+            <Link
+              href="/"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                textDecoration: 'none',
+              }}
+            >
               <img src="/images/logo.svg" alt="logo" />
               <Typography variant="h6" color="primary" ml="10px">
                 Scan
               </Typography>
-            </Box>
+            </Link>
             <Box
               display="flex"
               alignItems="center"
