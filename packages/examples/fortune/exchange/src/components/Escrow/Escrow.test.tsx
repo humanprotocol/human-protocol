@@ -1,8 +1,6 @@
 import renderer from 'react-test-renderer';
 import { screen, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { Escrow } from './Escrow';
-import sendFortune from '../../services/RecordingOracle/RecordingClient'
 
 describe('When rendered Escrow component', () => {
 

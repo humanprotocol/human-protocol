@@ -17,7 +17,6 @@
     "test:exchange": "cd exchange && yarn test",
     "test:recording": "cd recording-oracle && yarn test",
     "test:reputation": "cd reputation-oracle && yarn test",
-    "test:e2e:docker": "cross-env DOCKER=true jest tests/e2e-backend --runInBand",
     "test:e2e": "(concurrently -k -s first -g --hide 0 \"yarn local:test\" \"sleep 2s && yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
     "test:unit": "concurrently -g \"yarn test:recording\" \"yarn test:reputation\" \"yarn test:exchange\"",
     "test": "concurrently -g \"yarn test:e2e\" \"yarn test:unit\"",

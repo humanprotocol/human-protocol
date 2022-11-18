@@ -12,7 +12,7 @@ describe('EscrowFactory', function () {
 
   let token: HMToken, escrowFactory: EscrowFactory;
 
-  beforeEach(async () => {
+  before(async () => {
     [owner, reputationOracle, recordingOracle] = await ethers.getSigners();
 
     trustedHandlers = [
@@ -53,15 +53,20 @@ describe('EscrowFactory', function () {
 
     describe('Create escrow', async function () {
       it('Should increases counter after new escrow is created', async () => {
+        const initialCounter = await escrowFactory.counter();
         await escrowFactory.connect(owner).createEscrow(trustedHandlers);
 
         const newCounter1 = await escrowFactory.counter();
-        expect(newCounter1.toString()).to.equal('1');
+        expect(newCounter1.toString()).to.equal(
+          (initialCounter.toNumber() + 1).toString()
+        );
 
         await escrowFactory.connect(owner).createEscrow(trustedHandlers);
 
         const newCounter2 = await escrowFactory.counter();
-        expect(newCounter2.toString()).to.equal('2');
+        expect(newCounter2.toString()).to.equal(
+          (initialCounter.toNumber() + 2).toString()
+        );
       });
 
       it('Should finds the newly created escrow from deployed escrow', async () => {

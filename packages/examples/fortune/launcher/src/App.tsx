@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import getWeb3 from './web3';
-import Escrow from './escrow';
+import getWeb3 from './utils/web3';
+import Escrow from './components/escrow';
 import './App.css';
 
 
