@@ -6,8 +6,9 @@ import { useEscrowDataLoaded, usePollEventsData } from 'src/state/escrow/hooks';
 
 import { EscrowView } from './EscrowView';
 
-import HumanIcon from '../Icons/HumanIcon';
+import BinanceSmartChainIcon from '../Icons/BinanceSmartChainIcon';
 import EthereumIcon from '../Icons/EthreumIcon';
+import HumanIcon from '../Icons/HumanIcon';
 import MoonbeamIcon from '../Icons/MoonbeamIcon';
 import PolygonIcon from '../Icons/PolygonIcon';
 
@@ -17,6 +18,8 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.GOERLI]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,
   [ChainId.POLYGON_MUMBAI]: <PolygonIcon />,
+  [ChainId.BSC_MAINNET]: <BinanceSmartChainIcon />,
+  [ChainId.BSC_TESTNET]: <BinanceSmartChainIcon />,
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
@@ -32,10 +35,12 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
       <Tabs
         sx={{
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
-          flexWrap: 'wrap',
         }}
         value={chainId}
         onChange={(e, id) => setChainId(id)}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
       >
         <Tab
           value={ChainId.ALL}
