@@ -31,9 +31,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cross-env GENERATE_SOURCEMAP=false react-scripts start",
     "start:local": "concurrently -k -s first \"yarn workspace @human-protocol/core local\" \"yarn start\"",
-    "build": "react-scripts build",
+    "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint ."
