@@ -109,7 +109,7 @@ describe('Fortune', () => {
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('0', 'ether')
     );
-  });
+  }, 10000);
 
   it('Bulk payout rewards', async () => {
     await bulkPayOut(
@@ -136,5 +136,5 @@ describe('Fortune', () => {
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('8', 'ether')
     );
-  });
+  }, 10000);
 });
