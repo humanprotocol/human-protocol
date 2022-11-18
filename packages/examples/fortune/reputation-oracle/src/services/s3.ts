@@ -1,5 +1,5 @@
-const Minio = require('minio');
-const fs = require('fs/promises');
+import * as Minio from 'minio';
+import fs from 'fs/promises';
 
 const minioHost = process.env.MINIO_HOST || 'localhost';
 const minioPort = Number(process.env.MINIO_PORT) || 9000;
@@ -15,7 +15,7 @@ const minioClient = new Minio.Client({
   useSSL: false,
 });
 
-const uploadResults = async (fortunes, escrowAddress) => {
+export async function uploadResults(fortunes: string[], escrowAddress: string){
   const fileName = `${escrowAddress}.json`;
   const filePath = `./data/${fileName}`;
   await fs.mkdir('./data', { recursive: true });
@@ -23,7 +23,7 @@ const uploadResults = async (fortunes, escrowAddress) => {
 
   const bucketExists = await minioClient.bucketExists(minioBucketName);
   if (!bucketExists) {
-    await minioClient.makeBucket(minioBucketName);
+    await minioClient.makeBucket(minioBucketName, '');
   }
   await minioClient.fPutObject(minioBucketName, fileName, filePath, {
     'Content-Type': 'application/json',
@@ -33,8 +33,4 @@ const uploadResults = async (fortunes, escrowAddress) => {
   const url = await minioClient.presignedUrl('GET', minioBucketName, fileName);
 
   return url;
-};
-
-module.exports = {
-  uploadResults,
-};
+}

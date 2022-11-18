@@ -1,14 +1,15 @@
-const Web3 = require('web3');
-const { getBalance, bulkPayOut, bulkPaid } = require('./escrow');
-const { describe, expect, it, beforeAll } = require('@jest/globals');
-const Escrow = require('@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json');
-const HMToken = require('@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json');
-const EscrowFactory = require('@human-protocol/core/artifacts/contracts/EscrowFactory.sol/EscrowFactory.json');
+import Web3 from 'web3';
+import { getBalance, bulkPayOut, bulkPaid } from './escrow';
+import { describe, expect, it, beforeAll, beforeEach } from '@jest/globals';
+import Escrow from '@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json';
+import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
+import EscrowFactory from '@human-protocol/core/artifacts/contracts/EscrowFactory.sol/EscrowFactory.json';
+import { Contract } from 'web3-eth-contract';
 
-let token;
-let escrowFactory;
-let escrowAddress;
-let escrow;
+let token: Contract;
+let escrowFactory: Contract;
+let escrowAddress: string;
+let escrow: Contract;
 
 const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
 const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
@@ -25,7 +26,7 @@ web3.eth.defaultAccount = recordingAccount.address;
 
 describe('Fortune', () => {
   beforeAll(async () => {
-    const tokenContract = new web3.eth.Contract(HMToken.abi);
+    const tokenContract = new web3.eth.Contract(HMToken.abi as []);
     token = await tokenContract
       .deploy({
         data: HMToken.bytecode,
@@ -40,7 +41,7 @@ describe('Fortune', () => {
         from: account.address,
       });
 
-    const escrowFactoryContract = new web3.eth.Contract(EscrowFactory.abi);
+    const escrowFactoryContract = new web3.eth.Contract(EscrowFactory.abi as []);
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
@@ -63,7 +64,7 @@ describe('Fortune', () => {
       .transfer(escrowAddress, value)
       .send({ from: account.address });
 
-    escrow = new web3.eth.Contract(Escrow.abi, escrowAddress);
+    escrow = new web3.eth.Contract(Escrow.abi as [], escrowAddress);
     await escrow.methods
       .setup(
         '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
