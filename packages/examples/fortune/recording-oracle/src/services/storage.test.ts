@@ -1,12 +1,12 @@
-const { expect } = require('@jest/globals');
-const {
+import { describe, expect, it } from '@jest/globals';
+import {
   newEscrow,
   getEscrow,
   putFortune,
   getWorkerResult,
   getFortunes,
   cleanFortunes,
-} = require('./storage');
+} from './storage';
 
 describe('Storage', () => {
   const testAddress = '0x0ed2e86fce2e5a7965f59708c01f88a722bc7f07';

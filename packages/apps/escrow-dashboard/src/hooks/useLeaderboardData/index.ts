@@ -1,6 +1,6 @@
 import StakingABI from 'src/abis/Staking.json';
 import { BigNumber, ethers } from 'ethers';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STAKING_CONTRACT_ADDRESS } from 'src/constants';
 
 type Staker = {

@@ -1,12 +1,12 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const Web3 = require('web3');
-const { bulkPayOut, bulkPaid, getBalance } = require('./services/escrow');
-const {
+import express from 'express';
+import bodyParser from 'body-parser';
+import Web3 from 'web3';
+import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
+import {
   filterAddressesToReward,
   calculateRewardForWorker,
-} = require('./services/rewards');
-const { uploadResults } = require('./services/s3');
+} from './services/rewards';
+import { uploadResults } from './services/s3';
 
 const app = express();
 const privKey =
