@@ -1,4 +1,3 @@
-import { formatUnits } from '@ethersproject/units';
 import {
   Checkbox,
   FormControlLabel,
@@ -14,7 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
-import { HMT_DECIMALS, ROLES } from 'src/constants';
+import { ROLES } from 'src/constants';
 import useLeaderboardData from 'src/hooks/useLeaderboardData';
 import { shortenAddress } from 'src/utils';
 

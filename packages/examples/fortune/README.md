@@ -3,13 +3,6 @@
   
 
 Welcome to Fortune, an example HUMAN application that demonstrates how to create and fulfill job requests using the HUMAN protocol.
-
-  
-
->  **Warning**
-
-> For running Fortune with docker-compose you need at least version 1.27.0. Check with command `docker-compose --version`
-
   
 
 ## How it works
@@ -92,7 +85,7 @@ At a very high level this project consists of 4 main components (smart contracts
 
 # Usage Instructions
 
-There are three options to run the example, use our deployed playground example, run the example locally using node and run locally using Docker.
+There are three options to run the example, use our deployed playground example and run the example locally using node.
 
 ## Deployed Playground
 To use the deployed (hosted) example all you need is a metmask wallet with the Fortune Ethereum Testnet configured. Download and install Metamask from www.metamask.io.
@@ -177,15 +170,6 @@ yarn && yarn local
 At this point we have a Local Testnet running with our contracts deployed to a Hardhat testnet node. The next step is to configure Metamask to work with our Local Testnet.
 
 Go to this section to see [local network usage.](#local-network-usage)
-## Running Locally with Docker
-
-To run the example locally, you will require Docker. Please see this guide for Docker installation instructions. Once Docker is installed and running, from the root of the project run:
-```
-make local-docker
-```
-At this point we have a Local Testnet running with our contracts deployed to a Ganache testnet. The next step is to configure Metamask to work with our Local Testnet.
-
-Go to this section to see [local network usage.](#local-network-usage)
   
 # Local network usage 
 
@@ -198,7 +182,7 @@ To configure Metamask for the Local Testnet example:
 - Chain ID - `1337` (you may get a warning here that this ID is already in use, it is safe to ignore)
 - Currency Symbol - `ETH`
 
-2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2). In Metamask, click on your account icon in the top right and select Import Account. From this screen you can enter a private key to add an account. Repeat this process for each of the keys below depending on the option to run Fortune you chose:
+2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2). In Metamask, click on your account icon in the top right and select Import Account. From this screen you can enter a private key to add an account. Repeat this process for each of the keys below:
 
 |               | Node (Hardhat)                                                   |
 | ------------- |------------------------------------------------------------------|
@@ -206,17 +190,11 @@ To configure Metamask for the Local Testnet example:
 | Worker 1      | 7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6 |
 | Worker 2      | 47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a |
 
-|               | Docker (Ganache) 																								 |
-| ------------- |------------------------------------------------------------------|
-| Job Requester | 28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5 |
-| Worker 1      | 9e531b326f8c09437ab2af7a768e5e25422b43075169714f1790b6b036f73b00 |
-| Worker 2      | 9da0d3721774843193737244a0f3355191f66ff7321e83eae83f7f746eb34350 |
 
 (In case you are wondering where these private keys are from, they correspond to the standard accounts from a Ganache setup and are pre-funded with testnet HMT).
 
 3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the following Token Contract Address for the HMT Token:
-	- **Node (Hardhat)**: `0x5FbDB2315678afecb367f032d93F642f64180aa3` 
-	- **Docker (Ganache)**: `0x6E3E3756A69075018d620523EE72bdC087c17537` 
+	- **HMT**: `0x5FbDB2315678afecb367f032d93F642f64180aa3` 
 
    Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
 
@@ -225,9 +203,7 @@ To configure Metamask for the Local Testnet example:
 ### Creating a Job (Local Testnet)
 1. In Metamask, switch to the Job Requester account that you imported above.
 2. Ensure that you are connected to Fortune local network under Networks in Metamask.
-3. Navigate to http://localhost/launcher to access the Job Launcher:
-	- **Node (Hardhat)**: http://localhost:3000
-	- **Docker (Ganache)**: http://localhost/launcher 
+3. Navigate to http://localhost:3000 to access the Job Launcher.
 4. Click on connect to connect your metamask wallet.
 5. To begin deploying a new job click on 'Create Escrow', Metamask will ask you to sign this transaction
 6. Assuming the above transaction was successful you will now have a new Escrow address under the "Escrow created" field, this address represents the job, copy it down. Next we must fund the escrow.
@@ -235,30 +211,22 @@ To configure Metamask for the Local Testnet example:
 8. To complete the job creation process we must add the manifest URL. This URL points to the manifest.json file, which contains job specific data. For this example the data has already been created for you and stored in a local datastore (minio) which can be accessed at http://localhost:9001 (To login you must use the default username: 'dev' and password 'devdevdev')
 9. Once you are logged into the minio dashboard, click on the 'Manage' button, you will be taken to a Summary page for the manifest bucket. From this screen change the 'Access Policy' to 'public' and click 'Set' to confirm changes. We can now exit the minio dashboard and return to the Job creation process.
 10. Navigate back to the job launcher, enter the manifest URL into the form and hit 'Setup Escrow':
-	- **Node (Hardhat)**: http://localhost:9000/manifests/manifest.json 
-	- **Docker (Ganache)**: http://localhost/minio/manifests/manifest.json 
+	- **Manifest**: http://localhost:9000/manifests/manifest.json 
 
 The job creation is now complete!
 
 ### Viewing Jobs
-The job has now been created and is available for exchanges to pick up. To view the job status navigate to the exchange service and paste in the Escrow contract address:
-	- **Node (Hardhat)**: http://localhost:3001
-	- **Docker (Ganache)**: http://localhost/exchange
+The job has now been created and is available for exchanges to pick up. To view the job status navigate to the exchange service (http://localhost:3001) and paste in the Escrow contract address.
 
 The status should be 'Pending'. Jobs in a pending status are picked up by the exchange and forwarded to workers.
 
 ### Fulfilling a job
 To fulfil this job we require answers (fortunes in our case) from 2 workers:
 
-1. In your Metamask wallet switch to the Worker 1 account that we imported above. Navigate to exchange service and enter a fortune prediction (any text).
-	- **Node (Hardhat)**: http://localhost:3001
-	- **Docker (Ganache)**: http://localhost/exchange
+1. In your Metamask wallet switch to the Worker 1 account that we imported above. Navigate to exchange service (http://localhost:3001) and enter a fortune prediction (any text).
 2. Now switch to Worker 2 and enter a fortune prediction (it should be different from Worker 1).
 
-We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to the exchange service . You should also see that the account balances for Worker 1 and 2 have increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher and entering the Escrow contract address into the searchbar.
-	- **Node (Hardhat)**: http://localhost:3000
-	- **Docker (Ganache)**: http://localhost/launcher
-
+We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to the exchange service . You should also see that the account balances for Worker 1 and 2 have increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher (http://localhost:3000) and entering the Escrow contract address into the searchbar.
 # Tests
 ## Unit tests
 ```
@@ -269,34 +237,11 @@ yarn && yarn test:unit
 ```
 yarn && yarn test:e2e
 ```
-### Using Docker
-First run:
-```
-make test-docker
-```
-Then:
-```
-yarn && yarn test:e2e:docker
-```
 
 ## Unit & e2e tests
 ```
 yarn && yarn test
 ```
-  
-
-# Deploy to any EVM network
-
-**To deploy Fortune for any EVM network the contracts from https://github.com/humanprotocol/hmt-escrow must to be deployed on the target network.** Once the contracts are deployed, in the root folder of this project run the following command:
-```
-cp .env.docker .env
-```
-Then replace the values in the .env file with the desired config. Then run:
-```
-make network-docker
-```
-Now all the services needed for Fortune should be deployed and running.
-
   
 
 # Troubleshooting
