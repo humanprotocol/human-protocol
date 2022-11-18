@@ -15,6 +15,7 @@ export const TokenView: React.FC = (): React.ReactElement => {
           title="Price"
           value={data?.currentPriceInUSD}
           format="$0,0.00"
+          changes={data?.priceChangePercentage24h}
         />
       </Grid>
       <Grid item xs={12} sm={4}>

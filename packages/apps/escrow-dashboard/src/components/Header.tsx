@@ -11,8 +11,6 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import TokenPriceIndicator from './TokenPriceIndicator';
-
 type NavLink = {
   title: string;
   href: string;
@@ -20,9 +18,7 @@ type NavLink = {
 };
 
 const NAV_LINKS: NavLink[] = [
-  { title: 'Network', href: '/#network' },
-  { title: 'Token', href: '/#token' },
-  { title: 'Leaderboard', href: '/#leaderboard' },
+  { title: 'Leaderboard', href: '/leaderboard' },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
 
@@ -70,24 +66,25 @@ const Header: React.FC = (): React.ReactElement => {
                 Scan
               </Typography>
             </Box>
-            {!isMobile && (
-              <Box display="flex" sx={{ mx: 'auto' }}>
-                {NAV_LINKS.map((nav) => (
+            <Box
+              display="flex"
+              alignItems="center"
+              ml={isMobile ? 'auto' : 0}
+              gap={4}
+            >
+              {!isMobile &&
+                NAV_LINKS.map((nav) => (
                   <Link
                     key={nav.title}
                     href={nav.href}
                     target={nav.external ? '_blank' : '_self'}
-                    sx={{ textDecoration: 'none', ml: '28px' }}
+                    sx={{ textDecoration: 'none' }}
                   >
                     <Typography variant="body2" fontWeight={600}>
                       {nav.title}
                     </Typography>
                   </Link>
                 ))}
-              </Box>
-            )}
-            <Box display="flex" alignItems="center" ml={isMobile ? 'auto' : 0}>
-              <TokenPriceIndicator />
             </Box>
             {isMobile && (
               <>
