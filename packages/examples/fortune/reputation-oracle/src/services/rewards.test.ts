@@ -3,7 +3,6 @@ const {
   filterAddressesToReward,
   calculateRewardForWorker,
 } = require('./rewards');
-const { describe, expect, it } = require('@jest/globals');
 
 const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
 const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
