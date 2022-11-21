@@ -13,10 +13,11 @@
     "escrow-dashboard:start": "yarn workspace @human-protocol/escrow-dashboard start",
     "escrow-dashboard:test": "yarn workspace @human-protocol/escrow-dashboard test",
     "escrow-dashboard:lint": "yarn workspace @human-protocol/escrow-dashboard lint",
+    "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
     "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint",
     "prepare": "husky install"
   },
   "workspaces": [
@@ -31,6 +32,7 @@
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
+    "@typescript-eslint/utils": "^5.42.1",
     "concurrently": "^7.5.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.27.0",
