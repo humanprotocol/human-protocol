@@ -2,7 +2,7 @@ import React, { ChangeEvent, SetStateAction, Dispatch } from "react";
 import Button from "@mui/material/Button";
 
 import { usePrepareContractWrite, useContractWrite } from "wagmi";
-import KVStore from "../contracts/KVStore.json";
+import KVStore from "@human-protocol/core/abis/KVStore.json";
 import Grid from "@mui/material/Grid";
 import { NFTStorage } from "nft.storage";
 
@@ -23,7 +23,7 @@ export default function ImportButton({
 }) {
   const { config } = usePrepareContractWrite({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "set",
     args: ["", ""],
   });

@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import { saveAs } from "file-saver";
 import JSzip from "jszip";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import KVStore from "../contracts/KVStore.json";
+import KVStore from "@human-protocol/core/abis/KVStore.json";
 import { NFTStorage } from "nft.storage";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { generateKey } from "../services/index";
@@ -44,7 +44,7 @@ export default function GeneratePGP() {
   };
   const { config } = usePrepareContractWrite({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "set",
     args: ["public_key", cid],
   });

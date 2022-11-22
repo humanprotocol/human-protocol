@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "@human-protocol/core": "^1.0.8",
+    "@human-protocol/core": "workspace:*",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",

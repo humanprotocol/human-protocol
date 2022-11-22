@@ -4,7 +4,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import { usePrepareContractWrite, useContractWrite, useContractRead, useAccount } from "wagmi";
-import KVStore from "../contracts/KVStore.json";
+import KVStore from "@human-protocol/core/abis/KVStore.json";
 import * as openpgp from "openpgp";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { showIPFS } from "../services/index";
@@ -34,7 +34,7 @@ export default function KeyValue() {
   
   const { config } = usePrepareContractWrite({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "set",
     args: [key, value],
   });
@@ -99,7 +99,7 @@ export default function KeyValue() {
   const {address} = useAccount();
   const { refetch } = useContractRead({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "get",
     args: [address, "public_key"],
   });
