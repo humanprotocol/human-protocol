@@ -1,4 +1,18 @@
-[![CI](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci.yaml) [![CD](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd.yaml)
+[![Lint Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml)
+
+[![Ci test core js/typescript](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml)
+
+[![Ci test core python](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml)
+
+[![Npm](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml)
+
+[![Pypi](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml)
+
+[![Subgraph Test](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) 
+
+[![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) 
+
+[![Fortune check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml)
 
 ![HUMAN-LOGO](https://user-images.githubusercontent.com/104898604/201488028-2b0f29cb-c620-484f-991f-4a8b16efd7cc.png)
 
