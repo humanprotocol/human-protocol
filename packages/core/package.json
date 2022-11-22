@@ -1,17 +1,18 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "files": [
     "contracts/**/*.sol",
-    "abis/**/*.json"
+    "abis/**/*.json",
+    "artifacts/contracts/**/*.json"
   ],
   "scripts": {
     "compile": "hardhat compile",
     "verify": "hardhat verify",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
-    "local": "hardhat node",
+    "local": "concurrently --hide 0 \"hardhat node\" \"yarn deploy:local\"",
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "lint": "eslint .",
@@ -50,6 +51,7 @@
     "hardhat-abi-exporter": "^2.10.1",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.9",
+    "openpgp": "5.5.0",
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solidity-coverage": "^0.8.2",
     "tenderly": "^0.0.2",

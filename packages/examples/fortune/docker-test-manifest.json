@@ -1,0 +1,7 @@
+{
+    "job_title": "Requesting fortunes from the fortunes teller",
+    "job_type": "fortune",
+    "fortunes_requested": 3,
+    "recording_oracle_url": "http://recording-oracle-test:3005/job/results",
+    "reputation_oracle_url": "http://reputation-oracle-test:3006/job/results"
+  }

@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import Layout from 'src/components/Layout';
+import Layout from './Layout';
 
 describe('when rendered Layout component', () => {
   beforeAll(async () => {
@@ -23,24 +23,22 @@ describe('when rendered Layout component', () => {
   });
 
   it('should render passed `children` prop', () => {
-    act(() => {
-      const { getByTestId } = render(
-        <Layout>
-          <div data-testid="root">
-            <div data-testid="parent">
-              <div data-testid="child">content</div>
-            </div>
+    const { getByTestId } = render(
+      <Layout>
+        <div data-testid="root">
+          <div data-testid="parent">
+            <div data-testid="child">content</div>
           </div>
-        </Layout>
-      );
+        </div>
+      </Layout>
+    );
 
-      const root = getByTestId('root');
-      const parent = getByTestId('parent');
-      const child = getByTestId('child');
-      expect(root).toContainElement(parent);
-      expect(parent).toContainElement(child);
-      expect(child).not.toContainElement(parent); // Pass
-    });
+    const root = getByTestId('root');
+    const parent = getByTestId('parent');
+    const child = getByTestId('child');
+    expect(root).toContainElement(parent);
+    expect(parent).toContainElement(child);
+    expect(child).not.toContainElement(parent); // Pass
   });
 });
 

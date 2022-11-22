@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
+      - run: npm install --global yarn && yarn --ignore-scripts
         name: Install dependencies
       - run: yarn core:test
         name: Run protocol test
