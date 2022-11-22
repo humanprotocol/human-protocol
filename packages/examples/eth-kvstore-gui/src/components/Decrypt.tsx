@@ -6,7 +6,7 @@ import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import { useContractRead, useAccount } from "wagmi";
-import KVStore from "../contracts/KVStore.json";
+import KVStore from "@human-protocol/core/abis/KVStore.json";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import * as openpgp from "openpgp";
@@ -33,7 +33,7 @@ export default function ColorTextFields() {
   const [error, setError] = useState<string>("");
   const { refetch } = useContractRead({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "get",
     args: [address, key],
   });
