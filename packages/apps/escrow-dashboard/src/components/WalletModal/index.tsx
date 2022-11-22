@@ -20,30 +20,29 @@ const WALLET_ICONS: Record<string, any> = {
   walletConnect: walletConnectSvg,
 };
 
-export default function WalletModal() {
-  const {
-    connect,
-    connectors,
-    error,
-    isLoading,
-    pendingConnector,
-  } = useConnect();
+export default function WalletModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { connect, connectors, error, isLoading, pendingConnector } =
+    useConnect();
 
   const theme = useTheme();
 
   return (
-    <Dialog
-      open={false}
-      onClose={() => console.log('on close')}
-      maxWidth={false}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth={false}>
       <Box display="flex" maxWidth="784px">
         <Box
           width={{ xs: '0', md: '50%' }}
-          display={{ xs: 'none', md: 'block' }}
+          display={{ xs: 'none', md: 'flex' }}
           sx={{
-            background: theme.palette.primary.dark,
+            background: theme.palette.primary.main,
             boxSizing: 'border-box',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
           }}
           px={9}
           py={6}
@@ -65,7 +64,7 @@ export default function WalletModal() {
           flexDirection="column"
           p={4}
         >
-          <IconButton sx={{ ml: 'auto', mb: 3 }}>
+          <IconButton sx={{ ml: 'auto', mb: 3 }} onClick={onClose}>
             <CloseIcon color="primary" />
           </IconButton>
           <Box width="100%" display="flex" flexDirection="column" gap={3}>
