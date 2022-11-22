@@ -2,18 +2,23 @@ import AWS from 'aws-sdk';
 import crypto from 'crypto';
 
 import {
-  ESCROW_AWS_ACCESS_KEY_ID,
-  ESCROW_AWS_SECRET_ACCESS_KEY,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_REGION,
+  AWS_REQUEST_ENDPOINT,
   ESCROW_BUCKETNAME,
   ESCROW_PUBLIC_BUCKETNAME,
 } from './constants';
 import { UploadResult } from './types';
 
-const s3 = new AWS.S3();
-
 AWS.config.update({
-  accessKeyId: ESCROW_AWS_ACCESS_KEY_ID,
-  secretAccessKey: ESCROW_AWS_SECRET_ACCESS_KEY,
+  accessKeyId: AWS_ACCESS_KEY_ID,
+  secretAccessKey: AWS_SECRET_ACCESS_KEY,
+});
+
+const s3 = new AWS.S3({
+  endpoint: AWS_REQUEST_ENDPOINT,
+  region: AWS_REGION,
 });
 
 const getBucket = (isPublic: boolean) => {
@@ -21,7 +26,7 @@ const getBucket = (isPublic: boolean) => {
 };
 
 export const getPublicURL = (key: string): string => {
-  return `https://${getBucket(true)}.s3.amazonaws.com/${key}`;
+  return `https://${ESCROW_PUBLIC_BUCKETNAME}.s3.amazonaws.com/${key}`;
 };
 
 export const getKeyFromURL = (url: string): string => {
@@ -37,7 +42,11 @@ export const getKeyFromURL = (url: string): string => {
   return url;
 };
 
-export const downloadFromStorage = async (key: string, isPublic: boolean) => {
+export const download = async (
+  key: string,
+  privateKey: string,
+  isPublic = false
+): Promise<Record<string, string | number>> => {
   const params = {
     Bucket: getBucket(isPublic),
     Key: key,
@@ -45,17 +54,7 @@ export const downloadFromStorage = async (key: string, isPublic: boolean) => {
 
   const { Body } = await s3.getObject(params).promise();
 
-  return Body;
-};
-
-export const download = async (
-  key: string,
-  privateKey: string,
-  isPublic = false
-): Promise<Record<string, string | number>> => {
-  const content = await downloadFromStorage(key, isPublic);
-
-  const data = JSON.parse(content?.toString('utf-8') || '');
+  const data = JSON.parse(Body?.toString('utf-8') || '');
 
   return data;
 };

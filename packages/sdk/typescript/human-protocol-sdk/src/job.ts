@@ -16,6 +16,7 @@ import {
   toFullDigit,
 } from './utils';
 import { ErrorJobNotLaunched, ErrorReputationOracleMissing } from './error';
+import { logger } from './logger';
 
 /**
  * @class Human Protocol Job
@@ -458,6 +459,11 @@ class Job {
       }
     }
     return false;
+  }
+
+  private async _handleError(error: Error) {
+    logger.error(error.message);
+    throw error;
   }
 }
 
