@@ -1,11 +1,12 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
-    "artifacts/contracts/**/*.json"
+    "artifacts/contracts/**/*.json",
+    "typechain-types/**/*.ts"
   ],
   "scripts": {
     "compile": "hardhat compile",
