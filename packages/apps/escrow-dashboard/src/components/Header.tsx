@@ -19,6 +19,11 @@ type NavLink = {
 
 const NAV_LINKS: NavLink[] = [
   { title: 'Leaderboard', href: '/leaderboard' },
+  {
+    title: 'KV Store',
+    href: 'https://eth-kvstore-gui.vercel.app',
+    external: true,
+  },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
 
