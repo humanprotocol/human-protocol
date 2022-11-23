@@ -1,13 +1,19 @@
 import { BigNumber, ContractTransaction, ethers } from 'ethers';
 
-import {
-  Escrow,
-  EscrowFactory,
-  HMToken,
-} from '@human-protocol/core/typechain-types';
-
+import { DEFAULT_BUCKET, DEFAULT_PUBLIC_BUCKET } from './constants';
 import { download, getKeyFromURL, getPublicURL, upload } from './storage';
-import { EscrowStatus, Manifest, Payout, Result, UploadResult } from './types';
+import {
+  EscrowStatus,
+  Manifest,
+  Payout,
+  ProviderData,
+  Result,
+  UploadResult,
+  ManifestData,
+  ContractData,
+  JobArguments,
+  StorageAccessData,
+} from './types';
 import {
   deployEscrowFactory,
   getEscrow,
@@ -15,62 +21,57 @@ import {
   getHmToken,
   toFullDigit,
 } from './utils';
-import { ErrorJobNotLaunched, ErrorReputationOracleMissing } from './error';
+import {
+  ErrorHMTokenMissing,
+  ErrorJobAlreadyLaunched,
+  ErrorJobNotLaunched,
+  ErrorManifestMissing,
+  ErrorReputationOracleMissing,
+  ErrorStorageAccessDataMissing,
+} from './error';
 import { logger } from './logger';
 
 /**
  * @class Human Protocol Job
  */
 class Job {
-  provider: ethers.providers.BaseProvider;
-  gasPayer?: ethers.Wallet;
-  reputationOracle?: ethers.Wallet;
-  trustedHandlers: Array<ethers.Wallet>;
-
-  manifest?: Manifest;
-  manifestURL?: string;
-  manifestHash?: string;
-  intermediateManifestURL?: string;
-  intermediateManifestHash?: string;
-
-  factoryAddr?: string;
-  escrowAddr?: string;
-  hmTokenAddr: string;
-
-  factory?: EscrowFactory;
-  escrow?: Escrow;
-  hmToken?: HMToken;
-
-  get perJobCost(): number {
-    return this.manifest?.task_bid_price || 0;
-  }
-
-  get numberOfAnswers(): number {
-    return this.manifest?.job_total_tasks || 0;
-  }
-
-  get amount(): number {
-    return this.perJobCost * this.numberOfAnswers;
-  }
-
   /**
-   * Job Arguments
-   * @typedef {Object} JobArguments
-   * @property {string | undefined} network - Network to run job
-   * @property {string | undefined} infuraKey - Infura project ID
-   * @property {string | undefined} alchemyKey - Alchemy API Token
-   * @property {string | undefined } privateKey - Private key for job runner wallet
-   * @property {ethers.Wallet | undefined} signer - Job operator signer
-   * @property {string} hmTokenAddr - Address of HMToken
-   * @property {string | undefined} factoryAddr - Address of EscrowFactory contract
-   * @property {string | undefined} escrowAddr - Address of Escrow contract
-   * @property {Manifest | undefined} manifest - Job Manifest
+   * Ethers provider data
    */
+  providerData?: ProviderData;
+
   /**
-   * Job constructor
+   * Job manifest & result data
+   */
+  manifestData?: ManifestData;
+
+  /**
+   * Job smart contract data
+   */
+  contractData?: ContractData;
+
+  /**
+   * Cloud storage access data
+   */
+  storageAccessData?: StorageAccessData;
+
+  /**
+   * Get the total cost of the job
+   * @return {number} The total cost of the job
+   */
+  get amount(): number {
+    return (
+      (this.manifestData?.manifest?.task_bid_price || 0) *
+      (this.manifestData?.manifest?.job_total_tasks || 0)
+    );
+  }
+
+  /**
+   * **Job constructor**
    *
    * If the network is not specified, it'll connect to http://localhost:8545.
    * If the network other than hardhat is specified, either of Infura/Alchemy key is required to connect.
+   *
    * @param {JobArguments} args - Job arguments
    */
   constructor({
@@ -78,82 +79,100 @@ class Job {
     alchemyKey,
     infuraKey,
     gasPayer,
-    gasPayerPrivateKey,
     reputationOracle,
-    reputationOraclePrivateKey,
     trustedHandlers,
     hmTokenAddr,
     factoryAddr,
     escrowAddr,
     manifest,
-  }: {
-    network?: string;
-    infuraKey?: string;
-    alchemyKey?: string;
-    gasPayer?: ethers.Wallet;
-    gasPayerPrivateKey: string;
-    reputationOracle?: ethers.Wallet;
-    reputationOraclePrivateKey?: string;
-    trustedHandlers?: Array<ethers.Wallet | string>;
-    hmTokenAddr: string;
-    factoryAddr?: string;
-    escrowAddr?: string;
-    manifest?: Manifest;
-  }) {
-    this.provider = network
+    storageAccessKeyId,
+    storageSecretAccessKey,
+    storageEndpoint,
+    storagePublicBucket,
+    storageBucket,
+  }: JobArguments) {
+    const provider = network
       ? ethers.getDefaultProvider(network, {
           alchemy: alchemyKey,
           infura: infuraKey,
         })
       : new ethers.providers.JsonRpcProvider();
 
-    if (gasPayer) {
-      this.gasPayer = gasPayer;
-    } else if (gasPayerPrivateKey) {
-      this.gasPayer = new ethers.Wallet(gasPayerPrivateKey, this.provider);
+    this.providerData = {
+      provider,
+    };
+
+    if (typeof gasPayer === 'string') {
+      this.providerData.gasPayer = new ethers.Wallet(gasPayer, provider);
+    } else {
+      this.providerData.gasPayer = gasPayer;
     }
 
-    if (reputationOracle) {
-      this.reputationOracle = reputationOracle;
-    } else if (reputationOraclePrivateKey) {
-      this.reputationOracle = new ethers.Wallet(
-        reputationOraclePrivateKey,
-        this.provider
+    if (typeof reputationOracle === 'string') {
+      this.providerData.reputationOracle = new ethers.Wallet(
+        reputationOracle,
+        provider
       );
+    } else {
+      this.providerData.reputationOracle = reputationOracle;
     }
 
-    this.trustedHandlers =
+    this.providerData.trustedHandlers =
       trustedHandlers?.map((trustedHandler) => {
         if (typeof trustedHandler === 'string') {
-          return new ethers.Wallet(trustedHandler, this.provider);
+          return new ethers.Wallet(trustedHandler, provider);
         }
         return trustedHandler;
       }) || [];
 
-    this.hmTokenAddr = hmTokenAddr;
-    this.escrowAddr = escrowAddr;
-    this.factoryAddr = factoryAddr;
-    this.manifest = manifest;
+    this.contractData = {
+      hmTokenAddr,
+      escrowAddr,
+      factoryAddr,
+    };
+
+    this.manifestData = { manifest };
+
+    this.storageAccessData = {
+      accessKeyId: storageAccessKeyId || '',
+      secretAccessKey: storageSecretAccessKey || '',
+      endpoint: storageEndpoint,
+      publicBucket: storagePublicBucket || DEFAULT_BUCKET,
+      bucket: storageBucket || DEFAULT_PUBLIC_BUCKET,
+    };
 
     this._initialize();
   }
 
+  /**
+   * **Launch the escrow**
+   *
+   * Deploy new escrow contract, and uploads manifest.
+   *
+   * @returns {Promise<boolean>} - True if the escrow is launched successfully.
+   */
   async launch(): Promise<boolean> {
-    if (this.escrow) {
-      throw new Error('Job is already launched');
+    if (!this.contractData || this.contractData.escrow) {
+      this._logError(ErrorJobAlreadyLaunched);
+      return false;
     }
 
-    if (!this.manifest) {
-      throw new Error('Manifest is required');
+    if (!this.manifestData || !this.manifestData.manifest) {
+      this._logError(ErrorManifestMissing);
+      return false;
     }
 
-    if (!this.reputationOracle) {
-      throw new Error('Reputation Oracle is required');
+    if (!this.providerData || this.providerData.reputationOracle) {
+      this._logError(ErrorReputationOracleMissing);
+      return false;
     }
 
-    const txReceipt = await this.factory?.createEscrow(
-      this.trustedHandlers?.map((trustedHandler) => trustedHandler.address) ||
-        []
+    logger.info('Launching escrow...');
+
+    const txReceipt = await this.contractData?.factory?.createEscrow(
+      this.providerData?.trustedHandlers?.map(
+        (trustedHandler) => trustedHandler.address
+      ) || []
     );
 
     const txResponse = await txReceipt?.wait();
@@ -163,15 +182,28 @@ class Job {
     );
 
     const escrowAddr = event?.args?.[1];
-    console.log(`Escrow is deployed at ${escrowAddr}`);
+    logger.info(`Escrow is deployed at ${escrowAddr}.`);
 
-    this.escrowAddr = escrowAddr;
-    this.escrow = await getEscrow(escrowAddr, this.gasPayer);
+    this.contractData.escrowAddr = escrowAddr;
+    this.contractData.escrow = await getEscrow(
+      escrowAddr,
+      this.providerData?.gasPayer
+    );
 
-    const { key, hash } = await this._upload(this.manifest);
+    logger.info('Uploading manifest...');
+    const uploadResult = await this._upload(this.manifestData.manifest);
+    if (!uploadResult) {
+      this._logError(new Error('Error uploading manifest'));
+      return false;
+    }
 
-    this.manifestURL = key;
-    this.manifestHash = hash;
+    this.manifestData.manifestlink = {
+      url: uploadResult.key,
+      hash: uploadResult.hash,
+    };
+    logger.info(
+      `Uploaded manifest.\n\tKey: ${uploadResult.key}\n\tHash: ${uploadResult.hash}`
+    );
 
     return (
       (await this.status()) == EscrowStatus.Launched &&
@@ -179,41 +211,61 @@ class Job {
     );
   }
 
+  /**
+   * Setup escrow
+   *
+   * Sets the escrow contract to be ready to receive answers from the Recording Oracle.
+   *
+   * @param {string | undefined} senderAddr - Address of HMToken sender
+   * @returns {Promise<boolean>} True if the escrow is setup successfully.
+   */
   async setup(senderAddr?: string): Promise<boolean> {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    if (!this.hmToken) {
-      throw new Error('HMToken is not defined');
+    if (!this.contractData.hmToken) {
+      this._logError(ErrorHMTokenMissing);
+      return false;
     }
 
-    const reputationOracleStake = (this.manifest?.oracle_stake || 0) * 100;
-    const recordingOracleStake = (this.manifest?.oracle_stake || 0) * 100;
-    const repuationOracleAddr = this.manifest?.reputation_oracle_addr || '';
-    const recordingOracleAddr = this.manifest?.recording_oracle_addr || '';
+    const reputationOracleStake =
+      (this.manifestData?.manifest?.oracle_stake || 0) * 100;
+    const recordingOracleStake =
+      (this.manifestData?.manifest?.oracle_stake || 0) * 100;
+    const repuationOracleAddr =
+      this.manifestData?.manifest?.reputation_oracle_addr || '';
+    const recordingOracleAddr =
+      this.manifestData?.manifest?.recording_oracle_addr || '';
 
+    logger.info('Transferring HMT...');
     const transferred = await (senderAddr
       ? this._raffleExecute(
-          this.hmToken.transferFrom,
+          this.contractData.hmToken.transferFrom,
           senderAddr,
-          this.escrow.address,
+          this.contractData?.escrow.address,
           toFullDigit(this.amount)
         )
       : this._raffleExecute(
-          this.hmToken?.transfer,
-          this.escrow.address,
+          this.contractData.hmToken?.transfer,
+          this.contractData?.escrow.address,
           toFullDigit(this.amount)
         ));
 
     if (!transferred) {
-      throw new Error(
-        'Failed to transfer HMT with all credentials, not continuing to setup'
+      this._logError(
+        new Error(
+          'Failed to transfer HMT with all credentials, not continuing to setup'
+        )
       );
+      return false;
     }
+    logger.info('HMT transferred.');
 
+    logger.info('Setting up the escrow...');
     const contractSetup = await this._raffleExecute(
-      this.escrow.setup,
+      this.contractData?.escrow.setup,
       repuationOracleAddr,
       recordingOracleAddr,
       reputationOracleStake,
@@ -221,8 +273,11 @@ class Job {
     );
 
     if (!contractSetup) {
-      throw new Error('Failed to setup contract');
+      this._logError(new Error('Failed to setup contract'));
+      return false;
     }
+
+    logger.info('Escrow is set up.');
 
     return (
       (await this.status()) === EscrowStatus.Pending &&
@@ -230,43 +285,82 @@ class Job {
     );
   }
 
+  /**
+   * Add trusted handlers
+   *
+   * Add trusted handlers that can freely transact with the contract and
+   * perform aborts and cancels for example.
+   *
+   * @param {string[]} handlers - Trusted handlers to add
+   * @returns {Promise<boolean>} - True if trusted handlers are added successfully.
+   */
   async addTrustedHandlers(handlers: string[]): Promise<boolean> {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
     const result = await this._raffleExecute(
-      this.escrow.addTrustedHandlers,
+      this.contractData?.escrow.addTrustedHandlers,
       handlers
     );
 
     if (!result) {
-      throw new Error('Failed to add trusted handlers to the job');
+      this._logError(new Error('Failed to add trusted handlers to the job'));
+      return false;
     }
 
     return result;
   }
 
+  /**
+   * **Bulk payout**
+   *
+   * Payout the workers submitting the result.
+   *
+   * @param {Payout[]} payouts - Workers address & amount to payout
+   * @param {Result} result - Job result submitted
+   * @param {bool} encrypt - Whether to encrypt the result, or not
+   * @param {bool} isPublic - Whether to store data in public storage, or private.
+   * @returns {Promise<boolean>} - True if the workers are paid out successfully.
+   */
   async bulkPayout(
     payouts: Payout[],
-    result: Record<string, string | number>,
+    result: Result,
     encrypt = true,
     isPublic = false
   ): Promise<boolean> {
-    if (!this.reputationOracle) {
-      throw new Error('Reputation oracle is missing');
+    if (!this.providerData?.reputationOracle) {
+      this._logError(ErrorReputationOracleMissing);
+      return false;
     }
 
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    const { key, hash } = await this._upload(result, encrypt, isPublic);
+    logger.info('Uploading result...');
+    const uploadResult = await this._upload(result, encrypt, isPublic);
 
-    const url = isPublic ? getPublicURL(key) : key;
+    if (!uploadResult) {
+      this._logError(new Error('Error uploading result'));
+      return false;
+    }
 
+    const { key, hash } = uploadResult;
+    logger.info(`Uploaded result.\n\tKey: ${key}\n\tHash: ${hash}`);
+
+    if (!this.storageAccessData) {
+      this._logError(ErrorStorageAccessDataMissing);
+      return false;
+    }
+
+    const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
+
+    logger.info('Bulk paying out the workers...');
     const bulkPaid = await this._raffleExecute(
-      this.escrow.bulkPayOut,
+      this.contractData?.escrow.bulkPayOut,
       payouts.map(({ address }) => address),
       payouts.map(({ amount }) => toFullDigit(amount)),
       url,
@@ -275,99 +369,192 @@ class Job {
     );
 
     if (!bulkPaid) {
-      throw new Error('Failed to bulk payout users');
+      this._logError(new Error('Failed to bulk payout users'));
+      return false;
     }
+    logger.info('Workers are paid out.');
 
     return bulkPaid;
   }
 
+  /**
+   * **Abort the escrow**
+   *
+   * @returns {Promise<boolean>} - True if the escrow is aborted successfully.
+   */
   async abort(): Promise<boolean> {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    const aborted = await this._raffleExecute(this.escrow.abort);
+    logger.info('Aborting the job...');
+    const aborted = await this._raffleExecute(this.contractData?.escrow.abort);
 
     if (!aborted) {
-      throw new Error('Failed to abort the job');
+      this._logError(new Error('Failed to abort the job'));
+      return false;
     }
+    logger.info('Job is aborted successfully.');
 
     return aborted;
   }
 
+  /**
+   * **Cancel the escrow**
+   *
+   * @returns {Promise<boolean>} - True if the escrow is cancelled successfully.
+   */
   async cancel(): Promise<boolean> {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    const cancelled = await this._raffleExecute(this.escrow.cancel);
+    logger.info('Cancelling the job...');
+    const cancelled = await this._raffleExecute(
+      this.contractData?.escrow.cancel
+    );
 
     if (!cancelled) {
-      throw new Error('Failed to cancel the job');
+      this._logError(new Error('Failed to cancel the job'));
+      return false;
     }
+    logger.info('Job is cancelled successfully.');
 
     return (await this.status()) === EscrowStatus.Cancelled;
   }
 
+  /**
+   * **Store intermediate result**
+   *
+   * Uploads intermediate result to the storage, and saves the URL/Hash on-chain.
+   *
+   * @param {Result} result - Intermediate result
+   * @returns {Promise<boolean>} - True if the intermediate result is stored successfully.
+   */
   async storeIntermediateResults(result: Result): Promise<boolean> {
-    if (!this.reputationOracle) {
-      throw new Error('Reputation oracle is missing');
+    if (!this.providerData?.reputationOracle) {
+      this._logError(ErrorReputationOracleMissing);
+      return false;
     }
 
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    const { key, hash } = await this._upload(result);
+    logger.info('Uploading intermediate result...');
+    const uploadResult = await this._upload(result);
 
+    if (!uploadResult) {
+      this._logError(new Error('Error uploading intermediate result'));
+      return false;
+    }
+
+    const { key, hash } = uploadResult;
+    logger.info(
+      `Uploaded intermediate result.\n\tKey: ${key}\n\tHash: ${hash}`
+    );
+
+    logger.info('Saving intermediate result on-chain...');
     const resultStored = await this._raffleExecute(
-      this.escrow.storeResults,
+      this.contractData?.escrow.storeResults,
       key,
       hash
     );
 
     if (!resultStored) {
-      throw new Error('Failed to store results');
+      this._logError(new Error('Failed to store results'));
+      return false;
     }
+    logger.info('Intermediate result is stored on-chain successfully.');
 
-    this.intermediateManifestURL = key;
-    this.intermediateManifestHash = hash;
+    this.manifestData = {
+      ...this.manifestData,
+      intermediateResultLink: { url: key, hash },
+    };
 
     return resultStored;
   }
 
+  /**
+   * **Complete the escrow**
+   *
+   * @returns {Promise<boolean>} - True if the escrow if completed successfully.
+   */
   async complete() {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
     }
 
-    const completed = await this._raffleExecute(this.escrow.complete);
+    const completed = await this._raffleExecute(
+      this.contractData?.escrow.complete
+    );
 
     if (!completed) {
-      throw new Error('Failed to complete the job');
+      this._logError(new Error('Failed to complete the job'));
+      return false;
     }
 
     return (await this.status()) === EscrowStatus.Complete;
   }
 
-  async status(): Promise<EscrowStatus> {
-    return (await this.escrow?.status()) as EscrowStatus;
-  }
-
-  async balance(): Promise<BigNumber | undefined> {
-    return await this.escrow?.getBalance();
-  }
-
-  async intermediateResults(): Promise<Result | undefined> {
-    return this._download(this.intermediateManifestURL);
-  }
-
-  async finalResults(): Promise<Result | undefined> {
-    if (!this.escrow) {
-      throw ErrorJobNotLaunched;
+  /**
+   * **Get current status of the escrow**
+   *
+   * @returns {Promise<EscrowStatus | undefined>} - Status of the escrow
+   */
+  async status(): Promise<EscrowStatus | undefined> {
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return undefined;
     }
 
-    const finalResultsURL = await this.escrow?.finalResultsUrl();
+    return (await this.contractData.escrow.status()) as EscrowStatus;
+  }
+
+  /**
+   * **Get current balance of the escrow**
+   *
+   * @returns {Promise<BigNumber | undefined>} - Balance of the escrow
+   */
+  async balance(): Promise<BigNumber | undefined> {
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return undefined;
+    }
+
+    return await this.contractData.escrow.getBalance();
+  }
+
+  /**
+   * **Get intermediate result stored**
+   *
+   * @returns {Promise<Result | undefined>} - Intermediate result
+   */
+  async intermediateResults(): Promise<Result | undefined> {
+    if (!this.manifestData?.intermediateResultLink) {
+      this._logError(new Error('Intermediate result is missing.'));
+      return undefined;
+    }
+
+    return this._download(this.manifestData.intermediateResultLink.url);
+  }
+
+  /**
+   * **Get final result stored**
+   *
+   * @returns {Promise<Result | undefined>} - Final result
+   */
+  async finalResults(): Promise<Result | undefined> {
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
+      return undefined;
+    }
+
+    const finalResultsURL = await this.contractData?.escrow?.finalResultsUrl();
 
     if (!finalResultsURL) {
       return undefined;
@@ -379,91 +566,176 @@ class Job {
   }
 
   /**
-   * Initialize the job
-   * For existing jobs, access the job on-chain, and read manifest
-   * For new jobs, deploy escrow factory to launch escrows
+   * **Initialize the escrow**
+   *
+   * For existing escrows, access the escrow on-chain, and read manifest.
+   * For new escrows, deploy escrow factory to launch new escrow.
+   *
+   * @returns {Promise<boolean>} - True if escrow is initialized successfully.
    */
-  private async _initialize() {
-    this.hmToken = await getHmToken(this.hmTokenAddr);
+  private async _initialize(): Promise<boolean> {
+    if (!this.contractData) {
+      this._logError(new Error('Contract data is missing'));
+      return false;
+    }
 
-    if (!this.escrowAddr) {
-      if (!this.manifest) {
-        throw new Error('Manifest is required for new escrow');
+    this.contractData.hmToken = await getHmToken(this.contractData.hmTokenAddr);
+
+    if (!this.contractData?.escrowAddr) {
+      if (!this.manifestData?.manifest) {
+        this._logError(ErrorManifestMissing);
+        return false;
       }
 
-      this.factory = await deployEscrowFactory(this.hmTokenAddr, this.gasPayer);
+      logger.info('Deploying escrow factory...');
+      this.contractData.factory = await deployEscrowFactory(
+        this.contractData.hmTokenAddr,
+        this.providerData?.gasPayer
+      );
+      logger.info(
+        `Escrow factory is deployed at ${this.contractData.factory.address}.`
+      );
     } else {
-      if (!this.factoryAddr) {
-        throw new Error('Factory address is required for existing escrow');
+      if (!this.contractData?.factoryAddr) {
+        this._logError(
+          new Error('Factory address is required for existing escrow')
+        );
+        return false;
       }
 
-      this.factory = await getEscrowFactory(this.factoryAddr, this.gasPayer);
+      logger.info('Getting escrow factory...');
+      this.contractData.factory = await getEscrowFactory(
+        this.contractData?.factoryAddr,
+        this.providerData?.gasPayer
+      );
 
-      const hasEscrow = await this.factory.hasEscrow(this.escrowAddr);
+      logger.info('Checking if escrow exists in the factory...');
+      const hasEscrow = await this.contractData?.factory.hasEscrow(
+        this.contractData?.escrowAddr
+      );
 
       if (!hasEscrow) {
-        throw new Error('Factory does not contain the escrow');
+        this._logError(new Error('Factory does not contain the escrow'));
+        return false;
       }
 
-      this.escrow = await getEscrow(this.escrowAddr, this.gasPayer);
+      logger.info('Accessing the escrow...');
+      this.contractData.escrow = await getEscrow(
+        this.contractData?.escrowAddr,
+        this.providerData?.gasPayer
+      );
+      logger.info('Accessed the escrow successfully.');
 
-      this.manifestURL = await this.escrow.manifestUrl();
-      this.manifestHash = await this.escrow.manifestHash();
+      this.manifestData = {
+        ...this.manifestData,
+        manifestlink: {
+          url: await this.contractData?.escrow.manifestUrl(),
+          hash: await this.contractData?.escrow.manifestHash(),
+        },
+      };
 
-      this.manifest = (await this._download(this.manifestURL)) as Manifest;
+      this.manifestData.manifest = (await this._download(
+        this.manifestData.manifestlink?.url
+      )) as Manifest;
     }
+
+    return true;
   }
 
+  /**
+   * **Download result from cloud storage**
+   *
+   * @param {string | undefined} url - Result URL to download
+   * @returns {Result | undefined} - Downloaded result
+   */
   private async _download(url?: string): Promise<Result | undefined> {
-    if (!url || !this.reputationOracle) {
+    if (!url || !this.providerData?.reputationOracle) {
       return undefined;
     }
 
-    return await download(url, this.reputationOracle.privateKey);
+    if (!this.storageAccessData) {
+      this._logError(ErrorStorageAccessDataMissing);
+      return undefined;
+    }
+
+    return await download(
+      this.storageAccessData,
+      url,
+      this.providerData?.reputationOracle.privateKey
+    );
   }
 
+  /**
+   * **Uploads result to cloud storage**
+   *
+   * @param {Result} result - Result to upload
+   * @param {boolean} encrypt - Whether to encrypt result, or not.
+   * @param {bool} isPublic - Whether to store data in public storage, or private.
+   * @returns {Promise<UploadResult | undefined>} - Uploaded result
+   */
   private async _upload(
     result: Result,
-    encrypt = false,
+    encrypt = true,
     isPublic = false
-  ): Promise<UploadResult> {
-    if (!this.reputationOracle) {
-      throw ErrorReputationOracleMissing;
+  ): Promise<UploadResult | undefined> {
+    if (!this.providerData?.reputationOracle) {
+      this._logError(ErrorReputationOracleMissing);
+      return undefined;
+    }
+
+    if (!this.storageAccessData) {
+      this._logError(ErrorStorageAccessDataMissing);
+      return undefined;
     }
 
     return await upload(
+      this.storageAccessData,
       result,
-      this.reputationOracle?.publicKey,
+      this.providerData?.reputationOracle?.publicKey,
       encrypt,
       isPublic
     );
   }
 
+  /**
+   * **Raffle executes on-chain call**
+   *
+   * Try to execute the on-chain call from all possible trusted handlers
+   *
+   * @param {Function} txn - On-chain call to execute
+   * @param {any} args - On-chain call arguments
+   * @returns {Promise<boolean>} - True if one of handler succeed to execute the on-chain call
+   */
   private async _raffleExecute(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     txn: (...args: any) => Promise<ContractTransaction>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any
-  ) {
+  ): Promise<boolean> {
     try {
       await txn(...args);
       return true;
     } catch (err) {
-      console.log(err);
+      this._logError(err as Error);
     }
 
-    for (const trustedHandler of this.trustedHandlers) {
+    for (const trustedHandler of this.providerData?.trustedHandlers || []) {
       try {
         await txn(...args, { from: trustedHandler });
         return true;
       } catch (err) {
-        console.log(err);
+        this._logError(err as Error);
       }
     }
     return false;
   }
 
-  private async _handleError(error: Error) {
+  /**
+   * **Error log**
+   * @param {Error} error - Occured error
+   */
+  private async _logError(error: Error) {
     logger.error(error.message);
-    throw error;
   }
 }
 

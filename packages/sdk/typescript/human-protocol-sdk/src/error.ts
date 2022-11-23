@@ -1,8 +1,4 @@
 /**
- * Human Protocol Node.js SDK Errors
- */
-
-/**
  * @constant {Error} - The job is not launched yet.
  */
 export const ErrorJobNotLaunched = new Error('Job is not launched');
@@ -28,3 +24,10 @@ export const ErrorManifestMissing = new Error('Manifest is missing');
  * @constant {Error} - The HMToken is missing.
  */
 export const ErrorHMTokenMissing = new Error('HMToken is missing');
+
+/**
+ * @constant {Error} - The Storage access data is missing.
+ */
+export const ErrorStorageAccessDataMissing = new Error(
+  'Storage access data is missing'
+);

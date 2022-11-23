@@ -5,10 +5,6 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 
-/**********************************
- *          Types for Job         *
- **********************************/
-
 /**
  * Enum for escrow statuses.
  * @readonly
@@ -120,7 +116,7 @@ export type ProviderData = {
   /**
    * Other trusted handlers for the job
    */
-  trustedHandlers: Array<ethers.Wallet>;
+  trustedHandlers?: Array<ethers.Wallet>;
 };
 
 /**
@@ -221,4 +217,71 @@ export type UploadResult = {
    * Hash of uploaded object key
    */
   hash: string;
+};
+
+/**
+ * Job arguments
+ * @readonly
+ */
+export type JobArguments = {
+  /**
+   * Network
+   */
+  network?: string;
+  /**
+   * Infura project id
+   */
+  infuraKey?: string;
+  /**
+   * Alchemy API token
+   */
+  alchemyKey?: string;
+  /**
+   * Gas payer wallet / private key
+   */
+  gasPayer?: ethers.Wallet | string;
+  /**
+   * Reputation oracle wallet / private key
+   */
+  reputationOracle?: ethers.Wallet | string;
+  /**
+   * Trusted handlers wallet / private key
+   */
+  trustedHandlers?: Array<ethers.Wallet | string>;
+  /**
+   * HMToken address
+   */
+  hmTokenAddr: string;
+  /**
+   * Factory contract address
+   */
+  factoryAddr?: string;
+  /**
+   * Escrow contract address
+   */
+  escrowAddr?: string;
+  /**
+   * Job manifest
+   */
+  manifest?: Manifest;
+  /**
+   * AWS/GCP Access Key ID
+   */
+  storageAccessKeyId?: string;
+  /**
+   * AWS/GCP Secret Access Key
+   */
+  storageSecretAccessKey?: string;
+  /**
+   * AWS/GCP bucket endpoint
+   */
+  storageEndpoint?: string;
+  /**
+   * AWS/GCP public bucket name
+   */
+  storagePublicBucket?: string;
+  /**
+   * AWS/GCP private bucket name
+   */
+  storageBucket?: string;
 };

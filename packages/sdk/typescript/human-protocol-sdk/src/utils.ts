@@ -10,7 +10,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 
 /**
- * Get HMToken contract instance at given address
+ * **Get HMToken contract instance at given address**
  *
  * @param {string} hmTokenAddr HMToken contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -28,7 +28,7 @@ export const getHmToken = async (
 };
 
 /**
- * Deploy EscrowFactory contract
+ * **Deploy EscrowFactory contract**
  *
  * @param {string} hmTokenAddr HMToken address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -46,7 +46,7 @@ export const deployEscrowFactory = async (
 };
 
 /**
- * Get EscrowFactory contract instance at given address
+ * **Get EscrowFactory contract instance at given address**
  *
  * @param {string} factoryAddr EscrowFactory contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -64,7 +64,7 @@ export const getEscrowFactory = async (
 };
 
 /**
- * Get Escrow contract instance at given address
+ * **Get Escrow contract instance at given address**
  *
  * @param {string} escrowAddr Escrow contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -81,6 +81,18 @@ export const getEscrow = async (
   return contract;
 };
 
-export const toFullDigit = (amount: number, decimals = 18): BigNumber => {
+/**
+ * **Get specific amount representation in given decimals**
+ *
+ * Apply given decimals to the specified amount.
+ *
+ * @param {string | number} amount - Amount to convert
+ * @param {number} decimals - Decimal to convert
+ * @returns {BigNumber} Converted amount
+ */
+export const toFullDigit = (
+  amount: number | string,
+  decimals = 18
+): BigNumber => {
   return BigNumber.from(amount).mul(BigNumber.from(10).pow(decimals));
 };
