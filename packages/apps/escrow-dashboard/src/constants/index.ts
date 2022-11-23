@@ -94,8 +94,8 @@ export const FAST_INTERVAL = 10_000;
 export const SLOW_INTERVAL = 60_000;
 
 export const ROLES = [
-  'Operator (Job Launcher)',
   'Validator',
+  'Operator (Job Launcher)',
   'Exchange Oracle',
   'Reputation Oracle',
   'Recording Oracle',

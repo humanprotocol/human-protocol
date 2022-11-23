@@ -1,4 +1,5 @@
 import {
+  Box,
   Checkbox,
   FormControlLabel,
   FormGroup,
@@ -13,7 +14,12 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
-import { ROLES } from 'src/constants';
+import {
+  ChainId,
+  ESCROW_NETWORKS,
+  ROLES,
+  SUPPORTED_CHAIN_IDS,
+} from 'src/constants';
 import useLeaderboardData from 'src/hooks/useLeaderboardData';
 import { shortenAddress } from 'src/utils';
 
@@ -22,14 +28,17 @@ export const LeaderboardView = ({
 }: {
   showAll?: boolean;
 }): React.ReactElement => {
-  const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<number[]>(
+    ROLES.map((_, i) => i + 1)
+  );
+  const [selectedNetworks, setSelectedNetworks] =
+    useState<ChainId[]>(SUPPORTED_CHAIN_IDS);
 
   const stakers = useLeaderboardData();
 
   const displayRows = useMemo(() => {
     if (!stakers) return [];
     if (!showAll) return stakers.slice(0, 5);
-    if (selectedRoles.length === 0) return stakers;
     return stakers.filter((s) => selectedRoles.includes(s.role));
   }, [showAll, selectedRoles, stakers]);
 
@@ -41,26 +50,66 @@ export const LeaderboardView = ({
     }
   };
 
+  const handleNetworkCheckbox = (chainId: ChainId) => (e: any) => {
+    if (e.target.checked) {
+      setSelectedNetworks([...selectedNetworks, chainId]);
+    } else {
+      setSelectedNetworks(selectedNetworks.filter((id) => id !== chainId));
+    }
+  };
+
   return (
     <Grid container>
       {showAll && (
         <Grid item xs={12} sm={3} md={2}>
-          <Typography
-            color="textSecondary"
-            variant="body2"
-            sx={{ pl: 5, py: 1 }}
-          >
-            Role
-          </Typography>
-          <FormGroup>
-            {ROLES.map((role, i) => (
-              <FormControlLabel
-                componentsProps={{ typography: { color: 'textPrimary' } }}
-                control={<Checkbox onChange={handleRoleCheckbox(i + 1)} />}
-                label={role}
-              />
-            ))}
-          </FormGroup>
+          <Box>
+            <Typography
+              color="textSecondary"
+              variant="body2"
+              sx={{ pl: 5, py: 1 }}
+            >
+              Network
+            </Typography>
+            <FormGroup>
+              {SUPPORTED_CHAIN_IDS.map((chainId, i) => (
+                <FormControlLabel
+                  componentsProps={{ typography: { color: 'textPrimary' } }}
+                  control={
+                    <Checkbox
+                      onChange={handleNetworkCheckbox(chainId)}
+                      checked={selectedNetworks.includes(chainId)}
+                    />
+                  }
+                  label={ESCROW_NETWORKS[chainId]?.title}
+                  key={chainId}
+                />
+              ))}
+            </FormGroup>
+          </Box>
+          <Box>
+            <Typography
+              color="textSecondary"
+              variant="body2"
+              sx={{ pl: 5, py: 1 }}
+            >
+              Role
+            </Typography>
+            <FormGroup>
+              {ROLES.map((role, i) => (
+                <FormControlLabel
+                  key={role}
+                  componentsProps={{ typography: { color: 'textPrimary' } }}
+                  control={
+                    <Checkbox
+                      onChange={handleRoleCheckbox(i + 1)}
+                      checked={selectedRoles.includes(i + 1)}
+                    />
+                  }
+                  label={role}
+                />
+              ))}
+            </FormGroup>
+          </Box>
         </Grid>
       )}
       <Grid item xs={12} sm={showAll ? 9 : 12} md={showAll ? 10 : 12}>

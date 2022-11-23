@@ -11,7 +11,8 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
-import ConnectButton from './ConnectButton';
+import ConnectButton from 'src/components/ConnectButton';
+import SearchBox from 'src/components/SearchBox';
 
 type NavLink = {
   title: string;
@@ -75,6 +76,7 @@ const Header: React.FC = (): React.ReactElement => {
                 Scan
               </Typography>
             </Link>
+            <SearchBox />
             <Box
               display="flex"
               alignItems="center"

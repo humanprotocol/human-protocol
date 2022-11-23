@@ -15,6 +15,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
+    "downlevelIteration": true,
     "baseUrl": "."
   },
   "include": ["src/components", "custom.d.ts"]
