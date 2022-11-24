@@ -3,7 +3,7 @@ import PublicKey from "./PublicKey";
 import ImportButton from "./ImportButton";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { useContractRead, useAccount } from "wagmi";
-import KVStore from "../contracts/KVStore.json";
+import KVStore from "@human-protocol/core/abis/KVStore.json";
 import { Result } from "ethers/lib/utils";
 import Grid from "@mui/material/Grid";
 import { showIPFS } from "../services/index";
@@ -23,7 +23,7 @@ export default function YourPublicKey() {
   const [loading, setLoading] = useState<boolean>(false);
   const { refetch } = useContractRead({
     addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore.abi,
+    contractInterface: KVStore,
     functionName: "get",
     args: [address, "public_key"],
     async onSuccess(data: Result) {

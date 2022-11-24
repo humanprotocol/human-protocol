@@ -17,7 +17,7 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@human-protocol/core": "^1.0.8",
+    "@human-protocol/core": "workspace:*",
     "axios": "^1.1.3",
     "minio": "^7.0.32",
     "web3": "^1.8.1"
