@@ -1,6 +1,7 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
+import lowAmountEscrowSvg from 'src/assets/low-amount-escrow.svg';
 import { CardBarChart, CardStackedBarChart } from 'src/components/Cards';
 import { ChainId } from 'src/constants';
 import { useEscrowDataByChainID } from 'src/state/escrow/hooks';
@@ -74,7 +75,7 @@ export const EscrowView = ({ chainId }: { chainId: ChainId }) => {
         </Box>
         <Box
           sx={{
-            background: `url(/images/low-amount-escrow.svg)`,
+            background: `url(${lowAmountEscrowSvg})`,
             width: 470,
             mt: '48px',
             display: { xs: 'none', md: 'block' },

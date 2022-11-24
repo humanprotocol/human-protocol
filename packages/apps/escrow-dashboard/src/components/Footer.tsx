@@ -8,6 +8,8 @@ import TwitterIcon from './Icons/TwitterIcon';
 // import TelegramIcon from './Icons/TelegramIcon';
 import LinkedinIcon from './Icons/LinkedinIcon';
 
+import smallLogoSvg from 'src/assets/small-logo.svg';
+
 const Footer: React.FC = (): React.ReactElement => {
   return (
     <Box
@@ -22,7 +24,7 @@ const Footer: React.FC = (): React.ReactElement => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <img src="/images/small-logo.svg" alt="logo" />
+        <img src={smallLogoSvg} alt="logo" />
         <Link href="https://www.humanprotocol.org/privacy-policy">
           <Typography
             color="text.secondary"

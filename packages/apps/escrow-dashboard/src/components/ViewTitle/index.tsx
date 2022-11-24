@@ -6,7 +6,7 @@ interface ICategoryProps {
   iconUrl: string;
 }
 
-export default function ViewTitle({ title, iconUrl }: ICategoryProps) {
+export function ViewTitle({ title, iconUrl }: ICategoryProps) {
   return (
     <Box display="flex" alignItems="center">
       <Box

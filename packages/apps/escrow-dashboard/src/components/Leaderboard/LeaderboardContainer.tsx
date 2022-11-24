@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-
-import ViewTitle from 'src/components/ViewTitle';
+import userSvg from 'src/assets/user.svg';
+import { ViewTitle } from 'src/components';
 
 import { LeaderboardView } from './LeaderboardView';
 
@@ -15,7 +15,7 @@ export const LeaderboardContainer: React.FC<ILeaderboardContainer> = ({
   return (
     <Box mt={{ xs: 4, md: 8 }} id="leaderboard">
       <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="Leaderboard" iconUrl="/images/user.svg" />
+        <ViewTitle title="Leaderboard" iconUrl={userSvg} />
         {!showAll && (
           <Button
             variant="outlined"

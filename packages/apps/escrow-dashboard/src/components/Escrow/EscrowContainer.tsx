@@ -1,6 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
-import ViewTitle from 'src/components/ViewTitle';
+import networkSvg from 'src/assets/network.svg';
+import { ViewTitle } from 'src/components';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useEscrowDataLoaded, usePollEventsData } from 'src/state/escrow/hooks';
 
@@ -33,7 +34,7 @@ export const EscrowContainer: React.FC<
 
   return (
     <Box id="network">
-      <ViewTitle title="Network" iconUrl="/images/network.svg" />
+      <ViewTitle title="Network" iconUrl={networkSvg} />
       <Tabs
         sx={{
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },

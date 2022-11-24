@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
+import logoSvg from 'src/assets/logo.svg';
 import ConnectButton from 'src/components/ConnectButton';
 import SearchBox from 'src/components/SearchBox';
 
@@ -76,7 +77,7 @@ const Header: React.FC = (): React.ReactElement => {
                 textDecoration: 'none',
               }}
             >
-              <img src="/images/logo.svg" alt="logo" />
+              <img src={logoSvg} alt="logo" />
               <Typography variant="h6" color="primary" ml="10px">
                 Scan
               </Typography>
