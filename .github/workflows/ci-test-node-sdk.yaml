@@ -1,0 +1,16 @@
+name: Node.js SDK check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  node-sdk-test:
+    name: Node.js SDK Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install --global yarn && yarn --ignore-scripts
+        name: Install dependencies
+      - run: yarn sdk:test
+        name: Run Node.js SDK test

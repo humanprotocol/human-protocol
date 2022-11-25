@@ -2,6 +2,6 @@
 
 yarn workspace @human-protocol/core local &
 
-yarn test
+npx jest
 
 trap 'kill $(jobs -p)' EXIT

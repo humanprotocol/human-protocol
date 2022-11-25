@@ -1,0 +1,24 @@
+name: Node.js SDK NPM publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - packages/sdk/typescript/human-protocol-sdk/**
+  workflow_dispatch:
+
+jobs:
+  node-sdk-publish:
+    name: Node.js SDK NPM Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install dependencies
+      - uses: JS-DevTools/npm-publish@v1
+        name: Publish
+        with:
+          package: ./packages/sdk/typescript/human-protocol-sdk/package.json
+          access: public
+          token: ${{ secrets.NPM_TOKEN }}

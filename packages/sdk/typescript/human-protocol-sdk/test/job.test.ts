@@ -44,14 +44,14 @@ describe('Test Job', () => {
       jest.clearAllMocks();
     });
 
-    it('Should initializes the job by deploying escrow factory', async () => {
+    it('Should be able to initializes the job by deploying escrow factory', async () => {
       const initialized = await job.initialize();
       expect(initialized).toBe(true);
 
       expect(await job.contractData?.factory?.address).not.toBeNull();
     });
 
-    it('Should launch the job', async () => {
+    it('Should be able to launch the job', async () => {
       // Fail to launch the job before initialization
       expect(await job.launch()).toBe(false);
 
@@ -61,7 +61,7 @@ describe('Test Job', () => {
       expect(await job.status()).toBe(EscrowStatus.Launched);
     });
 
-    it('Should setup the job', async () => {
+    it('Should be able to setup the job', async () => {
       // Fail to setup the job before launch
       expect(await job.setup()).toBe(false);
 
@@ -71,7 +71,7 @@ describe('Test Job', () => {
       expect(await job.setup()).toBe(true);
     });
 
-    it('Should add trusted handlers', async () => {
+    it('Should be able to add trusted handlers', async () => {
       await job.initialize();
       await job.launch();
 
@@ -88,7 +88,7 @@ describe('Test Job', () => {
       expect(await job.isTrustedHandler(TRUSTED_OPERATOR2_ADDR)).toBe(true);
     });
 
-    it('Should bulk payout workers', async () => {
+    it('Should be able to bulk payout workers', async () => {
       await job.initialize();
       await job.launch();
       await job.setup();
@@ -279,6 +279,14 @@ describe('Test Job', () => {
       expect(JSON.stringify(await job.finalResults())).toBe(
         JSON.stringify(finalResults)
       );
+    });
+
+    it('Should be able to abort the job', async () => {
+      await job.initialize();
+      await job.launch();
+      await job.setup();
+
+      expect(await job.abort()).toBe(true);
     });
   });
 });

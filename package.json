@@ -16,8 +16,10 @@
     "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
-    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint",
+    "sdk:test": "yarn workspace @human-protocol/sdk test",
+    "sdk:lint": "yarn workspace @human-protocol/sdk lint",
+    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test, npm:sdk:test",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint npm:sdk:lint",
     "prepare": "husky install"
   },
   "workspaces": [
