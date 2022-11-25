@@ -1,4 +1,5 @@
 import { BigNumber, Contract, ethers } from 'ethers';
+import winston from 'winston';
 
 import { DEFAULT_BUCKET, DEFAULT_PUBLIC_BUCKET } from './constants';
 import { download, getKeyFromURL, getPublicURL, upload } from './storage';
@@ -30,7 +31,7 @@ import {
   ErrorReputationOracleMissing,
   ErrorStorageAccessDataMissing,
 } from './error';
-import { logger } from './logger';
+import { createLogger } from './logger';
 
 /**
  * @class Human Protocol Job
@@ -55,6 +56,8 @@ export class Job {
    * Cloud storage access data
    */
   storageAccessData?: StorageAccessData;
+
+  private _logger: winston.Logger;
 
   /**
    * Get the total cost of the job
@@ -91,6 +94,7 @@ export class Job {
     storageEndpoint,
     storagePublicBucket,
     storageBucket,
+    logLevel = 'info',
   }: JobArguments) {
     const provider = network
       ? ethers.getDefaultProvider(network, {
@@ -141,6 +145,8 @@ export class Job {
       publicBucket: storagePublicBucket || DEFAULT_BUCKET,
       bucket: storageBucket || DEFAULT_PUBLIC_BUCKET,
     };
+
+    this._logger = createLogger(logLevel);
   }
 
   /**
@@ -168,12 +174,13 @@ export class Job {
         return false;
       }
 
-      logger.info('Deploying escrow factory...');
+      this._logger.info('Deploying escrow factory...');
       this.contractData.factory = await deployEscrowFactory(
         this.contractData.hmTokenAddr,
         this.providerData?.gasPayer
       );
-      logger.info(
+      this.contractData.factoryAddr = this.contractData.factory.address;
+      this._logger.info(
         `Escrow factory is deployed at ${this.contractData.factory.address}.`
       );
     } else {
@@ -184,13 +191,13 @@ export class Job {
         return false;
       }
 
-      logger.info('Getting escrow factory...');
+      this._logger.info('Getting escrow factory...');
       this.contractData.factory = await getEscrowFactory(
         this.contractData?.factoryAddr,
         this.providerData?.gasPayer
       );
 
-      logger.info('Checking if escrow exists in the factory...');
+      this._logger.info('Checking if escrow exists in the factory...');
       const hasEscrow = await this.contractData?.factory.hasEscrow(
         this.contractData?.escrowAddr
       );
@@ -200,12 +207,12 @@ export class Job {
         return false;
       }
 
-      logger.info('Accessing the escrow...');
+      this._logger.info('Accessing the escrow...');
       this.contractData.escrow = await getEscrow(
         this.contractData?.escrowAddr,
         this.providerData?.gasPayer
       );
-      logger.info('Accessed the escrow successfully.');
+      this._logger.info('Accessed the escrow successfully.');
 
       this.manifestData = {
         ...this.manifestData,
@@ -251,7 +258,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Launching escrow...');
+    this._logger.info('Launching escrow...');
 
     const txReceipt = await this.contractData?.factory?.createEscrow(
       this.providerData?.trustedHandlers?.map(
@@ -266,7 +273,7 @@ export class Job {
     );
 
     const escrowAddr = event?.args?.[1];
-    logger.info(`Escrow is deployed at ${escrowAddr}.`);
+    this._logger.info(`Escrow is deployed at ${escrowAddr}.`);
 
     this.contractData.escrowAddr = escrowAddr;
     this.contractData.escrow = await getEscrow(
@@ -274,7 +281,7 @@ export class Job {
       this.providerData?.gasPayer
     );
 
-    logger.info('Uploading manifest...');
+    this._logger.info('Uploading manifest...');
     const uploadResult = await this._upload(this.manifestData.manifest);
     if (!uploadResult) {
       this._logError(new Error('Error uploading manifest'));
@@ -285,7 +292,7 @@ export class Job {
       url: uploadResult.key,
       hash: uploadResult.hash,
     };
-    logger.info(
+    this._logger.info(
       `Uploaded manifest.\n\tKey: ${uploadResult.key}\n\tHash: ${uploadResult.hash}`
     );
 
@@ -323,7 +330,7 @@ export class Job {
     const recordingOracleAddr =
       this.manifestData?.manifest?.recording_oracle_addr || '';
 
-    logger.info(
+    this._logger.info(
       `Transferring ${this.amount} HMT to ${this.contractData.escrow.address}...`
     );
     const transferred = await (senderAddr
@@ -349,9 +356,9 @@ export class Job {
       );
       return false;
     }
-    logger.info('HMT transferred.');
+    this._logger.info('HMT transferred.');
 
-    logger.info('Setting up the escrow...');
+    this._logger.info('Setting up the escrow...');
     const contractSetup = await this._raffleExecute(
       this.contractData.escrow,
       'setup',
@@ -368,7 +375,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Escrow is set up.');
+    this._logger.info('Escrow is set up.');
 
     return (
       (await this.status()) === EscrowStatus.Pending &&
@@ -432,7 +439,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Uploading result...');
+    this._logger.info('Uploading result...');
     const uploadResult = await this._upload(result, encrypt, isPublic);
 
     if (!uploadResult) {
@@ -441,7 +448,7 @@ export class Job {
     }
 
     const { key, hash } = uploadResult;
-    logger.info(`Uploaded result.\n\tKey: ${key}\n\tHash: ${hash}`);
+    this._logger.info(`Uploaded result.\n\tKey: ${key}\n\tHash: ${hash}`);
 
     if (!this.storageAccessData) {
       this._logError(ErrorStorageAccessDataMissing);
@@ -450,7 +457,7 @@ export class Job {
 
     const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
-    logger.info('Bulk paying out the workers...');
+    this._logger.info('Bulk paying out the workers...');
     await this._raffleExecute(
       this.contractData.escrow,
       'bulkPayOut',
@@ -467,7 +474,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Workers are paid out.');
+    this._logger.info('Workers are paid out.');
 
     return bulkPaid;
   }
@@ -483,7 +490,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Aborting the job...');
+    this._logger.info('Aborting the job...');
     const aborted = await this._raffleExecute(
       this.contractData.escrow,
       'abort'
@@ -493,7 +500,7 @@ export class Job {
       this._logError(new Error('Failed to abort the job'));
       return false;
     }
-    logger.info('Job is aborted successfully.');
+    this._logger.info('Job is aborted successfully.');
 
     return aborted;
   }
@@ -509,7 +516,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Cancelling the job...');
+    this._logger.info('Cancelling the job...');
     const cancelled = await this._raffleExecute(
       this.contractData.escrow,
       'cancel'
@@ -519,7 +526,7 @@ export class Job {
       this._logError(new Error('Failed to cancel the job'));
       return false;
     }
-    logger.info('Job is cancelled successfully.');
+    this._logger.info('Job is cancelled successfully.');
 
     return (await this.status()) === EscrowStatus.Cancelled;
   }
@@ -543,7 +550,7 @@ export class Job {
       return false;
     }
 
-    logger.info('Uploading intermediate result...');
+    this._logger.info('Uploading intermediate result...');
     const uploadResult = await this._upload(result);
 
     if (!uploadResult) {
@@ -552,11 +559,11 @@ export class Job {
     }
 
     const { key, hash } = uploadResult;
-    logger.info(
+    this._logger.info(
       `Uploaded intermediate result.\n\tKey: ${key}\n\tHash: ${hash}`
     );
 
-    logger.info('Saving intermediate result on-chain...');
+    this._logger.info('Saving intermediate result on-chain...');
     const resultStored = await this._raffleExecute(
       this.contractData.escrow,
       'storeResults',
@@ -568,7 +575,7 @@ export class Job {
       this._logError(new Error('Failed to store results'));
       return false;
     }
-    logger.info('Intermediate result is stored on-chain successfully.');
+    this._logger.info('Intermediate result is stored on-chain successfully.');
 
     this.manifestData = {
       ...this.manifestData,
@@ -752,18 +759,19 @@ export class Job {
     ...args: any
   ): Promise<boolean> {
     try {
-      if (!this.providerData?.gasPayer) {
-        throw new Error(
-          'Default gas payer is missing, trying with other trusted handlers...'
-        );
+      if (this.providerData?.gasPayer) {
+        await contract
+          .connect(this.providerData.gasPayer)
+          .functions[functionName](...args);
+        return true;
       }
-
-      await contract
-        .connect(this.providerData.gasPayer)
-        .functions[functionName](...args);
-      return true;
+      this._logger.info(
+        'Default gas payer is missing, trying with other trusted handlers...'
+      );
     } catch (err) {
-      this._logError(err as Error);
+      this._logger.info(
+        'Error executing the transaction from default gas payer, trying with other trusted handlers...'
+      );
     }
 
     for (const trustedHandler of this.providerData?.trustedHandlers || []) {
@@ -771,7 +779,9 @@ export class Job {
         await contract.connect(trustedHandler).functions[functionName](...args);
         return true;
       } catch (err) {
-        this._logError(err as Error);
+        new Error(
+          'Error executing the transaction from all of the trusted handlers. Stop continue executing...'
+        );
       }
     }
     return false;
@@ -782,6 +792,6 @@ export class Job {
    * @param {Error} error - Occured error
    */
   private async _logError(error: Error) {
-    logger.error(error.message);
+    this._logger.error(error.message);
   }
 }

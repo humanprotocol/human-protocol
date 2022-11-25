@@ -656,4 +656,8 @@ export type JobArguments = {
    * AWS/GCP private bucket name
    */
   storageBucket?: string;
+  /**
+   * Log level
+   */
+  logLevel?: 'debug' | 'info' | 'warn' | 'error';
 };
