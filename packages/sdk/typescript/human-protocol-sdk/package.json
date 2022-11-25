@@ -1,0 +1,47 @@
+{
+  "name": "@human-protocol/sdk",
+  "description": "Human Protocol SDK",
+  "version": "1.0.0",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && tsc",
+    "prepublish": "npm run build",
+    "test": "./scripts/run-test.sh",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write '**/*.{ts,json}'"
+  },
+  "repository": {
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/sdk/typescript/human-protocol-sdk"
+  },
+  "keywords": [
+    "human-protocol",
+    "sdk",
+    "node",
+    "typescript",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "@human-protocol/core": "workspace:*",
+    "aws-sdk": "^2.1255.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2",
+    "secp256k1": "^4.0.3",
+    "winston": "^3.8.2"
+  }
+}
