@@ -3,9 +3,17 @@
   "description": "Human Protocol SDK",
   "version": "1.0.0",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && tsc",
+    "prepublish": "npm run build",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'"

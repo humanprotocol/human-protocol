@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, ethers } from 'ethers';
+import { BigNumber, Contract, ethers } from 'ethers';
 
 import { DEFAULT_BUCKET, DEFAULT_PUBLIC_BUCKET } from './constants';
 import { download, getKeyFromURL, getPublicURL, upload } from './storage';
@@ -24,6 +24,7 @@ import {
 import {
   ErrorHMTokenMissing,
   ErrorJobAlreadyLaunched,
+  ErrorJobNotInitialized,
   ErrorJobNotLaunched,
   ErrorManifestMissing,
   ErrorReputationOracleMissing,
@@ -34,7 +35,7 @@ import { logger } from './logger';
 /**
  * @class Human Protocol Job
  */
-class Job {
+export class Job {
   /**
    * Ethers provider data
    */
@@ -140,8 +141,86 @@ class Job {
       publicBucket: storagePublicBucket || DEFAULT_BUCKET,
       bucket: storageBucket || DEFAULT_PUBLIC_BUCKET,
     };
+  }
 
-    this._initialize();
+  /**
+   * **Initialize the escrow**
+   *
+   * For existing escrows, access the escrow on-chain, and read manifest.
+   * For new escrows, deploy escrow factory to launch new escrow.
+   *
+   * @returns {Promise<boolean>} - True if escrow is initialized successfully.
+   */
+  async initialize(): Promise<boolean> {
+    if (!this.contractData) {
+      this._logError(new Error('Contract data is missing'));
+      return false;
+    }
+
+    this.contractData.hmToken = await getHmToken(
+      this.contractData.hmTokenAddr,
+      this.providerData?.gasPayer
+    );
+
+    if (!this.contractData?.escrowAddr) {
+      if (!this.manifestData?.manifest) {
+        this._logError(ErrorManifestMissing);
+        return false;
+      }
+
+      logger.info('Deploying escrow factory...');
+      this.contractData.factory = await deployEscrowFactory(
+        this.contractData.hmTokenAddr,
+        this.providerData?.gasPayer
+      );
+      logger.info(
+        `Escrow factory is deployed at ${this.contractData.factory.address}.`
+      );
+    } else {
+      if (!this.contractData?.factoryAddr) {
+        this._logError(
+          new Error('Factory address is required for existing escrow')
+        );
+        return false;
+      }
+
+      logger.info('Getting escrow factory...');
+      this.contractData.factory = await getEscrowFactory(
+        this.contractData?.factoryAddr,
+        this.providerData?.gasPayer
+      );
+
+      logger.info('Checking if escrow exists in the factory...');
+      const hasEscrow = await this.contractData?.factory.hasEscrow(
+        this.contractData?.escrowAddr
+      );
+
+      if (!hasEscrow) {
+        this._logError(new Error('Factory does not contain the escrow'));
+        return false;
+      }
+
+      logger.info('Accessing the escrow...');
+      this.contractData.escrow = await getEscrow(
+        this.contractData?.escrowAddr,
+        this.providerData?.gasPayer
+      );
+      logger.info('Accessed the escrow successfully.');
+
+      this.manifestData = {
+        ...this.manifestData,
+        manifestlink: {
+          url: await this.contractData?.escrow.manifestUrl(),
+          hash: await this.contractData?.escrow.manifestHash(),
+        },
+      };
+
+      this.manifestData.manifest = (await this._download(
+        this.manifestData.manifestlink?.url
+      )) as Manifest;
+    }
+
+    return true;
   }
 
   /**
@@ -157,12 +236,17 @@ class Job {
       return false;
     }
 
+    if (!this.contractData || !this.contractData.factory) {
+      this._logError(ErrorJobNotInitialized);
+      return false;
+    }
+
     if (!this.manifestData || !this.manifestData.manifest) {
       this._logError(ErrorManifestMissing);
       return false;
     }
 
-    if (!this.providerData || this.providerData.reputationOracle) {
+    if (!this.providerData || !this.providerData.reputationOracle) {
       this._logError(ErrorReputationOracleMissing);
       return false;
     }
@@ -239,17 +323,21 @@ class Job {
     const recordingOracleAddr =
       this.manifestData?.manifest?.recording_oracle_addr || '';
 
-    logger.info('Transferring HMT...');
+    logger.info(
+      `Transferring ${this.amount} HMT to ${this.contractData.escrow.address}...`
+    );
     const transferred = await (senderAddr
       ? this._raffleExecute(
-          this.contractData.hmToken.transferFrom,
+          this.contractData.hmToken,
+          'transferFrom',
           senderAddr,
-          this.contractData?.escrow.address,
+          this.contractData.escrow.address,
           toFullDigit(this.amount)
         )
       : this._raffleExecute(
-          this.contractData.hmToken?.transfer,
-          this.contractData?.escrow.address,
+          this.contractData.hmToken,
+          'transfer',
+          this.contractData.escrow.address,
           toFullDigit(this.amount)
         ));
 
@@ -265,11 +353,14 @@ class Job {
 
     logger.info('Setting up the escrow...');
     const contractSetup = await this._raffleExecute(
-      this.contractData?.escrow.setup,
+      this.contractData.escrow,
+      'setup',
       repuationOracleAddr,
       recordingOracleAddr,
       reputationOracleStake,
-      recordingOracleStake
+      recordingOracleStake,
+      this.manifestData?.manifestlink?.url,
+      this.manifestData?.manifestlink?.hash
     );
 
     if (!contractSetup) {
@@ -301,7 +392,8 @@ class Job {
     }
 
     const result = await this._raffleExecute(
-      this.contractData?.escrow.addTrustedHandlers,
+      this.contractData.escrow,
+      'addTrustedHandlers',
       handlers
     );
 
@@ -359,8 +451,9 @@ class Job {
     const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
     logger.info('Bulk paying out the workers...');
-    const bulkPaid = await this._raffleExecute(
-      this.contractData?.escrow.bulkPayOut,
+    await this._raffleExecute(
+      this.contractData.escrow,
+      'bulkPayOut',
       payouts.map(({ address }) => address),
       payouts.map(({ amount }) => toFullDigit(amount)),
       url,
@@ -368,10 +461,12 @@ class Job {
       1
     );
 
+    const bulkPaid = await this.contractData.escrow.bulkPaid();
     if (!bulkPaid) {
       this._logError(new Error('Failed to bulk payout users'));
       return false;
     }
+
     logger.info('Workers are paid out.');
 
     return bulkPaid;
@@ -389,7 +484,10 @@ class Job {
     }
 
     logger.info('Aborting the job...');
-    const aborted = await this._raffleExecute(this.contractData?.escrow.abort);
+    const aborted = await this._raffleExecute(
+      this.contractData.escrow,
+      'abort'
+    );
 
     if (!aborted) {
       this._logError(new Error('Failed to abort the job'));
@@ -413,7 +511,8 @@ class Job {
 
     logger.info('Cancelling the job...');
     const cancelled = await this._raffleExecute(
-      this.contractData?.escrow.cancel
+      this.contractData.escrow,
+      'cancel'
     );
 
     if (!cancelled) {
@@ -459,7 +558,8 @@ class Job {
 
     logger.info('Saving intermediate result on-chain...');
     const resultStored = await this._raffleExecute(
-      this.contractData?.escrow.storeResults,
+      this.contractData.escrow,
+      'storeResults',
       key,
       hash
     );
@@ -490,7 +590,8 @@ class Job {
     }
 
     const completed = await this._raffleExecute(
-      this.contractData?.escrow.complete
+      this.contractData.escrow,
+      'complete'
     );
 
     if (!completed) {
@@ -566,80 +667,18 @@ class Job {
   }
 
   /**
-   * **Initialize the escrow**
+   * **Check if handler is trusted**
    *
-   * For existing escrows, access the escrow on-chain, and read manifest.
-   * For new escrows, deploy escrow factory to launch new escrow.
-   *
-   * @returns {Promise<boolean>} - True if escrow is initialized successfully.
+   * @param {string} handlerAddr Address of the handler
+   * @returns {Promise<boolean>} - True if the handler is trusted
    */
-  private async _initialize(): Promise<boolean> {
-    if (!this.contractData) {
-      this._logError(new Error('Contract data is missing'));
+  async isTrustedHandler(handlerAddr: string): Promise<boolean> {
+    if (!this.contractData?.escrow) {
+      this._logError(ErrorJobNotLaunched);
       return false;
     }
 
-    this.contractData.hmToken = await getHmToken(this.contractData.hmTokenAddr);
-
-    if (!this.contractData?.escrowAddr) {
-      if (!this.manifestData?.manifest) {
-        this._logError(ErrorManifestMissing);
-        return false;
-      }
-
-      logger.info('Deploying escrow factory...');
-      this.contractData.factory = await deployEscrowFactory(
-        this.contractData.hmTokenAddr,
-        this.providerData?.gasPayer
-      );
-      logger.info(
-        `Escrow factory is deployed at ${this.contractData.factory.address}.`
-      );
-    } else {
-      if (!this.contractData?.factoryAddr) {
-        this._logError(
-          new Error('Factory address is required for existing escrow')
-        );
-        return false;
-      }
-
-      logger.info('Getting escrow factory...');
-      this.contractData.factory = await getEscrowFactory(
-        this.contractData?.factoryAddr,
-        this.providerData?.gasPayer
-      );
-
-      logger.info('Checking if escrow exists in the factory...');
-      const hasEscrow = await this.contractData?.factory.hasEscrow(
-        this.contractData?.escrowAddr
-      );
-
-      if (!hasEscrow) {
-        this._logError(new Error('Factory does not contain the escrow'));
-        return false;
-      }
-
-      logger.info('Accessing the escrow...');
-      this.contractData.escrow = await getEscrow(
-        this.contractData?.escrowAddr,
-        this.providerData?.gasPayer
-      );
-      logger.info('Accessed the escrow successfully.');
-
-      this.manifestData = {
-        ...this.manifestData,
-        manifestlink: {
-          url: await this.contractData?.escrow.manifestUrl(),
-          hash: await this.contractData?.escrow.manifestHash(),
-        },
-      };
-
-      this.manifestData.manifest = (await this._download(
-        this.manifestData.manifestlink?.url
-      )) as Manifest;
-    }
-
-    return true;
+    return await this.contractData?.escrow?.areTrustedHandlers(handlerAddr);
   }
 
   /**
@@ -707,13 +746,21 @@ class Job {
    * @returns {Promise<boolean>} - True if one of handler succeed to execute the on-chain call
    */
   private async _raffleExecute(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    txn: (...args: any) => Promise<ContractTransaction>,
+    contract: Contract,
+    functionName: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any
   ): Promise<boolean> {
     try {
-      await txn(...args);
+      if (!this.providerData?.gasPayer) {
+        throw new Error(
+          'Default gas payer is missing, trying with other trusted handlers...'
+        );
+      }
+
+      await contract
+        .connect(this.providerData.gasPayer)
+        .functions[functionName](...args);
       return true;
     } catch (err) {
       this._logError(err as Error);
@@ -721,7 +768,7 @@ class Job {
 
     for (const trustedHandler of this.providerData?.trustedHandlers || []) {
       try {
-        await txn(...args, { from: trustedHandler });
+        await contract.connect(trustedHandler).functions[functionName](...args);
         return true;
       } catch (err) {
         this._logError(err as Error);
@@ -738,5 +785,3 @@ class Job {
     logger.error(error.message);
   }
 }
-
-export default Job;

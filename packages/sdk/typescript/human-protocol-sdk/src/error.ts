@@ -1,4 +1,9 @@
 /**
+ * @constant {Error} - The job is not initialized yet.
+ */
+export const ErrorJobNotInitialized = new Error('Job is not initialized');
+
+/**
  * @constant {Error} - The job is not launched yet.
  */
 export const ErrorJobNotLaunched = new Error('Job is not launched');
