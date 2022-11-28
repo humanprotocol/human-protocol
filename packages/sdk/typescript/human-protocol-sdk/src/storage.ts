@@ -128,7 +128,7 @@ export const upload = async (
     Body: content,
   };
 
-  await s3.putObject(params);
+  await s3.putObject(params).promise();
 
   return { key, hash };
 };

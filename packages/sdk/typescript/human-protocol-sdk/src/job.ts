@@ -142,8 +142,8 @@ export class Job {
       accessKeyId: storageAccessKeyId || '',
       secretAccessKey: storageSecretAccessKey || '',
       endpoint: storageEndpoint,
-      publicBucket: storagePublicBucket || DEFAULT_BUCKET,
-      bucket: storageBucket || DEFAULT_PUBLIC_BUCKET,
+      publicBucket: storagePublicBucket || DEFAULT_PUBLIC_BUCKET,
+      bucket: storageBucket || DEFAULT_BUCKET,
     };
 
     this._logger = createLogger(logLevel);
@@ -204,6 +204,8 @@ export class Job {
 
       if (!hasEscrow) {
         this._logError(new Error('Factory does not contain the escrow'));
+        this.contractData.factory = undefined;
+
         return false;
       }
 
@@ -214,17 +216,34 @@ export class Job {
       );
       this._logger.info('Accessed the escrow successfully.');
 
-      this.manifestData = {
-        ...this.manifestData,
-        manifestlink: {
-          url: await this.contractData?.escrow.manifestUrl(),
-          hash: await this.contractData?.escrow.manifestHash(),
-        },
-      };
+      const manifestUrl = await this.contractData?.escrow.manifestUrl();
+      const manifestHash = await this.contractData?.escrow.manifestHash();
 
-      this.manifestData.manifest = (await this._download(
-        this.manifestData.manifestlink?.url
-      )) as Manifest;
+      if (
+        (!manifestUrl.length || !manifestHash.length) &&
+        !this.manifestData?.manifest
+      ) {
+        this._logError(ErrorManifestMissing);
+
+        this.contractData.factory = undefined;
+        this.contractData.escrow = undefined;
+
+        return false;
+      }
+
+      if (manifestUrl.length && manifestHash.length) {
+        this.manifestData = {
+          ...this.manifestData,
+          manifestlink: {
+            url: manifestUrl,
+            hash: manifestHash,
+          },
+        };
+
+        this.manifestData.manifest = (await this._download(
+          manifestUrl
+        )) as Manifest;
+      }
     }
 
     return true;
@@ -238,18 +257,13 @@ export class Job {
    * @returns {Promise<boolean>} - True if the escrow is launched successfully.
    */
   async launch(): Promise<boolean> {
-    if (!this.contractData || this.contractData.escrow) {
-      this._logError(ErrorJobAlreadyLaunched);
-      return false;
-    }
-
     if (!this.contractData || !this.contractData.factory) {
       this._logError(ErrorJobNotInitialized);
       return false;
     }
 
-    if (!this.manifestData || !this.manifestData.manifest) {
-      this._logError(ErrorManifestMissing);
+    if (!this.contractData || this.contractData.escrow) {
+      this._logError(ErrorJobAlreadyLaunched);
       return false;
     }
 
@@ -281,21 +295,6 @@ export class Job {
       this.providerData?.gasPayer
     );
 
-    this._logger.info('Uploading manifest...');
-    const uploadResult = await this._upload(this.manifestData.manifest);
-    if (!uploadResult) {
-      this._logError(new Error('Error uploading manifest'));
-      return false;
-    }
-
-    this.manifestData.manifestlink = {
-      url: uploadResult.key,
-      hash: uploadResult.hash,
-    };
-    this._logger.info(
-      `Uploaded manifest.\n\tKey: ${uploadResult.key}\n\tHash: ${uploadResult.hash}`
-    );
-
     return (
       (await this.status()) == EscrowStatus.Launched &&
       (await this.balance())?.toNumber() === 0
@@ -313,6 +312,16 @@ export class Job {
   async setup(senderAddr?: string): Promise<boolean> {
     if (!this.contractData?.escrow) {
       this._logError(ErrorJobNotLaunched);
+      return false;
+    }
+
+    if (!this.manifestData || !this.manifestData.manifest) {
+      this._logError(ErrorManifestMissing);
+      return false;
+    }
+
+    if (this.manifestData.manifestlink) {
+      this._logError(new Error('Job is already setup'));
       return false;
     }
 
@@ -357,6 +366,21 @@ export class Job {
       return false;
     }
     this._logger.info('HMT transferred.');
+
+    this._logger.info('Uploading manifest...');
+    const uploadResult = await this._upload(this.manifestData.manifest);
+    if (!uploadResult) {
+      this._logError(new Error('Error uploading manifest'));
+      return false;
+    }
+
+    this.manifestData.manifestlink = {
+      url: uploadResult.key,
+      hash: uploadResult.hash,
+    };
+    this._logger.info(
+      `Uploaded manifest.\n\tKey: ${uploadResult.key}\n\tHash: ${uploadResult.hash}`
+    );
 
     this._logger.info('Setting up the escrow...');
     const contractSetup = await this._raffleExecute(
