@@ -12,7 +12,9 @@ export const PageWrapper: React.FC<PageWrapperProps> = ({
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 } }}>
       <Box
         sx={{
+          minHeight: 'calc(100vh - 180px)',
           background: '#f6f7fe',
+          boxSizing: 'border-box',
           borderRadius: {
             xs: '16px',
             sm: '16px',

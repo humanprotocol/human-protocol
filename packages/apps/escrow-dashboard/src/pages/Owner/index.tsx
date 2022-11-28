@@ -16,7 +16,7 @@ import { CardContainer } from 'src/components/Cards/Container';
 import { CopyAddressButton } from 'src/components/CopyAddressButton';
 import { ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 
-export const EscrowDetailPage: React.FC = (): React.ReactElement => {
+export const OwnerPage: React.FC = (): React.ReactElement => {
   return (
     <PageWrapper>
       <Box display="flex" alignItems="center">
@@ -51,21 +51,11 @@ export const EscrowDetailPage: React.FC = (): React.ReactElement => {
               fontWeight={600}
               sx={{ mb: 2 }}
             >
-              Escrow details
+              Overview
             </Typography>
             <Stack spacing={2}>
-              <CardTextRow
-                label="Manifest URL"
-                value="https://job-laucher.ai"
-              />
-              <CardTextRow
-                label="Manifest Hash"
-                value="0xe22647d4ae522f7545e7b4dda8c967"
-              />
-              <CardTextRow label="Balance of" value="2,000 HMT" />
-              <CardTextRow label="Paid Out HMT" value="390 HMT" />
-              <CardTextRow label="Amount of Jobs" value="200" />
-              <CardTextRow label="Workers assigned" value="10" />
+              <CardTextRow label="Role" value="Owner" />
+              <CardTextRow label="Jobs Launched" value="15,064" />
             </Stack>
           </CardContainer>
         </Grid>
@@ -77,15 +67,10 @@ export const EscrowDetailPage: React.FC = (): React.ReactElement => {
               fontWeight={600}
               sx={{ mb: 2 }}
             >
-              Stake details
+              Stake info
             </Typography>
             <Stack spacing={2}>
-              <CardTextRow
-                label="Staker"
-                value="0xe22647d4ae522f7545e7b4dda8c967"
-              />
-              <CardTextRow label="Staked HMT" value="2,000 HMT" />
-              <CardTextRow label="Slashed HMT" value="0 HMT" />
+              <CardTextRow label="Toekns staked" value="89,000 HMT" />
             </Stack>
           </CardContainer>
         </Grid>

@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Main, Leaderboard, Leader, Escrow } from 'src/pages';
+import { Main, Leaderboard, Leader, Escrow, Profile, Owner } from 'src/pages';
 
 interface Route {
   key: string;
@@ -32,5 +32,17 @@ export const routes: Array<Route> = [
     title: 'Escrow',
     path: '/escrow/:address',
     component: Escrow,
+  },
+  {
+    key: 'profile-route',
+    title: 'Profile',
+    path: '/profile',
+    component: Profile,
+  },
+  {
+    key: 'owner-route',
+    title: 'owner',
+    path: '/owner',
+    component: Owner,
   },
 ];

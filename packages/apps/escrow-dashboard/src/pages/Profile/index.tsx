@@ -56,7 +56,7 @@ const DATA = [
   },
 ];
 
-export const LeaderDetailPage: React.FC = (): React.ReactElement => {
+export const ProfilePage: React.FC = (): React.ReactElement => {
   return (
     <PageWrapper>
       <Box display="flex" alignItems="center">
@@ -91,34 +91,60 @@ export const LeaderDetailPage: React.FC = (): React.ReactElement => {
               fontWeight={600}
               sx={{ mb: 2 }}
             >
-              Overview
+              Escrow details
             </Typography>
             <Stack spacing={2}>
-              <CardTextRow label="Role" value="Operator (Job Launcher)" />
-              <CardTextRow label="Network" value="Polygon" />
-              <CardTextRow label="World Rank" value="#1003" />
-              <CardTextRow label="Reputation" value="3403" />
-              <CardTextRow label="Jobs Launched" value="15" />
+              <CardTextRow
+                label="Manifest URL"
+                value="https://job-laucher.ai"
+              />
+              <CardTextRow
+                label="Manifest Hash"
+                value="0xe22647d4ae522f7545e7b4dda8c967"
+              />
+              <CardTextRow label="Balance of" value="2,000 HMT" />
+              <CardTextRow label="Paid Out HMT" value="390 HMT" />
+              <CardTextRow label="Amount of Jobs" value="200" />
+              <CardTextRow label="Workers assigned" value="10" />
             </Stack>
           </CardContainer>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <CardContainer densed>
-            <Typography
-              variant="body2"
-              color="primary"
-              fontWeight={600}
-              sx={{ mb: 2 }}
-            >
-              Stake info
-            </Typography>
-            <Stack spacing={2}>
-              <CardTextRow label="Tokens staked" value="220,000 HMT" />
-              <CardTextRow label="Tokens allocated" value="17,000 HMT" />
-              <CardTextRow label="Tokens locked" value="3,000 HMT" />
-              <CardTextRow label="Tokens locked until" value="02/02/2023" />
-            </Stack>
-          </CardContainer>
+          <Stack spacing={4}>
+            <CardContainer densed>
+              <Typography
+                variant="body2"
+                color="primary"
+                fontWeight={600}
+                sx={{ mb: 2 }}
+              >
+                Overview
+              </Typography>
+              <Stack spacing={2}>
+                <CardTextRow label="Role" value="Operator (Job Launcher)" />
+                <CardTextRow label="World Rank" value="#1003" />
+                <CardTextRow label="Reputation" value="3403" />
+                <CardTextRow label="Jobs Launched" value="15" />
+              </Stack>
+            </CardContainer>
+            <CardContainer densed>
+              <Typography
+                variant="body2"
+                color="primary"
+                fontWeight={600}
+                sx={{ mb: 2 }}
+              >
+                Stake info
+              </Typography>
+              <Stack spacing={2}>
+                <CardTextRow
+                  label="Tokens locked for withdrawal"
+                  value="300 HMT"
+                />
+                <CardTextRow label="Tokens locked until" value="02/02/2023" />
+              </Stack>
+            </CardContainer>
+          </Stack>
         </Grid>
       </Grid>
       <Box mt={4}>
