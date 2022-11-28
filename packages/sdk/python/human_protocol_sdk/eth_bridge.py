@@ -13,8 +13,6 @@ from web3.providers.auto import load_provider_from_uri
 from web3.providers.eth_tester import EthereumTesterProvider
 from web3.types import TxReceipt
 
-from human_protocol_sdk.kvstore_abi import abi as kvstore_abi
-
 AttributeDict = Dict[str, Any]
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
@@ -416,8 +414,11 @@ def get_pub_key_from_addr(wallet_addr: str, hmt_server_addr: str = None) -> byte
         raise ValueError("environment variable GAS_PAYER required")
 
     w3 = get_w3(hmt_server_addr)
+    contract_interface = get_contract_interface(
+        "{}/KVStore.sol/KVStore.json".format(ABIS_FOLDER)
+    )
 
-    kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=kvstore_abi)
+    kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=contract_interface["abi"])
     addr_pub_key = kvstore.functions.get(GAS_PAYER, "hmt_pub_key").call(
         {"from": GAS_PAYER}
     )
@@ -463,7 +464,11 @@ def set_pub_key_at_addr(
         raise ValueError("environment variable GAS_PAYER AND GAS_PAYER_PRIV required")
 
     w3 = get_w3(hmt_server_addr)
-    kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=kvstore_abi)
+    contract_interface = get_contract_interface(
+        "{}/KVStore.sol/KVStore.json".format(ABIS_FOLDER)
+    )
+
+    kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=contract_interface["abi"])
 
     txn_func = kvstore.functions.set
     func_args = ["hmt_pub_key", pub_key]
