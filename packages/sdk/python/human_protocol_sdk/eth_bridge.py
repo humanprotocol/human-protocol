@@ -26,7 +26,7 @@ ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contract
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
-    os.getenv("KVSTORE_CONTRACT", "0xbcF8274FAb0cbeD0099B2cAFe862035a6217Bf44")
+    os.getenv("KVSTORE_CONTRACT", "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0")
 )
 WEB3_POLL_LATENCY = float(os.getenv("WEB3_POLL_LATENCY", 5))
 WEB3_TIMEOUT = int(os.getenv("WEB3_TIMEOUT", 240))
@@ -213,6 +213,8 @@ def get_hmtoken(hmtoken_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contr
 def get_escrow(escrow_addr: str, hmt_server_addr: str = None) -> Contract:
     """Retrieve the Escrow contract from a given address.
 
+    >>> from human_protocol_sdk.job import Job
+    >>> from test.human_protocol_sdk.utils import manifest
     >>> credentials = {
     ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -251,6 +253,8 @@ def get_escrow(escrow_addr: str, hmt_server_addr: str = None) -> Contract:
 def get_factory(factory_addr: str, hmt_server_addr: str = None) -> Contract:
     """Retrieve the EscrowFactory contract from a given address.
 
+    >>> from human_protocol_sdk.job import Job
+    >>> from test.human_protocol_sdk.utils import manifest
     >>> credentials = {
     ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"

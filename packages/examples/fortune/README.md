@@ -1,53 +1,53 @@
 # Fortune
 
-  
+
 
 Welcome to Fortune, an example HUMAN application that demonstrates how to create and fulfill job requests using the HUMAN protocol.
-  
+
 
 ## How it works
 
-  
+
 
 In this specific usecase a job requester is requesting a fortune prediction from a group of workers (Fortune Tellers). Each Fortune Teller will provide their answers, which will then be verified and settled by a group of Oracles.
 
-  
+
 
 ## High Level Overview
 
-  
+
 
 At a very high level this project consists of 4 main components (smart contracts):
 
-  
+
 
 **Launcher (Job Launcher)** - The Job Launcher is factory which creates new escrow contracts. A job requester can then add Job details (as a mainfest) and fund the escrow.
 
-  
+
 
 **Exchange Oracle** - An Ethereum Oracle that interacts with people or bots to fufill the job.
 
-  
+
 
 **Recording Oracle** - An Ethereum Oracle which records the task output and who does what. In this case, the Recording Oracle will receive responses from the Exchange Oracle.
 
-  
+
 
 **Reptutation Oracle** - An Ethereum Oracle which pays workers for the jobs performed, based on their reputation within the oracle network. In this case, the Reputation Oracle collects all the responses from the Recording Oracle and pays out the Worker and the Recording Oracle.
 
-  
+
 
 ### User Persona's in this demo
 
-  
+
 
 **Job Creator/Requester** - The entity/person who wants some work performed.
 
-  
+
 
 **Worker (Fortune Teller)** - The entity/person who performs the actual work.
 
-  
+
 
 ## Process Flow
 
@@ -57,11 +57,11 @@ At a very high level this project consists of 4 main components (smart contracts
 
 2. Once the job is registered on-chain the Exchange Oracle picks up the job and routes it to workers.
 
-  
+
 
 ![Diagram for steps 1 and 2](assets/fortuneflow1.jpg)
 
-  
+
 
 ### Job Fulfillment and Answer Quality
 
@@ -69,19 +69,19 @@ At a very high level this project consists of 4 main components (smart contracts
 
 4. The Exchange Oracle passes the responses to the Recording Oracle, which then checks the quality of answers. If the quality is acceptable the answers are then routed to the Reputation Oracle.
 
-  
+
 
 ![Diagram for steps 3 and 4](assets/fortuneflow2.jpg)
 
-  
+
 
 ### Settlement
 
 5. The Reputation Oracle calculates a threshold based on certain job request parameters. If the answers pass the threshold it pays workers and updates the reputation scores for each worker.
-  
+
 
 ![Diagram for steps 4 and 5](assets/fortuneflow3.jpg)
-  
+
 
 # Usage Instructions
 
@@ -107,8 +107,8 @@ To configure Metamask for the deployed playground example:
 
 #### Job Requester
 
-`28e516f1e2f99e96a48a23cea1f94ee5f073403a1c68e818263f0eb898f1c8e5`
-  
+`ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`
+
 #### Worker 1
 
 `9e531b326f8c09437ab2af7a768e5e25422b43075169714f1790b6b036f73b00`
@@ -119,11 +119,11 @@ To configure Metamask for the deployed playground example:
 
 (In case you are wondering where these private keys are from, they correspond to the standard accounts from a Ganache setup and are pre-funded with testnet HMT).
 
-  
+
 
 3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the following Token Contract Address for the HMT Token: `0x444c45937D2202118a0FF9c48d491cef527b59dF` Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
 
-  
+
 
 ### Creating a Job (Deployed Playground)
 
@@ -170,8 +170,8 @@ yarn && yarn local
 At this point we have a Local Testnet running with our contracts deployed to a Hardhat testnet node. The next step is to configure Metamask to work with our Local Testnet.
 
 Go to this section to see [local network usage.](#local-network-usage)
-  
-# Local network usage 
+
+# Local network usage
 
 ### Metamask Configuration for Local Testnet
 To configure Metamask for the Local Testnet example:
@@ -194,11 +194,11 @@ To configure Metamask for the Local Testnet example:
 (In case you are wondering where these private keys are from, they correspond to the standard accounts from a Ganache setup and are pre-funded with testnet HMT).
 
 3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the following Token Contract Address for the HMT Token:
-	- **HMT**: `0x5FbDB2315678afecb367f032d93F642f64180aa3` 
+	- **HMT**: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
 
    Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
 
-  
+
 
 ### Creating a Job (Local Testnet)
 1. In Metamask, switch to the Job Requester account that you imported above.
@@ -211,7 +211,7 @@ To configure Metamask for the Local Testnet example:
 8. To complete the job creation process we must add the manifest URL. This URL points to the manifest.json file, which contains job specific data. For this example the data has already been created for you and stored in a local datastore (minio) which can be accessed at http://localhost:9001 (To login you must use the default username: 'dev' and password 'devdevdev')
 9. Once you are logged into the minio dashboard, click on the 'Manage' button, you will be taken to a Summary page for the manifest bucket. From this screen change the 'Access Policy' to 'public' and click 'Set' to confirm changes. We can now exit the minio dashboard and return to the Job creation process.
 10. Navigate back to the job launcher, enter the manifest URL into the form and hit 'Setup Escrow':
-	- **Manifest**: http://localhost:9000/manifests/manifest.json 
+	- **Manifest**: http://localhost:9000/manifests/manifest.json
 
 The job creation is now complete!
 
@@ -242,7 +242,7 @@ yarn && yarn test:e2e
 ```
 yarn && yarn test
 ```
-  
+
 
 # Troubleshooting
 
