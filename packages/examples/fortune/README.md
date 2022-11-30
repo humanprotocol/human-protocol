@@ -163,7 +163,11 @@ You should see account balance for Worker 1 and 2 has increased by the relevant 
 
 ## Running Locally with Node
 
-From the root folder of the Fortune run:
+First we must create and environment variables file.  To do so execute the command below in the root folder of Fortune:
+```
+cp .env.example .env
+```
+Then execute the following command:
 ```
 yarn && yarn local
 ```
