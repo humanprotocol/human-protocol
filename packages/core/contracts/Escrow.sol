@@ -2,8 +2,10 @@
 
 pragma solidity >=0.6.2;
 
-import './HMTokenInterface.sol';
-import './SafeMath.sol';
+import './interfaces/HMTokenInterface.sol';
+import './interfaces/IStaking.sol';
+import './interfaces/IRewardPool.sol';
+import './utils/SafeMath.sol';
 
 contract Escrow {
     using SafeMath for uint256;
@@ -25,10 +27,11 @@ contract Escrow {
     address public recordingOracle;
     address public launcher;
     address payable public canceler;
+    address public staking;
 
     uint256 public reputationOracleStake;
     uint256 public recordingOracleStake;
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10**18);
+    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     address public eip20;
@@ -48,6 +51,7 @@ contract Escrow {
 
     constructor(
         address _eip20,
+        address _staking,
         address payable _canceler,
         uint256 _duration,
         address[] memory _handlers
@@ -56,6 +60,7 @@ contract Escrow {
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
         launcher = msg.sender;
+        staking = _staking;
         canceler = _canceler;
         areTrustedHandlers[_canceler] = true;
         areTrustedHandlers[msg.sender] = true;
@@ -143,13 +148,17 @@ contract Escrow {
         );
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
+
+        // Distribute Reward
+        IRewardPool(IStaking(staking).rewardPool()).distributeReward(
+            address(this)
+        );
     }
 
-    function storeResults(string memory _url, string memory _hash)
-        public
-        trusted
-        notExpired
-    {
+    function storeResults(
+        string memory _url,
+        string memory _hash
+    ) public trusted notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
@@ -218,10 +227,9 @@ contract Escrow {
         return bulkPaid;
     }
 
-    function finalizePayouts(uint256[] memory _amounts)
-        internal
-        returns (uint256, uint256)
-    {
+    function finalizePayouts(
+        uint256[] memory _amounts
+    ) internal returns (uint256, uint256) {
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
@@ -243,6 +251,10 @@ contract Escrow {
             finalAmounts.push(amount);
         }
         return (reputationOracleFee, recordingOracleFee);
+    }
+
+    function getStatus() public view returns (EscrowStatuses) {
+        return status;
     }
 
     modifier trusted() {
