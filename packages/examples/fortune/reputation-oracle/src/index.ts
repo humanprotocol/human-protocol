@@ -33,34 +33,34 @@ app.post('/job/results', async (req, res) => {
         .send({ message: 'Fortunes are not specified or empty' });
     }
 
-    // if (!web3.utils.isAddress(escrowAddress)) {
-    //   return res
-    //     .status(400)
-    //     .send({ message: 'Escrow address is empty or invalid' });
-    // }
+    if (!web3.utils.isAddress(escrowAddress)) {
+      return res
+        .status(400)
+        .send({ message: 'Escrow address is empty or invalid' });
+    }
 
-    // const balance = await getBalance(web3, escrowAddress);
+    const balance = await getBalance(web3, escrowAddress);
 
-    // const workerAddresses = filterAddressesToReward(web3, fortunes);
-    // const rewards = calculateRewardForWorker(balance, workerAddresses);
+    const workerAddresses = filterAddressesToReward(web3, fortunes);
+    const rewards = calculateRewardForWorker(balance, workerAddresses);
     const resultsUrl = await uploadResults(
       fortunes.map(({ fortune }) => fortune),
       escrowAddress
     );
     // TODO calculate the URL hash(?)
-    // const resultHash = resultsUrl;
-    // await bulkPayOut(
-    //   web3,
-    //   escrowAddress,
-    //   workerAddresses,
-    //   rewards,
-    //   resultsUrl,
-    //   resultHash
-    // );
+    const resultHash = resultsUrl;
+    await bulkPayOut(
+      web3,
+      escrowAddress,
+      workerAddresses,
+      rewards,
+      resultsUrl,
+      resultHash
+    );
 
-    // if (!(await bulkPaid(web3, escrowAddress))) {
-    //   return res.status(400).send({ message: "Payout couldn't be done" });
-    // }
+    if (!(await bulkPaid(web3, escrowAddress))) {
+      return res.status(400).send({ message: "Payout couldn't be done" });
+    }
 
     return res.status(200).send({ message: 'Escrow has been completed' });
   } catch (err) {
