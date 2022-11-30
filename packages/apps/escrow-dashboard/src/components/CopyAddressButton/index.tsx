@@ -15,6 +15,7 @@ export function CopyAddressButton({
     <Box
       display="flex"
       alignItems="center"
+      justifyContent="space-between"
       sx={{
         background: '#fff',
         boxShadow:
@@ -29,7 +30,7 @@ export function CopyAddressButton({
         color="primary"
         variant="body2"
         fontWeight={600}
-        sx={{ mr: 3 }}
+        sx={{ maxWidth: '376px', overflow: 'hidden', textOverflow: 'ellipsis' }}
       >
         {address}
       </Typography>

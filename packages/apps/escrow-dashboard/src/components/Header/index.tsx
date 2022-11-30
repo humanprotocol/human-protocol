@@ -1,19 +1,22 @@
-import * as React from 'react';
+import {
+  AppBar,
+  Box,
+  Drawer,
+  IconButton,
+  Link,
+  Stack,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Link from '@mui/material/Link';
-import { useTheme } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Toolbar from '@mui/material/Toolbar';
-import useMediaQuery from '@mui/material/useMediaQuery';
-
+import SearchIcon from '@mui/icons-material/Search';
+import React, { useState } from 'react';
 import logoSvg from 'src/assets/logo.svg';
 import ConnectButton from 'src/components/ConnectButton';
 import SearchBox from 'src/components/SearchBox';
+import SocialIcons from 'src/components/SocialIcons';
 
 type NavLink = {
   title: string;
@@ -32,17 +35,35 @@ const NAV_LINKS: NavLink[] = [
 ];
 
 const Header: React.FC = (): React.ReactElement => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isDownLg = useMediaQuery(theme.breakpoints.down('lg'));
+  const isDownMd = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const toggleDrawer = () => setDrawerOpen(!drawerOpen);
+
+  const toggleSearchBox = () => setSearchOpen(!searchOpen);
+
+  const renderNavLinks = (orientation = 'horizontal') => (
+    <Stack
+      direction={orientation === 'horizontal' ? 'row' : 'column'}
+      spacing={4}
+    >
+      {NAV_LINKS.map((nav) => (
+        <Link
+          key={nav.title}
+          href={nav.href}
+          target={nav.external ? '_blank' : '_self'}
+          sx={{ textDecoration: 'none' }}
+        >
+          <Typography variant="body2" fontWeight={600}>
+            {nav.title}
+          </Typography>
+        </Link>
+      ))}
+    </Stack>
+  );
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -82,65 +103,64 @@ const Header: React.FC = (): React.ReactElement => {
                 Scan
               </Typography>
             </Link>
-            <SearchBox />
-            <Box
-              display="flex"
-              alignItems="center"
-              ml={isMobile ? 'auto' : 0}
-              gap={4}
-            >
-              {!isMobile &&
-                NAV_LINKS.map((nav) => (
-                  <Link
-                    key={nav.title}
-                    href={nav.href}
-                    target={nav.external ? '_blank' : '_self'}
-                    sx={{ textDecoration: 'none' }}
-                  >
-                    <Typography variant="body2" fontWeight={600}>
-                      {nav.title}
-                    </Typography>
-                  </Link>
-                ))}
-              <ConnectButton />
-            </Box>
-            {isMobile && (
-              <>
+            {!isDownLg && <SearchBox />}
+            {!isDownMd && (
+              <Box display="flex" alignItems="center" gap={4}>
+                {renderNavLinks()}
+                <ConnectButton />
+              </Box>
+            )}
+            {isDownMd && (
+              <Box>
                 <IconButton
                   color="primary"
                   sx={{ ml: 1 }}
-                  onClick={handleClick}
+                  onClick={toggleSearchBox}
+                >
+                  <SearchIcon />
+                </IconButton>
+                <IconButton
+                  color="primary"
+                  sx={{ ml: 1 }}
+                  onClick={toggleDrawer}
                 >
                   <MenuIcon />
                 </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                  MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                  }}
-                >
-                  {NAV_LINKS.map((nav) => (
-                    <MenuItem key={nav.title} onClick={handleClose}>
-                      <Link
-                        key={nav.title}
-                        href={nav.href}
-                        target={nav.external ? '_blank' : '_self'}
-                        sx={{ textDecoration: 'none' }}
-                      >
-                        <Typography variant="body2" fontWeight={600}>
-                          {nav.title}
-                        </Typography>
-                      </Link>
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </>
+              </Box>
             )}
           </Box>
         </Toolbar>
       </AppBar>
+
+      <Drawer
+        anchor="top"
+        open={drawerOpen}
+        onClose={toggleDrawer}
+        SlideProps={{ appear: false }}
+        PaperProps={{ sx: { top: '96px' } }}
+        sx={{
+          top: '96px',
+          '& .MuiBackdrop-root': {
+            top: '96px',
+          },
+        }}
+      >
+        <Box display="flex">
+          <Box flex="1" sx={{ p: 6 }}>
+            {renderNavLinks('vertical')}
+            <Box mt={8}>
+              <ConnectButton />
+            </Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            sx={{ px: 2, background: 'rgba(246, 247, 254, 0.7);' }}
+          >
+            <SocialIcons direction="column" />
+          </Box>
+        </Box>
+      </Drawer>
     </Box>
   );
 };

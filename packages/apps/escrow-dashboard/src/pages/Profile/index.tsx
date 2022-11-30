@@ -1,11 +1,7 @@
 import {
   Box,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -14,6 +10,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import * as React from 'react';
 import addressSvg from 'src/assets/address.svg';
@@ -21,7 +19,7 @@ import { PageWrapper, ViewTitle } from 'src/components';
 import { CardTextRow } from 'src/components/Cards';
 import { CardContainer } from 'src/components/Cards/Container';
 import { CopyAddressButton } from 'src/components/CopyAddressButton';
-import { ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { NetworkSelect } from 'src/components/NetworkSelect';
 
 const DATA = [
   {
@@ -57,33 +55,30 @@ const DATA = [
 ];
 
 export const ProfilePage: React.FC = (): React.ReactElement => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+
   return (
     <PageWrapper>
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" flexWrap="wrap">
         <ViewTitle title="Address" iconUrl={addressSvg} />
-        <CopyAddressButton
-          address="0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0"
-          ml={6}
-        />
+        {!isMobile && (
+          <CopyAddressButton
+            address="0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0"
+            ml={6}
+          />
+        )}
         <Box ml="auto">
-          <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
-            <InputLabel id="newtork-select-label">Network</InputLabel>
-            <Select
-              labelId="network-select-label"
-              id="network-select"
-              label="Network"
-            >
-              {SUPPORTED_CHAIN_IDS.map((chainId) => (
-                <MenuItem value={chainId} key={chainId}>
-                  {ESCROW_NETWORKS[chainId]?.title}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <NetworkSelect />
         </Box>
       </Box>
-      <Grid container spacing={4} mt={4}>
-        <Grid item xs={12} sm={6}>
+      {isMobile && (
+        <Box mt={{ xs: 4, md: 6 }}>
+          <CopyAddressButton address="0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0" />
+        </Box>
+      )}
+      <Grid container spacing={4} mt={{ xs: 0, md: 4 }}>
+        <Grid item xs={12} md={6}>
           <CardContainer densed>
             <Typography
               variant="body2"
@@ -109,7 +104,7 @@ export const ProfilePage: React.FC = (): React.ReactElement => {
             </Stack>
           </CardContainer>
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} md={6}>
           <Stack spacing={4}>
             <CardContainer densed>
               <Typography

@@ -1,17 +1,26 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import { Link, IconButton, Stack, Typography } from '@mui/material';
-
-import GithubIcon from './Icons/GithubIcon';
-import DiscordIcon from './Icons/DiscordIcon';
-import TwitterIcon from './Icons/TwitterIcon';
-// import TelegramIcon from './Icons/TelegramIcon';
-import LinkedinIcon from './Icons/LinkedinIcon';
+import { Box, Link, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 import smallLogoSvg from 'src/assets/small-logo.svg';
+import SocialIcons from 'src/components/SocialIcons';
 
 const Footer: React.FC = (): React.ReactElement => {
-  return (
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  return isMobile ? (
+    <Box px={4} py={6}>
+      <SocialIcons />
+      <Box display="flex" flexDirection="column" ml={1} mt={2}>
+        <Typography color="text.secondary" variant="caption" lineHeight={1}>
+          Terms and conditions
+        </Typography>
+        <Typography color="text.secondary" variant="caption" mt={1}>
+          © {new Date().getFullYear()} HPF. HUMAN Protocol® is a registered
+          trademark
+        </Typography>
+      </Box>
+    </Box>
+  ) : (
     <Box
       sx={{
         px: 12,
@@ -40,20 +49,7 @@ const Footer: React.FC = (): React.ReactElement => {
         © {new Date().getFullYear()} HPF. HUMAN Protocol® is a registered
         trademark
       </Typography>
-      <Stack direction="row" spacing={4}>
-        <IconButton href="http://hmt.ai/github" target="_blank">
-          <GithubIcon />
-        </IconButton>
-        <IconButton href="http://hmt.ai/discord" target="_blank">
-          <DiscordIcon />
-        </IconButton>
-        <IconButton href="http://hmt.ai/twitter" target="_blank">
-          <TwitterIcon />
-        </IconButton>
-        <IconButton href="http://hmt.ai/linkedin" target="_blank">
-          <LinkedinIcon />
-        </IconButton>
-      </Stack>
+      <SocialIcons />
     </Box>
   );
 };

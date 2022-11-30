@@ -1,5 +1,12 @@
 import React, { ReactElement, useState } from 'react';
-import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Tab,
+  Tabs,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import networkSvg from 'src/assets/network.svg';
 import { ViewTitle } from 'src/components';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
@@ -32,6 +39,9 @@ export const EscrowContainer: React.FC<
 
   const dataLoaded = useEscrowDataLoaded();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <Box id="network">
       <ViewTitle title="Network" iconUrl={networkSvg} />
@@ -49,7 +59,7 @@ export const EscrowContainer: React.FC<
           value={ChainId.ALL}
           label="All Networks"
           icon={<HumanIcon />}
-          iconPosition="start"
+          iconPosition={isMobile ? 'top' : 'start'}
         />
         {SUPPORTED_CHAIN_IDS.map((chainId) => (
           <Tab
@@ -57,7 +67,7 @@ export const EscrowContainer: React.FC<
             value={chainId}
             label={ESCROW_NETWORKS[chainId]?.title}
             icon={NETWORK_ICONS[chainId] ?? ''}
-            iconPosition="start"
+            iconPosition={isMobile ? 'top' : 'start'}
           />
         ))}
       </Tabs>

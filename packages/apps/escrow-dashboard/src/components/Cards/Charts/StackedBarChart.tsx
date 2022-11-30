@@ -32,7 +32,7 @@ export default function StackedBarChart({
 
   return (
     <CardContainer>
-      <Grid container>
+      <Grid container spacing={4}>
         <Grid item xs={12} sm={12} md={8}>
           <Box sx={{ width: '100%', height: 362 }}>
             <ResponsiveContainer>

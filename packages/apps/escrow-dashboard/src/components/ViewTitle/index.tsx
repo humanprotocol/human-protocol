@@ -13,8 +13,8 @@ export function ViewTitle({ title, iconUrl }: ICategoryProps) {
         sx={{
           display: 'flex',
           position: 'relative',
-          height: '85px',
-          width: '85px',
+          height: { xs: '48px', md: '85px' },
+          width: { xs: '48px', md: '85px' },
           justifyContent: 'center',
           alignItems: 'center',
         }}
@@ -24,8 +24,8 @@ export function ViewTitle({ title, iconUrl }: ICategoryProps) {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '85px',
-            height: '85px',
+            height: { xs: '48px', md: '85px' },
+            width: { xs: '48px', md: '85px' },
             borderRadius: '100%',
             background:
               'linear-gradient(12.79deg, #F7F8FD 20.33%, #FFFFFF 48.75%)',
@@ -37,17 +37,21 @@ export function ViewTitle({ title, iconUrl }: ICategoryProps) {
             position: 'absolute',
             top: 0,
             left: 0,
-            width: '85px',
-            height: '85px',
+            height: { xs: '48px', md: '85px' },
+            width: { xs: '48px', md: '85px' },
             borderRadius: '100%',
             background:
               'radial-gradient(83.8% 83.8% at 50% 16.2%, #F0F0FF 0%, #F1F1FD 0%, #FFFFFF 70.31%);',
             boxShadow: '0px 24px 32px rgba(12, 32, 213, 0.06)',
           }}
         />
-        <img src={iconUrl} alt="network" style={{ zIndex: 100 }} />
+        <img
+          src={iconUrl}
+          alt="network"
+          style={{ zIndex: 100, width: '50%' }}
+        />
       </Box>
-      <Typography variant="h4" color="primary" ml="30px">
+      <Typography variant="h4" color="primary" ml={{ xs: 2, sm: 4 }}>
         {title}
       </Typography>
     </Box>

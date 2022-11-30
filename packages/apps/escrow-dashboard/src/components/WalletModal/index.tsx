@@ -33,7 +33,12 @@ export default function WalletModal({
   const theme = useTheme();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={false}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={false}
+      PaperProps={{ sx: { mx: 2, maxWidth: 'calc(100% - 32px)' } }}
+    >
       <Box display="flex" maxWidth="784px">
         <Box
           width={{ xs: '0', md: '50%' }}
@@ -59,10 +64,10 @@ export default function WalletModal({
         <Box
           sx={{ boxSizing: 'border-box' }}
           width={{ xs: '100%', md: '50%' }}
-          minWidth="392px"
+          minWidth={{ xs: '340px', sm: '392px' }}
           display="flex"
           flexDirection="column"
-          p={4}
+          p={{ xs: 2, sm: 4 }}
         >
           <IconButton sx={{ ml: 'auto', mb: 3 }} onClick={onClose}>
             <CloseIcon color="primary" />

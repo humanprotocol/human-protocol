@@ -13,7 +13,11 @@ export function CardTextRow({ label, value, minWidth = 130 }: TextRowProps) {
       <Typography variant="body2" color="text.secondary" sx={{ minWidth }}>
         {label ? `${label} :` : ''}
       </Typography>
-      <Typography variant="body2" color="primary">
+      <Typography
+        variant="body2"
+        color="primary"
+        sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+      >
         {value}
       </Typography>
     </Stack>
