@@ -15,6 +15,8 @@ from web3.types import TxReceipt, Wei
 from human_protocol_sdk import utils
 from human_protocol_sdk.eth_bridge import (
     get_hmtoken,
+    get_hmtoken_interface,
+    get_entity_topic,
     get_escrow,
     get_factory,
     deploy_factory,
@@ -31,6 +33,7 @@ from human_protocol_sdk.storage import (
 )
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
+TRANSFER_EVENT = get_entity_topic(get_hmtoken_interface(), "Transfer")
 
 # Explicit env variable that will use s3 for storing results.
 
@@ -622,6 +625,7 @@ class Job:
             bool: returns True if paying to ethereum addresses and oracles succeeds.
 
         """
+        bulk_paid = False
         txn_event = "Bulk payout"
         txn_func = self.job_contract.functions.bulkPayOut
         txn_info = {
@@ -651,7 +655,13 @@ class Job:
         func_args = [eth_addrs, hmt_amounts, url, hash_, 1]
 
         try:
-            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            tx_receipt = handle_transaction_with_retry(
+                txn_func,
+                self.retry,
+                *func_args,
+                **txn_info,
+            )
+            bulk_paid = self._check_transfer_event(tx_receipt)
             return self._bulk_paid() is True
 
         except Exception as e:
@@ -659,15 +669,22 @@ class Job:
                 f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
             )
 
+        if bulk_paid:
+            return bulk_paid
+
+        LOG.warn(
+            f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv}. Using secondary ones..."
+        )
+
         raffle_txn_res = self._raffle_txn(
             self.multi_credentials, txn_func, func_args, txn_event
         )
-        bulk_paid = raffle_txn_res["txn_succeeded"]
+        bulk_paid = self._check_transfer_event(raffle_txn_res["tx_receipt"])
 
         if not bulk_paid:
             LOG.warning(f"{txn_event} failed with all credentials.")
 
-        return bulk_paid is True
+        return bulk_paid
 
     def abort(self) -> bool:
         """Kills the contract and returns the HMT back to the gas payer.
@@ -1518,3 +1535,22 @@ class Job:
                 )
 
         return {"txn_succeeded": txn_succeeded, "tx_receipt": tx_receipt}
+
+    def _check_transfer_event(self, tx_receipt: Optional[TxReceipt]) -> bool:
+        """
+        Check if transaction receipt has bulkTransfer event, to make sure that transaction was successful.
+
+        Args:
+            tx_receipt (Optional[TxReceipt]): a dict with transaction receipt.
+
+        Returns:
+            bool: returns True if transaction has bulkTransfer event, otherwise returns False.
+        """
+        if not tx_receipt:
+            return False
+
+        for log in tx_receipt.get("logs", {}):
+            for topic in log["topics"]:
+                if TRANSFER_EVENT == topic:
+                    return True
+        return False
