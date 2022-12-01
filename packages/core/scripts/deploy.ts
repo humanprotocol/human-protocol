@@ -2,6 +2,7 @@
 import { ethers } from 'hardhat';
 
 async function main() {
+  const [owner, recOracle, repOrcale, launcher] = await ethers.getSigners();
   const HMToken = await ethers.getContractFactory('HMToken');
   const HMTokenContract = await HMToken.deploy(
     1000000000,
@@ -50,6 +51,11 @@ async function main() {
 
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);
+
+  await HMTokenContract.transfer(
+    launcher.address,
+    ethers.utils.parseEther('1000')
+  );
 }
 
 main().catch((error) => {

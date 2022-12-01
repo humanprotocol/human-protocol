@@ -58,7 +58,7 @@ contract Staking is IStaking {
     event StakeLocked(address indexed staker, uint256 tokens, uint256 until);
 
     /**
-     * @dev Emitted when `staker` withdrew `tokens` staked.
+     * @dev Emitted when `staker` withdraws `tokens` staked.
      */
     event StakeWithdrawn(address indexed staker, uint256 tokens);
 

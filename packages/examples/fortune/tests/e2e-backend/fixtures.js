@@ -8,11 +8,21 @@ const {
 const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
+const stakingAbi = require('@human-protocol/core/abis/Staking.json');
 
 const axios = require('axios');
 const Web3 = require('web3');
 const web3 = new Web3(urls.ethHTTPServer);
 const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
+let owner;
+let launcher;
+
+const setupAccounts = async () => {
+  owner = (await web3.eth.getAccounts())[0];
+  launcher = (await web3.eth.getAccounts())[3];
+  await fundAccountHMT(launcher, owner, 1000);
+  return [owner, launcher];
+};
 
 const createEscrowFactory = () => {
   const escrowFactory = new web3.eth.Contract(
@@ -23,20 +33,29 @@ const createEscrowFactory = () => {
   return escrowFactory;
 };
 
-const createEscrow = async (escrowFactory) => {
-  const account = (await web3.eth.getAccounts())[0];
+const stake = async (escrowFactory) => {
+  const stakingAddress = await escrowFactory.methods.staking().call();
+  const staking = new web3.eth.Contract(stakingAbi, stakingAddress);
 
-  await escrowFactory.methods
-    .createEscrow([account])
-    .send({ from: account, gasLimit });
+  await staking.methods.setStaker(launcher, 1).send({ from: owner, gasLimit });
+  await Token.methods
+    .approve(stakingAddress, 5)
+    .send({ from: launcher, gasLimit });
+  await staking.methods.stake(5).send({ from: launcher, gasLimit });
 };
 
-const fundEscrow = async (escrowAddress) => {
-  const account = (await web3.eth.getAccounts())[0];
-  const value = web3.utils.toWei(`${escrowFundAmount}`, 'ether');
+const createEscrow = async (escrowFactory) => {
+  await escrowFactory.methods
+    .createEscrow([launcher])
+    .send({ from: launcher, gasLimit });
+  return await escrowFactory.methods.lastEscrow().call();
+};
+
+const fundAccountHMT = async (to, from, amount) => {
+  const value = web3.utils.toWei(`${amount || escrowFundAmount}`, 'ether');
   await Token.methods
-    .transfer(escrowAddress, value)
-    .send({ from: account, gasLimit });
+    .transfer(to, value)
+    .send({ from: from || launcher, gasLimit });
 };
 
 const setupEscrow = async (
@@ -47,7 +66,6 @@ const setupEscrow = async (
   recOracleStake,
   escrow
 ) => {
-  const account = (await web3.eth.getAccounts())[0];
   const Escrow = escrow || new web3.eth.Contract(escrowAbi, escrowAddress);
   try {
     await Escrow.methods
@@ -59,7 +77,7 @@ const setupEscrow = async (
         urls.manifestUrl,
         urls.manifestUrl
       )
-      .send({ from: account, gasLimit });
+      .send({ from: launcher, gasLimit });
   } catch (err) {
     return err;
   }
@@ -74,8 +92,8 @@ const setupAgents = async () => {
     ).data;
     const agents = [];
     const accounts = await web3.eth.getAccounts();
-    for (let i = 3; i < fortunesRequested + 3; i++) {
-      agents[i - 3] = accounts[i];
+    for (let i = 4; i < fortunesRequested + 4; i++) {
+      agents[i - 4] = accounts[i];
     }
 
     return agents;
@@ -117,11 +135,13 @@ const calculateRewardAmount = async () => {
 };
 
 module.exports = {
+  setupAccounts,
   createEscrowFactory,
   createEscrow,
-  fundEscrow,
+  fundAccountHMT,
   setupEscrow,
   setupAgents,
   sendFortune,
   calculateRewardAmount,
+  stake,
 };
