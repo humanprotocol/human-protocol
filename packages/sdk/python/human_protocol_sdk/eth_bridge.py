@@ -189,6 +189,19 @@ def get_contract_interface(contract_entrypoint):
     return contract_interface
 
 
+def get_hmtoken_interface():
+    """Retrieve the HMToken interface.
+
+    Returns:
+        Contract interface: returns the HMToken interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
+    )
+
+
 def get_hmtoken(hmtoken_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contract:
     """Retrieve the HMToken contract from a given address.
 
@@ -203,9 +216,7 @@ def get_hmtoken(hmtoken_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contr
 
     """
     w3 = get_w3(hmt_server_addr)
-    contract_interface = get_contract_interface(
-        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
-    )
+    contract_interface = get_hmtoken_interface()
     contract = w3.eth.contract(address=hmtoken_addr, abi=contract_interface["abi"])
     return contract
 
@@ -484,3 +495,28 @@ def set_pub_key_at_addr(
     }
 
     return handle_transaction(txn_func, *func_args, **txn_info)
+
+
+def get_entity_topic(contract_interface: Dict, name: str) -> str:
+    """
+    Args:
+        contract_interface (Dict): contract inteface.
+
+        name (str): event name to find in abi.
+
+    Returns
+        str: returns keccak_256 hash of event name with input parameters.
+    """
+    s = ""
+
+    for entity in contract_interface["abi"]:
+        event_name = entity.get("name")
+        if event_name == name:
+            s += event_name + "("
+            inputs = entity.get("inputs", [])
+            input_types = []
+            for input in inputs:
+                input_types.append(input.get("internalType"))
+            s += ",".join(input_types) + ")"
+
+    return Web3.keccak(text=s)

@@ -228,8 +228,8 @@ class JobTestCase(unittest.TestCase):
         ]
         self.assertTrue(self.job.bulk_payout(payouts, {}, self.rep_oracle_pub_key))
 
-    def test_job_bulk_payout_with_encryption_option(self):
-        """Tests whether final results must be persisted in storage encrypted or plain."""
+    def test_job_bulk_payout_with_false_encryption_option(self):
+        """Test that final results are stored encrypted"""
         job = Job(self.credentials, manifest)
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
@@ -256,10 +256,24 @@ class JobTestCase(unittest.TestCase):
                 encrypt_data=False,
                 use_public_bucket=False,
             )
-            mock_upload.reset_mock()
 
-            # Testing option as: encrypt final results: encrypt_final_results=True
+    def test_job_bulk_payout_with_true_encryption_option(self):
+        """Test that final results are stored uncrypted"""
+        job = Job(self.credentials, manifest)
+        self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
+        self.assertEqual(job.setup(), True)
+
+        payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
+
+        final_results = {"results": 0}
+
+        mock_upload = MagicMock(return_value=("hash", "url"))
+
+        # Testing option as: encrypt final results: encrypt_final_results=True
+        with patch("hmt_escrow.job.upload") as mock_upload:
             # Bulk payout with final results as plain (not encrypted)
+            mock_upload.return_value = ("hash", "url")
+
             job.bulk_payout(
                 payouts=payouts,
                 results=final_results,
@@ -332,13 +346,16 @@ class JobTestCase(unittest.TestCase):
         final_results = {"results": 0}
 
         with patch(
-            "human_protocol_sdk.job.handle_transaction_with_retry"
+            "hmt_escrow.job.handle_transaction_with_retry"
         ) as transaction_retry_mock, patch(
-            "human_protocol_sdk.job.upload"
-        ) as upload_mock:
+            "hmt_escrow.job.upload"
+        ) as upload_mock, patch.object(
+            Job, "_check_transfer_event"
+        ) as _check_transfer_event_mock:
             key = "abcdefg"
             hash_ = f"s3{key}"
             upload_mock.return_value = hash_, key
+            _check_transfer_event_mock.return_value = True
 
             # Bulk payout with option to store final results privately
             job.bulk_payout(
@@ -405,6 +422,10 @@ class JobTestCase(unittest.TestCase):
             self.assertEqual(persisted_final_results, final_results)
 
             # Bulk payout with encryption OFF
+            job = Job(self.credentials, manifest)
+            self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
+            self.assertEqual(job.setup(), True)
+
             job.bulk_payout(
                 payouts=payouts,
                 results=final_results,
