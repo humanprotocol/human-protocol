@@ -57,40 +57,40 @@ describe('Fortune', () => {
       .send({
         from: owner.address,
       });
-      const stakingContract = new web3.eth.Contract(Staking.abi as []);
-      staking = await stakingContract
-        .deploy({
-          data: Staking.bytecode,
-          arguments: [
-            token.options.address,
-            escrowFactory.options.address,
-            web3.utils.toWei('1', 'ether'),
-            1,
-          ],
-        })
-        .send({
-          from: owner.address,
-        });
-  
-      await escrowFactory.methods
-        .setStaking(staking.options.address)
-        .send({ from: owner.address });
-  
-      await token.methods
-        .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
-        .send({ from: owner.address });
-  
-      await token.methods
-        .approve(staking.options.address, web3.utils.toWei('500', 'ether'))
-        .send({ from: launcher.address });
-  
-      await staking.methods
-        .setStaker(launcher.address, 1)
-        .send({ from: owner.address });
-  
-      await staking.methods
-        .stake(web3.utils.toWei('500', 'ether'))
-        .send({ from: launcher.address });
+    const stakingContract = new web3.eth.Contract(Staking.abi as []);
+    staking = await stakingContract
+      .deploy({
+        data: Staking.bytecode,
+        arguments: [
+          token.options.address,
+          escrowFactory.options.address,
+          web3.utils.toWei('1', 'ether'),
+          1,
+        ],
+      })
+      .send({
+        from: owner.address,
+      });
+
+    await escrowFactory.methods
+      .setStaking(staking.options.address)
+      .send({ from: owner.address });
+
+    await token.methods
+      .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
+      .send({ from: owner.address });
+
+    await token.methods
+      .approve(staking.options.address, web3.utils.toWei('500', 'ether'))
+      .send({ from: launcher.address });
+
+    await staking.methods
+      .setStaker(launcher.address, 1)
+      .send({ from: owner.address });
+
+    await staking.methods
+      .stake(web3.utils.toWei('500', 'ether'))
+      .send({ from: launcher.address });
   });
 
   beforeEach(async () => {
