@@ -28,6 +28,12 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBEAM,
 ];
 
+export const TESTNET_CHAIN_IDS = [
+  ChainId.GOERLI,
+  ChainId.BSC_TESTNET,
+  ChainId.POLYGON_MUMBAI,
+];
+
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: IEscrowNetwork;
 } = {
@@ -101,7 +107,7 @@ export const ROLES = [
   'Recording Oracle',
 ];
 
-export const HMT_DECIMALS = 18;
+export const HM_TOKEN_DECIMALS = 18;
 
 export const STAKING_CONTRACT_ADDRESS =
   '0x1fA701df2bb75f2cE8B6439669BD1eCfCf8b26fe';
