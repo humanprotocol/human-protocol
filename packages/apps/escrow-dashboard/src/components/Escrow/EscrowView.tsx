@@ -3,11 +3,10 @@ import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import lowAmountEscrowSvg from 'src/assets/low-amount-escrow.svg';
 import { CardBarChart, CardStackedBarChart } from 'src/components/Cards';
-import { ChainId } from 'src/constants';
 import { useEscrowDataByChainID } from 'src/state/escrow/hooks';
 
-export const EscrowView = ({ chainId }: { chainId: ChainId }) => {
-  const escrowData = useEscrowDataByChainID(chainId);
+export const EscrowView = () => {
+  const escrowData = useEscrowDataByChainID();
 
   const escrowSeries = useMemo(() => {
     return escrowData.lastMonthEvents.map((item) => ({

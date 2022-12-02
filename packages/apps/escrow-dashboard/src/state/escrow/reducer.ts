@@ -1,4 +1,10 @@
-import { createAsyncThunk, createReducer, isAnyOf } from '@reduxjs/toolkit';
+import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
+import {
+  createAction,
+  createAsyncThunk,
+  createReducer,
+  isAnyOf,
+} from '@reduxjs/toolkit';
 import {
   UnknownAsyncThunkFulfilledAction,
   UnknownAsyncThunkPendingAction,
@@ -7,7 +13,6 @@ import {
 import { Contract, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
 import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
-import EscrowFactoryABI from 'src/abis/EscrowFactoryABI.json';
 import { RAW_ESCROW_STATS_QUERY, RAW_EVENT_DAY_DATA_QUERY } from 'src/queries';
 import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
@@ -22,6 +27,7 @@ type EscrowAmountsType = { [chainId in ChainId]?: number };
 
 interface EscrowState {
   loadingKeys: Record<string, boolean>;
+  chainId: ChainId;
   events: EscrowEventsType;
   eventsLoaded: boolean;
   stats: EscrowStatsType;
@@ -32,6 +38,7 @@ interface EscrowState {
 
 const initialState: EscrowState = {
   loadingKeys: {},
+  chainId: ChainId.ALL,
   events: {},
   eventsLoaded: false,
   stats: {},
@@ -134,6 +141,8 @@ export const fetchEscrowAmountsAsync = createAsyncThunk<
   return escrowAmounts;
 });
 
+export const setChainId = createAction<ChainId>('escrow/setChainId');
+
 type UnknownAsyncThunkFulfilledOrPendingAction =
   | UnknownAsyncThunkFulfilledAction
   | UnknownAsyncThunkPendingAction
@@ -151,6 +160,9 @@ const serializeLoadingKey = (
 };
 
 export default createReducer(initialState, (builder) => {
+  builder.addCase(setChainId, (state, action) => {
+    state.chainId = action.payload;
+  });
   builder.addCase(fetchEscrowEventsAsync.fulfilled, (state, action) => {
     state.events = action.payload;
     state.eventsLoaded = true;

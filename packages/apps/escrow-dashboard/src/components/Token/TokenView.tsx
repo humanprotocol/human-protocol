@@ -2,11 +2,12 @@ import { Grid } from '@mui/material';
 import * as React from 'react';
 import { CardTextBlock } from 'src/components/Cards';
 import useHMTData from 'src/hooks/useHMTData';
-import { useTokenStats } from 'src/state/token/hooks';
+import { useTokenStats, useTotalSupply } from 'src/state/token/hooks';
 
 export const TokenView: React.FC = (): React.ReactElement => {
   const data = useHMTData();
   const tokenStats = useTokenStats();
+  const totalSupply = Number(useTotalSupply());
 
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
@@ -34,7 +35,17 @@ export const TokenView: React.FC = (): React.ReactElement => {
         />
       </Grid>
       <Grid item xs={12} sm={6}>
-        <CardTextBlock title="Total Supply" value={data?.totalSupply} />
+        <CardTextBlock
+          title="Total Supply"
+          value={totalSupply}
+          format={
+            totalSupply >= Number('1e+18')
+              ? '0,0e+0'
+              : totalSupply >= Number('1e+9')
+              ? '0a'
+              : '0,0'
+          }
+        />
       </Grid>
     </Grid>
   );

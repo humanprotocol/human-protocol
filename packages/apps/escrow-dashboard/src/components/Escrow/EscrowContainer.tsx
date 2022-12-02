@@ -10,7 +10,11 @@ import {
 import networkSvg from 'src/assets/network.svg';
 import { ViewTitle } from 'src/components';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
-import { useEscrowDataLoaded, usePollEventsData } from 'src/state/escrow/hooks';
+import {
+  useChainId,
+  useEscrowDataLoaded,
+  usePollEventsData,
+} from 'src/state/escrow/hooks';
 
 import { EscrowView } from './EscrowView';
 
@@ -19,6 +23,8 @@ import EthereumIcon from '../Icons/EthreumIcon';
 import HumanIcon from '../Icons/HumanIcon';
 import MoonbeamIcon from '../Icons/MoonbeamIcon';
 import PolygonIcon from '../Icons/PolygonIcon';
+import { useAppDispatch } from 'src/state';
+import { setChainId } from 'src/state/escrow/reducer';
 
 interface IEscrowContainer {}
 
@@ -31,10 +37,10 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
-export const EscrowContainer: React.FC<
-  IEscrowContainer
-> = (): React.ReactElement => {
-  const [chainId, setChainId] = useState<ChainId>(ChainId.ALL);
+export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElement => {
+  const chainId = useChainId();
+  const dispatch = useAppDispatch();
+
   usePollEventsData();
 
   const dataLoaded = useEscrowDataLoaded();
@@ -50,7 +56,7 @@ export const EscrowContainer: React.FC<
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
         }}
         value={chainId}
-        onChange={(e, id) => setChainId(id)}
+        onChange={(e, id) => dispatch(setChainId(id))}
         variant="scrollable"
         scrollButtons="auto"
         allowScrollButtonsMobile
@@ -72,7 +78,7 @@ export const EscrowContainer: React.FC<
         ))}
       </Tabs>
       {dataLoaded ? (
-        <EscrowView chainId={chainId} />
+        <EscrowView />
       ) : (
         <Box display="flex" justifyContent="center" py={10}>
           <CircularProgress size={36} />

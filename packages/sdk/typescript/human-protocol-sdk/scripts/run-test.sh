@@ -4,6 +4,6 @@ yarn workspace @human-protocol/core local &
 
 sleep 5
 
-pipenv run pytest
+npx jest
 
 trap 'kill $(jobs -p)' EXIT

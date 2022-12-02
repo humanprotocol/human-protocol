@@ -1,10 +1,11 @@
+import BigNumber from 'bignumber.js';
 import { useSelector } from 'react-redux';
-import { SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 import { AppState, useAppDispatch } from 'src/state';
+import { useChainId } from '../escrow/hooks';
 
 import { fetchTokenStatsAsync } from './reducer';
-import { TokenStats } from './types';
 
 export const usePollTokenStats = () => {
   const dispatch = useAppDispatch();
@@ -14,29 +15,43 @@ export const usePollTokenStats = () => {
   }, [dispatch]);
 };
 
-export const useTokenStats = (): TokenStats => {
+export const useTokenStats = () => {
   const token = useSelector((state: AppState) => state.token);
   const { stats } = token;
 
-  const tokenStats: TokenStats = {
-    totalApprovalEventCount: 0,
+  const tokenStats = {
     totalTransferEventCount: 0,
-    totalValueTransfered: 0,
     holders: 0,
   };
 
   SUPPORTED_CHAIN_IDS.forEach((chainId) => {
     if (stats[chainId]) {
-      tokenStats.totalApprovalEventCount +=
-        stats[chainId]?.totalApprovalEventCount!;
-      tokenStats.totalTransferEventCount +=
-        stats[chainId]?.totalTransferEventCount!;
-      tokenStats.totalValueTransfered += stats[chainId]?.totalValueTransfered!;
+      tokenStats.totalTransferEventCount += stats[
+        chainId
+      ]?.totalTransferEventCount!;
       tokenStats.holders += stats[chainId]?.holders!;
     }
   });
 
   return tokenStats;
+};
+
+export const useTotalSupply = () => {
+  const chainId = useChainId();
+  const token = useSelector((state: AppState) => state.token);
+
+  if (chainId === ChainId.ALL) {
+    let allTotalSupplyBN = new BigNumber(0);
+    SUPPORTED_CHAIN_IDS.forEach((chainId) => {
+      allTotalSupplyBN = allTotalSupplyBN.plus(
+        new BigNumber(token.stats[chainId]?.totalSupply ?? '0')
+      );
+    });
+
+    return allTotalSupplyBN.toJSON();
+  }
+
+  return token.stats[chainId]?.totalSupply;
 };
 
 export const useTokenStatsLoaded = () => {
