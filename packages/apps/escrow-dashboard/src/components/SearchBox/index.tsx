@@ -20,7 +20,7 @@ const SearchBox: React.FC = (): React.ReactElement => {
   };
 
   return (
-    <Box display="flex" alignItems="center" position="relative">
+    <Box display="flex" alignItems="center" position="relative" width="100%">
       <>
         <Button
           variant="contained"
@@ -54,6 +54,7 @@ const SearchBox: React.FC = (): React.ReactElement => {
         </Menu>
       </>
       <TextField
+        fullWidth
         variant="filled"
         InputProps={{
           sx: {

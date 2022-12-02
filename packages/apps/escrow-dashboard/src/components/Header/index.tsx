@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import React, { useState } from 'react';
@@ -48,7 +49,7 @@ const Header: React.FC = (): React.ReactElement => {
   const renderNavLinks = (orientation = 'horizontal') => (
     <Stack
       direction={orientation === 'horizontal' ? 'row' : 'column'}
-      spacing={4}
+      spacing={3}
     >
       {NAV_LINKS.map((nav) => (
         <Link
@@ -90,48 +91,71 @@ const Header: React.FC = (): React.ReactElement => {
               },
             }}
           >
-            <Link
-              href="/"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-              }}
-            >
-              <img src={logoSvg} alt="logo" />
-              <Typography variant="h6" color="primary" ml="10px">
-                Scan
-              </Typography>
-            </Link>
-            {!isDownLg && <SearchBox />}
-            {!isDownMd && (
-              <Box display="flex" alignItems="center" gap={4}>
-                {renderNavLinks()}
-                <ConnectButton />
-              </Box>
-            )}
-            {isDownMd && (
-              <Box>
+            {searchOpen ? (
+              <Box display="flex" alignItems="center" width="100%">
+                <SearchBox />
                 <IconButton
                   color="primary"
-                  sx={{ ml: 1 }}
+                  sx={{ ml: 2 }}
                   onClick={toggleSearchBox}
                 >
-                  <SearchIcon />
-                </IconButton>
-                <IconButton
-                  color="primary"
-                  sx={{ ml: 1 }}
-                  onClick={toggleDrawer}
-                >
-                  <MenuIcon />
+                  <CloseIcon />
                 </IconButton>
               </Box>
+            ) : (
+              <>
+                <Link
+                  href="/"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <img src={logoSvg} alt="logo" />
+                  <Typography variant="h6" color="primary" ml="10px">
+                    Scan
+                  </Typography>
+                </Link>
+                {!isDownLg && (
+                  <Box sx={{ minWidth: '400px' }}>
+                    <SearchBox />
+                  </Box>
+                )}
+                {!isDownMd && (
+                  <Box display="flex" alignItems="center" gap={3}>
+                    {isDownLg && (
+                      <IconButton color="primary" onClick={toggleSearchBox}>
+                        <SearchIcon />
+                      </IconButton>
+                    )}
+                    {renderNavLinks()}
+                    <ConnectButton />
+                  </Box>
+                )}
+                {isDownMd && (
+                  <Box>
+                    <IconButton
+                      color="primary"
+                      sx={{ ml: 1 }}
+                      onClick={toggleSearchBox}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                    <IconButton
+                      color="primary"
+                      sx={{ ml: 1 }}
+                      onClick={toggleDrawer}
+                    >
+                      <MenuIcon />
+                    </IconButton>
+                  </Box>
+                )}
+              </>
             )}
           </Box>
         </Toolbar>
       </AppBar>
-
       <Drawer
         anchor="top"
         open={drawerOpen}
