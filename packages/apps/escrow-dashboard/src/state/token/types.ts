@@ -3,4 +3,5 @@ export interface TokenStats {
   totalTransferEventCount: number;
   totalValueTransfered: number;
   holders: number;
+  totalSupply: string;
 }
