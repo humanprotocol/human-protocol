@@ -2,6 +2,7 @@ import {
   Escrow,
   EscrowFactory,
   HMToken,
+  Staking,
 } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 
@@ -35,6 +36,38 @@ export enum EscrowStatus {
    * Escrow is cancelled.
    */
   Cancelled,
+}
+
+/**
+ * Enum for staker role.
+ * @readonly
+ * @enum {number}
+ */
+export enum StakerRole {
+  /**
+   * No role
+   */
+  Null,
+  /**
+   * Operator
+   */
+  Operator,
+  /**
+   * Validator
+   */
+  Validator,
+  /**
+   * Exchange Oracle
+   */
+  ExchangeOracle,
+  /**
+   * Reputation Oracle
+   */
+  ReputationOracle,
+  /**
+   * Recording Oracle
+   */
+  RecordingOracle,
 }
 
 /**
@@ -540,6 +573,24 @@ export type ManifestData = {
 };
 
 /**
+ * Staking data
+ */
+export type StakingData = {
+  /**
+   * Minimum amount for staking
+   */
+  minimumStake?: number;
+  /**
+   * Lock period for staking
+   */
+  lockPeriod?: number;
+  /**
+   * Reward fee
+   */
+  rewardFee?: number;
+};
+
+/**
  * Contract data
  */
 export type ContractData = {
@@ -567,6 +618,14 @@ export type ContractData = {
    * HMToken contract instance
    */
   hmToken?: HMToken;
+  /**
+   * Staking contract address
+   */
+  stakingAddr?: string;
+  /**
+   * Staking contract instance
+   */
+  staking?: Staking;
 };
 
 /**
@@ -656,6 +715,18 @@ export type JobArguments = {
    * AWS/GCP private bucket name
    */
   storageBucket?: string;
+  /**
+   * Minimum amount for staking
+   */
+  stakingMinimumAmount?: number;
+  /**
+   * Lock period for staking
+   */
+  stakingLockPeriod?: number;
+  /**
+   * Reward fee for staking
+   */
+  stakingRewardFee?: number;
   /**
    * Log level
    */

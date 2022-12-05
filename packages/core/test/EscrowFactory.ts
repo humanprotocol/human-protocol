@@ -47,7 +47,7 @@ describe('EscrowFactory', function () {
       await recordingOracle.getAddress(),
     ];
 
-    // Deploy HMTToken Contract
+    // Deploy HMToken Contract
     const HMToken = await ethers.getContractFactory('HMToken');
     token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
 

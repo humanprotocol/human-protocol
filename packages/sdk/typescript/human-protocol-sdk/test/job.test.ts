@@ -1,11 +1,14 @@
 import { getPublicURL } from './../src/storage';
-import { EscrowStatus, Job } from '../src';
+import { EscrowStatus, Job, StakerRole } from '../src';
 import { upload } from '../src/storage';
 import { toFullDigit } from '../src/utils';
 import {
   DEFAULT_GAS_PAYER_ADDR,
   DEFAULT_GAS_PAYER_PRIVKEY,
   DEFAULT_HMTOKEN_ADDR,
+  DEFAULT_LOCK_PERIOD,
+  DEFAULT_MINIMUM_STAKE,
+  DEFAULT_REWARD_FEE,
   NOT_TRUSTED_OPERATOR_PRIVKEY,
   REPUTATION_ORACLE_PRIVKEY,
   TRUSTED_OPERATOR1_ADDR,
@@ -29,6 +32,14 @@ jest.mock('../src/storage', () => ({
   getPublicURL: jest.fn().mockResolvedValue('public-url'),
 }));
 
+const setupJob = async (job: Job) => {
+  await job.initialize();
+  await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
+  await job.stake(1);
+  await job.launch();
+  await job.setup();
+};
+
 describe('Test Job', () => {
   describe('New job', () => {
     let job: Job;
@@ -39,6 +50,9 @@ describe('Test Job', () => {
         reputationOracle: REPUTATION_ORACLE_PRIVKEY,
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingMinimumAmount: DEFAULT_MINIMUM_STAKE,
+        stakingLockPeriod: DEFAULT_LOCK_PERIOD,
+        stakingRewardFee: DEFAULT_REWARD_FEE,
         logLevel: 'debug',
       });
     });
@@ -54,11 +68,13 @@ describe('Test Job', () => {
       expect(await job.contractData?.factory?.address).not.toBeNull();
     });
 
-    it('Should be able to launch the job', async () => {
+    it.only('Should be able to launch the job after staking', async () => {
       // Fail to launch the job before initialization
       expect(await job.launch()).toBe(false);
 
       await job.initialize();
+      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
+      await job.stake(1);
 
       expect(await job.launch()).toBe(true);
       expect(await job.status()).toBe(EscrowStatus.Launched);
@@ -69,6 +85,9 @@ describe('Test Job', () => {
       expect(await job.setup()).toBe(false);
 
       await job.initialize();
+      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
+      await job.stake(1);
+
       await job.launch();
 
       expect(await job.setup()).toBe(true);
@@ -76,6 +95,9 @@ describe('Test Job', () => {
 
     it('Should be able to add trusted handlers', async () => {
       await job.initialize();
+      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
+      await job.stake(1);
+
       await job.launch();
 
       expect(await job.isTrustedHandler(DEFAULT_GAS_PAYER_ADDR)).toBe(true);
@@ -92,9 +114,7 @@ describe('Test Job', () => {
     });
 
     it('Should be able to bulk payout workers', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       expect(
         await job.bulkPayout(
@@ -148,9 +168,7 @@ describe('Test Job', () => {
     });
 
     it('Should encrypt result, when bulk paying out workers', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -176,9 +194,7 @@ describe('Test Job', () => {
     });
 
     it('Should not encrypt result, when bulk paying out workers', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -204,9 +220,7 @@ describe('Test Job', () => {
     });
 
     it('Should store result in private storage, when bulk paying out workers', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -233,9 +247,7 @@ describe('Test Job', () => {
     });
 
     it('Should store result in public storage, when bulk paying out workers', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -263,9 +275,7 @@ describe('Test Job', () => {
     });
 
     it('Should return final result', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -285,17 +295,13 @@ describe('Test Job', () => {
     });
 
     it('Should be able to abort the job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       expect(await job.abort()).toBe(true);
     });
 
     it('Should be able to abort partially paid job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -313,9 +319,7 @@ describe('Test Job', () => {
     });
 
     it('Should not be able to abort fully paid job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -333,18 +337,14 @@ describe('Test Job', () => {
     });
 
     it('Should be able to cancel the job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       expect(await job.cancel()).toBe(true);
       expect((await job.balance())?.toString()).toBe(toFullDigit(0).toString());
     });
 
     it('Should be able to cancel partially paid job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -363,9 +363,7 @@ describe('Test Job', () => {
     });
 
     it('Should not be able to cancel paid job', async () => {
-      await job.initialize();
-      await job.launch();
-      await job.setup();
+      await setupJob(job);
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -393,12 +391,13 @@ describe('Test Job', () => {
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
         trustedHandlers: [TRUSTED_OPERATOR1_PRIVKEY],
+        stakingMinimumAmount: DEFAULT_MINIMUM_STAKE,
+        stakingLockPeriod: DEFAULT_LOCK_PERIOD,
+        stakingRewardFee: DEFAULT_REWARD_FEE,
         logLevel: 'error',
       });
 
-      await originalJob.initialize();
-      await originalJob.launch();
-      await originalJob.setup();
+      await setupJob(originalJob);
 
       job = new Job({
         gasPayer: NOT_TRUSTED_OPERATOR_PRIVKEY,
@@ -416,8 +415,7 @@ describe('Test Job', () => {
     });
 
     it('Should be able to initializes the job by accessing existing escrow', async () => {
-      const initialized = await job.initialize();
-      expect(initialized).toBe(true);
+      expect(await job.initialize()).toBe(true);
 
       expect(await job.manifestData?.manifestlink?.url).toBe('uploaded-key');
       expect(await job.manifestData?.manifestlink?.hash).toBe('uploaded-hash');
@@ -430,7 +428,7 @@ describe('Test Job', () => {
       expect(await job.status()).toBe(EscrowStatus.Pending);
     });
 
-    it('Should be able to setup the job again', async () => {
+    it('Should not be able to setup the job again', async () => {
       await job.initialize();
 
       expect(await job.setup()).toBe(false);
@@ -444,7 +442,6 @@ describe('Test Job', () => {
 
     it('Should be able to add trusted handlers', async () => {
       await job.initialize();
-      await job.launch();
 
       expect(await job.isTrustedHandler(DEFAULT_GAS_PAYER_ADDR)).toBe(true);
 
@@ -461,8 +458,6 @@ describe('Test Job', () => {
 
     it('Should be able to bulk payout workers', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       expect(
         await job.bulkPayout(
@@ -517,8 +512,6 @@ describe('Test Job', () => {
 
     it('Should encrypt result, when bulk paying out workers', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -545,8 +538,6 @@ describe('Test Job', () => {
 
     it('Should not encrypt result, when bulk paying out workers', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -573,8 +564,6 @@ describe('Test Job', () => {
 
     it('Should store result in private storage, when bulk paying out workers', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -602,8 +591,6 @@ describe('Test Job', () => {
 
     it('Should store result in public storage, when bulk paying out workers', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       jest.clearAllMocks();
       const finalResults = { results: 0 };
@@ -632,8 +619,6 @@ describe('Test Job', () => {
 
     it('Should return final result', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -654,16 +639,12 @@ describe('Test Job', () => {
 
     it('Should be able to abort the job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       expect(await job.abort()).toBe(true);
     });
 
     it('Should be able to abort partially paid job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -682,8 +663,6 @@ describe('Test Job', () => {
 
     it('Should not be able to abort fully paid job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -702,8 +681,6 @@ describe('Test Job', () => {
 
     it('Should be able to cancel the job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       expect(await job.cancel()).toBe(true);
       expect((await job.balance())?.toString()).toBe(toFullDigit(0).toString());
@@ -711,8 +688,6 @@ describe('Test Job', () => {
 
     it('Should be able to cancel partially paid job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
@@ -732,8 +707,6 @@ describe('Test Job', () => {
 
     it('Should not be able to cancel paid job', async () => {
       await job.initialize();
-      await job.launch();
-      await job.setup();
 
       const finalResults = { results: 0 };
       await job.bulkPayout(
