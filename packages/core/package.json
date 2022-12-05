@@ -9,6 +9,8 @@
     "typechain-types/**/*.ts"
   ],
   "scripts": {
+    "clean": "hardhat clean && rm -rf abis cache",
+    "precompile": "npm run clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
     "test": "hardhat test",
