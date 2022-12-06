@@ -16,7 +16,7 @@ pytest = "*"
 web3 = "==5.24.0"
 
 [requires]
-python_version = "3.7"
+python_version = "3"
 
 [pipenv]
 allow_prereleases = true
