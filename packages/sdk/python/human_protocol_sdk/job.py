@@ -662,8 +662,10 @@ class Job:
                 **txn_info,
             )
             bulk_paid = self._check_transfer_event(tx_receipt)
-            return self._bulk_paid() is True
 
+            LOG.debug(
+                f"Bulk paid: {bulk_paid} with main credentials: {self.gas_payer} and transaction receipt: {tx_receipt}."
+            )
         except Exception as e:
             LOG.warning(
                 f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
@@ -672,14 +674,19 @@ class Job:
         if bulk_paid:
             return bulk_paid
 
-        LOG.warn(
+        LOG.warning(
             f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv}. Using secondary ones..."
         )
 
         raffle_txn_res = self._raffle_txn(
             self.multi_credentials, txn_func, func_args, txn_event
         )
-        bulk_paid = self._check_transfer_event(raffle_txn_res["tx_receipt"])
+        tx_receipt = raffle_txn_res["tx_receipt"]
+        bulk_paid = self._check_transfer_event(tx_receipt)
+
+        LOG.debug(
+                f"Bulk paid: {bulk_paid} with transaction receipt: {tx_receipt}."
+            )
 
         if not bulk_paid:
             LOG.warning(f"{txn_event} failed with all credentials.")
