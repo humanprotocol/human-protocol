@@ -18,4 +18,5 @@ export interface EscrowData {
   amount: number;
   stats: EscrowStats;
   lastMonthEvents: EscrowEventDayData[];
+  totalSupply?: string;
 }

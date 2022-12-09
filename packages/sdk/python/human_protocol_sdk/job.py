@@ -684,9 +684,7 @@ class Job:
         tx_receipt = raffle_txn_res["tx_receipt"]
         bulk_paid = self._check_transfer_event(tx_receipt)
 
-        LOG.debug(
-                f"Bulk paid: {bulk_paid} with transaction receipt: {tx_receipt}."
-            )
+        LOG.debug(f"Bulk paid: {bulk_paid} with transaction receipt: {tx_receipt}.")
 
         if not bulk_paid:
             LOG.warning(f"{txn_event} failed with all credentials.")
