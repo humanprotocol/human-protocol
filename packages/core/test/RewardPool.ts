@@ -1,7 +1,6 @@
 import { ethers } from 'hardhat';
 import { Signer } from 'ethers';
 import {
-  Escrow,
   EscrowFactory,
   HMToken,
   RewardPool,
@@ -21,7 +20,6 @@ describe('RewardPool', function () {
 
   let token: HMToken,
     escrowFactory: EscrowFactory,
-    escrow: Escrow,
     staking: Staking,
     rewardPool: RewardPool;
   let owner: Signer,
@@ -36,8 +34,6 @@ describe('RewardPool', function () {
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 2;
-  const url = 'http://google.com/fake';
-  const hash = 'fakehash';
 
   beforeEach(async () => {
     [
@@ -75,19 +71,14 @@ describe('RewardPool', function () {
         );
     });
 
+    // Deploy Staking Conract
+    const Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy(token.address);
-
-    // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(
-      token.address,
-      escrowFactory.address,
-      minimumStake,
-      lockPeriod
-    );
+    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
@@ -96,9 +87,6 @@ describe('RewardPool', function () {
       staking.address,
       rewardFee
     );
-
-    // Configure Staking in EscrowFactory
-    await escrowFactory.setStaking(staking.address);
 
     // Configure RewardPool in Staking
     await staking.setRewardPool(rewardPool.address);
@@ -131,14 +119,9 @@ describe('RewardPool', function () {
     const allocatedTokens = 5;
 
     beforeEach(async () => {
-      await staking
-        .connect(owner)
-        .setStaker(await validator.getAddress(), Role.Validator);
       await staking.connect(validator).stake(stakedTokens);
+      await staking.connect(validator).setRole(Role.Validator);
 
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(stakedTokens);
 
       const result = await (
@@ -212,19 +195,12 @@ describe('RewardPool', function () {
     const allocatedTokens = 8;
 
     beforeEach(async () => {
-      await staking
-        .connect(owner)
-        .setStaker(await validator.getAddress(), Role.Validator);
       await staking.connect(validator).stake(stakedTokens);
+      await staking.connect(validator).setRole(Role.Validator);
 
-      await staking
-        .connect(owner)
-        .setStaker(await validator2.getAddress(), Role.Validator);
       await staking.connect(validator2).stake(stakedTokens);
+      await staking.connect(validator2).setRole(Role.Validator);
 
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(stakedTokens);
 
       const result = await (
@@ -243,13 +219,7 @@ describe('RewardPool', function () {
       await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
     });
 
-    it('Only escrow itself can distribute the reward', async () => {
-      await expect(
-        rewardPool.connect(operator).distributeReward(escrowAddress)
-      ).to.be.revertedWith('Caller is not escrow');
-    });
-
-    it('Once the escrow is completed, reward should be distributed', async () => {
+    it('Should distribute the reward.', async () => {
       const vSlashAmount = 2;
       const v2SlashAmount = 3;
       await staking
@@ -266,37 +236,7 @@ describe('RewardPool', function () {
         await validator2.getAddress()
       );
 
-      const Escrow = await ethers.getContractFactory('Escrow');
-      escrow = await Escrow.attach(escrowAddress);
-
-      // Deposit escrow
-      await token.connect(operator).transfer(escrowAddress, 100);
-
-      // Setup escrow
-      await escrow
-        .connect(operator)
-        .setup(
-          await reputationOracle.getAddress(),
-          await recordingOracle.getAddress(),
-          10,
-          10,
-          url,
-          hash
-        );
-
-      // Payout workers
-      await escrow
-        .connect(reputationOracle)
-        .bulkPayOut(
-          [await externalAccount.getAddress()],
-          [100],
-          url,
-          hash,
-          '000'
-        );
-
-      // Complete escrow
-      await escrow.connect(reputationOracle).complete();
+      await rewardPool.distributeReward(escrowAddress);
 
       expect(await token.balanceOf(await validator.getAddress())).to.equal(
         vBalanceBefore.add(vSlashAmount - rewardFee)

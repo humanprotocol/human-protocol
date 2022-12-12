@@ -85,19 +85,14 @@ describe('Staking', function () {
       })
     );
 
+    // Deploy Staking Conract
+    const Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy(token.address);
-
-    // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(
-      token.address,
-      escrowFactory.address,
-      minimumStake,
-      lockPeriod
-    );
+    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
@@ -106,9 +101,6 @@ describe('Staking', function () {
       staking.address,
       rewardFee
     );
-
-    // Configure Staking in EscrowFactory
-    await escrowFactory.setStaking(staking.address);
 
     // Topup staking address
     await token.connect(owner).transfer(staking.address, 1000);
@@ -133,11 +125,6 @@ describe('Staking', function () {
       expect(result).to.equal(token.address);
     });
 
-    it('Should set the right escrow factory address', async () => {
-      const result = await staking.escrowFactory();
-      expect(result).to.equal(escrowFactory.address);
-    });
-
     it('Should set the minimum stake', async () => {
       const result = await staking.minimumStake();
       expect(result.toString()).to.equal(minimumStake.toString());
@@ -149,66 +136,7 @@ describe('Staking', function () {
     });
   });
 
-  describe('setStaker', function () {
-    describe('Validations', function () {
-      it('Should revert with the right error if caller is not an owner', async function () {
-        await expect(
-          staking
-            .connect(operator)
-            .setStaker(ethers.constants.AddressZero, Role.Operator)
-        ).to.be.revertedWith('Caller is not a owner');
-      });
-
-      it('Should revert with the right error if invalid address', async function () {
-        await expect(
-          staking
-            .connect(owner)
-            .setStaker(ethers.constants.AddressZero, Role.Operator)
-        ).to.be.revertedWith('Must be a valid address');
-      });
-
-      it('Should revert with the right error if called want setup himself', async function () {
-        await expect(
-          staking
-            .connect(owner)
-            .setStaker(await owner.getAddress(), Role.Operator)
-        ).to.be.revertedWith('Staker cannot set himself');
-      });
-    });
-
-    describe('Events', function () {
-      it('Should emit an event on set staker', async function () {
-        await expect(
-          staking
-            .connect(owner)
-            .setStaker(await operator2.getAddress(), Role.Operator)
-        )
-          .to.emit(staking, 'SetStaker')
-          .withArgs(await operator2.getAddress(), anyValue);
-      });
-    });
-
-    describe('Set address as staker', function () {
-      it('Should set address as a staker with role', async function () {
-        await staking
-          .connect(owner)
-          .setStaker(await operator3.getAddress(), Role.Operator);
-        await expect(
-          await staking
-            .connect(owner)
-            .isRole(await operator3.getAddress(), Role.Operator)
-        ).to.equal(true);
-      });
-    });
-  });
-
   describe('stake', function () {
-    this.beforeEach(async () => {
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
-    });
-
     describe('Validations', function () {
       it('Should revert with the right error if not a positive number', async function () {
         await expect(staking.connect(operator).stake(0)).to.be.revertedWith(
@@ -246,10 +174,6 @@ describe('Staking', function () {
   describe('unstake', function () {
     this.beforeEach(async () => {
       const amount = 10;
-
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(amount);
     });
 
@@ -301,9 +225,6 @@ describe('Staking', function () {
     this.beforeEach(async () => {
       const amount = 10;
 
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(amount);
 
       const result = await (
@@ -401,9 +322,6 @@ describe('Staking', function () {
     this.beforeEach(async () => {
       const stakeTokens = 10;
 
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(stakeTokens);
 
       const result = await (
@@ -592,9 +510,7 @@ describe('Staking', function () {
   describe('isRole', function () {
     describe('Is user has role', function () {
       this.beforeEach(async () => {
-        await staking
-          .connect(owner)
-          .setStaker(await operator.getAddress(), Role.Operator);
+        await staking.connect(operator).stake(10);
       });
 
       it('Should return an user has not Operator role', async function () {
@@ -621,10 +537,6 @@ describe('Staking', function () {
 
       this.beforeEach(async () => {
         const stakedTokens = 10;
-
-        await staking
-          .connect(owner)
-          .setStaker(await operator.getAddress(), Role.Operator);
         await staking.connect(operator).stake(stakedTokens);
 
         const result = await (
@@ -665,12 +577,6 @@ describe('Staking', function () {
 
   describe('hasStake', function () {
     describe('Is stakes has stake', function () {
-      this.beforeEach(async () => {
-        await staking
-          .connect(owner)
-          .setStaker(await operator.getAddress(), Role.Operator);
-      });
-
       it('Should return an escrow address has not allocation', async function () {
         expect(
           await staking.connect(owner).hasStake(await operator.getAddress())
@@ -696,9 +602,6 @@ describe('Staking', function () {
       this.beforeEach(async () => {
         const stakedTokens = 10;
 
-        await staking
-          .connect(owner)
-          .setStaker(await operator.getAddress(), Role.Operator);
         await staking.connect(operator).stake(stakedTokens);
 
         const result = await (
@@ -755,14 +658,9 @@ describe('Staking', function () {
     this.beforeEach(async () => {
       await staking.connect(owner).setRewardPool(rewardPool.address);
 
-      await staking
-        .connect(owner)
-        .setStaker(await validator.getAddress(), Role.Validator);
       await staking.connect(validator).stake(stakedTokens);
+      await staking.connect(validator).setRole(Role.Validator);
 
-      await staking
-        .connect(owner)
-        .setStaker(await operator.getAddress(), Role.Operator);
       await staking.connect(operator).stake(stakedTokens);
 
       const result = await (
@@ -861,16 +759,13 @@ describe('Staking', function () {
           reputationOracle,
           recordingOracle,
         ].map(async (account, index) => {
-          await staking
-            .connect(owner)
-            .setStaker(await account.getAddress(), Role.Operator);
           await staking.connect(account).stake(stakedTokens * (index + 1));
         })
       );
     });
 
     it('Should return list of stakers', async () => {
-      const [stakers, stakes] = await staking.getListOfStakers(Role.Operator);
+      const [stakers, stakes] = await staking.getListOfStakers();
 
       expect(stakers.length).to.equal(6);
       expect(stakes.length).to.equal(6);
@@ -890,15 +785,6 @@ describe('Staking', function () {
           );
         })
       );
-    });
-
-    it('Should return empty array', async () => {
-      const [stakers, stakes] = await staking.getListOfStakers(
-        Role.RecordingOracle
-      );
-
-      expect(stakers.length).to.equal(0);
-      expect(stakes.length).to.equal(0);
     });
   });
 });

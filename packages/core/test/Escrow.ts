@@ -28,8 +28,6 @@ describe('Escrow', function () {
 
   let token: HMToken, escrow: Escrow, staking: Staking, rewardPool: RewardPool;
 
-  let escrowFactory: Signer;
-
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 2;
@@ -41,7 +39,6 @@ describe('Escrow', function () {
       reputationOracle,
       recordingOracle,
       externalAddress,
-      escrowFactory,
       ...restAccounts
     ] = await ethers.getSigners();
     trustedHandlers = [
@@ -55,12 +52,7 @@ describe('Escrow', function () {
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(
-      token.address,
-      await escrowFactory.getAddress(),
-      minimumStake,
-      lockPeriod
-    );
+    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
@@ -77,7 +69,6 @@ describe('Escrow', function () {
     const Escrow = await ethers.getContractFactory('Escrow');
     escrow = await Escrow.deploy(
       token.address,
-      staking.address,
       await owner.getAddress(),
       5,
       trustedHandlers
