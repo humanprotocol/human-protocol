@@ -23,14 +23,13 @@ contract Staking is IStaking {
     // ERC20 Token address
     address public eip20;
 
-    // Escrow factory address
-    address public escrowFactory;
-
     // Reward pool address
     address public override rewardPool;
 
     // Minimum amount of tokens an staker needs to stake
     uint256 public minimumStake;
+
+    mapping(Stakes.Role => uint256) public minimumStakeForRole;
 
     // Time in blocks to unstake
     uint32 public lockPeriod;
@@ -38,14 +37,11 @@ contract Staking is IStaking {
     // Staker stakes: staker => Stake
     mapping(address => Stakes.Staker) public stakes;
 
-    // List of stakers per role
-    mapping(Stakes.Role => address[]) public stakers;
+    // List of stakers
+    address[] public stakers;
 
     // Allocations : escrowAddress => Allocation
     mapping(address => IStaking.Allocation) public allocations;
-
-    // List of addresses allowed to slash stakes
-    mapping(address => bool) public slashers;
 
     /**
      * @dev Emitted when `staker` stake `tokens` amount.
@@ -93,6 +89,14 @@ contract Staking is IStaking {
     event SetMinumumStake(uint256 indexed minimumStake);
 
     /**
+     * @dev Emitted when `owner` set new value for `minimumStakeForRole`.
+     */
+    event SetMinumumStakeForRole(
+        Stakes.Role role,
+        uint256 indexed minimumStakeForRole
+    );
+
+    /**
      * @dev Emitted when `owner` set new value for `lockPeriod`.
      */
     event SetLockPeriod(uint32 indexed lockPeriod);
@@ -103,18 +107,12 @@ contract Staking is IStaking {
     event SetRewardPool(address indexed rewardPool);
 
     /**
-     * @dev Emitted when `owner` set address as `staker` with `role`.
+     * @dev Emitted when `staker` changed the role.
      */
-    event SetStaker(address indexed staker, Stakes.Role indexed role);
+    event SetStakerRole(address indexed staker, Stakes.Role role);
 
-    constructor(
-        address _eip20,
-        address _escrowFactory,
-        uint256 _minimumStake,
-        uint32 _lockPeriod
-    ) {
+    constructor(address _eip20, uint256 _minimumStake, uint32 _lockPeriod) {
         eip20 = _eip20;
-        escrowFactory = _escrowFactory;
         owner = msg.sender;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
@@ -138,6 +136,32 @@ contract Staking is IStaking {
         require(_minimumStake > 0, 'Must be a positive number');
         minimumStake = _minimumStake;
         emit SetMinumumStake(minimumStake);
+    }
+
+    /**
+     * @dev Set the minimum stake amount for the role.
+     * @param _role Role to set minimum stake amount
+     * @param _minimumStakeForRole Minimum stake amount for the role
+     */
+    function setMinimumStakeForRole(
+        Stakes.Role _role,
+        uint256 _minimumStakeForRole
+    ) external override onlyOwner {
+        _setMinimumStakeForRole(_role, _minimumStakeForRole);
+    }
+
+    /**
+     * @dev Set the minimum stake amount for the role.
+     * @param _role Role to set minimum stake amount
+     * @param _minimumStakeForRole Minimum stake amount for the role
+     */
+    function _setMinimumStakeForRole(
+        Stakes.Role _role,
+        uint256 _minimumStakeForRole
+    ) private {
+        require(_minimumStakeForRole > 0, 'Must be a positive number');
+        minimumStakeForRole[_role] = _minimumStakeForRole;
+        emit SetMinumumStakeForRole(_role, _minimumStakeForRole);
     }
 
     /**
@@ -174,22 +198,6 @@ contract Staking is IStaking {
         require(_rewardPool != address(0), 'Must be a valid address');
         rewardPool = _rewardPool;
         emit SetRewardPool(_rewardPool);
-    }
-
-    /**
-     * @dev Add address to the list of stakers.
-     * @param _staker Staker's address
-     * @param _role Role of the staker
-     */
-    function setStaker(address _staker, Stakes.Role _role) external onlyOwner {
-        require(_staker != address(0), 'Must be a valid address');
-        require(_staker != msg.sender, 'Staker cannot set himself');
-
-        Stakes.Staker memory staker = Stakes.Staker(_role, 0, 0, 0, 0);
-
-        stakes[_staker] = staker;
-        stakers[_role].push(_staker);
-        emit SetStaker(_staker, _role);
     }
 
     /**
@@ -335,19 +343,16 @@ contract Staking is IStaking {
     }
 
     /**
-     * @dev Get list of stakers per role
-     * @param _role Staker role
+     * @dev Get list of stakers
      * @return List of staker's addresses, and stake data
      */
-    function getListOfStakers(
-        Stakes.Role _role
-    )
+    function getListOfStakers()
         external
         view
         override
         returns (address[] memory, Stakes.Staker[] memory)
     {
-        address[] memory _stakerAddresses = stakers[_role];
+        address[] memory _stakerAddresses = stakers;
         uint256 _stakersCount = _stakerAddresses.length;
 
         if (_stakersCount == 0) {
@@ -367,12 +372,24 @@ contract Staking is IStaking {
      * @dev Deposit tokens on the staker stake.
      * @param _tokens Amount of tokens to stake
      */
-    function stake(uint256 _tokens) external override onlyStaker(msg.sender) {
+    function stake(uint256 _tokens) external override {
         require(_tokens > 0, 'Must be a positive number');
         require(
             stakes[msg.sender].tokensSecureStake().add(_tokens) >= minimumStake,
             'Total stake is below the minimum threshold'
         );
+
+        if (stakes[msg.sender].role == Stakes.Role.Null) {
+            Stakes.Staker memory staker = Stakes.Staker(
+                Stakes.Role.Operator,
+                0,
+                0,
+                0,
+                0
+            );
+            stakes[msg.sender] = staker;
+            stakers.push(msg.sender);
+        }
 
         HMTokenInterface token = HMTokenInterface(eip20);
         token.transferFrom(msg.sender, address(this), _tokens);
@@ -569,6 +586,34 @@ contract Staking is IStaking {
         );
     }
 
+    /**
+     * @dev Set the role of the staker
+     * @param _role Role to set
+     */
+    function setRole(
+        Stakes.Role _role
+    ) external override onlyStaker(msg.sender) {
+        _setRole(_role);
+    }
+
+    /**
+     * @dev Set the role of the staker
+     * @param _role Role to set
+     */
+    function _setRole(Stakes.Role _role) private {
+        Stakes.Staker memory staker = stakes[msg.sender];
+
+        require(
+            staker.tokensAvailable() >= minimumStakeForRole[_role],
+            'Not enough amount of the stakes'
+        );
+
+        staker.role = _role;
+        stakes[msg.sender] = staker;
+
+        emit SetStakerRole(msg.sender, _role);
+    }
+
     modifier onlyOwner() {
         require(owner == msg.sender, 'Caller is not a owner');
         _;
@@ -583,15 +628,6 @@ contract Staking is IStaking {
                 staker.role == Stakes.Role.ReputationOracle ||
                 staker.role == Stakes.Role.RecordingOracle,
             'Caller is not a staker'
-        );
-        _;
-    }
-
-    modifier onlyOperator(address _staker) {
-        Stakes.Staker memory staker = stakes[_staker];
-        require(
-            staker.role == Stakes.Role.Operator,
-            'Caller is not a operator'
         );
         _;
     }

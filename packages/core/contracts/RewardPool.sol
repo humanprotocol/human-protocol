@@ -75,12 +75,8 @@ contract RewardPool is IRewardPool {
 
     /**
      * @dev Distribute rewards for allocation
-     * The function will be called from Escrow contract,
-     * when the escrow gets Completed state
      */
     function distributeReward(address _escrowAddress) external override {
-        require(_escrowAddress == msg.sender, 'Caller is not escrow');
-
         Reward[] memory rewardsForEscrow = rewards[_escrowAddress];
         HMTokenInterface token = HMTokenInterface(eip20);
 

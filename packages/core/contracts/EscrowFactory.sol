@@ -19,14 +19,10 @@ contract EscrowFactory {
     address public staking;
     event Launched(address eip20, address escrow, uint256 counter);
 
-    constructor(address _eip20) {
+    constructor(address _eip20, address _staking) {
         eip20 = _eip20;
-        owner = msg.sender;
-    }
-
-    function setStaking(address _staking) external onlyOwner {
-        require(staking == address(0), 'Staking already set');
         staking = _staking;
+        owner = msg.sender;
     }
 
     function createEscrow(
@@ -43,7 +39,6 @@ contract EscrowFactory {
 
         Escrow escrow = new Escrow(
             eip20,
-            staking,
             payable(msg.sender),
             STANDARD_DURATION,
             trustedHandlers

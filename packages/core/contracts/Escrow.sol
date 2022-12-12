@@ -3,7 +3,6 @@
 pragma solidity >=0.6.2;
 
 import './interfaces/HMTokenInterface.sol';
-import './interfaces/IStaking.sol';
 import './interfaces/IRewardPool.sol';
 import './utils/SafeMath.sol';
 
@@ -27,7 +26,6 @@ contract Escrow {
     address public recordingOracle;
     address public launcher;
     address payable public canceler;
-    address public staking;
 
     uint256 public reputationOracleStake;
     uint256 public recordingOracleStake;
@@ -51,7 +49,6 @@ contract Escrow {
 
     constructor(
         address _eip20,
-        address _staking,
         address payable _canceler,
         uint256 _duration,
         address[] memory _handlers
@@ -60,7 +57,6 @@ contract Escrow {
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
         launcher = msg.sender;
-        staking = _staking;
         canceler = _canceler;
         areTrustedHandlers[_canceler] = true;
         areTrustedHandlers[msg.sender] = true;
@@ -148,11 +144,6 @@ contract Escrow {
         );
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
-
-        // Distribute Reward
-        IRewardPool(IStaking(staking).rewardPool()).distributeReward(
-            address(this)
-        );
     }
 
     function storeResults(
