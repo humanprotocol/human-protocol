@@ -194,6 +194,23 @@ class StorageTest(unittest.TestCase):
             # Download from storage must be called as PRIVATE (public is TRUE)
             download_mock.assert_called_once_with(key=file_key, public=True)
 
+    def test_download_from_public_resource(self):
+        """Download content from public URI"""
+        file_key = "https://s3aaa.com"
+        sample_data = '{"a": 1, "b": 2}'
+
+        with patch("urllib.request.urlopen") as mock_urlopen:
+            cm = MagicMock()
+            cm.read.side_effect = [
+                crypto.encrypt(self.pub_key, sample_data),
+                sample_data.encode("utf-8"),
+            ]
+            mock_urlopen.return_value = cm
+
+            downloaded = download(key=file_key, private_key=self.priv_key)
+            self.assertEqual(json.dumps(downloaded), sample_data)
+            mock_urlopen.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main(exit=True)

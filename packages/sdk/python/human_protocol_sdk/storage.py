@@ -2,6 +2,8 @@ import hashlib
 import json
 import logging
 import os
+import urllib.request
+import re
 from typing import Dict, Tuple, Optional, Union
 
 import boto3
@@ -163,6 +165,13 @@ def download(key: str, private_key: bytes, public: bool = False) -> Dict:
 
     """
     try:
+        url_pattern = "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$"
+        is_url = re.match(url_pattern, key)
+        content = (
+            urllib.request.urlopen(key).read()
+            if is_url
+            else download_from_storage(key=key, public=public)
+        )
         content = download_from_storage(key=key, public=public)
         artifact = (
             crypto.decrypt(private_key, content)

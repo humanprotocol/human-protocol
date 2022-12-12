@@ -20,9 +20,14 @@ export const usePollEventsData = () => {
   }, [dispatch]);
 };
 
-export const useEscrowDataByChainID = (chainId: ChainId): EscrowData => {
+export const useChainId = () => {
   const escrow = useSelector((state: AppState) => state.escrow);
-  const { amounts, stats, events } = escrow;
+  return escrow.chainId;
+};
+
+export const useEscrowDataByChainID = (): EscrowData => {
+  const escrow = useSelector((state: AppState) => state.escrow);
+  const { amounts, stats, events, chainId } = escrow;
 
   if (chainId === ChainId.ALL) {
     const escrowData: EscrowData = {
@@ -41,15 +46,12 @@ export const useEscrowDataByChainID = (chainId: ChainId): EscrowData => {
         escrowData.amount += amounts[chainId]!;
       }
       if (stats[chainId]) {
-        escrowData.stats.bulkTransferEventCount += stats[
-          chainId
-        ]?.bulkTransferEventCount!;
-        escrowData.stats.pendingEventCount += stats[
-          chainId
-        ]?.pendingEventCount!;
-        escrowData.stats.intermediateStorageEventCount += stats[
-          chainId
-        ]?.intermediateStorageEventCount!;
+        escrowData.stats.bulkTransferEventCount +=
+          stats[chainId]?.bulkTransferEventCount!;
+        escrowData.stats.pendingEventCount +=
+          stats[chainId]?.pendingEventCount!;
+        escrowData.stats.intermediateStorageEventCount +=
+          stats[chainId]?.intermediateStorageEventCount!;
         escrowData.stats.totalEventCount += stats[chainId]?.totalEventCount!;
       }
       if (Array.isArray(events[chainId])) {

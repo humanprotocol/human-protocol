@@ -3,11 +3,12 @@ import setuptools
 
 setuptools.setup(
     name="human-protocol-sdk",
-    version="0.0.2",
+    version="0.0.6",
     author="HUMAN Protocol",
     description="A python library to launch escrow contracts to the HUMAN network.",
     url="https://github.com/humanprotocol/human-protocol/packages/sdk/python",
     include_package_data=True,
+    exclude_package_data={"contracts": ["*.dbg.json"]},
     zip_safe=True,
     classifiers=[
         "Intended Audience :: Developers",
@@ -15,7 +16,6 @@ setuptools.setup(
         "Programming Language :: Python",
     ],
     packages=setuptools.find_packages() + ["contracts"],
-    data_files=[("contracts", glob("*.json", recursive=True))],
     install_requires=[
         "boto3",
         "cryptography",

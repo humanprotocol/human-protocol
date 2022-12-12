@@ -1,3 +1,6 @@
+clean-package:
+	rm -rf build contracts dist *.egg-info
+
 build-contracts:
 	./scripts/build-contracts.sh
 
@@ -9,6 +12,7 @@ run-test:
 	./scripts/run-test.sh
 
 build-package:
+	make clean-package
 	make build-contracts
 	python3 setup.py sdist bdist_wheel
 
