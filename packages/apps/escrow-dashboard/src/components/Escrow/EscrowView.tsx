@@ -2,9 +2,11 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { CardBarChart, CardStackedBarChart } from 'src/components/Cards';
-import { useEscrowDataByChainID } from 'src/state/escrow/hooks';
+import { ESCROW_NETWORKS } from 'src/constants';
+import { useChainId, useEscrowDataByChainID } from 'src/state/escrow/hooks';
 
 export const EscrowView = () => {
+  const chainId = useChainId();
   const escrowData = useEscrowDataByChainID();
 
   const escrowSeries = useMemo(() => {
@@ -85,6 +87,14 @@ export const EscrowView = () => {
 
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
+      {escrowData.totalSupply && (
+        <Grid item xs={12}>
+          <Typography color="primary" textAlign="right">
+            {ESCROW_NETWORKS[chainId]?.title} Token Supply:{' '}
+            {escrowData.totalSupply}
+          </Typography>
+        </Grid>
+      )}
       <Grid item xs={12}>
         <CardStackedBarChart
           series={escrowSeries}
