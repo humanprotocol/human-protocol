@@ -49,18 +49,9 @@ interface IStaking {
 
     function setMinimumStake(uint256 _minimumStake) external;
 
-    function setMinimumStakeForRole(
-        Stakes.Role _role,
-        uint256 _minimumStakeForRole
-    ) external;
-
     function setLockPeriod(uint32 _lockPeriod) external;
 
     function setRewardPool(address _rewardPool) external;
-
-    // function setStaker(address _staker, Role _role) external;
-
-    // function isRole(address _account, Role role) external view returns (bool);
 
     function isAllocation(address _escrowAddress) external view returns (bool);
 
@@ -78,7 +69,9 @@ interface IStaking {
 
     function getStakedTokens(address _staker) external view returns (uint256);
 
-    // function getStaker(address _staker) external view returns (Stakes.Staker memory);
+    function getStaker(
+        address _staker
+    ) external view returns (Stakes.Staker memory);
 
     function stake(uint256 _tokens) external;
 
@@ -87,6 +80,7 @@ interface IStaking {
     function withdraw() external;
 
     function slash(
+        address _slasher,
         address _staker,
         address _escrowAddress,
         uint256 _tokens
@@ -95,8 +89,6 @@ interface IStaking {
     function allocate(address escrowAddress, uint256 _tokens) external;
 
     function closeAllocation(address _escrowAddress) external;
-
-    function setRole(Stakes.Role _role) external;
 
     function getListOfStakers()
         external

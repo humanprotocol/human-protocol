@@ -12,27 +12,7 @@ library Stakes {
     using SafeMath for uint256;
     using Stakes for Stakes.Staker;
 
-    /**
-     * @dev Possible roles for participants
-     * Roles:
-     * - Null = Staker == address(0)
-     * - Operator = Job Launcher
-     * - Validator = Validator
-     * - ExchangeOracle = Exchange Oracle
-     * - ReputationOracle = Reputation Oracle
-     * - RecordingOracle = Recording Oracle
-     */
-    enum Role {
-        Null,
-        Operator,
-        Validator,
-        ExchangeOracle,
-        ReputationOracle,
-        RecordingOracle
-    }
-
     struct Staker {
-        Role role;
         uint256 tokensStaked; // Tokens staked by the Staker
         uint256 tokensAllocated; // Tokens allocated for jobs
         uint256 tokensLocked; // Tokens locked for withdrawal

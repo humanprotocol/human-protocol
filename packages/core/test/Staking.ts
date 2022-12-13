@@ -20,15 +20,6 @@ const mineNBlocks = async (n: number) => {
 };
 
 describe('Staking', function () {
-  enum Role {
-    Null = 0,
-    Operator = 1,
-    Validator = 2,
-    ExchangeOracle = 3,
-    ReputationOracle = 4,
-    RecordingOracle = 5,
-  }
-
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 1;
@@ -507,30 +498,6 @@ describe('Staking', function () {
     });
   });
 
-  describe('isRole', function () {
-    describe('Is user has role', function () {
-      this.beforeEach(async () => {
-        await staking.connect(operator).stake(10);
-      });
-
-      it('Should return an user has not Operator role', async function () {
-        expect(
-          await staking
-            .connect(owner)
-            .isRole(await operator.getAddress(), Role.ExchangeOracle)
-        ).to.equal(false);
-      });
-
-      it('Should return an user has Operator role', async function () {
-        expect(
-          await staking
-            .connect(owner)
-            .isRole(await operator.getAddress(), Role.Operator)
-        ).to.equal(true);
-      });
-    });
-  });
-
   describe('isAllocation', function () {
     describe('Is escrow address has allocation', function () {
       let escrowAddress: string;
@@ -659,7 +626,6 @@ describe('Staking', function () {
       await staking.connect(owner).setRewardPool(rewardPool.address);
 
       await staking.connect(validator).stake(stakedTokens);
-      await staking.connect(validator).setRole(Role.Validator);
 
       await staking.connect(operator).stake(stakedTokens);
 
@@ -680,19 +646,25 @@ describe('Staking', function () {
     });
 
     describe('Validations', function () {
-      it('Should revert with the right error if caller is not a validator', async function () {
+      it('Should revert with the right error if caller is not the owner', async function () {
         await expect(
           staking
             .connect(operator)
-            .slash(await operator.getAddress(), escrowAddress, slashedTokens)
-        ).to.be.revertedWith('Caller is not a validator');
+            .slash(
+              await operator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              slashedTokens
+            )
+        ).to.be.revertedWith('Caller is not a owner');
       });
 
       it('Should revert with the right error if invalid address', async function () {
         await expect(
           staking
-            .connect(validator)
+            .connect(owner)
             .slash(
+              await validator.getAddress(),
               await operator.getAddress(),
               ethers.constants.AddressZero,
               slashedTokens
@@ -707,8 +679,13 @@ describe('Staking', function () {
       it('Should emit an event on stake slashed', async function () {
         await expect(
           await staking
-            .connect(validator)
-            .slash(await operator.getAddress(), escrowAddress, slashedTokens)
+            .connect(owner)
+            .slash(
+              await validator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              slashedTokens
+            )
         )
           .to.emit(staking, 'StakeSlashed')
           .withArgs(await validator.getAddress(), anyValue);
@@ -720,8 +697,13 @@ describe('Staking', function () {
         const slashedTokens = 2;
 
         await staking
-          .connect(validator)
-          .slash(await operator.getAddress(), escrowAddress, slashedTokens);
+          .connect(owner)
+          .slash(
+            await validator.getAddress(),
+            await operator.getAddress(),
+            escrowAddress,
+            slashedTokens
+          );
 
         // await staking.connect(operator).withdraw();
 

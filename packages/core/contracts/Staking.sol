@@ -29,8 +29,6 @@ contract Staking is IStaking {
     // Minimum amount of tokens an staker needs to stake
     uint256 public minimumStake;
 
-    mapping(Stakes.Role => uint256) public minimumStakeForRole;
-
     // Time in blocks to unstake
     uint32 public lockPeriod;
 
@@ -89,14 +87,6 @@ contract Staking is IStaking {
     event SetMinumumStake(uint256 indexed minimumStake);
 
     /**
-     * @dev Emitted when `owner` set new value for `minimumStakeForRole`.
-     */
-    event SetMinumumStakeForRole(
-        Stakes.Role role,
-        uint256 indexed minimumStakeForRole
-    );
-
-    /**
      * @dev Emitted when `owner` set new value for `lockPeriod`.
      */
     event SetLockPeriod(uint32 indexed lockPeriod);
@@ -105,11 +95,6 @@ contract Staking is IStaking {
      * @dev Emitted when `owner` set new value for `rewardPool`.
      */
     event SetRewardPool(address indexed rewardPool);
-
-    /**
-     * @dev Emitted when `staker` changed the role.
-     */
-    event SetStakerRole(address indexed staker, Stakes.Role role);
 
     constructor(address _eip20, uint256 _minimumStake, uint32 _lockPeriod) {
         eip20 = _eip20;
@@ -136,32 +121,6 @@ contract Staking is IStaking {
         require(_minimumStake > 0, 'Must be a positive number');
         minimumStake = _minimumStake;
         emit SetMinumumStake(minimumStake);
-    }
-
-    /**
-     * @dev Set the minimum stake amount for the role.
-     * @param _role Role to set minimum stake amount
-     * @param _minimumStakeForRole Minimum stake amount for the role
-     */
-    function setMinimumStakeForRole(
-        Stakes.Role _role,
-        uint256 _minimumStakeForRole
-    ) external override onlyOwner {
-        _setMinimumStakeForRole(_role, _minimumStakeForRole);
-    }
-
-    /**
-     * @dev Set the minimum stake amount for the role.
-     * @param _role Role to set minimum stake amount
-     * @param _minimumStakeForRole Minimum stake amount for the role
-     */
-    function _setMinimumStakeForRole(
-        Stakes.Role _role,
-        uint256 _minimumStakeForRole
-    ) private {
-        require(_minimumStakeForRole > 0, 'Must be a positive number');
-        minimumStakeForRole[_role] = _minimumStakeForRole;
-        emit SetMinumumStakeForRole(_role, _minimumStakeForRole);
     }
 
     /**
@@ -198,20 +157,6 @@ contract Staking is IStaking {
         require(_rewardPool != address(0), 'Must be a valid address');
         rewardPool = _rewardPool;
         emit SetRewardPool(_rewardPool);
-    }
-
-    /**
-     * @dev Return the result of checking if the staker has a specific role.
-     * @param _staker Staker's address
-     * @param _role Role of the staker
-     * @return True if _staker has role
-     */
-    function isRole(
-        address _staker,
-        Stakes.Role _role
-    ) external view returns (bool) {
-        Stakes.Staker memory staker = stakes[_staker];
-        return staker.role == _role;
     }
 
     /**
@@ -338,7 +283,7 @@ contract Staking is IStaking {
      */
     function getStaker(
         address _staker
-    ) external view returns (Stakes.Staker memory) {
+    ) external view override returns (Stakes.Staker memory) {
         return stakes[_staker];
     }
 
@@ -374,19 +319,15 @@ contract Staking is IStaking {
      */
     function stake(uint256 _tokens) external override {
         require(_tokens > 0, 'Must be a positive number');
+
+        Stakes.Staker memory staker = stakes[msg.sender];
         require(
-            stakes[msg.sender].tokensSecureStake().add(_tokens) >= minimumStake,
+            staker.tokensSecureStake().add(_tokens) >= minimumStake,
             'Total stake is below the minimum threshold'
         );
 
-        if (stakes[msg.sender].role == Stakes.Role.Null) {
-            Stakes.Staker memory staker = Stakes.Staker(
-                Stakes.Role.Operator,
-                0,
-                0,
-                0,
-                0
-            );
+        if (staker.tokensStaked == 0) {
+            staker = Stakes.Staker(0, 0, 0, 0);
             stakes[msg.sender] = staker;
             stakers.push(msg.sender);
         }
@@ -462,10 +403,11 @@ contract Staking is IStaking {
      * @param _tokens Amount of tokens to slash from the indexer stake
      */
     function slash(
+        address _slasher,
         address _staker,
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlyValidator(msg.sender) {
+    ) external override onlyOwner {
         require(_escrowAddress != address(0), 'Must be a valid address');
 
         Stakes.Staker storage staker = stakes[_staker];
@@ -488,9 +430,9 @@ contract Staking is IStaking {
         token.transfer(rewardPool, _tokens);
 
         // Keep record on Reward Pool
-        IRewardPool(rewardPool).addReward(_escrowAddress, msg.sender, _tokens);
+        IRewardPool(rewardPool).addReward(_escrowAddress, _slasher, _tokens);
 
-        emit StakeSlashed(msg.sender, _tokens);
+        emit StakeSlashed(_slasher, _tokens);
     }
 
     /**
@@ -586,34 +528,6 @@ contract Staking is IStaking {
         );
     }
 
-    /**
-     * @dev Set the role of the staker
-     * @param _role Role to set
-     */
-    function setRole(
-        Stakes.Role _role
-    ) external override onlyStaker(msg.sender) {
-        _setRole(_role);
-    }
-
-    /**
-     * @dev Set the role of the staker
-     * @param _role Role to set
-     */
-    function _setRole(Stakes.Role _role) private {
-        Stakes.Staker memory staker = stakes[msg.sender];
-
-        require(
-            staker.tokensAvailable() >= minimumStakeForRole[_role],
-            'Not enough amount of the stakes'
-        );
-
-        staker.role = _role;
-        stakes[msg.sender] = staker;
-
-        emit SetStakerRole(msg.sender, _role);
-    }
-
     modifier onlyOwner() {
         require(owner == msg.sender, 'Caller is not a owner');
         _;
@@ -621,23 +535,7 @@ contract Staking is IStaking {
 
     modifier onlyStaker(address _staker) {
         Stakes.Staker memory staker = stakes[_staker];
-        require(
-            staker.role == Stakes.Role.Operator ||
-                staker.role == Stakes.Role.Validator ||
-                staker.role == Stakes.Role.ExchangeOracle ||
-                staker.role == Stakes.Role.ReputationOracle ||
-                staker.role == Stakes.Role.RecordingOracle,
-            'Caller is not a staker'
-        );
-        _;
-    }
-
-    modifier onlyValidator(address _staker) {
-        Stakes.Staker memory staker = stakes[_staker];
-        require(
-            staker.role == Stakes.Role.Validator,
-            'Caller is not a validator'
-        );
+        require(staker.tokensStaked > 0, 'Caller is not a staker');
         _;
     }
 }

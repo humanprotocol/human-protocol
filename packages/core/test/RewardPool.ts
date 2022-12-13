@@ -9,15 +9,6 @@ import {
 import { expect } from 'chai';
 
 describe('RewardPool', function () {
-  enum Role {
-    Null = 0,
-    Operator = 1,
-    Validator = 2,
-    ExchangeOracle = 3,
-    ReputationOracle = 4,
-    RecordingOracle = 5,
-  }
-
   let token: HMToken,
     escrowFactory: EscrowFactory,
     staking: Staking,
@@ -120,7 +111,6 @@ describe('RewardPool', function () {
 
     beforeEach(async () => {
       await staking.connect(validator).stake(stakedTokens);
-      await staking.connect(validator).setRole(Role.Validator);
 
       await staking.connect(operator).stake(stakedTokens);
 
@@ -156,8 +146,13 @@ describe('RewardPool', function () {
       const slashedTokens = 1;
 
       await staking
-        .connect(validator)
-        .slash(await operator.getAddress(), escrowAddress, slashedTokens);
+        .connect(owner)
+        .slash(
+          await validator.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          slashedTokens
+        );
 
       expect(await token.balanceOf(rewardPool.address)).to.equal(slashedTokens);
 
@@ -169,8 +164,13 @@ describe('RewardPool', function () {
       const slashedTokens = 3;
       await expect(
         await staking
-          .connect(validator)
-          .slash(await operator.getAddress(), escrowAddress, slashedTokens)
+          .connect(owner)
+          .slash(
+            await validator.getAddress(),
+            await operator.getAddress(),
+            escrowAddress,
+            slashedTokens
+          )
       )
         .to.emit(rewardPool, 'RewardAdded')
         .withArgs(
@@ -196,10 +196,8 @@ describe('RewardPool', function () {
 
     beforeEach(async () => {
       await staking.connect(validator).stake(stakedTokens);
-      await staking.connect(validator).setRole(Role.Validator);
 
       await staking.connect(validator2).stake(stakedTokens);
-      await staking.connect(validator2).setRole(Role.Validator);
 
       await staking.connect(operator).stake(stakedTokens);
 
@@ -223,11 +221,21 @@ describe('RewardPool', function () {
       const vSlashAmount = 2;
       const v2SlashAmount = 3;
       await staking
-        .connect(validator)
-        .slash(await operator.getAddress(), escrowAddress, vSlashAmount);
+        .connect(owner)
+        .slash(
+          await validator.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          vSlashAmount
+        );
       await staking
-        .connect(validator2)
-        .slash(await operator.getAddress(), escrowAddress, v2SlashAmount);
+        .connect(owner)
+        .slash(
+          await validator2.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          v2SlashAmount
+        );
 
       const vBalanceBefore = await token.balanceOf(
         await validator.getAddress()
