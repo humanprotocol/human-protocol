@@ -1,10 +1,11 @@
 import { Grid } from '@mui/material';
 import * as React from 'react';
 import { CardTextBlock } from 'src/components/Cards';
-import { useTokenStats } from 'src/state/token/hooks';
+import { useTokenStatsByChainId } from 'src/state/token/hooks';
 
 export const TokenView: React.FC = (): React.ReactElement => {
-  const { totalTransferEventCount, holders, totalSupply } = useTokenStats();
+  const { totalTransferEventCount, holders, totalSupply } =
+    useTokenStatsByChainId();
 
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
