@@ -39,38 +39,6 @@ export enum EscrowStatus {
 }
 
 /**
- * Enum for staker role.
- * @readonly
- * @enum {number}
- */
-export enum StakerRole {
-  /**
-   * No role
-   */
-  Null,
-  /**
-   * Operator
-   */
-  Operator,
-  /**
-   * Validator
-   */
-  Validator,
-  /**
-   * Exchange Oracle
-   */
-  ExchangeOracle,
-  /**
-   * Reputation Oracle
-   */
-  ReputationOracle,
-  /**
-   * Recording Oracle
-   */
-  RecordingOracle,
-}
-
-/**
  * Payout item
  * @readonly
  */

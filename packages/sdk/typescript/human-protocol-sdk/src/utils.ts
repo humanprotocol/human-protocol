@@ -35,16 +35,18 @@ export const getHmToken = async (
  * **Deploy EscrowFactory contract**
  *
  * @param {string} hmTokenAddr HMToken address
+ * @param {string} stakingAddr Staking address
  * @param {ethers.Signer | undefined} signer Deployer signer
  * @returns {Promise<EscrowFactory>} Deployed contract instance
  */
 export const deployEscrowFactory = async (
   hmTokenAddr: string,
+  stakingAddr: string,
   signer?: ethers.Signer
 ): Promise<EscrowFactory> => {
   const factory = new EscrowFactory__factory(signer);
 
-  const contract = await factory.deploy(hmTokenAddr);
+  const contract = await factory.deploy(hmTokenAddr, stakingAddr);
 
   return contract;
 };
@@ -89,7 +91,6 @@ export const getEscrow = async (
  * **Deploy Staking contract**
  *
  * @param {string} hmTokenAddr HMToken address
- * @param {string} escrowFactoryAddr Escrow factory address
  * @param {number} minimumStake Minimum amount to stake
  * @param {number} lockPeriod Lock period after unstake
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -97,18 +98,12 @@ export const getEscrow = async (
  */
 export const deployStaking = async (
   hmTokenAddr: string,
-  factoryAddr: string,
   minimumStake: number,
   lockPeriod: number,
   signer?: ethers.Signer
 ): Promise<Staking> => {
   const staking = new Staking__factory(signer);
-  const contract = await staking.deploy(
-    hmTokenAddr,
-    factoryAddr,
-    minimumStake,
-    lockPeriod
-  );
+  const contract = await staking.deploy(hmTokenAddr, minimumStake, lockPeriod);
 
   return contract;
 };

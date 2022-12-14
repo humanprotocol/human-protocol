@@ -1,5 +1,5 @@
 import { getPublicURL } from './../src/storage';
-import { EscrowStatus, Job, StakerRole } from '../src';
+import { EscrowStatus, Job } from '../src';
 import { upload } from '../src/storage';
 import { toFullDigit } from '../src/utils';
 import {
@@ -34,7 +34,6 @@ jest.mock('../src/storage', () => ({
 
 const setupJob = async (job: Job) => {
   await job.initialize();
-  await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
   await job.stake(1);
   await job.launch();
   await job.setup();
@@ -68,12 +67,11 @@ describe('Test Job', () => {
       expect(await job.contractData?.factory?.address).not.toBeNull();
     });
 
-    it.only('Should be able to launch the job after staking', async () => {
+    it('Should be able to launch the job after staking', async () => {
       // Fail to launch the job before initialization
       expect(await job.launch()).toBe(false);
 
       await job.initialize();
-      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
       await job.stake(1);
 
       expect(await job.launch()).toBe(true);
@@ -85,7 +83,6 @@ describe('Test Job', () => {
       expect(await job.setup()).toBe(false);
 
       await job.initialize();
-      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
       await job.stake(1);
 
       await job.launch();
@@ -95,7 +92,6 @@ describe('Test Job', () => {
 
     it('Should be able to add trusted handlers', async () => {
       await job.initialize();
-      await job.setStaker(DEFAULT_GAS_PAYER_ADDR, StakerRole.Operator);
       await job.stake(1);
 
       await job.launch();

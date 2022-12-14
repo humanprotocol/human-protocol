@@ -15,7 +15,6 @@ import {
   JobArguments,
   StorageAccessData,
   StakingData,
-  StakerRole,
 } from './types';
 import {
   deployEscrowFactory,
@@ -194,16 +193,6 @@ export class Job {
         return false;
       }
 
-      this._logger.info('Deploying escrow factory...');
-      this.contractData.factory = await deployEscrowFactory(
-        this.contractData.hmTokenAddr,
-        this.providerData?.gasPayer
-      );
-      this.contractData.factoryAddr = this.contractData.factory.address;
-      this._logger.info(
-        `Escrow factory is deployed at ${this.contractData.factory.address}.`
-      );
-
       if (
         !this.stakingData?.minimumStake ||
         !this.stakingData?.lockPeriod ||
@@ -218,7 +207,6 @@ export class Job {
       this._logger.info('Deploying staking...');
       this.contractData.staking = await deployStaking(
         this.contractData.hmTokenAddr,
-        this.contractData.factory.address,
         this.stakingData.minimumStake,
         this.stakingData.lockPeriod,
         this.providerData?.gasPayer
@@ -226,6 +214,17 @@ export class Job {
       this.contractData.stakingAddr = this.contractData.staking.address;
       this._logger.info(
         `Staking is deployed at ${this.contractData.staking.address}`
+      );
+
+      this._logger.info('Deploying escrow factory...');
+      this.contractData.factory = await deployEscrowFactory(
+        this.contractData.hmTokenAddr,
+        this.contractData.stakingAddr,
+        this.providerData?.gasPayer
+      );
+      this.contractData.factoryAddr = this.contractData.factory.address;
+      this._logger.info(
+        `Escrow factory is deployed at ${this.contractData.factory.address}.`
       );
 
       this._logger.info('Deploying reward pool...');
@@ -239,7 +238,6 @@ export class Job {
 
       this._logger.info('Configuring staking & reward pool...');
       await this.contractData.staking.setRewardPool(rewardPool.address);
-      await this.contractData.factory.setStaking(this.contractData.stakingAddr);
       this._logger.info(
         'Staking & Reward Pool is configured with Escrow Factory.'
       );
@@ -717,27 +715,6 @@ export class Job {
     }
 
     return (await this.status()) === EscrowStatus.Complete;
-  }
-
-  /**
-   * **Set the account as a staker**
-   *
-   * @param {string} accountAddr - Account address to set as a staker
-   * @param {StakerRole} role - Account role
-   * @returns {Promise<boolean>} - True if the account is set as staker
-   */
-  async setStaker(accountAddr: string, role: StakerRole) {
-    if (!this.contractData?.staking) {
-      this._logError(ErrorStakingMissing);
-      return false;
-    }
-
-    return await this._raffleExecute(
-      this.contractData.staking,
-      'setStaker',
-      accountAddr,
-      role
-    );
   }
 
   /**
