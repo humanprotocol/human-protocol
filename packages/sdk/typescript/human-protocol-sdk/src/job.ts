@@ -14,12 +14,9 @@ import {
   ContractData,
   JobArguments,
   StorageAccessData,
-  StakingData,
 } from './types';
 import {
   deployEscrowFactory,
-  deployRewardPool,
-  deployStaking,
   getEscrow,
   getEscrowFactory,
   getHmToken,
@@ -62,11 +59,6 @@ export class Job {
    */
   storageAccessData?: StorageAccessData;
 
-  /**
-   * Staking data
-   */
-  stakingData?: StakingData;
-
   private _logger: winston.Logger;
 
   /**
@@ -104,9 +96,7 @@ export class Job {
     storageEndpoint,
     storagePublicBucket,
     storageBucket,
-    stakingMinimumAmount,
-    stakingLockPeriod,
-    stakingRewardFee,
+    stakingAddr,
     logLevel = 'info',
   }: JobArguments) {
     const provider = network
@@ -147,6 +137,7 @@ export class Job {
       hmTokenAddr,
       escrowAddr,
       factoryAddr,
+      stakingAddr,
     };
 
     this.manifestData = { manifest };
@@ -157,12 +148,6 @@ export class Job {
       endpoint: storageEndpoint,
       publicBucket: storagePublicBucket || DEFAULT_PUBLIC_BUCKET,
       bucket: storageBucket || DEFAULT_BUCKET,
-    };
-
-    this.stakingData = {
-      minimumStake: stakingMinimumAmount,
-      lockPeriod: stakingLockPeriod,
-      rewardFee: stakingRewardFee,
     };
 
     this._logger = createLogger(logLevel);
@@ -193,27 +178,15 @@ export class Job {
         return false;
       }
 
-      if (
-        !this.stakingData?.minimumStake ||
-        !this.stakingData?.lockPeriod ||
-        !this.stakingData.rewardFee
-      ) {
-        this._logError(new Error('Staking data is missing.'));
-        this.contractData.factory = undefined;
-
+      if (!this.contractData.stakingAddr) {
+        this._logError(new Error('Staking contract is missing'));
         return false;
       }
 
-      this._logger.info('Deploying staking...');
-      this.contractData.staking = await deployStaking(
-        this.contractData.hmTokenAddr,
-        this.stakingData.minimumStake,
-        this.stakingData.lockPeriod,
+      this._logger.info('Getting staking...');
+      this.contractData.staking = await getStaking(
+        this.contractData.stakingAddr,
         this.providerData?.gasPayer
-      );
-      this.contractData.stakingAddr = this.contractData.staking.address;
-      this._logger.info(
-        `Staking is deployed at ${this.contractData.staking.address}`
       );
 
       this._logger.info('Deploying escrow factory...');
@@ -225,21 +198,6 @@ export class Job {
       this.contractData.factoryAddr = this.contractData.factory.address;
       this._logger.info(
         `Escrow factory is deployed at ${this.contractData.factory.address}.`
-      );
-
-      this._logger.info('Deploying reward pool...');
-      const rewardPool = await deployRewardPool(
-        this.contractData.hmTokenAddr,
-        this.contractData.staking.address,
-        this.stakingData.rewardFee,
-        this.providerData?.gasPayer
-      );
-      this._logger.info(`RewardPool is deployed at ${rewardPool.address}`);
-
-      this._logger.info('Configuring staking & reward pool...');
-      await this.contractData.staking.setRewardPool(rewardPool.address);
-      this._logger.info(
-        'Staking & Reward Pool is configured with Escrow Factory.'
       );
     } else {
       if (!this.contractData?.factoryAddr) {

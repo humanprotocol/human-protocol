@@ -541,24 +541,6 @@ export type ManifestData = {
 };
 
 /**
- * Staking data
- */
-export type StakingData = {
-  /**
-   * Minimum amount for staking
-   */
-  minimumStake?: number;
-  /**
-   * Lock period for staking
-   */
-  lockPeriod?: number;
-  /**
-   * Reward fee
-   */
-  rewardFee?: number;
-};
-
-/**
  * Contract data
  */
 export type ContractData = {
@@ -654,6 +636,10 @@ export type JobArguments = {
   /**
    * Factory contract address
    */
+  stakingAddr?: string;
+  /**
+   * Staking contract address
+   */
   factoryAddr?: string;
   /**
    * Escrow contract address
@@ -683,18 +669,6 @@ export type JobArguments = {
    * AWS/GCP private bucket name
    */
   storageBucket?: string;
-  /**
-   * Minimum amount for staking
-   */
-  stakingMinimumAmount?: number;
-  /**
-   * Lock period for staking
-   */
-  stakingLockPeriod?: number;
-  /**
-   * Reward fee for staking
-   */
-  stakingRewardFee?: number;
   /**
    * Log level
    */

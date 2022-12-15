@@ -19,11 +19,13 @@ from human_protocol_sdk.eth_bridge import (
     get_entity_topic,
     get_escrow,
     get_factory,
+    get_staking,
     deploy_factory,
     get_w3,
     handle_transaction_with_retry,
     Retry,
     HMTOKEN_ADDR,
+    STAKING_ADDR,
 )
 from human_protocol_sdk.storage import (
     download,
@@ -177,6 +179,7 @@ class Job:
         retry: Retry = None,
         hmt_server_addr: str = None,
         hmtoken_addr: str = None,
+        staking_addr: str = None,
         gas_limit: int = GAS_LIMIT,
     ):
         """Initializes a Job instance with values from a Manifest class and
@@ -207,6 +210,8 @@ class Job:
         True
 
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -272,6 +277,7 @@ class Job:
         self.multi_credentials = self._validate_multi_credentials(multi_credentials)
         self.hmt_server_addr = hmt_server_addr
         self.hmtoken_addr = HMTOKEN_ADDR if hmtoken_addr is None else hmtoken_addr
+        self.staking_addr = STAKING_ADDR if staking_addr is None else staking_addr
         self.gas = gas_limit or GAS_LIMIT
 
         # Initialize a new Job.
@@ -306,6 +312,8 @@ class Job:
 
         Deploying a new Job to the ethereum network succeeds.
 
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.status()
@@ -318,6 +326,8 @@ class Job:
 
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
         >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.status()
@@ -503,6 +513,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
 
@@ -573,6 +585,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -606,6 +620,8 @@ class Job:
 
         >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
         >>> job = Job(credentials, manifest, multi_credentials=multi_credentials)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -709,6 +725,8 @@ class Job:
 
         The escrow contract is in Pending state after setup so it can be aborted.
 
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -805,6 +823,8 @@ class Job:
 
         The escrow contract is in Pending state after setup so it can be cancelled.
 
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -884,6 +904,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -977,6 +999,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1033,6 +1057,201 @@ class Job:
 
         return self.status() == Status.Complete
 
+    def stake(self, amount: Decimal) -> bool:
+        """Stakes HMT token.
+
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> job = Job(credentials, manifest)
+
+        Stakes 1 HMT
+
+        >>> job.stake(1)
+        True
+
+        Args:
+            amount (Decimal): Amount to stake
+
+        Returns:
+            bool: returns True if staking succeeds.
+        """
+        w3 = get_w3(self.hmt_server_addr)
+
+        # Approve HMT
+        hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
+
+        txn_event = "Approving HMT"
+        txn_func = hmtoken_contract.functions.approve
+        txn_info = {
+            "gas_payer": self.gas_payer,
+            "gas_payer_priv": self.gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+        func_args = [self.staking_addr, amount]
+
+        hmt_approved = False
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            hmt_approved = True
+        except Exception as e:
+            LOG.info(
+                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            )
+        if not hmt_approved:
+            raffle_txn_res = self._raffle_txn(
+                self.multi_credentials, txn_func, func_args, txn_event
+            )
+            hmt_approved = raffle_txn_res["txn_succeeded"]
+
+        # give up
+        if not hmt_approved:
+            LOG.exception(f"{txn_event} failed with all credentials.")
+
+        txn_event = "Staking"
+        txn_func = self.staking_contract.functions.stake
+        txn_info = {
+            "gas_payer": self.gas_payer,
+            "gas_payer_priv": self.gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+
+        func_args = [amount]
+
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            return True
+        except Exception as e:
+            LOG.info(
+                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            )
+
+        raffle_txn_res = self._raffle_txn(
+            self.multi_credentials, txn_func, func_args, txn_event
+        )
+        staked = raffle_txn_res["txn_succeeded"]
+
+        if not staked:
+            LOG.exception(f"{txn_event} failed with all credentials.")
+
+        return True
+
+    def unstake(self, amount: Decimal) -> bool:
+        """Unstakes HMT token.
+
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> job = Job(credentials, manifest)
+
+        Stakes 1 HMT
+
+        >>> job.stake(1)
+        True
+
+        >>> job.unstake(1)
+        True
+
+        Args:
+            amount (Decimal): Amount to unstake
+
+        Returns:
+            bool: returns True if unstaking succeeds.
+        """
+        w3 = get_w3(self.hmt_server_addr)
+        txn_event = "Staking"
+        txn_func = self.staking_contract.functions.unstake
+        txn_info = {
+            "gas_payer": self.gas_payer,
+            "gas_payer_priv": self.gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+
+        func_args = [amount]
+
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            # After abort the contract should be destroyed
+            return w3.eth.getCode(self.job_contract.address) == b""
+        except Exception as e:
+            LOG.info(
+                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            )
+
+        raffle_txn_res = self._raffle_txn(
+            self.multi_credentials, txn_func, func_args, txn_event
+        )
+        unstaked = raffle_txn_res["txn_succeeded"]
+
+        if not unstaked:
+            LOG.exception(f"{txn_event} failed with all credentials.")
+
+        return True
+
+    def withdraw(self, amount: Decimal) -> bool:
+        """Withdraws HMT token.
+
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> job = Job(credentials, manifest)
+
+        Stakes 1 HMT
+
+        >>> job.stake(1)
+        True
+
+        >>> job.unstake(1)
+        True
+
+        >>> # TODO withdraw test
+
+        Args:
+            amount (Decimal): Amount to withdraw
+
+        Returns:
+            bool: returns True if withdrawing succeeds.
+        """
+        w3 = get_w3(self.hmt_server_addr)
+        txn_event = "Staking"
+        txn_func = self.staking_contract.functions.withdraw
+        txn_info = {
+            "gas_payer": self.gas_payer,
+            "gas_payer_priv": self.gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+
+        func_args = [amount]
+
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            # After abort the contract should be destroyed
+            return w3.eth.getCode(self.job_contract.address) == b""
+        except Exception as e:
+            LOG.info(
+                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            )
+
+        raffle_txn_res = self._raffle_txn(
+            self.multi_credentials, txn_func, func_args, txn_event
+        )
+        withdrawn = raffle_txn_res["txn_succeeded"]
+
+        if not withdrawn:
+            LOG.exception(f"{txn_event} failed with all credentials.")
+
+        return True
+
     def status(self) -> Enum:
         """Returns the status of the Job.
 
@@ -1046,6 +1265,8 @@ class Job:
 
         After deployment status is "Launched".
 
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.status()
@@ -1067,6 +1288,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1097,6 +1320,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1126,6 +1351,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1160,6 +1387,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1206,6 +1435,10 @@ class Job:
         rep_oracle_priv_key = credentials["rep_oracle_priv_key"]
 
         self.factory_contract = get_factory(factory_addr, self.hmt_server_addr)
+
+        self.staking_addr = self._factory_get_staking_addr(factory_addr)
+        self.staking_contract = get_staking(self.staking_addr, self.hmt_server_addr)
+
         self.job_contract = get_escrow(escrow_addr, self.hmt_server_addr)
         self.manifest_url = manifest_url(self.job_contract, gas_payer, self.gas)
         self.manifest_hash = manifest_hash(self.job_contract, gas_payer, self.gas)
@@ -1324,6 +1557,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()
@@ -1350,6 +1585,45 @@ class Job:
             factory_addr, hmt_server_addr=self.hmt_server_addr
         )
         return factory_contract.functions.hasEscrow(escrow_addr).call(
+            {"from": self.gas_payer, "gas": Wei(self.gas)}
+        )
+
+    def _factory_get_staking_addr(self, factory_addr: str) -> str:
+        """Get staking address from existing factory
+
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+        ...     "rep_oracle_priv_key": b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
+        >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
+        >>> job.launch(rep_oracle_pub_key)
+        True
+        >>> job.setup()
+        True
+
+        Factory contains the escrow address.
+        >>> factory_addr = job.factory_contract.address
+        >>> escrow_addr = job.job_contract.address
+        >>> new_job = Job(credentials=credentials, factory_addr=factory_addr, escrow_addr=escrow_addr)
+        >>> new_job._factory_get_staking_addr(factory_addr)
+        '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+
+        Args:
+            factory_addr (str): an ethereum address of the escrow factory contract.
+
+        Returns:
+            string: returns staking contract address
+
+        """
+        factory_contract = get_factory(
+            factory_addr, hmt_server_addr=self.hmt_server_addr
+        )
+        return factory_contract.functions.staking().call(
             {"from": self.gas_payer, "gas": Wei(self.gas)}
         )
 
@@ -1389,7 +1663,11 @@ class Job:
 
         if not factory_addr_valid:
             factory_addr = deploy_factory(
-                gas=self.gas, hmt_server_addr=self.hmt_server_addr, **credentials
+                gas=self.gas,
+                hmt_server_addr=self.hmt_server_addr,
+                hmtoken_addr=self.hmtoken_addr,
+                staking_addr=self.staking_addr,
+                **credentials,
             )
             factory = get_factory(factory_addr, hmt_server_addr=self.hmt_server_addr)
             if not factory_addr:
@@ -1399,6 +1677,8 @@ class Job:
             factory = get_factory(
                 str(factory_addr), hmt_server_addr=self.hmt_server_addr
             )
+
+        self.staking_contract = get_staking(self.staking_addr, self.hmt_server_addr)
 
         return factory
 
@@ -1412,6 +1692,8 @@ class Job:
         ... }
         >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
         >>> job = Job(credentials, manifest)
+        >>> job.stake(1)
+        True
         >>> job.launch(rep_oracle_pub_key)
         True
         >>> job.setup()

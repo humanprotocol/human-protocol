@@ -6,9 +6,7 @@ import {
   DEFAULT_GAS_PAYER_ADDR,
   DEFAULT_GAS_PAYER_PRIVKEY,
   DEFAULT_HMTOKEN_ADDR,
-  DEFAULT_LOCK_PERIOD,
-  DEFAULT_MINIMUM_STAKE,
-  DEFAULT_REWARD_FEE,
+  DEFAULT_STAKING_ADDR,
   NOT_TRUSTED_OPERATOR_PRIVKEY,
   REPUTATION_ORACLE_PRIVKEY,
   TRUSTED_OPERATOR1_ADDR,
@@ -49,9 +47,7 @@ describe('Test Job', () => {
         reputationOracle: REPUTATION_ORACLE_PRIVKEY,
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
-        stakingMinimumAmount: DEFAULT_MINIMUM_STAKE,
-        stakingLockPeriod: DEFAULT_LOCK_PERIOD,
-        stakingRewardFee: DEFAULT_REWARD_FEE,
+        stakingAddr: DEFAULT_STAKING_ADDR,
         logLevel: 'debug',
       });
     });
@@ -386,10 +382,8 @@ describe('Test Job', () => {
         reputationOracle: REPUTATION_ORACLE_PRIVKEY,
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingAddr: DEFAULT_STAKING_ADDR,
         trustedHandlers: [TRUSTED_OPERATOR1_PRIVKEY],
-        stakingMinimumAmount: DEFAULT_MINIMUM_STAKE,
-        stakingLockPeriod: DEFAULT_LOCK_PERIOD,
-        stakingRewardFee: DEFAULT_REWARD_FEE,
         logLevel: 'error',
       });
 

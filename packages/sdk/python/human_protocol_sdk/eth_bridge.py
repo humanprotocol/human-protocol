@@ -21,12 +21,15 @@ LOG = logging.getLogger("human_protocol_sdk.eth_bridge")
 HMTOKEN_ADDR = Web3.toChecksumAddress(
     os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
+STAKING_ADDR = Web3.toChecksumAddress(
+    os.getenv("STAKING_ADDR", "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512")
+)
 
 ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contracts")
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
-    os.getenv("KVSTORE_CONTRACT", "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0")
+    os.getenv("KVSTORE_CONTRACT", "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9")
 )
 WEB3_POLL_LATENCY = float(os.getenv("WEB3_POLL_LATENCY", 5))
 WEB3_TIMEOUT = int(os.getenv("WEB3_TIMEOUT", 240))
@@ -198,7 +201,7 @@ def get_hmtoken_interface():
     """
 
     return get_contract_interface(
-        "{}/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
+        "{}/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
     )
 
 
@@ -232,6 +235,10 @@ def get_escrow(escrow_addr: str, hmt_server_addr: str = None) -> Contract:
     ... }
     >>> rep_oracle_pub_key = b"2dbc2c2c86052702e7c219339514b2e8bd4687ba1236c478ad41b43330b08488c12c8c1797aa181f3a4596a1bd8a0c18344ea44d6655f61fa73e56e743f79e0d"
     >>> job = Job(credentials=credentials, escrow_manifest=manifest)
+
+    Stake HMT to create escrow
+    >>> job.stake(1)
+    True
 
     Deploying a new Job to the ethereum network succeeds.
 
@@ -298,6 +305,7 @@ def deploy_factory(
     gas: int = GAS_LIMIT,
     hmt_server_addr: str = None,
     hmtoken_addr: str = None,
+    staking_addr: str = None,
     **credentials,
 ) -> str:
     """Deploy an EscrowFactory solidity contract to the ethereum network.
@@ -316,6 +324,7 @@ def deploy_factory(
     gas_payer = credentials["gas_payer"]
     gas_payer_priv = credentials["gas_payer_priv"]
     hmtoken_address = HMTOKEN_ADDR if hmtoken_addr is None else hmtoken_addr
+    staking_address = STAKING_ADDR if staking_addr is None else staking_addr
 
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
@@ -326,7 +335,7 @@ def deploy_factory(
     )
 
     txn_func = factory.constructor
-    func_args = [hmtoken_address]
+    func_args = [hmtoken_address, staking_address]
     txn_info = {
         "gas_payer": gas_payer,
         "gas_payer_priv": gas_payer_priv,
@@ -338,51 +347,34 @@ def deploy_factory(
     return str(contract_addr)
 
 
-def deploy_staking(
-    gas: int = GAS_LIMIT,
-    hmt_server_addr: str = None,
-    hmtoken_addr: str = None,
-    factory_addr: str = None,
-    minimum_stake: int = 1,
-    lock_period: int = 1,
-    **credentials,
-) -> str:
-    """Deploy an EscrowFactory solidity contract to the ethereum network.
+def get_staking_interface():
+    """Retrieve the Staking interface.
 
-    Args:
-        gas (int): maximum amount of gas the caller is ready to pay.
-
-        hmt_server_addr (str): infura API address.
-
-    Returns
-        str: returns the contract address of the newly deployed factory.
+    Returns:
+        Contract interface: returns the Staking interface solidity contract.
 
     """
-    if gas is None:
-        gas = GAS_LIMIT
-    gas_payer = credentials["gas_payer"]
-    gas_payer_priv = credentials["gas_payer_priv"]
-    hmtoken_address = HMTOKEN_ADDR if hmtoken_addr is None else hmtoken_addr
 
+    return get_contract_interface("{}/Staking.sol/Staking.json".format(ABIS_FOLDER))
+
+
+def get_staking(staking_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contract:
+    """Retrieve the Staking contract from a given address.
+
+    >>> type(get_staking())
+    <class 'web3._utils.datatypes.Contract'>
+
+    Args:
+        hmt_server_addr (str): infura API address.
+
+    Returns:
+        Contract: returns the Staking solidity contract.
+
+    """
     w3 = get_w3(hmt_server_addr)
-    contract_interface = get_contract_interface(
-        "{}/Staking.sol/Staking.json".format(ABIS_FOLDER)
-    )
-    staking = w3.eth.contract(
-        abi=contract_interface["abi"], bytecode=contract_interface["bytecode"]
-    )
-
-    txn_func = staking.constructor
-    func_args = [hmtoken_address, factory_addr, minimum_stake, lock_period]
-    txn_info = {
-        "gas_payer": gas_payer,
-        "gas_payer_priv": gas_payer_priv,
-        "gas": gas,
-        "hmt_server_addr": hmt_server_addr,
-    }
-    txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
-    contract_addr = txn_receipt["contractAddress"]
-    return str(contract_addr)
+    contract_interface = get_staking_interface()
+    contract = w3.eth.contract(address=staking_addr, abi=contract_interface["abi"])
+    return contract
 
 
 def get_pub_key_from_addr(wallet_addr: str, hmt_server_addr: str = None) -> bytes:

@@ -35,6 +35,9 @@ class JobTestCase(unittest.TestCase):
 
     def test_launch(self):
         """Tests job launch"""
+        staked = self.job.stake(1)
+        self.assertEqual(staked, True)
+
         lauched = self.job.launch(self.rep_oracle_pub_key)
         self.assertEqual(lauched, True)
 
