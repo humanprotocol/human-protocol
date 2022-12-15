@@ -45,6 +45,8 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(next_status, Status.Launched)
 
     def test_status(self):
+        staked = self.job.stake(1)
+        self.assertEqual(staked, True)
         lauched = self.job.launch(self.rep_oracle_pub_key)
         self.assertEqual(lauched, True)
 
@@ -52,6 +54,7 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(next_status, Status.Launched)
 
     def test_manifest_url(self):
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         self.assertEqual(
@@ -70,6 +73,7 @@ class JobTestCase(unittest.TestCase):
         factory_addr = deploy_factory(**(self.credentials))
         self.job = Job(self.credentials, manifest, factory_addr)
         self.assertTrue(self.job.factory_contract.address, factory_addr)
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         self.assertTrue(
@@ -96,6 +100,7 @@ class JobTestCase(unittest.TestCase):
             new_job.launch(self.rep_oracle_pub_key)
 
     def test_job_launch(self):
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(1))
         multi_credentials = [
@@ -125,6 +130,7 @@ class JobTestCase(unittest.TestCase):
                 "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(1))
 
@@ -153,12 +159,14 @@ class JobTestCase(unittest.TestCase):
             ),
         ]
         self.job = Job(self.credentials, manifest, multi_credentials=multi_credentials)
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
 
     def test_job_add_trusted_handlers(self):
         # Make sure we se set our gas payer as a trusted handler by default.
 
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(
             is_trusted_handler(
@@ -187,6 +195,7 @@ class JobTestCase(unittest.TestCase):
 
     def test_job_bulk_payout(self):
         """Tests job's bulk payout."""
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [
@@ -234,6 +243,7 @@ class JobTestCase(unittest.TestCase):
     def test_job_bulk_payout_with_false_encryption_option(self):
         """Test that final results are stored encrypted"""
         job = Job(self.credentials, manifest)
+        self.assertTrue(job.stake(1))
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
@@ -263,6 +273,7 @@ class JobTestCase(unittest.TestCase):
     def test_job_bulk_payout_with_true_encryption_option(self):
         """Test that final results are stored uncrypted"""
         job = Job(self.credentials, manifest)
+        self.assertTrue(job.stake(1))
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
@@ -273,7 +284,7 @@ class JobTestCase(unittest.TestCase):
         mock_upload = MagicMock(return_value=("hash", "url"))
 
         # Testing option as: encrypt final results: encrypt_final_results=True
-        with patch("hmt_escrow.job.upload") as mock_upload:
+        with patch("human_protocol_sdk.job.upload") as mock_upload:
             # Bulk payout with final results as plain (not encrypted)
             mock_upload.return_value = ("hash", "url")
 
@@ -295,6 +306,7 @@ class JobTestCase(unittest.TestCase):
         """Tests bulk payout with option to store final results privately/publicly"""
 
         job = Job(self.credentials, manifest)
+        self.assertTrue(job.stake(1))
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
@@ -341,6 +353,7 @@ class JobTestCase(unittest.TestCase):
     def test_job_bulk_payout_with_full_qualified_url(self):
         """Tests whether url is only S3 string with encryption is on/off."""
         job = Job(self.credentials, manifest)
+        self.assertTrue(job.stake(1))
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
@@ -349,9 +362,9 @@ class JobTestCase(unittest.TestCase):
         final_results = {"results": 0}
 
         with patch(
-            "hmt_escrow.job.handle_transaction_with_retry"
+            "human_protocol_sdk.job.handle_transaction_with_retry"
         ) as transaction_retry_mock, patch(
-            "hmt_escrow.job.upload"
+            "human_protocol_sdk.job.upload"
         ) as upload_mock, patch.object(
             Job, "_check_transfer_event"
         ) as _check_transfer_event_mock:
@@ -394,6 +407,7 @@ class JobTestCase(unittest.TestCase):
         """Tests retrieving final results with encryption on/off"""
 
         job = Job(self.credentials, manifest)
+        self.assertTrue(job.stake(1))
         self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
         self.assertEqual(job.setup(), True)
 
@@ -426,6 +440,7 @@ class JobTestCase(unittest.TestCase):
 
             # Bulk payout with encryption OFF
             job = Job(self.credentials, manifest)
+            self.assertTrue(job.stake(1))
             self.assertEqual(job.launch(self.rep_oracle_pub_key), True)
             self.assertEqual(job.setup(), True)
 
@@ -448,6 +463,7 @@ class JobTestCase(unittest.TestCase):
             it can't be aborted.
         """
 
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal("100.0"))]
@@ -460,6 +476,7 @@ class JobTestCase(unittest.TestCase):
         # Trusted handler should be able to abort an existing contract
 
         self.job = Job(self.credentials, manifest)
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         trusted_handler = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
@@ -478,6 +495,7 @@ class JobTestCase(unittest.TestCase):
         self.assertTrue(access_job.abort())
 
     def test_job_cancel(self):
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal("20.0"))]
@@ -494,10 +512,12 @@ class JobTestCase(unittest.TestCase):
         self.assertEqual(self.job.status(), Status(4))
 
     def test_job_status(self):
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(1))
 
     def test_job_balance(self):
+        self.assertTrue(self.job.stake(1))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
         self.assertEqual(self.job.balance(), 100000000000000000000)
