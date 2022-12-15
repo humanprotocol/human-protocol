@@ -32,4 +32,4 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           make build-package
-          twine upload dist/*
+          twine upload dist/* --skip-existing
