@@ -55,36 +55,28 @@ describe('Fortune', () => {
       .send({
         from: owner.address,
       });
+
+    const stakingContract = new web3.eth.Contract(Staking.abi as []);
+    staking = await stakingContract
+      .deploy({
+        data: Staking.bytecode,
+        arguments: [token.options.address, web3.utils.toWei('1', 'ether'), 1],
+      })
+      .send({
+        from: owner.address,
+      });
+
     const escrowFactoryContract = new web3.eth.Contract(
       EscrowFactory.abi as []
     );
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
-        arguments: [token.options.address],
+        arguments: [token.options.address, staking.options.address],
       })
       .send({
         from: owner.address,
       });
-
-    const stakingContract = new web3.eth.Contract(Staking.abi as []);
-    staking = await stakingContract
-      .deploy({
-        data: Staking.bytecode,
-        arguments: [
-          token.options.address,
-          escrowFactory.options.address,
-          web3.utils.toWei('1', 'ether'),
-          1,
-        ],
-      })
-      .send({
-        from: owner.address,
-      });
-
-    await escrowFactory.methods
-      .setStaking(staking.options.address)
-      .send({ from: owner.address });
 
     await token.methods
       .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
@@ -93,10 +85,6 @@ describe('Fortune', () => {
     await token.methods
       .approve(staking.options.address, web3.utils.toWei('500', 'ether'))
       .send({ from: launcher.address });
-
-    await staking.methods
-      .setStaker(launcher.address, 1)
-      .send({ from: owner.address });
 
     await staking.methods
       .stake(web3.utils.toWei('500', 'ether'))
@@ -149,7 +137,7 @@ describe('Fortune', () => {
   });
 
   it('Do not allow two fortunes from the same worker', async () => {
-    let err: any = await addFortune(web3, worker1, escrowAddress, 'fortune 1');
+    let err = await addFortune(web3, worker1, escrowAddress, 'fortune 1');
     expect(getEscrow(escrowAddress)).toBeDefined();
     expect(getWorkerResult(escrowAddress, worker1)).toBe('fortune 1');
     expect(getFortunes(escrowAddress).length).toBe(1);
@@ -157,38 +145,28 @@ describe('Fortune', () => {
     err = await addFortune(web3, worker1, escrowAddress, 'fortune 2');
     expect(getEscrow(escrowAddress)).toBeDefined();
     expect(getFortunes(escrowAddress).length).toBe(1);
-    expect(err.message).toBe(
+    expect(err?.message).toBe(
       '0x90F79bf6EB2c4f870365E785982E1f101E93b906 already submitted a fortune'
     );
   });
 
   it('Do not allow empty fortune', async () => {
-    const err: any = await addFortune(web3, worker1, escrowAddress, '');
+    const err = await addFortune(web3, worker1, escrowAddress, '');
     expect(getEscrow(escrowAddress)).toBeUndefined();
-    expect(err.message).toBe('Non-empty fortune is required');
+    expect(err?.message).toBe('Non-empty fortune is required');
   });
 
   it('Invalid escrow address', async () => {
-    const err: any = await addFortune(
-      web3,
-      worker1,
-      'escrowAddress',
-      'fortune 1'
-    );
+    const err = await addFortune(web3, worker1, 'escrowAddress', 'fortune 1');
     expect(getEscrow(escrowAddress)).toBeUndefined();
-    expect(err.message).toBe('Valid ethereum address required');
+    expect(err?.message).toBe('Valid ethereum address required');
   });
 
   it('Invalid recording oracle address', async () => {
     web3.eth.defaultAccount = owner.address;
-    const err: any = await addFortune(
-      web3,
-      worker1,
-      escrowAddress,
-      'fortune 1'
-    );
+    const err = await addFortune(web3, worker1, escrowAddress, 'fortune 1');
     expect(getEscrow(escrowAddress)).toBeUndefined();
-    expect(err.message).toBe(
+    expect(err?.message).toBe(
       'The Escrow Recording Oracle address mismatches the current one'
     );
     web3.eth.defaultAccount = recordingAccount.address;
@@ -198,12 +176,7 @@ describe('Fortune', () => {
     await escrow.methods.cancel().send({
       from: launcher.address,
     });
-    const err: any = await addFortune(
-      web3,
-      worker1,
-      escrowAddress,
-      'fortune 1'
-    );
-    expect(err.message).toBe('The Escrow is not in the Pending status');
+    const err = await addFortune(web3, worker1, escrowAddress, 'fortune 1');
+    expect(err?.message).toBe('The Escrow is not in the Pending status');
   });
 });

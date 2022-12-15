@@ -37,7 +37,6 @@ const stake = async (escrowFactory) => {
   const stakingAddress = await escrowFactory.methods.staking().call();
   const staking = new web3.eth.Contract(stakingAbi, stakingAddress);
 
-  await staking.methods.setStaker(launcher, 1).send({ from: owner, gasLimit });
   await Token.methods
     .approve(stakingAddress, 5)
     .send({ from: launcher, gasLimit });

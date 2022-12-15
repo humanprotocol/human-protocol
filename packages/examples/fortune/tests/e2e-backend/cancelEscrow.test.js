@@ -18,12 +18,11 @@ const {
   escrowFundAmount,
 } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
-let owner;
 let launcher;
 
 describe('Cancel escrow', () => {
   beforeAll(async () => {
-    [owner, launcher] = await setupAccounts();
+    [, launcher] = await setupAccounts();
   });
   test('Flow', async () => {
     const escrowFactory = createEscrowFactory();
