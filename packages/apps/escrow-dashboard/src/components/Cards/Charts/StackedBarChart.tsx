@@ -33,29 +33,6 @@ export default function StackedBarChart({
   return (
     <CardContainer>
       <Grid container>
-        <Grid item xs={12} sm={12} md={8}>
-          <Box sx={{ width: '100%', height: 362 }}>
-            <ResponsiveContainer>
-              <RechartsBarChart
-                data={series}
-                margin={{ top: 30, left: 4, right: 4 }}
-              >
-                <XAxis dataKey="date" axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Bar
-                  dataKey="dailyPendingEvents"
-                  stackId="a"
-                  fill={theme.palette.secondary.main}
-                />
-                <Bar
-                  dataKey="dailyEscrowAmounts"
-                  stackId="a"
-                  fill={theme.palette.primary.main}
-                />
-              </RechartsBarChart>
-            </ResponsiveContainer>
-          </Box>
-        </Grid>
         <Grid item container justifyContent="center" xs={12} sm={12} md={4}>
           <Grid item xs={12} sm={6} md={12}>
             <Typography
@@ -91,6 +68,29 @@ export default function StackedBarChart({
               {numeral(pendingEventCount).format('0,0')}
             </Typography>
           </Grid>
+        </Grid>
+        <Grid item xs={12} sm={12} md={8}>
+          <Box sx={{ width: '100%', height: 362 }}>
+            <ResponsiveContainer>
+              <RechartsBarChart
+                data={series}
+                margin={{ top: 30, left: 4, right: 4 }}
+              >
+                <XAxis dataKey="date" axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar
+                  dataKey="dailyPendingEvents"
+                  stackId="a"
+                  fill={theme.palette.secondary.main}
+                />
+                <Bar
+                  dataKey="dailyEscrowAmounts"
+                  stackId="a"
+                  fill={theme.palette.primary.main}
+                />
+              </RechartsBarChart>
+            </ResponsiveContainer>
+          </Box>
         </Grid>
       </Grid>
     </CardContainer>

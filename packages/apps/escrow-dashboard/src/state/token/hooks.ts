@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { useSelector } from 'react-redux';
-import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 import { AppState, useAppDispatch } from 'src/state';
 import { useChainId } from '../escrow/hooks';
@@ -15,42 +15,39 @@ export const usePollTokenStats = () => {
   }, [dispatch]);
 };
 
-export const useTokenStats = () => {
+export const useTokenStatsByChainId = () => {
+  const currentChainId = useChainId();
   const token = useSelector((state: AppState) => state.token);
   const { stats } = token;
 
-  const tokenStats = {
-    totalTransferEventCount: 0,
-    holders: 0,
-  };
+  if (
+    currentChainId === ChainId.ALL ||
+    TESTNET_CHAIN_IDS.includes(currentChainId)
+  ) {
+    const tokenStats = {
+      totalTransferEventCount: 0,
+      holders: 0,
+      totalSupply: new BigNumber(0),
+    };
 
-  SUPPORTED_CHAIN_IDS.forEach((chainId) => {
-    if (stats[chainId]) {
-      tokenStats.totalTransferEventCount +=
-        stats[chainId]?.totalTransferEventCount!;
-      tokenStats.holders += stats[chainId]?.holders!;
-    }
-  });
-
-  return tokenStats;
-};
-
-export const useTotalSupply = () => {
-  const chainId = useChainId();
-  const token = useSelector((state: AppState) => state.token);
-
-  if (chainId === ChainId.ALL) {
-    let allTotalSupplyBN = new BigNumber(0);
     SUPPORTED_CHAIN_IDS.forEach((chainId) => {
-      allTotalSupplyBN = allTotalSupplyBN.plus(
-        new BigNumber(token.stats[chainId]?.totalSupply ?? '0')
-      );
+      if (stats[chainId] && !TESTNET_CHAIN_IDS.includes(chainId)) {
+        tokenStats.totalTransferEventCount +=
+          stats[chainId]?.totalTransferEventCount!;
+        tokenStats.holders += stats[chainId]?.holders!;
+        tokenStats.totalSupply = tokenStats.totalSupply.plus(
+          new BigNumber(token.stats[chainId]?.totalSupply ?? '0')
+        );
+      }
     });
 
-    return allTotalSupplyBN.toJSON();
+    return {
+      ...tokenStats,
+      totalSupply: tokenStats.totalSupply.toJSON(),
+    };
   }
 
-  return token.stats[chainId]?.totalSupply;
+  return stats[currentChainId]!;
 };
 
 export const useTokenStatsLoaded = () => {
