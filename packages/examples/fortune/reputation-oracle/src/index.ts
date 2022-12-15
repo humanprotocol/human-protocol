@@ -64,11 +64,12 @@ app.post('/job/results', async (req, res) => {
 
     return res.status(200).send({ message: 'Escrow has been completed' });
   } catch (err) {
-    console.error(err);
     return res.status(500).send({ message: err });
   }
 });
 
 app.listen(port, () => {
+  // TODO: Implement logger
+  // eslint-disable-next-line no-console
   console.log(`Reputation Oracle server listening the port ${port}`);
 });
