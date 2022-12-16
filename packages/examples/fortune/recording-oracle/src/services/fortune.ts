@@ -103,7 +103,7 @@ export async function addFortune(
   await storeResults(web3, escrowAddress, resultUrl, resultHash);
 
   if (fortunes.length === fortunesRequested) {
-    await bulkPayout(reputationOracleUrl, escrowAddress, fortunes, resultUrl);
+    await bulkPayout(reputationOracleUrl, escrowAddress, fortunes);
     cleanFortunes(escrowAddress);
   }
 
