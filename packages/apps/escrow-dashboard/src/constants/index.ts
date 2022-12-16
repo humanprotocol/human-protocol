@@ -9,6 +9,11 @@ export enum ChainId {
   MOONBEAM = 1284,
 }
 
+export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
+  [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
+  [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
+};
+
 export interface IEscrowNetwork {
   chainId: number;
   title: string;
@@ -111,3 +116,8 @@ export const HM_TOKEN_DECIMALS = 18;
 
 export const STAKING_CONTRACT_ADDRESS =
   '0x1fA701df2bb75f2cE8B6439669BD1eCfCf8b26fe';
+
+export const BITFINEX_SUPPORTED_CHAIN_IDS = [ChainId.MAINNET, ChainId.POLYGON];
+
+export const BITFINEX_HOT_WALLET_ADDRESS =
+  '0x77134cbc06cb00b66f4c7e623d5fdbf6777635ec';
