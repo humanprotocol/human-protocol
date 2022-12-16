@@ -98,7 +98,7 @@ To configure Metamask for the deployed playground example:
 
 - New RPC URL - http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:8545
 
-- Chain ID - 1337 (you may get a warning here that this ID is already in use, it is safe to ignore)
+- Chain ID - 1338 (you may get a warning here that this ID is already in use, it is safe to ignore)
 
 - Currency Symbol - ETH
 
@@ -165,7 +165,7 @@ You should see account balance for Worker 1 and 2 has increased by the relevant 
 
 First we must create and environment variables file.  To do so execute the command below in the root folder of Fortune:
 ```
-cp .env.example .env
+cp .env.development .env
 ```
 Then execute the following command:
 ```
@@ -183,7 +183,7 @@ To configure Metamask for the Local Testnet example:
 1. Open your Metamask wallet and click on the account icon in the top right. Select Settings > Networks > Add Network. Enter the details below:
 - Network Name - any name. We are using `Fortune` for this example
 - New RPC URL - http://localhost:8545
-- Chain ID - `1337` (you may get a warning here that this ID is already in use, it is safe to ignore)
+- Chain ID - `1338` (you may get a warning here that this ID is already in use, it is safe to ignore)
 - Currency Symbol - `ETH`
 
 2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2). In Metamask, click on your account icon in the top right and select Import Account. From this screen you can enter a private key to add an account. Repeat this process for each of the keys below:
