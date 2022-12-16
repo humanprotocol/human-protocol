@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 import { AppState, useAppDispatch } from 'src/state';
 
@@ -26,7 +26,7 @@ export const useChainId = () => {
 };
 
 export const useEscrowDataByChainID = (): EscrowData => {
-  const escrow = useSelector((state: AppState) => state.escrow);
+  const { escrow, token } = useSelector((state: AppState) => state);
   const { amounts, stats, events, chainId } = escrow;
 
   if (chainId === ChainId.ALL) {
@@ -46,15 +46,12 @@ export const useEscrowDataByChainID = (): EscrowData => {
         escrowData.amount += amounts[chainId]!;
       }
       if (stats[chainId]) {
-        escrowData.stats.bulkTransferEventCount += stats[
-          chainId
-        ]?.bulkTransferEventCount!;
-        escrowData.stats.pendingEventCount += stats[
-          chainId
-        ]?.pendingEventCount!;
-        escrowData.stats.intermediateStorageEventCount += stats[
-          chainId
-        ]?.intermediateStorageEventCount!;
+        escrowData.stats.bulkTransferEventCount +=
+          stats[chainId]?.bulkTransferEventCount!;
+        escrowData.stats.pendingEventCount +=
+          stats[chainId]?.pendingEventCount!;
+        escrowData.stats.intermediateStorageEventCount +=
+          stats[chainId]?.intermediateStorageEventCount!;
         escrowData.stats.totalEventCount += stats[chainId]?.totalEventCount!;
       }
       if (Array.isArray(events[chainId])) {
@@ -95,6 +92,9 @@ export const useEscrowDataByChainID = (): EscrowData => {
       totalEventCount: 0,
     },
     lastMonthEvents: events[chainId] ?? [],
+    totalSupply: TESTNET_CHAIN_IDS.includes(chainId)
+      ? token.stats[chainId]?.totalSupply
+      : undefined,
   };
 };
 
