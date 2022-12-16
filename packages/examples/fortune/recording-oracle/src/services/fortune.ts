@@ -1,5 +1,13 @@
 import Web3 from 'web3';
-import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
+import {
+  getEscrowStatus,
+  getEscrowManifestUrl,
+  getRecordingOracleAddress,
+  storeResults,
+} from './escrow';
+import { getManifest } from './manifest';
+import { bulkPayout } from './reputationClient';
+import { uploadResults } from './s3';
 import {
   cleanFortunes,
   getEscrow,
@@ -8,8 +16,6 @@ import {
   newEscrow,
   putFortune,
 } from './storage';
-import { getManifest } from './manifest';
-import { bulkPayout } from './reputationClient';
 
 const statusesMap = [
   'Launched',
@@ -42,8 +48,11 @@ export async function addFortune(
       message: 'Valid ethereum address required',
     };
   }
-  const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
-  const escrowRecOracleAddr = await Escrow.methods.recordingOracle().call();
+
+  const escrowRecOracleAddr = await getRecordingOracleAddress(
+    web3,
+    escrowAddress
+  );
 
   if (
     web3.utils.toChecksumAddress(escrowRecOracleAddr) !==
@@ -55,7 +64,7 @@ export async function addFortune(
     };
   }
 
-  const escrowStatus = await Escrow.methods.status().call();
+  const escrowStatus = await getEscrowStatus(web3, escrowAddress);
 
   if (statusesMap[escrowStatus] !== 'Pending') {
     return {
@@ -64,7 +73,7 @@ export async function addFortune(
     };
   }
 
-  const manifestUrl = await Escrow.methods.manifestUrl().call();
+  const manifestUrl = await getEscrowManifestUrl(web3, escrowAddress);
   const {
     fortunes_requested: fortunesRequested,
     reputation_oracle_url: reputationOracleUrl,
@@ -81,9 +90,20 @@ export async function addFortune(
   }
 
   putFortune(escrowAddress, workerAddress, fortune);
+
   const fortunes = getFortunes(escrowAddress);
+
+  const resultUrl = await uploadResults(
+    fortunes.map(({ fortune }: { fortune: any }) => fortune),
+    escrowAddress
+  );
+  // TODO calculate the URL hash(?)
+  const resultHash = resultUrl;
+
+  await storeResults(web3, escrowAddress, resultUrl, resultHash);
+
   if (fortunes.length === fortunesRequested) {
-    await bulkPayout(reputationOracleUrl, escrowAddress, fortunes);
+    await bulkPayout(reputationOracleUrl, escrowAddress, fortunes, resultUrl);
     cleanFortunes(escrowAddress);
   }
 

@@ -6,7 +6,6 @@ import {
   filterAddressesToReward,
   calculateRewardForWorker,
 } from './services/rewards';
-import { uploadResults } from './services/s3';
 
 const app = express();
 const privKey =
@@ -25,7 +24,7 @@ app.use(bodyParser.json());
 
 app.post('/job/results', async (req, res) => {
   try {
-    const { fortunes, escrowAddress } = req.body;
+    const { fortunes, escrowAddress, resultsUrl } = req.body;
 
     if (!Array.isArray(fortunes) || fortunes.length === 0) {
       return res
@@ -43,10 +42,7 @@ app.post('/job/results', async (req, res) => {
 
     const workerAddresses = filterAddressesToReward(web3, fortunes);
     const rewards = calculateRewardForWorker(balance, workerAddresses);
-    const resultsUrl = await uploadResults(
-      fortunes.map(({ fortune }) => fortune),
-      escrowAddress
-    );
+
     // TODO calculate the URL hash(?)
     const resultHash = resultsUrl;
     await bulkPayOut(
