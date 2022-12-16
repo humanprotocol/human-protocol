@@ -1,11 +1,11 @@
 import { Box, Typography } from '@mui/material';
 import numeral from 'numeral';
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { CardContainer } from '../Container';
 
 type CardTextBlockProps = {
-  title: string;
+  title: string | ReactElement;
   value?: number | string;
   format?: string;
   changes?: number;
