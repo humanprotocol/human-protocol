@@ -26,7 +26,7 @@ export default function Stake() {
     }
     return (
         <div>
-            <p>HMT staking amount(You need to be approved as a staker before): </p>
+            <p>HMT staking amount: </p>
             <input type='number' onChange={(e) => setStake(Number(e.target.value))} />
             <button onClick={() => stake()}> Stake </button>
         </div>
