@@ -4,23 +4,16 @@ pragma solidity >=0.6.2;
 
 import './interfaces/HMTokenInterface.sol';
 import './interfaces/IRewardPool.sol';
+import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
 
-contract Escrow {
+contract Escrow is IEscrow {
     using SafeMath for uint256;
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
 
-    enum EscrowStatuses {
-        Launched,
-        Pending,
-        Partial,
-        Paid,
-        Complete,
-        Cancelled
-    }
-    EscrowStatuses public status;
+    EscrowStatuses public override status;
 
     address public reputationOracle;
     address public recordingOracle;
@@ -242,10 +235,6 @@ contract Escrow {
             finalAmounts.push(amount);
         }
         return (reputationOracleFee, recordingOracleFee);
-    }
-
-    function getStatus() public view returns (EscrowStatuses) {
-        return status;
     }
 
     modifier trusted() {

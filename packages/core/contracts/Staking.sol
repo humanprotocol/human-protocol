@@ -238,7 +238,7 @@ contract Staking is IStaking {
         }
 
         IEscrow escrow = IEscrow(_escrowAddress);
-        IEscrow.EscrowStatuses escrowStatus = escrow.getStatus();
+        IEscrow.EscrowStatuses escrowStatus = escrow.status();
 
         if (
             allocation.createdAt != 0 &&

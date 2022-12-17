@@ -63,10 +63,6 @@ describe('EscrowFactory', function () {
   });
 
   describe('deployment', () => {
-    it('Should set owner', async () => {
-      expect(await escrowFactory.owner()).to.equal(await owner.getAddress());
-    });
-
     it('Should set the right token address', async () => {
       const result = await escrowFactory.eip20();
       expect(result).to.equal(token.address);

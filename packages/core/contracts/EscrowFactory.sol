@@ -8,9 +8,7 @@ import './interfaces/IStaking.sol';
 contract EscrowFactory {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
-
-    // Owner address
-    address public owner;
+    string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
 
     uint256 public counter;
     mapping(address => uint256) public escrowCounters;
@@ -20,15 +18,15 @@ contract EscrowFactory {
     event Launched(address eip20, address escrow, uint256 counter);
 
     constructor(address _eip20, address _staking) {
+        require(_eip20 != address(0), ERROR_ZERO_ADDRESS);
         eip20 = _eip20;
+        require(_staking != address(0), ERROR_ZERO_ADDRESS);
         staking = _staking;
-        owner = msg.sender;
     }
 
     function createEscrow(
         address[] memory trustedHandlers
     ) public returns (address) {
-        require(staking != address(0), 'Staking is not configured');
         bool hasAvailableStake = IStaking(staking).hasAvailableStake(
             msg.sender
         );
@@ -56,10 +54,5 @@ contract EscrowFactory {
 
     function hasEscrow(address _address) public view returns (bool) {
         return escrowCounters[_address] != 0;
-    }
-
-    modifier onlyOwner() {
-        require(owner == msg.sender, 'Caller is not owner');
-        _;
     }
 }

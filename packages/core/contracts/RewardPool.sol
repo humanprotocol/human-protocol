@@ -42,7 +42,7 @@ contract RewardPool is IRewardPool {
 
     /**
      * @dev Add reward record
-     * Protocol fee is duducted for each reward
+     * Protocol fee is deducted for each reward
      */
     function addReward(
         address _escrowAddress,
@@ -86,8 +86,7 @@ contract RewardPool is IRewardPool {
         // Transfer Tokens
         for (uint256 index = 0; index < rewardsForEscrow.length; index += 1) {
             Reward memory reward = rewardsForEscrow[index];
-            bool success = token.transfer(reward.slasher, reward.tokens);
-            require(success, 'Transfer failed');
+            token.transfer(reward.slasher, reward.tokens);
         }
     }
 

@@ -12,6 +12,8 @@ interface IEscrow {
         Cancelled
     }
 
+    function status() external view returns (EscrowStatuses);
+
     function addTrustedHandlers(address[] memory _handlers) external;
 
     function setup(
@@ -38,6 +40,4 @@ interface IEscrow {
         string memory _hash,
         uint256 _txId
     ) external returns (bool);
-
-    function getStatus() external view returns (EscrowStatuses);
 }
