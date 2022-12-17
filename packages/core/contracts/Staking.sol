@@ -348,11 +348,13 @@ contract Staking is IStaking {
         Stakes.Staker storage staker = stakes[msg.sender];
 
         require(staker.tokensStaked > 0, 'Must be a positive number');
+        require(_tokens > 0, 'Must be a positive number');
+        require(
+            staker.tokensAvailable() >= _tokens,
+            'Insufficient amount to unstake'
+        );
 
-        uint256 tokensToLock = Math.min(staker.tokensAvailable(), _tokens);
-        require(tokensToLock > 0, 'Must be a positive number');
-
-        uint256 newStake = staker.tokensSecureStake().sub(tokensToLock);
+        uint256 newStake = staker.tokensSecureStake().sub(_tokens);
         require(
             newStake == 0 || newStake >= minimumStake,
             'Total stake is below the minimum threshold'
@@ -363,7 +365,7 @@ contract Staking is IStaking {
             _withdraw(msg.sender);
         }
 
-        staker.lockTokens(tokensToLock, lockPeriod);
+        staker.lockTokens(_tokens, lockPeriod);
 
         emit StakeLocked(
             msg.sender,
