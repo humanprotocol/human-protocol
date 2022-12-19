@@ -1,6 +1,3 @@
-# Graph build
-build/
-
 # Graph generated
 generated/
 
@@ -8,5 +5,4 @@ generated/
 subgraph.yaml
 
 # Graph test generated
-test/.bin
-test/.latest.json
+tests/.latest.json

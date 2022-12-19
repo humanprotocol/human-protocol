@@ -172,6 +172,7 @@ def download(key: str, private_key: bytes, public: bool = False) -> Dict:
             if is_url
             else download_from_storage(key=key, public=public)
         )
+        content = download_from_storage(key=key, public=public)
         artifact = (
             crypto.decrypt(private_key, content)
             if crypto.is_encrypted(content) is True

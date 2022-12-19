@@ -20,17 +20,12 @@ const statusesMap = [
   'Cancelled',
 ];
 
-export interface FortuneError {
-  message: string;
-  field?: string;
-}
-
 export async function addFortune(
   web3: Web3,
   workerAddress: string,
   escrowAddress: string,
   fortune: string
-): Promise<FortuneError | null> {
+) {
   if (!web3.utils.isAddress(workerAddress)) {
     return {
       field: 'workerAddress',

@@ -4,13 +4,11 @@ const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const {
   createEscrowFactory,
   createEscrow,
-  fundAccountHMT,
+  fundEscrow,
   setupEscrow,
   setupAgents,
   sendFortune,
   calculateRewardAmount,
-  stake,
-  setupAccounts,
 } = require('./fixtures');
 const {
   urls,
@@ -21,13 +19,8 @@ const {
 const web3 = new Web3(urls.ethHTTPServer);
 
 describe('Positive flow + adding same fortune. Only one unique fortune teller should be rewarded.', () => {
-  beforeAll(async () => {
-    await setupAccounts();
-  });
-
   test('Flow', async () => {
     const escrowFactory = createEscrowFactory();
-    await stake(escrowFactory);
     await createEscrow(escrowFactory);
 
     const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
@@ -39,7 +32,7 @@ describe('Positive flow + adding same fortune. Only one unique fortune teller sh
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundAccountHMT(lastEscrowAddr);
+    await fundEscrow(lastEscrowAddr);
     await setupEscrow(lastEscrowAddr);
 
     escrowSt = await Escrow.methods.status().call();

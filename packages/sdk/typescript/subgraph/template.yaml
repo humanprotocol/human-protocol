@@ -21,7 +21,7 @@ dataSources:
         - name: EscrowFactory
           file: ./node_modules/@human-protocol/core/abis/EscrowFactory.json
       eventHandlers:
-        - event: Launched(address,address,uint256)
+        - event: Launched(address,address)
           handler: handleLaunched
   - kind: ethereum
     name: HMToken
