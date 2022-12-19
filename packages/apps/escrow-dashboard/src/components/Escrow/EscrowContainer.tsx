@@ -29,7 +29,9 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
-export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElement => {
+export const EscrowContainer: React.FC<
+  IEscrowContainer
+> = (): React.ReactElement => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
 
@@ -38,7 +40,7 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
   const dataLoaded = useEscrowDataLoaded();
 
   return (
-    <Box id="network">
+    <Box id="network" mt={{ xs: 4, md: 8 }}>
       <ViewTitle title="Network" iconUrl="/images/network.svg" />
       <Tabs
         sx={{
