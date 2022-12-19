@@ -1,11 +1,16 @@
 import Web3 from 'web3';
 
+export interface FortuneEntry {
+  worker: string;
+  fortune: string;
+}
+
 export function filterAddressesToReward(
   web3: Web3,
-  addressFortunesEntries: any[]
+  addressFortunesEntries: FortuneEntry[]
 ) {
-  const filteredResults: any = [];
-  const tmpHashMap: any = {};
+  const filteredResults: FortuneEntry[] = [];
+  const tmpHashMap: Record<string, boolean> = {};
 
   addressFortunesEntries.forEach((fortuneEntry) => {
     const { fortune } = fortuneEntry;
@@ -18,7 +23,7 @@ export function filterAddressesToReward(
   });
 
   return filteredResults
-    .map((fortune: { worker: any }) => fortune.worker)
+    .map((fortune: { worker: string }) => fortune.worker)
     .map(web3.utils.toChecksumAddress);
 }
 

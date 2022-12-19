@@ -1,4 +1,9 @@
-const storage: any = {};
+export interface FortuneEntry {
+  worker: string;
+  fortune: string;
+}
+
+const storage: Record<string, Record<string, string>> = {};
 
 export function newEscrow(address: string) {
   const escrow = {};
@@ -25,7 +30,7 @@ export function putFortune(
 
 export function getFortunes(escrowAddress: string) {
   const escrow = storage[escrowAddress];
-  const result: any = [];
+  const result: FortuneEntry[] = [];
   if (!escrow) {
     return result;
   }

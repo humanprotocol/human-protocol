@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/sdk",
   "description": "Human Protocol SDK",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "files": [
     "src",
     "dist",
@@ -14,7 +14,7 @@
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc",
     "prepublish": "npm run build",
-    "test": "./scripts/run-test.sh",
+    "test": "concurrently -k -s first -g --hide 0 \"yarn workspace @human-protocol/core local\" \"sleep 5 && jest --runInBand\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'"
@@ -38,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "@human-protocol/core": "^1.0.9",
+    "@human-protocol/core": "^1.0.11",
     "aws-sdk": "^2.1255.0",
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
@@ -47,6 +47,6 @@
     "winston": "^3.8.2"
   },
   "peerDependencies": {
-    "@human-protocol/core": "^1.0.9"
+    "@human-protocol/core": "^1.0.11"
   }
 }

@@ -29,7 +29,9 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
-export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElement => {
+export const EscrowContainer: React.FC<
+  IEscrowContainer
+> = (): React.ReactElement => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
 

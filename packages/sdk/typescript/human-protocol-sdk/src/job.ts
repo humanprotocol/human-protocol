@@ -20,6 +20,7 @@ import {
   getEscrow,
   getEscrowFactory,
   getHmToken,
+  getStaking,
   toFullDigit,
 } from './utils';
 import {
@@ -29,6 +30,7 @@ import {
   ErrorJobNotLaunched,
   ErrorManifestMissing,
   ErrorReputationOracleMissing,
+  ErrorStakingMissing,
   ErrorStorageAccessDataMissing,
 } from './error';
 import { createLogger } from './logger';
@@ -94,6 +96,7 @@ export class Job {
     storageEndpoint,
     storagePublicBucket,
     storageBucket,
+    stakingAddr,
     logLevel = 'info',
   }: JobArguments) {
     const provider = network
@@ -134,6 +137,7 @@ export class Job {
       hmTokenAddr,
       escrowAddr,
       factoryAddr,
+      stakingAddr,
     };
 
     this.manifestData = { manifest };
@@ -174,9 +178,21 @@ export class Job {
         return false;
       }
 
+      if (!this.contractData.stakingAddr) {
+        this._logError(new Error('Staking contract is missing'));
+        return false;
+      }
+
+      this._logger.info('Getting staking...');
+      this.contractData.staking = await getStaking(
+        this.contractData.stakingAddr,
+        this.providerData?.gasPayer
+      );
+
       this._logger.info('Deploying escrow factory...');
       this.contractData.factory = await deployEscrowFactory(
         this.contractData.hmTokenAddr,
+        this.contractData.stakingAddr,
         this.providerData?.gasPayer
       );
       this.contractData.factoryAddr = this.contractData.factory.address;
@@ -196,6 +212,31 @@ export class Job {
         this.contractData?.factoryAddr,
         this.providerData?.gasPayer
       );
+
+      this._logger.info('Checking if staking is configured...');
+      const stakingAddr = await this.contractData.factory.staking();
+      if (!stakingAddr) {
+        this._logError(new Error('Factory is not configured with staking'));
+        this.contractData.factory = undefined;
+
+        return false;
+      }
+      this._logger.info('Getting staking...');
+      this.contractData.staking = await getStaking(
+        stakingAddr,
+        this.providerData?.gasPayer
+      );
+      this.contractData.stakingAddr = stakingAddr;
+
+      this._logger.info('Checking if reward pool is configured...');
+      const rewardPoolAddr = await this.contractData.staking.rewardPool();
+      if (!rewardPoolAddr) {
+        this._logError(new Error('Staking is not configured with reward pool'));
+        this.contractData.staking = undefined;
+        this.contractData.factory = undefined;
+
+        return false;
+      }
 
       this._logger.info('Checking if escrow exists in the factory...');
       const hasEscrow = await this.contractData?.factory.hasEscrow(
@@ -283,7 +324,8 @@ export class Job {
     const txResponse = await txReceipt?.wait();
 
     const event = txResponse?.events?.find(
-      (event) => event.event === 'Launched'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (event: any) => event.event === 'Launched'
     );
 
     const escrowAddr = event?.args?.[1];
@@ -631,6 +673,120 @@ export class Job {
     }
 
     return (await this.status()) === EscrowStatus.Complete;
+  }
+
+  /**
+   * **Stake HMTokens**
+   *
+   * @param {number} amount - Amount to stake
+   * @returns {Promise<boolean>} - True if the token is staked
+   */
+  async stake(amount: number) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+    if (!this.contractData.hmToken) {
+      this._logError(ErrorHMTokenMissing);
+      return false;
+    }
+
+    const approved = await this.contractData.hmToken.approve(
+      this.contractData.staking.address,
+      toFullDigit(amount)
+    );
+
+    if (!approved) {
+      this._logError(new Error('Error approving HMTokens for staking'));
+      return false;
+    }
+
+    return await this._raffleExecute(
+      this.contractData.staking,
+      'stake',
+      toFullDigit(amount)
+    );
+  }
+
+  /**
+   * **Unstake HMTokens**
+   *
+   * @param {number} amount - Amount to unstake
+   * @returns {Promise<boolean>} - True if the token is unstaked
+   */
+  async unstake(amount: number) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    return await this._raffleExecute(
+      this.contractData.staking,
+      'unstake',
+      toFullDigit(amount)
+    );
+  }
+
+  /**
+   * **Withdraw unstaked HMTokens**
+   *
+   * @returns {Promise<boolean>} - True if the token is withdrawn
+   */
+  async withdraw() {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    return await this._raffleExecute(this.contractData.staking, 'withdraw');
+  }
+
+  /**
+   * **Allocate HMTokens staked to the job**
+   *
+   * @param amount - Amount to allocate
+   * @returns {Promise<boolean>} - True if the token is allocated
+   */
+  async allocate(amount: number) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    if (!this.contractData.escrowAddr) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
+    }
+
+    return await this._raffleExecute(
+      this.contractData.staking,
+      'allocate',
+      this.contractData.escrowAddr,
+      toFullDigit(amount)
+    );
+  }
+
+  /**
+   * **Unallocate HMTokens from the job**
+   *
+   * @returns {Promise<boolean>} - True if the token is unallocated.
+   */
+  async closeAllocation() {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    if (!this.contractData.escrowAddr) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
+    }
+
+    return await this._raffleExecute(
+      this.contractData.staking,
+      'closeAllocation',
+      this.contractData.escrowAddr
+    );
   }
 
   /**
