@@ -8,17 +8,15 @@ import './interfaces/IRewardPool.sol';
 import './interfaces/IStaking.sol';
 import './libs/Stakes.sol';
 import './utils/Math.sol';
+import './utils/Ownable.sol';
 
 /**
  * @title Staking contract
  * @dev The Staking contract allows Operator, Exchange Oracle, Recording Oracle and Reputation Oracle to stake to Escrow.
  */
-contract Staking is IStaking {
+contract Staking is IStaking, Ownable {
     using SafeMath for uint256;
     using Stakes for Stakes.Staker;
-
-    // Owner address
-    address public owner;
 
     // ERC20 Token address
     address public eip20;
@@ -98,7 +96,6 @@ contract Staking is IStaking {
 
     constructor(address _eip20, uint256 _minimumStake, uint32 _lockPeriod) {
         eip20 = _eip20;
-        owner = msg.sender;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
     }
@@ -528,11 +525,6 @@ contract Staking is IStaking {
             _escrowAddress,
             allocation.closedAt
         );
-    }
-
-    modifier onlyOwner() {
-        require(owner == msg.sender, 'Caller is not a owner');
-        _;
     }
 
     modifier onlyStaker(address _staker) {
