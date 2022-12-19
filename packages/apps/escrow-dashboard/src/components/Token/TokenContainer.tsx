@@ -8,9 +8,7 @@ import { TokenView } from './TokenView';
 
 interface ITokenContainer {}
 
-export const TokenContainer: React.FC<
-  ITokenContainer
-> = (): React.ReactElement => {
+export const TokenContainer: React.FC<ITokenContainer> = (): React.ReactElement => {
   usePollTokenStats();
 
   return (

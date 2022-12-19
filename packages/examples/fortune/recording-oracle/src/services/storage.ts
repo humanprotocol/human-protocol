@@ -1,9 +1,4 @@
-export interface FortuneEntry {
-  worker: string;
-  fortune: string;
-}
-
-const storage: Record<string, Record<string, string>> = {};
+const storage: any = {};
 
 export function newEscrow(address: string) {
   const escrow = {};
@@ -30,7 +25,7 @@ export function putFortune(
 
 export function getFortunes(escrowAddress: string) {
   const escrow = storage[escrowAddress];
-  const result: FortuneEntry[] = [];
+  const result: any = [];
   if (!escrow) {
     return result;
   }

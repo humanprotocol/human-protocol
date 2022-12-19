@@ -4,13 +4,11 @@ const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const {
   createEscrowFactory,
   createEscrow,
-  fundAccountHMT,
+  fundEscrow,
   setupEscrow,
   setupAgents,
   sendFortune,
   calculateRewardAmount,
-  stake,
-  setupAccounts,
 } = require('./fixtures');
 const {
   urls,
@@ -21,14 +19,8 @@ const {
 const web3 = new Web3(urls.ethHTTPServer);
 
 describe('Positive flow', () => {
-  beforeAll(async () => {
-    await setupAccounts();
-  });
-
   test('Flow', async () => {
     const escrowFactory = createEscrowFactory();
-    await stake(escrowFactory);
-
     await createEscrow(escrowFactory);
     const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
     const Escrow = new web3.eth.Contract(escrowAbi, lastEscrowAddr);
@@ -39,7 +31,7 @@ describe('Positive flow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundAccountHMT(lastEscrowAddr);
+    await fundEscrow(lastEscrowAddr);
     await setupEscrow(lastEscrowAddr);
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Pending');

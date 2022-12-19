@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.2;
-
-import './interfaces/HMTokenInterface.sol';
-import './utils/Ownable.sol';
-import './utils/SafeMath.sol';
+import './HMTokenInterface.sol';
+import './SafeMath.sol';
+import './Ownable.sol';
 
 contract HMToken is HMTokenInterface, Ownable {
     using SafeMath for uint256;
@@ -22,7 +21,7 @@ contract HMToken is HMTokenInterface, Ownable {
     uint256 public totalSupply;
 
     uint256 private constant MAX_UINT256 = ~uint256(0);
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
+    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10**18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
@@ -41,17 +40,18 @@ contract HMToken is HMTokenInterface, Ownable {
         uint8 _decimals,
         string memory _symbol
     ) {
-        totalSupply = _totalSupply * (10 ** uint256(_decimals));
+        totalSupply = _totalSupply * (10**uint256(_decimals));
         name = _name;
         decimals = _decimals;
         symbol = _symbol;
         balances[msg.sender] = totalSupply;
     }
 
-    function transfer(
-        address _to,
-        uint256 _value
-    ) public override returns (bool success) {
+    function transfer(address _to, uint256 _value)
+        public
+        override
+        returns (bool success)
+    {
         success = transferQuiet(_to, _value);
         require(success, "Transfer didn't succeed");
         return success;
@@ -86,16 +86,20 @@ contract HMToken is HMTokenInterface, Ownable {
         return true;
     }
 
-    function balanceOf(
-        address _owner
-    ) public view override returns (uint256 balance) {
+    function balanceOf(address _owner)
+        public
+        view
+        override
+        returns (uint256 balance)
+    {
         return balances[_owner];
     }
 
-    function approve(
-        address _spender,
-        uint256 _value
-    ) public override returns (bool success) {
+    function approve(address _spender, uint256 _value)
+        public
+        override
+        returns (bool success)
+    {
         require(
             _spender != address(0),
             'Token spender is an uninitialized address'
@@ -106,10 +110,10 @@ contract HMToken is HMTokenInterface, Ownable {
         return true;
     }
 
-    function increaseApproval(
-        address _spender,
-        uint256 _delta
-    ) public returns (bool success) {
+    function increaseApproval(address _spender, uint256 _delta)
+        public
+        returns (bool success)
+    {
         require(
             _spender != address(0),
             'Token spender is an uninitialized address'
@@ -131,10 +135,10 @@ contract HMToken is HMTokenInterface, Ownable {
         return true;
     }
 
-    function decreaseApproval(
-        address _spender,
-        uint256 _delta
-    ) public returns (bool success) {
+    function decreaseApproval(address _spender, uint256 _delta)
+        public
+        returns (bool success)
+    {
         require(
             _spender != address(0),
             'Token spender is an uninitialized address'
@@ -153,10 +157,12 @@ contract HMToken is HMTokenInterface, Ownable {
         return true;
     }
 
-    function allowance(
-        address _owner,
-        address _spender
-    ) public view override returns (uint256 remaining) {
+    function allowance(address _owner, address _spender)
+        public
+        view
+        override
+        returns (uint256 remaining)
+    {
         return allowed[_owner][_spender];
     }
 
@@ -217,10 +223,10 @@ contract HMToken is HMTokenInterface, Ownable {
     }
 
     // Like transfer, but fails quietly.
-    function transferQuiet(
-        address _to,
-        uint256 _value
-    ) internal returns (bool success) {
+    function transferQuiet(address _to, uint256 _value)
+        internal
+        returns (bool success)
+    {
         if (_to == address(0)) return false; // Preclude burning tokens to uninitialized address.
         if (_to == address(this)) return false; // Preclude sending tokens to the contract.
         if (balances[msg.sender] < _value) return false;

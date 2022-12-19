@@ -76,7 +76,7 @@ export const getKeyFromURL = (url: string): string => {
  * @param {StorageAccessData} storageAccessData - Cloud storage access data
  * @param {string} key - Key of result object
  * @param {string} privateKey - Private key to decode encrypted content
- * @param {boolean} isPublic - Whether the objest is using public bucket, or private bucket
+ * @param {string} isPublic - Whether the objest is using public bucket, or private bucket
  * @returns {Promise<Result>} - Downloaded result
  */
 export const download = async (
@@ -104,15 +104,14 @@ export const download = async (
  * @param {StorageAccessData} storageAccessData - Cloud storage access data
  * @param {Result} result - Result to upload
  * @param {string} publicKey - Public key to encrypt data if necessary
- * @param {boolean} _encrypt - Whether to encrypt the result, or not
- * @param {boolean} isPublic - Whether to use public bucket, or private bucket
+ * @param {string} encrypt - Whether to encrypt the result, or not
+ * @param {string} isPublic - Whether to use public bucket, or private bucket
  * @returns {Promise<UploadResult>} - Uploaded result with key/hash
  */
 export const upload = async (
   storageAccessData: StorageAccessData,
   result: Result,
   publicKey: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   encrypt = true,
   isPublic = false
 ): Promise<UploadResult> => {

@@ -4,12 +4,10 @@ const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const {
   createEscrowFactory,
   createEscrow,
-  fundAccountHMT,
+  fundEscrow,
   setupEscrow,
   setupAgents,
   sendFortune,
-  stake,
-  setupAccounts,
 } = require('./fixtures');
 const {
   urls,
@@ -18,15 +16,10 @@ const {
   escrowFundAmount,
 } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
-let launcher;
 
 describe('Cancel escrow', () => {
-  beforeAll(async () => {
-    [, launcher] = await setupAccounts();
-  });
   test('Flow', async () => {
     const escrowFactory = createEscrowFactory();
-    await stake(escrowFactory);
     await createEscrow(escrowFactory);
 
     const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
@@ -38,7 +31,7 @@ describe('Cancel escrow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundAccountHMT(lastEscrowAddr);
+    await fundEscrow(lastEscrowAddr);
     await setupEscrow(lastEscrowAddr);
 
     escrowSt = await Escrow.methods.status().call();
@@ -58,10 +51,11 @@ describe('Cancel escrow', () => {
     const agent_1_res = await sendFortune(agentAddresses[0], lastEscrowAddr);
     expect(agent_1_res.status).toBe(201);
 
+    const account = (await web3.eth.getAccounts())[0];
     const cancellerBalance = BigInt(
-      await Token.methods.balanceOf(launcher).call()
+      await Token.methods.balanceOf(account).call()
     );
-    const res = await Escrow.methods.cancel().send({ from: launcher });
+    const res = await Escrow.methods.cancel().send({ from: account });
     expect(res.status).toBe(true);
 
     escrowSt = await Escrow.methods.status().call();
@@ -71,7 +65,7 @@ describe('Cancel escrow', () => {
     expect(escrowBalance).toBe('0');
 
     const newCancellerBalance = BigInt(
-      await Token.methods.balanceOf(launcher).call()
+      await Token.methods.balanceOf(account).call()
     );
     expect(newCancellerBalance - cancellerBalance).toBe(BigInt(value));
     const reputationOracleOldBalance = await Token.methods

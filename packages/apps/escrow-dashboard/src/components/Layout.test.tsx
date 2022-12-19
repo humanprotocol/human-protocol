@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
+import { act } from 'react-dom/test-utils';
 import Layout from './Layout';
 
 describe('when rendered Layout component', () => {

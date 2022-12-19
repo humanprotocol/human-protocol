@@ -36,8 +36,3 @@ export const ErrorHMTokenMissing = new Error('HMToken is missing');
 export const ErrorStorageAccessDataMissing = new Error(
   'Storage access data is missing'
 );
-
-/**
- * @constant {Error} - The Staking contract is missing.
- */
-export const ErrorStakingMissing = new Error('Staking contract is missing');

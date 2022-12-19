@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import getWeb3 from './utils/web3';
 import Escrow from './components/escrow';
-import Staking from './components/staking';
 import './App.css';
 
 
@@ -36,10 +35,6 @@ function App() {
         }
         {!isMetamaskConnected &&
           (<button onClick={connect}> Connect </button>)
-        }
-        {
-          isMetamaskConnected &&
-          (<Staking />)
         }
         {
           isMetamaskConnected &&

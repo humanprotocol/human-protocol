@@ -2,7 +2,6 @@ import {
   Escrow,
   EscrowFactory,
   HMToken,
-  Staking,
 } from '@human-protocol/core/typechain-types';
 import { ethers } from 'ethers';
 
@@ -568,14 +567,6 @@ export type ContractData = {
    * HMToken contract instance
    */
   hmToken?: HMToken;
-  /**
-   * Staking contract address
-   */
-  stakingAddr?: string;
-  /**
-   * Staking contract instance
-   */
-  staking?: Staking;
 };
 
 /**
@@ -635,10 +626,6 @@ export type JobArguments = {
   hmTokenAddr: string;
   /**
    * Factory contract address
-   */
-  stakingAddr?: string;
-  /**
-   * Staking contract address
    */
   factoryAddr?: string;
   /**
