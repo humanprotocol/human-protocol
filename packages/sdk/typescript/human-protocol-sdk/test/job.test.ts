@@ -48,7 +48,7 @@ describe('Test Job', () => {
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
         stakingAddr: DEFAULT_STAKING_ADDR,
-        logLevel: 'debug',
+        logLevel: 'error',
       });
     });
 
@@ -396,7 +396,7 @@ describe('Test Job', () => {
         escrowAddr: originalJob.contractData?.escrowAddr,
         factoryAddr: originalJob.contractData?.factoryAddr,
         trustedHandlers: [TRUSTED_OPERATOR1_PRIVKEY],
-        logLevel: 'debug',
+        logLevel: 'error',
       });
     });
 
