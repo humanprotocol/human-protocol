@@ -394,7 +394,7 @@ describe('Staking', function () {
 
         await expect(
           staking.connect(operator).setMinimumStake(minumumStake)
-        ).to.be.revertedWith('Caller is not a owner');
+        ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -433,7 +433,7 @@ describe('Staking', function () {
 
         await expect(
           staking.connect(operator).setLockPeriod(lockPeriod)
-        ).to.be.revertedWith('Caller is not a owner');
+        ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -470,7 +470,7 @@ describe('Staking', function () {
       it('Should revert with the right error if caller is not an owner', async function () {
         await expect(
           staking.connect(operator).setRewardPool(rewardPool.address)
-        ).to.be.revertedWith('Caller is not a owner');
+        ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('Should revert with the right error if not a positive number', async function () {
@@ -656,7 +656,7 @@ describe('Staking', function () {
               escrowAddress,
               slashedTokens
             )
-        ).to.be.revertedWith('Caller is not a owner');
+        ).to.be.revertedWith('Ownable: caller is not the owner');
       });
 
       it('Should revert with the right error if invalid address', async function () {
