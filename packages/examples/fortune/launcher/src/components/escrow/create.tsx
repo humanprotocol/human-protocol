@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import getWeb3 from "../../utils/web3";
-import factoryAbi from "@human-protocol/core/abis/EscrowFactory.json";
-import { ESCROW_FACTORY_ADDRESS } from "../../constants/constants";
+import React, { useState, useEffect } from 'react';
+import getWeb3 from '../../utils/web3';
+import factoryAbi from '@human-protocol/core/abis/EscrowFactory.json';
+import { ESCROW_FACTORY_ADDRESS } from '../../constants/constants';
 
 export default function CreateEscrow() {
-  const [escrow, setEscrow] = useState("");
-  const [lastEscrow, setLastEscrow] = useState("");
+  const [escrow, setEscrow] = useState('');
+  const [lastEscrow, setLastEscrow] = useState('');
   const web3 = getWeb3();
   const escrowFactory = new web3.eth.Contract(
     factoryAbi as [],
@@ -13,9 +13,9 @@ export default function CreateEscrow() {
   );
 
   useEffect(() => {
-    (async function() {
+    (async function () {
       const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
-  
+
       setLastEscrow(lastEscrowAddr);
     })();
   }, [escrowFactory.methods]);
@@ -24,17 +24,10 @@ export default function CreateEscrow() {
     const accounts = await web3.eth.getAccounts();
     const mainAccount = accounts[0];
 
-    escrowFactory.once("Launched", function (error, event) {
-      const {
-        returnValues: { escrow },
-      } = event;
-      setEscrow(escrow);
-      setLastEscrow(escrow);
-    });
-
-    await escrowFactory.methods
+    const createdEscrow = await escrowFactory.methods
       .createEscrow([mainAccount])
       .send({ from: mainAccount });
+    setEscrow(createdEscrow.events.Launched.returnValues.escrow);
   };
 
   return (
