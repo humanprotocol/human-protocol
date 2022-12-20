@@ -9,6 +9,7 @@ const {
   setupAgents,
   sendFortune,
   calculateRewardAmount,
+  getS3File,
 } = require('./fixtures');
 const {
   urls,
@@ -57,6 +58,13 @@ describe('Positive flow', () => {
       const agent_res = await sendFortune(agentAddresses[i], lastEscrowAddr);
       expect(agent_res.status).toBe(201);
     }
+
+    await expect(getS3File(lastEscrowAddr)).resolves.not.toBeNull();
+    const events = await Escrow.getPastEvents('IntermediateStorage', {
+      fromBlock: 0,
+      toBlock: 'latest',
+    });
+    expect(events.length).toBe(agentAddresses.length);
 
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Paid');

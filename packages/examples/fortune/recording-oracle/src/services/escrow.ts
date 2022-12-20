@@ -37,7 +37,9 @@ export async function storeResults(
     .estimateGas({ from: web3.eth.defaultAccount });
   const gasPrice = await web3.eth.getGasPrice();
 
-  await Escrow.methods
+  const result = await Escrow.methods
     .storeResults(resultsUrl, resultHash)
     .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
+
+  return result;
 }
