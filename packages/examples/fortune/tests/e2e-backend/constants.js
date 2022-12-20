@@ -44,6 +44,14 @@ const statusesMap = [
   'Cancelled',
 ];
 
+const minioSettings = {
+  minioHost: process.env.MINIO_HOST || 'localhost',
+  minioPort: Number(process.env.MINIO_PORT) || 9000,
+  minioAccessKey: process.env.MINIO_ACCESS_KEY || 'dev',
+  minioSecretKey: process.env.MINIO_SECRET_KEY || 'devdevdev',
+  minioBucketName: process.env.MINIO_BUCKET_NAME || 'job-results',
+};
+
 module.exports = {
   addresses,
   urls,
@@ -51,4 +59,5 @@ module.exports = {
   gasLimit,
   escrowFundAmount,
   statusesMap,
+  minioSettings,
 };

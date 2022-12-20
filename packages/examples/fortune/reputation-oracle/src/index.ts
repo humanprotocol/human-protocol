@@ -43,11 +43,12 @@ app.post('/job/results', async (req, res) => {
 
     const workerAddresses = filterAddressesToReward(web3, fortunes);
     const rewards = calculateRewardForWorker(balance, workerAddresses);
+
+    // TODO calculate the URL hash(?)
     const resultsUrl = await uploadResults(
       fortunes.map(({ fortune }) => fortune),
       escrowAddress
     );
-    // TODO calculate the URL hash(?)
     const resultHash = resultsUrl;
     await bulkPayOut(
       web3,
