@@ -87,7 +87,6 @@ describe('EscrowFactory', function () {
 
     expect(event?.eip20).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
-    expect(event?.counter.toString()).to.equal('1', 'counter is correct');
   });
 
   it('Should emit an event on launched', async function () {
@@ -95,7 +94,7 @@ describe('EscrowFactory', function () {
 
     await expect(escrowFactory.connect(operator).createEscrow(trustedHandlers))
       .to.emit(escrowFactory, 'Launched')
-      .withArgs(token.address, anyValue, 1);
+      .withArgs(token.address, anyValue);
   });
 
   it('Should find the newly created escrow from deployed escrow', async () => {
@@ -120,7 +119,6 @@ describe('EscrowFactory', function () {
 
     expect(event?.eip20).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
-    expect(event?.counter.toString()).to.equal('2', 'counter is correct');
   });
 
   it('Operator should not be able to create an escrow after allocating all of the stakes', async () => {
@@ -146,6 +144,5 @@ describe('EscrowFactory', function () {
 
     expect(event?.eip20).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
-    expect(event?.counter.toString()).to.equal('2', 'counter is correct');
   });
 });

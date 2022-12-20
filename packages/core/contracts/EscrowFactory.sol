@@ -15,7 +15,7 @@ contract EscrowFactory {
     address public lastEscrow;
     address public eip20;
     address public staking;
-    event Launched(address eip20, address escrow, uint256 counter);
+    event Launched(address eip20, address escrow);
 
     constructor(address _eip20, address _staking) {
         require(_eip20 != address(0), ERROR_ZERO_ADDRESS);
@@ -44,7 +44,7 @@ contract EscrowFactory {
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
-        emit Launched(eip20, lastEscrow, counter);
+        emit Launched(eip20, lastEscrow);
         return lastEscrow;
     }
 
