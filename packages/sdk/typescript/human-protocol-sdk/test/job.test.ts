@@ -32,7 +32,6 @@ jest.mock('../src/storage', () => ({
 
 const setupJob = async (job: Job) => {
   await job.initialize();
-  await job.stake(1);
   await job.launch();
   await job.setup();
 };
@@ -64,10 +63,9 @@ describe('Test Job', () => {
     });
 
     it('Should be able to launch the job after staking', async () => {
-      // Fail to launch the job before initialization
+      expect(await job.initialize()).toBe(true);
       expect(await job.launch()).toBe(false);
 
-      await job.initialize();
       await job.stake(1);
 
       expect(await job.launch()).toBe(true);
@@ -79,8 +77,6 @@ describe('Test Job', () => {
       expect(await job.setup()).toBe(false);
 
       await job.initialize();
-      await job.stake(1);
-
       await job.launch();
 
       expect(await job.setup()).toBe(true);
@@ -88,8 +84,6 @@ describe('Test Job', () => {
 
     it('Should be able to add trusted handlers', async () => {
       await job.initialize();
-      await job.stake(1);
-
       await job.launch();
 
       expect(await job.isTrustedHandler(DEFAULT_GAS_PAYER_ADDR)).toBe(true);
@@ -371,6 +365,81 @@ describe('Test Job', () => {
 
       expect(await job.cancel()).toBe(false);
     });
+
+    it('Should be able to allocate token to the job', async () => {
+      await job.initialize();
+
+      expect(await job.launch()).toBe(true);
+      expect(await job.status()).toBe(EscrowStatus.Launched);
+
+      expect(await job.allocate(1)).toBe(true);
+    });
+
+    it('Should be able to launch another job after allocating portion of the stake', async () => {
+      await job.initialize();
+      await job.stake(2);
+
+      expect(await job.launch()).toBe(true);
+      expect(await job.status()).toBe(EscrowStatus.Launched);
+
+      expect(await job.allocate(1)).toBe(true);
+
+      const newJob = new Job({
+        gasPayer: DEFAULT_GAS_PAYER_PRIVKEY,
+        reputationOracle: REPUTATION_ORACLE_PRIVKEY,
+        manifest: manifest,
+        hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingAddr: DEFAULT_STAKING_ADDR,
+        logLevel: 'error',
+      });
+
+      await newJob.initialize();
+      expect(await newJob.launch()).toBe(true);
+    });
+
+    it('Should not be able to launch another job after allocating all of the stake', async () => {
+      await job.initialize();
+
+      expect(await job.launch()).toBe(true);
+      expect(await job.status()).toBe(EscrowStatus.Launched);
+
+      expect(await job.allocate(1)).toBe(true);
+
+      const newJob = new Job({
+        gasPayer: DEFAULT_GAS_PAYER_PRIVKEY,
+        reputationOracle: REPUTATION_ORACLE_PRIVKEY,
+        manifest: manifest,
+        hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingAddr: DEFAULT_STAKING_ADDR,
+        logLevel: 'error',
+      });
+
+      await newJob.initialize();
+      expect(await newJob.launch()).toBe(false);
+    });
+
+    it('Should be able to launch another job after staking more tokens', async () => {
+      await job.initialize();
+      await job.stake(1);
+
+      expect(await job.launch()).toBe(true);
+      expect(await job.status()).toBe(EscrowStatus.Launched);
+
+      expect(await job.allocate(1)).toBe(true);
+
+      const newJob = new Job({
+        gasPayer: DEFAULT_GAS_PAYER_PRIVKEY,
+        reputationOracle: REPUTATION_ORACLE_PRIVKEY,
+        manifest: manifest,
+        hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingAddr: DEFAULT_STAKING_ADDR,
+        logLevel: 'error',
+      });
+
+      await newJob.initialize();
+      await newJob.stake(1);
+      expect(await newJob.launch()).toBe(true);
+    });
   });
 
   describe('Access existing job from trusted handler', () => {
@@ -387,7 +456,10 @@ describe('Test Job', () => {
         logLevel: 'error',
       });
 
-      await setupJob(originalJob);
+      await originalJob.initialize();
+      await originalJob.launch();
+      await originalJob.stake(1);
+      await originalJob.setup();
 
       job = new Job({
         gasPayer: NOT_TRUSTED_OPERATOR_PRIVKEY,
@@ -711,6 +783,35 @@ describe('Test Job', () => {
       );
 
       expect(await job.cancel()).toBe(false);
+    });
+
+    it('Should not be able to allocate to job without staking', async () => {
+      await job.initialize();
+      expect(await job.allocate(1, TRUSTED_OPERATOR1_ADDR)).toBe(false);
+    });
+
+    it('Should be able to allocate to job after staking', async () => {
+      await job.initialize();
+      await job.stake(1, TRUSTED_OPERATOR1_ADDR);
+
+      expect(await job.allocate(1, TRUSTED_OPERATOR1_ADDR)).toBe(true);
+    });
+
+    it('Should be able to launch another job after staking', async () => {
+      await job.initialize();
+      await job.stake(1, TRUSTED_OPERATOR1_ADDR);
+
+      const newJob = new Job({
+        gasPayer: TRUSTED_OPERATOR1_PRIVKEY,
+        reputationOracle: REPUTATION_ORACLE_PRIVKEY,
+        manifest: manifest,
+        hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
+        stakingAddr: DEFAULT_STAKING_ADDR,
+        logLevel: 'error',
+      });
+
+      await newJob.initialize();
+      expect(await newJob.launch()).toBe(true);
     });
   });
 });

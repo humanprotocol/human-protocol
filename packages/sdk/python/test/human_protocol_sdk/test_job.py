@@ -130,7 +130,7 @@ class JobTestCase(unittest.TestCase):
                 "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
             ),
         ]
-        self.assertTrue(self.job.stake(1))
+        self.assertTrue(self.job.stake(1, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertEqual(self.job.status(), Status(1))
 
@@ -159,7 +159,7 @@ class JobTestCase(unittest.TestCase):
             ),
         ]
         self.job = Job(self.credentials, manifest, multi_credentials=multi_credentials)
-        self.assertTrue(self.job.stake(1))
+        self.assertTrue(self.job.stake(1, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"))
         self.assertTrue(self.job.launch(self.rep_oracle_pub_key))
         self.assertTrue(self.job.setup())
 

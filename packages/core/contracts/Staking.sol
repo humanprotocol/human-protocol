@@ -253,7 +253,7 @@ contract Staking is IStaking, Ownable {
         }
 
         if (
-            allocation.closedAt > 0 &&
+            allocation.closedAt == 0 &&
             escrowStatus == IEscrow.EscrowStatuses.Complete
         ) {
             return AllocationState.Completed;

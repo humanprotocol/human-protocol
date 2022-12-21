@@ -326,7 +326,7 @@ class Job:
 
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
         >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
-        >>> job.stake(1)
+        >>> job.stake(1, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC")
         True
         >>> job.launch(rep_oracle_pub_key)
         True
@@ -1057,7 +1057,7 @@ class Job:
 
         return self.status() == Status.Complete
 
-    def stake(self, amount: Decimal) -> bool:
+    def stake(self, amount: Decimal, staker: Optional[str] = None) -> bool:
         """Stakes HMT token.
 
         >>> credentials = {
@@ -1074,11 +1074,17 @@ class Job:
 
         Args:
             amount (Decimal): Amount to stake
+            staker (Optional[str]): Operator to stake
 
         Returns:
             bool: returns True if staking succeeds.
         """
-        w3 = get_w3(self.hmt_server_addr)
+        operator = self._find_operator(staker)
+
+        if not operator:
+            LOG.exception(f"Unknown wallet")
+
+        (gas_payer, gas_payer_priv) = operator
 
         # Approve HMT
         hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
@@ -1086,36 +1092,25 @@ class Job:
         txn_event = "Approving HMT"
         txn_func = hmtoken_contract.functions.approve
         txn_info = {
-            "gas_payer": self.gas_payer,
-            "gas_payer_priv": self.gas_payer_priv,
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
         func_args = [self.staking_addr, amount]
 
-        hmt_approved = False
         try:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            hmt_approved = True
         except Exception as e:
-            LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            LOG.exception(
+                f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
             )
-        if not hmt_approved:
-            raffle_txn_res = self._raffle_txn(
-                self.multi_credentials, txn_func, func_args, txn_event
-            )
-            hmt_approved = raffle_txn_res["txn_succeeded"]
-
-        # give up
-        if not hmt_approved:
-            LOG.exception(f"{txn_event} failed with all credentials.")
 
         txn_event = "Staking"
         txn_func = self.staking_contract.functions.stake
         txn_info = {
-            "gas_payer": self.gas_payer,
-            "gas_payer_priv": self.gas_payer_priv,
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
@@ -1126,21 +1121,11 @@ class Job:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
             return True
         except Exception as e:
-            LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            LOG.exception(
+                f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
             )
 
-        raffle_txn_res = self._raffle_txn(
-            self.multi_credentials, txn_func, func_args, txn_event
-        )
-        staked = raffle_txn_res["txn_succeeded"]
-
-        if not staked:
-            LOG.exception(f"{txn_event} failed with all credentials.")
-
-        return True
-
-    def unstake(self, amount: Decimal) -> bool:
+    def unstake(self, amount: Decimal, staker: Optional[str] = None) -> bool:
         """Unstakes HMT token.
 
         >>> credentials = {
@@ -1160,16 +1145,23 @@ class Job:
 
         Args:
             amount (Decimal): Amount to unstake
+            staker (Optional[str]): Operator to unstake
 
         Returns:
             bool: returns True if unstaking succeeds.
         """
-        w3 = get_w3(self.hmt_server_addr)
+        operator = self._find_operator(staker)
+
+        if not operator:
+            LOG.exception(f"Unknown wallet")
+
+        (gas_payer, gas_payer_priv) = operator
+
         txn_event = "Staking"
         txn_func = self.staking_contract.functions.unstake
         txn_info = {
-            "gas_payer": self.gas_payer,
-            "gas_payer_priv": self.gas_payer_priv,
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
@@ -1178,24 +1170,13 @@ class Job:
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            # After abort the contract should be destroyed
-            return w3.eth.getCode(self.job_contract.address) == b""
+            return True
         except Exception as e:
-            LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            LOG.exception(
+                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}."
             )
 
-        raffle_txn_res = self._raffle_txn(
-            self.multi_credentials, txn_func, func_args, txn_event
-        )
-        unstaked = raffle_txn_res["txn_succeeded"]
-
-        if not unstaked:
-            LOG.exception(f"{txn_event} failed with all credentials.")
-
-        return True
-
-    def withdraw(self, amount: Decimal) -> bool:
+    def withdraw(self, amount: Decimal, staker: Optional[str] = None) -> bool:
         """Withdraws HMT token.
 
         >>> credentials = {
@@ -1217,16 +1198,23 @@ class Job:
 
         Args:
             amount (Decimal): Amount to withdraw
+            staker (Optional[str]): Operator to withdraw
 
         Returns:
             bool: returns True if withdrawing succeeds.
         """
-        w3 = get_w3(self.hmt_server_addr)
+        operator = self._find_operator(staker)
+
+        if not operator:
+            LOG.exception(f"Unknown wallet")
+
+        (gas_payer, gas_payer_priv) = operator
+
         txn_event = "Staking"
         txn_func = self.staking_contract.functions.withdraw
         txn_info = {
-            "gas_payer": self.gas_payer,
-            "gas_payer_priv": self.gas_payer_priv,
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
@@ -1235,22 +1223,126 @@ class Job:
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            # After abort the contract should be destroyed
-            return w3.eth.getCode(self.job_contract.address) == b""
+            return True
         except Exception as e:
-            LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+            LOG.exception(
+                f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
             )
 
-        raffle_txn_res = self._raffle_txn(
-            self.multi_credentials, txn_func, func_args, txn_event
-        )
-        withdrawn = raffle_txn_res["txn_succeeded"]
+    def allocate(self, amount: Decimal, staker: Optional[str] = None) -> bool:
+        """Allocates HMT token to the escrow.
 
-        if not withdrawn:
-            LOG.exception(f"{txn_event} failed with all credentials.")
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> job = Job(credentials, manifest)
 
-        return True
+        >>> job.stake(1)
+        True
+        >>> job.launch(rep_oracle_pub_key)
+        True
+        >>> job.setup()
+        True
+
+        >>> job.allocate(1)
+        True
+
+        Args:
+            amount (Decimal): Amount to allocate
+            staker (Optional[str]): Operator to allocate
+
+        Returns:
+            bool: returns True if allocating succeeds.
+        """
+        operator = self._find_operator(staker)
+
+        if not operator:
+            LOG.exception(f"Unknown wallet")
+
+        (gas_payer, gas_payer_priv) = operator
+
+        txn_event = "Staking"
+        txn_func = self.staking_contract.functions.allocate
+        txn_info = {
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+
+        func_args = [self.job_contract.address, amount]
+
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            return True
+        except Exception as e:
+            LOG.exception(
+                f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
+            )
+
+    def closeAllocation(self, staker: Optional[str] = None) -> bool:
+        """Close allocation of HMT token from the escrow.
+
+        >>> credentials = {
+        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+        ... }
+        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
+        >>> from test.human_protocol_sdk.utils import manifest
+        >>> job = Job(credentials, manifest)
+
+        >>> job.stake(1)
+        True
+        >>> job.launch(rep_oracle_pub_key)
+        True
+        >>> job.setup()
+        True
+        >>> job.allocate(1)
+        True
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('100.0'))]
+        >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
+        True
+        >>> job.complete()
+        True
+
+        >>> job.closeAllocation()
+        True
+
+        Args:
+            amount (Decimal): Amount to close allocation
+            staker (Optional[str]): Operator to close allocation
+
+        Returns:
+            bool: returns True if closing allocation succeeds.
+        """
+        operator = self._find_operator(staker)
+
+        if not operator:
+            LOG.exception(f"Unknown wallet")
+
+        (gas_payer, gas_payer_priv) = operator
+
+        txn_event = "Staking"
+        txn_func = self.staking_contract.functions.closeAllocation
+        txn_info = {
+            "gas_payer": gas_payer,
+            "gas_payer_priv": gas_payer_priv,
+            "gas": self.gas,
+            "hmt_server_addr": self.hmt_server_addr,
+        }
+
+        func_args = [self.job_contract.address]
+
+        try:
+            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
+            return True
+        except Exception as e:
+            LOG.exception(
+                f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
+            )
 
     def status(self) -> Enum:
         """Returns the status of the Job.
@@ -1841,3 +1933,20 @@ class Job:
                 if TRANSFER_EVENT == topic:
                     return True
         return False
+
+    def _find_operator(self, addr: Optional[str]) -> Tuple[str, str] | None:
+        """
+        Find the operator to execute the transaction from trusted wallets.
+
+        Args:
+            addr (Optional[str]): Operator address to find.
+
+        Returns:
+            Tuple(str, str) | None: returns (gas_payer, gas_payer_privkey) if found, otherwise returns None.
+        """
+        if not addr or addr == self.gas_payer:
+            return (self.gas_payer, self.gas_payer_priv)
+        for gas_payer, gas_payer_priv in self.multi_credentials:
+            if gas_payer == addr:
+                return (gas_payer, gas_payer_priv)
+        return None

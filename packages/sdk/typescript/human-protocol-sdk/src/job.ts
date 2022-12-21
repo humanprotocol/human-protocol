@@ -315,27 +315,32 @@ export class Job {
 
     this._logger.info('Launching escrow...');
 
-    const txReceipt = await this.contractData?.factory?.createEscrow(
-      this.providerData?.trustedHandlers?.map(
-        (trustedHandler) => trustedHandler.address
-      ) || []
-    );
+    try {
+      const txReceipt = await this.contractData?.factory?.createEscrow(
+        this.providerData?.trustedHandlers?.map(
+          (trustedHandler) => trustedHandler.address
+        ) || []
+      );
 
-    const txResponse = await txReceipt?.wait();
+      const txResponse = await txReceipt?.wait();
 
-    const event = txResponse?.events?.find(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (event: any) => event.event === 'Launched'
-    );
+      const event = txResponse?.events?.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (event: any) => event.event === 'Launched'
+      );
 
-    const escrowAddr = event?.args?.[1];
-    this._logger.info(`Escrow is deployed at ${escrowAddr}.`);
+      const escrowAddr = event?.args?.[1];
+      this._logger.info(`Escrow is deployed at ${escrowAddr}.`);
 
-    this.contractData.escrowAddr = escrowAddr;
-    this.contractData.escrow = await getEscrow(
-      escrowAddr,
-      this.providerData?.gasPayer
-    );
+      this.contractData.escrowAddr = escrowAddr;
+      this.contractData.escrow = await getEscrow(
+        escrowAddr,
+        this.providerData?.gasPayer
+      );
+    } catch {
+      this._logError(new Error('Error creating escrow...'));
+      return false;
+    }
 
     return (
       (await this.status()) == EscrowStatus.Launched &&
@@ -679,9 +684,10 @@ export class Job {
    * **Stake HMTokens**
    *
    * @param {number} amount - Amount to stake
+   * @param {string | undefined} from - Address to stake
    * @returns {Promise<boolean>} - True if the token is staked
    */
-  async stake(amount: number) {
+  async stake(amount: number, from?: string) {
     if (!this.contractData?.staking) {
       this._logError(ErrorStakingMissing);
       return false;
@@ -691,63 +697,104 @@ export class Job {
       return false;
     }
 
-    const approved = await this.contractData.hmToken.approve(
-      this.contractData.staking.address,
-      toFullDigit(amount)
-    );
+    const operator = this._findOperator(from);
 
-    if (!approved) {
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      const approved = await this.contractData.hmToken
+        .connect(operator)
+        .approve(this.contractData.staking.address, toFullDigit(amount));
+
+      if (!approved) {
+        throw new Error('Not approved');
+      }
+    } catch {
       this._logError(new Error('Error approving HMTokens for staking'));
       return false;
     }
 
-    return await this._raffleExecute(
-      this.contractData.staking,
-      'stake',
-      toFullDigit(amount)
-    );
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .stake(toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
   }
 
   /**
    * **Unstake HMTokens**
    *
    * @param {number} amount - Amount to unstake
+   * @param {string | undefined} from - Address to unstake
    * @returns {Promise<boolean>} - True if the token is unstaked
    */
-  async unstake(amount: number) {
+  async unstake(amount: number, from?: string) {
     if (!this.contractData?.staking) {
       this._logError(ErrorStakingMissing);
       return false;
     }
 
-    return await this._raffleExecute(
-      this.contractData.staking,
-      'unstake',
-      toFullDigit(amount)
-    );
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .unstake(toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
   }
 
   /**
    * **Withdraw unstaked HMTokens**
    *
+   * @param {string | undefined} from - Address to withdraw
    * @returns {Promise<boolean>} - True if the token is withdrawn
    */
-  async withdraw() {
+  async withdraw(from?: string) {
     if (!this.contractData?.staking) {
       this._logError(ErrorStakingMissing);
       return false;
     }
 
-    return await this._raffleExecute(this.contractData.staking, 'withdraw');
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking.connect(operator).withdraw();
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
   }
 
   /**
    * **Allocate HMTokens staked to the job**
    *
-   * @param amount - Amount to allocate
+   * @param {number} amount - Amount to allocate
+   * @param {string | undefined} - Address to allocate with
    * @returns {Promise<boolean>} - True if the token is allocated
    */
-  async allocate(amount: number) {
+  async allocate(amount: number, from?: string) {
     if (!this.contractData?.staking) {
       this._logError(ErrorStakingMissing);
       return false;
@@ -758,20 +805,31 @@ export class Job {
       return false;
     }
 
-    return await this._raffleExecute(
-      this.contractData.staking,
-      'allocate',
-      this.contractData.escrowAddr,
-      toFullDigit(amount)
-    );
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .allocate(this.contractData.escrowAddr, toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
   }
 
   /**
    * **Unallocate HMTokens from the job**
    *
+   * @param {string | undefined} - Address to close allocation with
    * @returns {Promise<boolean>} - True if the token is unallocated.
    */
-  async closeAllocation() {
+  async closeAllocation(from?: string) {
     if (!this.contractData?.staking) {
       this._logError(ErrorStakingMissing);
       return false;
@@ -782,11 +840,22 @@ export class Job {
       return false;
     }
 
-    return await this._raffleExecute(
-      this.contractData.staking,
-      'closeAllocation',
-      this.contractData.escrowAddr
-    );
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .closeAllocation(this.contractData.escrowAddr);
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -959,8 +1028,10 @@ export class Job {
         await contract.connect(trustedHandler).functions[functionName](...args);
         return true;
       } catch (err) {
-        new Error(
-          'Error executing the transaction from all of the trusted handlers. Stop continue executing...'
+        this._logError(
+          new Error(
+            'Error executing the transaction from all of the trusted handlers. Stop continue executing...'
+          )
         );
       }
     }
@@ -969,9 +1040,25 @@ export class Job {
 
   /**
    * **Error log**
+   *
    * @param {Error} error - Occured error
    */
-  private async _logError(error: Error) {
+  private _logError(error: Error) {
     this._logger.error(error.message);
+  }
+
+  /**
+   * **Find operator to execute tx**
+   *
+   * @param {string} addr - Address of the operator
+   * @returns {ethers.Wallet | undefined} - Operator wallet
+   */
+  private _findOperator(addr?: string): ethers.Wallet | undefined {
+    return addr
+      ? [
+          this.providerData?.gasPayer,
+          ...(this.providerData?.trustedHandlers || []),
+        ].find((account?: ethers.Wallet) => account?.address === addr)
+      : this.providerData?.gasPayer;
   }
 }

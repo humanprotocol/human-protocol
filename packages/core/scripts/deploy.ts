@@ -2,7 +2,7 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  const [, , , launcher] = await ethers.getSigners();
+  const [, ...accounts] = await ethers.getSigners();
   const HMToken = await ethers.getContractFactory('HMToken');
   const HMTokenContract = await HMToken.deploy(
     1000000000,
@@ -45,10 +45,12 @@ async function main() {
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);
 
-  await HMTokenContract.transfer(
-    launcher.address,
-    ethers.utils.parseEther('1000')
-  );
+  for (const account of accounts) {
+    await HMTokenContract.transfer(
+      account.address,
+      ethers.utils.parseEther('1000')
+    );
+  }
 }
 
 main().catch((error) => {
