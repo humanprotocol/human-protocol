@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Box } from '@mui/material';
-import Footer from './Footer';
-import Header from './Header';
+import Footer from 'src/components/Footer';
+import Header from 'src/components/Header';
 
 interface ILayout {
   children: React.ReactNode;
 }
 
-const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
+export const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
   <Box
     sx={{
       marginTop: '88px',

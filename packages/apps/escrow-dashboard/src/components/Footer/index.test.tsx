@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import renderer from 'react-test-renderer';
-import Footer from './Footer';
+import Footer from 'src/components/Footer';
 
 const mock = {
   link: 'https://github.com/humanprotocol/hmt-escrow',

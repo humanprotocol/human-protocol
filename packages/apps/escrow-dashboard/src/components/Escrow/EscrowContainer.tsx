@@ -1,6 +1,14 @@
-import React, { ReactElement } from 'react';
-import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
-import ViewTitle from 'src/components/ViewTitle';
+import React, { ReactElement, useState } from 'react';
+import {
+  Box,
+  CircularProgress,
+  Tab,
+  Tabs,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import networkSvg from 'src/assets/network.svg';
+import { ViewTitle } from 'src/components';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import {
   useChainId,
@@ -37,9 +45,12 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
 
   const dataLoaded = useEscrowDataLoaded();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <Box id="network">
-      <ViewTitle title="Network" iconUrl="/images/network.svg" />
+      <ViewTitle title="Network" iconUrl={networkSvg} />
       <Tabs
         sx={{
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
@@ -54,7 +65,7 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
           value={ChainId.ALL}
           label="All Networks"
           icon={<HumanIcon />}
-          iconPosition="start"
+          iconPosition={isMobile ? 'top' : 'start'}
         />
         {SUPPORTED_CHAIN_IDS.map((chainId) => (
           <Tab
@@ -62,7 +73,7 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
             value={chainId}
             label={ESCROW_NETWORKS[chainId]?.title}
             icon={NETWORK_ICONS[chainId] ?? ''}
-            iconPosition="start"
+            iconPosition={isMobile ? 'top' : 'start'}
           />
         ))}
       </Tabs>
