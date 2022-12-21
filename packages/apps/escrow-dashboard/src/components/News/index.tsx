@@ -23,7 +23,13 @@ export const NewsContainer: React.FC<{}> = (): React.ReactElement => {
               Following your decisive community vote we're pleased to announce
               HMT will be listed on LBank Exchange.
             </Typography>
-            <Button variant="outlined">Read Article</Button>
+            <Button
+              variant="outlined"
+              href="https://newsbtc.com/press-releases/lbank-exchange-will-list-human-token-hmt-on-december-15-2022/"
+              target="_blank"
+            >
+              Read Article
+            </Button>
           </Box>
           <Box
             sx={{
