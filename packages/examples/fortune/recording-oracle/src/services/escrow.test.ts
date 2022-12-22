@@ -23,7 +23,7 @@ let escrow: Contract;
 const recordingOracle = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 const reputationOracle = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 
-const web3 = new Web3('http://127.0.0.1:8548');
+const web3 = new Web3('http://127.0.0.1:8547');
 const owner = web3.eth.accounts.privateKeyToAccount(
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 );
@@ -32,7 +32,7 @@ const recordingAccount = web3.eth.accounts.privateKeyToAccount(
 );
 web3.eth.defaultAccount = recordingAccount.address;
 
-describe('Fortune', () => {
+describe('Escrow', () => {
   beforeAll(async () => {
     const tokenContract = new web3.eth.Contract(HMToken.abi as []);
     token = await tokenContract
@@ -65,13 +65,22 @@ describe('Fortune', () => {
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
-        arguments: [token.options.address],
+        arguments: [token.options.address, staking.options.address],
       })
       .send({
         from: owner.address,
       });
+
+    await token.methods
+      .approve(staking.options.address, web3.utils.toWei('500', 'ether'))
+      .send({ from: owner.address });
+
+    await staking.methods
+      .stake(web3.utils.toWei('500', 'ether'))
+      .send({ from: owner.address });
+
     await escrowFactory.methods
-      .createEscrow([owner.address, staking.options.address])
+      .createEscrow([owner.address])
       .send({ from: owner.address });
 
     escrowAddress = await escrowFactory.methods.lastEscrow().call();
