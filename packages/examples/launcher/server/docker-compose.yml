@@ -1,0 +1,18 @@
+version: '3.8'
+services: 
+  db:
+    container_name: postgres_db
+    image: postgres
+    restart: always
+    environment: 
+      - POSTGRES_USER=hmt
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=hmt
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+    command: ["postgres", "-c", "log_statement=all"]  
+  
+volumes:
+  pgdata:

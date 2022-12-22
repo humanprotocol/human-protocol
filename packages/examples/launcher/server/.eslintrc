@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "@gemunion/eslint-config/presets/ts",
+    "@gemunion/eslint-config/rules/jest"
+  ],
+  "parserOptions": {
+    "project": "./job-launcher-server/tsconfig.test.json"
+  },
+  "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  },
+  "root": true
+}
