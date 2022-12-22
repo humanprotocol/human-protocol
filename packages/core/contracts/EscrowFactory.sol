@@ -4,8 +4,9 @@ pragma solidity >=0.6.2;
 
 import './Escrow.sol';
 import './interfaces/IStaking.sol';
+import './utils/Initializable.sol';
 
-contract EscrowFactory {
+contract EscrowFactory is Initializable {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
@@ -17,7 +18,7 @@ contract EscrowFactory {
     address public staking;
     event Launched(address eip20, address escrow);
 
-    constructor(address _eip20, address _staking) {
+    function initialize(address _eip20, address _staking) public initializer {
         require(_eip20 != address(0), ERROR_ZERO_ADDRESS);
         eip20 = _eip20;
         require(_staking != address(0), ERROR_ZERO_ADDRESS);

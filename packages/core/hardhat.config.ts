@@ -12,6 +12,7 @@ import 'hardhat-contract-sizer';
 import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
 
 dotenv.config();
 
@@ -70,6 +71,12 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    polygonMumbai: {
+      chainId: 80001,
+      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -97,6 +104,7 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
     },
   },
   mocha: {
