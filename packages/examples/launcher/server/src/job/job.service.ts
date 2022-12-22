@@ -3,10 +3,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
 import * as crypto from "crypto";
+import HMToken from '../contracts/HMToken.sol/HMToken.json';
 import Escrow from '../contracts/Escrow.sol/Escrow.json';
 import EscrowFactory from "../contracts/EscrowFactory.sol/EscrowFactory.json";
 
-import { InjectEthersProvider, BaseProvider, EthersSigner, InjectSignerProvider, Wallet, EthersContract, InjectContractProvider, Contract, Signer, AlchemyProvider } from 'nestjs-ethers';
+import { InjectEthersProvider, BaseProvider, EthersSigner, InjectSignerProvider, Wallet, EthersContract, InjectContractProvider, Contract, Signer, AlchemyProvider, StaticJsonRpcProvider, PocketProvider, MUMBAI_NETWORK } from 'nestjs-ethers';
 
 import { JobEntity } from "./job.entity";
 import { CONFIRMATION_TRESHOLD, JobMode, JobRequestType, JobStatus } from "../common/decorators";
@@ -22,6 +23,9 @@ import { avg, isAnGroundTruthDataAnnotations, isAnGroundTruthDataImage, max, min
 import { IJobFeeRangeDto } from "./interfaces/feeRange";
 import { NetworkId } from "../common/constants/networks";
 import { ethers } from "ethers";
+import { ILiquidityDto } from "./interfaces/liquidity";
+import { networkMap, networks } from "./interfaces/network";
+
 
 @Injectable()
 export class JobService {
@@ -36,6 +40,12 @@ export class JobService {
   private exchangeOracleAddress: string;
 
   constructor(
+    @InjectEthersProvider('goerli')
+    private readonly goerliProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('polygon')
+    private readonly polygonProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('mumbai')
+    private readonly mumbaiProvider: StaticJsonRpcProvider,
     @InjectEthersProvider()
     private readonly ethersProvider: BaseProvider,
     @InjectSignerProvider()
@@ -62,6 +72,27 @@ export class JobService {
     this.exchangeOracleUrl = this.configService.get<string>("EXCHANGE_ORACLE_URL", "");
     this.recordingOracleStake = this.configService.get<number>("RECORDING_ORACLE_STAKE", 0);
     this.reputationOracleStake = this.configService.get<number>("REPUTATION_ORACLE_STAKE", 0);
+  }
+
+  public async getLiquidity(): Promise<ILiquidityDto[]> {
+    const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "");
+    const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
+    
+    return Promise.all(networks.map(async network => {
+      const contractProvider = new EthersContract(new StaticJsonRpcProvider(network.rpcUrl, network.network))
+      const token: Contract = await contractProvider.create(
+        networkMap.mumbai.hmtAddress,
+        HMToken.abi
+      );
+      
+      const liquidity = (await token.connect(operator).balanceOf(network.defaultStakingAddress)).toString();
+
+      return {
+        network: network,
+        liquidity: Number(ethers.utils.formatEther(liquidity)),
+        symbol: "HMT",
+      }
+    }));
   }
 
   public async getJobByUser(userId: number): Promise<JobEntity[]> {

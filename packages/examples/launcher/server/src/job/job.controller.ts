@@ -4,6 +4,7 @@ import { Public } from "../common/decorators";
 import { RolesGuard } from "../common/guards";
 import { JobApproveDto, JobCreateDto } from "./dto";
 import { IJobFeeRangeDto } from "./interfaces/feeRange";
+import { ILiquidityDto } from "./interfaces/liquidity";
 import { JobEntity } from "./job.entity";
 import { JobService } from "./job.service";
 import { IJobDto, IManifestDataItemDto, IManifestDto } from "./serializers/job.responses";
@@ -19,6 +20,13 @@ export class JobController {
   @HttpCode(200)
   public getList(@Request() req: any): Promise<JobEntity[]> {
     return this.jobService.getJobByUser(req.user?.id);
+  }
+
+  @Get("/liquidity")
+  @HttpCode(200)
+  @Public()
+  public getLiquidity(@Request() req: any): Promise<ILiquidityDto[]> {
+    return this.jobService.getLiquidity();
   }
 
   @Get("/:id")
