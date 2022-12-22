@@ -1,10 +1,6 @@
 **/node_modules/*
 **/dist/*
 **/README.md
-**/ganache/*
 **/build/*
 **/cache/*
 **/coverage/*
-**/node_modules/*
-**/truffle.js
-**/cache/*
