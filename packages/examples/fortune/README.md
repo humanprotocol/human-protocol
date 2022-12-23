@@ -131,7 +131,7 @@ In Metamask, switch to the Job Requester account that you imported above
 
 1. Ensure that you are connected to Fortune Ganache (or whatever you named it above) under Networks in Metamask.
 
-2. Navigate to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3000 to access the Job Launcher
+2. Navigate to https://human-protocol.vercel.app/ to access the Job Launcher
 
 3. Click on connect to connect your metamask wallet
 
@@ -159,7 +159,7 @@ To fulfil this job we require answers (fortunes in our case) from 2 workers.
 
 We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3001
 
-You should see account balance for Worker 1 and 2 has increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher (http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3000) and entering the Escrow contract address into the searchbar.
+You should see account balance for Worker 1 and 2 has increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher (https://human-protocol.vercel.app/) and entering the Escrow contract address into the searchbar.
 
 ## Running Locally with Node
 
