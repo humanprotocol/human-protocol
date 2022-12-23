@@ -40,7 +40,7 @@ export const EscrowContainer: React.FC<
   const dataLoaded = useEscrowDataLoaded();
 
   return (
-    <Box id="network">
+    <Box id="network" mt={{ xs: 4, md: 8 }}>
       <ViewTitle title="Network" iconUrl="/images/network.svg" />
       <Tabs
         sx={{
