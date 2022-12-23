@@ -1,11 +1,8 @@
 name: Subgraph deployment
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - packages/sdk/typescript/subgraph/**
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:

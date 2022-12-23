@@ -1,11 +1,8 @@
 name: Node.js SDK NPM publish
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - packages/sdk/typescript/human-protocol-sdk/**
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -16,6 +13,12 @@ jobs:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
         name: Install dependencies
+      - name: Change Node.js SDK version
+        uses: jossef/action-set-json-field@v2
+        with:
+          file: ./packages/sdk/typescript/human-protocol-sdkpackage.json
+          field: version
+          value: ${{ github.event.release.tag_name }}
       - uses: JS-DevTools/npm-publish@v1
         name: Publish
         with:
