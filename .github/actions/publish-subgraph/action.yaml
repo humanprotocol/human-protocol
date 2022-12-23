@@ -1,0 +1,41 @@
+name: publish-subgraph
+description: Subgraph deployment
+
+inputs:
+  apiKey:
+    description: Graph API Key
+    required: true
+  name:
+    description: Network name
+    required: true
+  graph:
+    description: Network graph name
+    required: true
+  version:
+    description: Release version
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.version }}
+    - run: yarn --ignore-scripts
+      name: Install dependencies
+    - run: yarn global add @graphprotocol/graph-cli
+      name: Install Graph CLI
+    - run: graph auth --product hosted-service ${API_KEY}
+      name: Authenticate Graph CLI
+      env:
+        API_KEY: ${{ inputs.apiKey }}
+    - run: yarn generate
+      name: Generate Subgraph
+      working-directory: ./packages/sdk/typescript/subgraph
+      env:
+        NETWORK: ${{ inputs.name }}
+    - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
+      name: Deploy Subgraph
+      working-directory: ./packages/sdk/typescript/subgraph
+      env:
+        NETWORK: ${{ inputs.graph }}
