@@ -18,9 +18,8 @@ jobs:
           git config user.email noreply@github.com
       - name: Change core version
         uses: jossef/action-set-json-field@v2
-        working-directory: ./packages/core
         with:
-          file: package.json
+          file: ./packages/core/package.json
           field: version
           value: ${{ github.event.release.tag_name }}
       - name: Change Python SDK version
@@ -32,9 +31,8 @@ jobs:
           regex: true
       - name: Change Node.js SDK version
         uses: jossef/action-set-json-field@v2
-        working-directory: ./packages/sdk/typescript/human-protocol-sdk
         with:
-          file: package.json
+          file: ./packages/sdk/typescript/human-protocol-sdkpackage.json
           field: version
           value: ${{ github.event.release.tag_name }}
       - name: Commit files
@@ -43,8 +41,8 @@ jobs:
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "docs(): bumping release ${{ github.event.release.tag_name }}"
-       - name: Push changes
-         uses: ad-m/github-push-action@v0.6.0
-         with:
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
           github_token: ${{ github.token }}
           tags: true
