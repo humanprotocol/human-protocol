@@ -22,13 +22,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
-      - name: Change Python SDK version
-        uses: jacobtomlinson/gha-find-replace@v2
-        with:
-          find: "version\\s\\=\\s[\\d\\.]+"
-          replace: "version = ${{ github.event.release.tag_name }}"
-          include: "./packages/sdk/python/setup.cfg"
-          regex: true
       - name: Build and publish
         working-directory: ./packages/sdk/python
         env:
