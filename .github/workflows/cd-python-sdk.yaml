@@ -3,7 +3,6 @@ name: Python SDK publish
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 jobs:
   publish-python-sdk:

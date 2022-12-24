@@ -3,7 +3,6 @@ name: Core NPM publish
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 jobs:
   core-publish:
