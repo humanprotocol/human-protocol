@@ -25,7 +25,7 @@ jobs:
       - name: Change Python SDK version
         uses: jacobtomlinson/gha-find-replace@v2
         with:
-          find: "version = 0.0.7"
+          find: "version\\s\\=\\s[\\d\\.]+"
           replace: "version = ${{ github.event.release.tag_name }}"
           include: "./packages/sdk/python/setup.cfg"
           regex: true
