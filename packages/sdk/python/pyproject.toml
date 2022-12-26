@@ -3,4 +3,4 @@ name = "human-protocol-sdk"
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr = ".__version__"}
+version = {attr = "human_protocol_sdk.__version__"}

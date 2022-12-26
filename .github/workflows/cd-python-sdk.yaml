@@ -24,7 +24,7 @@ jobs:
       - name: Set the relase version
         uses: "DamianReeves/write-file-action@master"
         with:
-          path: ./packages/sdk/python/__init__.py
+          path: ./packages/sdk/python/human_protocol_sdk/__init__.py
           write-mode: overwrite
           contents: |
             __version__ = "${{ github.event.release.tag_name }}"
