@@ -14,7 +14,7 @@ run-test:
 build-package:
 	make clean-package
 	make build-contracts
-	python3 setup.py --version 0.0.8 sdist bdist_wheel
+	python3 setup.py sdist bdist_wheel
 
 generate-html-docs:
 	./scripts/generate-docs.sh --format html
