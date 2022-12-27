@@ -292,13 +292,20 @@ export class JobService {
       EscrowFactory.abi
     );
 
+    const gasLimit = await escrowFactory.connect(operator).estimateGas
+      .createEscrow([
+        jobEntity.reputationOracleAddress,
+        jobEntity.recordingOracleAddress
+      ])
+    const gasPrice = await this.ethersProvider.getGasPrice();
+
     const result: any = await (
       await escrowFactory
         .connect(operator)
         .createEscrow([
           jobEntity.reputationOracleAddress,
           jobEntity.recordingOracleAddress
-        ])
+        ], { gasLimit: gasLimit, gasPrice })
     ).wait()
 
     if (!result?.events[0]?.transactionHash) {
