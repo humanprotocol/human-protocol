@@ -1,6 +1,7 @@
 {
   "private": "true",
   "version": "1.0.0",
+  "name": "@human-protocol/job-launcher-server",
   "description": "Human Protocol Job Launcher Server",
   "license": "MIT",
   "publishConfig": {
