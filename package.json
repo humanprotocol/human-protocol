@@ -16,6 +16,7 @@
     "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
+    "launcher:server:start": "yarn workspace @human-protocol/job-launcher-server start",
     "launcher:server:lint": "yarn workspace @human-protocol/job-launcher-server lint",
     "launcher:server:test": "yarn workspace @human-protocol/job-launcher-server test",
     "sdk:test": "yarn workspace @human-protocol/sdk test",

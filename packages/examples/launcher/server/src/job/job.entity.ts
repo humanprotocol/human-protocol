@@ -4,6 +4,7 @@ import { NS } from "../common/constants";
 import { BaseEntity } from "../database/base.entity";
 import { IJob, JobStatus, JobMode, JobRequestType } from "../common/decorators";
 import { UserEntity } from "../user/user.entity";
+import { NetworkId } from "../common/constants/networks";
 
 @Entity({ schema: NS, name: "job" })
 export class JobEntity extends BaseEntity implements IJob {
@@ -87,5 +88,5 @@ export class JobEntity extends BaseEntity implements IJob {
   public userId: number;
 
   @Column({ type: "varchar" })
-  public networkId: string;
+  public networkId: NetworkId;
 }

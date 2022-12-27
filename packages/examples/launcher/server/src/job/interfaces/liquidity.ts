@@ -1,5 +1,4 @@
-mport { INetworkDto } from "./network";
- import { IStakingDto } from "./staking";
+import { INetworkDto } from "./network";
 
  export interface ILiquidityDto {
    network: INetworkDto;

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsNumber, IsOptional, IsPositive, IsString, IsUrl, Matches } from "class-validator";
+import { IsArray, IsEnum, IsNumber, IsOptional, IsPositive, IsString, IsUrl, Matches } from "class-validator";
+import { NetworkId } from "../../common/constants/networks";
 
 import { IJobCreateDto } from "../interfaces";
 
@@ -48,4 +49,10 @@ export class JobCreateDto implements IJobCreateDto {
   @IsNumber()
   @IsPositive()
   public fee: number;
+
+  @ApiPropertyOptional({
+    enum: NetworkId,
+  })
+  @IsEnum(NetworkId)
+  public networkId: NetworkId;
 }
