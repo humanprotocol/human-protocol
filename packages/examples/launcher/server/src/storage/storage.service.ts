@@ -4,6 +4,7 @@ import { S3 } from "aws-sdk";
 import { ProviderType } from "../common/constants/providers";
 import url from "url";
 import { isJson } from "../common/helpers";
+import { IBucketDto } from "../job/serializers/job.responses";
 
 @Injectable()
 export class StorageService {
@@ -15,9 +16,33 @@ export class StorageService {
     private readonly s3: S3,
   ) {}
 
-  async getDataFromBucket(backetUrl: string): Promise<any> {
+  getBucketNameFromUrl(backetUrl: string): string {
     const result = new url.URL(backetUrl);
-    const bucketName = result.host.split(".")[0];
+    return result?.host?.split(".")[0];
+  }
+
+  async getBucketInfo(backetUrl: string): Promise<IBucketDto> {
+    const bucketName = this.getBucketNameFromUrl(backetUrl)
+    const bucketParams = { Bucket: bucketName };
+
+    const location: any = await new Promise((resolve, reject) => {
+      this.s3.getBucketLocation(bucketParams, function(err: any, data: any) {
+        if (err) {
+          reject(err);
+        } else if (data) {
+          resolve(data);
+        }
+      });
+    });
+
+    return {
+      name: bucketName,
+      region: location?.LocationConstraint || null
+    }
+  }
+
+  async getDataFromBucket(backetUrl: string, excludedFilenames: string[]): Promise<any> {
+    const bucketName = this.getBucketNameFromUrl(backetUrl)
     const bucketParams = { Bucket: bucketName };
     const data: any = [];
 
@@ -27,9 +52,8 @@ export class StorageService {
           reject(err);
         } else {
           files.Contents?.forEach(item => {
-            data.push({
-              datapoint_uri: `${result.origin}/${item?.Key as string}`,
-            });
+            const filename = item?.Key as string;
+            if (!excludedFilenames.includes(filename)) data.push(filename);
           });
           resolve(data);
         }
@@ -60,8 +84,7 @@ export class StorageService {
   }
 
   async isBucketValid(backetUrl: string): Promise<any> {
-    const result = new url.URL(backetUrl);
-    const bucketName = result.host.split(".")[0];
+    const bucketName = this.getBucketNameFromUrl(backetUrl)
     const bucketParams = { Bucket: bucketName };
 
     const permissions: any = await new Promise((resolve, reject) => {

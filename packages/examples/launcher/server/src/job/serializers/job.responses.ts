@@ -15,7 +15,9 @@ export interface IJobDto extends IManifestDto {
 
 export interface IManifestDto {
   dataUrl: string;
-  data: IManifestDataItemDto[];
+  data: string[];
+  bucketName: string;
+  region: string;
   datasetLength: number;
   manifestHash: string;
   labels: string[];
@@ -29,14 +31,17 @@ export interface IManifestDto {
   escrowAddress: string;
 }
 
-export interface IManifestDataItemDto {
-  datapointUri: string;
+export interface IBucketDto {
+  name: string;
+  region: string;
 }
 
-export const manifestFormatter = (jobEntity: JobEntity): IManifestDto => {
+export const manifestFormatter = (jobEntity: JobEntity, bucket: IBucketDto): IManifestDto => {
   return {
     dataUrl: jobEntity.dataUrl,
-    data: JSON.parse(jobEntity.data) as IManifestDataItemDto[],
+    data: JSON.parse(jobEntity.data),
+    bucketName: bucket.name,
+    region: bucket.region,
     manifestHash: jobEntity.manifestHash,
     datasetLength: jobEntity.datasetLength,
     annotationsPerImage: jobEntity.annotationsPerImage,
@@ -51,7 +56,7 @@ export const manifestFormatter = (jobEntity: JobEntity): IManifestDto => {
   };
 };
 
-export const jobFormatter = (jobEntity: JobEntity): IJobDto => {
+export const jobFormatter = (jobEntity: JobEntity, bucket: IBucketDto): IJobDto => {
   return {
     id: jobEntity.id,
     networkId: jobEntity.networkId,
@@ -62,6 +67,6 @@ export const jobFormatter = (jobEntity: JobEntity): IJobDto => {
     recordingOracleUrl: jobEntity.recordingOracleUrl,
     reputationOracleUrl: jobEntity.reputationOracleUrl,
     exchangeOracleUrl: jobEntity.exchangeOracleUrl,
-    ...manifestFormatter(jobEntity),
+    ...manifestFormatter(jobEntity, bucket),
   };
 };

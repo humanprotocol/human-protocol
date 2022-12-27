@@ -111,7 +111,9 @@ export class JobService {
 
     if (!jobEntity) throw new NotFoundException("Job not found");
 
-    return jobFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return jobFormatter(jobEntity, bucket);
   }
 
   public async getJobByStatus(status: JobStatus): Promise<JobEntity[]> {
@@ -231,7 +233,7 @@ export class JobService {
       }
     }
     
-    const data = await this.storageService.getDataFromBucket(dataUrl);
+    const data = await this.storageService.getDataFromBucket(dataUrl, EXCLUDED_BUCKET_FILENAMES);
     if (data && Array.isArray(data) && data.length === 0) {
       throw new BadGatewayException("No data in the bucket");
     }
@@ -280,7 +282,9 @@ export class JobService {
     Object.assign(jobEntity, { escrowAddress })
     await jobEntity.save();
 
-    return jobFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return jobFormatter(jobEntity, bucket);
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<string> {
@@ -385,7 +389,9 @@ export class JobService {
 
     if (!jobEntity) throw new NotFoundException("Job not found");
 
-    return manifestFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return manifestFormatter(jobEntity, bucket);
   }
 
   public async getDataSample(jobId: number): Promise<IManifestDataItemDto[]> {
