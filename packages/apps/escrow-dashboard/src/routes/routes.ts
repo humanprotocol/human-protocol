@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Main, Leaderboard } from 'src/pages';
+import { Main, Leaderboard,Kvstore } from 'src/pages';
 
 interface Route {
   key: string;
@@ -23,5 +23,12 @@ export const routes: Array<Route> = [
     path: '/leaderboard',
     enabled: true,
     component: Leaderboard,
+  },
+  {
+      key: 'kvstore-route',
+      title: 'KV Store',
+      path: '/kvstore',
+      enabled: true,
+      component: Kvstore,
   },
 ];
