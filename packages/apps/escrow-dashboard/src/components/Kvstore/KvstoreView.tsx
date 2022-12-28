@@ -63,13 +63,13 @@ export const KvstoreView = (): React.ReactElement => {
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{height:window.innerHeight-340}}
+                sx={{height:{lg:window.innerHeight-340,xl:window.innerHeight-340}}}
                 >
                 <Box
 
                     >
 
-                    <Paper sx={{padding:2,width:"46em",marginBottom:2}}>   <Box sx={{ width: '100%' }}>
+                    <Paper sx={{padding:{md:2},width:{xl:"46em"},marginBottom:2}}>   <Box sx={{ width: '100%' }}>
                         <Stepper sx={{opacity:0.2}} activeStep={-1}>
                             {steps.map((label) => (
                                     <Step key={label}>
@@ -81,14 +81,14 @@ export const KvstoreView = (): React.ReactElement => {
                     <Paper>
                         <Grid container direction="column">
                             <Grid item container direction="column"
-                                alignItems="flex-start" sx={{marginTop:10,marginLeft:15,marginBottom:10}}>  <img width="100" src="/images/lbank.svg" alt="lbank" /> <Typography sx={{marginTop:3}} variant="body2" color="primary" >
+                                alignItems="flex-start" sx={{marginTop:{xs:1,sm:1,md:10,lg:10},marginLeft:{xs:1,sm:1,md:15,lg:15},marginBottom:{lg:10}}}>  <img width="100" src="/images/lbank.svg" alt="lbank" /> <Typography sx={{marginTop:3}} variant="body2" color="primary" >
                                 Connect your wallet to continue
                             </Typography></Grid>
                             <Grid item container direction="row" justifyContent="flex-end"
-                                alignItems="flex-end" sx={{marginTop:10,paddingRight:10,marginBottom:7}}><CustomConnectButton/></Grid>
+                                alignItems="flex-end" sx={{marginTop:{xs:1,sm:1,lg:10},paddingRight:{xs:1,sm:1,lg:10},marginBottom:{xs:1,sm:1,lg:7}}}><CustomConnectButton/></Grid>
                         </Grid>
                     </Paper>
-                </Box>
+</Box>
             </Grid>
         </Grid>
     </Grid>
