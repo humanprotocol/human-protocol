@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { CustomConnectButton } from 'src/components';
 type NavLink = {
   title: string;
   href: string;
@@ -97,7 +97,7 @@ const Header: React.FC = (): React.ReactElement => {
                     </Typography>
                   </Link>
                 ))}
-                {!isMobile && <ConnectButton/>}
+                {!isMobile && <CustomConnectButton/>}
 
             </Box>
             {isMobile && (

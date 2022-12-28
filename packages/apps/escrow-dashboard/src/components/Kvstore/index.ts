@@ -1,1 +1,2 @@
-export { LeaderboardContainer } from './LeaderboardContainer';
+export { KvstoreView } from './KvstoreView';
+export { CustomConnectButton } from './CustomConnectButton';

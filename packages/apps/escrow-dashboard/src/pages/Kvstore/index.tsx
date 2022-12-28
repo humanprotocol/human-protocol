@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 
 import { Kvstore } from 'src/components';
 
-export const LeaderboardPage: React.FC = (): React.ReactElement => {
+export const KvstorePage: React.FC = (): React.ReactElement => {
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 } }}>
       <Box
