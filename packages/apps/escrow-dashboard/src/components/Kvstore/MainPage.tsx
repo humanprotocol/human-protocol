@@ -61,7 +61,7 @@ export const MainPage = (): React.ReactElement => {
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
-                sx={{height:{lg:window.innerHeight-340,xl:window.innerHeight-340}}}
+
                 >
                 <Box
 

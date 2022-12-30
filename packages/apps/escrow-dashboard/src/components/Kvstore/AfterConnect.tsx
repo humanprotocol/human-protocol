@@ -11,6 +11,7 @@ import {
 import React from 'react';
 import {GenerateOrImport} from './GenerateOrImport'
 import {GeneratePubkey} from './GeneratePubkey'
+import {SuccessGenerate} from './SuccessGenerate'
 import {CustomConnectButton} from './CustomConnectButton'
 const steps = [
     'Get Public Key',
@@ -42,7 +43,7 @@ export const AfterConnect = (): React.ReactElement => {
                     <Typography  variant="h4" sx={{marginBottom:2}} color="primary" >
                         ETH KV Store
                     </Typography>
-                    <Paper sx={{padding:{md:2},width:{xl:"46em"},marginBottom:2}}>   <Box sx={{ width: '100%' }}>
+                    <Paper sx={{padding:{md:2},marginBottom:2}}>   <Box sx={{ width: '100%' }}>
                         <Stepper activeStep={0}>
                             {steps.map((label) => (
                                     <Step key={label}>
@@ -52,7 +53,8 @@ export const AfterConnect = (): React.ReactElement => {
                         </Stepper>
                     </Box></Paper>
                     {/* <GenerateOrImport/> */}
-                    <GeneratePubkey/>
+                    {/*<GeneratePubkey/>*/}
+                    {<SuccessGenerate/>}
 
 </Box>
             </Grid>

@@ -6,6 +6,6 @@ export const KvstoreView = (): React.ReactElement => {
 
   return (
 //          <MainPage/>
-  <AfterConnect/>
+<AfterConnect/>
   );
 };
