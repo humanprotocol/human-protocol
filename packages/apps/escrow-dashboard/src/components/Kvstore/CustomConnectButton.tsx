@@ -1,5 +1,8 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 export const CustomConnectButton = () => {
     return (
             <ConnectButton.Custom>
@@ -46,39 +49,14 @@ export const CustomConnectButton = () => {
                                     }
                                     return (
                                             <div style={{ display: 'flex', gap: 12 }}>
-                                                <button
-                                                    onClick={openChainModal}
-                                                    style={{ display: 'flex', alignItems: 'center' }}
-                                                    type="button"
-                                                    >
-                                                    {chain.hasIcon && (
-                                                            <div
-                                                                style={{
-                                                                background: chain.iconBackground,
-                                                                    width: 12,
-                                                                    height: 12,
-                                                                    borderRadius: 999,
-                                                                    overflow: 'hidden',
-                                                                    marginRight: 4,
-                                                                }}
-                                                                >
-                                                                {chain.iconUrl && (
-                                                                        <img
-                                                                            alt={chain.name ?? 'Chain icon'}
-                                                                            src={chain.iconUrl}
-                                                                            style={{ width: 12, height: 12 }}
-                                                                        />
-                                                                        )}
-                                                            </div>
-                                                            )}
-                                                    {chain.name}
-                                                </button>
-                                                <button onClick={openAccountModal} type="button">
-                                                    {account.displayName}
-                                                    {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ''}
-                                                </button>
+
+
+
+                                                <Button endIcon={<ArrowDropDownIcon/>} onClick={openAccountModal} variant="contained" sx={{  "&:hover": {
+                                                    color: 'gray',
+                                                    backgroundColor: '#f6f7fd'
+                                                },borderRadius:12,paddingLeft:1,paddingTop:0.4,paddingBottom:0.4,backgroundColor:"#f6f7fe",color:"#320a8d"}} startIcon={ <Avatar  alt="Remy Sharp" src="/static/images/avatar/1.jpg" />} >      {account.displayName}
+                                            </Button>
                                             </div>
                                             );
                                 })()}
