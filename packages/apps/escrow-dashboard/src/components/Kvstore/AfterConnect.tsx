@@ -12,6 +12,7 @@ import React from 'react';
 import {GenerateOrImport} from './GenerateOrImport'
 import {GeneratePubkey} from './GeneratePubkey'
 import {SuccessGenerate} from './SuccessGenerate'
+import {ImportPubkey} from './ImportPubkey'
 import {CustomConnectButton} from './CustomConnectButton'
 const steps = [
     'Get Public Key',
@@ -54,7 +55,8 @@ export const AfterConnect = (): React.ReactElement => {
                     </Box></Paper>
                     {/* <GenerateOrImport/> */}
                     {/*<GeneratePubkey/>*/}
-                    {<SuccessGenerate/>}
+                    {/*<SuccessGenerate/>*/}
+                    {<ImportPubkey/>}
 
 </Box>
             </Grid>
