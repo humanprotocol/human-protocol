@@ -57,7 +57,7 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   ├── core: EVM compatible smart contracts for HUMAN
 │   ├── examples
 	    ├── cvat: An open source annotation tool for labeling video and images
-		├── eth-kvstore: An on-chain key value store for publishing and rotating public keys
+	├── eth-kvstore: An on-chain key value store for publishing and rotating public keys
 	    ├── fortune:  An example application that combines all the core 
                       components of HUMAN
 	    ├── launcher: A reference implementation of a Job Launcher 
