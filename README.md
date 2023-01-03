@@ -21,7 +21,7 @@
 
 Tokenized, verified, rewarded.
 
-Join us on [Discord](https://discord.gg/TEspMGKF)
+Join us on [Discord](http://hmt.ai/discord)
 
 **What is the HUMAN Network?**
 
@@ -31,7 +31,7 @@ HUMAN is a permissionless protocol to facilitate the exchange of HUMAN work, kno
 
 * [Data labeling](https://app.humanprotocol.org/) - HUMAN is currently being used to label raw image data which can subsequently be used to train Machine Learning algorithms.  Last month over 20 Million images were labeled by HUMAN workers: [HUMAN Escrow Scanner](https://dashboard.humanprotocol.org/)
 * [IMOO](https://www.humanprotocol.org/imoo) - An on-chain oracle for decentralized prediction markets 
-* [POH](https://www.humanprotocol.org/proof-of-humanity) - A system that brings bot-blocking applications on-chain (Not strictly work)
+* [POH](https://www.humanprotocol.org/proof-of-humanity) - A system that brings bot-blocking applications on-chain
 * …
 
 **Documentation**
@@ -57,6 +57,7 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   ├── core: EVM compatible smart contracts for HUMAN
 │   ├── examples
 	    ├── cvat: An open source annotation tool for labeling video and images
+	    ├── eth-kvstore: An on-chain key value store for publishing and rotating public keys
 	    ├── fortune:  An example application that combines all the core 
                       components of HUMAN
 	    ├── launcher: A reference implementation of a Job Launcher 
@@ -82,4 +83,4 @@ If you are a developer and would like to build on top of HUMAN please see [examp
 
 **Usage and Installation**
 
-Navigate to the folder that you would like to install and follow the instructions in the README.MD file
+Navigate to the folder that you would like to install and follow the instructions in the README file
