@@ -12,7 +12,7 @@
   },
   "title": "Human Protocol Foundation",
   "engines": {
-    "node": "14.20.x"
+    "node": "16.x"
   },
   "main": "./dist/index.js",
   "scripts": {
