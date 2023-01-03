@@ -10,7 +10,7 @@
 
 <!-- If there are any special testing requirements, add them here -->
 
-## Issues affected
+## Related issues
 
 <!-- Does this close any open issues? -->
 
