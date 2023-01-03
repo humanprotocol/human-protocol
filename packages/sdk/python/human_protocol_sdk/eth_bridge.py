@@ -334,7 +334,7 @@ def deploy_factory(
         abi=contract_interface["abi"], bytecode=contract_interface["bytecode"]
     )
 
-    txn_func = factory.constructor
+    txn_func = factory.functions.initialize
     func_args = [hmtoken_address, staking_address]
     txn_info = {
         "gas_payer": gas_payer,
