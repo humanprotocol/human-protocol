@@ -11,6 +11,7 @@
 <!-- If there are any special testing requirements, add them here -->
 
 ## Related issues
+[Keywords for linking issues](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests)
 
 <!-- Does this close any open issues? -->
 
