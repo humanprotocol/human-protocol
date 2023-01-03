@@ -4,31 +4,29 @@ import Footer from './Footer';
 import Header from './Header';
 import '@rainbow-me/rainbowkit/styles.css';
 import {
-    getDefaultWallets,
-    RainbowKitProvider,
-    lightTheme
+  getDefaultWallets,
+  RainbowKitProvider,
+  lightTheme,
 } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { mainnet, polygon,polygonMumbai} from 'wagmi/chains';
+import { mainnet, polygon, polygonMumbai } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { alchemyProvider } from 'wagmi/providers/alchemy'
 const { chains, provider } = configureChains(
-        [mainnet, polygon,polygonMumbai],
-        [
-
-            publicProvider()
-        ]
-        );
+  [polygonMumbai],
+  [publicProvider(),
+   alchemyProvider({ apiKey: process.env.REACT_APP_ALCHEMY_API_KEY as string })]
+);
 
 const { connectors } = getDefaultWallets({
-    appName: 'Kv Store',
-    chains
+  appName: 'Kv Store',
+  chains,
 });
 
 const wagmiClient = createClient({
-    autoConnect: true,
-    connectors,
-    provider
-})
+  connectors,
+  provider,
+});
 interface ILayout {
   children: React.ReactNode;
 }
@@ -39,19 +37,17 @@ const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
       marginTop: '110px',
     }}
   >
-      <WagmiConfig client={wagmiClient}>
-          <RainbowKitProvider
-
-              chains={chains}
-              modalSize="compact"
-              initialChain={polygonMumbai}
-              >
-              <Header />
-              {children}
-              <Footer />
-          </RainbowKitProvider>
-      </WagmiConfig>
-
+    <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider
+        chains={chains}
+        modalSize="compact"
+        initialChain={polygonMumbai}
+      >
+        <Header />
+        {children}
+        <Footer />
+      </RainbowKitProvider>
+    </WagmiConfig>
   </Box>
 );
 

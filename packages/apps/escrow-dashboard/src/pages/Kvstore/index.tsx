@@ -24,7 +24,7 @@ export const KvstorePage: React.FC = (): React.ReactElement => {
           },
         }}
       >
-          <Kvstore />
+        <Kvstore />
       </Box>
     </Box>
   );

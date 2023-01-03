@@ -21,7 +21,7 @@ const NAV_LINKS: NavLink[] = [
   { title: 'Leaderboard', href: '/leaderboard' },
   {
     title: 'KV Store',
-    href: '/kvstore'
+    href: '/kvstore',
   },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
@@ -96,8 +96,7 @@ const Header: React.FC = (): React.ReactElement => {
                     </Typography>
                   </Link>
                 ))}
-                {!isMobile && <CustomConnectButton/>}
-
+              {!isMobile && <CustomConnectButton />}
             </Box>
             {isMobile && (
               <>
