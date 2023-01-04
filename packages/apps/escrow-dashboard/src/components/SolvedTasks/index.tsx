@@ -33,7 +33,7 @@ export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
       <Box mt={{ xs: 4, md: 8 }} flex={1}>
         <CardContainer>
           <Typography variant="body2" color="primary" fontWeight={600} mb="4px">
-            Solved tasks till November 31 2022
+            Solved tasks till December 31 2022
           </Typography>
           <Typography
             variant="h2"
@@ -41,7 +41,7 @@ export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
             fontWeight={600}
             sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
           >
-            114,000,000
+            247,392,072
           </Typography>
           <Box
             sx={{
