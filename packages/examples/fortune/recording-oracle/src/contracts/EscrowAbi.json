@@ -1,5 +1,4 @@
-[
-	{
+{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -450,4 +449,3 @@
 		"stateMutability": "nonpayable",
 		"type": "function"
 	}
-]
