@@ -5,7 +5,6 @@ import {JsonBodyParser, BodyParser } from "https://deno.land/x/body_parser/mod.t
 import { serveDir } from "https://deno.land/std@0.167.0/http/file_server.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 import Web3 from 'https://deno.land/x/web3/mod.ts'
-import * as EscrowABI from "./contracts/EscrowAbi.json" assert {type: 'json'};
 import { convertUrl } from "./utils.ts";
 import { statusesMap } from "./constants.ts";
 import * as storage from "./storage.ts";
