@@ -11,9 +11,6 @@
     "url": "https://github.com/humanprotocol/job-launcher/issues"
   },
   "title": "Human Protocol Foundation",
-  "engines": {
-    "node": "18.x"
-  },
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -117,8 +114,6 @@
     "eslint-plugin-standard": "4.1.0",
     "ethereum-types": "^3.7.1",
     "ethers": "^5.7.0",
-    "hardhat": "^2.11.1",
-    "hardhat-abi-exporter": "^2.10.0",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "4.3.8",
