@@ -1,7 +1,7 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
+import { Box, Grid } from '@mui/material';
 
-import { Escrow, Token, Leaderboard } from 'src/components';
+import { Escrow, Token, Leaderboard, SolvedTasks, News } from 'src/components';
 
 export const Main: React.FC = (): React.ReactElement => {
   return (
@@ -24,6 +24,14 @@ export const Main: React.FC = (): React.ReactElement => {
           },
         }}
       >
+        <Grid container spacing={4}>
+          <Grid item xs={12} lg={6}>
+            <SolvedTasks />
+          </Grid>
+          <Grid item xs={12} lg={6}>
+            <News />
+          </Grid>
+        </Grid>
         <Escrow />
         <Token />
         <Leaderboard showAll={false} />
