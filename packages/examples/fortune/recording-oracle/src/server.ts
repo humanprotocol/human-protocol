@@ -1,10 +1,8 @@
-import { Response } from "https://deno.land/std@0.167.0/http/mod.ts";
 import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
-import { type IBodyParserOptions } from "https://deno.land/x/body_parser@v0.0.1/mod.ts";
-import {JsonBodyParser, BodyParser } from "https://deno.land/x/body_parser/mod.ts";
-import { serveDir } from "https://deno.land/std@0.167.0/http/file_server.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
-import Web3 from 'https://deno.land/x/web3/mod.ts'
+import Web3 from 'https://deno.land/x/web3/mod.ts';
+import axiod from "https://deno.land/x/axiod/mod.ts";
+import "https://deno.land/x/dotenv/load.ts";
 import { convertUrl } from "./utils.ts";
 import { statusesMap } from "./constants.ts";
 import * as storage from "./storage.ts";
@@ -85,7 +83,7 @@ router.post(
       }
 
       const manifestUrl = await Escrow.methods.manifestUrl().call({ from: account.address });
-      const manifestResponse = await axios.get(convertUrl(manifestUrl));
+      const manifestResponse = await axiod.get(convertUrl(manifestUrl));
       const {
         fortunes_requested: fortunesRequested,
         reputation_oracle_url: reputationOracleUrl,
@@ -115,7 +113,7 @@ router.post(
         // a cron job might check how much annotations are in work
         // if this is full - then just push them to the reputation oracle
 
-        await axios.post(convertUrl(reputationOracleUrl), {
+        await axiod.post(convertUrl(reputationOracleUrl), {
           escrowAddress,
           fortunes,
         });
@@ -137,10 +135,6 @@ router.post(
 app.use(oakCors());
 app.use(router.routes());
 app.use(router.allowedMethods());
-serveDir(new Request("http://localhost/static/./index.html"), {
-   fsRoot: "src",
-   urlRoot: "static",
-  });
-console.log(`Listening on port ${port}...`);
-await app.listen({ port });
+app.listen({ port });
+console.log(`Listening on port ${port}...`); 
 

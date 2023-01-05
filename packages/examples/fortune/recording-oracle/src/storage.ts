@@ -1,4 +1,4 @@
-import { Storage } from "https://googleapis.deno.dev/v1/storage:v1.ts";
+import { Storage } from "https://storage.cloud.google.com";
 
 const bucket = new Storage("tomiwa-adeyemi");
 
