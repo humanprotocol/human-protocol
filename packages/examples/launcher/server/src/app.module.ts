@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
-import { EthersModule, MUMBAI_NETWORK } from 'nestjs-ethers';
+import { EthersModule, GOERLI_NETWORK, MAINNET_NETWORK, MATIC_NETWORK, MUMBAI_NETWORK, RINKEBY_NETWORK } from 'nestjs-ethers';
 
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
@@ -12,6 +12,16 @@ import { UserModule } from "./user/user.module";
 import { HttpValidationPipe } from "./common/pipes";
 import { JobModule } from "./job/job.module";
 import { HealthModule } from "./health/health.module";
+import { networkMap, networks } from "./job/interfaces/network";
+
+const ethersModules = networks.map(network => {
+  return EthersModule.forRoot({
+    token: network.key,
+    network: network.network,
+    custom: network.rpcUrl,
+    useDefaultProvider: false,
+  });
+});
 
 @Module({
   providers: [
@@ -30,9 +40,10 @@ import { HealthModule } from "./health/health.module";
   ],
   imports: [
     ScheduleModule.forRoot(),
+    ...ethersModules,
     EthersModule.forRoot({
-      network: MUMBAI_NETWORK,
-      alchemy: process.env.ALCHEMY_ACCESS_KEY as string,
+      network: networkMap.mumbai.network,
+      custom: networkMap.mumbai.rpcUrl,
       useDefaultProvider: false,
     }),
     ConfigModule.forRoot({

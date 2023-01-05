@@ -3,25 +3,29 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
 import * as crypto from "crypto";
+import HMToken from '../contracts/HMToken.sol/HMToken.json';
 import Escrow from '../contracts/Escrow.sol/Escrow.json';
 import EscrowFactory from "../contracts/EscrowFactory.sol/EscrowFactory.json";
 
-import { InjectEthersProvider, BaseProvider, EthersSigner, InjectSignerProvider, Wallet, EthersContract, InjectContractProvider, Contract, Signer, AlchemyProvider } from 'nestjs-ethers';
+import { InjectEthersProvider, BaseProvider, EthersSigner, InjectSignerProvider, Wallet, EthersContract, InjectContractProvider, Contract, StaticJsonRpcProvider } from 'nestjs-ethers';
 
 import { JobEntity } from "./job.entity";
 import { CONFIRMATION_TRESHOLD, JobMode, JobRequestType, JobStatus } from "../common/decorators";
 import { IJobApproveDto, IJobCreateDto } from "./interfaces";
 import { StorageService } from "../storage/storage.service";
-import { IJobDto, IManifestDataItemDto, IManifestDto, jobFormatter, manifestFormatter } from "./serializers/job.responses";
+import { IBucketDto, IJobDto, IManifestDto, jobFormatter, manifestFormatter } from "./serializers/job.responses";
 import { firstValueFrom } from "rxjs";
 import { HttpService } from "@nestjs/axios";
 import { IJobManifestDto } from "./interfaces/manifest";
 import { SortDirection } from "../common/collection";
-import { DATA_SAMPLE_SIZE } from "../common/constants";
+import { DATA_SAMPLE_SIZE, EXCLUDED_BUCKET_FILENAMES } from "../common/constants";
 import { avg, isAnGroundTruthDataAnnotations, isAnGroundTruthDataImage, max, min } from "../common/helpers";
 import { IJobFeeRangeDto } from "./interfaces/feeRange";
-import { NetworkId } from "../common/constants/networks";
 import { ethers } from "ethers";
+import { ILiquidityDto } from "./interfaces/liquidity";
+import { INetworkDto, networkMap, networks } from "./interfaces/network";
+import { NetworkId } from "../common/constants/networks";
+
 
 @Injectable()
 export class JobService {
@@ -36,12 +40,20 @@ export class JobService {
   private exchangeOracleAddress: string;
 
   constructor(
-    @InjectEthersProvider()
-    private readonly ethersProvider: BaseProvider,
+    @InjectEthersProvider('moonbeam')
+    private readonly moonbeamProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('bsc')
+    private readonly bscProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('bsctest')
+    private readonly bsctestProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('goerli')
+    private readonly goerliProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('polygon')
+    private readonly polygonProvider: StaticJsonRpcProvider,
+    @InjectEthersProvider('mumbai')
+    private readonly mumbaiProvider: StaticJsonRpcProvider,
     @InjectSignerProvider()
     private readonly ethersSigner: EthersSigner,
-    @InjectContractProvider()
-    private readonly ethersContract: EthersContract,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,
     private readonly storageService: StorageService,
@@ -63,6 +75,39 @@ export class JobService {
     this.recordingOracleStake = this.configService.get<number>("RECORDING_ORACLE_STAKE", 0);
     this.reputationOracleStake = this.configService.get<number>("REPUTATION_ORACLE_STAKE", 0);
   }
+  
+  private getEtherProvider(network: INetworkDto): StaticJsonRpcProvider {
+    return new StaticJsonRpcProvider(network.rpcUrl, network.network)
+  }
+
+  private getContractProvider(network: INetworkDto): EthersContract {
+    return new EthersContract(new StaticJsonRpcProvider(network.rpcUrl, network.network))
+  }
+
+  private getNetworkById(networkId: NetworkId): INetworkDto {
+    return networkMap[networkId]
+  }
+
+  public async getLiquidity(): Promise<ILiquidityDto[]> {
+    const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "");
+    const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
+    
+    return Promise.all(networks.map(async network => {
+      const contractProvider = this.getContractProvider(network);
+      const token: Contract = await contractProvider.create(
+        networkMap.mumbai.hmtAddress,
+        HMToken.abi
+      );
+      
+      const liquidity = (await token.connect(operator).balanceOf(network.defaultStakingAddress)).toString();
+
+      return {
+        network: network,
+        liquidity: Number(ethers.utils.formatEther(liquidity)),
+        symbol: "HMT",
+      }
+    }));
+  }
 
   public async getJobByUser(userId: number): Promise<JobEntity[]> {
     return this.jobEntityRepository.find({
@@ -80,7 +125,9 @@ export class JobService {
 
     if (!jobEntity) throw new NotFoundException("Job not found");
 
-    return jobFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return jobFormatter(jobEntity, bucket);
   }
 
   public async getJobByStatus(status: JobStatus): Promise<JobEntity[]> {
@@ -121,7 +168,9 @@ export class JobService {
 
     if (!jobEntity) throw new NotFoundException("Job not found");
 
-    const transaction = await this.ethersProvider.getTransactionReceipt(dto.transactionHash);
+    const network = this.getNetworkById(jobEntity.networkId)
+    const ethersProvider = this.getEtherProvider(network)
+    const transaction = await ethersProvider.getTransactionReceipt(dto.transactionHash);
     if (!transaction) throw new NotFoundException("Transaction not found by hash");
 
     if (transaction.confirmations < CONFIRMATION_TRESHOLD) {
@@ -132,7 +181,8 @@ export class JobService {
     const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "");
     const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
 
-    const escrow: Contract = this.ethersContract.create(
+    const contractProvider = this.getContractProvider(network)
+    const escrow: Contract = contractProvider.create(
       jobEntity.escrowAddress,
       Escrow.abi
     );
@@ -178,9 +228,7 @@ export class JobService {
   }
 
   public async create(dto: IJobCreateDto, userId: number): Promise<IJobDto> {
-    const { dataUrl, groundTruthFileUrl, fee, } = dto;
-
-    const networkId = NetworkId.LOCAL_GANACHE;
+    const { dataUrl, groundTruthFileUrl, fee, networkId } = dto;
 
     if (!await this.storageService.isBucketValid(dataUrl)) {
       throw new BadGatewayException("Bucket does not to have right permissions");
@@ -200,7 +248,7 @@ export class JobService {
       }
     }
     
-    const data = await this.storageService.getDataFromBucket(dataUrl);
+    const data = await this.storageService.getDataFromBucket(dataUrl, EXCLUDED_BUCKET_FILENAMES);
     if (data && Array.isArray(data) && data.length === 0) {
       throw new BadGatewayException("No data in the bucket");
     }
@@ -231,6 +279,8 @@ export class JobService {
 
     const manifestHash = crypto.createHash("sha256").update(manifest.toString()).digest("hex");
 
+    const network = this.getNetworkById(networkId)
+
     const jobEntity = await this.jobEntityRepository
       .create({
         ...manifest,
@@ -238,7 +288,7 @@ export class JobService {
         networkId,
         userId,
         manifestHash,
-        tokenAddress: this.configService.get<string>("WEB3_HMT_TOKEN", ""),
+        tokenAddress: network.hmtAddress,
         status: JobStatus.PENDING,
       })
       .save();
@@ -249,17 +299,31 @@ export class JobService {
     Object.assign(jobEntity, { escrowAddress })
     await jobEntity.save();
 
-    return jobFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return jobFormatter(jobEntity, bucket);
   }
 
   public async createEscrow(jobEntity: JobEntity): Promise<string> {
     const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "");
     const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
 
-    const escrowFactory: Contract = this.ethersContract.create(
-      this.configService.get<string>("WEB3_ESCROW_FACTORY_ADDRESS", ""),
+    const network = this.getNetworkById(jobEntity.networkId)
+    const contractProvider = this.getContractProvider(network)
+    console.log(contractProvider)
+    const escrowFactory: Contract = contractProvider.create(
+      network.defaultFactoryAddr,
       EscrowFactory.abi
     );
+
+    const gasLimit = await escrowFactory.connect(operator).estimateGas
+      .createEscrow([
+        jobEntity.reputationOracleAddress,
+        jobEntity.recordingOracleAddress
+      ])
+    
+    const ethersProvider = this.getEtherProvider(network)
+    const gasPrice = await ethersProvider.getGasPrice();
 
     const result: any = await (
       await escrowFactory
@@ -267,8 +331,10 @@ export class JobService {
         .createEscrow([
           jobEntity.reputationOracleAddress,
           jobEntity.recordingOracleAddress
-        ])
+        ], { gasLimit, gasPrice })
     ).wait()
+
+    console.log(result)
 
     if (!result?.events[0]?.transactionHash) {
       throw new BadGatewayException("Transaction hash related with createEscrow method does not exists");
@@ -296,7 +362,9 @@ export class JobService {
     const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "");
     const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
 
-    const escrow: Contract = this.ethersContract.create(
+    const network = this.getNetworkById(jobEntity.networkId)
+    const contractProvider = this.getContractProvider(network)
+    const escrow: Contract = contractProvider.create(
       jobEntity.escrowAddress,
       Escrow.abi
     );
@@ -347,10 +415,12 @@ export class JobService {
 
     if (!jobEntity) throw new NotFoundException("Job not found");
 
-    return manifestFormatter(jobEntity);
+    const bucket: IBucketDto = await this.storageService.getBucketInfo(jobEntity.dataUrl)
+
+    return manifestFormatter(jobEntity, bucket);
   }
 
-  public async getDataSample(jobId: number): Promise<IManifestDataItemDto[]> {
+  public async getDataSample(jobId: number): Promise<string[]> {
     const jobEntity = await this.findOne({ id: jobId });
 
     if (!jobEntity) throw new NotFoundException("Job not found");
@@ -360,7 +430,7 @@ export class JobService {
     return this.getRandomSample(data, DATA_SAMPLE_SIZE);
   }
 
-  private getRandomSample(data: IManifestDataItemDto[], n: number): IManifestDataItemDto[] {
+  private getRandomSample(data: string[], n: number): string[] {
     const length = data == null ? 0 : data.length
     if (!length || n < 1) {
         return []

@@ -1,7 +1,7 @@
 {
   "private": "true",
-  "name": "@human-protocol/job-launcher-server",
   "version": "1.0.0",
+  "name": "@human-protocol/job-launcher-server",
   "description": "Human Protocol Job Launcher Server",
   "license": "MIT",
   "publishConfig": {
@@ -11,9 +11,6 @@
     "url": "https://github.com/humanprotocol/job-launcher/issues"
   },
   "title": "Human Protocol Foundation",
-  "engines": {
-    "node": "16.x"
-  },
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -33,31 +30,13 @@
     "start:production": "cross-env NODE_ENV=${NODE_ENV:=production} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
     "start:staging": "cross-env NODE_ENV=${NODE_ENV:=staging} node .",
     "test": "cross-env NODE_ENV=${NODE_ENV:=test} jest --config jest.config.json --detectOpenHandles",
-    "typeorm": "cross-env NODE_ENV=${NODE_ENV:=development} ts-node ./node_modules/.bin/typeorm --config src/ormconfig.ts -t=each",
-    "hardhat:compile": "hardhat compile",
-    "hardhat:deploy": "hardhat run scripts/deploy.ts",
-    "hardhat:verify": "hardhat verify",
-    "hardhat:test": "scripts/test",
-    "hardhat:test:e2e": "scripts/e2e",
-    "hardhat:test:gas": "RUN_EVM=true REPORT_GAS=true scripts/test",
-    "hardhat:test:coverage": "scripts/coverage",
-    "hardha:node": "hardhat node"
-  },
-  "scriptsComments": {
-    "hardhat:compile": "Runs compilation for all contracts in the project. The compiled artifacts will be saved in the artifacts/ directory. Ex.: npm run hardhat:compile",
-    "hardhat:deploy": "Runs the deployment script to the specified network. Ex.: npx hardhat run scripts/deploy.ts --network polygonMumbai",
-    "hardhat:verify": "Runs the contract verification process and makes the source code public. Ex.: npx hardhat verify --network polygonMumbai",
-    "hardhat:test": "Runs contract tests. Ex.: npm run test",
-    "hardhat:test:gas": "Runs a measurement to get an indication of how much gas is being used based on your tests. Ex.: npm run hardhat:test:gas",
-    "hardhat:test:coverage": "Runs measuring test coverage in the project. Ex.: npm run hardhat:test:coverage",
-    "hardhat:node": "Runs HardHat node"
+    "typeorm": "cross-env NODE_ENV=${NODE_ENV:=development} ts-node ./node_modules/.bin/typeorm --config src/ormconfig.ts -t=each"
   },
   "dependencies": {
     "@nestjs/axios": "^0.1.0",
     "@nestjs/common": "^8.4.7",
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.2.2",
-    "@nestjs/graphql": "^10.1.6",
     "@nestjs/jwt": "8.0.0",
     "@nestjs/passport": "^8.2.2",
     "@nestjs/platform-express": "^8.2.2",
@@ -73,8 +52,6 @@
     "date-fns": "2.23.0",
     "express": "4.17.1",
     "express-session": "1.17.2",
-    "graphql": "^16.6.0",
-    "graphql-type-json": "^0.3.2",
     "helmet": "^5.1.0",
     "nestjs-ethers": "^1.0.3",
     "passport": "^0.6.0",
@@ -95,7 +72,7 @@
     "@ethersproject/providers": "^5.7.0",
     "@gemunion/cross-env": "0.0.3",
     "@gemunion/eslint-config": "0.1.9",
-    "@nestjs/testing": "^8.0.6",
+    "@nestjs/testing": "^7.6.18",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
@@ -137,8 +114,6 @@
     "eslint-plugin-standard": "4.1.0",
     "ethereum-types": "^3.7.1",
     "ethers": "^5.7.0",
-    "hardhat": "^2.11.1",
-    "hardhat-abi-exporter": "^2.10.0",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "4.3.8",

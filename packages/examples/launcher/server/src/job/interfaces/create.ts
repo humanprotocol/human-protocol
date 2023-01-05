@@ -1,3 +1,5 @@
+import { NetworkId } from "../../common/constants/networks";
+
 export interface IJobCreateDto {
   dataUrl: string;
   groundTruthFileUrl: string;
@@ -7,4 +9,5 @@ export interface IJobCreateDto {
   requesterAccuracyTarget: number;
   price: number;
   fee: number;
+  networkId: NetworkId
 }
