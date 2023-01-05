@@ -12,14 +12,14 @@ import { CardContainer } from 'src/components/Cards/Container';
 export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
   const theme = useTheme();
   const series = [
-    { date: '2022-09-01', value: 8 },
-    { date: '2022-09-10', value: 11 },
-    { date: '2022-09-20', value: 13 },
     { date: '2022-10-01', value: 17 },
-    { date: '2022-10-07', value: 30 },
-    { date: '2022-10-14', value: 50 },
-    { date: '2022-10-28', value: 70 },
+    { date: '2022-10-10', value: 40 },
+    { date: '2022-10-20', value: 70 },
     { date: '2022-11-01', value: 97 },
+    { date: '2022-11-07', value: 127 },
+    { date: '2022-11-14', value: 160 },
+    { date: '2022-11-28', value: 200 },
+    { date: '2022-12-01', value: 247 },
   ];
 
   return (
@@ -67,10 +67,10 @@ export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
                 color="#858EC6"
                 textAlign="right"
               >
-                Oct 22
+                Nov 22
               </Typography>
               <Typography variant="caption" component="p" color="primary">
-                17 MILLION
+                97 MILLION
               </Typography>
             </Box>
             <Box ml={19}>
@@ -80,10 +80,10 @@ export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
                 color="#858EC6"
                 textAlign="right"
               >
-                Nov 22
+                Dec 22
               </Typography>
               <Typography variant="caption" component="p" color="primary">
-                97 MILLION
+                247 MILLION
               </Typography>
             </Box>
           </Box>
