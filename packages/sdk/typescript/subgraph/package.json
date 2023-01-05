@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=matic yarn generate",
     "test": "graph test",
