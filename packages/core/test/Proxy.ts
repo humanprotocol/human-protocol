@@ -94,15 +94,12 @@ describe('Proxy', function () {
       escrowFactoryProxyContract,
       EscrowFactory
     );
-
-    try {
+    await expect(() => {
       escrowFactoryProxyContract.hasEscrow(owner.getAddress());
-    } catch (error: any) {
-      assert(
-        error.message ===
-          'escrowFactoryProxyContract.hasEscrow is not a function'
-      );
-    }
+    }).to.throw(
+      TypeError,
+      'escrowFactoryProxyContract.hasEscrow is not a function'
+    );
 
     expect(HMTokenContract.address).to.equal(
       await escrowFactoryProxyContract.eip20()
@@ -112,42 +109,36 @@ describe('Proxy', function () {
     );
   });
 
-  it('Admin permissions', async function () {
+  it('Revert when updating with a non contract address', async function () {
+    await expect(
+      adminImplementation.upgrade(
+        escrowFactoryProxyContract.address,
+        owner.getAddress()
+      )
+    ).to.be.revertedWith('ERC1967: new implementation is not a contract');
+  });
+
+  it('Only admin can modify', async function () {
     expect(await adminImplementation.owner()).to.equal(
       await owner.getAddress()
     );
 
-    try {
-      await adminImplementation
+    await expect(
+      adminImplementation
         .connect(account1)
-        .upgrade(escrowFactoryProxyContract.address, owner.getAddress());
-    } catch (error: any) {
-      assert(error.message.includes('Ownable: caller is not the owner'));
-    }
-
-    try {
-      await adminImplementation.upgrade(
-        escrowFactoryProxyContract.address,
-        owner.getAddress()
-      );
-    } catch (error: any) {
-      assert(
-        error.message.includes('ERC1967: new implementation is not a contract')
-      );
-    }
+        .upgrade(escrowFactoryProxyContract.address, owner.getAddress())
+    ).to.be.revertedWith('Ownable: caller is not the owner');
 
     adminImplementation.transferOwnership(account1.getAddress());
     expect(await adminImplementation.owner()).to.equal(
       await account1.getAddress()
     );
 
-    try {
-      await adminImplementation.upgrade(
+    await expect(
+      adminImplementation.upgrade(
         escrowFactoryProxyContract.address,
         owner.getAddress()
-      );
-    } catch (error: any) {
-      assert(error.message.includes('Ownable: caller is not the owner'));
-    }
+      )
+    ).to.be.revertedWith('Ownable: caller is not the owner');
   });
 });
