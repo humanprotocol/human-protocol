@@ -38,7 +38,7 @@ describe('Staking', function () {
     staking: Staking,
     rewardPool: RewardPool;
 
-  this.beforeEach(async () => {
+  this.beforeAll(async () => {
     [
       owner,
       validator,
@@ -75,7 +75,9 @@ describe('Staking', function () {
           );
       })
     );
+  });
 
+  this.beforeEach(async () => {
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(token.address, minimumStake, lockPeriod);

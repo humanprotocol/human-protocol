@@ -1,4 +1,4 @@
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import { Contract, Signer } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
 import { HMToken, Staking } from '../typechain-types';
@@ -24,7 +24,9 @@ describe('Proxy', function () {
     const Staking = await ethers.getContractFactory('Staking');
     stakingContract = await Staking.deploy(HMTokenContract.address, 1, 1);
     await stakingContract.deployed();
+  });
 
+  this.beforeEach(async () => {
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
     escrowFactoryProxyContract = await upgrades.deployProxy(
       EscrowFactory,

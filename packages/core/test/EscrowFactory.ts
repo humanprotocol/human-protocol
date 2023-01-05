@@ -12,7 +12,7 @@ describe('EscrowFactory', function () {
     trustedHandlers: string[];
 
   let token: HMToken, escrowFactory: EscrowFactory, staking: Staking;
-  let firstEscrow: string, secondEscrow: string;
+
   const minimumStake = 2;
   const lockPeriod = 2;
 
@@ -48,7 +48,9 @@ describe('EscrowFactory', function () {
 
     // Send HMT tokens to the operator
     await token.connect(owner).transfer(await operator.getAddress(), 1000);
+  });
 
+  this.beforeEach(async () => {
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
@@ -75,66 +77,75 @@ describe('EscrowFactory', function () {
     });
   });
 
-  describe('createEscrow', () => {
-    it('Operator should not be able to create an escrow without staking', async () => {
-      await expect(
-        escrowFactory
-          .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
-      ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
-    });
-
-    it('Operator should be able to create an escrow after staking', async () => {
-      const event = await stakeAndCreateEscrow(staking);
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
-      expect(event?.escrow).to.not.be.null;
-      firstEscrow = event?.escrow;
-    });
-
-    it('Should emit an event on launched', async function () {
-      await staking.connect(operator).stake(stakeAmount);
-
-      await expect(
-        escrowFactory.connect(operator).createEscrow(trustedHandlers)
-      )
-        .to.emit(escrowFactory, 'Launched')
-        .withArgs(token.address, anyValue);
-    });
-
-    it('Should find the newly created escrow from deployed escrow', async () => {
-      secondEscrow = await escrowFactory.lastEscrow();
-      const result = await escrowFactory
+  it('Operator should not be able to create an escrow without staking', async () => {
+    await expect(
+      escrowFactory
         .connect(operator)
-        .hasEscrow(secondEscrow);
-      expect(result).to.equal(true);
-    });
+        .createEscrow([ethers.constants.AddressZero])
+    ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
+  });
 
-    it('Operator should be able to create another escrow after allocating some of the stakes', async () => {
-      staking.connect(operator).allocate(secondEscrow.toString(), stakeAmount);
+  it('Operator should be able to create an escrow after staking', async () => {
+    const event = await stakeAndCreateEscrow(staking);
 
-      const event = await createEscrow();
+    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.escrow).to.not.be.null;
+  });
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
-      expect(event?.escrow).to.not.be.null;
-    });
+  it('Should emit an event on launched', async function () {
+    await staking.connect(operator).stake(stakeAmount);
 
-    it('Operator should not be able to create an escrow after allocating all of the stakes', async () => {
-      await staking
+    await expect(escrowFactory.connect(operator).createEscrow(trustedHandlers))
+      .to.emit(escrowFactory, 'Launched')
+      .withArgs(token.address, anyValue);
+  });
+
+  it('Should find the newly created escrow from deployed escrow', async () => {
+    await stakeAndCreateEscrow(staking);
+
+    const escrowAddress = await escrowFactory.lastEscrow();
+    const result = await escrowFactory
+      .connect(operator)
+      .hasEscrow(escrowAddress);
+    expect(result).to.equal(true);
+  });
+
+  it('Operator should be able to create another escrow after allocating some of the stakes', async () => {
+    const result = await stakeAndCreateEscrow(staking);
+    const escrowAddress = result?.escrow;
+
+    staking
+      .connect(operator)
+      .allocate(escrowAddress.toString(), stakeAmount / 2);
+
+    const event = await createEscrow();
+
+    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.escrow).to.not.be.null;
+  });
+
+  it('Operator should not be able to create an escrow after allocating all of the stakes', async () => {
+    const result = await stakeAndCreateEscrow(staking);
+    const escrowAddress = result?.escrow;
+
+    staking.connect(operator).allocate(escrowAddress.toString(), stakeAmount);
+
+    await expect(
+      escrowFactory
         .connect(operator)
-        .allocate(firstEscrow.toString(), stakeAmount);
+        .createEscrow([ethers.constants.AddressZero])
+    ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
+  });
 
-      await expect(
-        escrowFactory
-          .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
-      ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
-    });
+  it('Operator should be able to create an escrow after staking more tokens', async () => {
+    const result = await stakeAndCreateEscrow(staking);
+    const escrowAddress = result?.escrow;
 
-    it('Operator should be able to create an escrow after staking more tokens', async () => {
-      const event = await stakeAndCreateEscrow(staking);
+    staking.connect(operator).allocate(escrowAddress.toString(), stakeAmount);
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
-      expect(event?.escrow).to.not.be.null;
-    });
+    const event = await stakeAndCreateEscrow(staking);
+
+    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.escrow).to.not.be.null;
   });
 });

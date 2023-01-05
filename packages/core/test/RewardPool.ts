@@ -26,7 +26,7 @@ describe('RewardPool', function () {
   const lockPeriod = 2;
   const rewardFee = 2;
 
-  beforeEach(async () => {
+  this.beforeAll(async () => {
     [
       owner,
       validator,
@@ -42,6 +42,18 @@ describe('RewardPool', function () {
     const HMToken = await ethers.getContractFactory('HMToken');
     token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
 
+    // Deploy Staking Conract
+    const Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+
+    // Deploy Escrow Factory Contract
+    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+
+    escrowFactory = await EscrowFactory.deploy();
+    await escrowFactory.initialize(token.address, staking.address);
+  });
+
+  this.beforeEach(async () => {
     // Send HMT tokens to contract participants
     [
       validator,
@@ -61,16 +73,6 @@ describe('RewardPool', function () {
           1000
         );
     });
-
-    // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
-
-    // Deploy Escrow Factory Contract
-    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-
-    escrowFactory = await EscrowFactory.deploy();
-    await escrowFactory.initialize(token.address, staking.address);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
