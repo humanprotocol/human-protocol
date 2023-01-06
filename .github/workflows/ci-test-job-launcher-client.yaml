@@ -1,0 +1,16 @@
+name: Job Launcher Client check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  dashboard-test:
+    name: Job Launcher Client Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn job-launcher-client:test
+        name: Run Job Launcher Client test

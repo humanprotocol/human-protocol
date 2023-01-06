@@ -1,0 +1,65 @@
+{
+  "extends": [
+    "plugin:import/recommended",
+    "plugin:prettier/recommended",
+    "prettier",
+    "react-app"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"]
+      },
+      "typescript": {}
+    }
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    "react/jsx-props-no-spreading": 0,
+    "consistent-return": 0,
+    "import/prefer-default-export": 0,
+    "no-case-declarations": 0,
+    "no-alert": 0,
+    "no-console": 0,
+    "no-underscore-dangle": 0,
+    "no-shadow": 0,
+    "no-unused-vars": 0,
+    "prettier/prettier": ["error", { "singleQuote": true }],
+    "react/jsx-filename-extension": 0,
+    "react/prop-types": 0,
+    "react/no-unescaped-entities": 0,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    "import/named": 0,
+    "no-param-reassign": 0,
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-empty-interface": 0,
+    "@typescript-eslint/no-var-requires": 0
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
+  "env": {
+    "browser": true,
+    "jest": true,
+    "node": true
+  }
+}

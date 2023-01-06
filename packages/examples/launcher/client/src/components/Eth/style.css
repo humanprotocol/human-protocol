@@ -1,0 +1,9 @@
+.Toastify__toast-container .Toastify__toast--error {
+    background: #FAE1E2 !important;
+}
+
+
+.Toastify__toast .Toastify__toast-theme--light .Toastify__toast--error {
+    max-width: 600px !important;
+    max-height: 600px !important;
+}
