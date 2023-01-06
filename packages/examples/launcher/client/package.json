@@ -55,7 +55,7 @@
   "scripts": {
     "start": "yarn gen-runtime-env && react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --passWithNoTests",
     "start-prod": "yarn gen-runtime-env && serve -s build",
     "test:watch": "jest --watchAll --testPathPattern=src/__tests__",
     "eject": "react-scripts eject",
