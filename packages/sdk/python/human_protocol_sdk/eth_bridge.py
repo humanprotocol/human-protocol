@@ -22,14 +22,14 @@ HMTOKEN_ADDR = Web3.toChecksumAddress(
     os.getenv("HMTOKEN_ADDR", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
 )
 STAKING_ADDR = Web3.toChecksumAddress(
-    os.getenv("STAKING_ADDR", "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512")
+    os.getenv("STAKING_ADDR", "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0")
 )
 
 ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contracts")
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
-    os.getenv("KVSTORE_CONTRACT", "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9")
+    os.getenv("KVSTORE_CONTRACT", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9")
 )
 WEB3_POLL_LATENCY = float(os.getenv("WEB3_POLL_LATENCY", 5))
 WEB3_TIMEOUT = int(os.getenv("WEB3_TIMEOUT", 240))

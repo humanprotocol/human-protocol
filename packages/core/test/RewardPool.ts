@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { Signer } from 'ethers';
 import {
   EscrowFactory,
@@ -64,7 +64,11 @@ describe('RewardPool', function () {
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+    staking = (await upgrades.deployProxy(
+      Staking,
+      [token.address, minimumStake, lockPeriod],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as Staking;
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
@@ -73,11 +77,11 @@ describe('RewardPool', function () {
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
-    rewardPool = await RewardPool.deploy(
-      token.address,
-      staking.address,
-      rewardFee
-    );
+    rewardPool = (await upgrades.deployProxy(
+      RewardPool,
+      [token.address, staking.address, rewardFee],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as RewardPool;
 
     // Configure RewardPool in Staking
     await staking.setRewardPool(rewardPool.address);

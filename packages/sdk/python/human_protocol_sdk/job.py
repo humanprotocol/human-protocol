@@ -1703,7 +1703,7 @@ class Job:
         >>> escrow_addr = job.job_contract.address
         >>> new_job = Job(credentials=credentials, factory_addr=factory_addr, escrow_addr=escrow_addr)
         >>> new_job._factory_get_staking_addr(factory_addr)
-        '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'
+        '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
 
         Args:
             factory_addr (str): an ethereum address of the escrow factory contract.

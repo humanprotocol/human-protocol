@@ -2,8 +2,9 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts/access/Ownable.sol';
+
 import './interfaces/HMTokenInterface.sol';
-import './utils/Ownable.sol';
 import './utils/SafeMath.sol';
 
 contract HMToken is HMTokenInterface, Ownable {
