@@ -1,4 +1,4 @@
-import EscrowAbi from '../../node_modules/@human-protocol/core/abis/Escrow.json' assert { type: "json" } ;
+import EscrowAbi from '../../../fortune/node_modules/@human-protocol/core/abis/Escrow.json' assert { type: "json" } ;
 import Web3 from 'https://deno.land/x/web3@v0.11.1/mod.ts';
 
 
