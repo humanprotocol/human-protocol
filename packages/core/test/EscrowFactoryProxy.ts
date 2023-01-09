@@ -9,7 +9,7 @@ let escrowFactoryProxyContract: Contract,
   adminImplementation: Contract;
 let owner: Signer, account1: Signer;
 
-describe('Proxy', function () {
+describe('EscrowFactoryProxy', function () {
   this.beforeAll(async () => {
     [owner, account1] = await ethers.getSigners();
     const HMToken = await ethers.getContractFactory('HMToken');
