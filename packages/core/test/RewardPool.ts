@@ -188,7 +188,7 @@ describe('RewardPool', function () {
     });
   });
 
-  describe('Distribute Reward', () => {
+  describe('Distribute & Withdraw Reward', () => {
     let escrowAddress: string;
     const stakedTokens = 10;
     const allocatedTokens = 8;
@@ -253,6 +253,35 @@ describe('RewardPool', function () {
       );
 
       expect(await token.balanceOf(rewardPool.address)).to.equal(rewardFee * 2);
+    });
+
+    it('Should withdraw the reward', async () => {
+      const vSlashAmount = 2;
+      const v2SlashAmount = 3;
+      await staking
+        .connect(owner)
+        .slash(
+          await validator.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          vSlashAmount
+        );
+      await staking
+        .connect(owner)
+        .slash(
+          await validator2.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          v2SlashAmount
+        );
+
+      const oBalanceBefore = await token.balanceOf(await owner.getAddress());
+
+      await rewardPool.withdraw(await owner.getAddress());
+
+      expect(await token.balanceOf(await owner.getAddress())).to.equal(
+        oBalanceBefore.add(rewardFee * 2)
+      );
     });
   });
 });
