@@ -56,15 +56,28 @@ describe('Fortune', () => {
         from: owner.address,
       });
 
+    // const stakingContract = new web3.eth.Contract(Staking.abi as []);
+    // staking = await stakingContract
+    //   .deploy({
+    //     data: Staking.bytecode,
+    //     arguments: [token.options.address, web3.utils.toWei('1', 'ether'), 1],
+    //   })
+    //   .send({
+    //     from: owner.address,
+    //   });
     const stakingContract = new web3.eth.Contract(Staking.abi as []);
     staking = await stakingContract
       .deploy({
         data: Staking.bytecode,
-        arguments: [token.options.address, web3.utils.toWei('1', 'ether'), 1],
+        arguments: [],
       })
       .send({
         from: owner.address,
       });
+
+    await staking.methods
+      .initialize(token.options.address, web3.utils.toWei('1', 'ether'), 1)
+      .send({ from: owner.address });
 
     const escrowFactoryContract = new web3.eth.Contract(
       EscrowFactory.abi as []
