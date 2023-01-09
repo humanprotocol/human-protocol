@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
-import { EthersModule, GOERLI_NETWORK, MAINNET_NETWORK, MATIC_NETWORK, MUMBAI_NETWORK, RINKEBY_NETWORK } from 'nestjs-ethers';
+import { EthersModule } from 'nestjs-ethers';
 
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
@@ -13,6 +13,7 @@ import { HttpValidationPipe } from "./common/pipes";
 import { JobModule } from "./job/job.module";
 import { HealthModule } from "./health/health.module";
 import { networkMap, networks } from "./job/interfaces/network";
+import { PaymentsModule } from "./payments/payments.module";
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -54,6 +55,7 @@ const ethersModules = networks.map(network => {
     HealthModule,
     UserModule,
     JobModule,
+    PaymentsModule
   ],
   controllers: [AppController],
 })
