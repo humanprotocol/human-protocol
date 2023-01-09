@@ -6,7 +6,7 @@ import './Escrow.sol';
 import './interfaces/IStaking.sol';
 import './utils/Initializable.sol';
 
-contract EscrowFactory is Initializable {
+contract EscrowFactoryUpgradeTest is Initializable {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
@@ -47,13 +47,5 @@ contract EscrowFactory is Initializable {
         lastEscrow = address(escrow);
         emit Launched(eip20, lastEscrow);
         return lastEscrow;
-    }
-
-    function isChild(address _child) public view returns (bool) {
-        return escrowCounters[_child] == counter;
-    }
-
-    function hasEscrow(address _address) public view returns (bool) {
-        return escrowCounters[_address] != 0;
     }
 }

@@ -33,7 +33,7 @@ describe('EscrowFactory', function () {
     return await createEscrow();
   }
 
-  beforeEach(async () => {
+  this.beforeAll(async () => {
     [owner, operator, reputationOracle, recordingOracle] =
       await ethers.getSigners();
 
@@ -48,7 +48,9 @@ describe('EscrowFactory', function () {
 
     // Send HMT tokens to the operator
     await token.connect(owner).transfer(await operator.getAddress(), 1000);
+  });
 
+  this.beforeEach(async () => {
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
@@ -59,7 +61,8 @@ describe('EscrowFactory', function () {
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
+    escrowFactory = await EscrowFactory.deploy();
+    await escrowFactory.initialize(token.address, staking.address);
   });
 
   describe('deployment', () => {

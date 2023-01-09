@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 
 async function main() {
   const [, ...accounts] = await ethers.getSigners();
@@ -19,13 +18,23 @@ async function main() {
   console.log('Staking Contract Address:', stakingContract.address);
 
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-  const escrowFactoryContract = await EscrowFactory.deploy(
-    HMTokenContract.address,
-    stakingContract.address
+  const escrowFactoryContract = await upgrades.deployProxy(
+    EscrowFactory,
+    [HMTokenContract.address, stakingContract.address],
+    { initializer: 'initialize' }
   );
   await escrowFactoryContract.deployed();
-
-  console.log('Escrow Factory Address: ', escrowFactoryContract.address);
+  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  console.log(
+    'Escrow Factory Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(
+      escrowFactoryContract.address
+    )
+  );
+  console.log(
+    'Admin Address: ',
+    await upgrades.erc1967.getAdminAddress(escrowFactoryContract.address)
+  );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();

@@ -46,7 +46,8 @@ export const deployEscrowFactory = async (
 ): Promise<EscrowFactory> => {
   const factory = new EscrowFactory__factory(signer);
 
-  const contract = await factory.deploy(hmTokenAddr, stakingAddr);
+  const contract = await factory.deploy();
+  await contract.initialize(hmTokenAddr, stakingAddr);
 
   return contract;
 };

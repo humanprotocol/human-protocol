@@ -38,7 +38,7 @@ describe('Staking', function () {
     staking: Staking,
     rewardPool: RewardPool;
 
-  this.beforeEach(async () => {
+  this.beforeAll(async () => {
     [
       owner,
       validator,
@@ -75,7 +75,9 @@ describe('Staking', function () {
           );
       })
     );
+  });
 
+  this.beforeEach(async () => {
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
     staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
@@ -83,7 +85,8 @@ describe('Staking', function () {
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
+    escrowFactory = await EscrowFactory.deploy();
+    await escrowFactory.initialize(token.address, staking.address);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
