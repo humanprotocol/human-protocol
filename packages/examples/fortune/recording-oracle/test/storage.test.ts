@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
 
-import * as storage from "../src/storage.ts";
+import * as storage from "../src/servicers/storage.ts";
 
 Deno.test("getEscrow returns null if the escrow address is not found in the bucket", () => {
   const result = storage.getEscrow("0xabcd1234");

@@ -1,7 +1,22 @@
 {
 	"compilerOptions": {
-	"esModuleInterop": true,
-	"resolveJsonModule": true
-
-
-}}
+	  "target": "es2018",
+	  "lib": ["es6"],
+	  "module": "ES2022",
+	  "rootDir": ".",
+	  "moduleResolution": "node",
+	  "resolveJsonModule": true,
+	  "outDir": "build",
+	  "esModuleInterop": true,
+	  "forceConsistentCasingInFileNames": true,
+	  "strict": true,
+	  "noImplicitAny": true,
+	  "skipLibCheck": true
+	},
+	"exclude": [
+	  "./build/**/*",
+	  "src/**/*.spec.ts",
+	  "src/**/*.test.ts"
+	] 
+  }
+  

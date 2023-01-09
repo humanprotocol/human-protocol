@@ -322,9 +322,9 @@ To run the Deno app, follow these steps:
 
 2. Navigate to the directory containing the Deno app in your terminal.
 
-3. Run the `deno cache src/server.ts src/storage.ts` command to download the dependencies of the app.
+3. Run the `deno cache src/utils/url.ts src/services/manifest.ts src/services/storage.ts src/services/s3.ts src/services/escrow.ts src/services/reputationClients.ts src/services/fortune.ts src/index.ts` command to download the dependencies of the app.
 
-4. Run the `deno run --allow-net --allow-env src/server.ts` command to start the app server.
+4. Run the `deno run --allow-all src/index.ts` command to start the app server.
 
 5. Open a web browser and navigate to http://localhost:3005 to access the app.
 
