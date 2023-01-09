@@ -2,17 +2,14 @@ import {
   Grid,
   Paper,
   Typography,
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
   Button,
 } from '@mui/material';
 import React, { Dispatch } from 'react';
 export const GenerateOrImport = ({
-  setStep,
+  setStep,setPage
 }: {
   setStep: Dispatch<number>;
+  setPage: Dispatch<number>;
 }) => {
   return (
     <Paper>
@@ -48,13 +45,13 @@ export const GenerateOrImport = ({
           }}
         >
           <Button
-            onClick={() => setStep(1)}
+              onClick={() => {setStep(1);setPage(1);}}
             variant="contained"
             sx={{ marginRight: 2 }}
           >
             Generate
           </Button>
-          <Button onClick={() => setStep(2)} variant="outlined">
+            <Button onClick={() => {setStep(1);setPage(2);}} variant="outlined">
             Import
           </Button>
         </Grid>

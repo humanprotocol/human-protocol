@@ -2,10 +2,7 @@ import {
   Grid,
   Paper,
   Typography,
-  Box,
-  Stepper,
-  Step,
-  StepLabel,
+Stack,
   Button,
   TextField,
 } from '@mui/material';
@@ -13,53 +10,78 @@ import React, { Dispatch, useState } from 'react';
 import { generateKey } from 'openpgp/lightweight';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-
+import {Key} from './index'
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
         props,
         ref,
         ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
-type Key = {
-  publicKey: string;
-  privateKey: string;
-};
+
 let regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-export const GeneratePubkey = ({ setStep }: { setStep: Dispatch<number> }) => {
-  const [key, setKey] = useState<Key>({ publicKey: '', privateKey: '' });
+export const GeneratePubkey = ({
+    setStep,setPage,setKey
+}: {
+    setStep: Dispatch<number>;
+    setPage: Dispatch<number>;
+    setKey: Dispatch<Key>;
+}) => {
+
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [passphrase, setPassphrase] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [emailError, setEmailError] = useState<boolean>(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<string>("");
   async function generate() {
-      if (name.length === 0 || !regex.test(email) || email.length === 0 || passphrase.length === 0) {
-          if(!regex.test(email)){
+      try{
+          if (name.length === 0 || email.length === 0 || passphrase.length === 0) {
+
               setError(true);
-              setErrorMessage("Fill the email with correct format");
-              return;
+              setErrorMessage("Please fill name, email, and passphrase");
+
+    return;
           }
+          if(!regex.test(email)){
+              setEmailError(true);
+              setEmailErrorMessage("email doesn't use correct format");
+              return
+          }
+          setEmailError(false);
+          setEmailErrorMessage("");
+          setError(false);
+          setErrorMessage("");
+          const {publicKey,privateKey} = await generateKey({
+              userIDs: [{ name, email }],
+              passphrase,
+          });
+          setKey({publicKey,privateKey})
+          setPage(1.5)
+          setStep(1)
+      }catch(e){
           setError(true);
-          setErrorMessage("Please fill name, email, and passphrase");
-          return;
+          if (e instanceof Error) setErrorMessage(e.message);
+
       }
 
-      setError(false);
-      setErrorMessage("");
-    const generatedKey = await generateKey({
-       userIDs: [{ name, email }], // you can pass multiple user IDs
-      passphrase, // protects the private key
-    });
-    console.log(generatedKey);
   }
   return (
     <Paper>
-        <Snackbar  anchorOrigin={{ vertical:"top", horizontal:"center" }} open={error} autoHideDuration={6000} onClose={()=>setError(false)}>
-            <Alert onClose={()=>setError(false)} severity="error" sx={{ width: '100%' }}>
-                {errorMessage}
-            </Alert>
-        </Snackbar>
+        <Stack spacing={7}>
+            <Snackbar   anchorOrigin={{ vertical:"top", horizontal:"center" }} open={error} autoHideDuration={6000} onClose={()=>setError(false)}>
+                <Alert onClose={()=>setError(false)} severity="error" sx={{ width: '100%' }}>
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
+            <Snackbar  anchorOrigin={{ vertical:"top", horizontal:"center" }} open={emailError} autoHideDuration={6000} onClose={()=>setEmailError(false)}>
+                <Alert onClose={()=>setEmailError(false)} severity="error" sx={{ width: '100%' }}>
+                    {emailErrorMessage}
+                </Alert>
+            </Snackbar>
+        </Stack>
+
       <Grid container direction="column">
         <Grid
           item
@@ -120,7 +142,7 @@ export const GeneratePubkey = ({ setStep }: { setStep: Dispatch<number> }) => {
               marginBottom: { xs: 1, sm: 1,md:7, lg: 7 },
           }}
         >
-          <Button variant="outlined" sx={{ mr: 2 }} onClick={() => setStep(0)}>
+            <Button variant="outlined" sx={{ mr: 2 }} onClick={() => {setStep(0);setPage(0);}}>
             Back
           </Button>
           <Button

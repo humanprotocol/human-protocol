@@ -6,17 +6,19 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Button,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { GenerateOrImport } from './GenerateOrImport';
 import { GeneratePubkey } from './GeneratePubkey';
-import { SuccessGenerate } from './SuccessGenerate';
+import { Success } from './Success';
 import { ImportPubkey } from './ImportPubkey';
-import { CustomConnectButton } from './CustomConnectButton';
+import {Key} from './index'
 const steps = ['Get Public Key', 'Add Public Key', 'Empower Human Scan'];
+
 export const AfterConnect = (): React.ReactElement => {
   const [step, setStep] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [key, setKey] = useState<Key>({ publicKey: '', privateKey: '' });
   return (
     <Grid container>
       <Grid
@@ -54,10 +56,11 @@ export const AfterConnect = (): React.ReactElement => {
                 </Stepper>
               </Box>
             </Paper>
-            {step === 0 && <GenerateOrImport setStep={setStep} />}
-            {step === 1 && <GeneratePubkey setStep={setStep} />}
-            {/*<SuccessGenerate/>*/}
-            {step === 2 && <ImportPubkey setStep={setStep} />}
+              {page === 0 && <GenerateOrImport setStep={setStep} setPage={setPage} />}
+              {page === 1 && <GeneratePubkey setKey={setKey} setStep={setStep} setPage={setPage} />}
+              {page === 1.5 && <Success what="generated" keys={key}  setStep={setStep} setPage={setPage} />}
+              {page === 2 && <ImportPubkey setKey={setKey} setStep={setStep} setPage={setPage}/>}
+              {page === 2.5 && <Success what="imported" keys={key}  setStep={setStep} setPage={setPage} />}
           </Box>
         </Grid>
       </Grid>
