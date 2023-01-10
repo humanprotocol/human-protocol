@@ -1,7 +1,7 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
-import Chip from '@mui/material/Chip';
+import Box from '@mui/material/Box';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 export const CustomConnectButton = () => {
   return (
@@ -49,7 +49,7 @@ export const CustomConnectButton = () => {
                 );
               }
               return (
-                <div style={{ display: 'flex', gap: 12 }}>
+                      <Box sx={{ display: 'flex', gap: 12,padding:{xs:2} }}>
                   <Button
                     endIcon={<ArrowDropDownIcon />}
                     onClick={openAccountModal}
@@ -68,15 +68,15 @@ export const CustomConnectButton = () => {
                     }}
                     startIcon={
                       <Avatar
-                        alt="Remy Sharp"
-                        src="/static/images/avatar/1.jpg"
+
+                          src={"https://cdn.stamp.fyi/avatar/eth:"+account.displayName}
                       />
                     }
                   >
                     {' '}
                     {account.displayName}
                   </Button>
-                </div>
+                </Box>
               );
             })()}
           </div>

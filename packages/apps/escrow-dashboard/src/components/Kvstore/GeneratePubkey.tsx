@@ -103,7 +103,7 @@ export const GeneratePubkey = ({
             }}
           >
             <TextField
-              sx={{ width: { md:200,lg: 200, xl: 200 } }}
+              sx={{ width: { md:200,lg: 200, xl: 200 },my:{xs:2} }}
               id="outlined-basic"
               label="Name"
               variant="outlined"
@@ -111,7 +111,7 @@ export const GeneratePubkey = ({
                 onChange={(e) => setName(e.target.value)}
             />
             <TextField
-                sx={{ mx: { md:2,lg: 2, xl: 2 }, width: { md:200,lg: 200, xl: 200 } }}
+                sx={{ mx: { md:2,lg: 2, xl: 2 }, width: { md:200,lg: 200, xl: 200 },my:{xs:2} }}
               id="Email"
               label="Email"
               variant="outlined"
@@ -119,7 +119,7 @@ export const GeneratePubkey = ({
                 onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
-                sx={{ width: { md:200,lg: 200, xl: 200 } }}
+                sx={{ width: { md:200,lg: 200, xl: 200 },my:{xs:2} }}
               id="outlined-basic"
               label="Passphrase"
               variant="outlined"

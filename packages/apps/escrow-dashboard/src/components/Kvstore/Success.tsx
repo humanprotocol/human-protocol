@@ -129,7 +129,7 @@ saveToNFTStorage(keys.publicKey,setCid,setError);
                 padding: 2,
                 marginTop: 2,
                 overflowY: 'scroll',
-                inlineSize: { xs: 300, sm: 300, md: 400, lg: 600, xl: 600 },
+                inlineSize: { xs:200, md: 400, lg: 600, xl: 600 },
                 overflowWrap: 'break-word',
               }}
             >
@@ -150,9 +150,9 @@ saveToNFTStorage(keys.publicKey,setCid,setError);
           justifyContent="flex-end"
           alignItems="flex-end"
           sx={{
-            marginTop: { xs: 1, sm: 1, lg: 5 },
-            paddingRight: { xs: 1, sm: 1, lg: 5 },
-            marginBottom: { xs: 1, sm: 1, lg: 7 },
+            marginTop: { xs: 1, sm: 1, md:5,lg: 5 },
+              paddingRight: { xs: 1, sm: 1,md:5, lg: 5 },
+              marginBottom: { xs: 1, sm: 1,md:7, lg: 7 },
           }}
         >
             <Button variant="outlined" sx={{ mr: 2 }} onClick={() => {

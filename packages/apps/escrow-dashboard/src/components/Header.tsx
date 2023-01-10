@@ -129,6 +129,7 @@ const Header: React.FC = (): React.ReactElement => {
                       </Link>
                     </MenuItem>
                   ))}
+                     <CustomConnectButton />
                 </Menu>
               </>
             )}
