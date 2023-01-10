@@ -120,9 +120,9 @@ export const MainPage = (): React.ReactElement => {
                   justifyContent="flex-end"
                   alignItems="flex-end"
                   sx={{
-                    marginTop: { xs: 1, sm: 1, lg: 10 },
-                    paddingRight: { xs: 1, sm: 1, lg: 10 },
-                    marginBottom: { xs: 1, sm: 1, lg: 7 },
+                    marginTop: { xs: 1, sm: 1, md:10,lg: 10 },
+                      paddingRight: { xs: 1, sm: 1,md:10, lg: 10 },
+                      marginBottom: { xs: 1, sm: 1,md:10, lg: 7 },
                   }}
                 >
                   <CustomConnectButton />
