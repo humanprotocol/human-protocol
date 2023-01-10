@@ -12,6 +12,7 @@ import 'hardhat-contract-sizer';
 import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
 
 dotenv.config();
 

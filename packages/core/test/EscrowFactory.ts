@@ -1,6 +1,6 @@
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { Signer } from 'ethers';
 import { EscrowFactory, HMToken, Staking } from '../typechain-types';
 
@@ -51,7 +51,11 @@ describe('EscrowFactory', function () {
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+    staking = (await upgrades.deployProxy(
+      Staking,
+      [token.address, minimumStake, lockPeriod],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as Staking;
 
     // Approve spend HMT tokens staking contract
     await token.connect(operator).approve(staking.address, 1000);

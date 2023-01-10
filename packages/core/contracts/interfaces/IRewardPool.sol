@@ -23,4 +23,6 @@ interface IRewardPool {
     ) external view returns (Reward[] memory);
 
     function distributeReward(address _escrowAddress) external;
+
+    function withdraw(address to) external;
 }

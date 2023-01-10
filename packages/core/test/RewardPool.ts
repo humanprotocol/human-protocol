@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { Signer } from 'ethers';
 import {
   EscrowFactory,
@@ -64,7 +64,11 @@ describe('RewardPool', function () {
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+    staking = (await upgrades.deployProxy(
+      Staking,
+      [token.address, minimumStake, lockPeriod],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as Staking;
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
@@ -73,11 +77,11 @@ describe('RewardPool', function () {
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
-    rewardPool = await RewardPool.deploy(
-      token.address,
-      staking.address,
-      rewardFee
-    );
+    rewardPool = (await upgrades.deployProxy(
+      RewardPool,
+      [token.address, staking.address, rewardFee],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as RewardPool;
 
     // Configure RewardPool in Staking
     await staking.setRewardPool(rewardPool.address);
@@ -188,7 +192,7 @@ describe('RewardPool', function () {
     });
   });
 
-  describe('Distribute Reward', () => {
+  describe('Distribute & Withdraw Reward', () => {
     let escrowAddress: string;
     const stakedTokens = 10;
     const allocatedTokens = 8;
@@ -253,6 +257,35 @@ describe('RewardPool', function () {
       );
 
       expect(await token.balanceOf(rewardPool.address)).to.equal(rewardFee * 2);
+    });
+
+    it('Should withdraw the reward', async () => {
+      const vSlashAmount = 2;
+      const v2SlashAmount = 3;
+      await staking
+        .connect(owner)
+        .slash(
+          await validator.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          vSlashAmount
+        );
+      await staking
+        .connect(owner)
+        .slash(
+          await validator2.getAddress(),
+          await operator.getAddress(),
+          escrowAddress,
+          v2SlashAmount
+        );
+
+      const oBalanceBefore = await token.balanceOf(await owner.getAddress());
+
+      await rewardPool.withdraw(await owner.getAddress());
+
+      expect(await token.balanceOf(await owner.getAddress())).to.equal(
+        oBalanceBefore.add(rewardFee * 2)
+      );
     });
   });
 });

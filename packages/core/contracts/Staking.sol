@@ -2,19 +2,21 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+
 import './interfaces/HMTokenInterface.sol';
 import './interfaces/IEscrow.sol';
 import './interfaces/IRewardPool.sol';
 import './interfaces/IStaking.sol';
 import './libs/Stakes.sol';
 import './utils/Math.sol';
-import './utils/Ownable.sol';
 
 /**
  * @title Staking contract
  * @dev The Staking contract allows Operator, Exchange Oracle, Recording Oracle and Reputation Oracle to stake to Escrow.
  */
-contract Staking is IStaking, Ownable {
+contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMath for uint256;
     using Stakes for Stakes.Staker;
 
@@ -94,7 +96,21 @@ contract Staking is IStaking, Ownable {
      */
     event SetRewardPool(address indexed rewardPool);
 
-    constructor(address _eip20, uint256 _minimumStake, uint32 _lockPeriod) {
+    function initialize(
+        address _eip20,
+        uint256 _minimumStake,
+        uint32 _lockPeriod
+    ) external payable virtual initializer {
+        __Ownable_init_unchained();
+
+        __Staking_init_unchained(_eip20, _minimumStake, _lockPeriod);
+    }
+
+    function __Staking_init_unchained(
+        address _eip20,
+        uint256 _minimumStake,
+        uint32 _lockPeriod
+    ) internal onlyInitializing {
         eip20 = _eip20;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
@@ -532,4 +548,14 @@ contract Staking is IStaking, Ownable {
         require(staker.tokensStaked > 0, 'Caller is not a staker');
         _;
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[43] private __gap;
 }
