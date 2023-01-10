@@ -7,6 +7,7 @@ import {
   calculateRewardForWorker,
 } from './services/rewards';
 import { uploadResults } from './services/s3';
+import { updateReputations } from './services/reputation';
 
 const app = express();
 const privKey =
@@ -41,8 +42,22 @@ app.post('/job/results', async (req, res) => {
 
     const balance = await getBalance(web3, escrowAddress);
 
-    const workerAddresses = filterAddressesToReward(web3, fortunes);
-    const rewards = calculateRewardForWorker(balance, workerAddresses);
+    const { workerAddresses, reputationValues } = filterAddressesToReward(
+      web3,
+      fortunes
+    );
+
+    const reputationScores = await updateReputations(
+      web3,
+      reputationValues,
+      workerAddresses
+    );
+
+    const rewards = calculateRewardForWorker(
+      balance,
+      workerAddresses,
+      reputationScores
+    );
 
     // TODO calculate the URL hash(?)
     const resultsUrl = await uploadResults(

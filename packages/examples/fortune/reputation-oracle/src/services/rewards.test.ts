@@ -15,11 +15,29 @@ describe('Rewards', () => {
       { worker: worker2, fortune: 'fortune' },
       { worker: worker3, fortune: 'fortune1' },
     ]);
-    expect(result).toStrictEqual([worker1, worker3]);
+    expect(result.workerAddresses).toStrictEqual([worker1, worker3]);
   });
 
   it('Calculate rewards', async () => {
-    const result = calculateRewardForWorker(30, [worker1, worker2, worker3]);
+    let result = calculateRewardForWorker(
+      30,
+      [worker1, worker2, worker3],
+      [
+        { worker: worker1, reputation: 50 },
+        { worker: worker2, reputation: 50 },
+        { worker: worker3, reputation: 50 },
+      ]
+    );
     expect(result).toStrictEqual(['10', '10', '10']);
+    result = calculateRewardForWorker(
+      30,
+      [worker1, worker2, worker3],
+      [
+        { worker: worker1, reputation: 70 },
+        { worker: worker2, reputation: 20 },
+        { worker: worker3, reputation: 50 },
+      ]
+    );
+    expect(result).not.toStrictEqual(['10', '10', '10']);
   });
 });
