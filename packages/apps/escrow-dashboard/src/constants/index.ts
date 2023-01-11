@@ -7,11 +7,14 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
+  AVALANCHE_TESTNET = 43113,
+  AVALANCHE = 43114,
 }
 
 export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
+  [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
 };
 
 export interface IEscrowNetwork {
@@ -31,12 +34,15 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
+  ChainId.AVALANCHE_TESTNET,
+  ChainId.AVALANCHE,
 ];
 
 export const TESTNET_CHAIN_IDS = [
   ChainId.GOERLI,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
+  ChainId.AVALANCHE_TESTNET,
 ];
 
 export const ESCROW_NETWORKS: {
@@ -98,6 +104,26 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
     hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
+  },
+  [ChainId.AVALANCHE_TESTNET]: {
+    chainId: ChainId.AVALANCHE_TESTNET,
+    title: 'Fuji C-Chain',
+    scanUrl: 'https://testnet.snowtrace.io',
+    rpcUrl: 'https://api.avax-test.network/ext/C/rpc',
+    // Subgraph hasn't been implemented yet
+    subgraphUrl: 'https://api.thegraph.com',
+    factoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
+    hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
+  },
+  [ChainId.AVALANCHE]: {
+    chainId: ChainId.AVALANCHE,
+    title: 'Avalanche C-Chain Mainnet',
+    scanUrl: 'https://snowtrace.io',
+    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+    // Subgraph hasn't been implemented yet
+    subgraphUrl: 'https://api.thegraph.com',
+    factoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
+    hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
   },
 };
 
