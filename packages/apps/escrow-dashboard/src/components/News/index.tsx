@@ -1,48 +1,33 @@
 import * as React from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
+import lbankSvg from 'src/assets/lbank.svg';
 import { CardContainer } from 'src/components/Cards/Container';
-import ViewTitle from 'src/components/ViewTitle';
 
 export const NewsContainer: React.FC<{}> = (): React.ReactElement => {
   return (
-    <Box
-      id="news-container"
-      sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
-      <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="News" iconUrl="/images/user.svg" />
-      </Box>
-      <Box mt={{ xs: 4, md: 8 }} flex={1}>
-        <CardContainer>
-          <Box width={280} mb={{ xs: 5, sm: 16 }}>
-            <Typography variant="h3" color="primary" mb={4.5}>
-              HMT listed on Lbank
-            </Typography>
-            <Typography variant="body2" color="primary" mb={4.5}>
-              Following your decisive community vote we're pleased to announce
-              HMT will be listed on LBank Exchange.
-            </Typography>
-            <Button
-              variant="outlined"
-              href="https://newsbtc.com/press-releases/lbank-exchange-will-list-human-token-hmt-on-december-15-2022/"
-              target="_blank"
-            >
-              Read Article
-            </Button>
-          </Box>
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 40,
-              right: 40,
-              display: { xs: 'none', sm: 'block' },
-            }}
-          >
-            <img src="/images/lbank.svg" alt="lbank" />
-          </Box>
-        </CardContainer>
-      </Box>
+    <Box id="news-container" sx={{ height: '100%' }}>
+      <CardContainer>
+        <Box>
+          <Typography variant="h6" color="primary" mb={2}>
+            HMT listed on Lbank
+          </Typography>
+          <Typography variant="body2" color="primary" maxWidth={450}>
+            Following your decisive community vote we're pleased to announce HMT
+            will be listed on LBank Exchange.
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: { xs: 8, lg: 25 },
+            right: { xs: 14, lg: 28 },
+            display: { xs: 'none', sm: 'block' },
+          }}
+        >
+          <img src={lbankSvg} alt="lbank" />
+        </Box>
+      </CardContainer>
     </Box>
   );
 };
