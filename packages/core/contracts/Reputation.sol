@@ -16,21 +16,22 @@ contract Reputation is Ownable {
 
     // Staking contract address
     address public staking;
+    uint256 public minimumStake;
 
-    uint256 public MIN_STAKE = 1;
     int256 private constant MIN_REPUTATION = 1;
     int256 private constant MAX_REPUTATION = 100;
     mapping(address => int256) public reputations;
 
-    constructor(address _staking) {
+    constructor(address _staking, uint256 _minimumStake) {
         require(_staking != address(0), 'Zero address provided');
         staking = _staking;
+        _setMinimumStake(_minimumStake);
     }
 
     function addReputations(Worker[] memory _workers) public {
         Stakes.Staker memory staker = IStaking(staking).getStaker(msg.sender);
         require(
-            staker.tokensAvailable() > MIN_STAKE,
+            staker.tokensAvailable() > minimumStake,
             'Needs to stake HMT tokens to modify reputations.'
         );
 
@@ -98,7 +99,12 @@ contract Reputation is Ownable {
         return returnedValues;
     }
 
-    function updateStakingAmount(uint256 amount) public onlyOwner {
-        MIN_STAKE = amount;
+    function setMinimumStake(uint256 _minimumStake) external onlyOwner {
+        _setMinimumStake(_minimumStake);
+    }
+
+    function _setMinimumStake(uint256 _minimumStake) private {
+        require(_minimumStake > 0, 'Must be a positive number');
+        minimumStake = _minimumStake;
     }
 }

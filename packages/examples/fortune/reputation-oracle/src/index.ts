@@ -15,6 +15,9 @@ const privKey =
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
+const reputationAddress =
+  process.env.REPUTATION_ADDRESS ||
+  '0x09635F643e140090A9A8Dcd712eD6285858ceBef';
 
 const web3 = new Web3(ethHttpServer);
 const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
@@ -49,6 +52,7 @@ app.post('/job/results', async (req, res) => {
 
     const reputationScores = await updateReputations(
       web3,
+      reputationAddress,
       reputationValues,
       workerAddresses
     );
