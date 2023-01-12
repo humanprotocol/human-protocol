@@ -58,7 +58,7 @@ describe('Reputation', () => {
     reputation = await reputationContract
       .deploy({
         data: Reputation.bytecode,
-        arguments: [staking.options.address],
+        arguments: [staking.options.address, 1],
       })
       .send({
         from: owner.address,
