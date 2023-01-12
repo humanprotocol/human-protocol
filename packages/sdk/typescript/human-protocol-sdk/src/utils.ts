@@ -104,7 +104,8 @@ export const deployStaking = async (
   signer?: ethers.Signer
 ): Promise<Staking> => {
   const staking = new Staking__factory(signer);
-  const contract = await staking.deploy(hmTokenAddr, minimumStake, lockPeriod);
+  const contract = await staking.deploy();
+  await contract.initialize(hmTokenAddr, minimumStake, lockPeriod);
 
   return contract;
 };
@@ -143,7 +144,8 @@ export const deployRewardPool = async (
   signer?: ethers.Signer
 ): Promise<RewardPool> => {
   const rewardPool = new RewardPool__factory(signer);
-  const contract = await rewardPool.deploy(hmTokenAddr, stakingAddr, fee);
+  const contract = await rewardPool.deploy();
+  await contract.initialize(hmTokenAddr, stakingAddr, fee);
 
   return contract;
 };

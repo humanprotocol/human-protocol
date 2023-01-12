@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { ethers, upgrades } from 'hardhat';
 
 async function main() {
@@ -13,9 +14,17 @@ async function main() {
   console.log('HMToken Address: ', HMTokenContract.address);
 
   const Staking = await ethers.getContractFactory('Staking');
-  const stakingContract = await Staking.deploy(HMTokenContract.address, 1, 1);
+  const stakingContract = await upgrades.deployProxy(
+    Staking,
+    [HMTokenContract.address, 1, 1],
+    { initializer: 'initialize', kind: 'uups' }
+  );
   await stakingContract.deployed();
-  console.log('Staking Contract Address:', stakingContract.address);
+  console.log('Staking Proxy Address: ', stakingContract.address);
+  console.log(
+    'Staking Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(stakingContract.address)
+  );
 
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
   const escrowFactoryContract = await upgrades.deployProxy(
@@ -43,13 +52,18 @@ async function main() {
   console.log('KVStore Address: ', kvStoreContract.address);
 
   const RewardPool = await ethers.getContractFactory('RewardPool');
-  const rewardPoolContract = await RewardPool.deploy(
-    HMTokenContract.address,
-    stakingContract.address,
-    1
+  const rewardPoolContract = await upgrades.deployProxy(
+    RewardPool,
+    [HMTokenContract.address, stakingContract.address, 1],
+    { initializer: 'initialize', kind: 'uups' }
   );
   await rewardPoolContract.deployed();
   console.log('Reward Pool Contract Address:', rewardPoolContract.address);
+  console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
+  console.log(
+    'Reward Pool Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(rewardPoolContract.address)
+  );
 
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);

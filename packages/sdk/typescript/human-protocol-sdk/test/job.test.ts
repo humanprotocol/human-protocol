@@ -47,7 +47,7 @@ describe('Test Job', () => {
         manifest: manifest,
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
         stakingAddr: DEFAULT_STAKING_ADDR,
-        logLevel: 'error',
+        logLevel: 'debug',
       });
     });
 
