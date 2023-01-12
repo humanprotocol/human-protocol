@@ -5,6 +5,7 @@ const {
   gasLimit,
   escrowFundAmount,
   minioSettings,
+  repOraclePrivateKey,
 } = require('./constants');
 const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
@@ -16,6 +17,9 @@ const Web3 = require('web3');
 const Minio = require('minio');
 const web3 = new Web3(urls.ethHTTPServer);
 const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
+const reputationOracle = web3.eth.accounts.privateKeyToAccount(
+  `0x${repOraclePrivateKey}`
+);
 let owner;
 let launcher;
 
@@ -23,6 +27,8 @@ const setupAccounts = async () => {
   owner = (await web3.eth.getAccounts())[0];
   launcher = (await web3.eth.getAccounts())[3];
   await fundAccountHMT(launcher, owner, 1000);
+  // await fundAccountHMT(launcher, reputationOracle.address, 1000);
+
   return [owner, launcher];
 };
 
@@ -51,6 +57,13 @@ const stake = async (escrowFactory) => {
     .approve(stakingAddress, 5)
     .send({ from: launcher, gasLimit });
   await staking.methods.stake(5).send({ from: launcher, gasLimit });
+
+  await Token.methods
+    .approve(stakingAddress, 5)
+    .send({ from: reputationOracle.address, gasLimit });
+  await staking.methods
+    .stake(5)
+    .send({ from: reputationOracle.address, gasLimit });
 };
 
 const createEscrow = async (escrowFactory) => {

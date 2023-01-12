@@ -52,6 +52,10 @@ const minioSettings = {
   minioBucketName: process.env.MINIO_BUCKET_NAME || 'job-results',
 };
 
+const repOraclePrivateKey =
+  process.env.ETH_PRIVATE_KEY ||
+  '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
+
 module.exports = {
   addresses,
   urls,
@@ -60,4 +64,5 @@ module.exports = {
   escrowFundAmount,
   statusesMap,
   minioSettings,
+  repOraclePrivateKey,
 };

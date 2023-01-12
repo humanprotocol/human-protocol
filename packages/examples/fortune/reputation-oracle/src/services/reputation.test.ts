@@ -21,7 +21,6 @@ const owner = web3.eth.accounts.privateKeyToAccount(
 const reputationAccount = web3.eth.accounts.privateKeyToAccount(
   '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
 );
-const reputationAddress = '0x0165878A594ca255338adfa4d48449f69242Eb8F';
 
 describe('Reputation', () => {
   beforeAll(async () => {
@@ -82,7 +81,7 @@ describe('Reputation', () => {
   it('Add reputations', async () => {
     const result = await updateReputations(
       web3,
-      reputationAddress,
+      reputation.options.address,
       [
         { workerAddress: worker1, reputation: 1 },
         { workerAddress: worker2, reputation: -1 },
