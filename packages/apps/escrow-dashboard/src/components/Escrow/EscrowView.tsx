@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, Link, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
@@ -17,8 +17,8 @@ const TextBox = styled(Box)`
   align-items: center;
 `;
 
-const CopyAddressButton = ({ address }: { address: string }) => (
-  <IconButton onClick={() => navigator.clipboard.writeText(address)}>
+const CopyAddressButton = ({ address }: { address?: string }) => (
+  <IconButton onClick={() => navigator.clipboard.writeText(address ?? '')}>
     <CopyFilledIcon />
   </IconButton>
 );
@@ -158,14 +158,20 @@ export const EscrowView = () => {
                 Escrow
               </Typography>
               <TextBox sx={{ mb: 2 }}>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="primary"
-                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                <Link
+                  sx={{ overflow: 'hidden', textDecoration: 'none' }}
+                  href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.factoryAddress}`}
+                  target="_blank"
                 >
-                  {ESCROW_NETWORKS[chainId]?.factoryAddress}
-                </Typography>
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    color="primary"
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {ESCROW_NETWORKS[chainId]?.factoryAddress}
+                  </Typography>
+                </Link>
                 <CopyAddressButton
                   address={ESCROW_NETWORKS[chainId]?.factoryAddress}
                 />
@@ -179,14 +185,20 @@ export const EscrowView = () => {
                 Token
               </Typography>
               <TextBox sx={{ mb: 2 }}>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  color="primary"
-                  sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                <Link
+                  sx={{ overflow: 'hidden', textDecoration: 'none' }}
+                  href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.hmtAddress}`}
+                  target="_blank"
                 >
-                  {ESCROW_NETWORKS[chainId]?.hmtAddress}
-                </Typography>
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    color="primary"
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    {ESCROW_NETWORKS[chainId]?.hmtAddress}
+                  </Typography>
+                </Link>
                 <CopyAddressButton
                   address={ESCROW_NETWORKS[chainId]?.hmtAddress}
                 />
