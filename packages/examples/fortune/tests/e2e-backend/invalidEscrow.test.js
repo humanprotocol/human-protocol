@@ -4,21 +4,32 @@ const invalidEscrowAbi = require('./contracts/InvalidEscrowAbi.json');
 const {
   createEscrowFactory,
   createEscrow,
-  fundEscrow,
+  fundAccountHMT,
   setupEscrow,
   setupAgents,
   sendFortune,
+  setupAccounts,
+  stake,
 } = require('./fixtures');
 const { urls, statusesMap, escrowFundAmount } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
+let escrowFactory;
+let lastEscrowAddr;
+let Escrow;
 
 describe('Invalid escrow', () => {
-  test('Invalid escrow setup', async () => {
-    const escrowFactory = createEscrowFactory();
-    await createEscrow(escrowFactory);
+  beforeAll(async () => {
+    await setupAccounts();
+    escrowFactory = createEscrowFactory();
+    await stake(escrowFactory);
+  });
 
-    const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
-    const Escrow = new web3.eth.Contract(escrowAbi, lastEscrowAddr);
+  beforeEach(async () => {
+    lastEscrowAddr = await createEscrow(escrowFactory);
+    Escrow = new web3.eth.Contract(escrowAbi, lastEscrowAddr);
+  });
+
+  test('Invalid escrow setup', async () => {
     let escrowSt = await Escrow.methods.status().call();
 
     expect(statusesMap[escrowSt]).toBe('Launched');
@@ -26,7 +37,7 @@ describe('Invalid escrow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundEscrow(lastEscrowAddr);
+    await fundAccountHMT(lastEscrowAddr);
 
     // Bad repOracle address
     let res = await setupEscrow(lastEscrowAddr, 'BadAdress');
@@ -58,12 +69,8 @@ describe('Invalid escrow', () => {
   });
 
   test('Invalid escrow ABI', async () => {
-    const escrowFactory = createEscrowFactory();
-    await createEscrow(escrowFactory);
-
-    const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
     // Create an escrow with ABI not matches actual ABI
-    const Escrow = new web3.eth.Contract(invalidEscrowAbi, lastEscrowAddr);
+    Escrow = new web3.eth.Contract(invalidEscrowAbi, lastEscrowAddr);
     let escrowSt = await Escrow.methods.status().call();
 
     expect(statusesMap[escrowSt]).toBe('Launched');
@@ -71,7 +78,7 @@ describe('Invalid escrow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundEscrow(lastEscrowAddr);
+    await fundAccountHMT(lastEscrowAddr);
     let res = await setupEscrow(lastEscrowAddr, Escrow);
     expect(res.code).toBe('INVALID_ARGUMENT');
 
@@ -80,11 +87,6 @@ describe('Invalid escrow', () => {
   });
 
   test('Invalid fortunes', async () => {
-    const escrowFactory = createEscrowFactory();
-    await createEscrow(escrowFactory);
-
-    const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
-    const Escrow = new web3.eth.Contract(escrowAbi, lastEscrowAddr);
     let escrowSt = await Escrow.methods.status().call();
 
     expect(statusesMap[escrowSt]).toBe('Launched');
@@ -92,7 +94,7 @@ describe('Invalid escrow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundEscrow(lastEscrowAddr);
+    await fundAccountHMT(lastEscrowAddr);
 
     const agentAddresses = await setupAgents();
 

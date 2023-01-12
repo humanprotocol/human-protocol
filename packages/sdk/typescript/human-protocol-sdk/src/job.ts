@@ -20,6 +20,7 @@ import {
   getEscrow,
   getEscrowFactory,
   getHmToken,
+  getStaking,
   toFullDigit,
 } from './utils';
 import {
@@ -29,6 +30,7 @@ import {
   ErrorJobNotLaunched,
   ErrorManifestMissing,
   ErrorReputationOracleMissing,
+  ErrorStakingMissing,
   ErrorStorageAccessDataMissing,
 } from './error';
 import { createLogger } from './logger';
@@ -94,6 +96,7 @@ export class Job {
     storageEndpoint,
     storagePublicBucket,
     storageBucket,
+    stakingAddr,
     logLevel = 'info',
   }: JobArguments) {
     const provider = network
@@ -134,6 +137,7 @@ export class Job {
       hmTokenAddr,
       escrowAddr,
       factoryAddr,
+      stakingAddr,
     };
 
     this.manifestData = { manifest };
@@ -174,9 +178,21 @@ export class Job {
         return false;
       }
 
+      if (!this.contractData.stakingAddr) {
+        this._logError(new Error('Staking contract is missing'));
+        return false;
+      }
+
+      this._logger.info('Getting staking...');
+      this.contractData.staking = await getStaking(
+        this.contractData.stakingAddr,
+        this.providerData?.gasPayer
+      );
+
       this._logger.info('Deploying escrow factory...');
       this.contractData.factory = await deployEscrowFactory(
         this.contractData.hmTokenAddr,
+        this.contractData.stakingAddr,
         this.providerData?.gasPayer
       );
       this.contractData.factoryAddr = this.contractData.factory.address;
@@ -196,6 +212,31 @@ export class Job {
         this.contractData?.factoryAddr,
         this.providerData?.gasPayer
       );
+
+      this._logger.info('Checking if staking is configured...');
+      const stakingAddr = await this.contractData.factory.staking();
+      if (!stakingAddr) {
+        this._logError(new Error('Factory is not configured with staking'));
+        this.contractData.factory = undefined;
+
+        return false;
+      }
+      this._logger.info('Getting staking...');
+      this.contractData.staking = await getStaking(
+        stakingAddr,
+        this.providerData?.gasPayer
+      );
+      this.contractData.stakingAddr = stakingAddr;
+
+      this._logger.info('Checking if reward pool is configured...');
+      const rewardPoolAddr = await this.contractData.staking.rewardPool();
+      if (!rewardPoolAddr) {
+        this._logError(new Error('Staking is not configured with reward pool'));
+        this.contractData.staking = undefined;
+        this.contractData.factory = undefined;
+
+        return false;
+      }
 
       this._logger.info('Checking if escrow exists in the factory...');
       const hasEscrow = await this.contractData?.factory.hasEscrow(
@@ -274,26 +315,32 @@ export class Job {
 
     this._logger.info('Launching escrow...');
 
-    const txReceipt = await this.contractData?.factory?.createEscrow(
-      this.providerData?.trustedHandlers?.map(
-        (trustedHandler) => trustedHandler.address
-      ) || []
-    );
+    try {
+      const txReceipt = await this.contractData?.factory?.createEscrow(
+        this.providerData?.trustedHandlers?.map(
+          (trustedHandler) => trustedHandler.address
+        ) || []
+      );
 
-    const txResponse = await txReceipt?.wait();
+      const txResponse = await txReceipt?.wait();
 
-    const event = txResponse?.events?.find(
-      (event) => event.event === 'Launched'
-    );
+      const event = txResponse?.events?.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (event: any) => event.event === 'Launched'
+      );
 
-    const escrowAddr = event?.args?.[1];
-    this._logger.info(`Escrow is deployed at ${escrowAddr}.`);
+      const escrowAddr = event?.args?.[1];
+      this._logger.info(`Escrow is deployed at ${escrowAddr}.`);
 
-    this.contractData.escrowAddr = escrowAddr;
-    this.contractData.escrow = await getEscrow(
-      escrowAddr,
-      this.providerData?.gasPayer
-    );
+      this.contractData.escrowAddr = escrowAddr;
+      this.contractData.escrow = await getEscrow(
+        escrowAddr,
+        this.providerData?.gasPayer
+      );
+    } catch {
+      this._logError(new Error('Error creating escrow...'));
+      return false;
+    }
 
     return (
       (await this.status()) == EscrowStatus.Launched &&
@@ -634,6 +681,184 @@ export class Job {
   }
 
   /**
+   * **Stake HMTokens**
+   *
+   * @param {number} amount - Amount to stake
+   * @param {string | undefined} from - Address to stake
+   * @returns {Promise<boolean>} - True if the token is staked
+   */
+  async stake(amount: number, from?: string) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+    if (!this.contractData.hmToken) {
+      this._logError(ErrorHMTokenMissing);
+      return false;
+    }
+
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      const approved = await this.contractData.hmToken
+        .connect(operator)
+        .approve(this.contractData.staking.address, toFullDigit(amount));
+
+      if (!approved) {
+        throw new Error('Not approved');
+      }
+    } catch {
+      this._logError(new Error('Error approving HMTokens for staking'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .stake(toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * **Unstake HMTokens**
+   *
+   * @param {number} amount - Amount to unstake
+   * @param {string | undefined} from - Address to unstake
+   * @returns {Promise<boolean>} - True if the token is unstaked
+   */
+  async unstake(amount: number, from?: string) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .unstake(toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * **Withdraw unstaked HMTokens**
+   *
+   * @param {string | undefined} from - Address to withdraw
+   * @returns {Promise<boolean>} - True if the token is withdrawn
+   */
+  async withdraw(from?: string) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking.connect(operator).withdraw();
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * **Allocate HMTokens staked to the job**
+   *
+   * @param {number} amount - Amount to allocate
+   * @param {string | undefined} - Address to allocate with
+   * @returns {Promise<boolean>} - True if the token is allocated
+   */
+  async allocate(amount: number, from?: string) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    if (!this.contractData.escrowAddr) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
+    }
+
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .allocate(this.contractData.escrowAddr, toFullDigit(amount));
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * **Unallocate HMTokens from the job**
+   *
+   * @param {string | undefined} - Address to close allocation with
+   * @returns {Promise<boolean>} - True if the token is unallocated.
+   */
+  async closeAllocation(from?: string) {
+    if (!this.contractData?.staking) {
+      this._logError(ErrorStakingMissing);
+      return false;
+    }
+
+    if (!this.contractData.escrowAddr) {
+      this._logError(ErrorJobNotLaunched);
+      return false;
+    }
+
+    const operator = this._findOperator(from);
+
+    if (!operator) {
+      this._logError(new Error('Unknown wallet'));
+      return false;
+    }
+
+    try {
+      await this.contractData.staking
+        .connect(operator)
+        .closeAllocation(this.contractData.escrowAddr);
+    } catch {
+      this._logError(new Error(`Error executing transaction from ${from}`));
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * **Get current status of the escrow**
    *
    * @returns {Promise<EscrowStatus | undefined>} - Status of the escrow
@@ -803,8 +1028,10 @@ export class Job {
         await contract.connect(trustedHandler).functions[functionName](...args);
         return true;
       } catch (err) {
-        new Error(
-          'Error executing the transaction from all of the trusted handlers. Stop continue executing...'
+        this._logError(
+          new Error(
+            'Error executing the transaction from all of the trusted handlers. Stop continue executing...'
+          )
         );
       }
     }
@@ -813,9 +1040,25 @@ export class Job {
 
   /**
    * **Error log**
+   *
    * @param {Error} error - Occured error
    */
-  private async _logError(error: Error) {
+  private _logError(error: Error) {
     this._logger.error(error.message);
+  }
+
+  /**
+   * **Find operator to execute tx**
+   *
+   * @param {string} addr - Address of the operator
+   * @returns {ethers.Wallet | undefined} - Operator wallet
+   */
+  private _findOperator(addr?: string): ethers.Wallet | undefined {
+    return addr
+      ? [
+          this.providerData?.gasPayer,
+          ...(this.providerData?.trustedHandlers || []),
+        ].find((account?: ethers.Wallet) => account?.address === addr)
+      : this.providerData?.gasPayer;
   }
 }

@@ -43,13 +43,7 @@
     "@typescript-eslint/no-empty-function": 0,
     "@typescript-eslint/no-empty-interface": 0,
     "@typescript-eslint/no-var-requires": 0,
-    "max-len": [
-      "warn",
-      {
-        "code": 80
-      }
-    ],
-    "prettier/prettier": 0
+    "prettier/prettier": ["error"]
   },
   "overrides": [
     {

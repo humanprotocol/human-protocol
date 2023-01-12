@@ -22,3 +22,6 @@ flattened.sol
 
 # Tenderly fork deployment directory
 deployments_tenderly
+
+# OpenZeppelin
+.openzeppelin

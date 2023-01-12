@@ -27,18 +27,17 @@ app.post('/job/results', async (req, res) => {
     const { workerAddress, escrowAddress, fortune } = req.body;
     const err = await addFortune(web3, workerAddress, escrowAddress, fortune);
     if (err) {
-      console.log(err.message);
       return res.status(400).send(err);
     }
 
     return res.status(201).send();
   } catch (err) {
-    console.error(err);
-
     return res.status(500).send(err);
   }
 });
 
 app.listen(port, () => {
+  // TODO: Implement logger
+  // eslint-disable-next-line no-console
   console.log(`Recording Oracle server listening port ${port}`);
 });

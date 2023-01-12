@@ -207,9 +207,12 @@ class StorageTest(unittest.TestCase):
             ]
             mock_urlopen.return_value = cm
 
-            downloaded = download(key=file_key, private_key=self.priv_key)
-            self.assertEqual(json.dumps(downloaded), sample_data)
-            mock_urlopen.assert_called_once()
+            with patch(
+                "human_protocol_sdk.storage.download_from_storage"
+            ) as download_mock:
+                downloaded = download(key=file_key, private_key=self.priv_key)
+                self.assertEqual(json.dumps(downloaded), sample_data)
+                mock_urlopen.assert_called_once()
 
 
 if __name__ == "__main__":

@@ -2,24 +2,18 @@
 
 pragma solidity >=0.6.2;
 
-import './HMTokenInterface.sol';
-import './SafeMath.sol';
+import './interfaces/HMTokenInterface.sol';
+import './interfaces/IRewardPool.sol';
+import './interfaces/IEscrow.sol';
+import './utils/SafeMath.sol';
 
-contract Escrow {
+contract Escrow is IEscrow {
     using SafeMath for uint256;
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
 
-    enum EscrowStatuses {
-        Launched,
-        Pending,
-        Partial,
-        Paid,
-        Complete,
-        Cancelled
-    }
-    EscrowStatuses public status;
+    EscrowStatuses public override status;
 
     address public reputationOracle;
     address public recordingOracle;
@@ -28,7 +22,7 @@ contract Escrow {
 
     uint256 public reputationOracleStake;
     uint256 public recordingOracleStake;
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10**18);
+    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     address public eip20;
@@ -145,11 +139,10 @@ contract Escrow {
         status = EscrowStatuses.Complete;
     }
 
-    function storeResults(string memory _url, string memory _hash)
-        public
-        trusted
-        notExpired
-    {
+    function storeResults(
+        string memory _url,
+        string memory _hash
+    ) public trusted notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
@@ -218,10 +211,9 @@ contract Escrow {
         return bulkPaid;
     }
 
-    function finalizePayouts(uint256[] memory _amounts)
-        internal
-        returns (uint256, uint256)
-    {
+    function finalizePayouts(
+        uint256[] memory _amounts
+    ) internal returns (uint256, uint256) {
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
