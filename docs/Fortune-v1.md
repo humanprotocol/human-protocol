@@ -74,4 +74,6 @@ The reputation oracle must have staking and as well as the role "Reputation orac
 # Questions:
 ***When would the exchange oracle be slashed? Who could request the slashing?***
 
+***How can a Recording Oracle validate that the received fortunes are coming from a specific Exchange Oracle?***
+
 ***When would the reputation oracle be slashed? Who could request the slashing?***
