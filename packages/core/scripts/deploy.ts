@@ -40,10 +40,6 @@ async function main() {
       escrowFactoryContract.address
     )
   );
-  console.log(
-    'Admin Address: ',
-    await upgrades.erc1967.getAdminAddress(escrowFactoryContract.address)
-  );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
