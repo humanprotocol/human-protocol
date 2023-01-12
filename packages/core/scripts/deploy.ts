@@ -64,6 +64,14 @@ async function main() {
       ethers.utils.parseEther('1000')
     );
   }
+
+  const Reputation = await ethers.getContractFactory('Reputation');
+  const reputationContract = await Reputation.deploy(
+    stakingContract.address,
+    1
+  );
+  await reputationContract.deployed();
+  console.log('Reputation Contract Address:', reputationContract.address);
 }
 
 main().catch((error) => {
