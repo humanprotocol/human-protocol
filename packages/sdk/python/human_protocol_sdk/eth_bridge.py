@@ -29,7 +29,7 @@ ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contract
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
-    os.getenv("KVSTORE_CONTRACT", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9")
+    os.getenv("KVSTORE_CONTRACT", "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707")
 )
 WEB3_POLL_LATENCY = float(os.getenv("WEB3_POLL_LATENCY", 5))
 WEB3_TIMEOUT = int(os.getenv("WEB3_TIMEOUT", 240))
