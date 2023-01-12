@@ -11,18 +11,16 @@ describe('Reputation', function () {
   const minimumStake = 1;
   const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
   const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
-  const worker3 = '0x146D35a6485DbAFF357fB48B3BbA31fCF9E9c787';
 
   const reputationValues = [
     { workerAddress: worker1, reputation: 10 },
     { workerAddress: worker2, reputation: -10 },
-    { workerAddress: worker3, reputation: 20 },
   ];
 
   async function getReputations() {
     const result = await reputation
       .connect(reputationOracle)
-      .getReputations([worker1, worker2, worker3]);
+      .getReputations([worker1, worker2]);
 
     return result;
   }
@@ -73,8 +71,6 @@ describe('Reputation', function () {
     expect(reputations[0].reputation).to.equal('0');
     expect(reputations[1].workerAddress).to.equal(worker2);
     expect(reputations[1].reputation).to.equal('0');
-    expect(reputations[2].workerAddress).to.equal(worker3);
-    expect(reputations[2].reputation).to.equal('0');
   });
 
   it('Should not allow to modify reputation without stake', async () => {
@@ -92,8 +88,6 @@ describe('Reputation', function () {
     expect(reputations[0].reputation).to.equal('60');
     expect(reputations[1].workerAddress).to.equal(worker2);
     expect(reputations[1].reputation).to.equal('40');
-    expect(reputations[2].workerAddress).to.equal(worker3);
-    expect(reputations[2].reputation).to.equal('70');
 
     await reputation.connect(reputationOracle).addReputations(reputationValues);
 
@@ -102,8 +96,6 @@ describe('Reputation', function () {
     expect(reputations[0].reputation).to.equal('70');
     expect(reputations[1].workerAddress).to.equal(worker2);
     expect(reputations[1].reputation).to.equal('30');
-    expect(reputations[2].workerAddress).to.equal(worker3);
-    expect(reputations[2].reputation).to.equal('90');
   });
 
   it('Should calculate the rewards', async () => {
@@ -112,11 +104,24 @@ describe('Reputation', function () {
 
     const rewards = await reputation.getRewards(
       ethers.utils.parseUnits('1', 'ether'),
-      [worker1, worker2, worker3]
+      [worker1, worker2]
     );
 
-    expect(rewards[0]).to.equal('352941176470588235');
-    expect(rewards[1]).to.equal('235294117647058823');
-    expect(rewards[2]).to.equal('411764705882352941');
+    expect(rewards[0]).to.equal(ethers.utils.parseUnits('0.6', 'ether'));
+    expect(rewards[1]).to.equal(ethers.utils.parseUnits('0.4', 'ether'));
+  });
+
+  it('Check reputation limits', async () => {
+    await staking.connect(reputationOracle).stake(10);
+    await reputation.connect(reputationOracle).addReputations([
+      { workerAddress: worker1, reputation: 80 },
+      { workerAddress: worker2, reputation: -80 },
+    ]);
+
+    const reputations = await getReputations();
+    expect(reputations[0].workerAddress).to.equal(worker1);
+    expect(reputations[0].reputation).to.equal('100');
+    expect(reputations[1].workerAddress).to.equal(worker2);
+    expect(reputations[1].reputation).to.equal('1');
   });
 });
