@@ -1,44 +1,45 @@
-import Web3 from 'web3';
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import { addFortune } from './services/fortune';
+// deno-lint-ignore-file no-deprecated-deno-api
 
-const app = express();
+import Web3 from "https://deno.land/x/web3@v0.11.1/mod.ts";
+import { serve } from "https://deno.land/std@0.106.0/http/server.ts";
+import { addFortune } from './services/fortune.ts';
 
-const port = process.env.PORT || 3005;
 
-const privKey =
-  process.env.ETH_PRIVATE_KEY ||
-  '59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'; // ganaches priv key
-const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
+
+
+const privKey = Deno.env.get("ETH_PRIVATE_KEY") || "486a0621e595dd7fcbe5608cbbeec8f5a8b5cabe7637f11eccfc7acd408c3a0e";
+const ethHttpServer = Deno.env.get("ETH_HTTP_SERVER") || "http://localhost:8547";
+const port = Number(Deno.env.get("PORT")) || 3005;
 const web3 = new Web3(ethHttpServer);
 const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
 
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
-app.use(bodyParser.json());
 
-app.use(cors());
+const server = serve({ port });
 
-app.post('/job/results', async (req, res) => {
-  try {
-    const { workerAddress, escrowAddress, fortune } = req.body;
-    const err = await addFortune(web3, workerAddress, escrowAddress, fortune);
-    if (err) {
-      console.log(err.message);
-      return res.status(400).send(err);
+for await (const req of server) {
+  if (req.method === "POST" && req.url === "/job/results") {
+    try {
+      const body = await Deno.readAll(req.body);
+      const data = JSON.parse(new TextDecoder().decode(body));
+      const { workerAddress, escrowAddress, fortune } = data;
+      console.log(`workerAddress: ${workerAddress}`);
+      console.log(`escrowAddress: ${escrowAddress}`);
+      console.log(`fortune: ${fortune}`);
+      const err = await addFortune(web3, workerAddress, escrowAddress, fortune);
+      if (err) {
+        console.log(err.message);
+        req.respond({ status: 400, body: err.message });
+      } else {
+        req.respond({ status: 201 });
+      }
+    } catch (err) {
+      console.error(err);
+      req.respond({ status: 500, body: err.message });
     }
-
-    return res.status(201).send();
-  } catch (err) {
-    console.error(err);
-
-    return res.status(500).send(err);
   }
-});
+}
 
-app.listen(port, () => {
-  console.log(`Recording Oracle server listening port ${port}`);
-});
+console.log(`Recording Database server listening on port ${port}`);

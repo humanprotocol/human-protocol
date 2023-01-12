@@ -1,13 +1,13 @@
-import Web3 from 'web3';
+import Web3 from 'https://deno.land/x/web3@v0.11.1/mod.ts';
 import {
   getEscrowStatus,
   getEscrowManifestUrl,
   getRecordingOracleAddress,
   storeResults,
-} from './escrow';
-import { getManifest } from './manifest';
-import { bulkPayout } from './reputationClient';
-import { uploadResults } from './s3';
+} from './escrow.ts';
+import { getManifest } from './manifest.ts';
+import { bulkPayout } from './reputationClient.ts';
+import { uploadResults } from './s3.ts';
 import {
   cleanFortunes,
   getEscrow,
@@ -15,7 +15,7 @@ import {
   getWorkerResult,
   newEscrow,
   putFortune,
-} from './storage';
+} from './storage.ts';
 
 const statusesMap = [
   'Launched',
@@ -94,6 +94,7 @@ export async function addFortune(
   const fortunes = getFortunes(escrowAddress);
 
   const resultUrl = await uploadResults(
+    // deno-lint-ignore no-explicit-any
     fortunes.map(({ fortune }: { fortune: any }) => fortune),
     escrowAddress
   );

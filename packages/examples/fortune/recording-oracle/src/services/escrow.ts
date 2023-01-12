@@ -1,5 +1,7 @@
-import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
-import Web3 from 'web3';
+import EscrowAbi from '../../../fortune/node_modules/@human-protocol/core/abis/Escrow.json' assert { type: "json" } ;
+import Web3 from 'https://deno.land/x/web3@v0.11.1/mod.ts';
+
+
 
 export async function getRecordingOracleAddress(
   web3: Web3,

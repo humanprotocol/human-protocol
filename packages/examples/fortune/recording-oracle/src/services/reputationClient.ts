@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { convertUrl } from '../utils/url';
+import axiod from "https://deno.land/x/axiod@0.26.2/mod.ts";
+import { convertUrl } from '../utils/url.ts';
 
 export async function bulkPayout(
   reputationOracleUrl: string,
@@ -9,7 +9,7 @@ export async function bulkPayout(
   // a cron job might check how much annotations are in work
   // if this is full - then just push them to the reputation oracle
 
-  await axios.post(convertUrl(reputationOracleUrl), {
+  await axiod.post(convertUrl(reputationOracleUrl), {
     escrowAddress,
     fortunes,
   });

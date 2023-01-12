@@ -1,3 +1,5 @@
+// deno-lint-ignore-file prefer-const no-explicit-any
+
 const storage: any = {};
 
 export function newEscrow(address: string) {

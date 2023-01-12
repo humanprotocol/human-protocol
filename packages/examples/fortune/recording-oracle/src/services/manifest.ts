@@ -1,8 +1,8 @@
-import axios from 'axios';
-import { convertUrl } from '../utils/url';
+import axiod from "https://deno.land/x/axiod@0.26.2/mod.ts";
+import { convertUrl } from '../utils/url.ts';
 
 export async function getManifest(manifestUrl: string) {
-  const manifestResponse = await axios.get(convertUrl(manifestUrl));
+  const manifestResponse = await axiod.get(convertUrl(manifestUrl));
   return manifestResponse.data;
 }
 

@@ -1,0 +1,10 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: ''
+    command: 'echo "TODO: Replace with command to start project"'
+
+vscode:
+  extensions:
+    - denoland.vscode-deno@2.3.1
