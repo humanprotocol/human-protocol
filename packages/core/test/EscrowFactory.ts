@@ -108,17 +108,12 @@ describe('EscrowFactory', function () {
   });
 
   it('Should find the newly created escrow from deployed escrow', async () => {
-    console.log(await stakeAndCreateEscrow(staking));
-
-    console.log('it:', escrowFactory.address);
+    await stakeAndCreateEscrow(staking);
     const escrowAddress = await escrowFactory.lastEscrow();
-    console.log('lastEscrow', escrowAddress);
-    console.log('counter: ', await escrowFactory.counter());
 
     const result = await escrowFactory
       .connect(operator)
       .hasEscrow(escrowAddress);
-    console.log(result);
     expect(result).to.equal(true);
   });
 

@@ -55,9 +55,11 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
             STANDARD_DURATION,
             trustedHandlers
         );
-        escrowCounters[address(escrow)] = counter++;
-        emit Launched(eip20, address(escrow));
-        return address(escrow);
+        counter++;
+        escrowCounters[address(escrow)] = counter;
+        lastEscrow = address(escrow);
+        emit Launched(eip20, lastEscrow);
+        return lastEscrow;
     }
 
     function isChild(address _child) public view returns (bool) {
