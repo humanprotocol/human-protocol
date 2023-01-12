@@ -48,6 +48,7 @@ task(
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.9',
+    settings: { optimizer: { enabled: true, runs: 4294967295 } },
   },
   defaultNetwork: 'hardhat',
   networks: {

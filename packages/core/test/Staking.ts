@@ -89,8 +89,11 @@ describe('Staking', function () {
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy();
-    await escrowFactory.initialize(token.address, staking.address);
+    escrowFactory = (await upgrades.deployProxy(
+      EscrowFactory,
+      [token.address, staking.address],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as EscrowFactory;
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');

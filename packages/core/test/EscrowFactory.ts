@@ -65,8 +65,11 @@ describe('EscrowFactory', function () {
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy();
-    await escrowFactory.initialize(token.address, staking.address);
+    escrowFactory = (await upgrades.deployProxy(
+      EscrowFactory,
+      [token.address, staking.address],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as EscrowFactory;
   });
 
   describe('deployment', () => {
@@ -105,12 +108,17 @@ describe('EscrowFactory', function () {
   });
 
   it('Should find the newly created escrow from deployed escrow', async () => {
-    await stakeAndCreateEscrow(staking);
+    console.log(await stakeAndCreateEscrow(staking));
 
+    console.log('it:', escrowFactory.address);
     const escrowAddress = await escrowFactory.lastEscrow();
+    console.log('lastEscrow', escrowAddress);
+    console.log('counter: ', await escrowFactory.counter());
+
     const result = await escrowFactory
       .connect(operator)
       .hasEscrow(escrowAddress);
+    console.log(result);
     expect(result).to.equal(true);
   });
 

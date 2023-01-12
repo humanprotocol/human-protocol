@@ -30,7 +30,7 @@ async function main() {
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
     [HMTokenContract.address, stakingContract.address],
-    { initializer: 'initialize' }
+    { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
   console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);

@@ -44,13 +44,20 @@ describe('RewardPool', function () {
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
-    staking = await Staking.deploy(token.address, minimumStake, lockPeriod);
+    staking = (await upgrades.deployProxy(
+      Staking,
+      [token.address, minimumStake, lockPeriod],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as Staking;
 
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy();
-    await escrowFactory.initialize(token.address, staking.address);
+    escrowFactory = (await upgrades.deployProxy(
+      EscrowFactory,
+      [token.address, staking.address],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as EscrowFactory;
   });
 
   this.beforeEach(async () => {
@@ -73,19 +80,6 @@ describe('RewardPool', function () {
           1000
         );
     });
-
-    // Deploy Staking Conract
-    const Staking = await ethers.getContractFactory('Staking');
-    staking = (await upgrades.deployProxy(
-      Staking,
-      [token.address, minimumStake, lockPeriod],
-      { kind: 'uups', initializer: 'initialize' }
-    )) as Staking;
-
-    // Deploy Escrow Factory Contract
-    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-
-    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
