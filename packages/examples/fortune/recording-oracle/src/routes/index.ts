@@ -32,7 +32,7 @@ const routes: FastifyPluginAsync = async (server) => {
    async function (request, reply) {
     
     const fortunes = request.body;
-    console.log(12312321, fortunes)
+
     return sendFortunes(fortunes);
   });
 }
