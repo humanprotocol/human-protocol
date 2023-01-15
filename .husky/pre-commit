@@ -3,4 +3,4 @@
 
 npx lint-staged
 
-# cd packages/sdk/python && make format && git add -u
+cd packages/sdk/python && make format && git add . -u
