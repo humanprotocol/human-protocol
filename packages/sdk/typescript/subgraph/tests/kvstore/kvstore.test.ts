@@ -1,3 +1,4 @@
+import { BigInt } from '@graphprotocol/graph-ts';
 import { describe, test, assert, clearStore } from 'matchstick-as/assembly';
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
@@ -8,12 +9,14 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
-      'Operator'
+      'Operator',
+      BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator'
+      'Validator',
+      BigInt.fromI32(11)
     );
 
     handleDataSaved(data1);
@@ -93,12 +96,14 @@ describe('KVStore', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
-      'Operator'
+      'Operator',
+      BigInt.fromI32(10)
     );
     const data2 = createDataSavedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       'role',
-      'Validator'
+      'Validator',
+      BigInt.fromI32(11)
     );
 
     handleDataSaved(data1);

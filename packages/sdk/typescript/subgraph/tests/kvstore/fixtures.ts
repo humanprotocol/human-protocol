@@ -1,15 +1,18 @@
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, Address } from '@graphprotocol/graph-ts';
+import { ethereum, Address, BigInt } from '@graphprotocol/graph-ts';
 
 export function createDataSavedEvent(
   sender: string,
   key: string,
-  value: string
+  value: string,
+  timestamp: BigInt
 ): DataSaved {
   const newDataSavedEvent = changetype<DataSaved>(newMockEvent());
-  newDataSavedEvent.parameters = [];
 
+  newDataSavedEvent.block.timestamp = timestamp;
+
+  newDataSavedEvent.parameters = [];
   newDataSavedEvent.parameters.push(
     new ethereum.EventParam(
       'sender',
