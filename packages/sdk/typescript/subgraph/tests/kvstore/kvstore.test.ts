@@ -45,19 +45,17 @@ describe('KVStore', () => {
     assert.fieldEquals(
       'DataSavedEvent',
       id1,
-      'leader',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
-    );
-    assert.fieldEquals('DataSavedEvent', id1, 'key', 'role');
-
-    assert.fieldEquals('DataSavedEvent', id1, 'value', 'Operator');
-
-    assert.fieldEquals(
-      'DataSavedEvent',
-      id1,
       'transaction',
       data1.transaction.hash.toHexString()
     );
+    assert.fieldEquals(
+      'DataSavedEvent',
+      id1,
+      'leader',
+      data1.params.sender.toHexString()
+    );
+    assert.fieldEquals('DataSavedEvent', id1, 'key', 'role');
+    assert.fieldEquals('DataSavedEvent', id1, 'value', 'Operator');
 
     // Data 2
     assert.fieldEquals(
@@ -75,19 +73,17 @@ describe('KVStore', () => {
     assert.fieldEquals(
       'DataSavedEvent',
       id2,
-      'leader',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      'transaction',
+      data2.transaction.hash.toHexString()
     );
-    assert.fieldEquals('DataSavedEvent', id2, 'key', 'role');
-
-    assert.fieldEquals('DataSavedEvent', id2, 'value', 'Validator');
-
     assert.fieldEquals(
       'DataSavedEvent',
       id2,
-      'transaction',
-      data1.transaction.hash.toHexString()
+      'leader',
+      data2.params.sender.toHexString()
     );
+    assert.fieldEquals('DataSavedEvent', id2, 'key', 'role');
+    assert.fieldEquals('DataSavedEvent', id2, 'value', 'Validator');
 
     clearStore();
   });

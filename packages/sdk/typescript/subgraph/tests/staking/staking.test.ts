@@ -65,7 +65,7 @@ describe('Staking', () => {
       'StakeDepositedEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeDepositedEvent', id1, 'amount', '100');
 
@@ -92,7 +92,7 @@ describe('Staking', () => {
       'StakeDepositedEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
@@ -166,7 +166,7 @@ describe('Staking', () => {
       'StakeLockedEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeLockedEvent', id1, 'amount', '50');
     assert.fieldEquals('StakeLockedEvent', id1, 'lockedUntilTimestamp', '30');
@@ -194,7 +194,7 @@ describe('Staking', () => {
       'StakeLockedEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeLockedEvent', id2, 'amount', '100');
     assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
@@ -292,7 +292,7 @@ describe('Staking', () => {
       'StakeWithdrawnEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeWithdrawnEvent', id1, 'amount', '30');
 
@@ -319,7 +319,7 @@ describe('Staking', () => {
       'StakeWithdrawnEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeWithdrawnEvent', id2, 'amount', '100');
 
@@ -424,14 +424,14 @@ describe('Staking', () => {
       'StakeAllocatedEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeAllocatedEvent', id1, 'amount', '30');
     assert.fieldEquals(
       'StakeAllocatedEvent',
       id1,
       'escrow',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7'
+      data1.params.escrowAddress.toHexString()
     );
 
     // Data 2
@@ -457,14 +457,14 @@ describe('Staking', () => {
       'StakeAllocatedEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeAllocatedEvent', id2, 'amount', '50');
     assert.fieldEquals(
       'StakeAllocatedEvent',
       id2,
       'escrow',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a95A'
+      data2.params.escrowAddress.toHexString()
     );
 
     // Leader statistics
@@ -588,20 +588,20 @@ describe('Staking', () => {
       'StakeSlashedEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeSlashedEvent', id1, 'amount', '10');
     assert.fieldEquals(
       'StakeSlashedEvent',
       id1,
       'escrow',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7'
+      data1.params.escrowAddress.toHexString()
     );
     assert.fieldEquals(
       'StakeSlashedEvent',
       id1,
       'slasher',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC8'
+      data1.params.slasher.toHexString()
     );
 
     // Data 2
@@ -627,20 +627,20 @@ describe('Staking', () => {
       'StakeSlashedEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeSlashedEvent', id2, 'amount', '10');
     assert.fieldEquals(
       'StakeSlashedEvent',
       id2,
       'escrow',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a95A'
+      data2.params.escrowAddress.toHexString()
     );
     assert.fieldEquals(
       'StakeSlashedEvent',
       id2,
       'slasher',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a95B'
+      data2.params.slasher.toHexString()
     );
 
     // Leader statistics
@@ -776,14 +776,14 @@ describe('Staking', () => {
       'AllocationClosedEvent',
       id1,
       'staker',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('AllocationClosedEvent', id1, 'amount', '20');
     assert.fieldEquals(
       'AllocationClosedEvent',
       id1,
       'escrow',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7'
+      data1.params.escrowAddress.toHexString()
     );
 
     // Data 2
@@ -809,14 +809,14 @@ describe('Staking', () => {
       'AllocationClosedEvent',
       id2,
       'staker',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+      data1.params.staker.toHexString()
     );
     assert.fieldEquals('StakeAllocatedEvent', id2, 'amount', '40');
     assert.fieldEquals(
       'AllocationClosedEvent',
       id2,
       'escrow',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a95A'
+      data1.params.escrowAddress.toHexString()
     );
 
     // Leader statistics
