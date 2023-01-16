@@ -97,12 +97,12 @@ describe('Staking', () => {
     assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
     // Leader statistics
-    // assert.fieldEquals(
-    //   'LeaderStatistics',
-    //   STATISTICS_ENTITY_ID,
-    //   'leaders',
-    //   '2'
-    // );
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
@@ -200,12 +200,12 @@ describe('Staking', () => {
     assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
 
     // Leader statistics
-    // assert.fieldEquals(
-    //   'LeaderStatistics',
-    //   STATISTICS_ENTITY_ID,
-    //   'leaders',
-    //   '2'
-    // );
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
@@ -322,6 +322,14 @@ describe('Staking', () => {
       data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeWithdrawnEvent', id2, 'amount', '100');
+
+    // Leader statistics
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
@@ -468,12 +476,12 @@ describe('Staking', () => {
     );
 
     // Leader statistics
-    // assert.fieldEquals(
-    //   'LeaderStatistics',
-    //   STATISTICS_ENTITY_ID,
-    //   'leaders',
-    //   '2'
-    // );
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
@@ -644,12 +652,12 @@ describe('Staking', () => {
     );
 
     // Leader statistics
-    // assert.fieldEquals(
-    //   'LeaderStatistics',
-    //   STATISTICS_ENTITY_ID,
-    //   'leaders',
-    //   '2'
-    // );
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
@@ -820,12 +828,12 @@ describe('Staking', () => {
     );
 
     // Leader statistics
-    // assert.fieldEquals(
-    //   'LeaderStatistics',
-    //   STATISTICS_ENTITY_ID,
-    //   'leaders',
-    //   '2'
-    // );
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
 
     // Leader
     assert.fieldEquals(
