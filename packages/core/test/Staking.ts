@@ -687,7 +687,12 @@ describe('Staking', function () {
             )
         )
           .to.emit(staking, 'StakeSlashed')
-          .withArgs(await validator.getAddress(), anyValue);
+          .withArgs(
+            await operator.getAddress(),
+            slashedTokens,
+            escrowAddress,
+            await validator.getAddress()
+          );
       });
     });
 
