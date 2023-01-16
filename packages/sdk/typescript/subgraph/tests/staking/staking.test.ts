@@ -123,13 +123,13 @@ describe('Staking', () => {
     const data1 = createStakeLockedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       50,
-      BigInt.fromI32(30),
+      30,
       BigInt.fromI32(20)
     );
     const data2 = createStakeLockedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       100,
-      BigInt.fromI32(31),
+      31,
       BigInt.fromI32(21)
     );
 
@@ -380,14 +380,14 @@ describe('Staking', () => {
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       30,
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC7',
-      BigInt.fromI32(50),
+      50,
       BigInt.fromI32(50)
     );
     const data2 = createStakeAllocatedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       50,
       '0x92a2eEF7Ff696BCef98957a0189872680600a95A',
-      BigInt.fromI32(51),
+      51,
       BigInt.fromI32(51)
     );
 
@@ -732,14 +732,14 @@ describe('Staking', () => {
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       20,
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC7',
-      BigInt.fromI32(70),
+      70,
       BigInt.fromI32(70)
     );
     const data2 = createAllocationClosedEvent(
       '0x92a2eEF7Ff696BCef98957a0189872680600a959',
       40,
       '0x92a2eEF7Ff696BCef98957a0189872680600a95A',
-      BigInt.fromI32(71),
+      71,
       BigInt.fromI32(71)
     );
 

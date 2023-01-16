@@ -90,8 +90,10 @@ export function createStakeSlashedEvent(
   timestamp: BigInt
 ): StakeSlashed {
   const newStakeSlashedEvent = changetype<StakeSlashed>(newMockEvent());
-  newStakeSlashedEvent.parameters = [];
 
+  newStakeSlashedEvent.block.timestamp = timestamp;
+
+  newStakeSlashedEvent.parameters = [];
   newStakeSlashedEvent.parameters.push(
     new ethereum.EventParam(
       'staker',
