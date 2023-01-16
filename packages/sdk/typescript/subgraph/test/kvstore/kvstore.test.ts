@@ -43,7 +43,7 @@ describe('KVStore', () => {
       'DataSavedEvent',
       id1,
       'leader',
-      data1.params.sender.toHexString()
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
     );
     assert.fieldEquals('DataSavedEvent', id1, 'key', 'role');
 
@@ -73,7 +73,7 @@ describe('KVStore', () => {
       'DataSavedEvent',
       id2,
       'leader',
-      data2.params.sender.toHexString()
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
     );
     assert.fieldEquals('DataSavedEvent', id2, 'key', 'role');
 
@@ -114,7 +114,7 @@ describe('KVStore', () => {
       'Leader',
       data2.params.sender.toHexString(),
       'role',
-      'Validator1'
+      'Validator'
     );
   });
 });
