@@ -59,7 +59,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Emitted when `staker` was slashed for a total of `tokens` amount.
      */
-    event StakeSlashed(address indexed staker, uint256 tokens);
+    event StakeSlashed(
+        address indexed staker,
+        uint256 tokens,
+        address indexed escrowAddress,
+        address slasher
+    );
 
     /**
      * @dev Emitted when `staker` allocated `tokens` amount to `escrowAddress`.
@@ -447,7 +452,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         // Keep record on Reward Pool
         IRewardPool(rewardPool).addReward(_escrowAddress, _slasher, _tokens);
 
-        emit StakeSlashed(_slasher, _tokens);
+        emit StakeSlashed(_staker, _tokens, _escrowAddress, _slasher);
     }
 
     /**
