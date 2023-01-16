@@ -40,6 +40,7 @@ export function createOrLoadLeader(id: string, address: Address): Leader {
     leader.amountAllocated = BigInt.fromI32(0);
     leader.amountLocked = BigInt.fromI32(0);
     leader.lockedUntilTimestamp = BigInt.fromI32(0);
+    leader.amountSlashed = BigInt.fromI32(0);
     leader.amountWithdrawn = BigInt.fromI32(0);
     leader.reputation = BigInt.fromI32(0);
     leader.amountJobsLaunched = BigInt.fromI32(0);
