@@ -811,7 +811,7 @@ describe('Staking', () => {
       'staker',
       data2.params.staker.toHexString()
     );
-    assert.fieldEquals('StakeAllocatedEvent', id2, 'amount', '40');
+    assert.fieldEquals('AllocationClosedEvent', id2, 'amount', '40');
     assert.fieldEquals(
       'AllocationClosedEvent',
       id2,

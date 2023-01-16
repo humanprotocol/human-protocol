@@ -73,9 +73,9 @@ export function handleStakeDeposited(event: StakeDeposited): void {
 
   // Increase leader count for new leader
   if (
-    leader.amountStaked === BigInt.fromI32(0) &&
-    leader.amountLocked === BigInt.fromI32(0) &&
-    leader.amountWithdrawn === BigInt.fromI32(0)
+    leader.amountStaked.equals(BigInt.fromI32(0)) &&
+    leader.amountLocked.equals(BigInt.fromI32(0)) &&
+    leader.amountWithdrawn.equals(BigInt.fromI32(0))
   ) {
     // Update Leader Statistics
     let statsEntity = LeaderStatistics.load(STATISTICS_ENTITY_ID);
@@ -146,7 +146,7 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountLocked = leader.amountLocked.minus(entity.amount);
-  if (leader.amountLocked === BigInt.fromI32(0)) {
+  if (leader.amountLocked.equals(BigInt.fromI32(0))) {
     leader.lockedUntilTimestamp = BigInt.fromI32(0);
   }
 
