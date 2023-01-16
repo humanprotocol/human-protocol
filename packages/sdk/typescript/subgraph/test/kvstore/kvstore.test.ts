@@ -4,7 +4,7 @@ import { handleDataSaved } from '../../src/mapping/KVStore';
 import { createDataSavedEvent } from './fixtures';
 
 describe('KVStore', () => {
-  test('Should properly index DataSaved transfers', () => {
+  test('Should properly index DataSaved events', () => {
     const data1 = createDataSavedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
       'role',
@@ -43,7 +43,7 @@ describe('KVStore', () => {
       'DataSavedEvent',
       id1,
       'leader',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data1.params.sender.toHexString()
     );
     assert.fieldEquals('DataSavedEvent', id1, 'key', 'role');
 
@@ -73,11 +73,11 @@ describe('KVStore', () => {
       'DataSavedEvent',
       id2,
       'leader',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+      data2.params.sender.toHexString()
     );
     assert.fieldEquals('DataSavedEvent', id2, 'key', 'role');
 
-    assert.fieldEquals('DataSavedEvent', id2, 'value', 'Operator');
+    assert.fieldEquals('DataSavedEvent', id2, 'value', 'Validator');
 
     assert.fieldEquals(
       'DataSavedEvent',
@@ -106,13 +106,13 @@ describe('KVStore', () => {
 
     assert.fieldEquals(
       'Leader',
-      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      data1.params.sender.toHexString(),
       'role',
       'Operator'
     );
     assert.fieldEquals(
       'Leader',
-      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      data2.params.sender.toHexString(),
       'role',
       'Validator1'
     );
