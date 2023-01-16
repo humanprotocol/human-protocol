@@ -145,6 +145,11 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
   const leaderId = event.params.staker.toHex();
   const leader = createOrLoadLeader(leaderId, event.params.staker);
 
+  leader.amountLocked = leader.amountLocked.minus(entity.amount);
+  if (leader.amountLocked.toString() === '0') {
+    leader.lockedUntilTimestamp = BigInt.fromI32(0);
+  }
+
   leader.amountStaked = leader.amountStaked.minus(entity.amount);
   leader.amountWithdrawn = leader.amountWithdrawn.plus(entity.amount);
 
