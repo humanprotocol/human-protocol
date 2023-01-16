@@ -173,6 +173,8 @@ type StakeSlashedEvent @entity {
   id: ID!
   staker: Bytes! # address
   amount: BigInt!
+  escrow: Bytes! # address
+  slasher: Bytes! # address
   block: BigInt!
   timestamp: BigInt!
   transaction: Bytes!

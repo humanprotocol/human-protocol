@@ -168,6 +168,8 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   // Entity fields can be set based on event parameters
   entity.staker = event.params.staker;
   entity.amount = event.params.tokens;
+  entity.escrow = event.params.escrowAddress;
+  entity.slasher = event.params.slasher;
 
   entity.block = event.block.number;
   entity.timestamp = event.block.timestamp;

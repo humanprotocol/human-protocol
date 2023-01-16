@@ -85,6 +85,8 @@ export function createStakeWithdrawnEvent(
 export function createStakeSlashedEvent(
   staker: string,
   tokens: i32,
+  escrowAddress: string,
+  slasher: string,
   timestamp: BigInt
 ): StakeSlashed {
   const newStakeSlashedEvent = changetype<StakeSlashed>(newMockEvent());
@@ -98,6 +100,18 @@ export function createStakeSlashedEvent(
   );
   newStakeSlashedEvent.parameters.push(
     new ethereum.EventParam('tokens', ethereum.Value.fromI32(tokens))
+  );
+  newStakeSlashedEvent.parameters.push(
+    new ethereum.EventParam(
+      'escrowAddress',
+      ethereum.Value.fromAddress(Address.fromString(escrowAddress))
+    )
+  );
+  newStakeSlashedEvent.parameters.push(
+    new ethereum.EventParam(
+      'slasher',
+      ethereum.Value.fromAddress(Address.fromString(slasher))
+    )
   );
 
   return newStakeSlashedEvent;

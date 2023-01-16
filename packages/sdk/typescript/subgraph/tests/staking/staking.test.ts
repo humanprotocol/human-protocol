@@ -5,6 +5,7 @@ import {
   handleStakeAllocated,
   handleStakeDeposited,
   handleStakeLocked,
+  handleStakeSlashed,
   handleStakeWithdrawn,
   STATISTICS_ENTITY_ID,
 } from '../../src/mapping/Staking';
@@ -12,6 +13,7 @@ import {
   createStakeAllocatedEvent,
   createStakeDepositedEvent,
   createStakeLockedEvent,
+  createStakeSlashedEvent,
   createStakeWithdrawnEvent,
 } from './fixtures';
 
@@ -340,7 +342,7 @@ describe('Staking', () => {
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.staker.toHexString(),
+      data1.params.staker.toHexString(),
       'amountWithdrawn',
       '30'
     );
@@ -492,13 +494,13 @@ describe('Staking', () => {
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.staker.toHexString(),
+      data1.params.staker.toHexString(),
       'amountWithdrawn',
       '30'
     );
     assert.fieldEquals(
       'Leader',
-      data2.params.staker.toHexString(),
+      data1.params.staker.toHexString(),
       'amountAllocated',
       '30'
     );
@@ -532,6 +534,194 @@ describe('Staking', () => {
       data2.params.staker.toHexString(),
       'amountAllocated',
       '50'
+    );
+  });
+
+  test('Should properly index StakeSlashed events', () => {
+    const data1 = createStakeSlashedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      10,
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC8',
+      BigInt.fromI32(60)
+    );
+    const data2 = createStakeSlashedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      10,
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95A',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95B',
+      BigInt.fromI32(61)
+    );
+
+    handleStakeSlashed(data1);
+    handleStakeSlashed(data2);
+
+    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
+      data1.block.timestamp
+    }`;
+    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
+      data2.block.timestamp
+    }`;
+
+    // Data 1
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'timestamp',
+      data1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'transaction',
+      data1.transaction.hash.toHexString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'staker',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+    );
+    assert.fieldEquals('StakeSlashedEvent', id1, 'amount', '10');
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'escrow',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7'
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id1,
+      'slasher',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC8'
+    );
+
+    // Data 2
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'timestamp',
+      data2.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'transaction',
+      data1.transaction.hash.toHexString()
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'staker',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+    );
+    assert.fieldEquals('StakeSlashedEvent', id2, 'amount', '10');
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'escrow',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95A'
+    );
+    assert.fieldEquals(
+      'StakeSlashedEvent',
+      id2,
+      'slasher',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95B'
+    );
+
+    // Leader statistics
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
+
+    // Leader
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountStaked',
+      '60'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountLocked',
+      '20'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'lockedUntilTimestamp',
+      '30'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountWithdrawn',
+      '30'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountAllocated',
+      '20'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountSlashed',
+      '10'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountStaked',
+      '90'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountLocked',
+      '0'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'lockedUntilTimestamp',
+      '0'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountWithdrawn',
+      '100'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountAllocated',
+      '40'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountSlashed',
+      '10'
     );
   });
 });
