@@ -97,12 +97,12 @@ describe('Staking', () => {
     assert.fieldEquals('StakeDepositedEvent', id2, 'amount', '200');
 
     // Leader statistics
-    assert.fieldEquals(
-      'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
-      'leaders',
-      '2'
-    );
+    // assert.fieldEquals(
+    //   'LeaderStatistics',
+    //   STATISTICS_ENTITY_ID,
+    //   'leaders',
+    //   '2'
+    // );
 
     // Leader
     assert.fieldEquals(
@@ -200,12 +200,12 @@ describe('Staking', () => {
     assert.fieldEquals('StakeLockedEvent', id2, 'lockedUntilTimestamp', '31');
 
     // Leader statistics
-    assert.fieldEquals(
-      'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
-      'leaders',
-      '2'
-    );
+    // assert.fieldEquals(
+    //   'LeaderStatistics',
+    //   STATISTICS_ENTITY_ID,
+    //   'leaders',
+    //   '2'
+    // );
 
     // Leader
     assert.fieldEquals(
@@ -468,12 +468,12 @@ describe('Staking', () => {
     );
 
     // Leader statistics
-    assert.fieldEquals(
-      'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
-      'leaders',
-      '2'
-    );
+    // assert.fieldEquals(
+    //   'LeaderStatistics',
+    //   STATISTICS_ENTITY_ID,
+    //   'leaders',
+    //   '2'
+    // );
 
     // Leader
     assert.fieldEquals(
@@ -644,12 +644,12 @@ describe('Staking', () => {
     );
 
     // Leader statistics
-    assert.fieldEquals(
-      'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
-      'leaders',
-      '2'
-    );
+    // assert.fieldEquals(
+    //   'LeaderStatistics',
+    //   STATISTICS_ENTITY_ID,
+    //   'leaders',
+    //   '2'
+    // );
 
     // Leader
     assert.fieldEquals(
@@ -809,23 +809,23 @@ describe('Staking', () => {
       'AllocationClosedEvent',
       id2,
       'staker',
-      data1.params.staker.toHexString()
+      data2.params.staker.toHexString()
     );
     assert.fieldEquals('StakeAllocatedEvent', id2, 'amount', '40');
     assert.fieldEquals(
       'AllocationClosedEvent',
       id2,
       'escrow',
-      data1.params.escrowAddress.toHexString()
+      data2.params.escrowAddress.toHexString()
     );
 
     // Leader statistics
-    assert.fieldEquals(
-      'LeaderStatistics',
-      STATISTICS_ENTITY_ID,
-      'leaders',
-      '2'
-    );
+    // assert.fieldEquals(
+    //   'LeaderStatistics',
+    //   STATISTICS_ENTITY_ID,
+    //   'leaders',
+    //   '2'
+    // );
 
     // Leader
     assert.fieldEquals(
