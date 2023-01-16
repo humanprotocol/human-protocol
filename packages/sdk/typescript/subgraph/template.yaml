@@ -100,7 +100,7 @@ dataSources:
           handler: handleStakeLocked
         - event: StakeWithdrawn(indexed address,uint256)
           handler: handleStakeWithdrawn
-        - event: StakeSlashed(indexed address,uint256)
+        - event: StakeSlashed(indexed address,uint256,indexed address,address)
           handler: handleStakeSlashed
         - event: StakeAllocated(indexed address,uint256,indexed address,uint256)
           handler: handleStakeAllocated

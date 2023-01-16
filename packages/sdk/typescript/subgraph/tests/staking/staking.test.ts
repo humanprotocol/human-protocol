@@ -2,6 +2,7 @@ import { BigInt } from '@graphprotocol/graph-ts';
 import { describe, test, assert, clearStore } from 'matchstick-as/assembly';
 
 import {
+  handleAllocationClosed,
   handleStakeAllocated,
   handleStakeDeposited,
   handleStakeLocked,
@@ -10,6 +11,7 @@ import {
   STATISTICS_ENTITY_ID,
 } from '../../src/mapping/Staking';
 import {
+  createAllocationClosedEvent,
   createStakeAllocatedEvent,
   createStakeDepositedEvent,
   createStakeLockedEvent,
@@ -84,7 +86,7 @@ describe('Staking', () => {
       'StakeDepositedEvent',
       id2,
       'transaction',
-      data1.transaction.hash.toHexString()
+      data2.transaction.hash.toHexString()
     );
     assert.fieldEquals(
       'StakeDepositedEvent',
@@ -186,7 +188,7 @@ describe('Staking', () => {
       'StakeLockedEvent',
       id2,
       'transaction',
-      data1.transaction.hash.toHexString()
+      data2.transaction.hash.toHexString()
     );
     assert.fieldEquals(
       'StakeLockedEvent',
@@ -311,7 +313,7 @@ describe('Staking', () => {
       'StakeWithdrawnEvent',
       id2,
       'transaction',
-      data1.transaction.hash.toHexString()
+      data2.transaction.hash.toHexString()
     );
     assert.fieldEquals(
       'StakeWithdrawnEvent',
@@ -449,7 +451,7 @@ describe('Staking', () => {
       'StakeAllocatedEvent',
       id2,
       'transaction',
-      data1.transaction.hash.toHexString()
+      data2.transaction.hash.toHexString()
     );
     assert.fieldEquals(
       'StakeAllocatedEvent',
@@ -619,7 +621,7 @@ describe('Staking', () => {
       'StakeSlashedEvent',
       id2,
       'transaction',
-      data1.transaction.hash.toHexString()
+      data2.transaction.hash.toHexString()
     );
     assert.fieldEquals(
       'StakeSlashedEvent',
@@ -723,5 +725,184 @@ describe('Staking', () => {
       'amountSlashed',
       '10'
     );
+  });
+
+  test('Should properly index AllocationClosed events', () => {
+    const data1 = createAllocationClosedEvent(
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
+      20,
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7',
+      BigInt.fromI32(70),
+      BigInt.fromI32(70)
+    );
+    const data2 = createAllocationClosedEvent(
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959',
+      40,
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95A',
+      BigInt.fromI32(71),
+      BigInt.fromI32(71)
+    );
+
+    handleAllocationClosed(data1);
+    handleAllocationClosed(data2);
+
+    const id1 = `${data1.transaction.hash.toHex()}-${data1.logIndex.toString()}-${
+      data1.block.timestamp
+    }`;
+    const id2 = `${data2.transaction.hash.toHex()}-${data2.logIndex.toString()}-${
+      data2.block.timestamp
+    }`;
+
+    // Data 1
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id1,
+      'timestamp',
+      data1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id1,
+      'block',
+      data1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id1,
+      'transaction',
+      data1.transaction.hash.toHexString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id1,
+      'staker',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC6'
+    );
+    assert.fieldEquals('AllocationClosedEvent', id1, 'amount', '20');
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id1,
+      'escrow',
+      '0xD979105297fB0eee83F7433fC09279cb5B94fFC7'
+    );
+
+    // Data 2
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id2,
+      'timestamp',
+      data2.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id2,
+      'block',
+      data2.block.number.toString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id2,
+      'transaction',
+      data2.transaction.hash.toHexString()
+    );
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id2,
+      'staker',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a959'
+    );
+    assert.fieldEquals('StakeAllocatedEvent', id2, 'amount', '40');
+    assert.fieldEquals(
+      'AllocationClosedEvent',
+      id2,
+      'escrow',
+      '0x92a2eEF7Ff696BCef98957a0189872680600a95A'
+    );
+
+    // Leader statistics
+    assert.fieldEquals(
+      'LeaderStatistics',
+      STATISTICS_ENTITY_ID,
+      'leaders',
+      '2'
+    );
+
+    // Leader
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountStaked',
+      '60'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountLocked',
+      '20'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'lockedUntilTimestamp',
+      '30'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountWithdrawn',
+      '30'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountAllocated',
+      '0'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      data1.params.staker.toHexString(),
+      'amountSlashed',
+      '10'
+    );
+
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountStaked',
+      '90'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountLocked',
+      '0'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'lockedUntilTimestamp',
+      '0'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountWithdrawn',
+      '100'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountAllocated',
+      '0'
+    );
+    assert.fieldEquals(
+      'Leader',
+      data2.params.staker.toHexString(),
+      'amountSlashed',
+      '10'
+    );
+
+    clearStore();
   });
 });
