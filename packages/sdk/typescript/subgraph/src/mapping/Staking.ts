@@ -67,8 +67,8 @@ export function handleStakeDeposited(event: StakeDeposited): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   // Increase leader count for new leader
   if (
@@ -113,8 +113,8 @@ export function handleStakeLocked(event: StakeLocked): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountLocked = entity.amount;
   leader.lockedUntilTimestamp = entity.lockedUntilTimestamp;
@@ -141,8 +141,8 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountStaked = leader.amountStaked.minus(entity.amount);
   leader.amountWithdrawn = leader.amountWithdrawn.plus(entity.amount);
@@ -169,8 +169,8 @@ export function handleStakeSlashed(event: StakeSlashed): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountSlashed = leader.amountSlashed.plus(entity.amount);
   leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
@@ -199,8 +199,8 @@ export function handleStakeAllocated(event: StakeAllocated): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountAllocated = leader.amountAllocated.plus(entity.amount);
 
@@ -227,8 +227,8 @@ export function handleAllocationClosed(event: AllocationClosed): void {
 
   entity.save();
 
-  const leaderId = entity.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, entity.staker);
+  const leaderId = event.params.staker.toHex();
+  const leader = createOrLoadLeader(leaderId, event.params.staker);
 
   leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
 
