@@ -183,7 +183,7 @@ type StakeSlashedEvent @entity {
 type StakeAllocatedEvent @entity {
   id: ID!
   staker: Bytes! # address
-  amount: BigInt
+  amount: BigInt!
   escrow: Bytes! # address
   block: BigInt!
   timestamp: BigInt!
@@ -193,7 +193,7 @@ type StakeAllocatedEvent @entity {
 type AllocationClosedEvent @entity {
   id: ID!
   staker: Bytes! # address
-  amount: BigInt
+  amount: BigInt!
   escrow: Bytes! # address
   block: BigInt!
   timestamp: BigInt!
