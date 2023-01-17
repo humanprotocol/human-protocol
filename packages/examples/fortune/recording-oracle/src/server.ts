@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import config from './plugins/config.js';
 import web3 from './plugins/web3.js';
+import escrow from './plugins/escrow.js';
 import s3 from './plugins/s3.js'
 import storage from './plugins/storage.js';
 import routes from './routes/index.js';
@@ -22,6 +23,7 @@ const server = fastify({
 await server
   .register(config)
   .register(web3)
+  .register(escrow)
   .register(s3)
   .register(storage)
   .register(cors)
