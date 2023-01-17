@@ -9,7 +9,7 @@
     "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
     "codegen": "graph codegen",
     "build": "graph build",
-    "pretest": "NETWORK=matic yarn generate",
+    "pretest": "NETWORK=goerli yarn generate",
     "test": "graph test",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ posix4e/humansubgraph",
     "quickstart:matic": "NETWORK=matic yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
