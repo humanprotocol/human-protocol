@@ -11,6 +11,7 @@ const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
 const stakingAbi = require('@human-protocol/core/abis/Staking.json');
+const reputationAbi = require('@human-protocol/core/abis/Reputation.json');
 
 const axios = require('axios');
 const Web3 = require('web3');
@@ -138,22 +139,45 @@ const sendFortune = async (address, escrowAddress, fortune) => {
   }
 };
 
-const calculateRewardAmount = async () => {
-  const manifestResponse = await axios.get(urls.localManifestUrl);
-  const { fortunes_requested: fortunesRequested } = manifestResponse.data;
+const calculateRewardAmount = async (agentAddresses) => {
+  const workerRewards = [];
+  const repOracleRewards = [];
+  const recOracleRewards = [];
+  let totalReputation = 0,
+    totalRecOracleReward = 0,
+    totalRepOracleReward = 0;
 
   const balance = web3.utils.toWei(`${escrowFundAmount}`, 'ether');
-  const workerEvenReward = balance / fortunesRequested;
 
-  const repOracleReward = (workerEvenReward / 100) * stakes.repOracle;
-  const recOracleReward = (workerEvenReward / 100) * stakes.recOracle;
+  const Reputation = new web3.eth.Contract(reputationAbi, addresses.reputation);
+  const reputationValues = await Reputation.methods
+    .getReputations(agentAddresses)
+    .call();
 
-  const totalWorkerReward =
-    workerEvenReward - repOracleReward - recOracleReward;
-  const totalRepOracleReward = repOracleReward * fortunesRequested;
-  const totalRecOracleReward = recOracleReward * fortunesRequested;
-
-  return { totalWorkerReward, totalRepOracleReward, totalRecOracleReward };
+  reputationValues.forEach((element) => {
+    totalReputation += Number(element.reputation);
+  });
+  agentAddresses.forEach((worker) => {
+    const reputation = reputationValues.find(
+      (element) => element.workerAddress === worker
+    );
+    const workerReward =
+      (balance * (reputation?.reputation || 0)) / totalReputation;
+    const recReward = (workerReward * stakes.recOracle) / 100;
+    const repReward = (workerReward * stakes.repOracle) / 100;
+    workerRewards.push(workerReward);
+    recOracleRewards.push(recReward);
+    repOracleRewards.push(repReward);
+    totalRecOracleReward += recReward;
+    totalRepOracleReward += repReward;
+  });
+  return {
+    workerRewards: workerRewards,
+    repOracleRewards: repOracleRewards,
+    recOracleRewards: recOracleRewards,
+    totalRecOracleReward: totalRecOracleReward,
+    totalRepOracleReward: totalRepOracleReward,
+  };
 };
 
 const getS3File = async (escrowAddress) => {

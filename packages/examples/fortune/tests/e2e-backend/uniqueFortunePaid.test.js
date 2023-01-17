@@ -76,7 +76,7 @@ describe('Positive flow + adding same fortune. Only one unique fortune teller sh
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Paid');
 
-    const rewards = await calculateRewardAmount();
+    const rewards = await calculateRewardAmount([agentAddresses[0]]);
 
     const agent_1_balance = await Token.methods
       .balanceOf(agentAddresses[0])

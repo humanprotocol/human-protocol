@@ -77,13 +77,15 @@ describe('Positive flow', () => {
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Paid');
 
-    const rewards = await calculateRewardAmount();
+    const rewards = await calculateRewardAmount(agentAddresses);
     for (let i = 0; i < agentAddresses.length; i++) {
       const agent_balance = await Token.methods
         .balanceOf(agentAddresses[i])
         .call();
       expect(agent_balance - agentsOldBalances[i]).toBe(
-        rewards.totalWorkerReward
+        rewards.workerRewards[i] -
+          rewards.recOracleRewards[i] -
+          rewards.repOracleRewards[i]
       );
     }
 
