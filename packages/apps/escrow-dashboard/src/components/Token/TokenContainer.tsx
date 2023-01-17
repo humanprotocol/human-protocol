@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box } from '@mui/material';
 
+import tokenSvg from 'src/assets/token.svg';
 import ViewTitle from 'src/components/ViewTitle';
 import { usePollTokenStats } from 'src/state/token/hooks';
 
@@ -15,7 +16,7 @@ export const TokenContainer: React.FC<
 
   return (
     <Box mt={{ xs: 4, md: 8 }} id="token">
-      <ViewTitle title="Token" iconUrl="/images/token.svg" />
+      <ViewTitle title="Token" iconUrl={tokenSvg} />
       <Box mt={{ xs: 4, md: 8 }}>
         <TokenView />
       </Box>
