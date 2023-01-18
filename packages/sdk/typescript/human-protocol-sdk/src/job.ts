@@ -191,7 +191,6 @@ export class Job {
 
       this._logger.info('Deploying escrow factory...');
       this.contractData.factory = await deployEscrowFactory(
-        this.contractData.hmTokenAddr,
         this.contractData.stakingAddr,
         this.providerData?.gasPayer
       );
@@ -317,6 +316,7 @@ export class Job {
 
     try {
       const txReceipt = await this.contractData?.factory?.createEscrow(
+        this.contractData.hmTokenAddr,
         this.providerData?.trustedHandlers?.map(
           (trustedHandler) => trustedHandler.address
         ) || []

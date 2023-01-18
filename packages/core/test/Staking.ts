@@ -91,7 +91,7 @@ describe('Staking', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [token.address, staking.address],
+      [staking.address],
       { kind: 'uups', initializer: 'initialize' }
     )) as EscrowFactory;
 
@@ -231,7 +231,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
@@ -327,7 +327,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
@@ -517,7 +517,7 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow([ethers.constants.AddressZero])
+            .createEscrow(token.address, [ethers.constants.AddressZero])
         ).wait();
         const event = result.events?.[0].args;
 
@@ -581,7 +581,7 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow([ethers.constants.AddressZero])
+            .createEscrow(token.address, [ethers.constants.AddressZero])
         ).wait();
         const event = result.events?.[0].args;
 
@@ -638,7 +638,7 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 

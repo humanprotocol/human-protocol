@@ -29,7 +29,7 @@ async function main() {
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
-    [HMTokenContract.address, stakingContract.address],
+    [stakingContract.address],
     { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();

@@ -16,29 +16,24 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     uint256 public counter;
     mapping(address => uint256) public escrowCounters;
     address public lastEscrow;
-    address public eip20;
     address public staking;
+
     event Launched(address eip20, address escrow);
 
-    function initialize(
-        address _eip20,
-        address _staking
-    ) external payable virtual initializer {
+    function initialize(address _staking) external payable virtual initializer {
         __Ownable_init_unchained();
-        __EscrowFactory_init_unchained(_eip20, _staking);
+        __EscrowFactory_init_unchained(_staking);
     }
 
     function __EscrowFactory_init_unchained(
-        address _eip20,
         address _staking
     ) internal onlyInitializing {
-        require(_eip20 != address(0), ERROR_ZERO_ADDRESS);
-        eip20 = _eip20;
         require(_staking != address(0), ERROR_ZERO_ADDRESS);
         staking = _staking;
     }
 
     function createEscrow(
+        address eip20,
         address[] memory trustedHandlers
     ) public returns (address) {
         bool hasAvailableStake = IStaking(staking).hasAvailableStake(
@@ -78,5 +73,5 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[43] private __gap;
+    uint256[46] private __gap;
 }

@@ -2,13 +2,18 @@
 
 pragma solidity >=0.6.2;
 
-import './interfaces/HMTokenInterface.sol';
 import './interfaces/IRewardPool.sol';
 import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
 
 contract Escrow is IEscrow {
     using SafeMath for uint256;
+
+    bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
+        bytes4(keccak256('balanceOf(address)'));
+    bytes4 private constant FUNC_SELECTOR_TRANSFER =
+        bytes4(keccak256('transfer(address,uint256)'));
+
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
@@ -57,7 +62,13 @@ contract Escrow is IEscrow {
     }
 
     function getBalance() public view returns (uint256) {
-        return HMTokenInterface(eip20).balanceOf(address(this));
+        (bool success, bytes memory returnData) = eip20.staticcall(
+            abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
+        );
+        if (success) {
+            return abi.decode(returnData, (uint256));
+        }
+        return 0;
     }
 
     function addTrustedHandlers(address[] memory _handlers) public {
@@ -125,9 +136,9 @@ contract Escrow is IEscrow {
         notPaid
         returns (bool)
     {
-        bool success = HMTokenInterface(eip20).transfer(canceler, getBalance());
+        _safeTransfer(canceler, getBalance());
         status = EscrowStatuses.Cancelled;
-        return success;
+        return true;
     }
 
     function complete() public notExpired {
@@ -187,28 +198,25 @@ contract Escrow is IEscrow {
             uint256 reputationOracleFee,
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
-        HMTokenInterface token = HMTokenInterface(eip20);
 
         for (uint256 i = 0; i < _recipients.length; ++i) {
-            token.transfer(_recipients[i], finalAmounts[i]);
+            _safeTransfer(_recipients[i], finalAmounts[i]);
         }
 
         delete finalAmounts;
-        bulkPaid =
-            token.transfer(reputationOracle, reputationOracleFee) &&
-            token.transfer(recordingOracle, recordingOracleFee);
+
+        _safeTransfer(reputationOracle, reputationOracleFee);
+        _safeTransfer(recordingOracle, recordingOracleFee);
 
         balance = getBalance();
-        if (bulkPaid) {
-            if (status == EscrowStatuses.Pending) {
-                status = EscrowStatuses.Partial;
-            }
-            if (balance == 0 && status == EscrowStatuses.Partial) {
-                status = EscrowStatuses.Paid;
-            }
+        if (status == EscrowStatuses.Pending) {
+            status = EscrowStatuses.Partial;
+        }
+        if (balance == 0 && status == EscrowStatuses.Partial) {
+            status = EscrowStatuses.Paid;
         }
         emit BulkTransfer(_txId, _recipients.length);
-        return bulkPaid;
+        return true;
     }
 
     function finalizePayouts(
@@ -235,6 +243,17 @@ contract Escrow is IEscrow {
             finalAmounts.push(amount);
         }
         return (reputationOracleFee, recordingOracleFee);
+    }
+
+    function _safeTransfer(address to, uint256 value) internal {
+        (bool success, bytes memory returnData) = eip20.call(
+            abi.encodeWithSelector(FUNC_SELECTOR_TRANSFER, to, value)
+        );
+        require(
+            success &&
+                (returnData.length == 0 || abi.decode(returnData, (bool))),
+            'Transfer failed'
+        );
     }
 
     modifier trusted() {
