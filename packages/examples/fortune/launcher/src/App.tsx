@@ -1,52 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import getWeb3 from './utils/web3';
-import Escrow from './components/escrow';
-import Staking from './components/staking';
-import './App.css';
+import '@rainbow-me/rainbowkit/styles.css';
+import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { configureChains, createClient, WagmiConfig } from 'wagmi';
+import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
+import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { publicProvider } from 'wagmi/providers/public';
 
+import { LauncherConfigProvider } from './contexts/LauncherConfigContext';
+import Escrow from './components/escrow';
+
+const { chains, provider } = configureChains(
+  [mainnet, polygon, optimism, arbitrum],
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID! }), publicProvider()]
+);
+
+const { connectors } = getDefaultWallets({
+  appName: 'Human Protocol - Fortune Launcher',
+  chains,
+});
+
+const wagmiClient = createClient({
+  autoConnect: true,
+  connectors,
+  provider,
+});
 
 function App() {
-  const web3 = getWeb3();
-  const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
-  const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-
-  useEffect(() => {
-    (async function () {
-      const { ethereum } = window;
-      if (typeof ethereum !== 'undefined' && ethereum.isMetaMask) {
-        setIsMetamaskInstalled(true);
-        const accounts = await web3.eth.getAccounts();
-        if (accounts.length > 0) {
-          setIsMetamaskConnected(true);
-        }
-      }
-    })();
-  }, [web3.eth]);
-
-  const connect = async () => {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    setIsMetamaskConnected(true);
-  }
-
   return (
-    <div className="App">
-      <header className="App-header">
-        {!isMetamaskInstalled &&
-          (<p> Metamask not installed</p>)
-        }
-        {!isMetamaskConnected &&
-          (<button onClick={connect}> Connect </button>)
-        }
-        {
-          isMetamaskConnected &&
-          (<Staking />)
-        }
-        {
-          isMetamaskConnected &&
-          (<Escrow />)
-        }
-      </header>
-    </div>
+    <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider chains={chains}>
+        <LauncherConfigProvider>
+          <Escrow />
+        </LauncherConfigProvider>
+      </RainbowKitProvider>
+    </WagmiConfig>
   );
 }
 
