@@ -5,10 +5,10 @@ pragma solidity >=0.6.2;
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-import './interfaces/IStaking.sol';
-import './Escrow.sol';
+import '../interfaces/IStaking.sol';
+import '../Escrow.sol';
 
-contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
+contract EscrowFactoryV0 is OwnableUpgradeable, UUPSUpgradeable {
     // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
@@ -60,14 +60,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         lastEscrow = address(escrow);
         emit Launched(eip20, lastEscrow);
         return lastEscrow;
-    }
-
-    function isChild(address _child) public view returns (bool) {
-        return escrowCounters[_child] == counter;
-    }
-
-    function hasEscrow(address _address) public view returns (bool) {
-        return escrowCounters[_address] != 0;
     }
 
     // solhint-disable-next-line no-empty-blocks
