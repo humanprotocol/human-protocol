@@ -1855,7 +1855,7 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
-        func_args = [self.hmtoken_addr, [trusted_handlers]]
+        func_args = [self.hmtoken_addr, trusted_handlers]
 
         try:
             tx_receipt = handle_transaction_with_retry(
