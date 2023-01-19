@@ -1,6 +1,6 @@
 type LaunchedEscrow @entity {
   id: ID!
-  eip20: Bytes! # address
+  token: Bytes! # address
   from: Bytes! # address
   timestamp: BigInt!
   count: BigInt

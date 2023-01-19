@@ -20,7 +20,9 @@ describe('EscrowFactory', function () {
 
   async function createEscrow() {
     const result = await (
-      await escrowFactory.connect(operator).createEscrow(trustedHandlers)
+      await escrowFactory
+        .connect(operator)
+        .createEscrow(token.address, trustedHandlers)
     ).wait();
     const event = result.events?.[0].args;
 
@@ -67,17 +69,12 @@ describe('EscrowFactory', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [token.address, staking.address],
+      [staking.address],
       { kind: 'uups', initializer: 'initialize' }
     )) as EscrowFactory;
   });
 
   describe('deployment', () => {
-    it('Should set the right token address', async () => {
-      const result = await escrowFactory.eip20();
-      expect(result).to.equal(token.address);
-    });
-
     it('Should set the right counter', async () => {
       const initialCounter = await escrowFactory.counter();
       expect(initialCounter.toString()).to.equal('0');
@@ -88,21 +85,25 @@ describe('EscrowFactory', function () {
     await expect(
       escrowFactory
         .connect(operator)
-        .createEscrow([ethers.constants.AddressZero])
+        .createEscrow(token.address, [ethers.constants.AddressZero])
     ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
   });
 
   it('Operator should be able to create an escrow after staking', async () => {
     const event = await stakeAndCreateEscrow(staking);
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
   it('Should emit an event on launched', async function () {
     await staking.connect(operator).stake(stakeAmount);
 
-    await expect(escrowFactory.connect(operator).createEscrow(trustedHandlers))
+    await expect(
+      escrowFactory
+        .connect(operator)
+        .createEscrow(token.address, trustedHandlers)
+    )
       .to.emit(escrowFactory, 'Launched')
       .withArgs(token.address, anyValue);
   });
@@ -127,7 +128,7 @@ describe('EscrowFactory', function () {
 
     const event = await createEscrow();
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
@@ -140,7 +141,7 @@ describe('EscrowFactory', function () {
     await expect(
       escrowFactory
         .connect(operator)
-        .createEscrow([ethers.constants.AddressZero])
+        .createEscrow(token.address, [ethers.constants.AddressZero])
     ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
   });
 
@@ -152,7 +153,7 @@ describe('EscrowFactory', function () {
 
     const event = await stakeAndCreateEscrow(staking);
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
@@ -183,11 +184,12 @@ describe('EscrowFactory', function () {
 
       const event = await stakeAndCreateEscrow(staking);
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       try {
         escrowFactory.hasEscrow(owner.getAddress());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         assert(
           error.message === 'newEscrowFactory.hasEscrow is not a function'

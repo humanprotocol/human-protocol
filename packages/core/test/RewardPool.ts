@@ -55,7 +55,7 @@ describe('RewardPool', function () {
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
-      [token.address, staking.address],
+      [staking.address],
       { kind: 'uups', initializer: 'initialize' }
     )) as EscrowFactory;
   });
@@ -106,8 +106,8 @@ describe('RewardPool', function () {
     });
   });
 
-  it('Should set eip20 address given to constructor', async () => {
-    expect(await rewardPool.eip20()).to.equal(token.address);
+  it('Should set token address given to constructor', async () => {
+    expect(await rewardPool.token()).to.equal(token.address);
   });
 
   it('Should set fee given to constructor', async () => {
@@ -127,11 +127,11 @@ describe('RewardPool', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -213,11 +213,11 @@ describe('RewardPool', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;

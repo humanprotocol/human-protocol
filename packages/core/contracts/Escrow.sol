@@ -2,13 +2,21 @@
 
 pragma solidity >=0.6.2;
 
-import './interfaces/HMTokenInterface.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+
 import './interfaces/IRewardPool.sol';
 import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
 
 contract Escrow is IEscrow {
     using SafeMath for uint256;
+
+    bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
+        bytes4(keccak256('balanceOf(address)'));
+    bytes4 private constant FUNC_SELECTOR_TRANSFER =
+        bytes4(keccak256('transfer(address,uint256)'));
+
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
@@ -25,7 +33,7 @@ contract Escrow is IEscrow {
     uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
-    address public eip20;
+    address public token;
 
     string public manifestUrl;
     string public manifestHash;
@@ -41,12 +49,12 @@ contract Escrow is IEscrow {
     mapping(address => bool) public areTrustedHandlers;
 
     constructor(
-        address _eip20,
+        address _token,
         address payable _canceler,
         uint256 _duration,
         address[] memory _handlers
     ) {
-        eip20 = _eip20;
+        token = _token;
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
         launcher = msg.sender;
@@ -57,7 +65,13 @@ contract Escrow is IEscrow {
     }
 
     function getBalance() public view returns (uint256) {
-        return HMTokenInterface(eip20).balanceOf(address(this));
+        (bool success, bytes memory returnData) = token.staticcall(
+            abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
+        );
+        if (success) {
+            return abi.decode(returnData, (uint256));
+        }
+        return 0;
     }
 
     function addTrustedHandlers(address[] memory _handlers) public {
@@ -125,9 +139,9 @@ contract Escrow is IEscrow {
         notPaid
         returns (bool)
     {
-        bool success = HMTokenInterface(eip20).transfer(canceler, getBalance());
+        _safeTransfer(canceler, getBalance());
         status = EscrowStatuses.Cancelled;
-        return success;
+        return true;
     }
 
     function complete() public notExpired {
@@ -187,28 +201,26 @@ contract Escrow is IEscrow {
             uint256 reputationOracleFee,
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
-        HMTokenInterface token = HMTokenInterface(eip20);
 
         for (uint256 i = 0; i < _recipients.length; ++i) {
-            token.transfer(_recipients[i], finalAmounts[i]);
+            _safeTransfer(_recipients[i], finalAmounts[i]);
         }
 
         delete finalAmounts;
-        bulkPaid =
-            token.transfer(reputationOracle, reputationOracleFee) &&
-            token.transfer(recordingOracle, recordingOracleFee);
 
+        _safeTransfer(reputationOracle, reputationOracleFee);
+        _safeTransfer(recordingOracle, recordingOracleFee);
+
+        bulkPaid = true;
         balance = getBalance();
-        if (bulkPaid) {
-            if (status == EscrowStatuses.Pending) {
-                status = EscrowStatuses.Partial;
-            }
-            if (balance == 0 && status == EscrowStatuses.Partial) {
-                status = EscrowStatuses.Paid;
-            }
+        if (status == EscrowStatuses.Pending) {
+            status = EscrowStatuses.Partial;
+        }
+        if (balance == 0 && status == EscrowStatuses.Partial) {
+            status = EscrowStatuses.Paid;
         }
         emit BulkTransfer(_txId, _recipients.length);
-        return bulkPaid;
+        return true;
     }
 
     function finalizePayouts(
@@ -237,13 +249,17 @@ contract Escrow is IEscrow {
         return (reputationOracleFee, recordingOracleFee);
     }
 
+    function _safeTransfer(address to, uint256 value) internal {
+        SafeERC20.safeTransfer(IERC20(token), to, value);
+    }
+
     modifier trusted() {
         require(areTrustedHandlers[msg.sender], 'Address calling not trusted');
         _;
     }
 
     modifier notBroke() {
-        require(getBalance() != 0, 'EIP20 contract out of funds');
+        require(getBalance() != 0, 'Token contract out of funds');
         _;
     }
 

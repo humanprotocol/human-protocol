@@ -55,7 +55,7 @@ const stake = async (escrowFactory) => {
 
 const createEscrow = async (escrowFactory) => {
   await escrowFactory.methods
-    .createEscrow([launcher])
+    .createEscrow(addresses.hmt, [launcher])
     .send({ from: launcher, gasLimit });
   return await escrowFactory.methods.lastEscrow().call();
 };

@@ -347,7 +347,7 @@ def deploy_factory(
 
     factory_contract = get_factory(contract_addr)
     txn_func = factory_contract.functions.initialize
-    func_args = [hmtoken_address, staking_address]
+    func_args = [staking_address]
     txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
 
     return str(contract_addr)
