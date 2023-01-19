@@ -52,6 +52,61 @@ dataSources:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
       file: ./src/mapping/HMToken.ts
+  - kind: ethereum
+    name: KVStore
+    network: '{{ network }}'
+    source:
+      abi: KVStore
+      address: '{{ KVStore.address }}'
+      startBlock: {{ KVStore.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - DataSaved
+      abis:
+        - name: KVStore
+          file: '{{{ KVStore.abi }}}'
+      eventHandlers:
+        - event: DataSaved(indexed address,string,string)
+          handler: handleDataSaved
+      file: ./src/mapping/KVStore.ts
+  - kind: ethereum
+    name: Staking
+    network: '{{ network }}'
+    source:
+      abi: Staking
+      address: '{{ Staking.address }}'
+      startBlock: {{ Staking.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - StakeDeposited
+        - StakeLocked
+        - StakeWithdrawn
+        - StakeSlashed
+        - StakeAllocated
+        - AllocationClosed
+      abis:
+        - name: Staking
+          file: '{{{ Staking.abi }}}'
+      eventHandlers:
+        - event: StakeDeposited(indexed address,uint256)
+          handler: handleStakeDeposited
+        - event: StakeLocked(indexed address,uint256,uint256)
+          handler: handleStakeLocked
+        - event: StakeWithdrawn(indexed address,uint256)
+          handler: handleStakeWithdrawn
+        - event: StakeSlashed(indexed address,uint256,indexed address,address)
+          handler: handleStakeSlashed
+        - event: StakeAllocated(indexed address,uint256,indexed address,uint256)
+          handler: handleStakeAllocated
+        - event: AllocationClosed(indexed address,uint256,indexed address,uint256)
+          handler: handleAllocationClosed
+      file: ./src/mapping/Staking.ts
 templates:
   - name: Escrow
     kind: ethereum/contract
