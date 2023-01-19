@@ -3,7 +3,7 @@ import numeral from 'numeral';
 import * as React from 'react';
 
 import tasksSvg from 'src/assets/tasks.svg';
-import ViewTitle from 'src/components/ViewTitle';
+import { ViewTitle } from 'src/components/ViewTitle';
 
 const SOLVED_TASKS = [
   { date: '2022-07', value: 2181348 },
