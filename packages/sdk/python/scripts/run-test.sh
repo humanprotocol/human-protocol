@@ -5,7 +5,7 @@ set -eux
 yarn workspace @human-protocol/core local &
 
 # Wait for the contracts to be deployed properly
-sleep 5
+sleep 10
 
 # Run test
 pipenv run pytest
