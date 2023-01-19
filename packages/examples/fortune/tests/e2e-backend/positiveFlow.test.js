@@ -20,10 +20,10 @@ const {
   escrowFundAmount,
 } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
-
+let owner, launcher;
 describe('Positive flow', () => {
   beforeAll(async () => {
-    await setupAccounts();
+    [owner, launcher] = await setupAccounts();
   });
 
   test('Flow', async () => {
@@ -82,24 +82,37 @@ describe('Positive flow', () => {
       const agent_balance = await Token.methods
         .balanceOf(agentAddresses[i])
         .call();
-      expect(agent_balance - agentsOldBalances[i]).toBe(
-        rewards.workerRewards[i] -
-          rewards.recOracleRewards[i] -
-          rewards.repOracleRewards[i]
+      expect(
+        web3.utils
+          .toBN(agent_balance)
+          .sub(web3.utils.toBN(agentsOldBalances[i]))
+          .toString()
+      ).toBe(
+        web3.utils
+          .toBN(rewards.workerRewards[i])
+          .sub(rewards.recOracleRewards[i])
+          .sub(rewards.repOracleRewards[i])
+          .toString()
       );
     }
 
     const reputationOracleBalance = await Token.methods
       .balanceOf(addresses.repOracle)
       .call();
-    expect(reputationOracleBalance - reputationOracleOldBalance).toBe(
-      rewards.totalRepOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(reputationOracleBalance)
+        .sub(web3.utils.toBN(reputationOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRepOracleReward.toString());
     const recordingOracleBalance = await Token.methods
       .balanceOf(addresses.recOracle)
       .call();
-    expect(recordingOracleBalance - recordingOracleOldBalance).toBe(
-      rewards.totalRecOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(recordingOracleBalance)
+        .sub(web3.utils.toBN(recordingOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRecOracleReward.toString());
   });
 });

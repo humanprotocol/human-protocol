@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
-import './utils/SafeMath.sol';
+import './utils/SignedSafeMath.sol';
 import './interfaces/IStaking.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 contract Reputation is Ownable {
-    using SafeMath for int256;
+    using SignedSafeMath for int256;
     using Stakes for Stakes.Staker;
 
     struct Worker {
@@ -37,31 +37,33 @@ contract Reputation is Ownable {
 
         for (uint256 i = 0; i < _workers.length; i++) {
             if (
-                reputations[_workers[i].workerAddress] +
-                    _workers[i].reputation >
+                reputations[_workers[i].workerAddress].add(
+                    _workers[i].reputation
+                ) >
                 MAX_REPUTATION ||
                 (reputations[_workers[i].workerAddress] == 0 &&
-                    50 + _workers[i].reputation > MAX_REPUTATION)
+                    _workers[i].reputation.add(50) > MAX_REPUTATION)
             ) {
                 reputations[_workers[i].workerAddress] = MAX_REPUTATION;
             } else if (
                 (reputations[_workers[i].workerAddress] == 0 &&
-                    50 + _workers[i].reputation < MIN_REPUTATION) ||
-                (reputations[_workers[i].workerAddress] +
-                    _workers[i].reputation <
+                    _workers[i].reputation.add(50) < MIN_REPUTATION) ||
+                (reputations[_workers[i].workerAddress].add(
+                    _workers[i].reputation
+                ) <
                     MIN_REPUTATION &&
                     reputations[_workers[i].workerAddress] != 0)
             ) {
                 reputations[_workers[i].workerAddress] = MIN_REPUTATION;
             } else {
                 if (reputations[_workers[i].workerAddress] == 0) {
-                    reputations[_workers[i].workerAddress] =
-                        50 +
-                        _workers[i].reputation;
+                    reputations[_workers[i].workerAddress] = _workers[i]
+                        .reputation
+                        .add(50);
                 } else {
-                    reputations[_workers[i].workerAddress] =
-                        reputations[_workers[i].workerAddress] +
-                        _workers[i].reputation;
+                    reputations[_workers[i].workerAddress] = reputations[
+                        _workers[i].workerAddress
+                    ].add(_workers[i].reputation);
                 }
             }
         }
@@ -87,13 +89,13 @@ contract Reputation is Ownable {
         int256 totalReputation = 0;
 
         for (uint256 i = 0; i < _workers.length; i++) {
-            totalReputation += reputations[_workers[i]];
+            totalReputation = totalReputation.add(reputations[_workers[i]]);
         }
 
         for (uint256 i = 0; i < _workers.length; i++) {
-            returnedValues[i] =
-                (balance * reputations[_workers[i]]) /
-                totalReputation;
+            returnedValues[i] = balance.mul(reputations[_workers[i]]).div(
+                totalReputation
+            );
         }
 
         return returnedValues;

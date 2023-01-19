@@ -2,12 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import Web3 from 'web3';
 import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
-import {
-  filterAddressesToReward,
-  calculateRewardForWorker,
-} from './services/rewards';
+import { filterAddressesToReward } from './services/rewards';
 import { uploadResults } from './services/s3';
-import { updateReputations } from './services/reputation';
+import {
+  updateReputations,
+  calculateRewardForWorker,
+} from './services/reputation';
 
 const app = express();
 const privKey =
@@ -50,17 +50,12 @@ app.post('/job/results', async (req, res) => {
       fortunes
     );
 
-    const reputationScores = await updateReputations(
+    await updateReputations(web3, reputationAddress, reputationValues);
+    const rewards = await calculateRewardForWorker(
       web3,
       reputationAddress,
-      reputationValues,
+      balance.toString(),
       workerAddresses
-    );
-
-    const rewards = calculateRewardForWorker(
-      balance,
-      workerAddresses,
-      reputationScores
     );
 
     // TODO calculate the URL hash(?)

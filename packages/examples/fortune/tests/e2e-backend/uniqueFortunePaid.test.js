@@ -81,8 +81,17 @@ describe('Positive flow + adding same fortune. Only one unique fortune teller sh
     const agent_1_balance = await Token.methods
       .balanceOf(agentAddresses[0])
       .call();
-    expect(agent_1_balance - agentsOldBalances[0]).toBe(
-      value - rewards.totalRecOracleReward - rewards.totalRepOracleReward
+    expect(
+      web3.utils
+        .toBN(agent_1_balance)
+        .sub(web3.utils.toBN(agentsOldBalances[0]))
+        .toString()
+    ).toBe(
+      web3.utils
+        .toBN(value)
+        .sub(rewards.totalRecOracleReward)
+        .sub(rewards.totalRepOracleReward)
+        .toString()
     );
     for (let i = 1; i < agentAddresses.length; i++) {
       const agent_balance = await Token.methods
@@ -94,14 +103,20 @@ describe('Positive flow + adding same fortune. Only one unique fortune teller sh
     const reputationOracleBalance = await Token.methods
       .balanceOf(addresses.repOracle)
       .call();
-    expect(reputationOracleBalance - reputationOracleOldBalance).toBe(
-      rewards.totalRepOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(reputationOracleBalance)
+        .sub(web3.utils.toBN(reputationOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRepOracleReward.toString());
     const recordingOracleBalance = await Token.methods
       .balanceOf(addresses.recOracle)
       .call();
-    expect(recordingOracleBalance - recordingOracleOldBalance).toBe(
-      rewards.totalRecOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(recordingOracleBalance)
+        .sub(web3.utils.toBN(recordingOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRecOracleReward.toString());
   });
 });

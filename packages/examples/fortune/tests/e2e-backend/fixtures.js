@@ -6,8 +6,9 @@ const {
   escrowFundAmount,
   minioSettings,
   repOraclePrivateKey,
+  fortunesRequested,
 } = require('./constants');
-const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
+const escrowAbi = require('../../../../core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
 const stakingAbi = require('@human-protocol/core/abis/Staking.json');
@@ -98,7 +99,8 @@ const setupEscrow = async (
         reoOracleStake || stakes.repOracle,
         recOracleStake || stakes.recOracle,
         urls.manifestUrl,
-        urls.manifestUrl
+        urls.manifestUrl,
+        fortunesRequested
       )
       .send({ from: launcher, gasLimit });
   } catch (err) {
@@ -157,19 +159,28 @@ const calculateRewardAmount = async (agentAddresses) => {
   reputationValues.forEach((element) => {
     totalReputation += Number(element.reputation);
   });
+
   agentAddresses.forEach((worker) => {
     const reputation = reputationValues.find(
       (element) => element.workerAddress === worker
     );
-    const workerReward =
-      (balance * (reputation?.reputation || 0)) / totalReputation;
-    const recReward = (workerReward * stakes.recOracle) / 100;
-    const repReward = (workerReward * stakes.repOracle) / 100;
+    const workerReward = web3.utils
+      .toBN(balance)
+      .mul(web3.utils.toBN(reputation?.reputation || 0))
+      .div(web3.utils.toBN(totalReputation));
+    const recReward = web3.utils
+      .toBN(workerReward)
+      .mul(web3.utils.toBN(stakes.recOracle))
+      .div(web3.utils.toBN(100));
+    const repReward = web3.utils
+      .toBN(workerReward)
+      .mul(web3.utils.toBN(stakes.repOracle))
+      .div(web3.utils.toBN(100));
     workerRewards.push(workerReward);
     recOracleRewards.push(recReward);
     repOracleRewards.push(repReward);
-    totalRecOracleReward += recReward;
-    totalRepOracleReward += repReward;
+    totalRecOracleReward = web3.utils.toBN(totalRecOracleReward).add(recReward);
+    totalRepOracleReward = web3.utils.toBN(totalRepOracleReward).add(repReward);
   });
   return {
     workerRewards: workerRewards,

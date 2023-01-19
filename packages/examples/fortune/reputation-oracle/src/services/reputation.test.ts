@@ -4,7 +4,11 @@ import Staking from '@human-protocol/core/artifacts/contracts/Staking.sol/Stakin
 import { beforeAll, describe, expect, it } from '@jest/globals';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
-import { updateReputations } from './reputation';
+import {
+  updateReputations,
+  calculateRewardForWorker,
+  getReputations,
+} from './reputation';
 
 let token: Contract;
 let staking: Contract;
@@ -21,6 +25,12 @@ const owner = web3.eth.accounts.privateKeyToAccount(
 const reputationAccount = web3.eth.accounts.privateKeyToAccount(
   '0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a'
 );
+
+const reputations = [
+  { workerAddress: worker1, reputation: 10 },
+  { workerAddress: worker2, reputation: -10 },
+  { workerAddress: worker3, reputation: 20 },
+];
 
 describe('Reputation', () => {
   beforeAll(async () => {
@@ -52,7 +62,9 @@ describe('Reputation', () => {
     await staking.methods
       .initialize(token.options.address, web3.utils.toWei('1', 'ether'), 1)
       .send({ from: owner.address });
+  });
 
+  beforeEach(async () => {
     const reputationContract = new web3.eth.Contract(Reputation.abi as []);
     reputation = await reputationContract
       .deploy({
@@ -78,20 +90,44 @@ describe('Reputation', () => {
     web3.eth.defaultAccount = reputationAccount.address;
   });
 
+  it('Get reputations', async () => {
+    const result = await getReputations(web3, reputation.options.address, [
+      worker1,
+      worker2,
+      worker3,
+    ]);
+
+    expect(result).not.toBeUndefined();
+    expect(result[0].reputation).toBe('0');
+    expect(result[1].reputation).toBe('0');
+    expect(result[2].reputation).toBe('0');
+  });
+
   it('Add reputations', async () => {
-    const result = await updateReputations(
+    await updateReputations(web3, reputation.options.address, reputations);
+
+    const result = await getReputations(web3, reputation.options.address, [
+      worker1,
+      worker2,
+      worker3,
+    ]);
+
+    expect(result).not.toBeUndefined();
+    expect(result[0].reputation).toBe('60');
+    expect(result[1].reputation).toBe('40');
+    expect(result[2].reputation).toBe('70');
+  });
+
+  it('Calculate rewards', async () => {
+    await updateReputations(web3, reputation.options.address, reputations);
+
+    const result = await calculateRewardForWorker(
       web3,
       reputation.options.address,
-      [
-        { workerAddress: worker1, reputation: 1 },
-        { workerAddress: worker2, reputation: -1 },
-        { workerAddress: worker3, reputation: 2 },
-      ],
+      3000000,
       [worker1, worker2, worker3]
     );
-    expect(result).not.toBeUndefined();
-    expect(result[0].reputation).toBe('51');
-    expect(result[1].reputation).toBe('49');
-    expect(result[2].reputation).toBe('52');
+
+    expect(result).toStrictEqual(['1058823', '705882', '1235294']);
   });
 });

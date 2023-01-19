@@ -34,29 +34,3 @@ export function filterAddressesToReward(
     .map(web3.utils.toChecksumAddress);
   return { workerAddresses, reputationValues };
 }
-
-export function calculateRewardForWorker(
-  totalReward: number,
-  workerAddresses: string[],
-  reputationValues: ReputationEntry[] = []
-) {
-  const result: string[] = [];
-  let totalReputation = 0;
-  reputationValues.forEach((element) => {
-    totalReputation += Number(element.reputation);
-  });
-  workerAddresses.forEach((worker) => {
-    const reputation = reputationValues.find(
-      (element) => element.workerAddress === worker
-    );
-    result
-      .push(
-        (
-          (totalReward * (reputation?.reputation || 0)) /
-          totalReputation
-        ).toString()
-      )
-      .toString();
-  });
-  return result;
-}

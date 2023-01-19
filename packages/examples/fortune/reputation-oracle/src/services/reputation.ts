@@ -5,8 +5,7 @@ import { ReputationEntry } from './rewards';
 export async function updateReputations(
   web3: Web3,
   reputationAddress: string,
-  reputationValues: ReputationEntry[],
-  workers: string[]
+  reputationValues: ReputationEntry[]
 ) {
   const Reputation = new web3.eth.Contract(
     ReputationABI as [],
@@ -21,10 +20,35 @@ export async function updateReputations(
   await Reputation.methods
     .addReputations(reputationValues)
     .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
+}
 
+export async function getReputations(
+  web3: Web3,
+  reputationAddress: string,
+  workerAddresses: string[]
+) {
+  const Reputation = new web3.eth.Contract(
+    ReputationABI as [],
+    reputationAddress
+  );
   const reputationScores = await Reputation.methods
-    .getReputations(workers)
+    .getReputations(workerAddresses)
     .call();
-
   return reputationScores;
+}
+
+export async function calculateRewardForWorker(
+  web3: Web3,
+  reputationAddress: string,
+  totalReward: string,
+  workerAddresses: string[]
+) {
+  const Reputation = new web3.eth.Contract(
+    ReputationABI as [],
+    reputationAddress
+  );
+  const result = await Reputation.methods
+    .getRewards(totalReward, workerAddresses)
+    .call();
+  return result;
 }

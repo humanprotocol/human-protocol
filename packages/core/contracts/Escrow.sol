@@ -29,6 +29,7 @@ contract Escrow is IEscrow {
 
     string public manifestUrl;
     string public manifestHash;
+    uint256 public remainingFortunes;
 
     string public finalResultsUrl;
     string public finalResultsHash;
@@ -79,7 +80,8 @@ contract Escrow is IEscrow {
         uint256 _reputationOracleStake,
         uint256 _recordingOracleStake,
         string memory _url,
-        string memory _hash
+        string memory _hash,
+        uint256 _fortunesRequested
     ) public trusted notExpired {
         require(
             _reputationOracle != address(0),
@@ -89,6 +91,7 @@ contract Escrow is IEscrow {
             _recordingOracle != address(0),
             'Invalid or missing token spender'
         );
+        require(_fortunesRequested > 0, 'Invalid or missing fortunes');
         uint256 totalStake = _reputationOracleStake.add(_recordingOracleStake);
         require(totalStake >= 0 && totalStake <= 100, 'Stake out of bounds');
         require(
@@ -106,6 +109,7 @@ contract Escrow is IEscrow {
 
         manifestUrl = _url;
         manifestHash = _hash;
+        remainingFortunes = _fortunesRequested;
         status = EscrowStatuses.Pending;
         emit Pending(manifestUrl, manifestHash);
     }
@@ -202,6 +206,15 @@ contract Escrow is IEscrow {
         if (bulkPaid) {
             if (status == EscrowStatuses.Pending) {
                 status = EscrowStatuses.Partial;
+                remainingFortunes = remainingFortunes.sub(_recipients.length);
+            }
+            if (
+                balance > 0 &&
+                status == EscrowStatuses.Partial &&
+                remainingFortunes == 0
+            ) {
+                token.transfer(canceler, balance);
+                status = EscrowStatuses.Paid;
             }
             if (balance == 0 && status == EscrowStatuses.Partial) {
                 status = EscrowStatuses.Paid;
