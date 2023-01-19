@@ -2049,9 +2049,9 @@
   integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
 
 "@human-protocol/core@workspace:*":
-  version "1.0.32"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.32.tgz#cfbdfb9e752e9dcc569f6670ce00715f1b364163"
-  integrity sha512-Ct6tNvkAF26bLkgUsiFhNWi/vg+5Ll5kXdvI7qib6UGUHUub12PZ2ThOd0ZC57xtAHiRsiYTAr9DxiYfIbbsqA==
+  version "1.0.33"
+  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.33.tgz#3302b89176f6cc10df6385a16df6c5a61d75b3bd"
+  integrity sha512-2Hva2QXVJ2fd7TYRmVu5zKmFBN9JAuXvNYA+R+t4Tnt7iIoPZ8CkQOs5catQpm2E6/ptzYiySm+z2fS3JIqS2A==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"

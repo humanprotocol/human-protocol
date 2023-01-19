@@ -208,6 +208,7 @@ contract Escrow is IEscrow {
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
+        bulkPaid = true;
         balance = getBalance();
         if (status == EscrowStatuses.Pending) {
             status = EscrowStatuses.Partial;
