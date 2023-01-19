@@ -4,5 +4,5 @@
     "baseUrl": ".",
     "types": ["@graphprotocol/graph-ts", "node"]
   },
-  "include": ["./src", "./tests"]
+  "include": ["src", "tests"]
 }
