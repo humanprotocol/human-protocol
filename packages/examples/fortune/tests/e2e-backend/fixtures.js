@@ -4,6 +4,7 @@ const {
   stakes,
   gasLimit,
   escrowFundAmount,
+  minioSettings,
 } = require('./constants');
 const escrowAbi = require('@human-protocol/core/abis/Escrow.json');
 const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
@@ -11,8 +12,17 @@ const factoryAbi = require('@human-protocol/core/abis/EscrowFactory.json');
 
 const axios = require('axios');
 const Web3 = require('web3');
+const Minio = require('minio');
 const web3 = new Web3(urls.ethHTTPServer);
 const Token = new web3.eth.Contract(hmtokenAbi, addresses.hmt);
+
+const minioClient = new Minio.Client({
+  endPoint: minioSettings.minioHost,
+  port: minioSettings.minioPort,
+  accessKey: minioSettings.minioAccessKey,
+  secretKey: minioSettings.minioSecretKey,
+  useSSL: false,
+});
 
 const createEscrowFactory = () => {
   const escrowFactory = new web3.eth.Contract(
@@ -116,6 +126,17 @@ const calculateRewardAmount = async () => {
   return { totalWorkerReward, totalRepOracleReward, totalRecOracleReward };
 };
 
+const getS3File = async (escrowAddress) => {
+  const fileName = `${escrowAddress}.json`;
+
+  const file = await minioClient.getObject(
+    minioSettings.minioBucketName,
+    fileName
+  );
+
+  return file;
+};
+
 module.exports = {
   createEscrowFactory,
   createEscrow,
@@ -124,4 +145,5 @@ module.exports = {
   setupAgents,
   sendFortune,
   calculateRewardAmount,
+  getS3File,
 };

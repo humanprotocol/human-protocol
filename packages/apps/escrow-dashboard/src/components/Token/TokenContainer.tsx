@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Box } from '@mui/material';
+
 import tokenSvg from 'src/assets/token.svg';
-import { ViewTitle } from 'src/components';
+import { ViewTitle } from 'src/components/ViewTitle';
 import { usePollTokenStats } from 'src/state/token/hooks';
 
 import { TokenView } from './TokenView';

@@ -3,10 +3,15 @@
   "description": "Human subgraph on Moonbeam network",
   "EscrowFactory": {
     "address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
-    "startBlock": 1145429
+    "startBlock": 1145429,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
     "address": "0x3b25BC1dC591D24d60560d0135D6750A561D4764",
-    "startBlock": 1105853
+    "startBlock": 1105853,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   }
 }

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext", "es2015.promise"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -18,5 +18,5 @@
     "downlevelIteration": true,
     "baseUrl": "."
   },
-  "include": ["src/components", "custom.d.ts"]
+  "include": ["src"]
 }

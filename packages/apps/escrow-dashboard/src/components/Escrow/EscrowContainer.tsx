@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement } from 'react';
 import {
   Box,
   CircularProgress,
@@ -8,13 +8,15 @@ import {
   useTheme,
 } from '@mui/material';
 import networkSvg from 'src/assets/network.svg';
-import { ViewTitle } from 'src/components';
+import { ViewTitle } from 'src/components/ViewTitle';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { useAppDispatch } from 'src/state';
 import {
   useChainId,
   useEscrowDataLoaded,
   usePollEventsData,
 } from 'src/state/escrow/hooks';
+import { setChainId } from 'src/state/escrow/reducer';
 
 import { EscrowView } from './EscrowView';
 
@@ -23,8 +25,6 @@ import EthereumIcon from '../Icons/EthreumIcon';
 import HumanIcon from '../Icons/HumanIcon';
 import MoonbeamIcon from '../Icons/MoonbeamIcon';
 import PolygonIcon from '../Icons/PolygonIcon';
-import { useAppDispatch } from 'src/state';
-import { setChainId } from 'src/state/escrow/reducer';
 
 interface IEscrowContainer {}
 
@@ -37,7 +37,9 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
-export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElement => {
+export const EscrowContainer: React.FC<
+  IEscrowContainer
+> = (): React.ReactElement => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
 
@@ -49,7 +51,7 @@ export const EscrowContainer: React.FC<IEscrowContainer> = (): React.ReactElemen
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <Box id="network">
+    <Box id="network" mt={{ xs: 4, md: 8 }}>
       <ViewTitle title="Network" iconUrl={networkSvg} />
       <Tabs
         sx={{

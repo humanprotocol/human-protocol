@@ -3,10 +3,15 @@
   "description": "Human subgraph on Polygon network",
   "EscrowFactory": {
     "address": "0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794",
-    "startBlock": 25426565
+    "startBlock": 25426565,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
     "address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571Bf",
-    "startBlock": 20181700
+    "startBlock": 20181700,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   }
 }

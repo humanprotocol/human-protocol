@@ -6,8 +6,9 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+
 import userSvg from 'src/assets/user.svg';
-import { ViewTitle } from 'src/components';
+import { ViewTitle } from 'src/components/ViewTitle';
 
 import { LeaderboardView } from './LeaderboardView';
 import FilterListFilledIcon from '../Icons/FilterListFilled';

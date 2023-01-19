@@ -3,10 +3,15 @@
   "description": "Human subgraph on Binance Smart Chain testnet",
   "EscrowFactory": {
     "address": "0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f",
-    "startBlock": 23632686
+    "startBlock": 23632686,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
     "address": "0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317",
-    "startBlock": 23632621
+    "startBlock": 23632621,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   }
 }
