@@ -2042,9 +2042,9 @@
   integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
 
 "@human-protocol/core@workspace:*":
-  version "1.0.33"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.33.tgz#3302b89176f6cc10df6385a16df6c5a61d75b3bd"
-  integrity sha512-2Hva2QXVJ2fd7TYRmVu5zKmFBN9JAuXvNYA+R+t4Tnt7iIoPZ8CkQOs5catQpm2E6/ptzYiySm+z2fS3JIqS2A==
+  version "1.0.34"
+  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.34.tgz#e8bc5c56920979dff887ac27f16de94350f9012a"
+  integrity sha512-hFyDVKQnzRFlhIYlEk9G1rRzD8820h8jVnNeGQfpby3aBocq8BZ6m7ePz4vOGp0dMzYoFsCip5vftM3eDnQbcQ==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
@@ -2734,9 +2734,9 @@
     react-is "^18.2.0"
 
 "@mui/x-data-grid@^5.17.4":
-  version "5.17.19"
-  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-5.17.19.tgz#fe241f8e387fa8bb2ae0be9d477255755d571b7d"
-  integrity sha512-mVp2ZvPKMlVuTx8dYRv7yjRCFNGLQ6XK4c8uiGmC5NsbX58oGe3M3UH2/OLSCeOEUmcNLvZ8TH0HT306VfmW4g==
+  version "5.17.20"
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-5.17.20.tgz#ab50eadc330f10cdc056910598229ebcdcd3b062"
+  integrity sha512-khOe5l2deUBxUCkY9qKzevjIcg0l2rab2GjVwRfpJ/FUlV9cEsTvA9fSv4ylo6BsPfENBH6GPjZwxkr5GsXYgw==
   dependencies:
     "@babel/runtime" "^7.18.9"
     "@mui/utils" "^5.10.3"

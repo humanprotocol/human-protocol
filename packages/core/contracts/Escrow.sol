@@ -2,6 +2,9 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+
 import './interfaces/IRewardPool.sol';
 import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
@@ -30,7 +33,7 @@ contract Escrow is IEscrow {
     uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
-    address public eip20;
+    address public token;
 
     string public manifestUrl;
     string public manifestHash;
@@ -46,12 +49,12 @@ contract Escrow is IEscrow {
     mapping(address => bool) public areTrustedHandlers;
 
     constructor(
-        address _eip20,
+        address _token,
         address payable _canceler,
         uint256 _duration,
         address[] memory _handlers
     ) {
-        eip20 = _eip20;
+        token = _token;
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
         launcher = msg.sender;
@@ -62,7 +65,7 @@ contract Escrow is IEscrow {
     }
 
     function getBalance() public view returns (uint256) {
-        (bool success, bytes memory returnData) = eip20.staticcall(
+        (bool success, bytes memory returnData) = token.staticcall(
             abi.encodeWithSelector(FUNC_SELECTOR_BALANCE_OF, address(this))
         );
         if (success) {
@@ -247,14 +250,7 @@ contract Escrow is IEscrow {
     }
 
     function _safeTransfer(address to, uint256 value) internal {
-        (bool success, bytes memory returnData) = eip20.call(
-            abi.encodeWithSelector(FUNC_SELECTOR_TRANSFER, to, value)
-        );
-        require(
-            success &&
-                (returnData.length == 0 || abi.decode(returnData, (bool))),
-            'Transfer failed'
-        );
+        SafeERC20.safeTransfer(IERC20(token), to, value);
     }
 
     modifier trusted() {
@@ -263,7 +259,7 @@ contract Escrow is IEscrow {
     }
 
     modifier notBroke() {
-        require(getBalance() != 0, 'EIP20 contract out of funds');
+        require(getBalance() != 0, 'Token contract out of funds');
         _;
     }
 

@@ -122,7 +122,7 @@ describe('Staking', function () {
 
   describe('deployment', () => {
     it('Should set the right token address', async () => {
-      const result = await staking.eip20();
+      const result = await staking.token();
       expect(result).to.equal(token.address);
     });
 
@@ -235,7 +235,7 @@ describe('Staking', function () {
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -331,7 +331,7 @@ describe('Staking', function () {
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
     });
 
@@ -521,7 +521,7 @@ describe('Staking', function () {
         ).wait();
         const event = result.events?.[0].args;
 
-        expect(event?.eip20).to.equal(
+        expect(event?.token).to.equal(
           token.address,
           'token address is correct'
         );
@@ -585,7 +585,7 @@ describe('Staking', function () {
         ).wait();
         const event = result.events?.[0].args;
 
-        expect(event?.eip20).to.equal(
+        expect(event?.token).to.equal(
           token.address,
           'token address is correct'
         );
@@ -642,7 +642,7 @@ describe('Staking', function () {
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;

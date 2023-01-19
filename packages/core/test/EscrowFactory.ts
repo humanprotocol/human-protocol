@@ -92,7 +92,7 @@ describe('EscrowFactory', function () {
   it('Operator should be able to create an escrow after staking', async () => {
     const event = await stakeAndCreateEscrow(staking);
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
@@ -128,7 +128,7 @@ describe('EscrowFactory', function () {
 
     const event = await createEscrow();
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
@@ -153,7 +153,7 @@ describe('EscrowFactory', function () {
 
     const event = await stakeAndCreateEscrow(staking);
 
-    expect(event?.eip20).to.equal(token.address, 'token address is correct');
+    expect(event?.token).to.equal(token.address, 'token address is correct');
     expect(event?.escrow).to.not.be.null;
   });
 
@@ -184,7 +184,7 @@ describe('EscrowFactory', function () {
 
       const event = await stakeAndCreateEscrow(staking);
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       try {

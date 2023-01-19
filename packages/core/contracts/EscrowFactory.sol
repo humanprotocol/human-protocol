@@ -18,7 +18,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public lastEscrow;
     address public staking;
 
-    event Launched(address eip20, address escrow);
+    event Launched(address token, address escrow);
 
     function initialize(address _staking) external payable virtual initializer {
         __Ownable_init_unchained();
@@ -33,7 +33,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function createEscrow(
-        address eip20,
+        address token,
         address[] memory trustedHandlers
     ) public returns (address) {
         bool hasAvailableStake = IStaking(staking).hasAvailableStake(
@@ -45,7 +45,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         );
 
         Escrow escrow = new Escrow(
-            eip20,
+            token,
             payable(msg.sender),
             STANDARD_DURATION,
             trustedHandlers
@@ -53,7 +53,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
-        emit Launched(eip20, lastEscrow);
+        emit Launched(token, lastEscrow);
         return lastEscrow;
     }
 
