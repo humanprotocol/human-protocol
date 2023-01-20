@@ -17,7 +17,7 @@ const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
 const reputationAddress =
   process.env.REPUTATION_ADDRESS ||
-  '0xc5a5C42992dECbae36851359345FE25997F5C42d';
+  '0x67d269191c92Caf3cD7723F116c85e6E9bf55933';
 
 const web3 = new Web3(ethHttpServer);
 const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);

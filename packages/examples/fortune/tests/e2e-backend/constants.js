@@ -12,7 +12,7 @@ const addresses = {
     '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
   reputation:
     process.env.REPUTATION_ADDRESS ||
-    '0xc5a5C42992dECbae36851359345FE25997F5C42d',
+    '0x67d269191c92Caf3cD7723F116c85e6E9bf55933',
   recOracle:
     process.env.REC_ORACLE_ADDRESS ||
     '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',

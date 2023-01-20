@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 import { Signer } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
 import { HMToken, Reputation, Staking } from '../typechain-types';
@@ -51,8 +51,14 @@ describe('Reputation', function () {
 
     // Deploy Reputation Contract
     const Reputation = await ethers.getContractFactory('Reputation');
-
-    reputation = await Reputation.deploy(staking.address, minimumStake);
+    reputation = (await upgrades.deployProxy(
+      Reputation,
+      [staking.address, minimumStake],
+      {
+        kind: 'uups',
+        initializer: 'initialize',
+      }
+    )) as Reputation;
   });
 
   it('Should set the right staking address', async () => {
@@ -123,5 +129,74 @@ describe('Reputation', function () {
     expect(reputations[0].reputation).to.equal('100');
     expect(reputations[1].workerAddress).to.equal(worker2);
     expect(reputations[1].reputation).to.equal('1');
+  });
+
+  describe('proxy implementation', function () {
+    it('Should reject non-owner upgrades', async () => {
+      const ReputationV0 = await ethers.getContractFactory(
+        'ReputationV0',
+        reputationOracle
+      );
+
+      await expect(
+        upgrades.upgradeProxy(reputation.address, ReputationV0)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+
+    it('Owner should upgrade correctly', async () => {
+      const ReputationV0 = await ethers.getContractFactory('ReputationV0');
+      const oldImplementationAddress =
+        await upgrades.erc1967.getImplementationAddress(reputation.address);
+
+      await upgrades.upgradeProxy(reputation.address, ReputationV0);
+
+      expect(
+        await upgrades.erc1967.getImplementationAddress(reputation.address)
+      ).to.not.be.equal(oldImplementationAddress);
+
+      const stakingAddress = await reputation.staking();
+
+      expect(stakingAddress).to.equal(staking.address);
+      expect(stakingAddress).to.not.be.null;
+
+      try {
+        reputation.getRewards(ethers.utils.parseUnits('1', 'ether'), [
+          worker1,
+          worker2,
+        ]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        assert(error.message === 'reputation.hasEscrow is not a function');
+      }
+    });
+
+    it('Should have the same storage', async () => {
+      await staking.connect(reputationOracle).stake(10);
+      await reputation
+        .connect(reputationOracle)
+        .addReputations(reputationValues);
+
+      let reputations = await getReputations();
+      expect(reputations[0].workerAddress).to.equal(worker1);
+      expect(reputations[0].reputation).to.equal('60');
+      expect(reputations[1].workerAddress).to.equal(worker2);
+      expect(reputations[1].reputation).to.equal('40');
+
+      const oldImplementationAddress =
+        await upgrades.erc1967.getImplementationAddress(reputation.address);
+
+      const ReputationV0 = await ethers.getContractFactory('ReputationV0');
+      await upgrades.upgradeProxy(reputation.address, ReputationV0);
+
+      expect(
+        await upgrades.erc1967.getImplementationAddress(reputation.address)
+      ).to.not.be.equal(oldImplementationAddress);
+
+      reputations = await getReputations();
+      expect(reputations[0].workerAddress).to.equal(worker1);
+      expect(reputations[0].reputation).to.equal('60');
+      expect(reputations[1].workerAddress).to.equal(worker2);
+      expect(reputations[1].reputation).to.equal('40');
+    });
   });
 });

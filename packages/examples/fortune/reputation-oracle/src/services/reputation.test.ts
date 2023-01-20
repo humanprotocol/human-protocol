@@ -69,11 +69,15 @@ describe('Reputation', () => {
     reputation = await reputationContract
       .deploy({
         data: Reputation.bytecode,
-        arguments: [staking.options.address, 1],
+        arguments: [],
       })
       .send({
         from: owner.address,
       });
+
+    await reputation.methods
+      .initialize(staking.options.address, 1)
+      .send({ from: owner.address });
 
     await token.methods
       .transfer(reputationAccount.address, web3.utils.toWei('1000', 'ether'))
@@ -124,7 +128,7 @@ describe('Reputation', () => {
     const result = await calculateRewardForWorker(
       web3,
       reputation.options.address,
-      3000000,
+      '3000000',
       [worker1, worker2, worker3]
     );
 

@@ -72,12 +72,17 @@ async function main() {
   }
 
   const Reputation = await ethers.getContractFactory('Reputation');
-  const reputationContract = await Reputation.deploy(
-    stakingContract.address,
-    1
+  const reputationContract = await upgrades.deployProxy(
+    Reputation,
+    [stakingContract.address, 1],
+    { initializer: 'initialize', kind: 'uups' }
   );
   await reputationContract.deployed();
-  console.log('Reputation Contract Address:', reputationContract.address);
+  console.log('Reputation Proxy Address: ', reputationContract.address);
+  console.log(
+    'Reputation Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(reputationContract.address)
+  );
 }
 
 main().catch((error) => {

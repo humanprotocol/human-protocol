@@ -3,10 +3,10 @@ pragma solidity >=0.6.2;
 
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import './utils/SignedSafeMath.sol';
-import './interfaces/IStaking.sol';
+import '../utils/SignedSafeMath.sol';
+import '../interfaces/IStaking.sol';
 
-contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
+contract ReputationV0 is OwnableUpgradeable, UUPSUpgradeable {
     using SignedSafeMath for int256;
     using Stakes for Stakes.Staker;
 
@@ -88,26 +88,6 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
 
         for (uint256 i = 0; i < _workers.length; i++) {
             returnedValues[i] = Worker(_workers[i], reputations[_workers[i]]);
-        }
-
-        return returnedValues;
-    }
-
-    function getRewards(
-        int256 balance,
-        address[] memory _workers
-    ) public view returns (int256[] memory) {
-        int256[] memory returnedValues = new int256[](_workers.length);
-        int256 totalReputation = 0;
-
-        for (uint256 i = 0; i < _workers.length; i++) {
-            totalReputation = totalReputation.add(reputations[_workers[i]]);
-        }
-
-        for (uint256 i = 0; i < _workers.length; i++) {
-            returnedValues[i] = balance.mul(reputations[_workers[i]]).div(
-                totalReputation
-            );
         }
 
         return returnedValues;
