@@ -19,7 +19,7 @@ jobs:
       - name: Install pipenv
         run: pip install pipenv
       - name: Python test
-        working-directory: ./packages/sdk/python
+        working-directory: ./packages/sdk/python/human-protocol-sdk
         env:
           ESCROW_AWS_ACCESS_KEY_ID: ${{ secrets.ESCROW_AWS_ACCESS_KEY_ID }}
           ESCROW_AWS_SECRET_ACCESS_KEY: ${{ secrets.ESCROW_AWS_SECRET_ACCESS_KEY }}
