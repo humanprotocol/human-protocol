@@ -1,6 +1,9 @@
 name: Python SDK check
 
 on:
+  push:
+    branches:
+      - "main"
   pull_request:
   workflow_dispatch:
 
