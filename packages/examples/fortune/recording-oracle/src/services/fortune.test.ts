@@ -76,11 +76,15 @@ describe('Fortune', () => {
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
-        arguments: [token.options.address, staking.options.address],
+        arguments: [],
       })
       .send({
         from: owner.address,
       });
+
+    await escrowFactory.methods.initialize(staking.options.address).send({
+      from: owner.address,
+    });
 
     await token.methods
       .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
@@ -97,7 +101,7 @@ describe('Fortune', () => {
 
   beforeEach(async () => {
     await escrowFactory.methods
-      .createEscrow([launcher.address])
+      .createEscrow(token.options.address, [launcher.address])
       .send({ from: launcher.address });
 
     escrowAddress = await escrowFactory.methods.lastEscrow().call();

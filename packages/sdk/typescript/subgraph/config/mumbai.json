@@ -13,5 +13,15 @@
   },
   "Escrow": {
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0xf421fD3eB97982C205966ebB514Ab2E435c6d5B7",
+    "startBlock": 31060831,
+    "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x459EE403d060B84b5014605D6739cCFed32AFb96",
+    "startBlock": 31059244,
+    "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }

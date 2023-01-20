@@ -48,6 +48,7 @@ task(
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.9',
+    settings: { optimizer: { enabled: true, runs: 4294967295 } },
   },
   defaultNetwork: 'hardhat',
   networks: {
@@ -68,6 +69,12 @@ const config: HardhatUserConfig = {
     goerli: {
       chainId: 5,
       url: process.env.ETH_GOERLI_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    polygonMumbai: {
+      chainId: 80001,
+      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -98,6 +105,7 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
     },
   },
   mocha: {

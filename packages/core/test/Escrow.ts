@@ -90,7 +90,7 @@ describe('Escrow', function () {
     });
 
     it('Should set the right token address', async () => {
-      const result = await escrow.eip20();
+      const result = await escrow.token();
       expect(result).to.equal(token.address);
     });
 

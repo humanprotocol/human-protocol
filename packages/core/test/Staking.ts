@@ -38,7 +38,7 @@ describe('Staking', function () {
     staking: Staking,
     rewardPool: RewardPool;
 
-  this.beforeEach(async () => {
+  this.beforeAll(async () => {
     [
       owner,
       validator,
@@ -75,7 +75,9 @@ describe('Staking', function () {
           );
       })
     );
+  });
 
+  this.beforeEach(async () => {
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
     staking = (await upgrades.deployProxy(
@@ -87,7 +89,11 @@ describe('Staking', function () {
     // Deploy Escrow Factory Contract
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
 
-    escrowFactory = await EscrowFactory.deploy(token.address, staking.address);
+    escrowFactory = (await upgrades.deployProxy(
+      EscrowFactory,
+      [staking.address],
+      { kind: 'uups', initializer: 'initialize' }
+    )) as EscrowFactory;
 
     // Deploy Reward Pool Conract
     const RewardPool = await ethers.getContractFactory('RewardPool');
@@ -116,7 +122,7 @@ describe('Staking', function () {
 
   describe('deployment', () => {
     it('Should set the right token address', async () => {
-      const result = await staking.eip20();
+      const result = await staking.token();
       expect(result).to.equal(token.address);
     });
 
@@ -225,11 +231,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -321,11 +327,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
     });
 
@@ -511,11 +517,11 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow([ethers.constants.AddressZero])
+            .createEscrow(token.address, [ethers.constants.AddressZero])
         ).wait();
         const event = result.events?.[0].args;
 
-        expect(event?.eip20).to.equal(
+        expect(event?.token).to.equal(
           token.address,
           'token address is correct'
         );
@@ -575,11 +581,11 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow([ethers.constants.AddressZero])
+            .createEscrow(token.address, [ethers.constants.AddressZero])
         ).wait();
         const event = result.events?.[0].args;
 
-        expect(event?.eip20).to.equal(
+        expect(event?.token).to.equal(
           token.address,
           'token address is correct'
         );
@@ -632,11 +638,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow([ethers.constants.AddressZero])
+          .createEscrow(token.address, [ethers.constants.AddressZero])
       ).wait();
       const event = result.events?.[0].args;
 
-      expect(event?.eip20).to.equal(token.address, 'token address is correct');
+      expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
 
       escrowAddress = event?.escrow;
@@ -687,7 +693,12 @@ describe('Staking', function () {
             )
         )
           .to.emit(staking, 'StakeSlashed')
-          .withArgs(await validator.getAddress(), anyValue);
+          .withArgs(
+            await operator.getAddress(),
+            slashedTokens,
+            escrowAddress,
+            await validator.getAddress()
+          );
       });
     });
 

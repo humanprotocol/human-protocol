@@ -34,19 +34,18 @@ export const getHmToken = async (
 /**
  * **Deploy EscrowFactory contract**
  *
- * @param {string} hmTokenAddr HMToken address
  * @param {string} stakingAddr Staking address
  * @param {ethers.Signer | undefined} signer Deployer signer
  * @returns {Promise<EscrowFactory>} Deployed contract instance
  */
 export const deployEscrowFactory = async (
-  hmTokenAddr: string,
   stakingAddr: string,
   signer?: ethers.Signer
 ): Promise<EscrowFactory> => {
   const factory = new EscrowFactory__factory(signer);
 
-  const contract = await factory.deploy(hmTokenAddr, stakingAddr);
+  const contract = await factory.deploy();
+  await contract.initialize(stakingAddr);
 
   return contract;
 };

@@ -27,13 +27,19 @@ async function main() {
   );
 
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-  const escrowFactoryContract = await EscrowFactory.deploy(
-    HMTokenContract.address,
-    stakingContract.address
+  const escrowFactoryContract = await upgrades.deployProxy(
+    EscrowFactory,
+    [stakingContract.address],
+    { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
-
-  console.log('Escrow Factory Address: ', escrowFactoryContract.address);
+  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  console.log(
+    'Escrow Factory Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(
+      escrowFactoryContract.address
+    )
+  );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();

@@ -2,6 +2,8 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
@@ -20,8 +22,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMath for uint256;
     using Stakes for Stakes.Staker;
 
-    // ERC20 Token address
-    address public eip20;
+    // Token address
+    address public token;
 
     // Reward pool address
     address public override rewardPool;
@@ -59,7 +61,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Emitted when `staker` was slashed for a total of `tokens` amount.
      */
-    event StakeSlashed(address indexed staker, uint256 tokens);
+    event StakeSlashed(
+        address indexed staker,
+        uint256 tokens,
+        address indexed escrowAddress,
+        address slasher
+    );
 
     /**
      * @dev Emitted when `staker` allocated `tokens` amount to `escrowAddress`.
@@ -97,21 +104,21 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     event SetRewardPool(address indexed rewardPool);
 
     function initialize(
-        address _eip20,
+        address _token,
         uint256 _minimumStake,
         uint32 _lockPeriod
     ) external payable virtual initializer {
         __Ownable_init_unchained();
 
-        __Staking_init_unchained(_eip20, _minimumStake, _lockPeriod);
+        __Staking_init_unchained(_token, _minimumStake, _lockPeriod);
     }
 
     function __Staking_init_unchained(
-        address _eip20,
+        address _token,
         uint256 _minimumStake,
         uint32 _lockPeriod
     ) internal onlyInitializing {
-        eip20 = _eip20;
+        token = _token;
         _setMinimumStake(_minimumStake);
         _setLockPeriod(_lockPeriod);
     }
@@ -345,8 +352,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             stakers.push(msg.sender);
         }
 
-        HMTokenInterface token = HMTokenInterface(eip20);
-        token.transferFrom(msg.sender, address(this), _tokens);
+        _safeTransferFrom(msg.sender, address(this), _tokens);
 
         stakes[msg.sender].deposit(_tokens);
 
@@ -405,8 +411,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             'Stake has no available tokens for withdrawal'
         );
 
-        HMTokenInterface token = HMTokenInterface(eip20);
-        token.transfer(_staker, tokensToWithdraw);
+        _safeTransfer(_staker, tokensToWithdraw);
 
         emit StakeWithdrawn(_staker, tokensToWithdraw);
     }
@@ -441,13 +446,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         staker.release(_tokens);
 
-        HMTokenInterface token = HMTokenInterface(eip20);
-        token.transfer(rewardPool, _tokens);
+        _safeTransfer(rewardPool, _tokens);
 
         // Keep record on Reward Pool
         IRewardPool(rewardPool).addReward(_escrowAddress, _slasher, _tokens);
 
-        emit StakeSlashed(_slasher, _tokens);
+        emit StakeSlashed(_staker, _tokens, _escrowAddress, _slasher);
     }
 
     /**
@@ -541,6 +545,18 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             _escrowAddress,
             allocation.closedAt
         );
+    }
+
+    function _safeTransfer(address to, uint256 value) internal {
+        SafeERC20.safeTransfer(IERC20(token), to, value);
+    }
+
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) internal {
+        SafeERC20.safeTransferFrom(IERC20(token), from, to, value);
     }
 
     modifier onlyStaker(address _staker) {
