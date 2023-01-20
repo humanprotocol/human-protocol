@@ -20,10 +20,10 @@ const {
   escrowFundAmount,
 } = require('./constants');
 const web3 = new Web3(urls.ethHTTPServer);
-let owner, launcher;
+
 describe('Positive flow', () => {
   beforeAll(async () => {
-    [owner, launcher] = await setupAccounts();
+    await setupAccounts();
   });
 
   test('Flow', async () => {

@@ -1,14 +1,11 @@
-import { Grid, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
 import * as React from 'react';
 import { CardTextBlock } from 'src/components/Cards';
-import BitfinexIcon from 'src/components/Icons/BitfinexIcon';
-import useBitfinexTicker from 'src/hooks/useBitfinexTicker';
 import { useTokenStatsByChainId } from 'src/state/token/hooks';
 
 export const TokenView: React.FC = (): React.ReactElement => {
   const { totalTransferEventCount, holders, totalSupply } =
     useTokenStatsByChainId();
-  const bitfinexTicker = useBitfinexTicker();
 
   return (
     <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>

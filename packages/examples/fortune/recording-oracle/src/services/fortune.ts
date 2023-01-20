@@ -99,7 +99,7 @@ export async function addFortune(
   const fortunes = getFortunes(escrowAddress);
 
   const resultUrl = await uploadResults(
-    fortunes.map(({ fortune }: { fortune: any }) => fortune),
+    fortunes.map(({ fortune }: { fortune: string }) => fortune),
     escrowAddress
   );
   // TODO calculate the URL hash(?)
