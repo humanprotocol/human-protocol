@@ -15,4 +15,15 @@ describe('Rewards', () => {
 
     expect(result.workerAddresses).toStrictEqual([worker1, worker3]);
   });
+
+  it('Check fortune bad words', async () => {
+    const result = filterAddressesToReward(new Web3(), [
+      { worker: worker1, fortune: 'damn' },
+      { worker: worker2, fortune: 'fortune' },
+      { worker: worker3, fortune: 'shit should be blocked' },
+    ]);
+    expect(result.workerAddresses).toStrictEqual([worker2]);
+    expect(result.reputationValues[0].reputation).toStrictEqual(-1);
+    expect(result.reputationValues[2].reputation).toStrictEqual(-1);
+  });
 });
