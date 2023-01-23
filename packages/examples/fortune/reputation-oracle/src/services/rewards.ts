@@ -37,10 +37,12 @@ export function filterAddressesToReward(
 }
 
 export function checkBadWords(fortune: string) {
+  const words = fortune.replace(/[^a-zA-Z0-9 ]/g, '').split(' ');
   for (let i = 0; i < BAD_WORDS.length; i++) {
-    const val = BAD_WORDS[i];
-    if (fortune.toLowerCase().indexOf(val.toString()) > -1) {
-      return true;
+    for (let j = 0; j < words.length; j++) {
+      if (words[j].toLowerCase() === BAD_WORDS[i].toString()) {
+        return true;
+      }
     }
   }
   return false;
