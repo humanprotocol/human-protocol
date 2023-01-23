@@ -417,6 +417,7 @@ class Job:
         recording_oracle = str(self.serialized_manifest["recording_oracle_addr"])
         hmt_amount = int(self.amount * 10**18)
         hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
+        remaining_fortunes = int(self.serialized_manifest["job_total_tasks"])
 
         tx_balance = None
         hmt_transferred = False
@@ -481,6 +482,7 @@ class Job:
             recording_oracle_stake,
             self.manifest_url,
             self.manifest_hash,
+            remaining_fortunes,
         ]
 
         try:

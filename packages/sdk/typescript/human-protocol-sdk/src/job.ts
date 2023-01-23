@@ -385,6 +385,7 @@ export class Job {
       this.manifestData?.manifest?.reputation_oracle_addr || '';
     const recordingOracleAddr =
       this.manifestData?.manifest?.recording_oracle_addr || '';
+    const remainingFortunes = this.manifestData?.manifest?.job_total_tasks || 0;
 
     this._logger.info(
       `Transferring ${this.amount} HMT to ${this.contractData.escrow.address}...`
@@ -438,7 +439,8 @@ export class Job {
       reputationOracleStake,
       recordingOracleStake,
       this.manifestData?.manifestlink?.url,
-      this.manifestData?.manifestlink?.hash
+      this.manifestData?.manifestlink?.hash,
+      remainingFortunes
     );
 
     if (!contractSetup) {

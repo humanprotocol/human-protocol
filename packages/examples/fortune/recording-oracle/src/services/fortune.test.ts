@@ -119,7 +119,8 @@ describe('Fortune', () => {
         10,
         10,
         'manifestUrl',
-        'manifestUrl'
+        'manifestUrl',
+        3
       )
       .send({ from: launcher.address });
 

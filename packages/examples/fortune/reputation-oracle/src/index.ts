@@ -2,11 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import Web3 from 'web3';
 import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
-import {
-  filterAddressesToReward,
-  calculateRewardForWorker,
-} from './services/rewards';
+import { filterAddressesToReward } from './services/rewards';
 import { uploadResults } from './services/s3';
+import {
+  updateReputations,
+  calculateRewardForWorker,
+} from './services/reputation';
 
 const app = express();
 const privKey =
@@ -14,6 +15,9 @@ const privKey =
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
+const reputationAddress =
+  process.env.REPUTATION_ADDRESS ||
+  '0x67d269191c92Caf3cD7723F116c85e6E9bf55933';
 
 const web3 = new Web3(ethHttpServer);
 const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
@@ -41,8 +45,18 @@ app.post('/job/results', async (req, res) => {
 
     const balance = await getBalance(web3, escrowAddress);
 
-    const workerAddresses = filterAddressesToReward(web3, fortunes);
-    const rewards = calculateRewardForWorker(balance, workerAddresses);
+    const { workerAddresses, reputationValues } = filterAddressesToReward(
+      web3,
+      fortunes
+    );
+
+    await updateReputations(web3, reputationAddress, reputationValues);
+    const rewards = await calculateRewardForWorker(
+      web3,
+      reputationAddress,
+      balance.toString(),
+      workerAddresses
+    );
 
     // TODO calculate the URL hash(?)
     const resultsUrl = await uploadResults(
