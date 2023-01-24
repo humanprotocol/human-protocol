@@ -4,7 +4,7 @@ import { BAD_WORDS } from '../constants/badWords';
 export interface FortuneEntry {
   worker: string;
   fortune: string;
-  result: boolean;
+  score: boolean;
 }
 
 export interface ReputationEntry {
@@ -23,14 +23,14 @@ export function filterAddressesToReward(
   let errorRecordingOracle = false;
 
   addressFortunesEntries.forEach((fortuneEntry) => {
-    const { worker, fortune, result } = fortuneEntry;
+    const { worker, fortune, score } = fortuneEntry;
     if (tmpHashMap[fortune] || checkBadWords(fortune)) {
       reputationValues.push({ workerAddress: worker, reputation: -1 });
-      if (!result) {
+      if (!score) {
         errorRecordingOracle = true;
       }
       return;
-    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && result) {
+    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && score) {
       errorRecordingOracle = true;
     }
 
