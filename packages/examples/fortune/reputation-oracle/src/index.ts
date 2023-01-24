@@ -1,35 +1,39 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import Web3 from 'web3';
-import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
+import {
+  bulkPayOut,
+  bulkPaid,
+  getBalance,
+  getEscrowManifestUrl,
+} from './services/escrow';
 import { filterAddressesToReward } from './services/rewards';
 import { uploadResults } from './services/s3';
 import {
   updateReputations,
   calculateRewardForWorker,
 } from './services/reputation';
+import getManifest from './services/manifest';
+import { networks, NetworkSettings } from './constants/constants';
 
 const app = express();
 const privKey =
   process.env.ETH_PRIVATE_KEY ||
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
-const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
-const reputationAddress =
-  process.env.REPUTATION_ADDRESS ||
-  '0x67d269191c92Caf3cD7723F116c85e6E9bf55933';
-
-const web3 = new Web3(ethHttpServer);
-const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
-
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
 
 app.use(bodyParser.json());
 
 app.post('/job/results', async (req, res) => {
   try {
-    const { fortunes, escrowAddress } = req.body;
+    const { fortunes, escrowAddress, chainId } = req.body;
+
+    const web3 = new Web3(
+      networks[chainId as keyof NetworkSettings].httpServer
+    );
+    const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
 
     if (!Array.isArray(fortunes) || fortunes.length === 0) {
       return res
@@ -43,17 +47,26 @@ app.post('/job/results', async (req, res) => {
         .send({ message: 'Escrow address is empty or invalid' });
     }
 
+    const manifestUrl = await getEscrowManifestUrl(web3, escrowAddress);
+    const { recording_oracle_address: recordingOracleAddress } =
+      await getManifest(manifestUrl);
+
     const balance = await getBalance(web3, escrowAddress);
 
     const { workerAddresses, reputationValues } = filterAddressesToReward(
       web3,
-      fortunes
+      fortunes,
+      recordingOracleAddress
     );
 
-    await updateReputations(web3, reputationAddress, reputationValues);
+    await updateReputations(
+      web3,
+      networks[chainId as keyof NetworkSettings].reputation,
+      reputationValues
+    );
     const rewards = await calculateRewardForWorker(
       web3,
-      reputationAddress,
+      networks[chainId as keyof NetworkSettings].reputation,
       balance.toString(),
       workerAddresses
     );

@@ -4,6 +4,7 @@ import { BAD_WORDS } from '../constants/badWords';
 export interface FortuneEntry {
   worker: string;
   fortune: string;
+  result: boolean;
 }
 
 export interface ReputationEntry {
@@ -13,17 +14,24 @@ export interface ReputationEntry {
 
 export function filterAddressesToReward(
   web3: Web3,
-  addressFortunesEntries: FortuneEntry[]
+  addressFortunesEntries: FortuneEntry[],
+  recordingOracleAddress: string
 ) {
   const filteredResults: FortuneEntry[] = [];
   const reputationValues: ReputationEntry[] = [];
   const tmpHashMap: Record<string, boolean> = {};
+  let errorRecordingOracle = false;
 
   addressFortunesEntries.forEach((fortuneEntry) => {
-    const { worker, fortune } = fortuneEntry;
+    const { worker, fortune, result } = fortuneEntry;
     if (tmpHashMap[fortune] || checkBadWords(fortune)) {
       reputationValues.push({ workerAddress: worker, reputation: -1 });
+      if (!result) {
+        errorRecordingOracle = true;
+      }
       return;
+    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && result) {
+      errorRecordingOracle = true;
     }
 
     tmpHashMap[fortune] = true;
@@ -33,6 +41,17 @@ export function filterAddressesToReward(
   const workerAddresses = filteredResults
     .map((fortune: { worker: string }) => fortune.worker)
     .map(web3.utils.toChecksumAddress);
+  if (errorRecordingOracle) {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: -1,
+    });
+  } else {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: 1,
+    });
+  }
   return { workerAddresses, reputationValues };
 }
 
