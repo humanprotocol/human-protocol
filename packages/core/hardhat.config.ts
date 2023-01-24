@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      url: 'http://127.0.0.1:8545',
+      url: `http://127.0.0.1:${process.env.RPC_PORT || '8545'}`,
     },
     hardhat: {
       forking: process.env.FORKING_URL

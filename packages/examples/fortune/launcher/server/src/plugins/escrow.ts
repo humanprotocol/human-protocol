@@ -8,14 +8,14 @@ import Web3 from 'web3';
 import { REC_ORACLE_ADDRESS, REC_ORACLE_PERCENTAGE_FEE, REP_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE } from "../constants/oracles.js";
 
 class Escrow {
-    async setupEscrow (web3: Web3, escrowAddress: string, escrow: typeof escrowSchema.properties, url: string) {
+    async setupEscrow (web3: Web3, escrowAddress: string, url: string, fortunesRequested: number) {
         const escrowContract = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
         const gas = await escrowContract.methods
-            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url)
+            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url, fortunesRequested)
             .estimateGas({ from: web3.eth.defaultAccount });
         const gasPrice = await web3.eth.getGasPrice();
         const result = await escrowContract.methods
-            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url)
+            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url, fortunesRequested)
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
     }
 
@@ -30,14 +30,14 @@ class Escrow {
         return allowance == fundAmount && balance >= fundAmount;
     }
 
-    async createEscrow (web3: Web3, factoryAddress: string, jobRequester: string) {
+    async createEscrow (web3: Web3, factoryAddress: string, token: string,jobRequester: string) {
         const escrowFactory = new web3.eth.Contract(EscrowFactoryAbi as [], factoryAddress);
         const gas = await escrowFactory.methods
-            .createEscrow([jobRequester])
+            .createEscrow(token, [jobRequester])
             .estimateGas({ from: web3.eth.defaultAccount });
         const gasPrice = await web3.eth.getGasPrice();
         var result = await escrowFactory.methods
-            .createEscrow([])
+            .createEscrow(token, [jobRequester])
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
         return result.events.Launched.returnValues.escrow;
     }

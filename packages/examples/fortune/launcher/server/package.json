@@ -15,10 +15,13 @@
     "typescript": "^4.9.4"
   },
   "devDependencies": {
-    "ts-node": "^10.9.1"
+    "pino-pretty": "^9.1.1",
+    "ts-node": "^10.9.1",
+    "vitest": "^0.28.1"
   },
   "scripts": {
     "build": "tsc",
-    "start": "ts-node --esm ./src/index.ts"
+    "start": "ts-node --esm ./src/index.ts",
+    "test:unit": "concurrently -k -s first --hide 0 \"cross-env RPC_PORT=8546 yarn workspace @human-protocol/core local:port\" \"sleep 5 && vitest\""
   }
 }

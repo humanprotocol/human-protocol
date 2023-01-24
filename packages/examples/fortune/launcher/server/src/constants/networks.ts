@@ -6,15 +6,14 @@ export enum ChainId {
     BSC_TESTNET = 97,
     POLYGON = 137,
     POLYGON_MUMBAI = 80001,
-    MOONBEAM = 1284,
+  MOONBEAM = 1284,
+    LOCALHOST = 1338
   }
   
   export interface IEscrowNetwork {
     chainId: number;
     title: string;
-    scanUrl: string;
     rpcUrl: string;
-    subgraphUrl: string;
     hmtAddress: string;
     factoryAddress: string;
   }
@@ -64,9 +63,7 @@ export const ESCROW_NETWORKS: {
     [ChainId.POLYGON_MUMBAI]: {
       chainId: ChainId.POLYGON_MUMBAI,
       title: 'Polygon Mumbai',
-      scanUrl: 'https://mumbai.polygonscan.com',
       rpcUrl: 'https://rpc-mumbai.maticvigil.com',
-      subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
       factoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
       hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
     },

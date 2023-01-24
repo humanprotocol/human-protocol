@@ -39,13 +39,14 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
 
       const jobRequester = escrowData.jobRequester as unknown as string;
       const token = escrowData.token as unknown as string;
+      const fortunesRequested = Number(escrowData.fortunesRequired);
       const fundAmount = web3Client.utils.toWei(Number(escrowData.fundAmount).toString(), 'ether');
 
       if (await escrow.checkApproved(web3Client, token, jobRequester, fundAmount)) {
-        const escrowAddress = await escrow.createEscrow(web3Client, escrowNetwork.factoryAddress, jobRequester);
+        const escrowAddress = await escrow.createEscrow(web3Client, escrowNetwork.factoryAddress, token, jobRequester);
         await escrow.fundEscrow(web3Client, token, jobRequester, escrowAddress, fundAmount);
         const url = await s3.uploadManifest(escrowData, escrowAddress);
-        await escrow.setupEscrow(web3Client, escrowAddress, escrowData, url);
+        await escrow.setupEscrow(web3Client, escrowAddress, url, fortunesRequested);
         return escrowAddress;
       }
 
