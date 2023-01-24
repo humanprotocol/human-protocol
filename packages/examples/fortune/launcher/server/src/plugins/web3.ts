@@ -1,7 +1,6 @@
 import "dotenv/config";
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import * as Minio from 'minio';
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 import { IEscrowNetwork } from 'constants/networks';
@@ -38,15 +37,15 @@ class Web3Client {
   }
 
 const web3Plugin: FastifyPluginAsync = async (server) => {
-    const validate = ajv.compile(ConfigSchema);
-    const valid = validate(process.env);
-    if (!valid) {
-      throw new Error(
-        ".env file validation failed - " +
-          JSON.stringify(validate.errors, null, 2)
-      );
-    }
-    server.decorate("web3", new Web3Client());
+  const validate = ajv.compile(ConfigSchema);
+  const valid = validate(process.env);
+  if (!valid) {
+    throw new Error(
+      ".env file validation failed - " +
+        JSON.stringify(validate.errors, null, 2)
+    );
+  }
+  server.decorate("web3", new Web3Client());
 };
   
 declare module "fastify" {

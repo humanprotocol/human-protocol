@@ -50,6 +50,6 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
         return escrowAddress;
       }
 
-      return 'Balance or allowance not enough for funding the escrow';
+      return reply.status(400).send('Balance or allowance not enough for funding the escrow');
     });
   }

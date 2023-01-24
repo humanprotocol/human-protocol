@@ -66,7 +66,14 @@ export const ESCROW_NETWORKS: {
       rpcUrl: 'https://rpc-mumbai.maticvigil.com',
       factoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
       hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
-    },
+  },
+  [ChainId.LOCALHOST]: {
+    chainId: ChainId.LOCALHOST,
+    title: 'Localhost',
+    rpcUrl: 'http://localhost:8546',
+    factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+    hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+  }
     // [ChainId.MOONBEAM]: {
     //   chainId: ChainId.MOONBEAM,
     //   title: 'Moonbeam',

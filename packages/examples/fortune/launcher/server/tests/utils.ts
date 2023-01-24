@@ -18,7 +18,7 @@ export const stake = async (web3: Web3, network: IEscrowNetwork) => {
     const gasPrice = await web3.eth.getGasPrice();
     await stakingContract.methods
       .stake(stakeAmount)
-      .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+        .send({ from: web3.eth.defaultAccount, gas, gasPrice });
 };
 export const approve = async (web3: Web3, network: IEscrowNetwork, to: string, amount: string) => {
     const hmtContract = new web3.eth.Contract(HMTokenAbi as [], network.hmtAddress);

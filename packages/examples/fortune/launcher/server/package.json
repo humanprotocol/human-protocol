@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@human-protocol/job-launcher-server",
   "version": "1.0.0",
   "description": "Job Launcher Server",
   "main": "index.ts",
@@ -22,6 +22,6 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node --esm ./src/index.ts",
-    "test:unit": "concurrently -k -s first --hide 0 \"cross-env RPC_PORT=8546 yarn workspace @human-protocol/core local:port\" \"sleep 5 && vitest\""
+    "test:unit": "concurrently -k -s first --hide 0 \"cross-env RPC_PORT=8546 yarn workspace @human-protocol/core local:port\" \"sleep 5s && vitest --run\""
   }
 }

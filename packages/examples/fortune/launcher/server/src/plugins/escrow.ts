@@ -27,7 +27,7 @@ class Escrow {
         const balance = await hmtoken.methods
             .balanceOf(jobRequester)
             .call();
-        return allowance == fundAmount && balance >= fundAmount;
+        return allowance >= fundAmount && balance >= fundAmount;
     }
 
     async createEscrow (web3: Web3, factoryAddress: string, token: string,jobRequester: string) {

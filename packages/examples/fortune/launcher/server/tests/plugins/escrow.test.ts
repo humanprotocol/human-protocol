@@ -1,4 +1,3 @@
-import fastify from "fastify";
 import { describe, test, expect, beforeAll } from 'vitest';
 import { ChainId, IEscrowNetwork } from "../../src/constants/networks.js";
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "json" };
@@ -6,7 +5,6 @@ import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "
 import server from '../../src/server.js'
 import { stake, approve } from '../utils.js'
 
-const privKey = 'df57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e';
 const jobRequesterPrivKey = 'de9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0';
 const jobRequester = '0xdD2FD4581271e230360230F9337D5c0430Bf44C0';
 
@@ -19,7 +17,7 @@ describe('Escrow tests', () => {
     rpcUrl: 'http://localhost:8546',
     title: 'Localhost'
   };
-  const web3Client = web3.createWeb3(network, privKey);
+  const web3Client = web3.createWeb3(network);
   const web3JobRequester = web3.createWeb3(network, jobRequesterPrivKey);
   
   beforeAll(async () => {
@@ -31,7 +29,7 @@ describe('Escrow tests', () => {
   });
 
   test('Should be approved', async () => {
-    const amount = web3Client.utils.toWei('10', 'ether');
+    const amount = web3JobRequester.utils.toWei('10', 'ether');
     await approve(web3JobRequester, network, web3Client.eth.defaultAccount as string, amount);
     expect(await escrow.checkApproved(web3Client, network.hmtAddress, jobRequester, web3Client.utils.toWei('10', 'ether'))).eq(true);
   });
