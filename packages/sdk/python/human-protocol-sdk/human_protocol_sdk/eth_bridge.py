@@ -29,7 +29,7 @@ ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contract
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
-    os.getenv("KVSTORE_CONTRACT", "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9")
+    os.getenv("KVSTORE_CONTRACT", "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707")
 )
 WEB3_POLL_LATENCY = float(os.getenv("WEB3_POLL_LATENCY", 5))
 WEB3_TIMEOUT = int(os.getenv("WEB3_TIMEOUT", 240))
@@ -335,7 +335,7 @@ def deploy_factory(
     )
 
     txn_func = factory.constructor
-    func_args = [hmtoken_address, staking_address]
+    func_args = []
     txn_info = {
         "gas_payer": gas_payer,
         "gas_payer_priv": gas_payer_priv,
@@ -344,6 +344,12 @@ def deploy_factory(
     }
     txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
     contract_addr = txn_receipt["contractAddress"]
+
+    factory_contract = get_factory(contract_addr)
+    txn_func = factory_contract.functions.initialize
+    func_args = [staking_address]
+    txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
+
     return str(contract_addr)
 
 

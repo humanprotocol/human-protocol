@@ -9,7 +9,10 @@ const addresses = {
   hmt: process.env.HMT_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   escrowFactory:
     process.env.ESCROW_FACTORY_ADDRESS ||
-    '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+    '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+  reputation:
+    process.env.REPUTATION_ADDRESS ||
+    '0x67d269191c92Caf3cD7723F116c85e6E9bf55933',
   recOracle:
     process.env.REC_ORACLE_ADDRESS ||
     '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
@@ -52,6 +55,12 @@ const minioSettings = {
   minioBucketName: process.env.MINIO_BUCKET_NAME || 'job-results',
 };
 
+const repOraclePrivateKey =
+  process.env.ETH_PRIVATE_KEY ||
+  '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
+
+const fortunesRequested = process.env.FORTUNES_REQUESTED || 2;
+
 module.exports = {
   addresses,
   urls,
@@ -60,4 +69,6 @@ module.exports = {
   escrowFundAmount,
   statusesMap,
   minioSettings,
+  repOraclePrivateKey,
+  fortunesRequested,
 };

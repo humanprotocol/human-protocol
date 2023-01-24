@@ -6,6 +6,7 @@ import { Escrow, HMToken } from '../typechain-types';
 
 const MOCK_URL = 'http://google.com/fake';
 const MOCK_HASH = 'kGKmnj9BRf';
+const MOCK_FORTUNES = 3;
 const BULK_MAX_COUNT = 100;
 
 enum Status {
@@ -47,7 +48,8 @@ async function setupEscrow() {
       10,
       10,
       MOCK_URL,
-      MOCK_HASH
+      MOCK_HASH,
+      MOCK_FORTUNES
     );
 }
 
@@ -88,7 +90,7 @@ describe('Escrow', function () {
     });
 
     it('Should set the right token address', async () => {
-      const result = await escrow.eip20();
+      const result = await escrow.token();
       expect(result).to.equal(token.address);
     });
 
@@ -262,12 +264,13 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH
+              MOCK_HASH,
+              MOCK_FORTUNES
             )
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert with the right error if set invalid or missing reputation oracle address', async function () {
+      it('Should revert with the right error if set invalid or missing recording oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -277,7 +280,8 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH
+              MOCK_HASH,
+              MOCK_FORTUNES
             )
         ).to.be.revertedWith('Invalid or missing token spender');
       });
@@ -292,9 +296,26 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH
+              MOCK_HASH,
+              MOCK_FORTUNES
             )
         ).to.be.revertedWith('Invalid or missing token spender');
+      });
+
+      it('Should revert with the right error if set invalid number of fortunes', async function () {
+        await expect(
+          escrow
+            .connect(owner)
+            .setup(
+              await reputationOracle.getAddress(),
+              await recordingOracle.getAddress(),
+              10,
+              10,
+              MOCK_URL,
+              MOCK_HASH,
+              0
+            )
+        ).to.be.revertedWith('Invalid or missing fortunes');
       });
 
       it('Should revert with the right error if stake out of bounds and too high', async function () {
@@ -307,7 +328,8 @@ describe('Escrow', function () {
               500,
               500,
               MOCK_URL,
-              MOCK_HASH
+              MOCK_HASH,
+              MOCK_FORTUNES
             )
         ).to.be.revertedWith('Stake out of bounds');
       });
@@ -328,7 +350,8 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH
+              MOCK_HASH,
+              MOCK_FORTUNES
             )
         )
           .to.emit(escrow, 'Pending')
@@ -351,7 +374,8 @@ describe('Escrow', function () {
             10,
             10,
             MOCK_URL,
-            MOCK_HASH
+            MOCK_HASH,
+            MOCK_FORTUNES
           );
 
         expect(await escrow.reputationOracle()).to.equal(

@@ -1,8 +1,5 @@
 const Web3 = require('web3');
-const {
-  filterAddressesToReward,
-  calculateRewardForWorker,
-} = require('./rewards');
+const { filterAddressesToReward } = require('./rewards');
 
 const worker1 = '0x90F79bf6EB2c4f870365E785982E1f101E93b906';
 const worker2 = '0xcd3B766CCDd6AE721141F452C550Ca635964ce71';
@@ -15,11 +12,18 @@ describe('Rewards', () => {
       { worker: worker2, fortune: 'fortune' },
       { worker: worker3, fortune: 'fortune1' },
     ]);
-    expect(result).toStrictEqual([worker1, worker3]);
+
+    expect(result.workerAddresses).toStrictEqual([worker1, worker3]);
   });
 
-  it('Calculate rewards', async () => {
-    const result = calculateRewardForWorker(30, [worker1, worker2, worker3]);
-    expect(result).toStrictEqual(['10', '10', '10']);
+  it('Check fortune bad words', async () => {
+    const result = filterAddressesToReward(new Web3(), [
+      { worker: worker1, fortune: 'damn' },
+      { worker: worker2, fortune: 'fortune' },
+      { worker: worker3, fortune: 'shit should be blocked' },
+    ]);
+    expect(result.workerAddresses).toStrictEqual([worker2]);
+    expect(result.reputationValues[0].reputation).toStrictEqual(-1);
+    expect(result.reputationValues[2].reputation).toStrictEqual(-1);
   });
 });

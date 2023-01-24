@@ -69,11 +69,15 @@ describe('Escrow', () => {
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
-        arguments: [token.options.address, staking.options.address],
+        arguments: [],
       })
       .send({
         from: owner.address,
       });
+
+    await escrowFactory.methods.initialize(staking.options.address).send({
+      from: owner.address,
+    });
 
     await token.methods
       .approve(staking.options.address, web3.utils.toWei('500', 'ether'))
@@ -84,7 +88,7 @@ describe('Escrow', () => {
       .send({ from: owner.address });
 
     await escrowFactory.methods
-      .createEscrow([owner.address])
+      .createEscrow(token.options.address, [owner.address])
       .send({ from: owner.address });
 
     escrowAddress = await escrowFactory.methods.lastEscrow().call();
@@ -102,7 +106,8 @@ describe('Escrow', () => {
         10,
         10,
         'manifestUrl',
-        'manifestUrl'
+        'manifestUrl',
+        3
       )
       .send({ from: owner.address });
   });
