@@ -3,7 +3,7 @@
 |                     | Network Type | Status     | HMTToken                                   | Proxy | EscrowFactory                              | Staking | KVStore                                    |
 |---------------------|--------------|------------|--------------------------------------------|-------|--------------------------------------------|---------|--------------------------------------------|
 | Polygon             | Mainnet      | Active     | 0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF |       | 0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794 |         | 0x6334dB76037bb6d4bc21901433E870b22ACa1F9a |
-| Mumbai              | Testnet      | Active     | 0x3b25BC1dC591D24d60560d0135D6750A561D4764 |       | 0x558cd800f9F0B02f3B149667bDe003284c867E94 |         | 0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF |
+| Mumbai              | Testnet      | Active     | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 |       | 0x558cd800f9F0B02f3B149667bDe003284c867E94 |         | 0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF |
 | Goerli              | Testnet      | Active     | 0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317 |       | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |         |                                            |
 | Rinkeby             | Testnet      | Deprecated | 0x4dCf5ac4509888714dd43A5cCc46d7ab389D9c23 |       | 0x925B24444511c86F4d4E63141D8Be0A025E2dca4 |         |                                            |
 | Binance Smart Chain | Mainnet      | Active     | 0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7 |       | 0xc88bC422cAAb2ac8812de03176402dbcA09533f4 |         | 0x8340412Ed68BcF53a7Da72BFFc1E2E74CfdE74D0 |
