@@ -61,8 +61,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _duration,
         address[] memory _handlers
     ) {
-        require(_token != address(0), ERROR_ZERO_ADDRESS);
-        require(_canceler != address(0), ERROR_ZERO_ADDRESS);
+        // require(_token != address(0), ERROR_ZERO_ADDRESS);
+        // require(_canceler != address(0), ERROR_ZERO_ADDRESS);
 
         token = _token;
         status = EscrowStatuses.Launched;
@@ -90,7 +90,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             'Address calling cannot add trusted handlers'
         );
         for (uint256 i = 0; i < _handlers.length; i++) {
-            require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
+            // require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
             areTrustedHandlers[_handlers[i]] = true;
             emit TrustedHandlerAdded(_handlers[i]);
         }
