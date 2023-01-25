@@ -16,7 +16,7 @@
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
     "local": "concurrently --hide 0 \"hardhat node\" \"yarn deploy:local\"",
-    "local:port": "concurrently --hide 0 \"hardhat node --port $RPC_PORT\" \"yarn deploy:local\"",
+    "local:port": "concurrently \"hardhat node --port $RPC_PORT\" \"yarn deploy:local\"",
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "lint": "eslint .",
