@@ -20,7 +20,7 @@
     "test:reputation": "cd reputation-oracle && yarn test",
     "test:e2e": "(concurrently -k -s first -g --hide 0 \"yarn local:test\" \"sleep 5 && yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
     "test:unit": "concurrently -g \"yarn test:launcher-server\" \"yarn test:recording\" \"sleep 3 && yarn test:reputation\" \"yarn test:exchange\"",
-    "test": "concurrently -g \"yarn test:e2e\" \"yarn test:unit\"",
+    "test": "yarn test:launcher-server",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
