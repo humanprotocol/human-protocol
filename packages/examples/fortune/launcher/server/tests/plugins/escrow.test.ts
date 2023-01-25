@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll } from 'vitest';
-import { ChainId, IEscrowNetwork } from "../../src/constants/networks.js";
+import { ChainId, ESCROW_NETWORKS, IEscrowNetwork } from "../../src/constants/networks.js";
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "json" };
 import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "json" };
 import server from '../../src/server.js'
@@ -10,13 +10,7 @@ const jobRequester = '0xdD2FD4581271e230360230F9337D5c0430Bf44C0';
 
 describe('Escrow tests', () => {
   const { escrow, web3 } = server;
-  const network: IEscrowNetwork = {
-    chainId: ChainId.LOCALHOST,
-    factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
-    hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-    rpcUrl: 'http://localhost:8546',
-    title: 'Localhost'
-  };
+  const network = ESCROW_NETWORKS[ChainId.LOCALHOST] as IEscrowNetwork;
   const web3Client = web3.createWeb3(network);
   const web3JobRequester = web3.createWeb3(network, jobRequesterPrivKey);
   

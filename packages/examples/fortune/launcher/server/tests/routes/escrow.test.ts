@@ -7,7 +7,7 @@ const jobRequesterPrivKey = '689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b0616
 const jobRequester = '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E';
 
 describe('Escrow route tests', () => {
-    const { escrow, web3, s3 } = server;
+    const { web3, s3 } = server;
 
     const network = ESCROW_NETWORKS[ChainId.LOCALHOST] as IEscrowNetwork;
     const web3Client = web3.createWeb3(network);
@@ -74,7 +74,7 @@ describe('Escrow route tests', () => {
                 jobRequester: jobRequester
             }
         });
-        
+
         expect(response.statusCode).eq(200);
         expect(response.body).contains('0x');
     });
