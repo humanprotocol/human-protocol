@@ -1,0 +1,13 @@
+[workspace]
+
+members = [
+
+    # Escrow contract paths
+    "contracts/escrow",
+    "contracts/escrow/meta",
+
+    # Escrow factory contract paths
+    "contracts/escrow-factory",
+    "contracts/escrow-factory/meta",
+
+]

@@ -1,0 +1,5 @@
+# Contract builds
+output/
+
+# Rust targets
+target/
