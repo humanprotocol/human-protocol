@@ -49,7 +49,7 @@ describe('Escrow tests', () => {
     expect(await hmtContract.methods.balanceOf(escrowAddress).call()).eq(amount);
   });
 
-  test('Should setup an escrow ', async () => {
+  test('Should setup an escrow', async () => {
     const escrowAddress = await escrow.createEscrow(web3Client, network.factoryAddress, network.hmtAddress, jobRequester);
     const escrowContract = new web3Client.eth.Contract(EscrowAbi as [], escrowAddress);
     const url = 'http://test.com';
@@ -57,5 +57,12 @@ describe('Escrow tests', () => {
     expect(await escrowContract.methods.manifestUrl().call()).eq(url);
     expect(Number(await escrowContract.methods.remainingFortunes().call())).eq(3);
   });
+
+  test('Should not detect curse words', async () => {
+    expect(escrow.checkCurseWords("hello world")).eq(false);
+  });
   
+  test('Should detect curse words', async () => {
+    expect(escrow.checkCurseWords("porn")).eq(true);
+  });
 });

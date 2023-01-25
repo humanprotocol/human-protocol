@@ -6,6 +6,7 @@ import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "js
 import { escrow as escrowSchema } from '../schemas/escrow.js';
 import Web3 from 'web3';
 import { REC_ORACLE_ADDRESS, REC_ORACLE_PERCENTAGE_FEE, REP_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE } from "../constants/oracles.js";
+import { CURSE_WORDS } from "../constants/curseWords.js";
 
 class Escrow {
     async setupEscrow (web3: Web3, escrowAddress: string, url: string, fortunesRequested: number) {
@@ -51,6 +52,11 @@ class Escrow {
         var result = await hmtoken.methods
             .transferFrom(jobRequester, escrowAddress, fundAmount)
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+    }
+
+    checkCurseWords(text: string): boolean {
+        const words = text.replace(/[^a-zA-Z0-9 ]/g, '').split(' ');
+        return CURSE_WORDS.some(w => words.includes(w));
     }
 }
 

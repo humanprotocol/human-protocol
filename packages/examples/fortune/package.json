@@ -14,7 +14,7 @@
     "deploy:contracts": "yarn workspace @human-protocol/core install && yarn workspace @human-protocol/core deploy:local",
     "local": "docker compose down && (concurrently --hide 0 \"hardhat node\" \"yarn exchange\"  \"yarn launcher\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn deploy:contracts\" \"yarn minio\")",
     "local:test": "docker compose down && (concurrently --hide 0 \"hardhat node\" \"yarn recording-oracle\" \"yarn reputation-oracle\" \"yarn minio\")",
-    "test:launcher-server": "yarn workspace @human-protocol/job-launcher-server test:unit",
+    "test:launcher-server": "yarn workspace @human-protocol/job-launcher-server test",
     "test:exchange": "cd exchange && yarn test",
     "test:recording": "cd recording-oracle && yarn test",
     "test:reputation": "cd reputation-oracle && yarn test",
