@@ -5,7 +5,6 @@
   "description": "Human Protocol Fortune Exchange Oracle",
   "license": "MIT",
   "scripts": {
-    "install:all": "cd exchange && yarn && cd ../launcher && yarn && cd ../recording-oracle && yarn && cd ../reputation-oracle && yarn",
     "exchange": "cd exchange && yarn && yarn start",
     "launcher": "cd launcher && yarn && yarn start",
     "recording-oracle": "cd recording-oracle && yarn start",
@@ -20,7 +19,7 @@
     "test:reputation": "cd reputation-oracle && yarn test",
     "test:e2e": "(concurrently -k -s first -g --hide 0 \"yarn local:test\" \"sleep 5 && yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
     "test:unit": "concurrently -g \"yarn test:launcher-server\" \"yarn test:recording\" \"sleep 3 && yarn test:reputation\" \"yarn test:exchange\"",
-    "test": "yarn test:launcher-server",
+    "test": "concurrently -g \"yarn test:e2e\" \"yarn test:unit\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
