@@ -18,6 +18,7 @@
     "local": "concurrently --hide 0 \"hardhat node\" \"yarn deploy:local\"",
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
+    "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",

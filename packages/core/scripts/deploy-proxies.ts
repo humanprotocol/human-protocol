@@ -1,22 +1,18 @@
 /* eslint-disable no-console */
+import { Console } from 'console';
 import { ethers, upgrades } from 'hardhat';
 
 async function main() {
-  const [, ...accounts] = await ethers.getSigners();
-  const HMToken = await ethers.getContractFactory('HMToken');
-  const HMTokenContract = await HMToken.deploy(
-    1000000000,
-    'Human Token',
-    18,
-    'HMT'
-  );
-  await HMTokenContract.deployed();
-  console.log('HMToken Address: ', HMTokenContract.address);
+  const hmtAddress = process.env.HMT_ADDRESS;
+  if (!hmtAddress) {
+    console.error('HMT_ADDRESS env variable missing');
+    return;
+  }
 
   const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
-    [HMTokenContract.address, 1, 1],
+    [hmtAddress, 1, 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.deployed();
@@ -50,7 +46,7 @@ async function main() {
   const RewardPool = await ethers.getContractFactory('RewardPool');
   const rewardPoolContract = await upgrades.deployProxy(
     RewardPool,
-    [HMTokenContract.address, stakingContract.address, 1],
+    [hmtAddress, stakingContract.address, 1],
     { initializer: 'initialize', kind: 'uups' }
   );
   await rewardPoolContract.deployed();
@@ -62,13 +58,6 @@ async function main() {
 
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);
-
-  for (const account of accounts) {
-    await HMTokenContract.transfer(
-      account.address,
-      ethers.utils.parseEther('1000')
-    );
-  }
 
   const Reputation = await ethers.getContractFactory('Reputation');
   const reputationContract = await upgrades.deployProxy(
