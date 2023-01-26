@@ -1,0 +1,27 @@
+{
+  "name": "@human-protocol/job-launcher-server",
+  "version": "1.0.0",
+  "description": "Job Launcher Server",
+  "main": "index.ts",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "dependencies": {
+    "@fastify/cors": "^8.2.0",
+    "@human-protocol/core": "workspace:*",
+    "@types/node": "^18.11.18",
+    "bn.js": "^5.2.1",
+    "fastify": "^4.11.0",
+    "typescript": "^4.9.4"
+  },
+  "devDependencies": {
+    "pino-pretty": "^9.1.1",
+    "ts-node": "^10.9.1",
+    "vitest": "^0.28.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node --esm ./src/index.ts",
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && cross-env RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && vitest --run\""
+  }
+}
