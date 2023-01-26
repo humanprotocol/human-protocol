@@ -2,10 +2,8 @@ import "dotenv/config";
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
 import * as Minio from 'minio';
-import { escrow as escrowSchema } from '../schemas/escrow.js';
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
-import { EX_ORACLE_ADDRESS, EX_ORACLE_URL, REC_ORACLE_ADDRESS, REC_ORACLE_URL, REP_ORACLE_ADDRESS, REP_ORACLE_URL } from "../constants/oracles.js";
 
 const ConfigSchema = Type.Strict(
     Type.Object({

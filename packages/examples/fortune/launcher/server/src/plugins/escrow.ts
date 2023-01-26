@@ -5,18 +5,49 @@ import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "json" };
 import { escrow as escrowSchema } from '../schemas/escrow.js';
 import Web3 from 'web3';
-import { EX_ORACLE_ADDRESS, EX_ORACLE_URL, REC_ORACLE_ADDRESS, REC_ORACLE_PERCENTAGE_FEE, REC_ORACLE_URL, REP_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REP_ORACLE_URL } from "../constants/oracles.js";
 import { CURSE_WORDS } from "../constants/curseWords.js";
+import server from '../server.js';
+import { Type } from "@sinclair/typebox";
+import Ajv from "ajv";
 
+const ConfigSchema = Type.Strict(
+    Type.Object({
+      REC_ORACLE_ADDRESS: Type.String(),
+      REP_ORACLE_ADDRESS: Type.String(),
+      EX_ORACLE_ADDRESS: Type.String(),
+      REC_ORACLE_URL: Type.String(),
+      REP_ORACLE_URL: Type.String(),
+      EX_ORACLE_URL: Type.String(),
+      REC_ORACLE_PERCENTAGE_FEE: Type.Number(),
+      REP_ORACLE_PERCENTAGE_FEE: Type.Number(),
+    })
+);
+  
+const ajv = new Ajv({
+    allErrors: true,
+    removeAdditional: true,
+    useDefaults: true,
+    coerceTypes: true,
+    allowUnionTypes: true,
+});
+  
 class Escrow {
+    private recOracleAddress = process.env.REC_ORACLE_ADDRESS as string;
+    private repOracleAddress = process.env.REP_ORACLE_ADDRESS as string;
+    private exOracleAddress = process.env.EX_ORACLE_ADDRESS as string;
+    private recOracleUrl = process.env.REC_ORACLE_URL as string;
+    private repOracleUrl = process.env.REP_ORACLE_URL as string;
+    private exOracleUrl = process.env.EX_ORACLE_URL as string;
+    private recOracleFee = Number(process.env.REC_ORACLE_PERCENTAGE_FEE);
+    private repOracleFee = Number(process.env.REP_ORACLE_PERCENTAGE_FEE);
     async setupEscrow (web3: Web3, escrowAddress: string, url: string, fortunesRequested: number) {
         const escrowContract = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
         const gas = await escrowContract.methods
-            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url, fortunesRequested)
+            .setup(this.repOracleAddress, this.recOracleAddress, this.repOracleFee, this.recOracleFee, url, url, fortunesRequested)
             .estimateGas({ from: web3.eth.defaultAccount });
         const gasPrice = await web3.eth.getGasPrice();
         const result = await escrowContract.methods
-            .setup(REP_ORACLE_ADDRESS, REC_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REC_ORACLE_PERCENTAGE_FEE, url, url, fortunesRequested)
+            .setup(this.repOracleAddress, this.recOracleAddress, this.repOracleFee, this.recOracleFee, url, url, fortunesRequested)
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
     }
 
@@ -61,18 +92,26 @@ class Escrow {
 
     addOraclesData(escrow: typeof escrowSchema.properties) {
         const data = escrow as any;
-        data.recordingOracleAddress = REC_ORACLE_ADDRESS;
-        data.reputationOracleAddress = REP_ORACLE_ADDRESS;
-        data.exchangeOracleAddress = EX_ORACLE_ADDRESS;
-        data.recordingOracleUrl = REC_ORACLE_URL;
-        data.reputationOracleUrl = REP_ORACLE_URL;
-        data.exchangeOracleUrl = EX_ORACLE_URL;
+        data.recordingOracleAddress = this.recOracleAddress;
+        data.reputationOracleAddress = this.repOracleAddress;
+        data.exchangeOracleAddress = this.exOracleAddress;
+        data.recordingOracleUrl = this.recOracleUrl;
+        data.reputationOracleUrl = this.repOracleUrl;
+        data.exchangeOracleUrl = this.exOracleUrl;
         return data;
     }
 }
 
 const escrowPlugin: FastifyPluginAsync = async (server) => {
-  server.decorate("escrow", new Escrow());
+    const validate = ajv.compile(ConfigSchema);
+    const valid = validate(process.env);
+    if (!valid) {
+      throw new Error(
+        ".env file validation failed - " +
+          JSON.stringify(validate.errors, null, 2)
+      );
+    }
+    server.decorate("escrow", new Escrow());
 };
 
 declare module "fastify" {

@@ -16,6 +16,14 @@ const ConfigSchema = Type.Strict(
     LOG_LEVEL: Type.String(),
     API_HOST: Type.String(),
     API_PORT: Type.String(),
+    REC_ORACLE_ADDRESS: Type.String(),
+    REP_ORACLE_ADDRESS: Type.String(),
+    EX_ORACLE_ADDRESS: Type.String(),
+    REC_ORACLE_URL: Type.String(),
+    REP_ORACLE_URL: Type.String(),
+    EX_ORACLE_URL: Type.String(),
+    REC_ORACLE_PERCENTAGE_FEE: Type.Number(),
+    REP_ORACLE_PERCENTAGE_FEE: Type.Number(),
   })
 );
 
