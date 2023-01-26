@@ -2183,7 +2183,7 @@
     slash "^3.0.0"
     strip-ansi "^6.0.0"
 
-"@jest/core@^29.4.0":
+"@jest/core@^29.3.1", "@jest/core@^29.4.0":
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/@jest/core/-/core-29.4.0.tgz#23cf275372c51d1191a8cd9f36f8d5a47a4e9041"
   integrity sha512-E7oCMcENobBFwQXYjnN2IsuUSpRo5jSv7VYk6O9GyQ5kVAfVSS8819I4W5iCCYvqD6+1TzyzLpeEdZEik81kNw==
@@ -2408,7 +2408,7 @@
     "@types/istanbul-lib-coverage" "^2.0.0"
     collect-v8-coverage "^1.0.0"
 
-"@jest/test-result@^29.4.0":
+"@jest/test-result@^29.3.1", "@jest/test-result@^29.4.0":
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/@jest/test-result/-/test-result-29.4.0.tgz#64f7bd518d6d2a6662c40569e208e030a370f351"
   integrity sha512-EtRklzjpddZU/aBVxJqqejfzfOcnehmjNXufs6u6qwd05kkhXpAPhZdt8bLlQd7cA2nD+JqZQ5Dx9NX5Jh6mjA==
@@ -2503,7 +2503,7 @@
     "@types/yargs" "^17.0.8"
     chalk "^4.0.0"
 
-"@jest/types@^29.4.0":
+"@jest/types@^29.3.1", "@jest/types@^29.4.0":
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/@jest/types/-/types-29.4.0.tgz#569115f2438cacf3cff92521c7d624fbb683de3d"
   integrity sha512-1S2Dt5uQp7R0bGY/L2BpuwCSji7v12kY3o8zqwlkbYBmOY956SKk+zOWqmfhHSINegiAVqOXydAYuWpzX6TYsQ==
@@ -10994,9 +10994,9 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-"gluegun@git+https://github.com/edgeandnode/gluegun.git#v4.3.1-pin-colors-dep":
+"gluegun@https://github.com/edgeandnode/gluegun#v4.3.1-pin-colors-dep":
   version "4.3.1"
-  resolved "git+https://github.com/edgeandnode/gluegun.git#b34b9003d7bf556836da41b57ef36eb21570620a"
+  resolved "https://github.com/edgeandnode/gluegun#b34b9003d7bf556836da41b57ef36eb21570620a"
   dependencies:
     apisauce "^1.0.1"
     app-module-path "^2.2.0"
@@ -12817,21 +12817,21 @@ jest-cli@^27.5.1:
     prompts "^2.0.1"
     yargs "^16.2.0"
 
-jest-cli@^29.4.0:
-  version "29.4.0"
-  resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-29.4.0.tgz#63f34fc3b6f499a69337b2e5964661d22cead9e0"
-  integrity sha512-YUkICcxjUd864VOzbfQEi2qd2hIIOd9bRF7LJUNyhWb3Khh3YKrbY0LWwoZZ4WkvukiNdvQu0Z4s6zLsY4hYfg==
+jest-cli@^29.3.1:
+  version "29.3.1"
+  resolved "https://registry.yarnpkg.com/jest-cli/-/jest-cli-29.3.1.tgz#e89dff427db3b1df50cea9a393ebd8640790416d"
+  integrity sha512-TO/ewvwyvPOiBBuWZ0gm04z3WWP8TIK8acgPzE4IxgsLKQgb377NYGrQLc3Wl/7ndWzIH2CDNNsUjGxwLL43VQ==
   dependencies:
-    "@jest/core" "^29.4.0"
-    "@jest/test-result" "^29.4.0"
-    "@jest/types" "^29.4.0"
+    "@jest/core" "^29.3.1"
+    "@jest/test-result" "^29.3.1"
+    "@jest/types" "^29.3.1"
     chalk "^4.0.0"
     exit "^0.1.2"
     graceful-fs "^4.2.9"
     import-local "^3.0.2"
-    jest-config "^29.4.0"
-    jest-util "^29.4.0"
-    jest-validate "^29.4.0"
+    jest-config "^29.3.1"
+    jest-util "^29.3.1"
+    jest-validate "^29.3.1"
     prompts "^2.0.1"
     yargs "^17.3.1"
 
@@ -12865,7 +12865,7 @@ jest-config@^27.5.1:
     slash "^3.0.0"
     strip-json-comments "^3.1.1"
 
-jest-config@^29.4.0:
+jest-config@^29.3.1, jest-config@^29.4.0:
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/jest-config/-/jest-config-29.4.0.tgz#08065bcfc7c2ccfd3ca9f8bb412eb366d73fd5a2"
   integrity sha512-jtgd72nN4Mob4Oego3N/pLRVfR2ui1hv+yO6xR/SUi5G7NtZ/grr95BJ1qRSDYZshuA0Jw57fnttZHZKb04+CA==
@@ -13439,7 +13439,7 @@ jest-util@^28.1.3:
     graceful-fs "^4.2.9"
     picomatch "^2.2.3"
 
-jest-util@^29.0.0, jest-util@^29.4.0:
+jest-util@^29.0.0, jest-util@^29.3.1, jest-util@^29.4.0:
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/jest-util/-/jest-util-29.4.0.tgz#1f3743c3dda843049623501c7e6f8fa5efdc2c2f"
   integrity sha512-lCCwlze7UEV8TpR9ArS8w0cTbcMry5tlBkg7QSc5og5kNyV59dnY2aKHu5fY2k5aDJMQpCUGpvL2w6ZU44lveA==
@@ -13463,7 +13463,7 @@ jest-validate@^27.5.1:
     leven "^3.1.0"
     pretty-format "^27.5.1"
 
-jest-validate@^29.4.0:
+jest-validate@^29.3.1, jest-validate@^29.4.0:
   version "29.4.0"
   resolved "https://registry.yarnpkg.com/jest-validate/-/jest-validate-29.4.0.tgz#5090be16531051edc21bc0892553f7f7fab99bf0"
   integrity sha512-EXS7u594nX3aAPBnARxBdJ1eZ1cByV6MWrK0Qpt9lt/BcY0p0yYGp/EGJ8GhdLDQh+RFf8qMt2wzbbVzpj5+Vg==
