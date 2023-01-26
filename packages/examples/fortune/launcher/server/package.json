@@ -22,6 +22,6 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node --esm ./src/index.ts",
-    "test": "concurrently -k -s first \"hardhat node --port 8546\" \"sleep 5 && cross-env RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && vitest --run\""
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && cross-env RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && vitest --run\""
   }
 }

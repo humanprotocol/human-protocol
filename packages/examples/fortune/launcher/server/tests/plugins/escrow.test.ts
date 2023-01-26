@@ -4,6 +4,8 @@ import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "js
 import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "json" };
 import server from '../../src/server.js'
 import { stake, approve } from '../utils.js'
+import { escrow as escrowSchema } from '../../src/schemas/escrow.js';
+import { EX_ORACLE_ADDRESS, EX_ORACLE_URL, REC_ORACLE_ADDRESS, REC_ORACLE_URL, REP_ORACLE_ADDRESS, REP_ORACLE_URL } from '../../src/constants/oracles.js';
 
 const jobRequesterPrivKey = 'de9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0';
 const jobRequester = '0xdD2FD4581271e230360230F9337D5c0430Bf44C0';
@@ -52,11 +54,32 @@ describe('Escrow tests', () => {
     expect(Number(await escrowContract.methods.remainingSolutions().call())).eq(3);
   });
 
-  test('Should not detect curse words', async () => {
+  test('Should not detect curse words', () => {
     expect(escrow.checkCurseWords("hello world")).eq(false);
   });
   
-  test('Should detect curse words', async () => {
+  test('Should detect curse words', () => {
     expect(escrow.checkCurseWords("porn")).eq(true);
+  });
+
+  test('Should add oracles info', () => {
+    const escrowData = {
+      chainId: 1338,
+      title: "title 1",
+      description: "description 1",
+      fortunesRequired: 2,
+      token: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      fundAmount: 1,
+      jobRequester: jobRequester
+    };
+    const result = escrow.addOraclesData(escrowData as unknown as typeof escrowSchema.properties);
+
+    expect(result.recordingOracleAddress).eq(REC_ORACLE_ADDRESS);
+    expect(result.reputationOracleAddress).eq(REP_ORACLE_ADDRESS);
+    expect(result.exchangeOracleAddress).eq(EX_ORACLE_ADDRESS);
+    expect(result.recordingOracleUrl).eq(REC_ORACLE_URL);
+    expect(result.recordingOracleUrl).eq(REP_ORACLE_URL);
+    expect(result.recordingOracleUrl).eq(EX_ORACLE_URL);
+
   });
 });

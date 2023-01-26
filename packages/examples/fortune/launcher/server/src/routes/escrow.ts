@@ -48,7 +48,8 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
           return reply.status(400).send('Title or description contains curse words');
         const escrowAddress = await escrow.createEscrow(web3Client, escrowNetwork.factoryAddress, token, jobRequester);
         await escrow.fundEscrow(web3Client, token, jobRequester, escrowAddress, fundAmount);
-        const url = await s3.uploadManifest(escrowData, escrowAddress);
+        const data = escrow.addOraclesData(escrowData);
+        const url = await s3.uploadManifest(data, escrowAddress);
         const fortunesRequested = Number(escrowData.fortunesRequired);
         await escrow.setupEscrow(web3Client, escrowAddress, url, fortunesRequested);
         return escrowAddress;

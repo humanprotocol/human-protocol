@@ -5,7 +5,7 @@ import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "json" };
 import { escrow as escrowSchema } from '../schemas/escrow.js';
 import Web3 from 'web3';
-import { REC_ORACLE_ADDRESS, REC_ORACLE_PERCENTAGE_FEE, REP_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE } from "../constants/oracles.js";
+import { EX_ORACLE_ADDRESS, EX_ORACLE_URL, REC_ORACLE_ADDRESS, REC_ORACLE_PERCENTAGE_FEE, REC_ORACLE_URL, REP_ORACLE_ADDRESS, REP_ORACLE_PERCENTAGE_FEE, REP_ORACLE_URL } from "../constants/oracles.js";
 import { CURSE_WORDS } from "../constants/curseWords.js";
 
 class Escrow {
@@ -57,6 +57,17 @@ class Escrow {
     checkCurseWords(text: string): boolean {
         const words = text.replace(/[^a-zA-Z0-9 ]/g, '').split(' ');
         return CURSE_WORDS.some(w => words.includes(w));
+    }
+
+    addOraclesData(escrow: typeof escrowSchema.properties) {
+        const data = escrow as any;
+        data.recordingOracleAddress = REC_ORACLE_ADDRESS;
+        data.reputationOracleAddress = REP_ORACLE_ADDRESS;
+        data.exchangeOracleAddress = EX_ORACLE_ADDRESS;
+        data.recordingOracleUrl = REC_ORACLE_URL;
+        data.reputationOracleUrl = REP_ORACLE_URL;
+        data.exchangeOracleUrl = EX_ORACLE_URL;
+        return data;
     }
 }
 

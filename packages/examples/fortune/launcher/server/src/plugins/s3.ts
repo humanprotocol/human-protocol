@@ -5,6 +5,7 @@ import * as Minio from 'minio';
 import { escrow as escrowSchema } from '../schemas/escrow.js';
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
+import { EX_ORACLE_ADDRESS, EX_ORACLE_URL, REC_ORACLE_ADDRESS, REC_ORACLE_URL, REP_ORACLE_ADDRESS, REP_ORACLE_URL } from "../constants/oracles.js";
 
 const ConfigSchema = Type.Strict(
     Type.Object({
@@ -44,21 +45,20 @@ class S3Client {
           });
     }
     
-    async uploadManifest(escrow: typeof escrowSchema.properties, escrowAddress: string) {
-    const fileName = `${escrowAddress}-manifest.json`;
-
-    const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);
-    if (!bucketExists) {
-    await this.s3Client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
+    async uploadManifest(escrowData: any, escrowAddress: string) {
+      const fileName = `${escrowAddress}-manifest.json`;
+      const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);
+      if (!bucketExists) {
+      await this.s3Client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
+      }
+      await this.s3Client.putObject(
+          this.s3BucketName,
+          fileName,
+          JSON.stringify(escrowData),
+          { 'Content-Type': 'application/json' }
+      );
+      return `${this.s3BaseUrl}${fileName}`
     }
-    await this.s3Client.putObject(
-        this.s3BucketName,
-        fileName,
-        JSON.stringify(escrow),
-        { 'Content-Type': 'application/json' }
-    );
-    return `${this.s3BaseUrl}${fileName}`
-}
   }
 
 const s3Plugin: FastifyPluginAsync = async (server) => {
