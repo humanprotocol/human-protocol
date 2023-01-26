@@ -25,11 +25,11 @@ export function filterAddressesToReward(
     const { fortune, score } = fortunesEntries[workerAddress];
     if (tmpHashMap[fortune] || checkBadWords(fortune)) {
       reputationValues.push({ workerAddress, reputation: -1 });
-      if (!score) {
+      if (score) {
         errorRecordingOracle = true;
       }
       return;
-    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && score) {
+    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && !score) {
       errorRecordingOracle = true;
     }
 
