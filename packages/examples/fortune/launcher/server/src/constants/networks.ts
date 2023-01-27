@@ -64,7 +64,7 @@ export const ESCROW_NETWORKS: {
       chainId: ChainId.POLYGON_MUMBAI,
       title: 'Polygon Mumbai',
       rpcUrl: 'https://rpc-mumbai.maticvigil.com',
-      factoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
+      factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
       hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
   },
   [ChainId.LOCALHOST]: {

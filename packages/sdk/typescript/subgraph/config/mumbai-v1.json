@@ -2,8 +2,8 @@
   "network": "mumbai",
   "description": "Human subgraph on Polygon Mumbai testnet",
   "EscrowFactory": {
-    "address": "0x558cd800f9F0B02f3B149667bDe003284c867E94",
-    "startBlock": 26086172,
+    "address": "0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d",
+    "startBlock": 31433945,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -15,13 +15,13 @@
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0xf421fD3eB97982C205966ebB514Ab2E435c6d5B7",
-    "startBlock": 31060831,
+    "address": "0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac",
+    "startBlock": 31433938,
     "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x459EE403d060B84b5014605D6739cCFed32AFb96",
-    "startBlock": 31059244,
+    "address": "0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807",
+    "startBlock": 31433948,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }
