@@ -6,7 +6,7 @@ import { Escrow, HMToken } from '../typechain-types';
 
 const MOCK_URL = 'http://google.com/fake';
 const MOCK_HASH = 'kGKmnj9BRf';
-const MOCK_FORTUNES = 3;
+const MOCK_SOLUTIONS = 3;
 const BULK_MAX_COUNT = 100;
 
 enum Status {
@@ -49,7 +49,7 @@ async function setupEscrow() {
       10,
       MOCK_URL,
       MOCK_HASH,
-      MOCK_FORTUNES
+      MOCK_SOLUTIONS
     );
 }
 
@@ -265,7 +265,7 @@ describe('Escrow', function () {
               10,
               MOCK_URL,
               MOCK_HASH,
-              MOCK_FORTUNES
+              MOCK_SOLUTIONS
             )
         ).to.be.revertedWith('Address calling not trusted');
       });
@@ -281,7 +281,7 @@ describe('Escrow', function () {
               10,
               MOCK_URL,
               MOCK_HASH,
-              MOCK_FORTUNES
+              MOCK_SOLUTIONS
             )
         ).to.be.revertedWith('Invalid or missing token spender');
       });
@@ -297,12 +297,12 @@ describe('Escrow', function () {
               10,
               MOCK_URL,
               MOCK_HASH,
-              MOCK_FORTUNES
+              MOCK_SOLUTIONS
             )
         ).to.be.revertedWith('Invalid or missing token spender');
       });
 
-      it('Should revert with the right error if set invalid number of fortunes', async function () {
+      it('Should revert with the right error if set invalid number of solutions', async function () {
         await expect(
           escrow
             .connect(owner)
@@ -315,7 +315,7 @@ describe('Escrow', function () {
               MOCK_HASH,
               0
             )
-        ).to.be.revertedWith('Invalid or missing fortunes');
+        ).to.be.revertedWith('Invalid or missing solutions');
       });
 
       it('Should revert with the right error if stake out of bounds and too high', async function () {
@@ -329,7 +329,7 @@ describe('Escrow', function () {
               500,
               MOCK_URL,
               MOCK_HASH,
-              MOCK_FORTUNES
+              MOCK_SOLUTIONS
             )
         ).to.be.revertedWith('Stake out of bounds');
       });
@@ -351,7 +351,7 @@ describe('Escrow', function () {
               10,
               MOCK_URL,
               MOCK_HASH,
-              MOCK_FORTUNES
+              MOCK_SOLUTIONS
             )
         )
           .to.emit(escrow, 'Pending')
@@ -375,7 +375,7 @@ describe('Escrow', function () {
             10,
             MOCK_URL,
             MOCK_HASH,
-            MOCK_FORTUNES
+            MOCK_SOLUTIONS
           );
 
         expect(await escrow.reputationOracle()).to.equal(
