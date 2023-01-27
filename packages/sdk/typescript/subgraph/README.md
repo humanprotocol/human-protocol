@@ -32,7 +32,6 @@ You can access it on `http://localhost:8020/`
 
 The deployment of the graph on each network is automatically triggered by the github CI when mofications are made on the subgraph.
 
-
 ### Tests
 
 To run tests next commands should be executed:
@@ -53,21 +52,24 @@ Following networks are supported :
 - Goerli
 - Polygon Mumbai (testnet)
 
-### Add a new network
+# Add a new network
 
 You can find networks configuration in the directory `config`. Each JSON file is use to generate the `subgraph.yaml` file for each network.
 
 1. Add your network configuration as `config/NETWORK.json`
-2. On the `package.json` file add the command `npm run quickstart:{NETWORK}`
-3. On the `./.github/workflows/deploy.yaml` file add these 3command at the end of the file
-   - run: node ./scripts/generatenetworkssubgraphs.js {yourNetworkName}
-   - run: npm run codegen
-   - run: graph deploy --product hosted-service humanprotocol/{yourNetworkName}
+2. Run authentication command: `npx graph auth --product hosted-service [AUTH_TOKEN]`
+3. Generate `cross-env NETWORK=[NETWORK] yarn generate`
+4. Go to you hosted [service dashboard](https://thegraph.com/hosted-service/dashboard) and create the new subgraph
+5. Deploy the subgraph `npx graph deploy --product hosted-service humanprotocol/[SUBGRAPH_NAME]`
+6. On the `./.github/workflows/cd-subgraph.yaml` add your network name and graph name.
 
-Currently deploying to:
+# Existing subgraphs
 
-- main branch -> https://thegraph.com/hosted-service/subgraph/humanprotocol/polygon
-
-- goerli branch -> https://thegraph.com/hosted-service/subgraph/humanprotocol/goerli
-
-- mumbai branch -> https://thegraph.com/hosted-service/subgraph/humanprotocol/mumbai
+- https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1
+- https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai
+- https://api.thegraph.com/subgraphs/name/humanprotocol/polygon
+- https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam
+- https://api.thegraph.com/subgraphs/name/humanprotocol/rinkeby
+- https://api.thegraph.com/subgraphs/name/humanprotocol/goerli
+- https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest
+- https://api.thegraph.com/subgraphs/name/humanprotocol/bsc

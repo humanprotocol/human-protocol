@@ -102,3 +102,5 @@
 |2022/04/25                | HMToken        | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 | N/A                                        |
 |2022/04/25                | EscrowFactory  | 0x558cd800f9F0B02f3B149667bDe003284c867E94 |                                            |
 |2022/04/29                | EthKVStore     | 0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF | N/A                                        |
+|2023/01/17                | Staking        | 0x76E2EF2E177097E0b296E1e305d69Fe8Bae5f774 | 0xf421fD3eB97982C205966ebB514Ab2E435c6d5B7 |
+|2023/01/17                | EthKVStore     | 0x459EE403d060B84b5014605D6739cCFed32AFb96 | N/A                                        |
