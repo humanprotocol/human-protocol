@@ -14,7 +14,7 @@ import {
   calculateRewardForWorker,
 } from './services/reputation';
 import getManifest from './services/manifest';
-import { networks, NetworkSettings } from './constants/constants';
+import { ChainId, REPUTATION_NETWORKS } from './constants/constants';
 
 const app = express();
 const privKey =
@@ -28,7 +28,17 @@ app.post('/send-fortunes', async (req, res) => {
   try {
     const errorMessage: string[] = [];
     Object.keys(req.body).forEach((escrowAddress) => {
-      const { fortunes, chainId } = req.body[escrowAddress];
+      const fortunes = req.body[escrowAddress].fortunes;
+      const chainId = Number(req.body[escrowAddress].chainId) as ChainId;
+
+      if (!chainId) {
+        errorMessage.push(`ChainId is empty or invalid`);
+      }
+      const network = REPUTATION_NETWORKS[chainId];
+      if (!network) {
+        errorMessage.push('ChainId not supported');
+      }
+
       if (!Array.isArray(fortunes) || fortunes.length === 0) {
         errorMessage.push(
           `Fortunes of ${escrowAddress} are not specified or empty`
@@ -40,10 +50,6 @@ app.post('/send-fortunes', async (req, res) => {
           `Escrow address ${escrowAddress} is empty or invalid`
         );
       }
-
-      if (!networks[chainId as keyof NetworkSettings]) {
-        errorMessage.push(`ChainId ${chainId} is empty or invalid`);
-      }
     });
 
     if (errorMessage.length > 0) {
@@ -53,10 +59,11 @@ app.post('/send-fortunes', async (req, res) => {
     }
 
     for (const escrowAddress of Object.keys(req.body)) {
-      const { fortunes, chainId } = req.body[escrowAddress];
-      const web3 = new Web3(
-        networks[chainId as keyof NetworkSettings].httpServer
-      );
+      const fortunes = req.body[escrowAddress].fortunes;
+      const chainId = Number(req.body[escrowAddress].chainId) as ChainId;
+      const network = REPUTATION_NETWORKS[chainId];
+      if (!network) throw new Error('ChainId not supported');
+      const web3 = new Web3(network.reputationAddress);
       const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
       web3.eth.accounts.wallet.add(account);
       web3.eth.defaultAccount = account.address;
@@ -75,12 +82,12 @@ app.post('/send-fortunes', async (req, res) => {
 
       await updateReputations(
         web3,
-        networks[chainId as keyof NetworkSettings].reputation,
+        network.reputationAddress,
         reputationValues
       );
       const rewards = await calculateRewardForWorker(
         web3,
-        networks[chainId as keyof NetworkSettings].reputation,
+        network.reputationAddress,
         balance.toString(),
         workerAddresses
       );
