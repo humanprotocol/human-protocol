@@ -2,8 +2,8 @@ import Web3 from 'web3';
 import { BAD_WORDS } from '../constants/badWords';
 
 export interface FortuneEntry {
-  worker: string;
   fortune: string;
+  score: boolean;
 }
 
 export interface ReputationEntry {
@@ -13,26 +13,42 @@ export interface ReputationEntry {
 
 export function filterAddressesToReward(
   web3: Web3,
-  addressFortunesEntries: FortuneEntry[]
+  fortunesEntries: { [key: string]: FortuneEntry },
+  recordingOracleAddress: string
 ) {
-  const filteredResults: FortuneEntry[] = [];
+  const filteredWorkers: string[] = [];
   const reputationValues: ReputationEntry[] = [];
   const tmpHashMap: Record<string, boolean> = {};
+  let errorRecordingOracle = false;
 
-  addressFortunesEntries.forEach((fortuneEntry) => {
-    const { worker, fortune } = fortuneEntry;
+  Object.keys(fortunesEntries).forEach((workerAddress) => {
+    const { fortune, score } = fortunesEntries[workerAddress];
     if (tmpHashMap[fortune] || checkBadWords(fortune)) {
-      reputationValues.push({ workerAddress: worker, reputation: -1 });
+      reputationValues.push({ workerAddress, reputation: -1 });
+      if (score) {
+        errorRecordingOracle = true;
+      }
       return;
+    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && !score) {
+      errorRecordingOracle = true;
     }
 
     tmpHashMap[fortune] = true;
-    filteredResults.push(fortuneEntry);
-    reputationValues.push({ workerAddress: worker, reputation: 1 });
+    filteredWorkers.push(workerAddress);
+    reputationValues.push({ workerAddress, reputation: 1 });
   });
-  const workerAddresses = filteredResults
-    .map((fortune: { worker: string }) => fortune.worker)
-    .map(web3.utils.toChecksumAddress);
+  const workerAddresses = filteredWorkers.map(web3.utils.toChecksumAddress);
+  if (errorRecordingOracle) {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: -1,
+    });
+  } else {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: 1,
+    });
+  }
   return { workerAddresses, reputationValues };
 }
 
