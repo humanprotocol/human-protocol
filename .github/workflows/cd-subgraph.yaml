@@ -26,6 +26,10 @@ jobs:
             graph: bsctest
           - name: mumbai
             graph: mumbai
+          - name: avalanche
+            graph: avalanche
+          - name: fuji
+            graph: fuji
       fail-fast: true
       max-parallel: 3
     steps:
