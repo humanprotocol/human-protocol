@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import getWeb3 from '../../utils/web3';
 import factoryAbi from '@human-protocol/core/abis/EscrowFactory.json';
-import { ESCROW_FACTORY_ADDRESS } from '../../constants/constants';
+import { ESCROW_FACTORY_ADDRESS, HMT_ADDRESS } from '../../constants/constants';
 
 export default function CreateEscrow() {
   const [escrow, setEscrow] = useState('');
@@ -25,7 +25,7 @@ export default function CreateEscrow() {
     const mainAccount = accounts[0];
 
     const createdEscrow = await escrowFactory.methods
-      .createEscrow([mainAccount])
+      .createEscrow(HMT_ADDRESS, [mainAccount])
       .send({ from: mainAccount });
     setEscrow(createdEscrow.events.Launched.returnValues.escrow);
   };
