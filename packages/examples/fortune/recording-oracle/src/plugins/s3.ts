@@ -1,77 +1,82 @@
 import "dotenv/config";
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { Static, Type } from "@sinclair/typebox";
-import AWS from "aws-sdk";
+import * as Minio from 'minio';
+import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 import { v4 as uuid } from 'uuid';
 
-
 const ConfigSchema = Type.Strict(
-  Type.Object({
-    AWS_ACCESS_KEY_ID: Type.String(),
-    AWS_SECRET_ACCESS_KEY: Type.String(),
-    AWS_BUCKET_NAME: Type.String(),
-  })
-);
+    Type.Object({
+        S3_HOST: Type.String(),
+        S3_PORT: Type.Number(),
+        S3_ACCESS_KEY: Type.String(),
+        S3_SECRET_KEY: Type.String(),
+        S3_BUCKET_NAME: Type.String(),
+        S3_BASE_URL: Type.String()
+    })
+  );
+  
+  const ajv = new Ajv({
+    allErrors: true,
+    removeAdditional: true,
+    useDefaults: true,
+    coerceTypes: true,
+    allowUnionTypes: true,
+  });
 
-const ajv = new Ajv({
-  allErrors: true,
-  removeAdditional: true,
-  useDefaults: true,
-  coerceTypes: true,
-  allowUnionTypes: true,
-});
 
-
-class S3Client {
-  private s3: AWS.S3;
+export class S3Client {
+  private s3Client: Minio.Client;
+  private s3Host = process.env.S3_HOST as string;
+  private s3Port = Number(process.env.S3_PORT);
+  private s3AccessKey = process.env.S3_ACCESS_KEY as string;
+  private s3SecretKey = process.env.S3_SECRET_KEY as string;
+  private s3BucketName = process.env.S3_BUCKET_NAME as string;
+  private s3BaseUrl = process.env.S3_BASE_URL as string;
 
   constructor() {
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.S3_ACCESS_KEY_ID, 
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    });
+      this.s3Client = new Minio.Client({
+          endPoint: this.s3Host,
+          port: this.s3Port,
+          accessKey: this.s3AccessKey,
+          secretKey: this.s3SecretKey,
+          useSSL: false,
+        });
   }
   
-  async saveFile(data: any) {
-    const s3Bucket = process.env.AWS_BUCKET_NAME || "";
+  async saveData(data: any) {
     const fileName = `${uuid()}.json`;
-    
-    try {
-      const params = {
-        Bucket: s3Bucket,
-        Key: fileName,
-        Body: data,
-        ContentType: "application/json",
-      };
-      const result = await this.s3.putObject(params).promise();
-      console.log(
-        `File uploaded successfully at https:/${s3Bucket}.s3.amazonaws.com/${fileName}`
-      );
-    } catch (error) {
-      console.log("error");
+    const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);
+    if (!bucketExists) {
+      await this.s3Client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
     }
+    await this.s3Client.putObject(
+        this.s3BucketName,
+        fileName,
+        JSON.stringify(data),
+        { 'Content-Type': 'application/json' }
+    );
+    return `${this.s3BaseUrl}${fileName}`
   }
 }
 
 const s3Plugin: FastifyPluginAsync = async (server) => {
-  const validate = ajv.compile(ConfigSchema);
-  const valid = validate(process.env);
-  if (!valid) {
-    throw new Error(
-      ".env file validation failed - " +
-        JSON.stringify(validate.errors, null, 2)
-    );
-  }
-
-  server.decorate("s3", new S3Client());
+    const validate = ajv.compile(ConfigSchema);
+    const valid = validate(process.env);
+    if (!valid) {
+      throw new Error(
+        ".env file validation failed - " +
+          JSON.stringify(validate.errors, null, 2)
+      );
+    }
+    server.decorate("s3", new S3Client());
 };
-
+  
 declare module "fastify" {
-  interface FastifyInstance {
-    s3: S3Client;
-  }
+    interface FastifyInstance {
+      s3: S3Client;
+    }
 }
 
 export default fp(s3Plugin);

@@ -1,10 +1,10 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import EscrowAbi from "@human-protocol/core/abis/Escrow.json"
+import EscrowAbi from "@human-protocol/core/abis/Escrow.json" assert { type: "json" };
 import Web3 from 'web3';
 
 
-class Escrow {
+export class Escrow {
   async getRecordingOracleAddress(
     web3: Web3,
     escrowAddress: string

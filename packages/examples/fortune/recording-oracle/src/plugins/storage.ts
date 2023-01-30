@@ -1,19 +1,77 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
 import store from 'store2';
+import { IEscrowStorage, IFortuneStorage } from "interfaces/storage";
 
 
-class Storage {
-  get(key: string) {
-    return store.get(key);
-  }
-
-  set(key: string, data: any) {
-    return store.set(key, data);
-  }
-
-  remove(key: string) {
+export class Storage {
+  remove(key: string): boolean {
     return store.remove(key)
+  }
+
+  addEscrow(escrowAddress: string, chainId: number, fortunesRequested: number): IEscrowStorage {
+    const escrow = {
+      chainId,
+      fortunesRequested,
+      fortunes: {}
+    }
+
+    store.set(escrowAddress, escrow);
+
+    return escrow;
+  }
+
+  hasEscrow(
+    escrowAddress: string
+  ): boolean {
+    return store.has(escrowAddress);
+  }
+  
+  getEscrow(escrowAddress: string): IEscrowStorage {
+    return store.get(escrowAddress);
+  }
+  
+  getFortune(escrowAddress: string, workerAddress: string): IFortuneStorage {
+    const escrow = store.get(escrowAddress);
+    return escrow.fortunes[workerAddress];
+  }
+
+  hasFortune(
+    escrowAddress: string,
+    workerAddress: string,
+  ): boolean {
+    const escrow = store.get(escrowAddress);
+    
+    if (!escrow?.fortunes[workerAddress]) {
+      return false;
+    }
+
+    return true
+  }
+
+  addFortune(
+    escrowAddress: string,
+    workerAddress: string,
+    fortune: string,
+    score: boolean
+  ): IEscrowStorage {
+    const escrow = store.get(escrowAddress);
+    
+    if(Object.keys(escrow.fortunes).length === escrow.fortunesRequested) {
+      return escrow;
+    }
+
+    if (escrow.fortunes[workerAddress]) {
+      return escrow;
+    }
+
+    escrow.fortunes[workerAddress] = {
+      fortune,
+      score
+    }
+
+    store.set(escrowAddress, escrow);
+    return escrow;  
   }
 }
 

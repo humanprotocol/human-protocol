@@ -4,6 +4,7 @@ import { FastifyPluginAsync } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import Web3 from 'web3';
 import Ajv from "ajv";
+import { IEscrowNetwork } from "../interfaces/networks.js";
 
 const ConfigSchema = Type.Strict(
   Type.Object({
@@ -20,6 +21,21 @@ const ajv = new Ajv({
   allowUnionTypes: true,
 });
 
+class Web3Client {
+  private privKey = process.env.ETH_PRIVATE_KEY as string;
+
+  create (network: IEscrowNetwork, privateKey?: string) {
+    const ethHttpServer = network.rpcUrl as string;
+    const web3 = new Web3(ethHttpServer);
+
+    const account = web3.eth.accounts.privateKeyToAccount(`0x${privateKey || this.privKey}`);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
+
+    return web3;
+  }
+}
+
 const web3Plugin: FastifyPluginAsync = async (server) => {
   const validate = ajv.compile(ConfigSchema);
   const valid = validate(process.env);
@@ -29,19 +45,20 @@ const web3Plugin: FastifyPluginAsync = async (server) => {
         JSON.stringify(validate.errors, null, 2)
     );
   }
-
-  const web3 = new Web3(process.env.ETH_NODE_URL || 'http://127.0.0.1:8545');
+  
+  const web3 = new Web3(process.env.ETH_NODE_URL as string);
   const account = web3.eth.accounts.privateKeyToAccount(`0x${process.env.ETH_PRIVATE_KEY}`);
 
   web3.eth.accounts.wallet.add(account);
   web3.eth.defaultAccount = account.address;
 
-  server.decorate("web3", web3);
+
+  server.decorate("web3", new Web3Client());
 };
 
 declare module "fastify" {
   interface FastifyInstance {
-    web3: Web3;
+    web3: Web3Client;
   }
 }
 
