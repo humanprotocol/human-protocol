@@ -2,8 +2,8 @@
   "network": "goerli",
   "description": "Human subgraph on goerli network",
   "EscrowFactory": {
-    "address": "0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F",
-    "startBlock": 7755458,
+    "address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
+    "startBlock": 8403038,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -15,13 +15,13 @@
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0x115df71Eb07F44Ab0019E98B1383768B8742dB18",
-    "startBlock": 8326533,
+    "address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
+    "startBlock": 8403036,
     "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x4e0cF75c0840c8E9664b257c32BFB760b5ed6ef5",
-    "startBlock": 8326276,
+    "address": "0xc9Fe39c4b6e1d7A2991355Af159956982DADf842",
+    "startBlock": 8403040,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }

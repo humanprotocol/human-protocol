@@ -22,11 +22,11 @@
 | Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                | HMToken        | 0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317 | N/A                                        |
-|2022/10/12                | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |
-|                          | Staking        |                                            |                                            |
-|                          | RewardPool     |                                            |                                            |
-|                          | EthKVStore     |                                            | N/A                                        |
-|                          | Reputation     |                                            |                                            |
+|2023/01/30                | EscrowFactory  | 0x5D65C42cF4a140863744889BAd07f246C0211754 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
+|2023/01/30                | Staking        | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
+|2023/01/30                | RewardPool     | 0x6478312bE22FeE34a366d8e945d4dBd97388a306 | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 |
+|2023/01/30                | EthKVStore     | 0xc9Fe39c4b6e1d7A2991355Af159956982DADf842 | N/A                                        |
+|2023/01/30                | Reputation     | 0x1BA4F1d2dA691fF0445345436b9306B29eEd3913 | 0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405 |
 
 | Rinkeby (Testnet)        | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -110,3 +110,7 @@
 |2022/10/12                | HMToken        | 0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317 | N/A                                        |
 |2022/10/12                | EscrowFactory  | 0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f |                                            |
 |2022/08/12                | EthKVStore     | 0x7676F326f1e30E96a76B7F1a860d56A9ac988a7d | N/A                                        |
+
+| Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
+|--------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/10/12                | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |
