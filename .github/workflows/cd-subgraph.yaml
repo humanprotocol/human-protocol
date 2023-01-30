@@ -23,9 +23,9 @@ jobs:
           - name: bsc
             graph: bsc
           - name: chapel
-            graph: bsctest
+            graph: bsctest-v1
           - name: mumbai
-            graph: mumbai
+            graph: mumbai-v1
       fail-fast: true
       max-parallel: 3
     steps:
