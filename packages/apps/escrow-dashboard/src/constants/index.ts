@@ -111,7 +111,8 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://testnet.snowtrace.io',
     rpcUrl: 'https://api.avax-test.network/ext/C/rpc',
     // Subgraph hasn't been implemented yet
-    subgraphUrl: 'https://api.thegraph.com',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
     factoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
     hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
   },
@@ -121,7 +122,7 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://snowtrace.io',
     rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
     // Subgraph hasn't been implemented yet
-    subgraphUrl: 'https://api.thegraph.com',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji',
     factoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
     hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
   },
