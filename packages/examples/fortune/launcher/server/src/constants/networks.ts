@@ -1,22 +1,23 @@
 export enum ChainId {
-    ALL = -1,
-    MAINNET = 1,
-    GOERLI = 5,
-    BSC_MAINNET = 56,
-    BSC_TESTNET = 97,
-    POLYGON = 137,
-    POLYGON_MUMBAI = 80001,
+  ALL = -1,
+  MAINNET = 1,
+  GOERLI = 5,
+  BSC_MAINNET = 56,
+  BSC_TESTNET = 97,
+  POLYGON = 137,
+  POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
-    LOCALHOST = 1338
-  }
+  MOONBASE_ALPHA=1287,
+  LOCALHOST = 1338,
+}
   
-  export interface IEscrowNetwork {
-    chainId: number;
-    title: string;
-    rpcUrl: string;
-    hmtAddress: string;
-    factoryAddress: string;
-  }
+export interface IEscrowNetwork {
+  chainId: number;
+  title: string;
+  rpcUrl: string;
+  hmtAddress: string;
+  factoryAddress: string;
+}
 
 
 export const ESCROW_NETWORKS: {
@@ -68,7 +69,7 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'http://127.0.0.1:8546',
     factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-  }
+  },
     // [ChainId.MOONBEAM]: {
     //   chainId: ChainId.MOONBEAM,
     //   title: 'Moonbeam',
@@ -79,4 +80,11 @@ export const ESCROW_NETWORKS: {
     //   factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
     //   hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
     // },
+    [ChainId.MOONBASE_ALPHA]: {
+      chainId: ChainId.MOONBASE_ALPHA,
+      title: 'Moonbase Alpha',
+      rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+      factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+      hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+    },
   };

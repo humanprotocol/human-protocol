@@ -6,6 +6,7 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
+  MOONBASE_ALPHA=1287,
   LOCALHOST = 1338,
 }
 
@@ -19,14 +20,12 @@ export interface IReputationNetwork {
 export const REPUTATION_NETWORKS: {
   [chainId in ChainId]?: IReputationNetwork;
 } = {
-  // [ChainId.GOERLI]: {
-  //   chainId: ChainId.GOERLI,
-  //   title: 'Ethereum Goerli',
-  //   scanUrl: 'https://goerli.etherscan.io',
-  //   rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-  //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
-  //   reputationAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
-  // },
+  [ChainId.GOERLI]: {
+    chainId: ChainId.GOERLI,
+    title: 'Ethereum Goerli',
+    rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    reputationAddress: '0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405',
+  },
   // [ChainId.BSC_MAINNET]: {
   //   chainId: ChainId.BSC_MAINNET,
   //   title: 'Binance Smart Chain',
@@ -35,15 +34,12 @@ export const REPUTATION_NETWORKS: {
   //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
   //   reputationAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   // },
-  // [ChainId.BSC_TESTNET]: {
-  //   chainId: ChainId.BSC_TESTNET,
-  //   title: 'Binance Smart Chain (Testnet)',
-  //   scanUrl: 'https://testnet.bscscan.com',
-  //   rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
-  //   subgraphUrl:
-  //     'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
-  //   reputationAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
-  // },
+  [ChainId.BSC_TESTNET]: {
+    chainId: ChainId.BSC_TESTNET,
+    title: 'Binance Smart Chain (Testnet)',
+    rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
+    reputationAddress: '0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98',
+  },
   // [ChainId.POLYGON]: {
   //   chainId: ChainId.POLYGON,
   //   title: 'Polygon',
@@ -74,4 +70,10 @@ export const REPUTATION_NETWORKS: {
   //     'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
   //   reputationAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
   // },
+  [ChainId.MOONBASE_ALPHA]: {
+    chainId: ChainId.MOONBASE_ALPHA,
+    title: 'Moonbase Alpha',
+    rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+    reputationAddress: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+  },
 };
