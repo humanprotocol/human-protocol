@@ -2,6 +2,8 @@ export enum FortuneStageStatus {
   FUNDING_METHOD,
   JOB_REQUEST,
   LAUNCH,
+  LAUNCH_SUCCESS,
+  LAUNCH_FAIL,
 }
 
 export type FundingMethodType = 'crypto' | 'fiat';

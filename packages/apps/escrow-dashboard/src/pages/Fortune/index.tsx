@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import Box from '@mui/material/Box';
 import { Grid, Link, Typography } from '@mui/material';
+import axios from 'axios';
+import React, { useState } from 'react';
 import {
   FortuneStages,
   FortuneFundingMethod,
   FortuneJobRequest,
   FortuneLaunch,
+  FortuneLaunchSuccess,
+  FortuneLaunchFail,
 } from 'src/components/Fortune';
 import {
   FortuneJobRequestType,
   FortuneStageStatus,
   FundingMethodType,
 } from 'src/components/Fortune/types';
+import { ethers } from 'ethers';
+import { useSigner } from 'wagmi';
+import { ChainId, ESCROW_NETWORKS, HM_TOKEN_DECIMALS } from 'src/constants';
 
 export const FortunePage: React.FC = (): React.ReactElement => {
+  const { data: signer } = useSigner();
   const [status, setStatus] = useState<FortuneStageStatus>(
     FortuneStageStatus.FUNDING_METHOD
   );
@@ -30,9 +38,26 @@ export const FortunePage: React.FC = (): React.ReactElement => {
     setStatus(FortuneStageStatus.JOB_REQUEST);
   };
 
-  const handleLaunch = (data: FortuneJobRequestType) => {
-    console.log(data);
-    // setStatus(FortuneStageStatus.LAUNCH);
+  const handleLaunch = async (data: FortuneJobRequestType) => {
+    if (!signer) return;
+    try {
+      const contract = new ethers.Contract(data.token, HMTokenABI, signer);
+      const escrowFactoryAddress =
+        ESCROW_NETWORKS[data.chainId as ChainId]?.factoryAddress;
+
+      await contract.approve(
+        escrowFactoryAddress,
+        ethers.utils.parseUnits(data.fundAmount.toString(), HM_TOKEN_DECIMALS)
+      );
+
+      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      setStatus(FortuneStageStatus.LAUNCH);
+      await axios.post(`${baseUrl}/escrow`, data);
+      setStatus(FortuneStageStatus.LAUNCH_SUCCESS);
+    } catch (err) {
+      console.log(err);
+      setStatus(FortuneStageStatus.LAUNCH_FAIL);
+    }
   };
 
   return (
@@ -101,6 +126,14 @@ export const FortunePage: React.FC = (): React.ReactElement => {
                 />
               )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
+              {status === FortuneStageStatus.LAUNCH_SUCCESS && (
+                <FortuneLaunchSuccess />
+              )}
+              {status === FortuneStageStatus.LAUNCH_FAIL && (
+                <FortuneLaunchFail
+                  onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
+                />
+              )}
             </Box>
           </Grid>
         </Grid>
