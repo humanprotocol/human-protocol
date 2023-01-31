@@ -1,0 +1,28 @@
+{
+  "title": "Preprocess",
+  "type": "object",
+  "properties": {
+    "pipeline": {
+      "$ref": "#/definitions/Pipeline"
+    },
+    "config": {
+      "title": "Config",
+      "type": "object"
+    }
+  },
+  "required": [
+    "pipeline"
+  ],
+  "definitions": {
+    "Pipeline": {
+      "title": "Pipeline",
+      "description": "An enumeration.",
+      "enum": [
+        "FaceBlurPipeline",
+        "OCRThinFilterPipeline",
+        "UploadPipeline"
+      ],
+      "type": "string"
+    }
+  }
+}
