@@ -22,11 +22,11 @@
 | Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                | HMToken        | 0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317 | N/A                                        |
-|2022/10/12                | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |
-|                          | Staking        |                                            |                                            |
-|                          | RewardPool     |                                            |                                            |
-|                          | EthKVStore     |                                            | N/A                                        |
-|                          | Reputation     |                                            |                                            |
+|2023/01/30                | EscrowFactory  | 0x5D65C42cF4a140863744889BAd07f246C0211754 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
+|2023/01/30                | Staking        | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
+|2023/01/30                | RewardPool     | 0x6478312bE22FeE34a366d8e945d4dBd97388a306 | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 |
+|2023/01/30                | EthKVStore     | 0xc9Fe39c4b6e1d7A2991355Af159956982DADf842 | N/A                                        |
+|2023/01/30                | Reputation     | 0x1BA4F1d2dA691fF0445345436b9306B29eEd3913 | 0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405 |
 
 | Rinkeby (Testnet)        | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -48,12 +48,12 @@
 
 | Binance SC (Testnet)     | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
-|2022/10/12                | HMToken        | 0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317 | N/A                                        |
-|2022/10/12                | EscrowFactory  | 0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f |                                            |
-|                          | Staking        |                                            |                                            |
-|                          | RewardPool     |                                            |                                            |
-|2022/08/12                | EthKVStore     | 0x7676F326f1e30E96a76B7F1a860d56A9ac988a7d | N/A                                        |
-|                          | Reputation     |                                            |                                            |
+|2023/01/27                | HMToken        | 0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d | N/A                                        |
+|2023/01/27                | EscrowFactory  | 0xD8c35adC3b386d092846a93015220b7Fe8efD938 | 0x2bfA592DBDaF434DDcbb893B1916120d181DAD18 |
+|2023/01/27                | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 |
+|2023/01/27                | RewardPool     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29 |
+|2023/01/27                | EthKVStore     | 0x3aD4B091E054f192a822D1406f4535eAd38580e4 | N/A                                        |
+|2023/01/27                | Reputation     | 0x4DCB3906A65B77f6a588087652E6Dd9685d1F67f | 0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98 |
 
 | Moonbeam (Mainnet)       | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -104,3 +104,13 @@
 |2022/04/29                | EthKVStore     | 0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF | N/A                                        |
 |2023/01/17                | Staking        | 0x76E2EF2E177097E0b296E1e305d69Fe8Bae5f774 | 0xf421fD3eB97982C205966ebB514Ab2E435c6d5B7 |
 |2023/01/17                | EthKVStore     | 0x459EE403d060B84b5014605D6739cCFed32AFb96 | N/A                                        |
+
+| Binance SC (Testnet)     | Contract       | Address                                    | Proxy                                      |
+|--------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/10/12                | HMToken        | 0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317 | N/A                                        |
+|2022/10/12                | EscrowFactory  | 0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f |                                            |
+|2022/08/12                | EthKVStore     | 0x7676F326f1e30E96a76B7F1a860d56A9ac988a7d | N/A                                        |
+
+| Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
+|--------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/10/12                | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |

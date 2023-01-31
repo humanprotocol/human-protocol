@@ -1,27 +1,27 @@
 {
-  "network": "goerli",
-  "description": "Human subgraph on goerli network",
+  "network": "chapel",
+  "description": "Human subgraph on Binance Smart Chain testnet",
   "EscrowFactory": {
-    "address": "0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F",
-    "startBlock": 7755458,
+    "address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
+    "startBlock": 26716359,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
-    "address": "0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317",
-    "startBlock": 7755449,
+    "address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
+    "startBlock": 26716354,
     "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
   },
   "Escrow": {
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0x115df71Eb07F44Ab0019E98B1383768B8742dB18",
-    "startBlock": 8326533,
+    "address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+    "startBlock": 26716357,
     "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x4e0cF75c0840c8E9664b257c32BFB760b5ed6ef5",
-    "startBlock": 8326276,
+    "address": "0x3aD4B091E054f192a822D1406f4535eAd38580e4",
+    "startBlock": 26716360,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }

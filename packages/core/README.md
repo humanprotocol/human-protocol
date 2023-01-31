@@ -22,7 +22,7 @@ POLYGONSCAN_API_KEY=
 ```bash
 yarn deploy:proxy --network [NETWORK_NAME]
 ```
-4. Verify every contract runing the following line for each contract address(have in mind that for contract with proxy, first you need to validate the implementation):
+4. Verify every contract runing the following line for each contract address(for those that use a proxy just verifyin the proxy will verify the implementation too):
 ```bash
 npx hardhat verify [CONTRACT_ADDRESS] --network [NETWORK_NAME]
 ```
