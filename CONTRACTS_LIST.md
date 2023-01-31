@@ -64,14 +64,14 @@
 |2022/06/01                | EthKVStore     | 0x6617d21ab0f16A7079e2811Cf9306CAe7018bDd9 | N/A                                        |
 |                          | Reputation     |                                            |                                            |
 
-| Moonbeam Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
+| Moonbase Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/05/31                | HMToken        | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 | N/A                                        |
-|2022/05/31                | EscrowFactory  | 0x3Cd0B117Be4CC1e31c8d7d1eD8b32208a2820902 |                                            |
-|                          | Staking        |                                            |                                            |
-|                          | RewardPool     |                                            |                                            |
-|2022/05/31                | EthKVStore     | 0x64009ca5fb4b34769F7240c6073FEc34bf5b64E3 | N/A                                        |
-|                          | Reputation     |                                            |                                            |
+|2023/01/30                | EscrowFactory  | 0xD8c35adC3b386d092846a93015220b7Fe8efD938 | 0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB |
+|2023/01/30                | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92 |
+|2023/01/30                | RewardPool     | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 | 0x2bfA592DBDaF434DDcbb893B1916120d181DAD18 |
+|2023/01/30                | EthKVStore     | 0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d | N/A                                        |
+|2023/01/30                | Reputation     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29 |
 
 | Avalanche (Mainnet)      | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -114,3 +114,8 @@
 | Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |
+
+| Moonbase Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
+|--------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/05/31                | EscrowFactory  | 0x3Cd0B117Be4CC1e31c8d7d1eD8b32208a2820902 |                                            |
+|2022/05/31                | EthKVStore     | 0x64009ca5fb4b34769F7240c6073FEc34bf5b64E3 | N/A                                        |

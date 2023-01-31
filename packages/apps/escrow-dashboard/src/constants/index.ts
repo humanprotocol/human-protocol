@@ -7,6 +7,7 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
+  MOONBASE_ALPHA = 1287,
 }
 
 export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
@@ -31,12 +32,14 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
+  ChainId.MOONBASE_ALPHA,
 ];
 
 export const TESTNET_CHAIN_IDS = [
   ChainId.GOERLI,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
+  ChainId.MOONBASE_ALPHA,
 ];
 
 export const ESCROW_NETWORKS: {
@@ -47,7 +50,8 @@ export const ESCROW_NETWORKS: {
     title: 'Ethereum Goerli',
     scanUrl: 'https://goerli.etherscan.io',
     rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v1',
     factoryAddress: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
     hmtAddress: '0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317',
   },
@@ -66,7 +70,7 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://testnet.bscscan.com',
     rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1',
     factoryAddress: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
     hmtAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
   },
@@ -99,6 +103,16 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
     hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
+  },
+  [ChainId.MOONBASE_ALPHA]: {
+    chainId: ChainId.MOONBASE_ALPHA,
+    title: 'Moonbase Alpha',
+    scanUrl: 'https://moonbase.moonscan.io/',
+    rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1',
+    factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+    hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
   },
 };
 
