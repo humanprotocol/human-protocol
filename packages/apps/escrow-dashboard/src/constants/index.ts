@@ -8,11 +8,14 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
+  AVALANCHE_TESTNET = 43113,
+  AVALANCHE = 43114,
 }
 
 export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
+  [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
 };
 
 export interface IEscrowNetwork {
@@ -33,6 +36,8 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
   ChainId.MOONBASE_ALPHA,
+  ChainId.AVALANCHE_TESTNET,
+  ChainId.AVALANCHE,
 ];
 
 export const TESTNET_CHAIN_IDS = [
@@ -40,6 +45,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBASE_ALPHA,
+  ChainId.AVALANCHE_TESTNET,
 ];
 
 export const ESCROW_NETWORKS: {
@@ -113,6 +119,27 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1',
     factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
     hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+  },
+  [ChainId.AVALANCHE_TESTNET]: {
+    chainId: ChainId.AVALANCHE_TESTNET,
+    title: 'Fuji C-Chain',
+    scanUrl: 'https://testnet.snowtrace.io',
+    rpcUrl: 'https://api.avax-test.network/ext/C/rpc',
+    // Subgraph hasn't been implemented yet
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
+    factoryAddress: '0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88',
+    hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
+  },
+  [ChainId.AVALANCHE]: {
+    chainId: ChainId.AVALANCHE,
+    title: 'Avalanche C-Chain Mainnet',
+    scanUrl: 'https://snowtrace.io',
+    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
+    // Subgraph hasn't been implemented yet
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji',
+    factoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
+    hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
   },
 };
 

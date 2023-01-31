@@ -88,6 +88,16 @@ const config: HardhatUserConfig = {
       chainId: 1287,
       timeout: 1000000000,
       url: process.env.ETH_MOONBASE_ALPHA_URL || '',
+    },
+    avalancheTestnet: {
+      chainId: 43113,
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avalanche: {
+      chainId: 43114,
+      url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
