@@ -4,12 +4,13 @@ pragma solidity >=0.6.2;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 import './interfaces/IRewardPool.sol';
 import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
 
-contract Escrow is IEscrow {
+contract Escrow is IEscrow, ReentrancyGuard {
     using SafeMath for uint256;
 
     bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
@@ -17,9 +18,14 @@ contract Escrow is IEscrow {
     bytes4 private constant FUNC_SELECTOR_TRANSFER =
         bytes4(keccak256('transfer(address,uint256)'));
 
+    string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
+
+    event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
+    event Cancelled();
+    event Completed();
 
     EscrowStatuses public override status;
 
@@ -30,7 +36,7 @@ contract Escrow is IEscrow {
 
     uint256 public reputationOracleStake;
     uint256 public recordingOracleStake;
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
+    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     address public token;
@@ -55,6 +61,9 @@ contract Escrow is IEscrow {
         uint256 _duration,
         address[] memory _handlers
     ) {
+        require(_token != address(0), ERROR_ZERO_ADDRESS);
+        require(_canceler != address(0), ERROR_ZERO_ADDRESS);
+
         token = _token;
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
@@ -81,7 +90,9 @@ contract Escrow is IEscrow {
             'Address calling cannot add trusted handlers'
         );
         for (uint256 i = 0; i < _handlers.length; i++) {
+            require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
             areTrustedHandlers[_handlers[i]] = true;
+            emit TrustedHandlerAdded(_handlers[i]);
         }
     }
 
@@ -96,7 +107,7 @@ contract Escrow is IEscrow {
         string memory _url,
         string memory _hash,
         uint256 _solutionsRequested
-    ) public trusted notExpired {
+    ) external trusted notExpired {
         require(
             _reputationOracle != address(0),
             'Invalid or missing token spender'
@@ -107,7 +118,7 @@ contract Escrow is IEscrow {
         );
         require(_solutionsRequested > 0, 'Invalid or missing solutions');
         uint256 totalStake = _reputationOracleStake.add(_recordingOracleStake);
-        require(totalStake >= 0 && totalStake <= 100, 'Stake out of bounds');
+        require(totalStake <= 100, 'Stake out of bounds');
         require(
             status == EscrowStatuses.Launched,
             'Escrow not in Launched status state'
@@ -128,7 +139,7 @@ contract Escrow is IEscrow {
         emit Pending(manifestUrl, manifestHash);
     }
 
-    function abort() public trusted notComplete notPaid {
+    function abort() external trusted notComplete notPaid {
         if (getBalance() != 0) {
             cancel();
         }
@@ -141,31 +152,35 @@ contract Escrow is IEscrow {
         notBroke
         notComplete
         notPaid
+        nonReentrant
         returns (bool)
     {
         _safeTransfer(canceler, getBalance());
         status = EscrowStatuses.Cancelled;
+        emit Cancelled();
         return true;
     }
 
-    function complete() public notExpired {
+    function complete() external notExpired {
         require(
-            msg.sender == reputationOracle || areTrustedHandlers[msg.sender],
+            areTrustedHandlers[msg.sender],
             'Address calling is not trusted'
         );
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
+        emit Completed();
     }
 
     function storeResults(
         string memory _url,
         string memory _hash
-    ) public trusted notExpired {
+    ) external trusted notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
             'Escrow not in Pending or Partial status state'
         );
+        _storeResult(_url, _hash);
         emit IntermediateStorage(_url, _hash);
     }
 
@@ -175,18 +190,32 @@ contract Escrow is IEscrow {
         string memory _url,
         string memory _hash,
         uint256 _txId
-    ) public trusted notBroke notLaunched notPaid notExpired returns (bool) {
+    )
+        external
+        trusted
+        notBroke
+        notLaunched
+        notPaid
+        notExpired
+        nonReentrant
+        returns (bool)
+    {
         require(
             _recipients.length == _amounts.length,
             "Amount of recipients and values don't match"
         );
         require(_recipients.length < BULK_MAX_COUNT, 'Too many recipients');
+        require(
+            status != EscrowStatuses.Complete &&
+                status != EscrowStatuses.Cancelled,
+            'Invalid status'
+        );
 
         uint256 balance = getBalance();
         bulkPaid = false;
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
-            aggregatedBulkAmount += _amounts[i];
+            aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
 
@@ -194,12 +223,7 @@ contract Escrow is IEscrow {
             return bulkPaid;
         }
 
-        bool writeOnchain = bytes(_hash).length != 0 || bytes(_url).length != 0;
-        if (writeOnchain) {
-            // Be sure they are both zero if one of them is
-            finalResultsUrl = _url;
-            finalResultsHash = _hash;
-        }
+        _storeResult(_url, _hash);
 
         (
             uint256 reputationOracleFee,
@@ -207,7 +231,12 @@ contract Escrow is IEscrow {
         ) = finalizePayouts(_amounts);
 
         for (uint256 i = 0; i < _recipients.length; ++i) {
-            _safeTransfer(_recipients[i], finalAmounts[i]);
+            uint256 amount = finalAmounts[i];
+            if (amount == 0) {
+                continue;
+            }
+            finalAmounts[i] = 0;
+            _safeTransfer(_recipients[i], amount);
         }
 
         delete finalAmounts;
@@ -266,6 +295,15 @@ contract Escrow is IEscrow {
 
     function _safeTransfer(address to, uint256 value) internal {
         SafeERC20.safeTransfer(IERC20(token), to, value);
+    }
+
+    function _storeResult(string memory _url, string memory _hash) internal {
+        bool writeOnchain = bytes(_hash).length != 0 || bytes(_url).length != 0;
+        if (writeOnchain) {
+            // Be sure both of them are not zero
+            finalResultsUrl = _url;
+            finalResultsHash = _hash;
+        }
     }
 
     modifier trusted() {

@@ -24,7 +24,9 @@ describe('EscrowFactory', function () {
         .connect(operator)
         .createEscrow(token.address, trustedHandlers)
     ).wait();
-    const event = result.events?.[0].args;
+    const event = result.events?.find(({ topics }) =>
+      topics.includes(ethers.utils.id('Launched(address,address)'))
+    )?.args;
 
     return event;
   }
@@ -85,7 +87,7 @@ describe('EscrowFactory', function () {
     await expect(
       escrowFactory
         .connect(operator)
-        .createEscrow(token.address, [ethers.constants.AddressZero])
+        .createEscrow(token.address, [await reputationOracle.getAddress()])
     ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
   });
 
@@ -141,7 +143,7 @@ describe('EscrowFactory', function () {
     await expect(
       escrowFactory
         .connect(operator)
-        .createEscrow(token.address, [ethers.constants.AddressZero])
+        .createEscrow(token.address, [await reputationOracle.getAddress()])
     ).to.be.revertedWith('Needs to stake HMT tokens to create an escrow.');
   });
 
