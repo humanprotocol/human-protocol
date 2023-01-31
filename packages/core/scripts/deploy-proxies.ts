@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import { Console } from 'console';
 import { ethers, upgrades } from 'hardhat';
 
 async function main() {

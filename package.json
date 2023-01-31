@@ -15,7 +15,7 @@
     "escrow-dashboard:lint": "yarn workspace @human-protocol/escrow-dashboard lint",
     "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
-    "fortune:lint": "yarn workspace @human-protocol/fortune lint",
+    "fortune:lint": "yarn workspace @human-protocol/fortune lint && yarn workspace @human-protocol/fortune lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
     "sdk:lint": "yarn workspace @human-protocol/sdk lint",
     "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:sdk:test",

@@ -6,7 +6,6 @@ import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "js
 import { escrow as escrowSchema } from '../schemas/escrow.js';
 import Web3 from 'web3';
 import { CURSE_WORDS } from "../constants/curseWords.js";
-import server from '../server.js';
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 
@@ -46,7 +45,7 @@ class Escrow {
             .setup(this.repOracleAddress, this.recOracleAddress, this.repOracleFee, this.recOracleFee, url, url, fortunesRequested)
             .estimateGas({ from: web3.eth.defaultAccount });
         const gasPrice = await web3.eth.getGasPrice();
-        const result = await escrowContract.methods
+        await escrowContract.methods
             .setup(this.repOracleAddress, this.recOracleAddress, this.repOracleFee, this.recOracleFee, url, url, fortunesRequested)
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
     }
@@ -80,7 +79,7 @@ class Escrow {
             .transferFrom(jobRequester, escrowAddress, fundAmount)
             .estimateGas({ from: web3.eth.defaultAccount });
         const gasPrice = await web3.eth.getGasPrice();
-        var result = await hmtoken.methods
+        await hmtoken.methods
             .transferFrom(jobRequester, escrowAddress, fundAmount)
             .send({ from: web3.eth.defaultAccount, gas, gasPrice });
     }
