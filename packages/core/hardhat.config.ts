@@ -70,6 +70,18 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    avalancheTestnet: {
+      chainId: 43113,
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avalanche: {
+      chainId: 43114,
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

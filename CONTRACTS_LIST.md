@@ -12,3 +12,4 @@
 | Moonbeam Alpha      | Testnet      | Active     | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 |       | 0x3Cd0B117Be4CC1e31c8d7d1eD8b32208a2820902 |         | 0x64009ca5fb4b34769F7240c6073FEc34bf5b64E3 |
 | Avalanche           | Mainnet      | Active     | 0x12365293cb6477d4fc2686e46bb97e3fb64f1550 |       | 0x9767a578ba7a5FA1563c8229943cB01cd8446BB4 |         | 0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df |
 | Avalanche Fuji      | Testnet      | Active     | 0x9406d5c635AD22b0d76c75E52De57A2177919ca3 |       | 0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88 |         | 0xd232c1426CF0653cE8a71DC98bCfDf10c471c114 |
+
