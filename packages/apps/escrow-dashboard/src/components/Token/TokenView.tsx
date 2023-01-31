@@ -21,7 +21,7 @@ export const TokenView: React.FC = (): React.ReactElement => {
       <Grid item xs={12} sm={6}>
         <CardTextBlock title="Holders" value={holders} />
       </Grid>
-      <Grid item xs={12} sm={6}>
+      <Grid item xs={12}>
         <CardTextBlock
           title="Total Supply"
           value={Number(totalSupply)}
@@ -34,7 +34,7 @@ export const TokenView: React.FC = (): React.ReactElement => {
           }
         />
       </Grid>
-      <Grid item xs={12} sm={6}>
+      {/* <Grid item xs={12} sm={6}>
         <CardTextBlock
           title={
             <Typography
@@ -50,7 +50,7 @@ export const TokenView: React.FC = (): React.ReactElement => {
           value={bitfinexTicker?.volume}
           format={'$0,0.00'}
         />
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 };
