@@ -1,11 +1,11 @@
 {
   "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
-  "outputDirectory": "packages/examples/fortune/launcher/server/build",
+  "outputDirectory": "build",
   "installCommand": "yarn install",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/src/index.ts"
+      "destination": "src/index.ts"
     }
   ]
 }
