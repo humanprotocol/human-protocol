@@ -1,17 +1,11 @@
 {
-    "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
-    "outputDirectory": "build",
-    "installCommand": "yarn workspace @human-protocol/job-launcher-server install",
-    "builds": [
-        {
-            "src": "index.ts",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "index.ts"
-        }
-    ]
+  "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
+  "outputDirectory": "build",
+  "installCommand": "yarn workspace @human-protocol/job-launcher-server install",
+  "functions": {
+    "src/index.ts": {
+      "memory": 3008,
+      "maxDuration": 60
+    }
   }
+}
