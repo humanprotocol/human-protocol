@@ -1,11 +1,10 @@
 {
   "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
-  "outputDirectory": "build",
   "installCommand": "yarn install",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/serverless.js"
+      "destination": "build/api/serverless.js"
     }
   ]
 }
