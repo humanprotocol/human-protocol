@@ -4,14 +4,14 @@
     "installCommand": "yarn workspace @human-protocol/job-launcher-server install",
     "builds": [
         {
-            "src": "src/index.ts",
+            "src": "index.ts",
             "use": "@vercel/node"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "src/index.ts"
+            "dest": "index.ts"
         }
     ]
   }
