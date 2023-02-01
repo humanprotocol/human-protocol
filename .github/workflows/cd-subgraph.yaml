@@ -26,6 +26,12 @@ jobs:
             graph: bsctest-v1
           - name: mumbai
             graph: mumbai-v1
+          - name: mbase
+            graph: moonbase-alpha-v1
+          - name: avalanche
+            graph: avalanche
+          - name: fuji
+            graph: fuji
       fail-fast: true
       max-parallel: 3
     steps:

@@ -2,8 +2,8 @@
 
 pragma solidity >=0.6.2;
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
@@ -548,7 +548,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function _safeTransfer(address to, uint256 value) internal {
-        SafeERC20.safeTransfer(IERC20(token), to, value);
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(token), to, value);
     }
 
     function _safeTransferFrom(
@@ -556,7 +556,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         address to,
         uint256 value
     ) internal {
-        SafeERC20.safeTransferFrom(IERC20(token), from, to, value);
+        SafeERC20Upgradeable.safeTransferFrom(
+            IERC20Upgradeable(token),
+            from,
+            to,
+            value
+        );
     }
 
     modifier onlyStaker(address _staker) {
