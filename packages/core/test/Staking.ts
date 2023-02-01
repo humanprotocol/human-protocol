@@ -231,9 +231,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [ethers.constants.AddressZero])
+          .createEscrow(token.address, [await validator.getAddress()])
       ).wait();
-      const event = result.events?.[0].args;
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
@@ -327,9 +329,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [ethers.constants.AddressZero])
+          .createEscrow(token.address, [await validator.getAddress()])
       ).wait();
-      const event = result.events?.[0].args;
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;
@@ -517,9 +521,11 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow(token.address, [ethers.constants.AddressZero])
+            .createEscrow(token.address, [await validator.getAddress()])
         ).wait();
-        const event = result.events?.[0].args;
+        const event = result.events?.find(({ topics }) =>
+          topics.includes(ethers.utils.id('Launched(address,address)'))
+        )?.args;
 
         expect(event?.token).to.equal(
           token.address,
@@ -581,9 +587,11 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow(token.address, [ethers.constants.AddressZero])
+            .createEscrow(token.address, [await validator.getAddress()])
         ).wait();
-        const event = result.events?.[0].args;
+        const event = result.events?.find(({ topics }) =>
+          topics.includes(ethers.utils.id('Launched(address,address)'))
+        )?.args;
 
         expect(event?.token).to.equal(
           token.address,
@@ -638,9 +646,11 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [ethers.constants.AddressZero])
+          .createEscrow(token.address, [await validator.getAddress()])
       ).wait();
-      const event = result.events?.[0].args;
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
       expect(event?.escrow).to.not.be.null;

@@ -1,0 +1,17 @@
+{
+  "network": "avalanche",
+  "description": "Human subgraph on Avalanche Mainnet",
+  "EscrowFactory": {
+    "address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
+    "startBlock": 23168540,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0x12365293cb6477d4fc2686e46BB97E3Fb64f1550",
+    "startBlock": 20412574,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  }
+}

@@ -62,11 +62,15 @@ To configure Metamask for the deployed playground example:
 
 1. Open your Metamask wallet and click on the account icon in the top right. Select Settings > Networks > Add Network. Enter the details below:
 
-- New RPC URL - http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:8545
+- Network Name - Mumbai
 
-- Chain ID - 1338 (you may get a warning here that this ID is already in use, it is safe to ignore)
+- New RPC URL - https://rpc-mumbai.maticvigil.com/
 
-- Currency Symbol - ETH
+- Chain ID - 80001
+
+- Currency Symbol - MATIC
+
+- Block Explorer URL - https://mumbai.polygonscan.com/
 
 2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2). In Metamask, click on your account icon in the top right and select Import Account. From this screen you can enter a private key to add an account. Repeat this process for each of the keys below:
 
@@ -82,9 +86,9 @@ To configure Metamask for the deployed playground example:
 
 `9da0d3721774843193737244a0f3355191f66ff7321e83eae83f7f746eb34350`
 
-(In case you are wondering where these private keys are from, they correspond to the standard accounts from a Ganache setup and are pre-funded with testnet HMT).
+(In case you are wondering where these private keys are from, they correspond to the standard accounts from a Ganache setup).
 
-3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the following Token Contract Address for the HMT Token: `0x444c45937D2202118a0FF9c48d491cef527b59dF` Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
+3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the following Token Contract Address for the HMT Token: `0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4` Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
 
 ### Creating a Job (Deployed Playground)
 
@@ -92,7 +96,7 @@ In Metamask, switch to the Job Requester account that you imported above
 
 1. Ensure that you are connected to Fortune Ganache (or whatever you named it above) under Networks in Metamask.
 
-2. Navigate to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3000 to access the Job Launcher
+2. Navigate to https://human-protocol.vercel.app/ to access the Job Launcher
 
 3. Click on connect to connect your metamask wallet
 
@@ -102,7 +106,7 @@ In Metamask, switch to the Job Requester account that you imported above
 
 6. Enter the Escrow address in to the search box and click the 'Search Escrow' button. You should now be presented with information about the Escrow, such as the status etc. Enter any amount into the box titled 'Fund the escrow' and click the 'Fund' button.
 
-7. To complete the job creation process we must add the manifest URL. This URL points to the manifest.json file, which contains job specific data. For this example the data is already created for you and stored in a local datastore (minio) which can be accessed at http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:9001 (To login you must use the default username: 'dev' and password 'devdevdev')
+7. To complete the job creation process we must add the manifest URL. This URL points to the manifest.json file, which contains job specific data. For this example the data is already created for you and stored in a datastore which can be accessed at https://storage.googleapis.com/fortune-manifests/manifest.json
 
 8. Once you are into the minio dashboard, click on the 'Browse' button (manifests bucket), then click on the manifest.json file. Click the 'share' button to get the manifest url.
 
@@ -112,18 +116,19 @@ The job creation is now complete!
 
 ### Viewing Jobs
 
-The job has now been created and is available for exchanges to pick up. To view the job status navigate to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3001 and paste in the Escrow contract address. The status should be 'Pending'. Jobs in a pending status are picked up by the exchange and forwarded to workers.
+The job has now been created and is available for exchanges to pick up. To view the job status navigate to https://fortune-exchange-mumbai.vercel.app/ and paste in the Escrow contract address. The status should be 'Pending'. Jobs in a pending status are picked up by the exchange and forwarded to workers.
 
 ### Fulfilling a job
 
 To fulfil this job we require answers (fortunes in our case) from 2 workers.
 
-1. In your Metamask wallet switch to the Worker 1 account that we imported above. Navigate to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3001 and enter a fortune prediction (any text).
+1. In your Metamask wallet switch to the Worker 1 account that we imported above. Navigate to https://fortune-exchange-mumbai.vercel.app/ and enter a fortune prediction (any text).
+
 2. Now switch to Worker 2 and enter a fortune prediction (it should be different from Worker 1).
 
-We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3001
+We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to https://fortune-exchange-mumbai.vercel.app/
 
-You should see account balance for Worker 1 and 2 has increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher (http://ec2-3-15-230-238.us-east-2.compute.amazonaws.com:3000) and entering the Escrow contract address into the searchbar.
+You should see account balance for Worker 1 and 2 has increased by the relevant amount. The final results URL can be found by navigating to the Job Launcher (https://human-protocol.vercel.app/) and entering the Escrow contract address into the searchbar.
 
 ## Running Locally with Node
 

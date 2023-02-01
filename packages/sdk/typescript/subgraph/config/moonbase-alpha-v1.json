@@ -1,27 +1,27 @@
 {
-  "network": "goerli",
-  "description": "Human subgraph on goerli network",
+  "network": "mbase",
+  "description": "Human subgraph on Moonbase Alpha network",
   "EscrowFactory": {
-    "address": "0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F",
-    "startBlock": 7755458,
+    "address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
+    "startBlock": 3648028,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
-    "address": "0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317",
-    "startBlock": 7755449,
+    "address": "0xe4C8eC5d057EacF40060b2174627a4941a5c8127",
+    "startBlock": 2238347,
     "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
   },
   "Escrow": {
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0x115df71Eb07F44Ab0019E98B1383768B8742dB18",
-    "startBlock": 8326533,
+    "address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
+    "startBlock": 3648026,
     "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x4e0cF75c0840c8E9664b257c32BFB760b5ed6ef5",
-    "startBlock": 8326276,
+    "address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
+    "startBlock": 3648030,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }
