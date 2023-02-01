@@ -3,7 +3,7 @@ import fp from 'fastify-plugin';
 import { FastifyPluginAsync } from 'fastify';
 import { Type } from '@sinclair/typebox';
 import Ajv from 'ajv';
-import { IEscrowNetwork } from 'constants/networks';
+import { IEscrowNetwork } from '../constants/networks';
 import Web3 from 'web3';
 
 const ConfigSchema = Type.Strict(

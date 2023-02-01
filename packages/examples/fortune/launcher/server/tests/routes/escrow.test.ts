@@ -4,14 +4,15 @@ import {
   ESCROW_NETWORKS,
   IEscrowNetwork,
 } from '../../src/constants/networks.js';
-import server from '../../src/server.js';
+import getServer from '../../src/server.js';
 import { stake, approve, decreaseApproval } from '../utils.js';
 
 const jobRequesterPrivKey =
   '689af8efa8c651a91ad287602527f3af2fe9f6501a7ac4b061667b5a93e037fd';
 const jobRequester = '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E';
 
-describe('Escrow route tests', () => {
+describe('Escrow route tests', async () => {
+  const server = await getServer();
   const { web3, s3 } = server;
 
   const network = ESCROW_NETWORKS[ChainId.LOCALHOST] as IEscrowNetwork;

@@ -1,11 +1,12 @@
+import 'dotenv/config';
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import EscrowFactoryAbi from '@human-protocol/core/abis/EscrowFactory.json' assert { type: "json" };
-import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: "json" };
-import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: "json" };
-import { escrow as escrowSchema } from '../schemas/escrow.js';
+import EscrowFactoryAbi from '@human-protocol/core/abis/EscrowFactory.json';
+import HMTokenAbi from '@human-protocol/core/abis/HMToken.json';
+import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
+import { escrow as escrowSchema } from '../schemas/escrow';
 import Web3 from 'web3';
-import { CURSE_WORDS } from "../constants/curseWords.js";
+import { CURSE_WORDS } from "../constants/curseWords";
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 

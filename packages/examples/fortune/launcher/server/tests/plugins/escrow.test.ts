@@ -3,18 +3,19 @@ import {
   ChainId,
   ESCROW_NETWORKS,
   IEscrowNetwork,
-} from '../../src/constants/networks.js';
+} from '../../src/constants/networks';
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json' assert { type: 'json' };
 import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: 'json' };
-import server from '../../src/server.js';
-import { stake, approve } from '../utils.js';
-import { escrow as escrowSchema } from '../../src/schemas/escrow.js';
+import getServer from '../../src/server';
+import { stake, approve } from '../utils';
+import { escrow as escrowSchema } from '../../src/schemas/escrow';
 
 const jobRequesterPrivKey =
   'de9be858da4a475276426320d5e9262ecfc3ba460bfac56360bfa6c4c28b4ee0';
 const jobRequester = '0xdD2FD4581271e230360230F9337D5c0430Bf44C0';
 
-describe('Escrow tests', () => {
+describe('Escrow tests', async () => {
+  const server = await getServer();
   const { escrow, web3 } = server;
   const network = ESCROW_NETWORKS[ChainId.LOCALHOST] as IEscrowNetwork;
   const web3Client = web3.createWeb3(network);
