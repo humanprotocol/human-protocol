@@ -2,10 +2,10 @@
   "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
   "outputDirectory": "packages/examples/fortune/launcher/server/build",
   "installCommand": "yarn install",
-  "functions": {
-    "src/index.ts": {
-      "memory": 3008,
-      "maxDuration": 60
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/src/index.ts"
     }
-  }
+  ]
 }
