@@ -2,12 +2,8 @@
 
 // Read the .env file.
 import * as dotenv from 'dotenv';
-import server from './server.js';
+import server from '../src/server.js';
 dotenv.config();
-
-// Require the framework
-import Fastify from 'fastify';
-
 
 export default async (req: any, res: any) => {
   await server.ready();
