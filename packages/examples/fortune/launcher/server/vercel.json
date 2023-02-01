@@ -7,5 +7,11 @@
       "source": "/(.*)",
       "destination": "index.js"
     }
-  ]
+  ],
+  "functions": {
+    "index.js": {
+      "memory": 3008,
+      "maxDuration": 30
+    }
+  }
 }
