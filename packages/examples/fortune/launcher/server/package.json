@@ -8,7 +8,7 @@
   "type": "module",
   "dependencies": {
     "@fastify/cors": "^8.2.0",
-    "@human-protocol/core": "1.0.39",
+    "@human-protocol/core": "workspace:*",
     "@sinclair/typebox": "^0.25.21",
     "@types/minio": "^7.0.15",
     "@types/node": "^18.11.18",

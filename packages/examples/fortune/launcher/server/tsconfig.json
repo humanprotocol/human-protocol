@@ -5,6 +5,7 @@
     "moduleResolution": "Node",
     "lib": ["esnext"],
     "esModuleInterop": true,
+    "rootDir": ".",
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "outDir": "build",
@@ -13,6 +14,6 @@
     "strict": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts", "api/serverless.ts"],
-  "exclude": ["tests", "node_modules"]
+  "include": ["src/**/*", "api/serverless.ts", "node_modules/@human-protocol/core/abis/*.json"],
+  "exclude": ["tests"]
 }
