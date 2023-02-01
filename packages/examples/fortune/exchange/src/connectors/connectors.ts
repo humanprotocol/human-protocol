@@ -1,26 +1,50 @@
-import { goerli, mainnet, polygon, polygonMumbai } from '@wagmi/core/chains';
+import {
+  goerli,
+  mainnet,
+  polygon,
+  polygonMumbai,
+  bsc,
+  bscTestnet,
+} from 'wagmi/chains';
+import {
+  EthereumClient,
+  modalConnectors,
+  walletConnectProvider,
+} from '@web3modal/ethereum';
 import { configureChains, createClient } from 'wagmi';
-import { InjectedConnector } from 'wagmi/connectors/injected';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { publicProvider } from 'wagmi/providers/public';
 import { fortune } from './chains';
 
-const { chains, provider } = configureChains(
-  [mainnet, polygon, goerli, polygonMumbai, fortune],
-  [publicProvider()]
-);
+// 1. Get projectID at https://cloud.walletconnect.com
+if (!process.env.REACT_APP_WALLETCONNECT_PROJECT_ID) {
+  const message =
+    'You need to provide REACT_APP_WALLETCONNECT_PROJECT_ID env variable';
+  alert(message);
+  throw new Error(message);
+}
+export const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
+
+// 2. Configure wagmi client
+const chains = [
+  mainnet,
+  polygon,
+  bsc,
+  goerli,
+  polygonMumbai,
+  bscTestnet,
+  fortune,
+];
+const { provider } = configureChains(chains, [
+  walletConnectProvider({ projectId }),
+]);
 
 export const wagmiClient = createClient({
-  connectors: [
-    new InjectedConnector({ chains }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        qrcode: true,
-        version: '2',
-        projectId: '68415bedd1597a33e8e83cc53e52071b',
-      },
-    }),
-  ],
+  autoConnect: true,
+  connectors: modalConnectors({
+    appName: 'web3Modal',
+    chains,
+  }),
   provider,
 });
+
+// 3. Configure modal ethereum client
+export const ethereumClient = new EthereumClient(wagmiClient, chains);

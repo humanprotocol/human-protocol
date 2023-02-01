@@ -1,37 +1,41 @@
-import { useAccount, useConnect } from 'wagmi';
+import {
+  useWeb3ModalTheme,
+  Web3Button,
+  Web3Modal,
+  Web3NetworkSwitch,
+} from '@web3modal/react';
+import { useAccount } from 'wagmi';
 import './App.css';
 import { Escrow } from './components/Escrow';
+import { ethereumClient, projectId } from './connectors/connectors';
 
 function App() {
-  const { connector: activeConnector, isConnected } = useAccount();
-  const { connect, connectors, isLoading, error, pendingConnector, data } =
-    useConnect();
+  const { setTheme } = useWeb3ModalTheme();
+  const { isConnected } = useAccount();
+
+  setTheme({
+    themeColor: 'purple',
+    themeMode: 'light',
+    themeBackground: 'themeColor',
+  });
 
   return (
     <>
       <div className="App">
-        {isConnected && <div>Connected to {activeConnector?.name}</div>}
-        {isConnected && <div>Address: {data?.account}</div>}
         <header className="App-header">
-          <>
-            {!isConnected &&
-              connectors.map((connector) => (
-                <button
-                  disabled={!connector.ready}
-                  key={connector.id}
-                  onClick={() => connect({ connector })}
-                >
-                  {connector.name}
-                  {isLoading &&
-                    pendingConnector?.id === connector.id &&
-                    ' (connecting)'}
-                </button>
-              ))}
-            {isConnected && <Escrow />}
-            {error && <div>{error.message}</div>}
-          </>
+          {isConnected && <Web3Button icon="show" balance="show" />}
         </header>
+        <div className="App-body">
+          {!isConnected && (
+            <>
+              <h1>Select Network</h1>
+              <Web3NetworkSwitch />
+            </>
+          )}
+          {isConnected && <Escrow />}
+        </div>
       </div>
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
     </>
   );
 }
