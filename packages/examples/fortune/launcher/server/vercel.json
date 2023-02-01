@@ -1,5 +1,4 @@
 {
-    "framework": "other",
     "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
     "outputDirectory": "build",
     "installCommand": "yarn workspace @human-protocol/job-launcher-server install",
