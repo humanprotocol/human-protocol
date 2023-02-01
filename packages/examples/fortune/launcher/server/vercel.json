@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "src/serverless.ts"
+      "destination": "index.js"
     }
   ]
 }
