@@ -1,0 +1,19 @@
+name: Node.js Base Models check
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  node-basemodels-test:
+    name: Node.js Base Models Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install --global yarn && yarn --ignore-scripts
+        name: Install dependencies
+      - run: yarn basemodels:test
+        name: Run Node.js Base Models Test

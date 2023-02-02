@@ -1,9 +1,14 @@
 import axios from 'axios';
 
 import { JOB_TYPES_FOR_CONTENT_TYPE_VALIDATION } from './constants';
-import { BaseJobTypesEnum, Manifest } from './generated/manifest';
+import {
+  BaseJobTypesEnum,
+  Manifest,
+  NestedManifest,
+} from './generated/manifest';
 import { validateGroundTruthEntry } from './groundtruth';
-import { validateInteger, validateURL, validateUUID } from './validators';
+import { validateScoreFields, validateSiteKey } from './restricted-audience';
+import { validateNumber, validateURL, validateUUID } from './validators';
 
 /**
  * min repeats are required to be at least 4 if ilmc
@@ -18,7 +23,9 @@ const validateMinRepeats = (manifest: Manifest): Manifest => {
   return manifest;
 };
 
-const validateGroundTruth = (manifest: Manifest) => {
+const validateGroundTruth = <T extends Manifest | NestedManifest>(
+  manifest: T
+) => {
   if (manifest.groundtruth && manifest.groundtruth_uri) {
     throw new Error('Specify only groundtruth_uri or groundtruth, not both.');
   }
@@ -27,7 +34,11 @@ const validateGroundTruth = (manifest: Manifest) => {
 /**
  * image_label_area_select should always have a single RAS set
  */
-const validateRequesterRestrictedAnswerSet = (manifest: Manifest): Manifest => {
+const validateRequesterRestrictedAnswerSet = <
+  T extends Manifest | NestedManifest
+>(
+  manifest: T
+): T => {
   // validation runs before other params, so need to handle missing case
   if (!manifest.request_type) {
     throw new Error('request_type missing');
@@ -46,7 +57,9 @@ const validateRequesterRestrictedAnswerSet = (manifest: Manifest): Manifest => {
   return manifest;
 };
 
-const validateRequesterQuestionExample = (manifest: Manifest) => {
+const validateRequesterQuestionExample = <T extends Manifest | NestedManifest>(
+  manifest: T
+) => {
   // validation runs before other params, so need to handle missing case
   if (!manifest.request_type) {
     throw new Error('request_type missing');
@@ -77,7 +90,10 @@ const validateTaskData = (manifest: Manifest) => {
  * validate request types for all types of challenges
  * multi_challenge should always have multi_challenge_manifests
  */
-const validateRequestType = (manifest: Manifest, multiChallenge = true) => {
+const validateRequestType = <T extends Manifest | NestedManifest>(
+  manifest: T,
+  multiChallenge = true
+) => {
   if (manifest.request_type === 'multi_challenge') {
     if (!multiChallenge) {
       throw new Error('multi_challenge request is not allowed here.');
@@ -102,24 +118,64 @@ const validateRequestType = (manifest: Manifest, multiChallenge = true) => {
 
 export const validate = (manifest: Manifest): Manifest => {
   // Basic validation
-  validateInteger(manifest.job_total_tasks);
+  validateNumber(manifest.job_total_tasks);
+  validateNumber(manifest.task_bid_price);
 
   if (manifest.taskdata_uri) {
     validateURL(manifest.taskdata_uri);
   }
+  if (manifest.groundtruth_uri) {
+    validateURL(manifest.groundtruth_uri);
+  }
+  if (manifest.rejected_uri) {
+    validateURL(manifest.rejected_uri);
+  }
+  if (manifest.requester_question_example) {
+    if (Array.isArray(manifest.requester_question_example)) {
+      manifest.requester_question_example.forEach(validateURL);
+    } else {
+      validateURL(manifest.requester_question_example);
+    }
+  }
 
   let manifestValidated = manifest;
   manifestValidated = validateMinRepeats(manifestValidated);
-  manifestValidated = validateUUID(manifestValidated, 'job_api_key');
   manifestValidated = validateUUID(manifestValidated, 'job_id');
+  manifestValidated = validateUUID(manifestValidated, 'job_api_key');
+  manifestValidated = validateRequesterRestrictedAnswerSet(manifestValidated);
 
   validateGroundTruth(manifestValidated);
-  validateRequesterRestrictedAnswerSet(manifestValidated);
   validateRequesterQuestionExample(manifestValidated);
   validateTaskData(manifestValidated);
   validateRequestType(manifestValidated);
 
+  if (manifestValidated.restricted_audience) {
+    validateScoreFields(manifestValidated.restricted_audience);
+    validateSiteKey(manifestValidated.restricted_audience);
+  }
+
   return manifestValidated;
+};
+
+export const validateNestedManifest = (
+  nestedManifest: NestedManifest
+): NestedManifest => {
+  if (nestedManifest.groundtruth_uri) {
+    validateURL(nestedManifest.groundtruth_uri);
+  }
+
+  let nestedManifestValidated = nestedManifest;
+
+  nestedManifestValidated = validateUUID(nestedManifestValidated, 'job_id');
+  nestedManifestValidated = validateRequesterRestrictedAnswerSet(
+    nestedManifestValidated
+  );
+
+  validateRequesterQuestionExample(nestedManifestValidated);
+  validateRequestType(nestedManifestValidated, false);
+  validateGroundTruth(nestedManifestValidated);
+
+  return nestedManifestValidated;
 };
 
 /**
