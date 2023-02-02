@@ -17,6 +17,7 @@ function App() {
   );
   const [fundingMethod, setFundingMethod] =
     useState<FundingMethodType>('crypto');
+  const [escrowAddress, setEscrowAddress] = useState<string>('');
 
   const handleChangeFundingMethod = (method: FundingMethodType) => {
     setFundingMethod(method);
@@ -26,6 +27,11 @@ function App() {
   const handleBack = () => {
     setFundingMethod('crypto');
     setStatus(FortuneStageStatus.JOB_REQUEST);
+  };
+
+  const handleOnSuccess = (escrowAddress: string) => {
+    setEscrowAddress(escrowAddress);
+    setStatus(FortuneStageStatus.LAUNCH_SUCCESS);
   };
 
   return (
@@ -91,13 +97,13 @@ function App() {
                   fundingMethod={fundingMethod}
                   onBack={handleBack}
                   onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
-                  onSuccess={() => setStatus(FortuneStageStatus.LAUNCH_SUCCESS)}
+                  onSuccess={handleOnSuccess}
                   onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
                 />
               )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
-                <FortuneLaunchSuccess />
+                <FortuneLaunchSuccess escrowAddress={escrowAddress} />
               )}
               {status === FortuneStageStatus.LAUNCH_FAIL && (
                 <FortuneLaunchFail

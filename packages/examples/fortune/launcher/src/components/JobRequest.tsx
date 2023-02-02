@@ -28,7 +28,7 @@ type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
-  onSuccess: () => void;
+  onSuccess: (escrowAddress: string) => void;
   onFail: () => void;
 };
 
@@ -77,10 +77,15 @@ export const JobRequest = ({
     };
     try {
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
-      const escrowFactoryAddress =
-        ESCROW_NETWORKS[data.chainId as ChainId]?.factoryAddress;
+      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
+      if (!jobLauncherAddress)
+      {
+        alert('Job Launcher address is missing');
+        setIsLoading(false);
+        return;
+      }
       const tx = await contract.approve(
-        escrowFactoryAddress,
+        jobLauncherAddress,
         ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
       );
       const receipt = await tx.wait();
@@ -88,8 +93,8 @@ export const JobRequest = ({
 
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
       onLaunch();
-      await axios.post(`${baseUrl}/escrow`, data);
-      onSuccess();
+      const result = await axios.post(`${baseUrl}/escrow`, data);
+      onSuccess(result.data);
     } catch (err) {
       console.log(err);
       onFail();
