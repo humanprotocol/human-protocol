@@ -1,15 +1,68 @@
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { WagmiConfig, createClient, configureChains } from 'wagmi';
+import {
+  goerli,
+  mainnet,
+  polygon,
+  polygonMumbai,
+  bsc,
+  bscTestnet,
+} from 'wagmi/chains';
+import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { publicProvider } from 'wagmi/providers/public';
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import theme from './theme';
+
+window.Buffer = window.Buffer || require('buffer').Buffer;
+
+// Configure chains & providers with the Alchemy provider.
+// Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
+const { chains, provider, webSocketProvider } = configureChains(
+  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet],
+  [publicProvider()]
+);
+
+// Set up client
+const client = createClient({
+  autoConnect: true,
+  connectors: [
+    new MetaMaskConnector({ chains }),
+    new CoinbaseWalletConnector({
+      chains,
+      options: {
+        appName: 'wagmi',
+      },
+    }),
+    new WalletConnectConnector({
+      chains,
+      options: {
+        qrcode: true,
+      },
+    }),
+  ],
+  provider,
+  webSocketProvider,
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <WagmiConfig client={client}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </WagmiConfig>
   </React.StrictMode>
 );
 

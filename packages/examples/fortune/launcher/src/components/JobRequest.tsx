@@ -1,6 +1,8 @@
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   Grid,
   InputLabel,
@@ -9,39 +11,91 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS, ChainId } from 'src/constants';
+import axios from 'axios';
+import { ethers } from 'ethers';
+import {
+  SUPPORTED_CHAIN_IDS,
+  ESCROW_NETWORKS,
+  ChainId,
+  HM_TOKEN_DECIMALS,
+} from 'src/constants';
 import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
 import { FortuneJobRequestType, FundingMethodType } from './types';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
-  onLaunch: (data: any) => void;
+  onLaunch: () => void;
+  onSuccess: () => void;
+  onFail: () => void;
 };
 
 export const JobRequest = ({
   fundingMethod,
   onBack,
   onLaunch,
+  onSuccess,
+  onFail,
 }: JobRequestProps) => {
   const { address } = useAccount();
+  const { data: signer } = useSigner();
+  const chainId = useChainId();
+  const { switchNetwork } = useSwitchNetwork();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
     chainId: 80001,
     title: '',
     description: '',
-    fortunesRequired: 0,
+    fortunesRequired: '',
     token: '',
-    fundAmount: 0,
+    fundAmount: '',
     jobRequester: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleJobRequestFormFieldChange = (
     fieldName: string,
     fieldValue: any
   ) => {
     setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+  };
+
+  const handleLaunch = async () => {
+    if (!signer || !address) return;
+
+    if (chainId !== jobRequest.chainId) {
+      switchNetwork?.(jobRequest.chainId);
+      return;
+    }
+
+    setIsLoading(true);
+    const data: FortuneJobRequestType = {
+      ...jobRequest,
+      jobRequester: address,
+      token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
+    };
+    try {
+      const contract = new ethers.Contract(data.token, HMTokenABI, signer);
+      const escrowFactoryAddress =
+        ESCROW_NETWORKS[data.chainId as ChainId]?.factoryAddress;
+      const tx = await contract.approve(
+        escrowFactoryAddress,
+        ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+      );
+      const receipt = await tx.wait();
+      console.log(receipt);
+
+      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      onLaunch();
+      await axios.post(`${baseUrl}/escrow`, data);
+      onSuccess();
+    } catch (err) {
+      console.log(err);
+      onFail();
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -99,7 +153,7 @@ export const JobRequest = ({
                   onChange={(e) =>
                     handleJobRequestFormFieldChange(
                       'fortunesRequired',
-                      Number(e.target.value)
+                      e.target.value
                     )
                   }
                 />
@@ -140,23 +194,12 @@ export const JobRequest = ({
               </Typography>
             </RoundedBox>
           </Box>
-          {/* <FormControl sx={{ minWidth: 120 }} size="small">
-            <InputLabel>Token</InputLabel>
-            <Select label="Token" variant="outlined">
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl> */}
           <FormControl>
             <TextField
               placeholder="Amount"
               value={jobRequest.fundAmount}
               onChange={(e) =>
-                handleJobRequestFormFieldChange(
-                  'fundAmount',
-                  Number(e.target.value)
-                )
+                handleJobRequestFormFieldChange('fundAmount', e.target.value)
               }
             />
           </FormControl>
@@ -173,15 +216,11 @@ export const JobRequest = ({
         <Button
           variant="contained"
           sx={{ minWidth: '240px', py: 1 }}
-          onClick={() =>
-            onLaunch({
-              ...jobRequest,
-              jobRequester: address,
-              token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress,
-            })
-          }
+          onClick={handleLaunch}
+          disabled={isLoading}
         >
-          Fund and Request Job
+          {isLoading && <CircularProgress size={24} sx={{ mr: 1 }} />} Fund and
+          Request Job
         </Button>
       </Box>
     </RoundedBox>

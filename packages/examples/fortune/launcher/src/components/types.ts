@@ -12,8 +12,8 @@ export type FortuneJobRequestType = {
   chainId: number;
   title: string;
   description: string;
-  fortunesRequired: number;
+  fortunesRequired: string;
   token: string;
-  fundAmount: number;
+  fundAmount: string;
   jobRequester: string;
 };

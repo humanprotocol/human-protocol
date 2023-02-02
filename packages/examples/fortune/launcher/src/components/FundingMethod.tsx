@@ -1,9 +1,9 @@
 import { Box, Button, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import WalletModal from '../WalletModal';
 import { RoundedBox } from './RoundedBox';
 import { FundingMethodType } from './types';
+import WalletModal from './WalletModal';
 
 type FundingMethodProps = {
   onChange: (arg: FundingMethodType) => void;
