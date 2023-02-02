@@ -3,7 +3,7 @@ import { getContract, getProvider } from '@wagmi/core';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import sendFortune from '../../services/RecordingOracle/RecordingClient';
 import './Escrow.css';
 
@@ -45,6 +45,7 @@ function parseQuery(qs: any) {
 }
 export const Escrow = () => {
   const { address } = useAccount();
+  const { chain } = useNetwork();
   const provider = getProvider();
   const [escrow, setEscrow] = useState('');
   const [fortune, setFortune] = useState('');
@@ -87,7 +88,13 @@ export const Escrow = () => {
   }, [setMainEscrow]);
 
   const send = async () => {
-    await sendFortune(escrow, fortune, recordingOracleUrl, address as string);
+    await sendFortune(
+      escrow,
+      fortune,
+      recordingOracleUrl,
+      address as string,
+      chain?.id as number
+    );
     alert('Your fortune has been submitted');
     setFortune('');
     return;
