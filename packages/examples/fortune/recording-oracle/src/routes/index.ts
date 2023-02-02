@@ -8,27 +8,19 @@ import { IPlugin } from '../interfaces/plugins.js';
 import { IFortuneRequest } from '../interfaces/fortunes.js';
 
 const bodySchema = {
-  type: 'array',
-  items: {
-    type: 'object',
-    properties: {
-      fortune: { type: 'string', minLength: 2 },
-      escrowAddress: { type: 'string', minLength: 2, pattern: '^0x[a-fA-F0-9]{40}$' },
-      workerAddress: { type: 'string', minLength: 2, pattern: '^0x[a-fA-F0-9]{40}$' },
-      chainId: { type: 'number', enum: Object.values(ChainId) },
-    },
-    required: ['fortune', 'escrowAddress', 'workerAddress', 'chainId']
-  }
+  type: 'object',
+  properties: {
+    fortune: { type: 'string', minLength: 2 },
+    escrowAddress: { type: 'string', minLength: 2, pattern: '^0x[a-fA-F0-9]{40}$' },
+    workerAddress: { type: 'string', minLength: 2, pattern: '^0x[a-fA-F0-9]{40}$' },
+    chainId: { type: 'number', enum: Object.values(ChainId) },
+  },
+  required: ['fortune', 'escrowAddress', 'workerAddress', 'chainId']
 }
 
 const opts = {
   schema: {
     body: bodySchema,
-    response: {
-      200: Type.Object({
-        response: Type.Boolean()
-      }),
-    },
   }, 
 }
 
@@ -51,7 +43,7 @@ const routes: FastifyPluginAsync = async (server: FastifyInstance<Server>) => {
   server.post('/send-fortunes', opts,
     async function (request: FastifyRequest, reply: ReplyDefault) {
     
-    const fortunes = request.body as IFortuneRequest[];
+    const fortunes = request.body as IFortuneRequest;
 
     return processFortunes(plugins, fortunes);
   });
