@@ -22,9 +22,10 @@
     "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint npm:sdk:lint",
     "prepare": "husky install"
   },
-  "workspaces": [
-    "packages/**"
-  ],
+  "workspaces": {
+    "packages": ["packages/**"],
+    "nohoist": ["**/*wagmi/", "**/*wagmi/core"]
+  },
   "devDependencies": {
     "@babel/core": "^7.20.2",
     "@babel/preset-env": "^7.20.2",
