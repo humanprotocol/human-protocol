@@ -1,5 +1,4 @@
 import { Box, Typography } from '@mui/material';
-import React, { useState } from 'react';
 import { RoundedBox } from './RoundedBox';
 import { FortuneStageStatus } from './types';
 

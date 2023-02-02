@@ -1,5 +1,5 @@
 import { Box, Button, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
 import { FundingMethodType } from './types';
