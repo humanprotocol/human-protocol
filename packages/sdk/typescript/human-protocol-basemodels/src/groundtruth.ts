@@ -12,7 +12,6 @@ const validateContentType = async (uri: string) => {
     ) {
       throw new Error('Invalid content type');
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e) {
     throw new Error(e.message);
   }

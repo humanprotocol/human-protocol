@@ -207,7 +207,6 @@ const validateTaskDataURI = async (manifest: Manifest) => {
         );
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e) {
     throw new Error(`${uriKey} validation failed: ${e.message}`);
   }
