@@ -1,11 +1,11 @@
 import { Type } from '@sinclair/typebox';
 import { FastifyPluginAsync } from 'fastify';
-import { escrow as escrowSchema } from '../schemas/escrow.js';
+import { escrow as escrowSchema } from '../schemas/escrow';
 import {
   ChainId,
   ESCROW_NETWORKS,
   IEscrowNetwork,
-} from '../constants/networks.js';
+} from '../constants/networks';
 
 export const createEscrow: FastifyPluginAsync = async (server) => {
   let escrowNetwork: IEscrowNetwork;

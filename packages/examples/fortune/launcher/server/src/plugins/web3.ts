@@ -3,7 +3,7 @@ import fp from 'fastify-plugin';
 import { FastifyPluginAsync } from 'fastify';
 import { Type } from '@sinclair/typebox';
 import Ajv from 'ajv';
-import { IEscrowNetwork } from 'constants/networks';
+import { IEscrowNetwork } from '../constants/networks';
 import Web3 from 'web3';
 
 const ConfigSchema = Type.Strict(
@@ -22,7 +22,7 @@ const ajv = new Ajv({
 
 class Web3Client {
   private privKey = process.env.ETH_PRIVATE_KEY as string;
-  
+
   createWeb3(network: IEscrowNetwork, privKey?: string) {
     const ethHttpServer = network.rpcUrl as string;
     const web3 = new Web3(ethHttpServer);

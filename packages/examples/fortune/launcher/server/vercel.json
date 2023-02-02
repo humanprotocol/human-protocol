@@ -1,17 +1,17 @@
 {
-    "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
-    "outputDirectory": "build",
-    "installCommand": "yarn workspace @human-protocol/job-launcher-server install",
-    "builds": [
-        {
-            "src": "src/index.ts",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "src/index.ts"
-        }
-    ]
-  }
+  "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
+  "installCommand": "yarn install",
+  "outputDirectory": "build",
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts"
+    }
+  ]
+}

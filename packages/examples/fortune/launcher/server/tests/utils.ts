@@ -36,7 +36,7 @@ export const approve = async (
     HMTokenAbi as [],
     network.hmtAddress
   );
-  let gas = await hmtContract.methods
+  const gas = await hmtContract.methods
     .approve(to, amount)
     .estimateGas({ from: web3.eth.defaultAccount });
   const gasPrice = await web3.eth.getGasPrice();
@@ -55,7 +55,7 @@ export const decreaseApproval = async (
     HMTokenAbi as [],
     network.hmtAddress
   );
-  let gas = await hmtContract.methods
+  const gas = await hmtContract.methods
     .decreaseApproval(to, amount)
     .estimateGas({ from: web3.eth.defaultAccount });
   const gasPrice = await web3.eth.getGasPrice();
