@@ -1,5 +1,7 @@
 # Fortune Recording Oracle
 
+Fortune Recording Oracle 
+
 ## Set Up
 
 - Install the dependencies.

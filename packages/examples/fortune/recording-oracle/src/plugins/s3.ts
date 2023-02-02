@@ -45,19 +45,18 @@ export class S3Client {
         });
   }
   
-  async saveData(data: any) {
-    const fileName = `${uuid()}.json`;
+  async saveData(fileName: string, data: any) {
     const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);
     if (!bucketExists) {
       await this.s3Client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
     }
     await this.s3Client.putObject(
         this.s3BucketName,
-        fileName,
+        `${fileName}.json`,
         JSON.stringify(data),
         { 'Content-Type': 'application/json' }
     );
-    return `${this.s3BaseUrl}${fileName}`
+    return `${this.s3BaseUrl}/${this.s3BucketName}/${fileName}.json`
   }
 }
 

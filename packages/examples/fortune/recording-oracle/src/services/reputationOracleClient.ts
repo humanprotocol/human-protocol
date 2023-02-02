@@ -6,6 +6,7 @@ export async function sendFortunes(
   data: IFortuneResults
 ) {
   const result = await axios.post(reputationOracleUrl, data);
+  console.log(12321, result)
 
   return result;
 }

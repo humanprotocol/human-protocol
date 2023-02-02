@@ -16,9 +16,10 @@ export class Uniqueness {
       let unique = true;
 
       for (const item of set) {
-        test.indexOf(item) > -1
-        unique = false;
-        break;
+        if (test.indexOf(item) > -1) {
+          unique = false;
+          break;
+        }
       }
       
       return unique;

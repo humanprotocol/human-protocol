@@ -5,7 +5,7 @@ import { IPlugin } from '../interfaces/plugins.js';
 import * as crypto from "crypto";
 import { sendFortunes } from './reputationOracleClient.js';
 import { IEscrowStorage } from 'interfaces/storage.js';
-    
+
 
 export async function getManifestByUrl(manifestUrl: string) {
   const response = await axios.get(manifestUrl);
@@ -18,7 +18,7 @@ export async function getManifestByUrl(manifestUrl: string) {
 }
 
 async function saveFortuneResults(plugins: IPlugin, results: IFortuneResults): Promise<string> {
-  return await plugins.s3.saveData(results)
+  return await plugins.s3.saveData(results.escrowAddress, results)
 }
 
 function isFortunesRequestedDone(escrow: IEscrowStorage): boolean {
@@ -67,12 +67,12 @@ export async function processFortunes(plugins: IPlugin, fortunes: IFortuneReques
 
     const escrowStatus = await plugins.escrow.getEscrowStatus(web3, item.escrowAddress);
 
-    console.log(EscrowStatus[escrowStatus])
     if (EscrowStatus[escrowStatus] !== EscrowStatus[EscrowStatus.Pending]) {
       throw new Error('Escrow is not in the Pending status');
     }
 
     const manifestUrl = await plugins.escrow.getEscrowManifestUrl(web3, item.escrowAddress);
+ 
     const {
       fortunes_requested: fortunesRequested,
       reputation_oracle_url: reputationOracleUrl,
@@ -90,19 +90,23 @@ export async function processFortunes(plugins: IPlugin, fortunes: IFortuneReques
 
     let fortune = plugins.storage.getFortune(item.escrowAddress, item.workerAddress)
 
-    if (!fortune) {
-      if (!plugins.curses.isProfane(item.fortune)) {
-        escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, false)
+    if (!fortune || (fortune && !fortune.score)) {
+      let score = false;
+
+      if (plugins.curses.isProfane(item.fortune)) {
+        escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, score)
         throw new Error('Fortune contains curses');
       }
 
       const fortunesContent = getFortunesContent(escrow);
+
       if (!plugins.uniqueness.isUnique(item.fortune, fortunesContent)) {
-        escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, false)
+        escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, score)
         throw new Error('Fortune is not unique');
       }
 
-      escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, true)
+      score = (fortune && !fortune.score) ? false : true;
+      escrow = plugins.storage.addFortune(item.escrowAddress, item.workerAddress, item.fortune, score)
     } else {
       throw new Error(`${item.workerAddress} already submitted a fortune`);
     }
@@ -113,7 +117,8 @@ export async function processFortunes(plugins: IPlugin, fortunes: IFortuneReques
       fortunes: escrow.fortunes
     }
     const fortuneResultsUrl = await saveFortuneResults(plugins, fortuneResults);
-
+    console.log("Fortune Results Url: ", fortuneResultsUrl)
+    
     const fortuneResultsHash = crypto.createHash("sha256").update(escrow.toString()).digest("hex");;
     
     await plugins.escrow.storeResults(web3, item.escrowAddress, fortuneResultsUrl, fortuneResultsHash);
