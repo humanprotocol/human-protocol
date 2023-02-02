@@ -56,9 +56,8 @@ export const ESCROW_NETWORKS: {
     title: 'Ethereum Goerli',
     scanUrl: 'https://goerli.etherscan.io',
     rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-    subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v1',
-    factoryAddress: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
+    factoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
     hmtAddress: '0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317',
   },
   [ChainId.BSC_MAINNET]: {
@@ -76,9 +75,9 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://testnet.bscscan.com',
     rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1',
-    factoryAddress: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
-    hmtAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
+    factoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
+    hmtAddress: '0xd3a31d57fdd790725d0f6b78095f62e8cd4ab317',
   },
   [ChainId.POLYGON]: {
     chainId: ChainId.POLYGON,
@@ -95,9 +94,8 @@ export const ESCROW_NETWORKS: {
     title: 'Polygon Mumbai',
     scanUrl: 'https://mumbai.polygonscan.com',
     rpcUrl: 'https://rpc-mumbai.maticvigil.com',
-    subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1',
-    factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
+    factoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
   },
   [ChainId.MOONBEAM]: {
