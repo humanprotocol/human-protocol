@@ -84,6 +84,23 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    moonbaseAlpha: {
+      chainId: 1287,
+      timeout: 1000000000,
+      url: process.env.ETH_MOONBASE_ALPHA_URL || '',
+    },
+    avalancheTestnet: {
+      chainId: 43113,
+      url: 'https://api.avax-test.network/ext/C/rpc',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avalanche: {
+      chainId: 43114,
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -113,6 +130,7 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
       bscTestnet: process.env.BSC_TESTNET_API_KEY || '',
+      moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
     },
   },
   mocha: {
