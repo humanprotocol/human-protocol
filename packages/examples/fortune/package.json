@@ -6,7 +6,6 @@
   "license": "MIT",
   "scripts": {
     "exchange": "cd exchange && yarn && yarn start",
-    "launcher": "cd launcher && yarn && yarn start",
     "recording-oracle": "cd recording-oracle && yarn start",
     "reputation-oracle": "cd reputation-oracle && yarn start",
     "minio": "docker compose --env-file=.env.development up -d minio-mc",
