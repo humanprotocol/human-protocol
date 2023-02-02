@@ -96,6 +96,14 @@ export const fetchEscrowStatsAsync = createAsyncThunk<
       )
         .then((res) => res.json())
         .then((json) => {
+          if (!json.data.escrowStatistics) {
+            return {
+              intermediateStorageEventCount: 0,
+              pendingEventCount: 0,
+              bulkTransferEventCount: 0,
+              totalEventCount: 0,
+            };
+          }
           const {
             intermediateStorageEventCount,
             pendingEventCount,
