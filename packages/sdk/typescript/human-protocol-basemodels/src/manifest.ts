@@ -195,20 +195,16 @@ const validateTaskDataURI = async (manifest: Manifest) => {
     return;
   }
 
-  try {
-    const data = await axios.get(uri).then((res) => res.data);
-    if (Array.isArray(data)) {
-      for (const item of data) {
-        await validateGroundTruthEntry(
-          '',
-          item,
-          requestType,
-          validateImageContentType
-        );
-      }
+  const data = await axios.get(uri).then((res) => res.data);
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      await validateGroundTruthEntry(
+        '',
+        item,
+        requestType,
+        validateImageContentType
+      );
     }
-  } catch (e) {
-    throw new Error(`${uriKey} validation failed: ${e.message}`);
   }
 };
 

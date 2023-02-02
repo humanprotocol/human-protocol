@@ -5,15 +5,11 @@ import { BaseJobTypesEnum } from './generated/manifest';
 import { validateURL } from './validators';
 
 const validateContentType = async (uri: string) => {
-  try {
-    const response = await axios.head(uri);
-    if (
-      SUPPORTED_CONTENT_TYPES.indexOf(response.headers['content-type']) === -1
-    ) {
-      throw new Error('Invalid content type');
-    }
-  } catch (e) {
-    throw new Error(e.message);
+  const response = await axios.head(uri);
+  if (
+    SUPPORTED_CONTENT_TYPES.indexOf(response.headers['content-type']) === -1
+  ) {
+    throw new Error('Invalid content type');
   }
 };
 
