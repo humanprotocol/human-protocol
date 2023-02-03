@@ -1,6 +1,5 @@
 import { ChainId, ESCROW_NETWORKS } from '../constants/networks';
 import { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
-import { ReplyDefault } from 'fastify/types/utils';
 import { Server } from 'http';
 import { processFortunes } from '../services/recordingOracle';
 import { IPlugin } from '../interfaces/plugins';
@@ -49,15 +48,11 @@ const routes: FastifyPluginAsync = async (server: FastifyInstance<Server>) => {
     uniqueness,
   };
 
-  server.post(
-    '/send-fortunes',
-    opts,
-    async function (request: FastifyRequest) {
-      const fortunes = request.body as IFortuneRequest;
+  server.post('/send-fortunes', opts, async function (request: FastifyRequest) {
+    const fortunes = request.body as IFortuneRequest;
 
-      return processFortunes(plugins, fortunes);
-    }
-  );
+    return processFortunes(plugins, fortunes);
+  });
 };
 
 export default routes;
