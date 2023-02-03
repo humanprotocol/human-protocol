@@ -86,8 +86,8 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://polygonscan.com',
     rpcUrl: 'https://polygon-rpc.com/',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
-    factoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v1',
+    factoryAddress: '0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB',
     hmtAddress: '0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF',
   },
   [ChainId.POLYGON_MUMBAI]: {
