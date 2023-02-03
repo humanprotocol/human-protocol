@@ -2,28 +2,30 @@ import axios from 'axios';
 import { EscrowStatus } from '../constants/escrow';
 import { IFortuneRequest, IFortuneResults } from '../interfaces/fortunes';
 import { IPlugin } from '../interfaces/plugins';
-import * as crypto from "crypto";
+import * as crypto from 'crypto';
 import { sendFortunes } from './reputationOracleClient';
 import { IEscrowStorage } from '../interfaces/storage';
-
 
 export async function getManifestByUrl(manifestUrl: string) {
   const response = await axios.get(manifestUrl);
 
   if (!response.data) {
-    throw new Error("Not Found")
+    throw new Error('Not Found');
   }
 
   return response.data;
 }
 
-async function saveFortuneResults(plugins: IPlugin, results: IFortuneResults): Promise<string> {
-  return await plugins.s3.saveData(results.escrowAddress, results)
+async function saveFortuneResults(
+  plugins: IPlugin,
+  results: IFortuneResults
+): Promise<string> {
+  return await plugins.s3.saveData(results.escrowAddress, results);
 }
 
 function isFortunesRequestedDone(escrow: IEscrowStorage): boolean {
-  const data = Object.values(escrow.fortunes)
-  const validFortunes = data.filter(item => item.score);
+  const data = Object.values(escrow.fortunes);
+  const validFortunes = data.filter((item) => item.score);
 
   if (validFortunes.length < escrow.fortunesRequested) {
     return false;
@@ -33,11 +35,14 @@ function isFortunesRequestedDone(escrow: IEscrowStorage): boolean {
 }
 
 function getFortunesContent(escrow: IEscrowStorage): string[] {
-  const data = Object.values(escrow.fortunes)
-  return data.map(item => item.fortune);
+  const data = Object.values(escrow.fortunes);
+  return data.map((item) => item.fortune);
 }
 
-export async function processFortunes(plugins: IPlugin, fortune: IFortuneRequest) {
+export async function processFortunes(
+  plugins: IPlugin,
+  fortune: IFortuneRequest
+) {
   const web3 = plugins.web3[fortune.chainId];
 
   if (!web3.utils.isAddress(fortune.escrowAddress)) {
@@ -61,51 +66,81 @@ export async function processFortunes(plugins: IPlugin, fortune: IFortuneRequest
     web3.utils.toChecksumAddress(recordingOracleAddress) !==
     web3.utils.toChecksumAddress(web3.eth.defaultAccount as string)
   ) {
-    throw new Error('Escrow Recording Oracle address mismatches the current one');
+    throw new Error(
+      'Escrow Recording Oracle address mismatches the current one'
+    );
   }
 
-  const escrowStatus = await plugins.escrow.getEscrowStatus(web3, fortune.escrowAddress);
+  const escrowStatus = await plugins.escrow.getEscrowStatus(
+    web3,
+    fortune.escrowAddress
+  );
 
   if (EscrowStatus[escrowStatus] !== EscrowStatus[EscrowStatus.Pending]) {
     throw new Error('Escrow is not in the Pending status');
   }
 
-  const manifestUrl = await plugins.escrow.getEscrowManifestUrl(web3, fortune.escrowAddress);
+  const manifestUrl = await plugins.escrow.getEscrowManifestUrl(
+    web3,
+    fortune.escrowAddress
+  );
 
   const {
     fortunes_requested: fortunesRequested,
     reputation_oracle_url: reputationOracleUrl,
   } = await getManifestByUrl(manifestUrl);
 
-  let escrow = plugins.storage.getEscrow(fortune.escrowAddress)
+  let escrow = plugins.storage.getEscrow(fortune.escrowAddress);
 
   if (!escrow) {
-    escrow = plugins.storage.addEscrow(fortune.escrowAddress, fortune.chainId, fortunesRequested)
+    escrow = plugins.storage.addEscrow(
+      fortune.escrowAddress,
+      fortune.chainId,
+      fortunesRequested
+    );
   }
 
-  if(isFortunesRequestedDone(escrow)) {
+  if (isFortunesRequestedDone(escrow)) {
     throw new Error('All fortunes have already been sent');
   }
 
-  let fortuneStored = plugins.storage.getFortune(fortune.escrowAddress, fortune.workerAddress)
+  const fortuneStored = plugins.storage.getFortune(
+    fortune.escrowAddress,
+    fortune.workerAddress
+  );
 
   if (!fortuneStored || (fortuneStored && !fortuneStored.score)) {
     let score = false;
 
     if (plugins.curses.isProfane(fortune.fortune)) {
-      escrow = plugins.storage.addFortune(fortune.escrowAddress, fortune.workerAddress, fortune.fortune, score)
+      escrow = plugins.storage.addFortune(
+        fortune.escrowAddress,
+        fortune.workerAddress,
+        fortune.fortune,
+        score
+      );
       throw new Error('Fortune contains curses');
     }
 
     const fortunesContent = getFortunesContent(escrow);
 
     if (!plugins.uniqueness.isUnique(fortune.fortune, fortunesContent)) {
-      escrow = plugins.storage.addFortune(fortune.escrowAddress, fortune.workerAddress, fortune.fortune, score)
+      escrow = plugins.storage.addFortune(
+        fortune.escrowAddress,
+        fortune.workerAddress,
+        fortune.fortune,
+        score
+      );
       throw new Error('Fortune is not unique');
     }
 
-    score = (fortuneStored && !fortuneStored.score) ? false : true;
-    escrow = plugins.storage.addFortune(fortune.escrowAddress, fortune.workerAddress, fortune.fortune, score)
+    score = fortuneStored && !fortuneStored.score ? false : true;
+    escrow = plugins.storage.addFortune(
+      fortune.escrowAddress,
+      fortune.workerAddress,
+      fortune.fortune,
+      score
+    );
   } else {
     throw new Error(`${fortune.workerAddress} already submitted a fortune`);
   }
@@ -113,19 +148,27 @@ export async function processFortunes(plugins: IPlugin, fortune: IFortuneRequest
   const fortuneResults = {
     escrowAddress: fortune.escrowAddress,
     chainId: escrow.chainId,
-    fortunes: escrow.fortunes
-  }
+    fortunes: escrow.fortunes,
+  };
   const fortuneResultsUrl = await saveFortuneResults(plugins, fortuneResults);
-  console.log("Fortune Results Url: ", fortuneResultsUrl)
-  
-  const fortuneResultsHash = crypto.createHash("sha256").update(escrow.toString()).digest("hex");;
-  
-  await plugins.escrow.storeResults(web3, fortune.escrowAddress, fortuneResultsUrl, fortuneResultsHash);
+  console.log('Fortune Results Url: ', fortuneResultsUrl);
 
-  if(isFortunesRequestedDone(escrow)) {
-    sendFortunes(reputationOracleUrl, fortuneResults)
+  const fortuneResultsHash = crypto
+    .createHash('sha256')
+    .update(escrow.toString())
+    .digest('hex');
+
+  await plugins.escrow.storeResults(
+    web3,
+    fortune.escrowAddress,
+    fortuneResultsUrl,
+    fortuneResultsHash
+  );
+
+  if (isFortunesRequestedDone(escrow)) {
+    sendFortunes(reputationOracleUrl, fortuneResults);
     plugins.storage.remove(fortune.escrowAddress);
-    return { response: "The requested fortunes have been completed." };
+    return { response: 'The requested fortunes have been completed.' };
   }
 
   return { response: true };

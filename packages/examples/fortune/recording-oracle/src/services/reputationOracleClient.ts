@@ -5,10 +5,10 @@ export async function sendFortunes(
   reputationOracleUrl: string,
   fortunes: IFortuneResults
 ) {
-  const data = [fortunes]
+  const data = [fortunes];
   try {
     return await axios.post(reputationOracleUrl, data);
-  } catch(e) {
-    console.log("Reputation Oracle error: ", e)
+  } catch (e) {
+    console.log('Reputation Oracle error: ', e);
   }
 }

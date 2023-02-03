@@ -1,29 +1,29 @@
-import { ChainId } from "../constants/networks";
-import { IFortuneStorage } from "./storage";
+import { ChainId } from '../constants/networks';
+import { IFortuneStorage } from './storage';
 
 export interface IFortuneRequest {
-    fortune: string,
-    workerAddress: string,
-    escrowAddress: string
-    chainId: ChainId,
+  fortune: string;
+  workerAddress: string;
+  escrowAddress: string;
+  chainId: ChainId;
 }
 
 export interface IFortuneResults {
-    escrowAddress: string,
-    chainId: Number,
-    fortunes: {
-        [workerAddress: string]: IFortuneStorage
-    }
+  escrowAddress: string;
+  chainId: number;
+  fortunes: {
+    [workerAddress: string]: IFortuneStorage;
+  };
 }
 
 export interface IRecordingOracleRequest {
-    [escrowAddress: string]: {
-        chainId: Number
-        fortunes: {
-            [workerAddress: string]: {
-                fortune: string,
-                score: boolean
-            }
-        }
-    }   
+  [escrowAddress: string]: {
+    chainId: number;
+    fortunes: {
+      [workerAddress: string]: {
+        fortune: string;
+        score: boolean;
+      };
+    };
+  };
 }

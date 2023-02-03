@@ -1,8 +1,7 @@
-import fp from "fastify-plugin";
-import { FastifyPluginAsync } from "fastify";
-import EscrowAbi from "@human-protocol/core/abis/Escrow.json"
+import fp from 'fastify-plugin';
+import { FastifyPluginAsync } from 'fastify';
+import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
 import Web3 from 'web3';
-
 
 export class Escrow {
   async getRecordingOracleAddress(
@@ -13,10 +12,7 @@ export class Escrow {
     return await Escrow.methods.recordingOracle().call();
   }
 
-  async getEscrowStatus(
-    web3: Web3,
-    escrowAddress: string
-  ): Promise<number> {
+  async getEscrowStatus(web3: Web3, escrowAddress: string): Promise<number> {
     const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
     return await Escrow.methods.status().call();
   }
@@ -47,14 +43,13 @@ export class Escrow {
 
     return result;
   }
-
 }
 
 const escrowPlugin: FastifyPluginAsync = async (server) => {
-  server.decorate("escrow", new Escrow());
+  server.decorate('escrow', new Escrow());
 };
 
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     escrow: Escrow;
   }

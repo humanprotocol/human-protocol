@@ -6,11 +6,13 @@ describe('POST /', () => {
     const response = await server.inject({
       method: 'POST',
       path: '/send-fortunes',
-      payload: [{
-        fortune: "tale",
-        workerAddress: "0x0000000000000000000000000000000000000000",
-        escrowAddress: "0x0000000000000000000000000000000000000000"
-    }]
+      payload: [
+        {
+          fortune: 'tale',
+          workerAddress: '0x0000000000000000000000000000000000000000',
+          escrowAddress: '0x0000000000000000000000000000000000000000',
+        },
+      ],
     });
     expect(response.statusCode).eq(200);
     expect(response.json()).deep.eq({ response: true });

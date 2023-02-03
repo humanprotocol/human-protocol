@@ -1,52 +1,50 @@
-import fp from "fastify-plugin";
-import { FastifyPluginAsync } from "fastify";
+import fp from 'fastify-plugin';
+import { FastifyPluginAsync } from 'fastify';
 import store from 'store2';
-import { IEscrowStorage, IFortuneStorage } from "../interfaces/storage";
-
+import { IEscrowStorage, IFortuneStorage } from '../interfaces/storage';
 
 export class Storage {
   remove(key: string): boolean {
-    return store.remove(key)
+    return store.remove(key);
   }
 
-  addEscrow(escrowAddress: string, chainId: number, fortunesRequested: number): IEscrowStorage {
+  addEscrow(
+    escrowAddress: string,
+    chainId: number,
+    fortunesRequested: number
+  ): IEscrowStorage {
     const escrow = {
       chainId,
       fortunesRequested,
-      fortunes: {}
-    }
+      fortunes: {},
+    };
 
     store.set(escrowAddress, escrow);
 
     return escrow;
   }
 
-  hasEscrow(
-    escrowAddress: string
-  ): boolean {
+  hasEscrow(escrowAddress: string): boolean {
     return store.has(escrowAddress);
   }
-  
+
   getEscrow(escrowAddress: string): IEscrowStorage {
     return store.get(escrowAddress);
   }
-  
+
   getFortune(escrowAddress: string, workerAddress: string): IFortuneStorage {
     const escrow = store.get(escrowAddress);
     return escrow.fortunes[workerAddress];
   }
 
-  hasFortune(
-    escrowAddress: string,
-    workerAddress: string,
-  ): boolean {
+  hasFortune(escrowAddress: string, workerAddress: string): boolean {
     const escrow = store.get(escrowAddress);
-    
+
     if (!escrow?.fortunes[workerAddress]) {
       return false;
     }
 
-    return true
+    return true;
   }
 
   addFortune(
@@ -59,19 +57,19 @@ export class Storage {
 
     escrow.fortunes[workerAddress] = {
       fortune,
-      score
-    }
+      score,
+    };
 
     store.set(escrowAddress, escrow);
-    return escrow;  
+    return escrow;
   }
 }
 
 const storagePlugin: FastifyPluginAsync = async (server) => {
-  server.decorate("storage", new Storage());
+  server.decorate('storage', new Storage());
 };
 
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     storage: Storage;
   }

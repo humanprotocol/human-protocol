@@ -1,13 +1,13 @@
-import "dotenv/config";
-import fp from "fastify-plugin";
-import { FastifyPluginAsync } from "fastify";
-import { Static, Type } from "@sinclair/typebox";
-import Ajv from "ajv";
+import 'dotenv/config';
+import fp from 'fastify-plugin';
+import { FastifyPluginAsync } from 'fastify';
+import { Static, Type } from '@sinclair/typebox';
+import Ajv from 'ajv';
 
 export enum NodeEnv {
-  development = "development",
-  test = "test",
-  production = "production",
+  development = 'development',
+  test = 'test',
+  production = 'production',
 }
 
 const ConfigSchema = Type.Strict(
@@ -34,14 +34,14 @@ const configPlugin: FastifyPluginAsync = async (server) => {
   const valid = validate(process.env);
   if (!valid) {
     throw new Error(
-      ".env file validation failed - " +
+      '.env file validation failed - ' +
         JSON.stringify(validate.errors, null, 2)
     );
   }
-  server.decorate("config", process.env);
+  server.decorate('config', process.env);
 };
 
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     config: Config;
   }

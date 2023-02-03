@@ -1,18 +1,18 @@
 export interface IStorage {
-    [escrowAddress: string]: IEscrowStorage
+  [escrowAddress: string]: IEscrowStorage;
 }
 
 export interface IEscrowStorage {
-    fortunesRequested: Number,
-    chainId: Number
-    fortunes: IWorkerFortuneStorage
+  fortunesRequested: number;
+  chainId: number;
+  fortunes: IWorkerFortuneStorage;
 }
 
 export interface IWorkerFortuneStorage {
-    [workerAddress: string]: IFortuneStorage
+  [workerAddress: string]: IFortuneStorage;
 }
 
 export interface IFortuneStorage {
-    fortune: string,
-    score: boolean
+  fortune: string;
+  score: boolean;
 }

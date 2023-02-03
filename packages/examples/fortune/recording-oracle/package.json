@@ -6,6 +6,8 @@
   "author": "human-protocol",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "build": "tsc",
     "start:prod": "ts-node build/src/index.js",
     "start": "ts-node ./src/index.ts",
