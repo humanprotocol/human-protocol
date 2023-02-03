@@ -137,7 +137,6 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
-      polygon: process.env.POLYGONSCAN_API_KEY || '',
       bscTestnet: process.env.BSC_TESTNET_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
     },
