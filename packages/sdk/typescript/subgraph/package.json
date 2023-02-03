@@ -39,9 +39,10 @@
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.37.1",
     "@graphprotocol/graph-ts": "^0.27.0",
-    "@graphql-eslint/eslint-plugin": "^3.13.0",
+    "@graphql-eslint/eslint-plugin": "^3.15.0",
     "@human-protocol/core": "workspace:*",
     "assemblyscript": "^0.25.1",
+    "graphql": "^16.6.0",
     "matchstick-as": "^0.5.0",
     "mustache": "^4.2.0"
   },
