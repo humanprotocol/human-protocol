@@ -8,7 +8,7 @@ export const cryptoPayment: FastifyPluginAsync = async (server) => {
         body: { type: 'string' },
       },
     },
-    async function (request, reply) {
+    async function (request) {
       const txHash = request.body;
 
       console.log(txHash);

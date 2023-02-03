@@ -22,7 +22,7 @@ const ajv = new Ajv({
 
 class Web3Client {
   private privKey = process.env.ETH_PRIVATE_KEY as string;
-  
+
   createWeb3(network: IEscrowNetwork, privKey?: string) {
     const ethHttpServer = network.rpcUrl as string;
     const web3 = new Web3(ethHttpServer);

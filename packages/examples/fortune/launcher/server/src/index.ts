@@ -5,7 +5,6 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-
 const startServer = async () => {
   const server = await getServer();
   const port = +server.config.API_PORT;
