@@ -4,11 +4,11 @@
 | Polygon (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2021/10/13                | HMToken        | 0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF | N/A                                        |
-|2022/02/28                | EscrowFactory  | 0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794 |                                            |
-|                          | Staking        |                                            |                                            |
-|                          | RewardPool     |                                            |                                            |
-|2022/03/01                | EthKVStore     | 0x6334dB76037bb6d4bc21901433E870b22ACa1F9a | N/A                                        |
-|                          | Reputation     |                                            |                                            |
+|2022/02/28                | EscrowFactory  | 0xe44D7eb960f24797D36FAdD8a8FfF29C76375Ef0 | 0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB |
+|                          | Staking        | 0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c | 0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29 |
+|                          | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0xa8e32d777a3839440cc7c24D591A64B9481753B3 |
+|2022/03/01                | EthKVStore     | 0x35Cf4beBD58F9C8D75B9eA2599479b6C173d406F | N/A                                        |
+|                          | Reputation     | N/A                                        | N/A                                        |
 
 | Polygon Mumbai (Testnet) | Contract       | Address                                    | Proxy                                      |
 |--------------------------|----------------|--------------------------------------------|--------------------------------------------|
