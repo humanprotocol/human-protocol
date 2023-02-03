@@ -74,9 +74,10 @@ const config: HardhatUserConfig = {
     },
     polygon: {
       chainId: 137,
-      url: process.env.ETH_POLYGON_MAINNET_URL || '',
+      url: process.env.ETH_POLYGON_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 1000000000,
     },
     polygonMumbai: {
       chainId: 80001,
@@ -134,6 +135,7 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       bscTestnet: process.env.BSC_TESTNET_API_KEY || '',

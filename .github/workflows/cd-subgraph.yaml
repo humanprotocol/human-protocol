@@ -15,7 +15,7 @@ jobs:
       matrix:
         network:
           - name: matic
-            graph: polygon
+            graph: polygon-v1
           - name: goerli
             graph: goerli-v1
           - name: moonbeam
