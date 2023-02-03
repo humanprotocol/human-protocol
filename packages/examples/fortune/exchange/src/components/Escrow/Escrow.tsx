@@ -72,7 +72,7 @@ export const Escrow = () => {
       if (manifestUrl) {
         const manifestContent = (await axios.get(manifestUrl)).data;
 
-        setRecordingOracleUrl(manifestContent.recording_oracle_url);
+        setRecordingOracleUrl(manifestContent.recordingOracleUrl);
       }
       return;
     },
