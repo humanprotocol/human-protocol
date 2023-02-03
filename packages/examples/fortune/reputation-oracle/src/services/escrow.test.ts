@@ -1,5 +1,10 @@
 import Web3 from 'web3';
-import { getBalance, bulkPayOut, bulkPaid } from './escrow';
+import {
+  getBalance,
+  bulkPayOut,
+  bulkPaid,
+  getEscrowManifestUrl,
+} from './escrow';
 import { describe, expect, it, beforeAll, beforeEach } from '@jest/globals';
 import Escrow from '@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
@@ -66,11 +71,15 @@ describe('Fortune', () => {
     escrowFactory = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
-        arguments: [token.options.address, staking.options.address],
+        arguments: [],
       })
       .send({
         from: owner.address,
       });
+
+    await escrowFactory.methods.initialize(staking.options.address).send({
+      from: owner.address,
+    });
 
     await token.methods
       .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
@@ -87,7 +96,7 @@ describe('Fortune', () => {
 
   beforeEach(async () => {
     await escrowFactory.methods
-      .createEscrow([launcher.address])
+      .createEscrow(token.options.address, [launcher.address])
       .send({ from: launcher.address });
 
     escrowAddress = await escrowFactory.methods.lastEscrow().call();
@@ -105,7 +114,8 @@ describe('Fortune', () => {
         10,
         10,
         'manifestUrl',
-        'manifestUrl'
+        'manifestUrl',
+        3
       )
       .send({ from: launcher.address });
   });
@@ -113,6 +123,11 @@ describe('Fortune', () => {
   it('Get escrow balance', async () => {
     const balance = await getBalance(web3, escrowAddress);
     expect(balance).toBe(30000000000000000000);
+  });
+
+  it('Get manifest URL', async () => {
+    const manifest = await getEscrowManifestUrl(web3, escrowAddress);
+    expect(manifest).toBe('manifestUrl');
   });
 
   it('Bulk payout rewards, higher amount than balance', async () => {

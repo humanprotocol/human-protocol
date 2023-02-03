@@ -14,7 +14,7 @@
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc",
     "prepublish": "npm run build",
-    "test": "concurrently -k -s first -g --hide 0 \"yarn workspace @human-protocol/core local\" \"sleep 5 && jest --runInBand\"",
+    "test": "concurrently -k -s first -g --hide 0 \"yarn workspace @human-protocol/core local\" \"sleep 10 && jest --runInBand\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'"
@@ -45,8 +45,5 @@
     "ethers": "^5.7.2",
     "secp256k1": "^4.0.3",
     "winston": "^3.8.2"
-  },
-  "peerDependencies": {
-    "@human-protocol/core": "^1.0.12"
   }
 }

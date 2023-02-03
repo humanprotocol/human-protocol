@@ -2,10 +2,11 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-import './interfaces/HMTokenInterface.sol';
 import './interfaces/IRewardPool.sol';
 import './utils/Math.sol';
 
@@ -16,8 +17,8 @@ import './utils/Math.sol';
 contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMath for uint256;
 
-    // ERC20 Token address
-    address public eip20;
+    // Token address
+    address public token;
 
     // Staking contract address
     address public staking;
@@ -40,21 +41,21 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
     );
 
     function initialize(
-        address _eip20,
+        address _token,
         address _staking,
         uint256 _fees
     ) external payable virtual initializer {
         __Ownable_init_unchained();
 
-        __RewardPool_init_unchained(_eip20, _staking, _fees);
+        __RewardPool_init_unchained(_token, _staking, _fees);
     }
 
     function __RewardPool_init_unchained(
-        address _eip20,
+        address _token,
         address _staking,
         uint256 _fees
     ) internal onlyInitializing {
-        eip20 = _eip20;
+        token = _token;
         staking = _staking;
         fees = _fees;
     }
@@ -99,7 +100,6 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
      */
     function distributeReward(address _escrowAddress) external override {
         Reward[] memory rewardsForEscrow = rewards[_escrowAddress];
-        HMTokenInterface token = HMTokenInterface(eip20);
 
         // Delete rewards for allocation
         delete rewards[_escrowAddress];
@@ -107,17 +107,18 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         // Transfer Tokens
         for (uint256 index = 0; index < rewardsForEscrow.length; index += 1) {
             Reward memory reward = rewardsForEscrow[index];
-            token.transfer(reward.slasher, reward.tokens);
+            _safeTransfer(reward.slasher, reward.tokens);
         }
     }
 
     function withdraw(address to) external override onlyOwner {
-        HMTokenInterface token = HMTokenInterface(eip20);
-
         uint256 amount = totalFee;
         totalFee = 0;
+        _safeTransfer(to, amount);
+    }
 
-        token.transfer(to, amount);
+    function _safeTransfer(address to, uint256 value) internal {
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(token), to, value);
     }
 
     modifier onlyStaking() {

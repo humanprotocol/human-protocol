@@ -27,13 +27,19 @@ async function main() {
   );
 
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-  const escrowFactoryContract = await EscrowFactory.deploy(
-    HMTokenContract.address,
-    stakingContract.address
+  const escrowFactoryContract = await upgrades.deployProxy(
+    EscrowFactory,
+    [stakingContract.address],
+    { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
-
-  console.log('Escrow Factory Address: ', escrowFactoryContract.address);
+  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  console.log(
+    'Escrow Factory Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(
+      escrowFactoryContract.address
+    )
+  );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
@@ -48,7 +54,6 @@ async function main() {
     { initializer: 'initialize', kind: 'uups' }
   );
   await rewardPoolContract.deployed();
-  console.log('Reward Pool Contract Address:', rewardPoolContract.address);
   console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
   console.log(
     'Reward Pool Implementation Address: ',
@@ -64,6 +69,19 @@ async function main() {
       ethers.utils.parseEther('1000')
     );
   }
+
+  const Reputation = await ethers.getContractFactory('Reputation');
+  const reputationContract = await upgrades.deployProxy(
+    Reputation,
+    [stakingContract.address, 1],
+    { initializer: 'initialize', kind: 'uups' }
+  );
+  await reputationContract.deployed();
+  console.log('Reputation Proxy Address: ', reputationContract.address);
+  console.log(
+    'Reputation Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(reputationContract.address)
+  );
 }
 
 main().catch((error) => {
