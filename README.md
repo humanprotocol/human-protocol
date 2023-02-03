@@ -8,6 +8,8 @@
 
 [![Node.js SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml)
 
+[![Node.js Base Models Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-basemodels.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-basemodels.yaml)
+
 [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml)
 
 [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml)
@@ -21,6 +23,8 @@
 [![Python Base Models Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-basemodels.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-basemodels.yaml)
 
 [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml)
+
+[![Node.js Base Models Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-basemodels.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-basemodels.yaml)
 
 [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml)
 

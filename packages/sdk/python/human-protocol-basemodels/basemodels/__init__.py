@@ -6,7 +6,11 @@ from .manifest import (
     TaskData,
     Webhook,
 )
-from .manifest.data import validate_taskdata_entry, validate_groundtruth_entry
+from .manifest.data import (
+    TaskDataEntry,
+    validate_taskdata_entry,
+    validate_groundtruth_entry,
+)
 from .via import ViaDataManifest
 from .manifest.data.preprocess import Pipeline, Preprocess
 
