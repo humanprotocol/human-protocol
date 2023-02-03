@@ -1,20 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "lib": ["es6"],
+    "target": "es2020",
     "module": "commonjs",
-    "rootDir": ".",
-    "resolveJsonModule": true,
-    "outDir": "build",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "pretty": true,
+    "noEmitOnError": true,
     "strict": true,
-    "noImplicitAny": true,
-    "skipLibCheck": true
+    "resolveJsonModule": true,
+    "removeComments": true,
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
+    "useDefineForClassFields": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "outDir": "build",
+    "lib": ["es2020"]
   },
-  "exclude": [
-    "./build/**/*",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts"
-  ] 
+  "include": ["src/**/*"],
+  "exclude": ["tests"]
 }
