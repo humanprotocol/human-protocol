@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { EscrowStatus } from '../constants/escrow.js';
-import { IFortuneRequest, IFortuneResults } from '../interfaces/fortunes.js';
-import { IPlugin } from '../interfaces/plugins.js';
+import { EscrowStatus } from '../constants/escrow';
+import { IFortuneRequest, IFortuneResults } from '../interfaces/fortunes';
+import { IPlugin } from '../interfaces/plugins';
 import * as crypto from "crypto";
-import { sendFortunes } from './reputationOracleClient.js';
-import { IEscrowStorage } from 'interfaces/storage.js';
+import { sendFortunes } from './reputationOracleClient';
+import { IEscrowStorage } from '../interfaces/storage';
 
 
 export async function getManifestByUrl(manifestUrl: string) {
@@ -120,12 +120,12 @@ export async function processFortunes(plugins: IPlugin, fortune: IFortuneRequest
   
   const fortuneResultsHash = crypto.createHash("sha256").update(escrow.toString()).digest("hex");;
   
-  //await plugins.escrow.storeResults(web3, fortune.escrowAddress, fortuneResultsUrl, fortuneResultsHash);
+  await plugins.escrow.storeResults(web3, fortune.escrowAddress, fortuneResultsUrl, fortuneResultsHash);
 
   if(isFortunesRequestedDone(escrow)) {
     sendFortunes(reputationOracleUrl, fortuneResults)
     plugins.storage.remove(fortune.escrowAddress);
-    return { response: "The requested fortunes have been completed" };
+    return { response: "The requested fortunes have been completed." };
   }
 
   return { response: true };

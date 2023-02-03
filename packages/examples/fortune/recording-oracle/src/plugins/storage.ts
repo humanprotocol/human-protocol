@@ -1,7 +1,7 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
 import store from 'store2';
-import { IEscrowStorage, IFortuneStorage } from "interfaces/storage";
+import { IEscrowStorage, IFortuneStorage } from "../interfaces/storage";
 
 
 export class Storage {
@@ -56,14 +56,6 @@ export class Storage {
     score: boolean
   ): IEscrowStorage {
     const escrow = store.get(escrowAddress);
-    
-    if(Object.keys(escrow.fortunes).length === escrow.fortunesRequested) {
-      return escrow;
-    }
-
-    if (escrow.fortunes[workerAddress]) {
-      return escrow;
-    }
 
     escrow.fortunes[workerAddress] = {
       fortune,

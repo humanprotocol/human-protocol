@@ -1,10 +1,10 @@
 import "dotenv/config";
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { Static, Type } from "@sinclair/typebox";
+import { Type } from "@sinclair/typebox";
 import Web3 from 'web3';
 import Ajv from "ajv";
-import { IEscrowNetwork } from "../interfaces/networks.js";
+import { IEscrowNetwork } from "../interfaces/networks";
 
 const ConfigSchema = Type.Strict(
   Type.Object({

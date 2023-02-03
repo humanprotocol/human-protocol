@@ -1,5 +1,5 @@
-import { ChainId } from "../constants/networks.js";
-import { IFortuneStorage } from "./storage.js";
+import { ChainId } from "../constants/networks";
+import { IFortuneStorage } from "./storage";
 
 export interface IFortuneRequest {
     fortune: string,

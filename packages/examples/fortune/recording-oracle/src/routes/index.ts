@@ -1,11 +1,10 @@
-import { Type } from '@sinclair/typebox';
-import { ChainId, ESCROW_NETWORKS } from '../constants/networks.js';
+import { ChainId, ESCROW_NETWORKS } from '../constants/networks';
 import { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
-import { ReplyDefault } from 'fastify/types/utils.js';
+import { ReplyDefault } from 'fastify/types/utils';
 import { Server } from 'http';
-import { processFortunes } from '../services/recordingOracle.js';
-import { IPlugin } from '../interfaces/plugins.js';
-import { IFortuneRequest } from '../interfaces/fortunes.js';
+import { processFortunes } from '../services/recordingOracle';
+import { IPlugin } from '../interfaces/plugins';
+import { IFortuneRequest } from '../interfaces/fortunes';
 
 const bodySchema = {
   type: 'object',

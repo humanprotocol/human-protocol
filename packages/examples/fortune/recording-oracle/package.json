@@ -5,19 +5,11 @@
   "main": "index.ts",
   "author": "human-protocol",
   "license": "MIT",
-  "private": false,
-  "type": "module",
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "check:types": "tsc --noEmit",
-    "build": "esbuild `find src \\( -name '*.ts' \\)` --platform=node --outdir=build --resolve-extensions=.js",
-    "build:docker:prod": "docker build . -t my-fastify-app --build-arg APP_ENV=production",
-    "start": "node build",
-    "dev": "tsx watch src .env | pino-pretty --colorize",
-    "pretest": "npm run build",
-    "test": "vitest",
-    "test:watch": "vitest -w"
+    "build": "tsc",
+    "start:prod": "ts-node build/src/index.js",
+    "start": "ts-node ./src/index.ts",
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && cross-env RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && vitest --run\""
   },
   "repository": {
     "type": "git",

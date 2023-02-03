@@ -1,12 +1,14 @@
 import axios from 'axios';
-import { IFortuneResults } from 'interfaces/fortunes.js';
+import { IFortuneResults } from '../interfaces/fortunes';
 
 export async function sendFortunes(
   reputationOracleUrl: string,
-  data: IFortuneResults
+  fortunes: IFortuneResults
 ) {
-  const result = await axios.post(reputationOracleUrl, data);
-  console.log(12321, result)
-
-  return result;
+  const data = [fortunes]
+  try {
+    return await axios.post(reputationOracleUrl, data);
+  } catch(e) {
+    console.log("Reputation Oracle error: ", e)
+  }
 }

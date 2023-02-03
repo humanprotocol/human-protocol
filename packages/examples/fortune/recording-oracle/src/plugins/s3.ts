@@ -4,7 +4,6 @@ import { FastifyPluginAsync } from "fastify";
 import * as Minio from 'minio';
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
-import { v4 as uuid } from 'uuid';
 
 const ConfigSchema = Type.Strict(
     Type.Object({

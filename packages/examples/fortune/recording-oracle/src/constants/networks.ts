@@ -1,4 +1,4 @@
-import { IEscrowNetwork } from "interfaces/networks";
+import { IEscrowNetwork } from "../interfaces/networks";
 
 export enum ChainId {
     POLYGON = 137,

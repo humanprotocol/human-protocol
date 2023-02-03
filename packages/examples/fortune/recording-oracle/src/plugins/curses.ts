@@ -1,15 +1,6 @@
 import "dotenv/config";
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import Ajv from "ajv";
-
-const ajv = new Ajv({
-  allErrors: true,
-  removeAdditional: true,
-  useDefaults: true,
-  coerceTypes: true,
-  allowUnionTypes: true,
-});
 
 const curses = [
   "ahole",
