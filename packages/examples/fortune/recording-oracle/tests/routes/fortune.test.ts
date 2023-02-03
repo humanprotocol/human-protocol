@@ -1,7 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import getServer from '../../src/server.js';
 
-
 describe('Escrow route tests', async () => {
   const server = await getServer();
 
