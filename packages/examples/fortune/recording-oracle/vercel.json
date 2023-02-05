@@ -11,7 +11,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "dest": "src/index.ts"
+      "destination": "src/index.ts"
     }
   ],
   "headers": [
