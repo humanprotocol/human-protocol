@@ -33,7 +33,7 @@ const getServer = async () => {
     .register(uniqueness)
     .register(cors, {
       origin: '*',
-      methods: ['GET', 'PUT', 'POST'],
+      methods: ['GET', 'PUT', 'POST', 'OPTIONS'],
     })
     .register(routes)
     .ready();
