@@ -52,7 +52,7 @@ app.post('/send-fortunes', async (req, res) => {
         );
       }
     });
-    
+
     if (errorMessage.length > 0) {
       return res.status(400).send({
         message: JSON.stringify(errorMessage),
@@ -68,7 +68,10 @@ app.post('/send-fortunes', async (req, res) => {
       web3.eth.accounts.wallet.add(account);
       web3.eth.defaultAccount = account.address;
 
-      const manifestUrl = await getEscrowManifestUrl(web3, escrow.escrowAddress);
+      const manifestUrl = await getEscrowManifestUrl(
+        web3,
+        escrow.escrowAddress
+      );
       const { recordingOracleAddress } = await getManifest(manifestUrl);
 
       const balance = await getBalance(web3, escrow.escrowAddress);
@@ -106,7 +109,9 @@ app.post('/send-fortunes', async (req, res) => {
         resultHash
       );
       if (!(await bulkPaid(web3, escrow.escrowAddress))) {
-        errorMessage.push(`Escrow ${escrow.escrowAddress} payout couldn't be done`);
+        errorMessage.push(
+          `Escrow ${escrow.escrowAddress} payout couldn't be done`
+        );
       }
     }
     if (errorMessage.length > 0) {

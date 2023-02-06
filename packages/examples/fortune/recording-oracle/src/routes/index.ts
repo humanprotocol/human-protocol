@@ -1,4 +1,4 @@
-import { ChainId, ESCROW_NETWORKS } from '../constants/networks';
+import { ChainId } from '../constants/networks';
 import { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { Server } from 'http';
 import { processFortunes } from '../services/recordingOracle';
@@ -34,13 +34,7 @@ const routes: FastifyPluginAsync = async (server: FastifyInstance<Server>) => {
   const { web3, s3, storage, escrow, curses, uniqueness } = server;
 
   const plugins: IPlugin = {
-    web3: {
-      [ChainId.POLYGON]: web3.create(ESCROW_NETWORKS[ChainId.POLYGON]),
-      [ChainId.POLYGON_MUMBAI]: web3.create(
-        ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]
-      ),
-      [ChainId.LOCALHOST]: web3.create(ESCROW_NETWORKS[ChainId.LOCALHOST]),
-    },
+    web3: web3.web3Clients,
     s3,
     storage,
     escrow,
@@ -48,7 +42,7 @@ const routes: FastifyPluginAsync = async (server: FastifyInstance<Server>) => {
     uniqueness,
   };
 
-  server.post('/send-fortunes', opts, async function (request: FastifyRequest, reply) {
+  server.post('/send-fortunes', opts, async function (request: FastifyRequest) {
     const fortunes = request.body as IFortuneRequest;
     return await processFortunes(plugins, fortunes);
   });
