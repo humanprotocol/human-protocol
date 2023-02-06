@@ -31,13 +31,12 @@ const getServer = async () => {
     .register(storage)
     .register(curses)
     .register(uniqueness)
-    .register(cors, {
-      preflight: false,
-      origin: true,
-      methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'PATCH', 'DELETE'],
-      allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version'],
-      credentials: true      
-    })
+    // .register(cors, {
+    //   origin: true,
+    //   methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'PATCH', 'DELETE'],
+    //   allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version'],
+    //   credentials: true      
+    // })
     .register(routes)
     .ready();
 
