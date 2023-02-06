@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import dayjs from 'dayjs';
 import numeral from 'numeral';
 import * as React from 'react';
 
@@ -6,12 +7,13 @@ import tasksSvg from 'src/assets/tasks.svg';
 import ViewTitle from 'src/components/ViewTitle';
 
 const SOLVED_TASKS = [
-  { date: '2022-07', value: 2181348 },
-  { date: '2022-08', value: 2537442 },
-  { date: '2022-09', value: 7014852 },
-  { date: '2022-10', value: 17189000 },
-  { date: '2022-11', value: 97000578 },
-  { date: '2022-12', value: 247392072 },
+  { date: '2022-07-31', value: 2181348 },
+  { date: '2022-08-31', value: 2537442 },
+  { date: '2022-09-30', value: 7014852 },
+  { date: '2022-10-31', value: 17189000 },
+  { date: '2022-11-30', value: 97000578 },
+  { date: '2022-12-31', value: 247392072 },
+  { date: '2023-01-31', value: 209000000 },
 ];
 
 export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
@@ -29,7 +31,10 @@ export const SolvedTasksContainer: React.FC<{}> = (): React.ReactElement => {
           fontSize={14}
           sx={{ mt: 1.5, ml: 2 }}
         >
-          till December 31, 2022
+          till{' '}
+          {dayjs(SOLVED_TASKS[SOLVED_TASKS.length - 1].date).format(
+            'MMM D, YYYY'
+          )}
         </Typography>
       </Box>
       <Typography
