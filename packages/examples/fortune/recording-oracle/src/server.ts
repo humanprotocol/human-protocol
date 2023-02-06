@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import config from './plugins/config';
 import s3 from './plugins/s3';
 import routes from './routes/index';
-// import cors from '@fastify/cors';
+import cors from '@fastify/cors';
 import escrow from './plugins/escrow';
 import web3 from './plugins/web3';
 import storage from './plugins/storage';
@@ -31,6 +31,7 @@ const getServer = async () => {
     .register(storage)
     .register(curses)
     .register(uniqueness)
+    .register(cors)
     // .register(cors, {
     //   origin: true,
     //   methods: ['GET', 'PUT', 'POST', 'OPTIONS', 'PATCH', 'DELETE'],
