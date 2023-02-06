@@ -8,7 +8,6 @@ import { IEscrowNetwork } from '../interfaces/networks';
 
 const ConfigSchema = Type.Strict(
   Type.Object({
-    ETH_NODE_URL: Type.String(),
     ETH_PRIVATE_KEY: Type.String(),
   })
 );
@@ -47,14 +46,6 @@ const web3Plugin: FastifyPluginAsync = async (server) => {
         JSON.stringify(validate.errors, null, 2)
     );
   }
-
-  const web3 = new Web3(process.env.ETH_NODE_URL as string);
-  const account = web3.eth.accounts.privateKeyToAccount(
-    `0x${process.env.ETH_PRIVATE_KEY}`
-  );
-
-  web3.eth.accounts.wallet.add(account);
-  web3.eth.defaultAccount = account.address;
 
   server.decorate('web3', new Web3Client());
 };
