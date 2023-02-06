@@ -7,7 +7,8 @@ export async function sendFortunes(
 ) {
   const data = [fortunes];
   try {
-    return await axios.post(reputationOracleUrl, data);
+    const url = reputationOracleUrl.replace(/\/+$/, '');
+    return await axios.post(`${url}/send-fortunes`, data);
   } catch (e) {
     console.log('Reputation Oracle error: ', e);
   }

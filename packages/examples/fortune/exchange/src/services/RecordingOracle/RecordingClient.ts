@@ -13,7 +13,8 @@ const sendFortune = async (
     fortune,
     chainId,
   };
-  await axios.post(`${recordingOracleUrl}/send-fortunes`, body);
+  const url = recordingOracleUrl.replace(/\/+$/, '');
+  await axios.post(`${url}/send-fortunes`, body);
   return;
 };
 
