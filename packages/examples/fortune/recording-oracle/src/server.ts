@@ -31,10 +31,7 @@ const getServer = async () => {
     .register(storage)
     .register(curses)
     .register(uniqueness)
-    .register(cors, {
-      origin: '*',
-      methods: ['GET', 'PUT', 'POST', 'OPTIONS'],
-    })
+    .register(cors)
     .register(routes)
     .ready();
 
