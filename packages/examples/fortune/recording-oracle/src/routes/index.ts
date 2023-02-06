@@ -50,16 +50,7 @@ const routes: FastifyPluginAsync = async (server: FastifyInstance<Server>) => {
 
   server.post('/send-fortunes', opts, async function (request: FastifyRequest, reply) {
     const fortunes = request.body as IFortuneRequest;
-    reply.headers({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, OPTIONS, DELETE'
-    });
-    if(request.method === 'OPTIONS') {
-      return reply.status(200);
-    }
-    return processFortunes(plugins, fortunes);
+    return await processFortunes(plugins, fortunes);
   });
 };
 
