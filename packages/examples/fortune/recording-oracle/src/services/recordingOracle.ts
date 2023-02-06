@@ -166,7 +166,7 @@ export async function processFortunes(
   );
 
   if (isFortunesRequestedDone(escrow)) {
-    sendFortunes(reputationOracleUrl, fortuneResults);
+    await sendFortunes(reputationOracleUrl, fortuneResults);
     plugins.storage.remove(fortune.escrowAddress);
     return { response: 'The requested fortunes have been completed.' };
   }

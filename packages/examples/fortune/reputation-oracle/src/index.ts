@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import bodyParser from 'body-parser';
 import Web3 from 'web3';
@@ -27,9 +28,9 @@ app.use(bodyParser.json());
 app.post('/send-fortunes', async (req, res) => {
   try {
     const errorMessage: string[] = [];
-    Object.keys(req.body).forEach((escrowAddress) => {
-      const fortunes = req.body[escrowAddress].fortunes;
-      const chainId = Number(req.body[escrowAddress].chainId) as ChainId;
+    req.body.forEach((escrow: any) => {
+      const fortunes = escrow.fortunes;
+      const chainId = Number(escrow.chainId) as ChainId;
 
       if (!chainId) {
         errorMessage.push(`ChainId is empty or invalid`);
@@ -39,41 +40,38 @@ app.post('/send-fortunes', async (req, res) => {
         errorMessage.push('ChainId not supported');
       }
 
-      if (!Array.isArray(fortunes) || fortunes.length === 0) {
+      if (Object.keys(fortunes).length === 0) {
         errorMessage.push(
-          `Fortunes of ${escrowAddress} are not specified or empty`
+          `Fortunes of ${escrow.escrowAddress} are not specified or empty`
         );
       }
 
-      if (!Web3.utils.isAddress(escrowAddress)) {
+      if (!Web3.utils.isAddress(escrow.escrowAddress)) {
         errorMessage.push(
-          `Escrow address ${escrowAddress} is empty or invalid`
+          `Escrow address ${escrow.escrowAddress} is empty or invalid`
         );
       }
     });
-
+    
     if (errorMessage.length > 0) {
       return res.status(400).send({
         message: JSON.stringify(errorMessage),
       });
     }
-
-    for (const escrowAddress of Object.keys(req.body)) {
-      const fortunes = req.body[escrowAddress].fortunes;
-      const chainId = Number(req.body[escrowAddress].chainId) as ChainId;
+    for (const escrow of req.body) {
+      const fortunes = escrow.fortunes;
+      const chainId = Number(escrow.chainId) as ChainId;
       const network = REPUTATION_NETWORKS[chainId];
       if (!network) throw new Error('ChainId not supported');
-      const web3 = new Web3(network.reputationAddress);
+      const web3 = new Web3(network.rpcUrl);
       const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
       web3.eth.accounts.wallet.add(account);
       web3.eth.defaultAccount = account.address;
 
-      const manifestUrl = await getEscrowManifestUrl(web3, escrowAddress);
-      const { recording_oracle_address: recordingOracleAddress } =
-        await getManifest(manifestUrl);
+      const manifestUrl = await getEscrowManifestUrl(web3, escrow.escrowAddress);
+      const { recordingOracleAddress } = await getManifest(manifestUrl);
 
-      const balance = await getBalance(web3, escrowAddress);
-
+      const balance = await getBalance(web3, escrow.escrowAddress);
       const { workerAddresses, reputationValues } = filterAddressesToReward(
         web3,
         fortunes,
@@ -85,6 +83,7 @@ app.post('/send-fortunes', async (req, res) => {
         network.reputationAddress,
         reputationValues
       );
+
       const rewards = await calculateRewardForWorker(
         web3,
         network.reputationAddress,
@@ -95,20 +94,19 @@ app.post('/send-fortunes', async (req, res) => {
       // TODO calculate the URL hash(?)
       const resultsUrl = await uploadResults(
         Object.keys(fortunes),
-        escrowAddress
+        escrow.escrowAddress
       );
       const resultHash = resultsUrl;
       await bulkPayOut(
         web3,
-        escrowAddress,
+        escrow.escrowAddress,
         workerAddresses,
         rewards,
         resultsUrl,
         resultHash
       );
-
-      if (!(await bulkPaid(web3, escrowAddress))) {
-        errorMessage.push(`Escrow ${escrowAddress} payout couldn't be done`);
+      if (!(await bulkPaid(web3, escrow.escrowAddress))) {
+        errorMessage.push(`Escrow ${escrow.escrowAddress} payout couldn't be done`);
       }
     }
     if (errorMessage.length > 0) {
