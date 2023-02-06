@@ -13,21 +13,19 @@ export const GenerateOrImport = ({
 }) => {
   return (
     <Paper>
-      <Grid container direction="column">
+        <Grid container justifyContent="center" direction="column">
         <Grid
           item
           container
           direction="column"
-          alignItems="flex-start"
+          alignItems="center"
           sx={{
             marginTop: { xs: 1, sm: 1, md: 10, lg: 10 },
-            marginLeft: { xs: 1, sm: 1, md: 15, lg: 15 },
-            marginRight: { xs: 1, sm: 1, md: 15, lg: 15 },
-            marginBottom: { lg: 10 },
+             marginBottom: { lg: 10 },
           }}
         >
           {' '}
-          <img width="100" src="/images/key.png" alt="lbank" />{' '}
+          <img width="100" src="/images/key.svg" alt="lbank" />{' '}
           <Typography sx={{ marginTop: 3 }} variant="body2" color="primary">
             If you already have your public key import it, if not generate it
           </Typography>
@@ -36,11 +34,11 @@ export const GenerateOrImport = ({
           item
           container
           direction="row"
-          justifyContent="flex-end"
+          justifyContent="center"
           alignItems="flex-end"
           sx={{
             marginTop: { xs: 1, sm: 1, md: 10, lg: 10 },
-              paddingRight: { xs: 1, sm: 1,md: 10, lg: 10 },
+
               marginBottom: { xs: 1, sm: 1,md: 10, lg: 7 },
           }}
         >

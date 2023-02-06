@@ -34,6 +34,7 @@ export const MainPage = (): React.ReactElement => {
           justifyContent="flex-start"
           alignItems="flex-start"
         >
+            <img width="100" src="/images/key.svg" alt="lbank" />{' '}
           <div>
             <Typography variant="h4" color="primary">
               Empower HUMAN Scan
@@ -47,7 +48,7 @@ export const MainPage = (): React.ReactElement => {
           </div>
           <Box sx={{ marginTop: 2 }}>
             <Typography variant="body2" color="primary">
-              Use your public key to lorem ipsum
+              Store your public key in the blockchain, use your public key to encrypt or decrypt data.
             </Typography>
           </Box>
         </Grid>
@@ -96,15 +97,15 @@ export const MainPage = (): React.ReactElement => {
                   item
                   container
                   direction="column"
-                  alignItems="flex-start"
+                  alignItems="center"
                   sx={{
                     marginTop: { xs: 1, sm: 1, md: 10, lg: 10 },
-                    marginLeft: { xs: 1, sm: 1, md: 15, lg: 15 },
-                    marginBottom: { lg: 10 },
+
+                    
                   }}
                 >
                   {' '}
-                  <img width="100" src="/images/lbank.svg" alt="lbank" />{' '}
+                  <img width="100" src="/images/wallet.svg" alt="lbank" />{' '}
                   <Typography
                     sx={{ marginTop: 3 }}
                     variant="body2"
@@ -112,20 +113,21 @@ export const MainPage = (): React.ReactElement => {
                   >
                     Connect your wallet to continue
                   </Typography>
+
                 </Grid>
                 <Grid
                   item
                   container
                   direction="row"
-                  justifyContent="flex-end"
-                  alignItems="flex-end"
+                  justifyContent="center"
+
                   sx={{
-                    marginTop: { xs: 1, sm: 1, md:10,lg: 10 },
-                      paddingRight: { xs: 1, sm: 1,md:10, lg: 10 },
+                    marginTop: { xs: 1, sm: 1,lg: 3 },
+
                       marginBottom: { xs: 1, sm: 1,md:10, lg: 7 },
                   }}
                 >
-                  <CustomConnectButton />
+                    <CustomConnectButton />
                 </Grid>
               </Grid>
             </Paper>

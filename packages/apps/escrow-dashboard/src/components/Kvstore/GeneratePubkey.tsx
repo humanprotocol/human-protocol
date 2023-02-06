@@ -21,11 +21,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 let regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 export const GeneratePubkey = ({
-    setStep,setPage,setKey
+    setStep,setPage,setKey,pubkeyExist,refetch,setPublicKey
 }: {
     setStep: Dispatch<number>;
     setPage: Dispatch<number>;
     setKey: Dispatch<Key>;
+    pubkeyExist: boolean;
+    refetch: any;
+    setPublicKey: Dispatch<string>;
 }) => {
 
   const [name, setName] = useState<string>("");
@@ -35,6 +38,23 @@ export const GeneratePubkey = ({
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [emailError, setEmailError] = useState<boolean>(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState<string>("");
+  async function goBack(){
+      try{
+          if(pubkeyExist){
+const {data}=await refetch();
+setPublicKey(data)
+          }else{
+              setStep(0);setPage(0);
+          }
+      }catch(e){
+          if(e instanceof Error){
+setError(true)
+              setErrorMessage(e.message)
+          }
+      }
+
+
+  }
   async function generate() {
       try{
           if (name.length === 0 || email.length === 0 || passphrase.length === 0) {
@@ -142,7 +162,7 @@ export const GeneratePubkey = ({
               marginBottom: { xs: 1, sm: 1,md:7, lg: 7 },
           }}
         >
-            <Button variant="outlined" sx={{ mr: 2 }} onClick={() => {setStep(0);setPage(0);}}>
+            <Button variant="outlined" sx={{ mr: 2 }} onClick={goBack}>
             Back
           </Button>
           <Button
