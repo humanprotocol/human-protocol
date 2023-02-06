@@ -86,8 +86,8 @@ export async function processFortunes(
   );
 
   const {
-    fortunes_requested: fortunesRequested,
-    reputation_oracle_url: reputationOracleUrl,
+    fortunesRequired,
+    reputationOracleUrl
   } = await getManifestByUrl(manifestUrl);
 
   let escrow = plugins.storage.getEscrow(fortune.escrowAddress);
@@ -96,7 +96,7 @@ export async function processFortunes(
     escrow = plugins.storage.addEscrow(
       fortune.escrowAddress,
       fortune.chainId,
-      fortunesRequested
+      fortunesRequired
     );
   }
 
