@@ -141,68 +141,79 @@ export const EscrowView = () => {
               </Box>
             )}
             <Box>
-              <Typography
-                color="primary"
-                variant="body2"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
-                Contract Address
-              </Typography>
-              <Typography
-                color="primary"
-                variant="caption"
-                component="p"
-                sx={{ mb: 1 }}
-              >
-                Escrow
-              </Typography>
-              <TextBox sx={{ mb: 2 }}>
-                <Link
-                  sx={{ overflow: 'hidden', textDecoration: 'none' }}
-                  href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.factoryAddress}`}
-                  target="_blank"
+              {(ESCROW_NETWORKS[chainId]?.factoryAddress ||
+                ESCROW_NETWORKS[chainId]?.hmtAddress) && (
+                <Typography
+                  color="primary"
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{ mb: 2 }}
                 >
+                  Contract Address
+                </Typography>
+              )}
+              {ESCROW_NETWORKS[chainId]?.factoryAddress && (
+                <>
                   <Typography
-                    variant="body2"
-                    fontWeight={600}
                     color="primary"
-                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    variant="caption"
+                    component="p"
+                    sx={{ mb: 1 }}
                   >
-                    {ESCROW_NETWORKS[chainId]?.factoryAddress}
+                    Escrow
                   </Typography>
-                </Link>
-                <CopyAddressButton
-                  address={ESCROW_NETWORKS[chainId]?.factoryAddress}
-                />
-              </TextBox>
-              <Typography
-                color="primary"
-                variant="caption"
-                component="p"
-                sx={{ mb: 1 }}
-              >
-                Token
-              </Typography>
-              <TextBox sx={{ mb: 2 }}>
-                <Link
-                  sx={{ overflow: 'hidden', textDecoration: 'none' }}
-                  href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.hmtAddress}`}
-                  target="_blank"
-                >
+                  <TextBox sx={{ mb: 2 }}>
+                    <Link
+                      sx={{ overflow: 'hidden', textDecoration: 'none' }}
+                      href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.factoryAddress}`}
+                      target="_blank"
+                    >
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        color="primary"
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {ESCROW_NETWORKS[chainId]?.factoryAddress}
+                      </Typography>
+                    </Link>
+                    <CopyAddressButton
+                      address={ESCROW_NETWORKS[chainId]?.factoryAddress}
+                    />
+                  </TextBox>
+                </>
+              )}
+              {ESCROW_NETWORKS[chainId]?.hmtAddress && (
+                <>
                   <Typography
-                    variant="body2"
-                    fontWeight={600}
                     color="primary"
-                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    variant="caption"
+                    component="p"
+                    sx={{ mb: 1 }}
                   >
-                    {ESCROW_NETWORKS[chainId]?.hmtAddress}
+                    Token
                   </Typography>
-                </Link>
-                <CopyAddressButton
-                  address={ESCROW_NETWORKS[chainId]?.hmtAddress}
-                />
-              </TextBox>
+                  <TextBox sx={{ mb: 2 }}>
+                    <Link
+                      sx={{ overflow: 'hidden', textDecoration: 'none' }}
+                      href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.hmtAddress}`}
+                      target="_blank"
+                    >
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        color="primary"
+                        sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {ESCROW_NETWORKS[chainId]?.hmtAddress}
+                      </Typography>
+                    </Link>
+                    <CopyAddressButton
+                      address={ESCROW_NETWORKS[chainId]?.hmtAddress}
+                    />
+                  </TextBox>
+                </>
+              )}
             </Box>
           </Grid>
         </>
