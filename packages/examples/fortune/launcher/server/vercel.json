@@ -2,16 +2,16 @@
   "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
   "installCommand": "yarn install",
   "outputDirectory": "build",
-  "functions": {
-    "src/index.ts": {
-      "runtime": "@vercel/node",
-      "maxDuration": "60"
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "src/index.ts"
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts"
     }
   ]
 }
