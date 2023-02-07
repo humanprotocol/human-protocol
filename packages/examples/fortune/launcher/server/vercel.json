@@ -4,7 +4,8 @@
   "outputDirectory": "build",
   "functions": {
     "src/index.ts": {
-      "maxDuration": "300"
+      "runtime": "@vercel/node",
+      "maxDuration": "60"
     }
   },
   "rewrites": [
