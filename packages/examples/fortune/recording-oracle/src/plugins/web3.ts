@@ -5,7 +5,7 @@ import { Type } from '@sinclair/typebox';
 import Web3 from 'web3';
 import Ajv from 'ajv';
 import { IEscrowNetwork } from '../interfaces/networks';
-import { ESCROW_NETWORKS } from '../constants/networks';
+import { ChainId, ESCROW_NETWORKS } from '../constants/networks';
 
 const ConfigSchema = Type.Strict(
   Type.Object({
@@ -25,8 +25,9 @@ class Web3Client {
   private privKey = process.env.ETH_PRIVATE_KEY as string;
   public web3Clients: Web3[] = [];
   constructor() {
-    Array.prototype.forEach.call(ESCROW_NETWORKS, (network) => {
-      this.web3Clients[network.chainId] = this.create(network);
+    Object.keys(ESCROW_NETWORKS).forEach((id) => {
+      const chainId = Number(id) as ChainId;
+      this.web3Clients[chainId] = this.create(ESCROW_NETWORKS[chainId] as IEscrowNetwork);
     });
   }
 
