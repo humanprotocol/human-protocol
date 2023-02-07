@@ -96,10 +96,7 @@ app.post('/send-fortunes', async (req, res) => {
       );
 
       // TODO calculate the URL hash(?)
-      const resultsUrl = await uploadResults(
-        escrow,
-        escrow.escrowAddress
-      );
+      const resultsUrl = await uploadResults(escrow, escrow.escrowAddress);
       const resultHash = resultsUrl;
       await bulkPayOut(
         web3,
