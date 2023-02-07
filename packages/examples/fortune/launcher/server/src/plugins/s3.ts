@@ -42,6 +42,7 @@ class S3Client {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async uploadManifest(escrowData: any, escrowAddress: string) {
     const fileName = `${escrowAddress}-manifest.json`;
     const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);

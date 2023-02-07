@@ -10,6 +10,7 @@ export async function sendFortunes(
     const url = reputationOracleUrl.replace(/\/+$/, '');
     return await axios.post(`${url}/send-fortunes`, data);
   } catch (e) {
-    console.log('Reputation Oracle error: ', e);
+    // eslint-disable-next-line no-console
+    console.error('Reputation Oracle error: ', e);
   }
 }

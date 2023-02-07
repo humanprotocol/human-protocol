@@ -28,6 +28,7 @@ app.use(bodyParser.json());
 app.post('/send-fortunes', async (req, res) => {
   try {
     const errorMessage: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     req.body.forEach((escrow: any) => {
       const fortunes = escrow.fortunes;
       const chainId = Number(escrow.chainId) as ChainId;

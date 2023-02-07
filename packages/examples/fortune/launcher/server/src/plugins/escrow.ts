@@ -132,6 +132,7 @@ class Escrow {
   }
 
   addOraclesData(escrow: typeof escrowSchema.properties) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = escrow as any;
     data.recordingOracleAddress = this.recOracleAddress;
     data.reputationOracleAddress = this.repOracleAddress;

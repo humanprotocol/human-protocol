@@ -25,6 +25,7 @@ export const FundingMethod = ({ onChange }: FundingMethodProps) => {
       setWalletModalOpen(false);
       onChange('crypto');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
 
   return (

@@ -27,7 +27,9 @@ class Web3Client {
   constructor() {
     Object.keys(ESCROW_NETWORKS).forEach((id) => {
       const chainId = Number(id) as ChainId;
-      this.web3Clients[chainId] = this.create(ESCROW_NETWORKS[chainId] as IEscrowNetwork);
+      this.web3Clients[chainId] = this.create(
+        ESCROW_NETWORKS[chainId] as IEscrowNetwork
+      );
     });
   }
 

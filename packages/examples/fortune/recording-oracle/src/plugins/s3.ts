@@ -43,6 +43,7 @@ export class S3Client {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async saveData(fileName: string, data: any) {
     const bucketExists = await this.s3Client.bucketExists(this.s3BucketName);
     if (!bucketExists) {

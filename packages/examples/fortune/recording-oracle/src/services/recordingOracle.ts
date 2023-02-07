@@ -150,7 +150,7 @@ export async function processFortunes(
     fortunes: escrow.fortunes,
   };
   const fortuneResultsUrl = await saveFortuneResults(plugins, fortuneResults);
-  console.log('Fortune Results Url: ', fortuneResultsUrl);
+  // console.log('Fortune Results Url: ', fortuneResultsUrl);
 
   const fortuneResultsHash = crypto
     .createHash('sha256')

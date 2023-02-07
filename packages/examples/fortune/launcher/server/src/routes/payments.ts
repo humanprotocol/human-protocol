@@ -11,6 +11,7 @@ export const cryptoPayment: FastifyPluginAsync = async (server) => {
     async function (request) {
       const txHash = request.body;
 
+      // eslint-disable-next-line no-console
       console.log(txHash);
 
       return true;
