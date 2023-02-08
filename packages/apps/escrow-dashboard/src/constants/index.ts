@@ -1,6 +1,7 @@
 export enum ChainId {
   ALL = -1,
   MAINNET = 1,
+  RINKEBY = 4,
   GOERLI = 5,
   BSC_MAINNET = 56,
   BSC_TESTNET = 97,
@@ -31,6 +32,7 @@ export interface IEscrowNetwork {
 }
 
 export const SUPPORTED_CHAIN_IDS = [
+  ChainId.RINKEBY,
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
@@ -43,6 +45,7 @@ export const SUPPORTED_CHAIN_IDS = [
 ];
 
 export const TESTNET_CHAIN_IDS = [
+  ChainId.RINKEBY,
   ChainId.GOERLI,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON_MUMBAI,
@@ -53,6 +56,17 @@ export const TESTNET_CHAIN_IDS = [
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: IEscrowNetwork;
 } = {
+  [ChainId.RINKEBY]: {
+    chainId: ChainId.RINKEBY,
+    title: 'Ethereum Rinkeby',
+    scanUrl: 'https://rinkeby.etherscan.io',
+    rpcUrl: 'https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    subgraphUrl: '',
+    factoryAddress: '0x925B24444511c86F4d4E63141D8Be0A025E2dca4',
+    hmtAddress: '0x4dCf5ac4509888714dd43A5cCc46d7ab389D9c23',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
     title: 'Ethereum Goerli',
