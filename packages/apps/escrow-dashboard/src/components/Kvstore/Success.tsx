@@ -14,8 +14,11 @@ import { Key } from "./index";
 import React, { Dispatch, useState, useEffect } from "react";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import KVStore from "@human-protocol/core/abis/KVStore.json";
+import { NFTStorage } from "nft.storage";
+const client = new NFTStorage({
+    token: process.env.REACT_APP_NFT_STORAGE_API as string
+});
 
-import {client} from './index'
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -71,7 +74,10 @@ export const Success = ({
   const [cid, setCid] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
   useEffect(() => {
-    saveToNFTStorage(keys.publicKey, setCid, setError);
+      if(keys.publicKey.trim().length!==0){
+          saveToNFTStorage(keys.publicKey, setCid, setError);      
+      }
+    
   }, [keys.publicKey]);
   const { config } = usePrepareContractWrite({
     address,

@@ -13,8 +13,13 @@ import { GeneratePubkey } from "./GeneratePubkey";
 import { Success } from "./Success";
 import { ImportPubkey } from "./ImportPubkey";
 import { Empower } from "./Empower";
-import { Key, StepPage } from "./index";
-
+import { Key } from "./index";
+interface StepPage {
+    step:number;
+    setStep:Dispatch<number>;
+    page:number;
+    setPage:Dispatch<number>;
+}
 const steps = ["Get Public Key", "Add Public Key", "Empower Human Scan"];
 
 export const AfterConnect = ({ step, setStep, page, setPage, pubkeyExist, refetch, setPublicKey }: {

@@ -1,19 +1,17 @@
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-export const CustomConnectButton = () => {
+import {ConnectButton} from '@rainbow-me/rainbowkit';
+export const CustomConnectButton= () => {
   return (
-    <ConnectButton.Custom>
+          <ConnectButton.Custom>
       {({
         account,
         chain,
         openAccountModal,
-        openChainModal,
-        openConnectModal,
-        authenticationStatus,
-        mounted,
+         openConnectModal,
+         mounted,
       }) => {
         // Note: If your app doesn't use authentication, you
         // can remove all 'authenticationStatus' checks

@@ -1,32 +1,33 @@
-import * as React from 'react';
-import { Box } from '@mui/material';
-import Footer from './Footer';
-import Header from './Header';
-import '@rainbow-me/rainbowkit/styles.css';
+import * as React from "react";
+import { Box } from "@mui/material";
+import Footer from "./Footer";
+import Header from "./Header";
+import "@rainbow-me/rainbowkit/styles.css";
 import {
   getDefaultWallets,
-  RainbowKitProvider,
-  lightTheme,
-} from '@rainbow-me/rainbowkit';
-import { configureChains, createClient, WagmiConfig } from 'wagmi';
-import { mainnet, polygon, polygonMumbai } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
-import { alchemyProvider } from 'wagmi/providers/alchemy'
+  RainbowKitProvider
+} from "@rainbow-me/rainbowkit";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
+import { polygonMumbai } from "wagmi/chains";
+import { publicProvider } from "wagmi/providers/public";
+import { alchemyProvider } from "wagmi/providers/alchemy";
+
 const { chains, provider } = configureChains(
   [polygonMumbai],
   [publicProvider(),
-   alchemyProvider({ apiKey: process.env.REACT_APP_ALCHEMY_API_KEY as string })]
+    alchemyProvider({ apiKey: process.env.REACT_APP_ALCHEMY_API_KEY as string })]
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'Kv Store',
-  chains,
+  appName: "Kv Store",
+  chains
 });
 
 const wagmiClient = createClient({
   connectors,
-  provider,
+  provider
 });
+
 interface ILayout {
   children: React.ReactNode;
 }
@@ -34,7 +35,7 @@ interface ILayout {
 const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
   <Box
     sx={{
-      marginTop: '110px',
+      marginTop: "110px"
     }}
   >
     <WagmiConfig client={wagmiClient}>
@@ -43,7 +44,7 @@ const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
         modalSize="compact"
         initialChain={polygonMumbai}
       >
-        <Header />
+          <Header />
         {children}
         <Footer />
       </RainbowKitProvider>

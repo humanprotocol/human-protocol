@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import * as openpgp from "openpgp";
-import { client } from "./index";
+import { NFTStorage } from "nft.storage";
 import { usePrepareContractWrite, useContractWrite } from "wagmi";
 import KVStore from "@human-protocol/core/abis/KVStore.json";
 import Snackbar from "@mui/material/Snackbar";
@@ -19,7 +19,9 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
         ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
-
+const client = new NFTStorage({
+    token: process.env.REACT_APP_NFT_STORAGE_API as string
+});
 export const Encrypt = ({ publicKey }: { publicKey: string }): React.ReactElement => {
 
   const [key, setKey] = useState("");

@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { CustomConnectButton } from 'src/components';
+import { CustomConnectButton } from './Kvstore/CustomConnectButton';
 type NavLink = {
   title: string;
   href: string;
@@ -129,7 +129,7 @@ const Header: React.FC = (): React.ReactElement => {
                       </Link>
                     </MenuItem>
                   ))}
-                     <CustomConnectButton />
+                    <CustomConnectButton />
                 </Menu>
               </>
             )}
