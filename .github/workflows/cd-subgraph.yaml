@@ -21,7 +21,7 @@ jobs:
           - name: moonbeam
             graph: moonbeam
           - name: bsc
-            graph: bsc
+            graph: bsc-v1
           - name: chapel
             graph: bsctest-v1
           - name: mumbai

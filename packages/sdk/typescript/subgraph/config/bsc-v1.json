@@ -2,8 +2,8 @@
   "network": "bsc",
   "description": "Human subgraph on Binance Smart Chain network",
   "EscrowFactory": {
-    "address": "0xc88bC422cAAb2ac8812de03176402dbcA09533f4",
-    "startBlock": 20689161,
+    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+    "startBlock": 25486222,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -13,5 +13,15 @@
   },
   "Escrow": {
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c",
+    "startBlock": 25486216,
+    "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
+    "startBlock": 25486223,
+    "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }
