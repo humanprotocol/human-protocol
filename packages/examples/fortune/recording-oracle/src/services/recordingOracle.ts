@@ -89,6 +89,10 @@ export async function processFortunes(
     manifestUrl
   );
 
+  if (!fortunesRequired || !reputationOracleUrl) {
+    throw new Error('Manifest does not contain the required data');
+  }
+
   let escrow = plugins.storage.getEscrow(fortune.escrowAddress);
 
   if (!escrow) {
@@ -108,29 +112,28 @@ export async function processFortunes(
     fortune.workerAddress
   );
 
-  if (!fortuneStored || (fortuneStored && !fortuneStored.score)) {
+  if (!fortuneStored || (fortuneStored && !fortuneStored.fortune && !fortuneStored.score)) {
     let score = false;
-
-    if (plugins.curses.isProfane(fortune.fortune)) {
-      escrow = plugins.storage.addFortune(
-        fortune.escrowAddress,
-        fortune.workerAddress,
-        fortune.fortune,
-        score
-      );
-      throw new Error('Fortune contains curses');
-    }
 
     const fortunesContent = getFortunesContent(escrow);
 
-    if (!plugins.uniqueness.isUnique(fortune.fortune, fortunesContent)) {
-      escrow = plugins.storage.addFortune(
+    if (
+      plugins.curses.isProfane(fortune.fortune) ||
+      !plugins.uniqueness.isUnique(fortune.fortune, fortunesContent)
+    ) {
+      escrow = plugins.storage.addDowngrade(
         fortune.escrowAddress,
         fortune.workerAddress,
-        fortune.fortune,
-        score
       );
-      throw new Error('Fortune is not unique');
+      
+      const fortuneResults = {
+        escrowAddress: fortune.escrowAddress,
+        chainId: escrow.chainId,
+        fortunes: escrow.fortunes,
+      };
+
+      await saveFortuneResults(plugins, fortuneResults);
+      throw new Error('Fortune is not unique or contains curses');
     }
 
     score = fortuneStored && !fortuneStored.score ? false : true;
@@ -149,8 +152,9 @@ export async function processFortunes(
     chainId: escrow.chainId,
     fortunes: escrow.fortunes,
   };
+  
   const fortuneResultsUrl = await saveFortuneResults(plugins, fortuneResults);
-  // console.log('Fortune Results Url: ', fortuneResultsUrl);
+  console.log('Fortune Results Url: ', fortuneResultsUrl);
 
   const fortuneResultsHash = crypto
     .createHash('sha256')

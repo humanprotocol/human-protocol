@@ -63,6 +63,21 @@ export class Storage {
     store.set(escrowAddress, escrow);
     return escrow;
   }
+
+  addDowngrade(
+    escrowAddress: string,
+    workerAddress: string,
+  ): IEscrowStorage {
+    const escrow = store.get(escrowAddress);
+
+    escrow.fortunes[workerAddress] = {
+      fortune: null,
+      score: false,
+    };
+
+    store.set(escrowAddress, escrow);
+    return escrow;
+  }
 }
 
 const storagePlugin: FastifyPluginAsync = async (server) => {

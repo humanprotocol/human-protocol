@@ -102,7 +102,6 @@ const curses = [
   'h00r',
   'h0ar',
   'h0re',
-  'hells',
   'hoar',
   'hoor',
   'hoore',
