@@ -44,7 +44,11 @@ export const JobRequest = ({
   const chainId = useChainId();
   const { switchNetwork } = useSwitchNetwork();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
-    chainId: 80001,
+    chainId: SUPPORTED_CHAIN_IDS.includes(ChainId.LOCALHOST)
+      ? ChainId.LOCALHOST
+      : SUPPORTED_CHAIN_IDS.includes(ChainId.POLYGON_MUMBAI)
+      ? ChainId.POLYGON_MUMBAI
+      : SUPPORTED_CHAIN_IDS[0],
     title: '',
     description: '',
     fortunesRequired: '',
@@ -63,11 +67,13 @@ export const JobRequest = ({
 
   const handleLaunch = async () => {
     if (!signer || !address) return;
+    console.log(chainId, jobRequest.chainId);
 
     if (chainId !== jobRequest.chainId) {
       switchNetwork?.(jobRequest.chainId);
       return;
     }
+    console.log('b');
 
     setIsLoading(true);
     const data: FortuneJobRequestType = {
@@ -78,8 +84,7 @@ export const JobRequest = ({
     try {
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
-      if (!jobLauncherAddress)
-      {
+      if (!jobLauncherAddress) {
         alert('Job Launcher address is missing');
         setIsLoading(false);
         return;

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import fp from 'fastify-plugin';
 import { FastifyPluginAsync } from 'fastify';
 import * as Minio from 'minio';
@@ -55,7 +54,7 @@ class S3Client {
       JSON.stringify(escrowData),
       { 'Content-Type': 'application/json' }
     );
-    return `${this.s3BaseUrl}${fileName}`;
+    return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}`;
   }
 }
 

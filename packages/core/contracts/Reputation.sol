@@ -43,7 +43,7 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
     function addReputations(Worker[] memory _workers) public {
         Stakes.Staker memory staker = IStaking(staking).getStaker(msg.sender);
         require(
-            staker.tokensAvailable() > minimumStake,
+            staker.tokensAvailable() >= minimumStake,
             'Needs to stake HMT tokens to modify reputations.'
         );
 

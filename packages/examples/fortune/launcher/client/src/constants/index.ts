@@ -7,9 +7,10 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
+  LOCALHOST = 1338,
 }
 
-export const SUPPORTED_CHAIN_IDS = [
+export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
@@ -17,6 +18,11 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
 ];
+
+export const SUPPORTED_CHAIN_IDS =
+  process.env.NODE_ENV === 'development'
+    ? [ChainId.LOCALHOST]
+    : SUPPORTED_CHAIN_IDS_PRODUCTION;
 
 export interface IEscrowNetwork {
   chainId: number;
@@ -89,6 +95,15 @@ export const ESCROW_NETWORKS: {
   //   factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
   //   hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
   // },
+  [ChainId.LOCALHOST]: {
+    chainId: ChainId.LOCALHOST,
+    title: 'Localhost',
+    scanUrl: '',
+    rpcUrl: 'http://127.0.0.1:8545',
+    subgraphUrl: '',
+    factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+    hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+  },
 };
 
 export const HM_TOKEN_DECIMALS = 18;
