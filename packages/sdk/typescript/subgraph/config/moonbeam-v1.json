@@ -2,8 +2,8 @@
   "network": "moonbeam",
   "description": "Human subgraph on Moonbeam network",
   "EscrowFactory": {
-    "address": "0x98108c28B7767a52BE38B4860832dd4e11A7ecad",
-    "startBlock": 1145429,
+    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+    "startBlock": 2904819,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -13,5 +13,15 @@
   },
   "Escrow": {
     "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+    "startBlock": 2904815,
+    "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
+    "startBlock": 2904821,
+    "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
   }
 }
