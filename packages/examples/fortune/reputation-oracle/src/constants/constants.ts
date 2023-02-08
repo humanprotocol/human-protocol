@@ -32,7 +32,7 @@ export const REPUTATION_NETWORKS: {
   //   scanUrl: 'https://bscscan.com',
   //   rpcUrl: 'https://bsc-dataseed1.binance.org/',
   //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
-  //   reputationAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
+  //   reputationAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   // },
   [ChainId.BSC_TESTNET]: {
     chainId: ChainId.BSC_TESTNET,
