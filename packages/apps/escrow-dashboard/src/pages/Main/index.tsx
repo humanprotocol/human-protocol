@@ -28,9 +28,9 @@ export const Main: React.FC = (): React.ReactElement => {
           <Grid item xs={12} lg={6}>
             <SolvedTasks />
           </Grid>
-          <Grid item xs={12} lg={6}>
+          {/* <Grid item xs={12} lg={6}>
             <News />
-          </Grid>
+          </Grid> */}
         </Grid>
         <Escrow />
         <Token />
