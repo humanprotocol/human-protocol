@@ -76,7 +76,7 @@ export const ESCROW_NETWORKS: {
   //   rpcUrl: 'https://rpc.api.moonbeam.network',
   //   subgraphUrl:
   //     'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
-  //   factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
+  //   factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   //   hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
   // },
   [ChainId.MOONBASE_ALPHA]: {

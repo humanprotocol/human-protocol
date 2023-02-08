@@ -68,7 +68,7 @@ export const REPUTATION_NETWORKS: {
   //   rpcUrl: 'https://rpc.api.moonbeam.network',
   //   subgraphUrl:
   //     'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
-  //   reputationAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
+  //   reputationAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   // },
   [ChainId.MOONBASE_ALPHA]: {
     chainId: ChainId.MOONBASE_ALPHA,
