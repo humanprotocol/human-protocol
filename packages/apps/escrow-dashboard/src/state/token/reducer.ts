@@ -42,6 +42,15 @@ export const fetchTokenStatsAsync = createAsyncThunk<
   let tokenStats: TokenStatsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
+      if (chainId === ChainId.RINKEBY) {
+        return {
+          totalApprovalEventCount: 0,
+          totalTransferEventCount: 0,
+          totalValueTransfered: 0,
+          holders: 0,
+          totalSupply: 0,
+        };
+      }
       const stats = await gqlFetch(
         ESCROW_NETWORKS[chainId]?.subgraphUrl!,
         RAW_TOKEN_STATS_QUERY
