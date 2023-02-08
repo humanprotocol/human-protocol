@@ -19,7 +19,7 @@ dataSources:
         - Launched
       abis:
         - name: EscrowFactory
-          file: ./node_modules/@human-protocol/core/abis/EscrowFactory.json
+          file: '{{{ EscrowFactory.abi }}}'
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
@@ -41,7 +41,7 @@ dataSources:
         - Transfer
       abis:
         - name: HMToken
-          file: ./node_modules/@human-protocol/core/abis/HMToken.json
+          file: '{{{ HMToken.abi }}}'
       eventHandlers:
         - event: Approval(indexed address,indexed address,uint256)
           handler: handleApproval
@@ -68,7 +68,7 @@ templates:
         - PEvent
       abis:
         - name: Escrow
-          file: ./node_modules/@human-protocol/core/abis/Escrow.json
+          file: '{{{ Escrow.abi }}}'
       eventHandlers:
         - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage

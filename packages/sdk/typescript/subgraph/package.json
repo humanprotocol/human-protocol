@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "generate": "mustache ./config/$NETWORK.json template.yaml > subgraph.yaml && graph codegen",
+    "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=matic yarn generate",
     "test": "graph test",
@@ -14,6 +15,8 @@
     "quickstart:matic": "NETWORK=matic yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "quickstart:goerli": "NETWORK=goerli yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "quickstart:mumbai": "NETWORK=mumbai yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "quickstart:avalanche": "NETWORK=avalanche yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
+    "quickstart:fuji": "NETWORK=fuji yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "create-local": "graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "remove-local": "graph remove --node http://localhost:8020/ posix4e/humansubgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 posix4e/humansubgraph",
