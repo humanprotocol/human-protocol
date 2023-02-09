@@ -5,6 +5,8 @@ contract KVStore {
     uint private constant MAX_STRING_LENGTH = 1000;
     mapping(address => mapping(string => string)) private store;
 
+    event DataSaved(address indexed sender, string key, string value);
+
     function get(
         address _account,
         string memory _key
@@ -19,5 +21,6 @@ contract KVStore {
             'Maximum string length'
         );
         store[msg.sender][_key] = _value;
+        emit DataSaved(msg.sender, _key, _value);
     }
 }

@@ -15,24 +15,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: "3.x"
       - name: Install dependencies
-        working-directory: ./packages/sdk/python
+        working-directory: ./packages/sdk/python/human-protocol-sdk
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
       - name: Set the relase version
         uses: "DamianReeves/write-file-action@master"
         with:
-          path: ./packages/sdk/python/human_protocol_sdk/__init__.py
+          path: ./packages/sdk/python/human-protocol-sdk/human_protocol_sdk/__init__.py
           write-mode: overwrite
           contents: |
             __version__ = "${{ github.event.release.tag_name }}"
       - name: Build and publish
-        working-directory: ./packages/sdk/python
+        working-directory: ./packages/sdk/python/human-protocol-sdk
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           make build-package
-          twine upload dist/*
+          twine upload dist/* --skip-existing

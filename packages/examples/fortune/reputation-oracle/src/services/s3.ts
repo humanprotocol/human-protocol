@@ -14,8 +14,8 @@ const minioClient = new Minio.Client({
   useSSL: false,
 });
 
-export async function uploadResults(fortunes: string[], escrowAddress: string) {
-  const fileName = `${escrowAddress}.json`;
+export async function uploadResults(result: string[], escrowAddress: string) {
+  const fileName = `${escrowAddress}-result.json`;
 
   const bucketExists = await minioClient.bucketExists(minioBucketName);
   if (!bucketExists) {
@@ -24,7 +24,7 @@ export async function uploadResults(fortunes: string[], escrowAddress: string) {
   await minioClient.putObject(
     minioBucketName,
     fileName,
-    JSON.stringify(fortunes),
+    JSON.stringify(result),
     { 'Content-Type': 'application/json' }
   );
 

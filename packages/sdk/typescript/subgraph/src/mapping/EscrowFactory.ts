@@ -10,7 +10,7 @@ export function handleLaunched(event: Launched): void {
   const entity = new LaunchedEscrow(event.params.escrow.toHex());
 
   // Entity fields can be set based on event parameters
-  entity.eip20 = event.params.eip20;
+  entity.token = event.params.token;
   entity.from = event.transaction.from;
   entity.timestamp = event.block.timestamp;
 

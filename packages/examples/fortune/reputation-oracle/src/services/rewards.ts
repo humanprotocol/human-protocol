@@ -1,31 +1,65 @@
 import Web3 from 'web3';
+import { BAD_WORDS } from '../constants/badWords';
+
+export interface FortuneEntry {
+  fortune: string;
+  score: boolean;
+}
+
+export interface ReputationEntry {
+  workerAddress: string;
+  reputation: number;
+}
 
 export function filterAddressesToReward(
   web3: Web3,
-  addressFortunesEntries: any[]
+  fortunesEntries: { [key: string]: FortuneEntry },
+  recordingOracleAddress: string
 ) {
-  const filteredResults: any = [];
-  const tmpHashMap: any = {};
+  const filteredWorkers: string[] = [];
+  const reputationValues: ReputationEntry[] = [];
+  const tmpHashMap: Record<string, boolean> = {};
+  let errorRecordingOracle = false;
 
-  addressFortunesEntries.forEach((fortuneEntry) => {
-    const { fortune } = fortuneEntry;
-    if (tmpHashMap[fortune]) {
+  Object.keys(fortunesEntries).forEach((workerAddress) => {
+    const { fortune, score } = fortunesEntries[workerAddress];
+    if (tmpHashMap[fortune] || checkBadWords(fortune)) {
+      reputationValues.push({ workerAddress, reputation: -1 });
+      if (score) {
+        errorRecordingOracle = true;
+      }
       return;
+    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && !score) {
+      errorRecordingOracle = true;
     }
 
     tmpHashMap[fortune] = true;
-    filteredResults.push(fortuneEntry);
+    filteredWorkers.push(workerAddress);
+    reputationValues.push({ workerAddress, reputation: 1 });
   });
-
-  return filteredResults
-    .map((fortune: { worker: any }) => fortune.worker)
-    .map(web3.utils.toChecksumAddress);
+  const workerAddresses = filteredWorkers.map(web3.utils.toChecksumAddress);
+  if (errorRecordingOracle) {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: -1,
+    });
+  } else {
+    reputationValues.push({
+      workerAddress: recordingOracleAddress,
+      reputation: 1,
+    });
+  }
+  return { workerAddresses, reputationValues };
 }
 
-export function calculateRewardForWorker(
-  totalReward: number,
-  workerAddresses: string[]
-) {
-  const rewardValue = Math.floor(totalReward / workerAddresses.length);
-  return workerAddresses.map(() => rewardValue.toString());
+export function checkBadWords(fortune: string) {
+  const words = fortune.replace(/[^a-zA-Z0-9 ]/g, '').split(' ');
+  for (let i = 0; i < BAD_WORDS.length; i++) {
+    for (let j = 0; j < words.length; j++) {
+      if (words[j].toLowerCase() === BAD_WORDS[i].toString()) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

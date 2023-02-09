@@ -12,6 +12,7 @@ import 'hardhat-contract-sizer';
 import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
 
 dotenv.config();
 
@@ -47,11 +48,12 @@ task(
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.9',
+    settings: { optimizer: { enabled: true, runs: 1000000 } },
   },
   defaultNetwork: 'hardhat',
   networks: {
     localhost: {
-      url: 'http://127.0.0.1:8545',
+      url: `http://127.0.0.1:${process.env.RPC_PORT || '8545'}`,
     },
     hardhat: {
       forking: process.env.FORKING_URL
@@ -67,6 +69,45 @@ const config: HardhatUserConfig = {
     goerli: {
       chainId: 5,
       url: process.env.ETH_GOERLI_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    polygon: {
+      chainId: 137,
+      url: process.env.ETH_POLYGON_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 1000000000,
+    },
+    polygonMumbai: {
+      chainId: 80001,
+      url: process.env.ETH_POLYGON_MUMBAI_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    bsc: {
+      chainId: 56,
+      url: process.env.ETH_BSC_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    bscTestnet: {
+      chainId: 97,
+      url: process.env.ETH_BSC_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    moonbeam: {
+      chainId: 1284,
+      timeout: 1000000000,
+      url: process.env.ETH_MOONBEAM_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    moonbaseAlpha: {
+      chainId: 1287,
+      timeout: 1000000000,
+      url: process.env.ETH_MOONBASE_ALPHA_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -109,6 +150,12 @@ const config: HardhatUserConfig = {
       // For Mainnet, Goerli
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
+      polygon: process.env.POLYGONSCAN_API_KEY || '',
+      polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      bsc: process.env.BSC_API_KEY || '',
+      bscTestnet: process.env.BSC_API_KEY || '',
+      moonbeam: process.env.MOONSCAN_API_KEY || '',
+      moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
     },
   },
   mocha: {

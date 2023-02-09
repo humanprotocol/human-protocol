@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 
 async function main() {
+  const [, ...accounts] = await ethers.getSigners();
   const HMToken = await ethers.getContractFactory('HMToken');
   const HMTokenContract = await HMToken.deploy(
     1000000000,
@@ -12,46 +13,75 @@ async function main() {
   await HMTokenContract.deployed();
   console.log('HMToken Address: ', HMTokenContract.address);
 
+  const Staking = await ethers.getContractFactory('Staking');
+  const stakingContract = await upgrades.deployProxy(
+    Staking,
+    [HMTokenContract.address, 1, 1],
+    { initializer: 'initialize', kind: 'uups' }
+  );
+  await stakingContract.deployed();
+  console.log('Staking Proxy Address: ', stakingContract.address);
+  console.log(
+    'Staking Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(stakingContract.address)
+  );
+
   const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
-  const escrowFactoryContract = await EscrowFactory.deploy(
-    HMTokenContract.address
+  const escrowFactoryContract = await upgrades.deployProxy(
+    EscrowFactory,
+    [stakingContract.address],
+    { initializer: 'initialize', kind: 'uups' }
   );
   await escrowFactoryContract.deployed();
-
-  console.log('Escrow Factory Address: ', escrowFactoryContract.address);
-
-  // TODO: Enable Staking/RewardPool deployment
-
-  // const Staking = await ethers.getContractFactory('Staking');
-  // const stakingContract = await Staking.deploy(
-  //   HMTokenContract.address,
-  //   escrowFactoryContract.address,
-  //   1,
-  //   1
-  // );
-  // await stakingContract.deployed();
-  // console.log('Staking Contract Address:', stakingContract.address);
-
-  // const RewardPool = await ethers.getContractFactory('RewardPool');
-  // const rewardPoolContract = await RewardPool.deploy(
-  //   HMTokenContract.address,
-  //   stakingContract.address,
-  //   1
-  // );
-  // await rewardPoolContract.deployed();
-  // console.log('Reward Pool Contract Address:', rewardPoolContract.address);
-
-  // Configure Staking in EscrowFactory
-  // await escrowFactoryContract.setStaking(stakingContract.address);
-
-  // Configure RewardPool in Staking
-  // await stakingContract.setRewardPool(rewardPoolContract.address);
+  console.log('Escrow Factory Proxy Address: ', escrowFactoryContract.address);
+  console.log(
+    'Escrow Factory Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(
+      escrowFactoryContract.address
+    )
+  );
 
   const KVStore = await ethers.getContractFactory('KVStore');
   const kvStoreContract = await KVStore.deploy();
   await kvStoreContract.deployed();
 
   console.log('KVStore Address: ', kvStoreContract.address);
+
+  const RewardPool = await ethers.getContractFactory('RewardPool');
+  const rewardPoolContract = await upgrades.deployProxy(
+    RewardPool,
+    [HMTokenContract.address, stakingContract.address, 1],
+    { initializer: 'initialize', kind: 'uups' }
+  );
+  await rewardPoolContract.deployed();
+  console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
+  console.log(
+    'Reward Pool Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(rewardPoolContract.address)
+  );
+
+  // Configure RewardPool in Staking
+  await stakingContract.setRewardPool(rewardPoolContract.address);
+
+  for (const account of accounts) {
+    await HMTokenContract.transfer(
+      account.address,
+      ethers.utils.parseEther('1000')
+    );
+  }
+
+  const Reputation = await ethers.getContractFactory('Reputation');
+  const reputationContract = await upgrades.deployProxy(
+    Reputation,
+    [stakingContract.address, 1],
+    { initializer: 'initialize', kind: 'uups' }
+  );
+  await reputationContract.deployed();
+  console.log('Reputation Proxy Address: ', reputationContract.address);
+  console.log(
+    'Reputation Implementation Address: ',
+    await upgrades.erc1967.getImplementationAddress(reputationContract.address)
+  );
 }
 
 main().catch((error) => {
