@@ -3,7 +3,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_eip20",
+        "name": "_token",
         "type": "address"
       },
       {
@@ -221,7 +221,7 @@
   },
   {
     "inputs": [],
-    "name": "eip20",
+    "name": "token",
     "outputs": [
       {
         "internalType": "address",

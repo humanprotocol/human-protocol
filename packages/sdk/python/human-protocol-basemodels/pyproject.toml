@@ -1,0 +1,6 @@
+[project]
+name = "human-protocol-basemodels"
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "basemodels.__version__"}

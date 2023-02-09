@@ -29,6 +29,7 @@ import PolygonIcon from '../Icons/PolygonIcon';
 interface IEscrowContainer {}
 
 const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
+  [ChainId.RINKEBY]: <EthereumIcon />,
   [ChainId.GOERLI]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,
   [ChainId.POLYGON_MUMBAI]: <PolygonIcon />,
