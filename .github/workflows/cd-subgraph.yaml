@@ -48,7 +48,7 @@ jobs:
         name: Generate Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: ${{ matrix.network.name }}
+          NETWORK: ${{ matrix.network.graph }}
       - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
         name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
