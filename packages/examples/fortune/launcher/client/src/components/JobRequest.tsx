@@ -67,13 +67,11 @@ export const JobRequest = ({
 
   const handleLaunch = async () => {
     if (!signer || !address) return;
-    console.log(chainId, jobRequest.chainId);
 
     if (chainId !== jobRequest.chainId) {
       switchNetwork?.(jobRequest.chainId);
       return;
     }
-    console.log('b');
 
     setIsLoading(true);
     const data: FortuneJobRequestType = {
