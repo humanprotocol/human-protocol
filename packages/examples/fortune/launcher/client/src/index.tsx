@@ -2,7 +2,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { WagmiConfig, createClient, configureChains } from 'wagmi';
+import { WagmiConfig, createClient, configureChains, Chain } from 'wagmi';
 import {
   goerli,
   mainnet,
@@ -22,10 +22,29 @@ import theme from './theme';
 
 window.Buffer = window.Buffer || require('buffer').Buffer;
 
+const fortune: Chain = {
+  id: 1338,
+  name: 'Localhost',
+  network: 'localhost',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: {
+      http: ['http://127.0.0.1:8545'],
+    },
+    public: {
+      http: ['http://127.0.0.1:8545'],
+    },
+  },
+};
+
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet],
+  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet, fortune],
   [publicProvider()]
 );
 

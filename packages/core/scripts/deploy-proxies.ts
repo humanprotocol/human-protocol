@@ -58,18 +58,19 @@ async function main() {
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);
 
-  const Reputation = await ethers.getContractFactory('Reputation');
-  const reputationContract = await upgrades.deployProxy(
-    Reputation,
-    [stakingContract.address, 1],
-    { initializer: 'initialize', kind: 'uups' }
-  );
-  await reputationContract.deployed();
-  console.log('Reputation Proxy Address: ', reputationContract.address);
-  console.log(
-    'Reputation Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(reputationContract.address)
-  );
+  // ==== Only for testnets ====
+  // const Reputation = await ethers.getContractFactory('Reputation');
+  // const reputationContract = await upgrades.deployProxy(
+  //   Reputation,
+  //   [stakingContract.address, 1],
+  //   { initializer: 'initialize', kind: 'uups' }
+  // );
+  // await reputationContract.deployed();
+  // console.log('Reputation Proxy Address: ', reputationContract.address);
+  // console.log(
+  //   'Reputation Implementation Address: ',
+  //   await upgrades.erc1967.getImplementationAddress(reputationContract.address)
+  // );
 }
 
 main().catch((error) => {
