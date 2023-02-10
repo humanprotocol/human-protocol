@@ -31,8 +31,8 @@ const rinkeby = {
   network: 'rinkeby',
   nativeCurrency: {
     decimals: 18,
-    name: 'Avalanche',
-    symbol: 'AVAX',
+    name: 'Ethereum',
+    symbol: 'ETH',
   },
   rpcUrls: {
     public: {
