@@ -2,24 +2,15 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import {ConnectButton} from '@rainbow-me/rainbowkit';
-export const CustomConnectButton= () => {
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+export const CustomConnectButton = () => {
   return (
-          <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-         openConnectModal,
-         mounted,
-      }) => {
+    <ConnectButton.Custom>
+      {({ account, chain, openAccountModal, openConnectModal, mounted }) => {
         // Note: If your app doesn't use authentication, you
         // can remove all 'authenticationStatus' checks
-        const ready = mounted ;
-        const connected =
-          ready &&
-          account &&
-          chain 
+        const ready = mounted;
+        const connected = ready && account && chain;
         return (
           <div
             {...(!ready && {
@@ -34,7 +25,11 @@ export const CustomConnectButton= () => {
             {(() => {
               if (!connected) {
                 return (
-                        <Button sx={{marginLeft:{xs:0.7,sm:0.7,md:0}}}  onClick={openConnectModal} variant="outlined">
+                  <Button
+                    sx={{ marginLeft: { xs: 0.7, sm: 0.7, md: 0 } }}
+                    onClick={openConnectModal}
+                    variant="outlined"
+                  >
                     Connect Wallet
                   </Button>
                 );
@@ -47,7 +42,7 @@ export const CustomConnectButton= () => {
                 );
               }
               return (
-                      <Box sx={{ display: 'flex', gap: 12 }}>
+                <Box sx={{ display: 'flex', gap: 12 }}>
                   <Button
                     endIcon={<ArrowDropDownIcon />}
                     onClick={openAccountModal}
@@ -66,8 +61,10 @@ export const CustomConnectButton= () => {
                     }}
                     startIcon={
                       <Avatar
-
-                          src={"https://cdn.stamp.fyi/avatar/eth:"+account.displayName}
+                        src={
+                          'https://cdn.stamp.fyi/avatar/eth:' +
+                          account.displayName
+                        }
                       />
                     }
                   >

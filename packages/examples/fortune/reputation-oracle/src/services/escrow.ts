@@ -6,11 +6,19 @@ export async function getBalance(web3: Web3, escrowAddress: string) {
   return Number(await Escrow.methods.getBalance().call());
 }
 
+export async function getEscrowManifestUrl(
+  web3: Web3,
+  escrowAddress: string
+): Promise<string> {
+  const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
+  return await Escrow.methods.manifestUrl().call();
+}
+
 export async function bulkPayOut(
   web3: Web3,
   escrowAddress: string,
   workerAddresses: string[],
-  rewards: any,
+  rewards: Array<string | number>,
   resultsUrl: string,
   resultHash: string
 ) {

@@ -12,6 +12,9 @@ import {
 } from '@reduxjs/toolkit/dist/matchers';
 import { Contract, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
+import rinkebyEscrowEvents from 'src/history-data/rinkeby_EscrowEvents.json';
+import rinkebyEscrowStats from 'src/history-data/rinkeby_EscrowStats.json';
+import rinkebyEscrowAmount from 'src/history-data/rinkeby_EscrowAmount.json';
 import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
 import { RAW_ESCROW_STATS_QUERY, RAW_EVENT_DAY_DATA_QUERY } from 'src/queries';
 import { AppState } from 'src/state';
@@ -55,32 +58,54 @@ export const fetchEscrowEventsAsync = createAsyncThunk<
   let escrowEvents: EscrowEventsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
-      const eventDayDatas = await gqlFetch(
-        ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-        RAW_EVENT_DAY_DATA_QUERY
-      )
-        .then((res) => res.json())
-        .then((json) =>
-          json.data.eventDayDatas.map((d: EscrowEventDayData) => ({
-            ...d,
-            dailyBulkTransferEvents: Number(d.dailyBulkTransferEvents),
-            dailyIntermediateStorageEvents: Number(
-              d.dailyIntermediateStorageEvents
-            ),
-            dailyPendingEvents: Number(d.dailyPendingEvents),
-            dailyTotalEvents:
-              Number(d.dailyBulkTransferEvents) +
-              Number(d.dailyIntermediateStorageEvents) +
-              Number(d.dailyPendingEvents),
-            dailyEscrowAmounts: Number(d.dailyEscrowAmounts),
-          }))
+      if (chainId === ChainId.RINKEBY) {
+        escrowEvents[chainId] = rinkebyEscrowEvents as any;
+      } else {
+        let eventDayDatas = await getEventDayData(
+          ESCROW_NETWORKS[chainId]?.subgraphUrl!,
+          30
         );
-      escrowEvents[chainId] = eventDayDatas;
+
+        if (
+          ESCROW_NETWORKS[chainId]?.oldSubgraphUrl &&
+          eventDayDatas.length < 30
+        ) {
+          const oldData = await getEventDayData(
+            ESCROW_NETWORKS[chainId]?.oldSubgraphUrl!,
+            30 - eventDayDatas.length
+          );
+          eventDayDatas = eventDayDatas.concat(oldData);
+        }
+        escrowEvents[chainId] = eventDayDatas;
+      }
     })
   );
 
   return escrowEvents;
 });
+
+const getEventDayData = async (subgraphUrl: string, count: number) => {
+  return await gqlFetch(
+    subgraphUrl!,
+    RAW_EVENT_DAY_DATA_QUERY.replace('[COUNT_PARAM]', count.toString())
+  )
+    .then((res) => res.json())
+    .then((json) =>
+      json.data.eventDayDatas.map((d: EscrowEventDayData) => ({
+        ...d,
+        dailyBulkTransferEvents: Number(d.dailyBulkTransferEvents),
+        dailyIntermediateStorageEvents: Number(
+          d.dailyIntermediateStorageEvents
+        ),
+        dailyPendingEvents: Number(d.dailyPendingEvents),
+        dailyTotalEvents:
+          Number(d.dailyBulkTransferEvents) +
+          Number(d.dailyIntermediateStorageEvents) +
+          Number(d.dailyPendingEvents),
+        dailyEscrowAmounts: Number(d.dailyEscrowAmounts),
+      }))
+    );
+};
 
 export const fetchEscrowStatsAsync = createAsyncThunk<
   EscrowStatsType,
@@ -90,36 +115,59 @@ export const fetchEscrowStatsAsync = createAsyncThunk<
   let escrowStats: EscrowStatsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
-      const stats = await gqlFetch(
-        ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-        RAW_ESCROW_STATS_QUERY
-      )
-        .then((res) => res.json())
-        .then((json) => {
-          const {
-            intermediateStorageEventCount,
-            pendingEventCount,
-            bulkTransferEventCount,
-          } = json.data.escrowStatistics;
-
-          return {
-            intermediateStorageEventCount: Number(
-              intermediateStorageEventCount
-            ),
-            pendingEventCount: Number(pendingEventCount),
-            bulkTransferEventCount: Number(bulkTransferEventCount),
-            totalEventCount:
-              Number(intermediateStorageEventCount) +
-              Number(pendingEventCount) +
-              Number(bulkTransferEventCount),
-          };
-        });
-      escrowStats[chainId] = stats;
+      if (chainId === ChainId.RINKEBY) {
+        escrowStats[chainId] = rinkebyEscrowStats;
+      } else {
+        const stats = await getEscrowStats(
+          ESCROW_NETWORKS[chainId]?.subgraphUrl!
+        );
+        if (ESCROW_NETWORKS[chainId]?.oldSubgraphUrl) {
+          const oldStats = await getEscrowStats(
+            ESCROW_NETWORKS[chainId]?.oldSubgraphUrl!
+          );
+          stats.bulkTransferEventCount += oldStats.bulkTransferEventCount;
+          stats.intermediateStorageEventCount +=
+            oldStats.intermediateStorageEventCount;
+          stats.pendingEventCount += oldStats.pendingEventCount;
+          stats.totalEventCount += oldStats.totalEventCount;
+        }
+        escrowStats[chainId] = stats;
+      }
     })
   );
 
   return escrowStats;
 });
+
+const getEscrowStats = async (subgraphUrl: string) => {
+  return await gqlFetch(subgraphUrl, RAW_ESCROW_STATS_QUERY)
+    .then((res) => res.json())
+    .then((json) => {
+      if (!json.data.escrowStatistics) {
+        return {
+          intermediateStorageEventCount: 0,
+          pendingEventCount: 0,
+          bulkTransferEventCount: 0,
+          totalEventCount: 0,
+        };
+      }
+      const {
+        intermediateStorageEventCount,
+        pendingEventCount,
+        bulkTransferEventCount,
+      } = json.data.escrowStatistics;
+
+      return {
+        intermediateStorageEventCount: Number(intermediateStorageEventCount),
+        pendingEventCount: Number(pendingEventCount),
+        bulkTransferEventCount: Number(bulkTransferEventCount),
+        totalEventCount:
+          Number(intermediateStorageEventCount) +
+          Number(pendingEventCount) +
+          Number(bulkTransferEventCount),
+      };
+    });
+};
 
 export const fetchEscrowAmountsAsync = createAsyncThunk<
   EscrowAmountsType,
@@ -129,12 +177,24 @@ export const fetchEscrowAmountsAsync = createAsyncThunk<
   let escrowAmounts: EscrowAmountsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
-      const rpcUrl = ESCROW_NETWORKS[chainId]?.rpcUrl!;
-      const factoryAddress = ESCROW_NETWORKS[chainId]?.factoryAddress!;
-      const provider = new providers.JsonRpcProvider(rpcUrl);
-      const contract = new Contract(factoryAddress, EscrowFactoryABI, provider);
-      const escrowAmount = await contract.counter();
-      escrowAmounts[chainId] = Number(escrowAmount);
+      if (chainId === ChainId.RINKEBY) {
+        escrowAmounts[chainId] = rinkebyEscrowAmount;
+      } else {
+        const rpcUrl = ESCROW_NETWORKS[chainId]?.rpcUrl!;
+        const factoryAddress = ESCROW_NETWORKS[chainId]?.factoryAddress!;
+        const provider = new providers.JsonRpcProvider(rpcUrl);
+        let contract = new Contract(factoryAddress, EscrowFactoryABI, provider);
+        let escrowAmount = Number(await contract.counter());
+        if (ESCROW_NETWORKS[chainId]?.oldFactoryAddress) {
+          contract = new Contract(
+            ESCROW_NETWORKS[chainId]?.oldFactoryAddress!,
+            EscrowFactoryABI,
+            provider
+          );
+          escrowAmount += Number(await contract.counter());
+        }
+        escrowAmounts[chainId] = Number(escrowAmount);
+      }
     })
   );
 

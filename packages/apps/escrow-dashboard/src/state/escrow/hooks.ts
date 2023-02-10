@@ -83,7 +83,7 @@ export const useEscrowDataByChainID = (): EscrowData => {
     return escrowData;
   }
 
-  return {
+  const escrowData = {
     amount: amounts[chainId] ?? 0,
     stats: stats[chainId] ?? {
       pendingEventCount: 0,
@@ -96,6 +96,13 @@ export const useEscrowDataByChainID = (): EscrowData => {
       ? token.stats[chainId]?.totalSupply
       : undefined,
   };
+
+  escrowData.lastMonthEvents = [...escrowData.lastMonthEvents]
+    .sort((x, y) => Number(y.timestamp) - Number(x.timestamp))
+    .slice(0, 30)
+    .reverse();
+  console.log(escrowData);
+  return escrowData;
 };
 
 export const useEscrowDataLoaded = () => {

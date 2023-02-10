@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 

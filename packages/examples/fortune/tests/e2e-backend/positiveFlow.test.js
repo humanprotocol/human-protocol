@@ -4,11 +4,13 @@ const hmtokenAbi = require('@human-protocol/core/abis/HMToken.json');
 const {
   createEscrowFactory,
   createEscrow,
-  fundEscrow,
+  fundAccountHMT,
   setupEscrow,
   setupAgents,
   sendFortune,
   calculateRewardAmount,
+  stake,
+  setupAccounts,
   getS3File,
 } = require('./fixtures');
 const {
@@ -20,8 +22,14 @@ const {
 const web3 = new Web3(urls.ethHTTPServer);
 
 describe('Positive flow', () => {
+  beforeAll(async () => {
+    await setupAccounts();
+  });
+
   test('Flow', async () => {
     const escrowFactory = createEscrowFactory();
+    await stake(escrowFactory);
+
     await createEscrow(escrowFactory);
     const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
     const Escrow = new web3.eth.Contract(escrowAbi, lastEscrowAddr);
@@ -32,7 +40,7 @@ describe('Positive flow', () => {
       '0x0000000000000000000000000000000000000000'
     );
 
-    await fundEscrow(lastEscrowAddr);
+    await fundAccountHMT(lastEscrowAddr);
     await setupEscrow(lastEscrowAddr);
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Pending');
@@ -69,27 +77,42 @@ describe('Positive flow', () => {
     escrowSt = await Escrow.methods.status().call();
     expect(statusesMap[escrowSt]).toBe('Paid');
 
-    const rewards = await calculateRewardAmount();
+    const rewards = await calculateRewardAmount(agentAddresses);
     for (let i = 0; i < agentAddresses.length; i++) {
       const agent_balance = await Token.methods
         .balanceOf(agentAddresses[i])
         .call();
-      expect(agent_balance - agentsOldBalances[i]).toBe(
-        rewards.totalWorkerReward
+      expect(
+        web3.utils
+          .toBN(agent_balance)
+          .sub(web3.utils.toBN(agentsOldBalances[i]))
+          .toString()
+      ).toBe(
+        web3.utils
+          .toBN(rewards.workerRewards[i])
+          .sub(rewards.recOracleRewards[i])
+          .sub(rewards.repOracleRewards[i])
+          .toString()
       );
     }
 
     const reputationOracleBalance = await Token.methods
       .balanceOf(addresses.repOracle)
       .call();
-    expect(reputationOracleBalance - reputationOracleOldBalance).toBe(
-      rewards.totalRepOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(reputationOracleBalance)
+        .sub(web3.utils.toBN(reputationOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRepOracleReward.toString());
     const recordingOracleBalance = await Token.methods
       .balanceOf(addresses.recOracle)
       .call();
-    expect(recordingOracleBalance - recordingOracleOldBalance).toBe(
-      rewards.totalRecOracleReward
-    );
+    expect(
+      web3.utils
+        .toBN(recordingOracleBalance)
+        .sub(web3.utils.toBN(recordingOracleOldBalance))
+        .toString()
+    ).toBe(rewards.totalRecOracleReward.toString());
   });
 });

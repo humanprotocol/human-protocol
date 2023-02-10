@@ -1,9 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
-import { act } from 'react-dom/test-utils';
 import Layout from './Layout';
-import {  vi } from 'vitest'
+import { vi } from 'vitest';
 describe('when rendered Layout component', () => {
   beforeAll(async () => {
     global.fetch = vi.fn().mockImplementationOnce(() =>

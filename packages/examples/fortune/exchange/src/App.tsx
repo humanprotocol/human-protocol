@@ -1,47 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import getWeb3 from './utils/web3';
-import { Escrow } from './components/Escrow';
+import {
+  useWeb3ModalTheme,
+  Web3Button,
+  Web3Modal,
+  Web3NetworkSwitch,
+} from '@web3modal/react';
+import { useAccount } from 'wagmi';
 import './App.css';
+import { Escrow } from './components/Escrow';
+import { ethereumClient, projectId } from './connectors/connectors';
 
 function App() {
-  const web3 = getWeb3();
-  const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
-  const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
+  const { setTheme } = useWeb3ModalTheme();
+  const { isConnected } = useAccount();
 
-  useEffect(() => {
-    (async function () {
-      const { ethereum } = window;
-      if (typeof ethereum !== 'undefined' && ethereum.isMetaMask) {
-        setIsMetamaskInstalled(true);
-        const accounts = await web3.eth.getAccounts();
-        if (accounts.length > 0) {
-          setIsMetamaskConnected(true);
-        }
-      }
-    })();
-  }, [web3.eth]);
-
-  const connect = async () => {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    setIsMetamaskConnected(true);
-  }
+  setTheme({
+    themeColor: 'purple',
+    themeMode: 'light',
+    themeBackground: 'themeColor',
+  });
 
   return (
-    <div className="App">
-      <header className="App-header">
-        {!isMetamaskInstalled &&
-          (<p> Metamask not installed</p>)
-        }
-        {!isMetamaskConnected &&
-          (<button onClick={connect}> Connect </button>)
-        }
-        {
-          isMetamaskConnected &&
-          (<Escrow />)
-        }
-      </header>
-    </div>
-  )
+    <>
+      <div className="App">
+        <header className="App-header">
+          {isConnected && <Web3Button icon="show" balance="show" />}
+        </header>
+        <div className="App-body">
+          {!isConnected && (
+            <>
+              <h1>Select Network</h1>
+              <Web3NetworkSwitch />
+            </>
+          )}
+          {isConnected && <Escrow />}
+        </div>
+      </div>
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
+    </>
+  );
 }
 
 export default App;

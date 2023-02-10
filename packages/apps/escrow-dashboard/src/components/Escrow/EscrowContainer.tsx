@@ -1,12 +1,15 @@
 import React, { ReactElement } from 'react';
 import { Box, CircularProgress, Tab, Tabs } from '@mui/material';
+import networkSvg from 'src/assets/network.svg';
 import ViewTitle from 'src/components/ViewTitle';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { useAppDispatch } from 'src/state';
 import {
   useChainId,
   useEscrowDataLoaded,
   usePollEventsData,
 } from 'src/state/escrow/hooks';
+import { setChainId } from 'src/state/escrow/reducer';
 
 import { EscrowView } from './EscrowView';
 
@@ -15,12 +18,11 @@ import EthereumIcon from '../Icons/EthreumIcon';
 import HumanIcon from '../Icons/HumanIcon';
 import MoonbeamIcon from '../Icons/MoonbeamIcon';
 import PolygonIcon from '../Icons/PolygonIcon';
-import { useAppDispatch } from 'src/state';
-import { setChainId } from 'src/state/escrow/reducer';
 
 interface IEscrowContainer {}
 
 const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
+  [ChainId.RINKEBY]: <EthereumIcon />,
   [ChainId.GOERLI]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,
   [ChainId.POLYGON_MUMBAI]: <PolygonIcon />,
@@ -41,7 +43,7 @@ export const EscrowContainer: React.FC<
 
   return (
     <Box id="network" mt={{ xs: 4, md: 8 }}>
-      <ViewTitle title="Network" iconUrl="/images/network.svg" />
+      <ViewTitle title="Network" iconUrl={networkSvg} />
       <Tabs
         sx={{
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },

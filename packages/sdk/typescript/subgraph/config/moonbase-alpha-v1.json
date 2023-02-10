@@ -1,0 +1,27 @@
+{
+  "network": "mbase",
+  "description": "Human subgraph on Moonbase Alpha network",
+  "EscrowFactory": {
+    "address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
+    "startBlock": 3648028,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0xe4C8eC5d057EacF40060b2174627a4941a5c8127",
+    "startBlock": 2238347,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
+    "startBlock": 3648026,
+    "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
+    "startBlock": 3648030,
+    "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  }
+}

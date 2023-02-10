@@ -5,30 +5,37 @@ import {
   Box,
   Stepper,
   Step,
-  StepLabel
-} from "@mui/material";
-import React, { useState, Dispatch } from "react";
-import { GenerateOrImport } from "./GenerateOrImport";
-import { GeneratePubkey } from "./GeneratePubkey";
-import { Success } from "./Success";
-import { ImportPubkey } from "./ImportPubkey";
-import { Empower } from "./Empower";
-import { Key } from "./index";
+  StepLabel,
+} from '@mui/material';
+import React, { useState, Dispatch } from 'react';
+import { GenerateOrImport } from './GenerateOrImport';
+import { GeneratePubkey } from './GeneratePubkey';
+import { Success } from './Success';
+import { ImportPubkey } from './ImportPubkey';
+import { Empower } from './Empower';
+import { Key } from './index';
 interface StepPage {
-    step:number;
-    setStep:Dispatch<number>;
-    page:number;
-    setPage:Dispatch<number>;
+  step: number;
+  setStep: Dispatch<number>;
+  page: number;
+  setPage: Dispatch<number>;
 }
-const steps = ["Get Public Key", "Add Public Key", "Empower Human Scan"];
+const steps = ['Get Public Key', 'Add Public Key', 'Empower Human Scan'];
 
-export const AfterConnect = ({ step, setStep, page, setPage, pubkeyExist, refetch, setPublicKey }: {
-  pubkeyExist: boolean,
-  refetch: any,
-  setPublicKey: Dispatch<string>
+export const AfterConnect = ({
+  step,
+  setStep,
+  page,
+  setPage,
+  pubkeyExist,
+  refetch,
+  setPublicKey,
+}: {
+  pubkeyExist: boolean;
+  refetch: any;
+  setPublicKey: Dispatch<string>;
 } & StepPage): React.ReactElement => {
-
-  const [key, setKey] = useState<Key>({ publicKey: "", privateKey: "" });
+  const [key, setKey] = useState<Key>({ publicKey: '', privateKey: '' });
   return (
     <Grid container>
       <Grid
@@ -55,8 +62,8 @@ export const AfterConnect = ({ step, setStep, page, setPage, pubkeyExist, refetc
               ETH KV Store
             </Typography>
             <Paper sx={{ padding: { md: 2 }, marginBottom: 2 }}>
-              {" "}
-              <Box sx={{ width: "100%" }}>
+              {' '}
+              <Box sx={{ width: '100%' }}>
                 <Stepper activeStep={step}>
                   {steps.map((label) => (
                     <Step key={label}>
@@ -67,20 +74,48 @@ export const AfterConnect = ({ step, setStep, page, setPage, pubkeyExist, refetc
               </Box>
             </Paper>
 
-            {page === 0 && <GenerateOrImport setStep={setStep} setPage={setPage} />}
-            {page === 1 &&
-              <GeneratePubkey refetch={refetch} setPublicKey={setPublicKey} pubkeyExist={pubkeyExist} setKey={setKey}
-                              setStep={setStep} setPage={setPage} />}
-            {page === 1.5 &&
-              <Success  what="generated" keys={key} setStep={setStep}
-                       setPage={setPage} />}
-            {page === 2 &&
-              <ImportPubkey refetch={refetch} setPublicKey={setPublicKey} pubkeyExist={pubkeyExist} setKey={setKey}
-                            setStep={setStep} setPage={setPage} />}
-            {page === 2.5 &&
-              <Success  what="imported" keys={key} setStep={setStep}
-                       setPage={setPage} />}
-              {page === 3 && <Empower refetch={refetch} setPublicKey={setPublicKey} />}
+            {page === 0 && (
+              <GenerateOrImport setStep={setStep} setPage={setPage} />
+            )}
+            {page === 1 && (
+              <GeneratePubkey
+                refetch={refetch}
+                setPublicKey={setPublicKey}
+                pubkeyExist={pubkeyExist}
+                setKey={setKey}
+                setStep={setStep}
+                setPage={setPage}
+              />
+            )}
+            {page === 1.5 && (
+              <Success
+                what="generated"
+                keys={key}
+                setStep={setStep}
+                setPage={setPage}
+              />
+            )}
+            {page === 2 && (
+              <ImportPubkey
+                refetch={refetch}
+                setPublicKey={setPublicKey}
+                pubkeyExist={pubkeyExist}
+                setKey={setKey}
+                setStep={setStep}
+                setPage={setPage}
+              />
+            )}
+            {page === 2.5 && (
+              <Success
+                what="imported"
+                keys={key}
+                setStep={setStep}
+                setPage={setPage}
+              />
+            )}
+            {page === 3 && (
+              <Empower refetch={refetch} setPublicKey={setPublicKey} />
+            )}
           </Box>
         </Grid>
       </Grid>

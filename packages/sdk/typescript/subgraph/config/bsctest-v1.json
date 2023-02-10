@@ -1,0 +1,27 @@
+{
+  "network": "chapel",
+  "description": "Human subgraph on Binance Smart Chain testnet",
+  "EscrowFactory": {
+    "address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
+    "startBlock": 26716359,
+    "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
+  },
+  "HMToken": {
+    "address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
+    "startBlock": 26716354,
+    "abi": "./node_modules/@human-protocol/core/abis/HMToken.json"
+  },
+  "Escrow": {
+    "abi": "./node_modules/@human-protocol/core/abis/Escrow.json"
+  },
+  "Staking": {
+    "address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+    "startBlock": 26716357,
+    "abi": "./node_modules/@human-protocol/core/abis/Staking.json"
+  },
+  "KVStore": {
+    "address": "0x3aD4B091E054f192a822D1406f4535eAd38580e4",
+    "startBlock": 26716360,
+    "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  }
+}

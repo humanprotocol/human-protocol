@@ -1,6 +1,6 @@
 type LaunchedEscrow @entity {
   id: ID!
-  eip20: Bytes! # address
+  token: Bytes! # address
   from: Bytes! # address
   timestamp: BigInt!
   count: BigInt
@@ -110,4 +110,92 @@ type EventDayData @entity {
   dailyIntermediateStorageEvents: BigInt!
   dailyPendingEvents: BigInt!
   dailyEscrowAmounts: BigInt!
+}
+
+type LeaderStatistics @entity {
+  id: ID!
+  leaders: BigInt!
+}
+
+type Leader @entity {
+  id: ID!
+  address: Bytes!
+  role: String!
+  amountStaked: BigInt!
+  amountAllocated: BigInt!
+  amountLocked: BigInt!
+  lockedUntilTimestamp: BigInt!
+  amountWithdrawn: BigInt!
+  amountSlashed: BigInt!
+  reputation: BigInt!
+  amountJobsLaunched: BigInt!
+}
+
+type DataSavedEvent @entity {
+  id: ID!
+  leader: Bytes! # address
+  key: String!
+  value: String!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type StakeDepositedEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type StakeLockedEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  lockedUntilTimestamp: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type StakeWithdrawnEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type StakeSlashedEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  escrow: Bytes! # address
+  slasher: Bytes! # address
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type StakeAllocatedEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  escrow: Bytes! # address
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type AllocationClosedEvent @entity {
+  id: ID!
+  staker: Bytes! # address
+  amount: BigInt!
+  escrow: Bytes! # address
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
 }

@@ -1,0 +1,51 @@
+{
+  "name": "@human-protocol/basemodels",
+  "description": "Human Protocol Base Models",
+  "version": "0.0.1",
+  "files": [
+    "src",
+    "dist",
+    "test"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && tsc .",
+    "test": "jest --runInBand",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write '**/*.{ts,json}'",
+    "generate:manifest": "json2ts -i ../../json-schema/manifest.json -o ./src/generated/manifest.ts",
+    "generate:preprocess": "json2ts -i ../../json-schema/preprocess.json -o ./src/generated/preprocess.ts",
+    "generate": "concurrently \"npm:generate:*\""
+  },
+  "repository": {
+    "url": "https://github.com/humanprotocol/human-protocol.git",
+    "directory": "packages/sdk/typescript/human-protocol-basemodels"
+  },
+  "keywords": [
+    "human-protocol",
+    "sdk",
+    "basemodels",
+    "schema",
+    "node",
+    "typescript",
+    "ethereum"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "dependencies": {
+    "axios": "^1.2.6",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "json-schema-to-typescript": "^11.0.3"
+  }
+}

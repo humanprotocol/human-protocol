@@ -1,2 +1,2 @@
 // / <reference types="react-scripts" />
-declare module "file-saver"
+declare module 'file-saver';

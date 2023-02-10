@@ -11,6 +11,18 @@
 
 .App-header {
   background-color: #fafcff;
+  display: flex;
+  align-items: right;
+  justify-content: right;
+  padding: 10px;
+}
+
+.App-body h1 {
+  font-size: calc(10px + 2vmin);
+}
+
+.App-body {
+  background-color: #fafcff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

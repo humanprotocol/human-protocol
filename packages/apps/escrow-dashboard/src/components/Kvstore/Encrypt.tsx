@@ -1,211 +1,261 @@
-import {
-  Grid,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  TextField
-} from "@mui/material";
-import React, { useState } from "react";
-import * as openpgp from "openpgp";
-import { NFTStorage } from "nft.storage";
-import { useWaitForTransaction, useContractWrite,useNetwork } from "wagmi";
-import {ESCROW_NETWORKS,ChainId} from "../../constants"
-import KVStore from "@human-protocol/core/abis/KVStore.json";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
+import React, { useState } from 'react';
+import * as openpgp from 'openpgp';
+import { NFTStorage } from 'nft.storage';
+import { useWaitForTransaction, useContractWrite, useNetwork } from 'wagmi';
+import { ESCROW_NETWORKS, ChainId } from '../../constants';
+import KVStore from '@human-protocol/core/abis/KVStore.json';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-        props,
-        ref
-        ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 const client = new NFTStorage({
-    token: process.env.REACT_APP_NFT_STORAGE_API as string
+  token: process.env.REACT_APP_NFT_STORAGE_API as string,
 });
-export const Encrypt = ({ publicKey }: { publicKey: string }): React.ReactElement => {
-    const { chain } = useNetwork()
-  const [key, setKey] = useState("");
+export const Encrypt = ({
+  publicKey,
+}: {
+  publicKey: string;
+}): React.ReactElement => {
+  const { chain } = useNetwork();
+  const [key, setKey] = useState('');
 
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
   const [copy, setCopy] = useState<boolean>(false);
-  const [encrypted, setEncrypted] = useState<string>("");
+  const [encrypted, setEncrypted] = useState<string>('');
 
-  const { data,writeAsync} = useContractWrite({
-      mode: 'recklesslyUnprepared',
-      address: ESCROW_NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
-      abi: KVStore,
-      chainId: chain?.id,
-      functionName: "set",
+  const { data, writeAsync } = useContractWrite({
+    mode: 'recklesslyUnprepared',
+    address: ESCROW_NETWORKS[chain?.id as ChainId]
+      ?.kvstoreAddress as `0x${string}`,
+    abi: KVStore,
+    chainId: chain?.id,
+    functionName: 'set',
 
     onError() {
-      setError("Error transaction");
-      setSuccess(false)
+      setError('Error transaction');
+      setSuccess(false);
       setLoading(false);
-    }
+    },
   });
-   useWaitForTransaction({
-      hash: data?.hash,
-       onSuccess(data){
-          setSuccess(true)
-           setLoading(false);
-      },
-       onError() {
-          setError("Error transaction");
-          setSuccess(false)
-           setLoading(false);
-      }
-  })
+  useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess(data) {
+      setSuccess(true);
+      setLoading(false);
+    },
+    onError() {
+      setError('Error transaction');
+      setSuccess(false);
+      setLoading(false);
+    },
+  });
   async function storeKeyValue() {
     setLoading(true);
-    setError("");
+    setError('');
     setSuccess(false);
-    setEncrypted("")
+    setEncrypted('');
     if (key.trim().length === 0 || value.trim().length === 0) {
-      setError("please fill key, value");
+      setError('please fill key, value');
       setLoading(false);
       return;
     }
 
     try {
-
       const publicKeyArmored = await openpgp.readKey({ armoredKey: publicKey });
       const message = await openpgp.createMessage({ text: value });
       const encrypted1 = await openpgp.encrypt({
         message,
         encryptionKeys: publicKeyArmored,
         config: {
-          preferredCompressionAlgorithm: openpgp.enums.compression.zlib
-        }
+          preferredCompressionAlgorithm: openpgp.enums.compression.zlib,
+        },
       });
       const someData = new Blob([encrypted1 as string]);
-      const cid=await client.storeBlob(someData);
-      await writeAsync?.({recklesslySetUnpreparedArgs:[key,cid]});
+      const cid = await client.storeBlob(someData);
+      await writeAsync?.({ recklesslySetUnpreparedArgs: [key, cid] });
       setEncrypted(encrypted1 as string);
-
     } catch (e) {
       if (e instanceof Error) {
-
         setLoading(false);
         setError(e.message);
       }
-
     }
   }
 
-  return (<Grid
-    item
-    xs={12}
-    sm={12}
-    md={12}
-    container
-    direction="column"
-    justifyContent="center"
-    alignItems="center"
-
-  >
-      <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={copy} autoHideDuration={3000}
-          onClose={() => setCopy(false)}>
-          <Alert onClose={() => setCopy(false)} severity="info" sx={{ width: "100%" }}>
-              Encrypted message copied
-          </Alert>
+  return (
+    <Grid
+      item
+      xs={12}
+      sm={12}
+      md={12}
+      container
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+    >
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={copy}
+        autoHideDuration={3000}
+        onClose={() => setCopy(false)}
+      >
+        <Alert
+          onClose={() => setCopy(false)}
+          severity="info"
+          sx={{ width: '100%' }}
+        >
+          Encrypted message copied
+        </Alert>
       </Snackbar>
-      <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={success} autoHideDuration={3000}
-          onClose={() => setSuccess(false)}>
-          <Alert onClose={() => setSuccess(false)} severity="success" sx={{ width: "100%" }}>
-              Transaction success
-          </Alert>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={success}
+        autoHideDuration={3000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert
+          onClose={() => setSuccess(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+        >
+          Transaction success
+        </Alert>
       </Snackbar>
-      <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={error.length > 0} autoHideDuration={3000}
-          onClose={() => setError("")}>
-          <Alert onClose={() => setError("")} severity="error" sx={{ width: "100%" }}>
-              {error}
-          </Alert>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={error.length > 0}
+        autoHideDuration={3000}
+        onClose={() => setError('')}
+      >
+        <Alert
+          onClose={() => setError('')}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
       </Snackbar>
-      <Box sx={{ width: { xs: 1,md: "50%", lg: "50%", xl: "40%" } }}>
-
-      <Paper>
-        <Box sx={{ borderBottom: "1px solid #CBCFE6" }}>
-          <Grid container direction="row" justifyContent={"space-between"}
-                flexDirection={{ xs: "column-reverse", md: "row" }}>
-            <Grid item><Typography fontWeight={`500`} padding={`10px`}>Encrypt</Typography></Grid>
-
-          </Grid>
-        </Box>
-        <Grid container direction="column" sx={{
-          padding: {
-            xs: "0px 80px 0px 80px",
-            md: "0px 80px 0px 80px",
-            lg: "0px 80px 0px 80px",
-            xl: "0px 80px 0px 80px"
-          }
-        }}>
+      <Box sx={{ width: { xs: 1, md: '50%', lg: '50%', xl: '40%' } }}>
+        <Paper>
+          <Box sx={{ borderBottom: '1px solid #CBCFE6' }}>
+            <Grid
+              container
+              direction="row"
+              justifyContent={'space-between'}
+              flexDirection={{ xs: 'column-reverse', md: 'row' }}
+            >
+              <Grid item>
+                <Typography fontWeight={`500`} padding={`10px`}>
+                  Encrypt
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
           <Grid
-            item
             container
             direction="column"
-
             sx={{
-              marginBottom: { lg: 10 }
-
-
+              padding: {
+                xs: '0px 80px 0px 80px',
+                md: '0px 80px 0px 80px',
+                lg: '0px 80px 0px 80px',
+                xl: '0px 80px 0px 80px',
+              },
             }}
           >
-            <Box sx={{ mt: { md: 10, lg: 10, xl: 10 }, mb: 2 }}><Typography>Encrypt using your stored public
-              key</Typography></Box>
-            <TextField
+            <Grid
+              item
+              container
+              direction="column"
+              sx={{
+                marginBottom: { lg: 10 },
+              }}
+            >
+              <Box sx={{ mt: { md: 10, lg: 10, xl: 10 }, mb: 2 }}>
+                <Typography>Encrypt using your stored public key</Typography>
+              </Box>
+              <TextField
                 disabled={loading}
-              sx={{ my: 2 }}
-              id="outlined-basic"
-              label="Key"
-              variant="outlined"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-            />
-            <TextField
+                sx={{ my: 2 }}
+                id="outlined-basic"
+                label="Key"
+                variant="outlined"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+              />
+              <TextField
                 disabled={loading}
-              sx={{ my: 1 }}
-              id="outlined-basic"
-              label="Value"
-              variant="outlined"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-              <Box display={`flex`} width={`100%`} justifyContent={`flex-end`} marginBottom={2}>
-                <Button disabled={loading} onClick={storeKeyValue} sx={{ my: 1 }} variant="contained">Store</Button>
-            </Box>
+                sx={{ my: 1 }}
+                id="outlined-basic"
+                label="Value"
+                variant="outlined"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+              <Box
+                display={`flex`}
+                width={`100%`}
+                justifyContent={`flex-end`}
+                marginBottom={2}
+              >
+                <Button
+                  disabled={loading}
+                  onClick={storeKeyValue}
+                  sx={{ my: 1 }}
+                  variant="contained"
+                >
+                  Store
+                </Button>
+              </Box>
 
-              {encrypted.length > 0 && !loading && <><Box sx={{ width: { xs: 1 } }}>
-                  <Box
+              {encrypted.length > 0 && !loading && (
+                <>
+                  <Box sx={{ width: { xs: 1 } }}>
+                    <Box
                       className="pubkey"
                       sx={{
-                      backgroundColor: "#f6f7fe",
-                          maxHeight: 200,
-                          marginTop: 2,
-                          overflowY: "scroll",
-                          overflowWrap: "break-word",
-                          padding: 4,
-                          borderRadius: 3
-                  }}
-                      >
+                        backgroundColor: '#f6f7fe',
+                        maxHeight: 200,
+                        marginTop: 2,
+                        overflowY: 'scroll',
+                        overflowWrap: 'break-word',
+                        padding: 4,
+                        borderRadius: 3,
+                      }}
+                    >
                       {encrypted}
-                  </Box
-                      >
-          </Box>
-            <Box sx={{ marginTop: 2, marginBottom: { xs: 2, sm: 2, md: 4, lg: 0 } }}>
-                <Button onClick={() => {
-                    setCopy(true);
-                    navigator.clipboard.writeText(encrypted);
-                }} size="small">Copy</Button>
-
-            </Box></>}
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      marginTop: 2,
+                      marginBottom: { xs: 2, sm: 2, md: 4, lg: 0 },
+                    }}
+                  >
+                    <Button
+                      onClick={() => {
+                        setCopy(true);
+                        navigator.clipboard.writeText(encrypted);
+                      }}
+                      size="small"
+                    >
+                      Copy
+                    </Button>
+                  </Box>
+                </>
+              )}
+            </Grid>
           </Grid>
-
-        </Grid>
-      </Paper>
-    </Box>
-  </Grid>);
+        </Paper>
+      </Box>
+    </Grid>
+  );
 };

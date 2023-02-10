@@ -34,13 +34,12 @@ export const MainPage = (): React.ReactElement => {
           justifyContent="flex-start"
           alignItems="flex-start"
         >
-            <img width="100" src="/images/key.svg" alt="lbank" />{' '}
+          <img width="100" src="/images/key.svg" alt="lbank" />{' '}
           <div>
             <Typography variant="h4" color="primary">
               Empower HUMAN Scan
             </Typography>
           </div>
-
           <div>
             <Typography variant="h4" color="primary">
               with ETH KV Store
@@ -48,7 +47,8 @@ export const MainPage = (): React.ReactElement => {
           </div>
           <Box sx={{ marginTop: 2 }}>
             <Typography variant="body2" color="primary">
-              Store your public key in the blockchain, use your public key to encrypt or decrypt data.
+              Store your public key in the blockchain, use your public key to
+              encrypt or decrypt data.
             </Typography>
           </Box>
         </Grid>
@@ -100,8 +100,6 @@ export const MainPage = (): React.ReactElement => {
                   alignItems="center"
                   sx={{
                     marginTop: { xs: 1, sm: 1, md: 10, lg: 10 },
-
-                    
                   }}
                 >
                   {' '}
@@ -113,21 +111,19 @@ export const MainPage = (): React.ReactElement => {
                   >
                     Connect your wallet to continue
                   </Typography>
-
                 </Grid>
                 <Grid
                   item
                   container
                   direction="row"
                   justifyContent="center"
-
                   sx={{
-                    marginTop: { xs: 1, sm: 1,lg: 3 },
+                    marginTop: { xs: 1, sm: 1, lg: 3 },
 
-                      marginBottom: { xs: 1, sm: 1,md:10, lg: 7 },
+                    marginBottom: { xs: 1, sm: 1, md: 10, lg: 7 },
                   }}
                 >
-                    <CustomConnectButton />
+                  <CustomConnectButton />
                 </Grid>
               </Grid>
             </Paper>

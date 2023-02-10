@@ -1,0 +1,26 @@
+name: Node.js Base Models NPM publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  node-sdk-publish:
+    name: Node.js Base Models NPM Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn --ignore-scripts
+        name: Install dependencies
+      - name: Change Package version
+        uses: jossef/action-set-json-field@v2
+        with:
+          file: ./packages/sdk/typescript/human-protocol-basemodels/package.json
+          field: version
+          value: ${{ github.event.release.tag_name }}
+      - uses: JS-DevTools/npm-publish@v1
+        name: Publish
+        with:
+          package: ./packages/sdk/typescript/human-protocol-basemodels/package.json
+          access: public
+          token: ${{ secrets.NPM_TOKEN }}

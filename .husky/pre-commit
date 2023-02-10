@@ -3,5 +3,9 @@
 
 npx lint-staged
 
-cd packages/sdk/python && make format
-git add -u
+cd packages/sdk/python
+cd human-protocol-basemodels && make format && git add . -u
+cd ..
+cd human-protocol-sdk && make format && git add . -u
+cd ../../../
+
