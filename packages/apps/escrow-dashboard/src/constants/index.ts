@@ -25,31 +25,7 @@ export enum ChainId {
   AVALANCHE_TESTNET = 43113,
   AVALANCHE = 43114,
 }
-const rinkeby = {
-  id: ChainId.RINKEBY,
-  name: 'Ethereum Rinkeby',
-  network: 'rinkeby',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ethereum',
-    symbol: 'ETH',
-  },
-  rpcUrls: {
-    public: {
-      http: ['https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-    },
-    default: {
-      http: ['https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
-    },
-  },
-  blockExplorers: {
-    etherscan: {
-      name: 'rinkeby etherscan',
-      url: 'https://rinkeby.etherscan.io',
-    },
-    default: { name: 'rinkebyetherscan', url: 'https://rinkeby.etherscan.io' },
-  },
-} as const satisfies Chain;
+
 export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
@@ -107,7 +83,7 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
     kvstoreAddress: '',
-    wagmiChain: rinkeby,
+    wagmiChain: {} as Chain,
   },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,

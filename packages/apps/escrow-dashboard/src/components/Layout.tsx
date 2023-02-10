@@ -7,17 +7,19 @@ import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-import { ESCROW_NETWORKS } from '../constants';
-const chain = Object.values(ESCROW_NETWORKS).map(
-  ({ wagmiChain }) => wagmiChain
-);
-const rpcUrls = Object.values(ESCROW_NETWORKS).map(({ rpcUrl }) =>
-  jsonRpcProvider({
-    rpc: (chain) => ({
-      http: rpcUrl,
-    }),
-  })
-);
+import { ESCROW_NETWORKS, ChainId } from '../constants';
+const chain = Object.values(ESCROW_NETWORKS)
+  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
+  .map(({ wagmiChain }) => wagmiChain);
+const rpcUrls = Object.values(ESCROW_NETWORKS)
+  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
+  .map(({ rpcUrl }) =>
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: rpcUrl,
+      }),
+    })
+  );
 const { chains, provider } = configureChains(chain, [
   publicProvider(),
   ...rpcUrls,
