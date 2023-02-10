@@ -2,35 +2,18 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import Header from 'src/components/Header';
-import { vi } from 'vitest';
+import { KvstoreView } from 'src/components/Kvstore/KvstoreView';
+
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import {
   Providers,
   setupClient,
   getSigners,
   testChains,
-} from '../../tests/utils';
+} from '../../../../tests/utils';
 import { MockConnector } from '@wagmi/core/connectors/mock';
 
-describe('when rendered Header component', () => {
-  beforeAll(async () => {
-    global.fetch = vi.fn().mockImplementationOnce(() =>
-      Promise.resolve({
-        status: 200,
-        json: () =>
-          Promise.resolve({
-            market_data: {
-              circulating_supply: 0,
-              total_supply: 0,
-              current_price: { usd: 0 },
-              price_change_percentage_24h: 0,
-            },
-          }),
-      })
-    );
-  });
-
+describe('when rendered KvstoreView component', () => {
   it('should render `text` prop', async () => {
     const client = setupClient({
       connectors: [
@@ -43,7 +26,7 @@ describe('when rendered Header component', () => {
       ],
     });
     await act(async () => {
-      render(<Header />, {
+      render(<KvstoreView />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <Providers client={client}>
             <RainbowKitProvider chains={testChains} modalSize="compact">
@@ -53,11 +36,15 @@ describe('when rendered Header component', () => {
         ),
       });
     });
-    expect(screen.getByText(/HUMAN Website/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Store your public key in the blockchain, use your public key to encrypt or decrypt data./
+      )
+    ).toBeInTheDocument();
   });
 });
 
-it('Header component renders correctly, corresponds to the snapshot', () => {
+it('KvstoreView component renders correctly, corresponds to the snapshot', () => {
   const client = setupClient({
     connectors: [
       new MockConnector({
@@ -72,7 +59,7 @@ it('Header component renders correctly, corresponds to the snapshot', () => {
     .create(
       <Providers client={client}>
         <RainbowKitProvider chains={testChains} modalSize="compact">
-          <Header />
+          <KvstoreView />
         </RainbowKitProvider>
       </Providers>
     )

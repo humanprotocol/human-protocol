@@ -1,3 +1,16 @@
+import {
+  goerli,
+  bsc,
+  bscTestnet,
+  polygon,
+  polygonMumbai,
+  moonbeam,
+  Chain,
+  moonbaseAlpha,
+  avalancheFuji,
+  avalanche,
+} from 'wagmi/chains';
+
 export enum ChainId {
   ALL = -1,
   MAINNET = 1,
@@ -27,6 +40,9 @@ export interface IEscrowNetwork {
   subgraphUrl: string;
   hmtAddress: string;
   factoryAddress: string;
+
+  kvstoreAddress: string;
+  wagmiChain: Chain;
   oldSubgraphUrl: string;
   oldFactoryAddress: string;
 }
@@ -66,6 +82,8 @@ export const ESCROW_NETWORKS: {
     hmtAddress: '0x4dCf5ac4509888714dd43A5cCc46d7ab389D9c23',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    kvstoreAddress: '',
+    wagmiChain: {} as Chain,
   },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
@@ -79,6 +97,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
     oldFactoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
+    kvstoreAddress: '0xc9Fe39c4b6e1d7A2991355Af159956982DADf842',
+    wagmiChain: goerli,
   },
   [ChainId.BSC_MAINNET]: {
     chainId: ChainId.BSC_MAINNET,
@@ -90,6 +110,8 @@ export const ESCROW_NETWORKS: {
     hmtAddress: '0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
+    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+    wagmiChain: bsc,
   },
   [ChainId.BSC_TESTNET]: {
     chainId: ChainId.BSC_TESTNET,
@@ -103,6 +125,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
+    kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
+    wagmiChain: bscTestnet,
   },
   [ChainId.POLYGON]: {
     chainId: ChainId.POLYGON,
@@ -116,6 +140,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
+    kvstoreAddress: '0x35Cf4beBD58F9C8D75B9eA2599479b6C173d406F',
+    wagmiChain: polygon,
   },
   [ChainId.POLYGON_MUMBAI]: {
     chainId: ChainId.POLYGON_MUMBAI,
@@ -129,6 +155,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
     oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
+    kvstoreAddress: '0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807',
+    wagmiChain: polygonMumbai,
   },
   [ChainId.MOONBEAM]: {
     chainId: ChainId.MOONBEAM,
@@ -142,6 +170,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     oldFactoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
+    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+    wagmiChain: moonbeam,
   },
   [ChainId.MOONBASE_ALPHA]: {
     chainId: ChainId.MOONBASE_ALPHA,
@@ -154,6 +184,8 @@ export const ESCROW_NETWORKS: {
     hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    kvstoreAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
+    wagmiChain: moonbaseAlpha,
   },
   [ChainId.AVALANCHE_TESTNET]: {
     chainId: ChainId.AVALANCHE_TESTNET,
@@ -167,6 +199,8 @@ export const ESCROW_NETWORKS: {
     hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    kvstoreAddress: '0xd232c1426CF0653cE8a71DC98bCfDf10c471c114',
+    wagmiChain: avalancheFuji,
   },
   [ChainId.AVALANCHE]: {
     chainId: ChainId.AVALANCHE,
@@ -179,6 +213,8 @@ export const ESCROW_NETWORKS: {
     hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
+    kvstoreAddress: '0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df',
+    wagmiChain: avalanche,
   },
 };
 

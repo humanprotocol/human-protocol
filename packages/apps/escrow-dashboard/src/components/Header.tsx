@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
+import { CustomConnectButton } from './Kvstore/CustomConnectButton';
 type NavLink = {
   title: string;
   href: string;
@@ -21,8 +21,7 @@ const NAV_LINKS: NavLink[] = [
   { title: 'Leaderboard', href: '/leaderboard' },
   {
     title: 'KV Store',
-    href: 'https://eth-kvstore-gui.vercel.app',
-    external: true,
+    href: '/kvstore',
   },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
@@ -97,6 +96,7 @@ const Header: React.FC = (): React.ReactElement => {
                     </Typography>
                   </Link>
                 ))}
+              {!isMobile && <CustomConnectButton />}
             </Box>
             {isMobile && (
               <>
@@ -129,6 +129,7 @@ const Header: React.FC = (): React.ReactElement => {
                       </Link>
                     </MenuItem>
                   ))}
+                  <CustomConnectButton />
                 </Menu>
               </>
             )}
