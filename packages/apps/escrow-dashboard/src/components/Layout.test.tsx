@@ -2,10 +2,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Layout from './Layout';
-
+import { vi } from 'vitest';
 describe('when rendered Layout component', () => {
   beforeAll(async () => {
-    global.fetch = jest.fn().mockImplementationOnce(() =>
+    global.fetch = vi.fn().mockImplementationOnce(() =>
       Promise.resolve({
         status: 200,
         json: () =>

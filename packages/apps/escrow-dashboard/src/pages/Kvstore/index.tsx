@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box';
 
-import { Escrow, Token, Leaderboard, SolvedTasks } from 'src/components';
+import { Kvstore } from 'src/components';
 
-export const Main: React.FC = (): React.ReactElement => {
+export const KvstorePage: React.FC = (): React.ReactElement => {
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 } }}>
       <Box
@@ -24,17 +24,7 @@ export const Main: React.FC = (): React.ReactElement => {
           },
         }}
       >
-        <Grid container spacing={4}>
-          <Grid item xs={12} lg={6}>
-            <SolvedTasks />
-          </Grid>
-          {/* <Grid item xs={12} lg={6}>
-            <News />
-          </Grid> */}
-        </Grid>
-        <Escrow />
-        <Token />
-        <Leaderboard showAll={false} />
+        <Kvstore />
       </Box>
     </Box>
   );
