@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - packages/sdk/typescript/subgraph/**
+      - .github/workflows/cd-subgraph.yaml
 
 jobs:
   subgraph:
