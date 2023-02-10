@@ -95,7 +95,7 @@ export const ESCROW_NETWORKS: {
     chainId: ChainId.BSC_TESTNET,
     title: 'Binance Smart Chain (Testnet)',
     scanUrl: 'https://testnet.bscscan.com',
-    rpcUrl: 'https://data-seed-prebsc-1-s3.binance.org:8545',
+    rpcUrl: 'https://endpoints.omniatech.io/v1/bsc/testnet/public',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1',
     factoryAddress: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
