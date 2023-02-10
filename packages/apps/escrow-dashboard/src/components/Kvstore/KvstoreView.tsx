@@ -2,27 +2,32 @@ import React, { useState, useEffect } from "react";
 import { MainPage } from "./MainPage";
 import { AfterConnect } from "./AfterConnect";
 import { Dashboard } from "./Dashboard";
-import { useAccount, useContractRead } from "wagmi";
+import { useAccount, useContractRead,useNetwork } from "wagmi";
 import KVStore from "@human-protocol/core/abis/KVStore.json";
-
+import {ESCROW_NETWORKS,ChainId} from "../../constants"
 export const KvstoreView = (): React.ReactElement => {
   const { isConnected, address } = useAccount();
+  const { chain } = useNetwork()
   const [publicKey, setPublicKey] = useState<string>("");
   const [step, setStep] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [pubkeyExist, setPubkeyExist] = useState<boolean>(false);
   const { data, refetch } = useContractRead({
-    address: process.env.REACT_APP_CONTRACT as string,
+      address: ESCROW_NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: "get",
     args: [address, "public_key"]
   });
 useEffect(()=>{
+    if(publicKey?.trim().length === 0){
+        setStep(0);
+        setPage(0)
+    }
     setPublicKey(data as string)
     if(data as string){
         setPubkeyExist(true)
     }
-},[data])
+},[data,chain])
   return (
     <>
       {!isConnected && <MainPage />}

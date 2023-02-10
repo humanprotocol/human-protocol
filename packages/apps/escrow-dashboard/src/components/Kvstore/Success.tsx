@@ -12,8 +12,9 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { Key } from "./index";
 import React, { Dispatch, useState, useEffect } from "react";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useWaitForTransaction,useContractWrite, usePrepareContractWrite,useNetwork } from "wagmi";
 import KVStore from "@human-protocol/core/abis/KVStore.json";
+import {ESCROW_NETWORKS,ChainId} from "../../constants"
 import { NFTStorage } from "nft.storage";
 const client = new NFTStorage({
     token: process.env.REACT_APP_NFT_STORAGE_API as string
@@ -59,7 +60,7 @@ async function saveToNFTStorage(publicKey: string, setCid: Dispatch<string>, set
 
 }
 
-const address = process.env.REACT_APP_CONTRACT as string;
+
 export const Success = ({
     setStep, setPage, keys, what
                         }: {
@@ -69,6 +70,7 @@ export const Success = ({
   what: string;
  
 }) => {
+    const { chain } = useNetwork()
   const [copy, setCopy] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [cid, setCid] = useState<string>("");
@@ -80,23 +82,32 @@ export const Success = ({
     
   }, [keys.publicKey]);
   const { config } = usePrepareContractWrite({
-    address,
+      address:ESCROW_NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: "set",
     args: ["public_key", cid]
   });
 
-  const { write, isLoading } = useContractWrite({
+  const { write, isLoading,data } = useContractWrite({
     ...config,
-    onSuccess(data) {
-      setSuccess(true);
-      setStep(2);
-      setPage(3);
-    }, onError(error) {
+     onError(error) {
       setError(error.message);
+      setSuccess(false)
     }
   });
+  const {isLoading:loadingTransaction}=useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess(data){
+        setSuccess(true);
+        setStep(2);
+        setPage(3);
+        },
+    onError() {
+        setError("Error transaction");
+        setSuccess(false)
 
+    }
+  })
   function empowerHuman() {
     write?.();
   }
@@ -177,7 +188,7 @@ export const Success = ({
             marginBottom: { xs: 1, sm: 1, md: 7, lg: 7 }
           }}
         >
-          <Button variant="outlined" sx={{ mr: 2 }} onClick={() => {
+            <Button disabled={cid.length === 0 || !write || isLoading || loadingTransaction} variant="outlined" sx={{ mr: 2 }} onClick={() => {
             if (what === "imported") {
               setStep(1);
               setPage(2);
@@ -189,11 +200,11 @@ export const Success = ({
           }}>
             Back
           </Button>
-          {what === "generated" && <Button variant="outlined" sx={{ mr: 2 }}
+            {what === "generated" && <Button disabled={cid.length === 0 || !write || isLoading || loadingTransaction} variant="outlined" sx={{ mr: 2 }}
                                            onClick={() => downloadKey(keys.publicKey, keys.privateKey, setError)}>
             Download
           </Button>}
-          <Button disabled={cid.length === 0 || !write || isLoading} onClick={() => empowerHuman()}
+            <Button disabled={cid.length === 0 || !write || isLoading || loadingTransaction} onClick={() => empowerHuman()}
                   variant="contained">{cid.length === 0 ? `Please wait...` : `Add to ETH - KV Store`}</Button>
         </Grid>
       </Grid>

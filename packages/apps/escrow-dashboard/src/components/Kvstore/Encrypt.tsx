@@ -9,7 +9,8 @@ import {
 import React, { useState } from "react";
 import * as openpgp from "openpgp";
 import { NFTStorage } from "nft.storage";
-import { usePrepareContractWrite, useContractWrite } from "wagmi";
+import { useWaitForTransaction, useContractWrite,useNetwork } from "wagmi";
+import {ESCROW_NETWORKS,ChainId} from "../../constants"
 import KVStore from "@human-protocol/core/abis/KVStore.json";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
@@ -23,33 +24,41 @@ const client = new NFTStorage({
     token: process.env.REACT_APP_NFT_STORAGE_API as string
 });
 export const Encrypt = ({ publicKey }: { publicKey: string }): React.ReactElement => {
-
+    const { chain } = useNetwork()
   const [key, setKey] = useState("");
+
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [copy, setCopy] = useState<boolean>(false);
   const [encrypted, setEncrypted] = useState<string>("");
-  const { config } = usePrepareContractWrite({
-    address: process.env.REACT_APP_CONTRACT as string,
-    abi: KVStore,
-    functionName: "set",
-    args: ["", ""]
-  });
-  const { writeAsync } = useContractWrite({
-    ...config,
-    onSuccess() {
-setSuccess(true)
-      setLoading(false);
-    },
+
+  const { data,writeAsync} = useContractWrite({
+      mode: 'recklesslyUnprepared',
+      address: ESCROW_NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
+      abi: KVStore,
+      chainId: chain?.id,
+      functionName: "set",
+
     onError() {
       setError("Error transaction");
       setSuccess(false)
       setLoading(false);
     }
   });
-
+   useWaitForTransaction({
+      hash: data?.hash,
+       onSuccess(data){
+          setSuccess(true)
+           setLoading(false);
+      },
+       onError() {
+          setError("Error transaction");
+          setSuccess(false)
+           setLoading(false);
+      }
+  })
   async function storeKeyValue() {
     setLoading(true);
     setError("");
@@ -73,10 +82,8 @@ setSuccess(true)
         }
       });
       const someData = new Blob([encrypted1 as string]);
-      const cid = await client.storeBlob(someData);
-      await writeAsync?.({
-        recklesslySetUnpreparedArgs: [key, cid]
-      });
+      const cid=await client.storeBlob(someData);
+      await writeAsync?.({recklesslySetUnpreparedArgs:[key,cid]});
       setEncrypted(encrypted1 as string);
 
     } catch (e) {
@@ -171,7 +178,7 @@ setSuccess(true)
                 <Button disabled={loading} onClick={storeKeyValue} sx={{ my: 1 }} variant="contained">Store</Button>
             </Box>
 
-              {encrypted.length > 0 && <><Box sx={{ width: { xs: 1 } }}>
+              {encrypted.length > 0 && !loading && <><Box sx={{ width: { xs: 1 } }}>
                   <Box
                       className="pubkey"
                       sx={{

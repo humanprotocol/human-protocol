@@ -10,11 +10,12 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import React, { useState,ChangeEvent } from "react";
 import KVStore from "@human-protocol/core/abis/KVStore.json";
-import { showIPFS } from "../../services/index";
-import { useContractRead, useAccount } from "wagmi";
+import { showIPFS } from "../../services";
+import { useContractRead, useAccount,useNetwork } from "wagmi";
 import * as openpgp from "openpgp";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import {ESCROW_NETWORKS,ChainId} from "../../constants"
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
         props,
         ref
@@ -22,6 +23,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 export const Decrypt = (): React.ReactElement => {
+    const { chain } = useNetwork()
   const [key, setKey] = useState("");
   const [passphrase, setPassphrase] = useState("");
   const [value, setValue] = useState("");
@@ -33,7 +35,7 @@ export const Decrypt = (): React.ReactElement => {
   const [filename, setFilename] = useState<string>("");
   const { address } = useAccount();
   const { refetch } = useContractRead({
-      address: process.env.REACT_APP_CONTRACT as string,
+      address: ESCROW_NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
       abi: KVStore,
       functionName: "get",
       args: [address, key],
@@ -46,7 +48,7 @@ export const Decrypt = (): React.ReactElement => {
           setLoading(false)
       } catch (e) {
           if(e instanceof Error){
-              setLoading(true)
+              setLoading(false)
               setError(e.message)
           }
       }

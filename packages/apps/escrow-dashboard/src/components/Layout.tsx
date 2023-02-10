@@ -8,14 +8,19 @@ import {
   RainbowKitProvider
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { polygonMumbai } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
+import {ESCROW_NETWORKS} from "../constants"
+const chain = Object.values(ESCROW_NETWORKS).map(({wagmiChain})=>wagmiChain)
+const rpcUrls = Object.values(ESCROW_NETWORKS).map(({rpcUrl})=>jsonRpcProvider({
+      rpc: (chain) => ({
+        http: rpcUrl,
+      }),
+}),)
 const { chains, provider } = configureChains(
-  [polygonMumbai],
-  [publicProvider(),
-    alchemyProvider({ apiKey: process.env.REACT_APP_ALCHEMY_API_KEY as string })]
+        chain,
+        [publicProvider(),...rpcUrls]
+
 );
 
 const { connectors } = getDefaultWallets({
@@ -42,7 +47,7 @@ const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
       <RainbowKitProvider
         chains={chains}
         modalSize="compact"
-        initialChain={polygonMumbai}
+
       >
           <Header />
         {children}
