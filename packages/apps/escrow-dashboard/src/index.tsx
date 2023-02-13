@@ -6,6 +6,8 @@ import { App } from './components';
 import reportWebVitals from './reportWebVitals';
 import store from './state';
 
+window.Buffer = window.Buffer || require('buffer').Buffer;
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
