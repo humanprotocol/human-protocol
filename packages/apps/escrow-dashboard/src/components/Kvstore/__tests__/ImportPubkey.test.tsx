@@ -4,13 +4,8 @@ import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { ImportPubkey } from 'src/components/Kvstore/ImportPubkey';
 
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered ImportPubkey component', () => {
   it('should render `text` prop', async () => {

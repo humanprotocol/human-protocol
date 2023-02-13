@@ -4,13 +4,8 @@ import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { Empower } from 'src/components/Kvstore/Empower';
 
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered Empower component', () => {
   it('should render `text` prop', async () => {

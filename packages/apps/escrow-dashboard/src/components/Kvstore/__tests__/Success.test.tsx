@@ -3,13 +3,8 @@ import { render, screen } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { Success } from 'src/components/Kvstore/Success';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered Success component', () => {
   it('should render `text` prop', async () => {

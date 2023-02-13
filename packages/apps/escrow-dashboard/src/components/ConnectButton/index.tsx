@@ -7,12 +7,12 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import React from 'react';
 import profileSvg from 'src/assets/profile.svg';
 import { shortenAddress } from 'src/utils';
-import { useAccount, useBalance } from 'wagmi';
+import { useAccount } from 'wagmi';
 import WalletModal from '../WalletModal';
 import CopyLinkIcon from '../Icons/CopyLinkIcon';
 import OpenInNewIcon from '../Icons/OpenInNewIcon';

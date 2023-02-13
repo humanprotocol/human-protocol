@@ -6,7 +6,6 @@ import theme from 'src/theme';
 import Layout from 'src/components/Layout';
 import { WagmiConfig, createClient, configureChains } from 'wagmi';
 
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 

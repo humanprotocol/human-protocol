@@ -4,13 +4,8 @@ import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { KvstoreView } from 'src/components/Kvstore/KvstoreView';
 
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered KvstoreView component', () => {
   it('should render `text` prop', async () => {
