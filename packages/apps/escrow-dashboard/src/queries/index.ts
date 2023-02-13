@@ -7,7 +7,7 @@ export const RAW_ESCROW_STATS_QUERY = `{
 }`;
 
 export const RAW_EVENT_DAY_DATA_QUERY = `{
-  eventDayDatas(first: 30, orderBy: timestamp, orderDirection: desc) {
+  eventDayDatas(first: [COUNT_PARAM], orderBy: timestamp, orderDirection: desc) {
     timestamp
     dailyBulkTransferEvents
     dailyIntermediateStorageEvents

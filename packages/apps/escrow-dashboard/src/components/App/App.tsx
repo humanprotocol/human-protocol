@@ -4,22 +4,34 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
 import Layout from 'src/components/Layout';
-import {
-  WagmiConfig,
-  createClient,
-  defaultChains,
-  configureChains,
-} from 'wagmi';
+import { WagmiConfig, createClient, configureChains } from 'wagmi';
 
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { publicProvider } from 'wagmi/providers/public';
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 
-const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
+import { ESCROW_NETWORKS, ChainId } from '../../constants';
+
+const chain = Object.values(ESCROW_NETWORKS)
+  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
+  .map(({ wagmiChain }) => wagmiChain);
+const rpcUrls = Object.values(ESCROW_NETWORKS)
+  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
+  .map(({ rpcUrl }) =>
+    jsonRpcProvider({
+      rpc: (chain) => ({
+        http: rpcUrl,
+      }),
+    })
+  );
+
+const { chains, provider, webSocketProvider } = configureChains(chain, [
   publicProvider(),
+  ...rpcUrls,
 ]);
 
 const client = createClient({

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import fp from 'fastify-plugin';
 import { FastifyPluginAsync } from 'fastify';
 import { Static, Type } from '@sinclair/typebox';

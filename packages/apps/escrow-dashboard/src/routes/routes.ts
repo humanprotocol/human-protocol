@@ -1,5 +1,13 @@
 import { FC } from 'react';
-import { Main, Leaderboard, Leader, Escrow, Profile, Owner } from 'src/pages';
+import {
+  Main,
+  Leaderboard,
+  Kvstore,
+  Leader,
+  Escrow,
+  Profile,
+  Owner,
+} from 'src/pages';
 
 interface Route {
   key: string;
@@ -44,5 +52,11 @@ export const routes: Array<Route> = [
     title: 'owner',
     path: '/owner',
     component: Owner,
+  },
+  {
+    key: 'kvstore-route',
+    title: 'KV Store',
+    path: '/kvstore',
+    component: Kvstore,
   },
 ];

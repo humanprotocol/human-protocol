@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, Grid } from '@mui/material';
 
-import { Escrow, Token, Leaderboard, SolvedTasks, News } from 'src/components';
+import { Escrow, Token, Leaderboard, SolvedTasks } from 'src/components';
 
 export const Main: React.FC = (): React.ReactElement => {
   return (

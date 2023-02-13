@@ -10,7 +10,7 @@ interface ILayout {
 export const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
   <Box
     sx={{
-      marginTop: '88px',
+      marginTop: '110px',
     }}
   >
     <Header />
