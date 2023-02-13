@@ -1,4 +1,5 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
 import {
   Box,
   Button,
@@ -19,7 +20,7 @@ import {
   ChainId,
   HM_TOKEN_DECIMALS,
 } from 'src/constants';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
 import { FortuneJobRequestType, FundingMethodType } from './types';
@@ -43,6 +44,7 @@ export const JobRequest = ({
   const { data: signer } = useSigner();
   const chainId = useChainId();
   const { switchNetwork } = useSwitchNetwork();
+  const [lastEscrowAddress, setLastEscrowAddress] = useState('');
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
     chainId: SUPPORTED_CHAIN_IDS.includes(ChainId.LOCALHOST)
       ? ChainId.LOCALHOST
@@ -62,7 +64,12 @@ export const JobRequest = ({
     fieldName: string,
     fieldValue: any
   ) => {
-    setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    const regex = /^[0-9\b]+$/;
+    if (fieldName !== 'fortunesRequired') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    } else if (regex.test(fieldValue)) {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    }
   };
 
   const handleLaunch = async () => {
@@ -87,12 +94,20 @@ export const JobRequest = ({
         setIsLoading(false);
         return;
       }
-      const tx = await contract.approve(
-        jobLauncherAddress,
-        ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
-      );
-      const receipt = await tx.wait();
-      console.log(receipt);
+      const allowance = await contract.allowance(address, jobLauncherAddress);
+
+      if (
+        allowance.lt(
+          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+        )
+      ) {
+        const tx = await contract.approve(
+          jobLauncherAddress,
+          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+        );
+        const receipt = await tx.wait();
+        console.log(receipt);
+      }
 
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
       onLaunch();
@@ -105,6 +120,24 @@ export const JobRequest = ({
 
     setIsLoading(false);
   };
+
+  const fetchLastEscrow = async (factoryAddress: string | undefined) => {
+    if (factoryAddress && signer) {
+      const contract = new ethers.Contract(
+        factoryAddress,
+        EscrowFactoryABI,
+        signer
+      );
+      const address = await contract.lastEscrow();
+      setLastEscrowAddress(address);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastEscrow(
+      ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.factoryAddress
+    );
+  }, [jobRequest.chainId, signer]);
 
   return (
     <RoundedBox sx={{ p: '50px 140px' }}>
@@ -157,6 +190,8 @@ export const JobRequest = ({
               <FormControl fullWidth>
                 <TextField
                   placeholder="Fortunes Requested"
+                  type="number"
+                  inputProps={{ min: 0, step: 1 }}
                   value={jobRequest.fortunesRequired}
                   onChange={(e) =>
                     handleJobRequestFormFieldChange(
@@ -212,6 +247,11 @@ export const JobRequest = ({
             />
           </FormControl>
         </Box>
+      </Box>
+      <Box my={2}>
+        <Typography variant="body2">
+          Last Escrow: {lastEscrowAddress}
+        </Typography>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 8 }}>
         <Button

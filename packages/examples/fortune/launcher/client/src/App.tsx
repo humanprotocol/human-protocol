@@ -34,6 +34,12 @@ function App() {
     setStatus(FortuneStageStatus.LAUNCH_SUCCESS);
   };
 
+  const handleCreateNewEscrow = () => {
+    setFundingMethod('crypto');
+    setEscrowAddress('');
+    setStatus(FortuneStageStatus.FUNDING_METHOD);
+  };
+
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
       <Box
@@ -103,7 +109,10 @@ function App() {
               )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
-                <FortuneLaunchSuccess escrowAddress={escrowAddress} />
+                <FortuneLaunchSuccess
+                  escrowAddress={escrowAddress}
+                  onCreateNewEscrow={handleCreateNewEscrow}
+                />
               )}
               {status === FortuneStageStatus.LAUNCH_FAIL && (
                 <FortuneLaunchFail

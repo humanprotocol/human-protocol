@@ -3,12 +3,13 @@ import React from 'react';
 import { RoundedBox } from './RoundedBox';
 
 type LaunchSuccessProps = {
-  escrowAddress: string
+  escrowAddress: string;
+  onCreateNewEscrow: () => void;
 };
 
-
 export const LaunchSuccess = ({
-  escrowAddress
+  escrowAddress,
+  onCreateNewEscrow,
 }: LaunchSuccessProps) => {
   return (
     <RoundedBox sx={{ py: 20, textAlign: 'center' }}>
@@ -19,10 +20,14 @@ export const LaunchSuccess = ({
         Your escrow has been created
       </Typography>
       <Typography variant="body2" color="primary">
-        { escrowAddress }
+        {escrowAddress}
       </Typography>
-      <Button sx={{ mt: 5, minWidth: '200px' }} variant="contained">
-        CTA
+      <Button
+        sx={{ mt: 5, minWidth: '200px' }}
+        variant="contained"
+        onClick={onCreateNewEscrow}
+      >
+        Create New Escrow
       </Button>
     </RoundedBox>
   );
