@@ -99,6 +99,9 @@ describe('Escrow route tests', async () => {
     });
 
     expect(response.statusCode).eq(200);
-    expect(response.body).contains('0x');
+    const body = JSON.parse(response.body);
+    expect(body.escrowAddress).contains('0x');
+    expect(body.exchangeUrl).contains(body.escrowAddress);
+    expect(body.exchangeUrl).contains('http://localhost:3001/?address=');
   });
 });
