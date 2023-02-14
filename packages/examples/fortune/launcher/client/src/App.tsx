@@ -17,7 +17,7 @@ import {
 
 function App() {
   const [status, setStatus] = useState<FortuneStageStatus>(
-    FortuneStageStatus.LAUNCH_SUCCESS
+    FortuneStageStatus.FUNDING_METHOD
   );
   const [fundingMethod, setFundingMethod] =
     useState<FundingMethodType>('crypto');
