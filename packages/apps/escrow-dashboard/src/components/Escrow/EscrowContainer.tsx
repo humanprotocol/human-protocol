@@ -16,7 +16,8 @@ import {
   useEscrowDataLoaded,
   usePollEventsData,
 } from 'src/state/escrow/hooks';
-import { setChainId } from 'src/state/escrow/reducer';
+import { setChainId as setEscrowChainId } from 'src/state/escrow/reducer';
+import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
 
 import { EscrowView } from './EscrowView';
 
@@ -51,6 +52,11 @@ export const EscrowContainer: React.FC<
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const handleChangeChain = (_e: React.SyntheticEvent, id: ChainId) => {
+    dispatch(setEscrowChainId(id));
+    dispatch(setLeaderChainId(id));
+  };
+
   return (
     <Box id="network" mt={{ xs: 4, md: 8 }}>
       <ViewTitle title="Network" iconUrl={networkSvg} />
@@ -59,7 +65,7 @@ export const EscrowContainer: React.FC<
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
         }}
         value={chainId}
-        onChange={(e, id) => dispatch(setChainId(id))}
+        onChange={handleChangeChain}
         variant="scrollable"
         scrollButtons="auto"
         allowScrollButtonsMobile

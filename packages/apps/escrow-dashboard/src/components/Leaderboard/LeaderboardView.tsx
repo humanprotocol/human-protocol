@@ -19,13 +19,14 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ChainId,
   ESCROW_NETWORKS,
   ROLES,
   SUPPORTED_CHAIN_IDS,
 } from 'src/constants';
-import useLeaderboardData from 'src/hooks/useLeaderboardData';
+import { useLeadersByChainID, useLeadersData } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
 
 type LeaderboardViewProps = {
@@ -43,21 +44,25 @@ export const LeaderboardView = ({
 }: LeaderboardViewProps): React.ReactElement => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [selectedRoles, setSelectedRoles] = useState<number[]>(
-    ROLES.map((_, i) => i + 1)
-  );
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(ROLES);
   const [selectedNetworks, setSelectedNetworks] =
     useState<ChainId[]>(SUPPORTED_CHAIN_IDS);
 
-  const stakers = useLeaderboardData();
+  const leaders = useLeadersByChainID();
+
+  console.log(leaders);
+
+  useLeadersData();
+
+  const navigate = useNavigate();
 
   const displayRows = useMemo(() => {
-    if (!stakers) return [];
-    if (!showAll) return stakers.slice(0, 5);
-    return stakers.filter((s) => selectedRoles.includes(s.role));
-  }, [showAll, selectedRoles, stakers]);
+    if (!leaders) return [];
+    if (!showAll) return leaders.slice(0, 5);
+    return leaders.filter((s) => selectedRoles.includes(s.role));
+  }, [showAll, selectedRoles, leaders]);
 
-  const handleRoleCheckbox = (role: number) => (e: any) => {
+  const handleRoleCheckbox = (role: string) => (e: any) => {
     if (e.target.checked) {
       setSelectedRoles([...selectedRoles, role]);
     } else {
@@ -71,6 +76,10 @@ export const LeaderboardView = ({
     } else {
       setSelectedNetworks(selectedNetworks.filter((id) => id !== chainId));
     }
+  };
+
+  const handleClickLeader = (address: string) => {
+    navigate(`/leader/${address}`);
   };
 
   const renderFilter = (isMobile = false) => {
@@ -109,14 +118,14 @@ export const LeaderboardView = ({
             Role
           </Typography>
           <FormGroup>
-            {ROLES.map((role, i) => (
+            {ROLES.map((role) => (
               <FormControlLabel
                 key={role}
                 componentsProps={{ typography: { color: 'textPrimary' } }}
                 control={
                   <Checkbox
-                    onChange={handleRoleCheckbox(i + 1)}
-                    checked={selectedRoles.includes(i + 1)}
+                    onChange={handleRoleCheckbox(role)}
+                    checked={selectedRoles.includes(role)}
                   />
                 }
                 label={role}
@@ -159,16 +168,20 @@ export const LeaderboardView = ({
                 {displayRows.map((staker) => (
                   <TableRow
                     key={staker.address}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleClickLeader(staker.address)}
                   >
                     <TableCell component="th" scope="row">
                       {shortenAddress(staker.address)}
                     </TableCell>
-                    <TableCell align="left">{ROLES[staker.role - 1]}</TableCell>
+                    <TableCell align="left">{staker.role}</TableCell>
                     <TableCell align="left">
-                      {staker.tokensStaked.toNumber()} HMT
+                      {staker.amountStaked} HMT
                     </TableCell>
-                    <TableCell align="left">0</TableCell>
+                    <TableCell align="left">{staker.reputation}</TableCell>
                     <TableCell align="left">0 HMT</TableCell>
                   </TableRow>
                 ))}

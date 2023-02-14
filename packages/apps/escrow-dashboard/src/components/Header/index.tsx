@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import logoSvg from 'src/assets/logo.svg';
 import ConnectButton from 'src/components/ConnectButton';
 import SearchBox from 'src/components/SearchBox';
-import SocialIcons from 'src/components/SocialIcons';
+import { SocialIcons } from 'src/components/SocialIcons';
 
 type NavLink = {
   title: string;

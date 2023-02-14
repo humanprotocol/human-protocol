@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import renderer from 'react-test-renderer';
-// import Footer from 'src/components/Footer';
+import Footer from 'src/components/Footer';
 
 const mock = {
   link: 'https://github.com/humanprotocol/hmt-escrow',
@@ -9,8 +9,8 @@ const mock = {
 
 describe('when rendered Footer component', () => {
   it('should render `text` prop', () => {
-    // render(<Footer />);
-    // expect(screen.getByText(mock.text)).toBeTruthy();
+    render(<Footer />);
+    expect(screen.getByText(mock.text)).toBeTruthy();
   });
 
   // it('should render prop `link` to /https://github.com/humanprotocol/hmt-escrow', () => {
@@ -20,6 +20,6 @@ describe('when rendered Footer component', () => {
 });
 
 it('Footer component renders correctly, corresponds to the snapshot', () => {
-  // const tree = renderer.create(<Footer />).toJSON();
-  // expect(tree).toMatchSnapshot();
+  const tree = renderer.create(<Footer />).toJSON();
+  expect(tree).toMatchSnapshot();
 });

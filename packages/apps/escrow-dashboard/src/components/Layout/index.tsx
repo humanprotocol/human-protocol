@@ -18,5 +18,3 @@ export const Layout: React.FC<ILayout> = ({ children }): React.ReactElement => (
     <Footer />
   </Box>
 );
-
-export default Layout;

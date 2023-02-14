@@ -28,5 +28,3 @@ export const SocialIcons = ({
     </Stack>
   );
 };
-
-export default SocialIcons;

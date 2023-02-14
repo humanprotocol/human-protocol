@@ -54,6 +54,7 @@
     "@jest/globals": "^29.3.1",
     "@types/numeral": "^2.0.2",
     "@types/react-test-renderer": "^18.0.0",
+    "@typescript-eslint/parser": "^5.52.0",
     "@vitejs/plugin-react": "^3.1.0",
     "babel-jest": "^29.3.1",
     "eslint-config-airbnb": "^19.0.4",
@@ -72,13 +73,15 @@
     "vitest": "^0.28.4"
   },
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint '**/*.{ts,tsx}'",
     "start": "react-scripts start",
     "start-prod": "serve -s build",
     "build": "react-scripts build",
     "test": "vitest -u",
     "eject": "react-scripts eject",
-    "format": "prettier --write '**/*.{ts,tsx}'"
+    "format:prettier": "prettier --write '**/*.{ts,tsx}'",
+    "format:lint": "eslint --fix '**/*.{ts,tsx}'",
+    "format": "npm run format:prettier && npm run format:lint"
   },
   "eslintConfig": {
     "extends": [

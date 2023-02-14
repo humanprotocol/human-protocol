@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Box, Link, Typography, useMediaQuery, useTheme } from '@mui/material';
 
 import smallLogoSvg from 'src/assets/small-logo.svg';
-import SocialIcons from 'src/components/SocialIcons';
+import { SocialIcons } from 'src/components/SocialIcons';
 
 const Footer: React.FC = (): React.ReactElement => {
   const theme = useTheme();

@@ -101,7 +101,6 @@ export const useEscrowDataByChainID = (): EscrowData => {
     .sort((x, y) => Number(y.timestamp) - Number(x.timestamp))
     .slice(0, 30)
     .reverse();
-  console.log(escrowData);
   return escrowData;
 };
 

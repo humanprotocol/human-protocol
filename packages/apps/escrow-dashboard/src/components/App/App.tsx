@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
-import Layout from 'src/components/Layout';
+import { Layout } from 'src/components/Layout';
 import { WagmiConfig, createClient, configureChains } from 'wagmi';
 
 import { publicProvider } from 'wagmi/providers/public';
