@@ -23,13 +23,17 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
-import { FortuneJobRequestType, FundingMethodType } from './types';
+import {
+  FortuneJobRequestType,
+  FundingMethodType,
+  JobLaunchResponse,
+} from './types';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
-  onSuccess: (escrowAddress: string) => void;
+  onSuccess: (response: JobLaunchResponse) => void;
   onFail: () => void;
 };
 

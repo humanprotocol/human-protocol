@@ -9,15 +9,22 @@ import {
   FortuneLaunchSuccess,
   FortuneLaunchFail,
 } from 'src/components';
-import { FortuneStageStatus, FundingMethodType } from 'src/components/types';
+import {
+  FortuneStageStatus,
+  FundingMethodType,
+  JobLaunchResponse,
+} from 'src/components/types';
 
 function App() {
   const [status, setStatus] = useState<FortuneStageStatus>(
-    FortuneStageStatus.FUNDING_METHOD
+    FortuneStageStatus.LAUNCH_SUCCESS
   );
   const [fundingMethod, setFundingMethod] =
     useState<FundingMethodType>('crypto');
-  const [escrowAddress, setEscrowAddress] = useState<string>('');
+  const [jobResponse, setJobResponse] = useState<JobLaunchResponse>({
+    escrowAddress: '',
+    exchangeUrl: '',
+  });
 
   const handleChangeFundingMethod = (method: FundingMethodType) => {
     setFundingMethod(method);
@@ -29,14 +36,13 @@ function App() {
     setStatus(FortuneStageStatus.JOB_REQUEST);
   };
 
-  const handleOnSuccess = (escrowAddress: string) => {
-    setEscrowAddress(escrowAddress);
+  const handleOnSuccess = (data: JobLaunchResponse) => {
+    setJobResponse(data);
     setStatus(FortuneStageStatus.LAUNCH_SUCCESS);
   };
 
   const handleCreateNewEscrow = () => {
-    setFundingMethod('crypto');
-    setEscrowAddress('');
+    setJobResponse({ escrowAddress: '', exchangeUrl: '' });
     setStatus(FortuneStageStatus.FUNDING_METHOD);
   };
 
@@ -110,7 +116,7 @@ function App() {
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
                 <FortuneLaunchSuccess
-                  escrowAddress={escrowAddress}
+                  jobResponse={jobResponse}
                   onCreateNewEscrow={handleCreateNewEscrow}
                 />
               )}
