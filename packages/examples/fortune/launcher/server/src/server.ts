@@ -5,6 +5,8 @@ import routes from './routes/index';
 import cors from '@fastify/cors';
 import escrow from './plugins/escrow';
 import web3 from './plugins/web3';
+import stripe from './plugins/stripe';
+import rawBody from './plugins/rawBody';
 
 const getServer = async () => {
   const server = fastify({
@@ -22,11 +24,13 @@ const getServer = async () => {
 
   await server
     .register(config)
+    .register(rawBody)
     .register(s3)
     .register(cors)
     .register(routes)
     .register(escrow)
     .register(web3)
+    .register(stripe)
     .ready();
 
   return server;

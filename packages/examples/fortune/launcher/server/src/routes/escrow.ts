@@ -10,14 +10,17 @@ import {
 export const createEscrow: FastifyPluginAsync = async (server) => {
   let escrowNetwork: IEscrowNetwork;
   let escrowData: typeof escrowSchema.properties;
+  let fiat: boolean;
   server.post(
     '/escrow',
     {
       preValidation: (request, reply, done) => {
         escrowData = request.body as typeof escrowSchema.properties;
+        fiat = JSON.parse(escrowData?.fiat?.toString());
+        const paymentId = escrowData.paymentId.toString();
+        if (fiat && !paymentId) done(new Error('Invalid Payment Id'));
         const chainId = Number(escrowData.chainId) as ChainId;
-        if (!chainId) return new Error('Invalid chain Id');
-
+        if (!chainId) done(new Error('Invalid Chain Id'));
         const network = ESCROW_NETWORKS[chainId];
         if (network) {
           escrowNetwork = network;
@@ -38,6 +41,7 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
       const { escrow, s3, web3 } = server;
 
       const web3Client = web3.createWeb3(escrowNetwork);
+      const launcherAddress = web3Client.eth.defaultAccount as string;
 
       const jobRequester = escrowData.jobRequester as unknown as string;
       const token = escrowData.token as unknown as string;
@@ -45,9 +49,22 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
         Number(escrowData.fundAmount).toString(),
         'ether'
       );
-
+      // If fiat check paymentId also succeed on stripe
       if (
-        await escrow.checkApproved(web3Client, token, jobRequester, fundAmount)
+        (!fiat &&
+          (await escrow.checkApproved(
+            web3Client,
+            token,
+            jobRequester,
+            fundAmount
+          ))) ||
+        (fiat &&
+          (await escrow.checkBalance(
+            web3Client,
+            token,
+            launcherAddress,
+            fundAmount
+          )))
       ) {
         const description = escrowData.description as unknown as string;
         const title = escrowData.title as unknown as string;
@@ -67,7 +84,7 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
         await escrow.fundEscrow(
           web3Client,
           token,
-          jobRequester,
+          fiat ? launcherAddress : jobRequester,
           escrowAddress,
           fundAmount
         );

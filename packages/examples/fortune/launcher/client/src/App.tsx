@@ -5,6 +5,7 @@ import {
   FortuneStages,
   FortuneFundingMethod,
   FortuneJobRequest,
+  FortuneFiatJobRequest,
   FortuneLaunch,
   FortuneLaunchSuccess,
   FortuneLaunchFail,
@@ -25,8 +26,7 @@ function App() {
   };
 
   const handleBack = () => {
-    setFundingMethod('crypto');
-    setStatus(FortuneStageStatus.JOB_REQUEST);
+    setStatus(status > 0 ? status - 1 : 0);
   };
 
   const handleOnSuccess = (escrowAddress: string) => {
@@ -92,15 +92,26 @@ function App() {
               {status === FortuneStageStatus.FUNDING_METHOD && (
                 <FortuneFundingMethod onChange={handleChangeFundingMethod} />
               )}
-              {status === FortuneStageStatus.JOB_REQUEST && (
-                <FortuneJobRequest
-                  fundingMethod={fundingMethod}
-                  onBack={handleBack}
-                  onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
-                  onSuccess={handleOnSuccess}
-                  onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
-                />
-              )}
+              {status === FortuneStageStatus.JOB_REQUEST &&
+                fundingMethod === 'crypto' && (
+                  <FortuneJobRequest
+                    fundingMethod={fundingMethod}
+                    onBack={handleBack}
+                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                    onSuccess={handleOnSuccess}
+                    onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
+                  />
+                )}
+              {status === FortuneStageStatus.JOB_REQUEST &&
+                fundingMethod === 'fiat' && (
+                  <FortuneFiatJobRequest
+                    fundingMethod={fundingMethod}
+                    onBack={handleBack}
+                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                    onSuccess={handleOnSuccess}
+                    onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
+                  />
+                )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
                 <FortuneLaunchSuccess escrowAddress={escrowAddress} />
