@@ -26,7 +26,7 @@ import {
   ROLES,
   SUPPORTED_CHAIN_IDS,
 } from 'src/constants';
-import { useLeadersByChainID, useLeadersData } from 'src/state/leader/hooks';
+import { useLeadersByChainID } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
 
 type LeaderboardViewProps = {
@@ -50,16 +50,12 @@ export const LeaderboardView = ({
 
   const leaders = useLeadersByChainID();
 
-  console.log(leaders);
-
-  useLeadersData();
-
   const navigate = useNavigate();
 
   const displayRows = useMemo(() => {
     if (!leaders) return [];
     if (!showAll) return leaders.slice(0, 5);
-    return leaders.filter((s) => selectedRoles.includes(s.role));
+    return leaders.filter((s) => selectedRoles.includes(s.role) || !s.role);
   }, [showAll, selectedRoles, leaders]);
 
   const handleRoleCheckbox = (role: string) => (e: any) => {
@@ -78,8 +74,8 @@ export const LeaderboardView = ({
     }
   };
 
-  const handleClickLeader = (address: string) => {
-    navigate(`/leader/${address}`);
+  const handleClickLeader = (chainId: ChainId, address: string) => {
+    navigate(`/leader/${chainId}/${address}`);
   };
 
   const renderFilter = (isMobile = false) => {
@@ -167,12 +163,14 @@ export const LeaderboardView = ({
               <TableBody>
                 {displayRows.map((staker) => (
                   <TableRow
-                    key={staker.address}
+                    key={`${staker.chainId}-${staker.address}`}
                     sx={{
                       '&:last-child td, &:last-child th': { border: 0 },
                       cursor: 'pointer',
                     }}
-                    onClick={() => handleClickLeader(staker.address)}
+                    onClick={() =>
+                      handleClickLeader(staker.chainId, staker.address)
+                    }
                   >
                     <TableCell component="th" scope="row">
                       {shortenAddress(staker.address)}

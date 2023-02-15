@@ -32,7 +32,7 @@ export const routes: Array<Route> = [
   {
     key: 'leader-detail-route',
     title: 'Leader',
-    path: '/leader/:address',
+    path: '/leader/:chainId/:address',
     component: Leader,
   },
   {

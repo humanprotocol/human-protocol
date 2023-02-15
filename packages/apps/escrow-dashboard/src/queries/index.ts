@@ -27,7 +27,23 @@ export const RAW_TOKEN_STATS_QUERY = `{
 }`;
 
 export const RAW_LEADERS_QUERY = `{
-  leaders {
+  leaders(orderBy: amountStaked, orderDirection: desc) {
+    id
+    address
+    role
+    amountStaked
+    amountAllocated
+    amountLocked
+    lockedUntilTimestamp
+    amountSlashed
+    amountWithdrawn
+    reputation
+    amountJobsLaunched
+  }
+}`;
+
+export const RAW_LEADER_QUERY = (address: string) => `{
+  leader(id: "${address}") {
     id
     address
     role

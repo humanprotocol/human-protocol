@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   Box,
   Button,
+  CircularProgress,
   IconButton,
   useMediaQuery,
   useTheme,
@@ -13,6 +14,9 @@ import { ViewTitle } from 'src/components/ViewTitle';
 import { LeaderboardView } from './LeaderboardView';
 import FilterListFilledIcon from '../Icons/FilterListFilled';
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { AppState } from 'src/state';
+import { useLeadersData } from 'src/state/leader/hooks';
 
 interface ILeaderboardContainer {
   showAll?: boolean;
@@ -24,6 +28,9 @@ export const LeaderboardContainer: React.FC<ILeaderboardContainer> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const { leadersLoaded } = useSelector((state: AppState) => state.leader);
+
+  useLeadersData();
 
   const openMobileFilter = () => setMobileFilterOpen(true);
 
@@ -49,12 +56,18 @@ export const LeaderboardContainer: React.FC<ILeaderboardContainer> = ({
         )}
       </Box>
       <Box mt={{ xs: 4, md: 8 }}>
-        <LeaderboardView
-          showAll={showAll}
-          filterOpen={mobileFilterOpen}
-          openFilter={openMobileFilter}
-          closeFilter={closeMobileFilter}
-        />
+        {leadersLoaded ? (
+          <LeaderboardView
+            showAll={showAll}
+            filterOpen={mobileFilterOpen}
+            openFilter={openMobileFilter}
+            closeFilter={closeMobileFilter}
+          />
+        ) : (
+          <Box display="flex" justifyContent="center" py={10}>
+            <CircularProgress size={36} />
+          </Box>
+        )}
       </Box>
     </Box>
   );

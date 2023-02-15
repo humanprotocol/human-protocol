@@ -1,12 +1,15 @@
+import { ChainId } from 'src/constants';
+
 export interface LeaderData {
+  chainId: ChainId;
   address: string;
   role: string;
-  amountStaked: string;
-  amountAllocated: string;
-  amountLocked: string;
-  amountSlashed: string;
-  amountWithdrawn: string;
-  lockedUntilTimestamp: string;
-  reputation: string;
-  amountJobsLaunched: string;
+  amountStaked: number;
+  amountAllocated: number;
+  amountLocked: number;
+  amountSlashed: number;
+  amountWithdrawn: number;
+  lockedUntilTimestamp: number;
+  reputation: number;
+  amountJobsLaunched: number;
 }
