@@ -108,6 +108,10 @@ class StripeClient {
     );
     return event;
   }
+
+  async getPayment(paymentId: string) {
+    return this.stripeClient.paymentIntents.retrieve(paymentId);
+  }
 }
 
 const stripePlugin: FastifyPluginAsync = async (server) => {

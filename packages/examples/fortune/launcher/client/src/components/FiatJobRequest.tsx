@@ -17,7 +17,7 @@ import {
   ChainId,
   Currencies,
 } from 'src/constants';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RoundedBox } from './RoundedBox';
 import {
   CreatePaymentType,
@@ -62,6 +62,7 @@ export const JobRequest = ({
     name: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenAmount, setTokenAmount] = useState(0);
 
   const handleJobRequestFormFieldChange = (
     fieldName: string,
@@ -76,6 +77,18 @@ export const JobRequest = ({
   ) => {
     setPaymentData({ ...paymentData, [fieldName]: fieldValue });
   };
+
+  useEffect(() => {
+    const getHMTPrice = async () => {
+      const currentPrice = (
+        await axios.get(
+          `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=${paymentData.currency.toLowerCase()}`
+        )
+      ).data['human-protocol'][paymentData.currency.toLowerCase()];
+      setTokenAmount(Number(paymentData.amount) / currentPrice);
+    };
+    getHMTPrice();
+  }, [paymentData.amount, paymentData.currency]);
 
   const handleLaunch = async () => {
     if (!stripe || !elements) {
@@ -96,16 +109,16 @@ export const JobRequest = ({
 
       const card = elements.getElement(CardElement);
       if (!card) return;
-      const { paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: card,
-          billing_details: {
-            name: paymentData.name,
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: card,
+            billing_details: {
+              name: paymentData.name,
+            },
           },
-        },
-      });
-
-      console.log(`Payment ${paymentIntent?.status}: ${paymentIntent?.id}`);
+        });
+      if (stripeError) throw new Error(stripeError.message);
 
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
@@ -118,11 +131,12 @@ export const JobRequest = ({
 
       const data: FortuneJobRequestType = {
         ...jobRequest,
-        fundAmount: ((paymentIntent?.amount as number) / 100).toString(),
+        fundAmount: paymentData.amount,
         token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
         fiat: true,
         paymentId: paymentIntent?.id,
       };
+      console.log(data);
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
@@ -303,6 +317,16 @@ export const JobRequest = ({
           </Grid>
         </Box>
       </Box>
+      {tokenAmount !== 0 && (
+        <Typography
+          variant="body2"
+          color="primary"
+          sx={{ mb: 1, mt: 1, display: 'flex', justifyContent: 'flex-end' }}
+        >
+          Escrow will be funded with {tokenAmount}HMT aprox.
+        </Typography>
+      )}
+      {tokenAmount === 0 && <br></br>}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 8 }}>
         <Button
           variant="outlined"
