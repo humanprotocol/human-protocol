@@ -19,7 +19,7 @@ import {
   ESCROW_NETWORKS,
   ChainId,
   HM_TOKEN_DECIMALS,
-} from 'src/constants';
+} from '../constants';
 import React, { useEffect, useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
