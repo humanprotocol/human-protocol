@@ -28,7 +28,8 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
         body: escrowSchema,
         response: {
           200: Type.Object({
-            response: Type.String(),
+            escrowAddress: Type.String(),
+            exchangeUrl: Type.String(),
           }),
         },
       },
@@ -79,7 +80,10 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
           url,
           fortunesRequested
         );
-        return escrowAddress;
+        return {
+          escrowAddress,
+          exchangeUrl: `${data.exchangeOracleUrl}?address=${escrowAddress}`,
+        };
       }
 
       return reply
