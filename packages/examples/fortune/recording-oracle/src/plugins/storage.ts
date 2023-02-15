@@ -32,7 +32,7 @@ export class Storage {
     return store.get(escrowAddress);
   }
 
-  getFortune(escrowAddress: string, workerAddress: string): IFortuneStorage {
+  getFortunes(escrowAddress: string, workerAddress: string): IFortuneStorage[] {
     const escrow = store.get(escrowAddress);
     return escrow.fortunes[workerAddress];
   }
@@ -55,25 +55,16 @@ export class Storage {
   ): IEscrowStorage {
     const escrow = store.get(escrowAddress);
 
-    escrow.fortunes[workerAddress] = {
+    console.log(escrow.fortunes);
+
+    if (!this.hasFortune(escrowAddress, workerAddress)) {
+      escrow.fortunes[workerAddress] = [];
+    }
+
+    escrow.fortunes[workerAddress].unshift({
       fortune,
       score,
-    };
-
-    store.set(escrowAddress, escrow);
-    return escrow;
-  }
-
-  addDowngrade(
-    escrowAddress: string,
-    workerAddress: string,
-  ): IEscrowStorage {
-    const escrow = store.get(escrowAddress);
-
-    escrow.fortunes[workerAddress] = {
-      fortune: null,
-      score: false,
-    };
+    });
 
     store.set(escrowAddress, escrow);
     return escrow;
