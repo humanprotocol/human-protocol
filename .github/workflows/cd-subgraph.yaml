@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - packages/sdk/typescript/subgraph/**
+      - .github/workflows/cd-subgraph.yaml
 
 jobs:
   subgraph:
@@ -19,19 +20,19 @@ jobs:
           - name: goerli
             graph: goerli-v1
           - name: moonbeam
-            graph: moonbeam
+            graph: moonbeam-v1
           - name: bsc
-            graph: bsc
+            graph: bsc-v1
           - name: chapel
             graph: bsctest-v1
           - name: mumbai
             graph: mumbai-v1
           - name: mbase
             graph: moonbase-alpha-v1
-          - name: avalanche
-            graph: avalanche
-          - name: fuji
-            graph: fuji
+          # - name: avalanche
+          #   graph: avalanche
+          # - name: fuji
+          #   graph: fuji
       fail-fast: true
       max-parallel: 3
     steps:
@@ -48,7 +49,7 @@ jobs:
         name: Generate Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
-          NETWORK: ${{ matrix.network.name }}
+          NETWORK: ${{ matrix.network.graph }}
       - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
         name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph

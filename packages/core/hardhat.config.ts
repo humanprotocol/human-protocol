@@ -85,9 +85,22 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    bsc: {
+      chainId: 56,
+      url: process.env.ETH_BSC_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     bscTestnet: {
       chainId: 97,
       url: process.env.ETH_BSC_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    moonbeam: {
+      chainId: 1284,
+      timeout: 1000000000,
+      url: process.env.ETH_MOONBEAM_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -95,6 +108,8 @@ const config: HardhatUserConfig = {
       chainId: 1287,
       timeout: 1000000000,
       url: process.env.ETH_MOONBASE_ALPHA_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     avalancheTestnet: {
       chainId: 43113,
@@ -137,7 +152,9 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
-      bscTestnet: process.env.BSC_TESTNET_API_KEY || '',
+      bsc: process.env.BSC_API_KEY || '',
+      bscTestnet: process.env.BSC_API_KEY || '',
+      moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
     },
   },

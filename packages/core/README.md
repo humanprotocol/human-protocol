@@ -24,6 +24,6 @@ yarn deploy:proxy --network [NETWORK_NAME]
 ```
 4. Verify every contract runing the following line for each contract address(for those that use a proxy just verifyin the proxy will verify the implementation too):
 ```bash
-npx hardhat verify [CONTRACT_ADDRESS] --network [NETWORK_NAME]
+npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 5. Update the file `CONTRACTS_LIST.md` in the root of this monorepo.

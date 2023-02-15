@@ -35,7 +35,7 @@ export const ESCROW_NETWORKS: {
   //   scanUrl: 'https://bscscan.com',
   //   rpcUrl: 'https://bsc-dataseed1.binance.org/',
   //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
-  //   factoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
+  //   factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   //   hmtAddress: '0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7',
   // },
   [ChainId.BSC_TESTNET]: {
@@ -65,7 +65,7 @@ export const ESCROW_NETWORKS: {
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
-    rpcUrl: 'http://127.0.0.1:8546',
+    rpcUrl: `http://127.0.0.1:${process.env.RPC_PORT}`,
     factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   },
@@ -76,7 +76,7 @@ export const ESCROW_NETWORKS: {
   //   rpcUrl: 'https://rpc.api.moonbeam.network',
   //   subgraphUrl:
   //     'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
-  //   factoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
+  //   factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   //   hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
   // },
   [ChainId.MOONBASE_ALPHA]: {
