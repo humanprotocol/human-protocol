@@ -81,11 +81,18 @@ class Escrow {
     fundAmount: string
   ) {
     const hmtoken = new web3.eth.Contract(HMTokenAbi as [], tokenAddress);
-    const allowance = await hmtoken.methods
-      .allowance(jobRequester, web3.eth.defaultAccount)
-      .call();
-    const balance = await hmtoken.methods.balanceOf(jobRequester).call();
-    return allowance >= fundAmount && balance >= fundAmount;
+    const allowance = web3.utils.toBN(
+      await hmtoken.methods
+        .allowance(jobRequester, web3.eth.defaultAccount)
+        .call()
+    );
+    const balance = web3.utils.toBN(
+      await hmtoken.methods.balanceOf(jobRequester).call()
+    );
+    return (
+      allowance.gte(web3.utils.toBN(fundAmount)) &&
+      balance.gte(web3.utils.toBN(fundAmount))
+    );
   }
 
   async checkBalance(
@@ -95,8 +102,10 @@ class Escrow {
     fundAmount: string
   ) {
     const hmtoken = new web3.eth.Contract(HMTokenAbi as [], tokenAddress);
-    const balance = await hmtoken.methods.balanceOf(jobRequester).call();
-    return balance >= fundAmount;
+    const balance = web3.utils.toBN(
+      await hmtoken.methods.balanceOf(jobRequester).call()
+    );
+    return balance.gte(web3.utils.toBN(fundAmount));
   }
 
   async createEscrow(

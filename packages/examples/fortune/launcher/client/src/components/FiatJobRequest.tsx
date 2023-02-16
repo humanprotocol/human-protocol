@@ -100,6 +100,14 @@ export const JobRequest = ({
     setIsLoading(true);
     try {
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      const data: FortuneJobRequestType = {
+        ...jobRequest,
+        fundAmount: tokenAmount.toString(),
+        token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
+        fiat: true,
+      };
+      console.log(await axios.post(`${baseUrl}/check-escrow`, data));
+
       const clientSecret = (
         await axios.post(`${baseUrl}/create-payment-intent`, {
           currency: paymentData.currency.toLowerCase(),
@@ -127,17 +135,8 @@ export const JobRequest = ({
         return;
       }
 
-      //Convert amount paid into HMT
-
-      const data: FortuneJobRequestType = {
-        ...jobRequest,
-        fundAmount: paymentData.amount,
-        token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
-        fiat: true,
-        paymentId: paymentIntent?.id,
-      };
-      console.log(data);
       onLaunch();
+      data.paymentId = paymentIntent?.id;
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
     } catch (err) {

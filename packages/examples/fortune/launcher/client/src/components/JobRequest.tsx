@@ -80,6 +80,9 @@ export const JobRequest = ({
       token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
     };
     try {
+      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      await axios.post(`${baseUrl}/check-escrow`, data);
+
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
@@ -94,7 +97,6 @@ export const JobRequest = ({
       const receipt = await tx.wait();
       console.log(receipt);
 
-      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
