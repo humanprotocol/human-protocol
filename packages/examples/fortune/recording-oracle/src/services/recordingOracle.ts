@@ -25,7 +25,7 @@ async function saveFortuneResults(
 
 function isFortunesRequestedDone(escrow: IEscrowStorage): boolean {
   const data = Object.values(escrow.fortunes);
-  const validFortunes = data.filter((item) => item.score);
+  const validFortunes = data.filter((item) => item[0].score);
 
   if (validFortunes.length < escrow.fortunesRequested) {
     return false;
@@ -36,7 +36,7 @@ function isFortunesRequestedDone(escrow: IEscrowStorage): boolean {
 
 function getFortunesContent(escrow: IEscrowStorage): string[] {
   const data = Object.values(escrow.fortunes);
-  return data.map((item) => item.fortune);
+  return data.map((item) => item[0].fortune);
 }
 
 async function isValidFortune(
@@ -198,7 +198,6 @@ export async function processFortunes(
 
   if (isFortunesRequestedDone(escrow)) {
     await sendFortunes(reputationOracleUrl, fortuneResults);
-    plugins.storage.remove(fortune.escrowAddress);
     return { response: 'The requested fortunes have been completed.' };
   }
 
