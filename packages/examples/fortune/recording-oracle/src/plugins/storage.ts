@@ -55,8 +55,6 @@ export class Storage {
   ): IEscrowStorage {
     const escrow = store.get(escrowAddress);
 
-    console.log(escrow.fortunes);
-
     if (!this.hasFortune(escrowAddress, workerAddress)) {
       escrow.fortunes[workerAddress] = [];
     }

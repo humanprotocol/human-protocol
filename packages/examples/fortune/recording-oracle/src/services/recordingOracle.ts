@@ -182,7 +182,6 @@ export async function processFortunes(
   };
 
   const fortuneResultsUrl = await saveFortuneResults(plugins, fortuneResults);
-  console.log('Fortune Results Url: ', fortuneResultsUrl);
 
   const fortuneResultsHash = crypto
     .createHash('sha256')
