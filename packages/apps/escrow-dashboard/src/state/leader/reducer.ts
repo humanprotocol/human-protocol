@@ -83,18 +83,20 @@ const getLeaders = async (subgraphUrl: string) => {
   return await gqlFetch(subgraphUrl!, RAW_LEADERS_QUERY)
     .then((res) => res.json())
     .then((json) =>
-      json.data.leaders.map((leader: any) => ({
-        address: leader.address,
-        role: leader.role,
-        amountStaked: Number(leader.amountStaked),
-        amountAllocated: Number(leader.amountAllocated),
-        amountLocked: Number(leader.amountLocked),
-        amountSlashed: Number(leader.amountSlashed),
-        amountWithdrawn: Number(leader.amountWithdrawn),
-        lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
-        reputation: Number(leader.reputation),
-        amountJobsLaunched: Number(leader.amountJobsLaunched),
-      }))
+      json.data.leaders
+        .map((leader: any) => ({
+          address: leader.address,
+          role: leader.role,
+          amountStaked: Number(leader.amountStaked),
+          amountAllocated: Number(leader.amountAllocated),
+          amountLocked: Number(leader.amountLocked),
+          amountSlashed: Number(leader.amountSlashed),
+          amountWithdrawn: Number(leader.amountWithdrawn),
+          lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+          reputation: Number(leader.reputation),
+          amountJobsLaunched: Number(leader.amountJobsLaunched),
+        }))
+        .filter((leader: any) => !!leader.role)
     )
     .catch((err) => []);
 };
