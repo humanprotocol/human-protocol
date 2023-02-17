@@ -23,6 +23,7 @@ import {
   CreatePaymentType,
   FortuneJobRequestType,
   FundingMethodType,
+  JobLaunchResponse,
 } from './types';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -30,7 +31,7 @@ type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
-  onSuccess: (escrowAddress: string) => void;
+  onSuccess: (response: JobLaunchResponse) => void;
   onFail: () => void;
 };
 
@@ -68,7 +69,12 @@ export const JobRequest = ({
     fieldName: string,
     fieldValue: any
   ) => {
-    setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    const regex = /^[0-9\b]+$/;
+    if (fieldName !== 'fortunesRequired') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    } else if (regex.test(fieldValue) || fieldValue === '') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    }
   };
 
   const handlePaymentDataFormFieldChange = (
