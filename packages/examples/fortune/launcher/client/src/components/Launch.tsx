@@ -18,7 +18,7 @@ export const Launch = () => {
           color="primary"
           sx={{ opacity: 0.2 }}
         >
-          Founding Escrow
+          Funding Escrow
         </Typography>
         <Typography
           variant="h6"
