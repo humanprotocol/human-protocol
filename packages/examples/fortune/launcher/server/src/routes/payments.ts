@@ -81,37 +81,4 @@ export const createFiatPayment: FastifyPluginAsync = async (server) => {
       }
     }
   );
-  // server.post(
-  //   '/webhook',
-  //   {
-  //     config: {
-  //       rawBody: true,
-  //     },
-  //     schema: {
-  //       response: {
-  //         200: Type.Object({
-  //           response: Type.String(),
-  //         }),
-  //       },
-  //     },
-  //   },
-  //   async function (request, reply) {
-  //     const { stripe } = server;
-
-  //     const sig = request.headers['stripe-signature'];
-
-  //     try {
-  //       const event = await stripe.webhookHandler(
-  //         request.rawBody as string,
-  //         sig as string
-  //       );
-
-  //       console.log('event', event);
-  //       return JSON.stringify({ success: true });
-  //     } catch (err) {
-  //       console.error(err);
-  //       return reply.status(400).send(`Webhook Error: ${err.message}`);
-  //     }
-  //   }
-  // );
 };

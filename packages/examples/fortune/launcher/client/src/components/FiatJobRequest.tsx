@@ -1,3 +1,4 @@
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import {
   Box,
   Button,
@@ -10,14 +11,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { getProvider } from '@wagmi/core';
 import axios from 'axios';
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
 import {
-  SUPPORTED_CHAIN_IDS,
-  ESCROW_NETWORKS,
   ChainId,
   Currencies,
+  ESCROW_NETWORKS,
+  HM_TOKEN_DECIMALS,
+  SUPPORTED_CHAIN_IDS,
 } from 'src/constants';
-import React, { useEffect, useState } from 'react';
 import { RoundedBox } from './RoundedBox';
 import {
   CreatePaymentType,
@@ -25,14 +30,13 @@ import {
   FundingMethodType,
   JobLaunchResponse,
 } from './types';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
   onSuccess: (response: JobLaunchResponse) => void;
-  onFail: () => void;
+  onFail: (message: string) => void;
 };
 
 export const JobRequest = ({
@@ -42,6 +46,7 @@ export const JobRequest = ({
   onSuccess,
   onFail,
 }: JobRequestProps) => {
+  const provider = getProvider();
   const stripe = useStripe();
   const elements = useElements();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
@@ -104,14 +109,35 @@ export const JobRequest = ({
       return;
     }
     setIsLoading(true);
+    const data: FortuneJobRequestType = {
+      ...jobRequest,
+      fundAmount: tokenAmount.toString(),
+      token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
+      fiat: true,
+    };
     try {
+      console.log('data.token', data.token);
+      const contract = new ethers.Contract(data.token, HMTokenABI, provider);
+      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
+      if (!jobLauncherAddress) {
+        alert('Job Launcher address is missing');
+        setIsLoading(false);
+        return;
+      }
+      console.log('a');
+      console.log('jobLauncherAddress', jobLauncherAddress);
+      console.log(contract);
+      const balance = await contract.balanceOf(jobLauncherAddress);
+      console.log('balance', balance);
+
+      const fundAmount = ethers.utils.parseUnits(
+        data.fundAmount,
+        HM_TOKEN_DECIMALS
+      );
+      if (balance.lt(fundAmount)) {
+        throw new Error('Balance not enough for funding the escrow');
+      }
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
-      const data: FortuneJobRequestType = {
-        ...jobRequest,
-        fundAmount: tokenAmount.toString(),
-        token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
-        fiat: true,
-      };
       console.log(await axios.post(`${baseUrl}/check-escrow`, data));
 
       const clientSecret = (
@@ -134,20 +160,14 @@ export const JobRequest = ({
         });
       if (stripeError) throw new Error(stripeError.message);
 
-      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
-      if (!jobLauncherAddress) {
-        alert('Job Launcher address is missing');
-        setIsLoading(false);
-        return;
-      }
-
       onLaunch();
       data.paymentId = paymentIntent?.id;
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      onFail();
+      if (err.name === 'AxiosError') onFail(err.response.data);
+      else onFail(err.message);
     }
 
     setIsLoading(false);

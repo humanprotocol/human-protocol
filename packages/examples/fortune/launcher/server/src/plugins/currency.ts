@@ -9,7 +9,6 @@ export class Currency {
         `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=${currency}`
       )
     ).data['human-protocol'][currency];
-    console.log('amount: ', amount, currentPrice, amount / currentPrice);
     return amount / currentPrice;
   }
 }

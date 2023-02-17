@@ -33,6 +33,7 @@ function App() {
     escrowAddress: '',
     exchangeUrl: '',
   });
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeFundingMethod = (method: FundingMethodType) => {
     setFundingMethod(method);
@@ -51,6 +52,11 @@ function App() {
   const handleCreateNewEscrow = () => {
     setJobResponse({ escrowAddress: '', exchangeUrl: '' });
     setStatus(FortuneStageStatus.FUNDING_METHOD);
+  };
+
+  const handleOnError = (message: string) => {
+    setErrorMessage(message);
+    setStatus(FortuneStageStatus.LAUNCH_FAIL);
   };
 
   const fetchLastEscrow = async (factoryAddress: string | undefined) => {
@@ -134,7 +140,7 @@ function App() {
                     onBack={handleBack}
                     onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
                     onSuccess={handleOnSuccess}
-                    onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
+                    onFail={handleOnError}
                   />
                 )}
               {status === FortuneStageStatus.JOB_REQUEST &&
@@ -144,7 +150,7 @@ function App() {
                     onBack={handleBack}
                     onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
                     onSuccess={handleOnSuccess}
-                    onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
+                    onFail={handleOnError}
                   />
                 )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
@@ -156,6 +162,7 @@ function App() {
               )}
               {status === FortuneStageStatus.LAUNCH_FAIL && (
                 <FortuneLaunchFail
+                  message={errorMessage}
                   onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
                 />
               )}

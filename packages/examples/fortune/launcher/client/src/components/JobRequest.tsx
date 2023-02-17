@@ -13,14 +13,14 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import {
-  SUPPORTED_CHAIN_IDS,
-  ESCROW_NETWORKS,
-  ChainId,
-  HM_TOKEN_DECIMALS,
-} from '../constants';
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
+import {
+  ChainId,
+  ESCROW_NETWORKS,
+  HM_TOKEN_DECIMALS,
+  SUPPORTED_CHAIN_IDS,
+} from '../constants';
 import { RoundedBox } from './RoundedBox';
 import {
   FortuneJobRequestType,
@@ -33,7 +33,7 @@ type JobRequestProps = {
   onBack: () => void;
   onLaunch: () => void;
   onSuccess: (response: JobLaunchResponse) => void;
-  onFail: () => void;
+  onFail: (message: string) => void;
 };
 
 export const JobRequest = ({
@@ -89,9 +89,6 @@ export const JobRequest = ({
       token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
     };
     try {
-      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
-      await axios.post(`${baseUrl}/check-escrow`, data);
-
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
@@ -99,17 +96,22 @@ export const JobRequest = ({
         setIsLoading(false);
         return;
       }
+      const balance = await contract.balanceOf(address);
+      const fundAmount = ethers.utils.parseUnits(
+        data.fundAmount,
+        HM_TOKEN_DECIMALS
+      );
+      if (balance.lt(fundAmount)) {
+        throw new Error('Balance not enough for funding the escrow');
+      }
+
+      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      await axios.post(`${baseUrl}/check-escrow`, data);
+
       const allowance = await contract.allowance(address, jobLauncherAddress);
 
-      if (
-        allowance.lt(
-          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
-        )
-      ) {
-        const tx = await contract.approve(
-          jobLauncherAddress,
-          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
-        );
+      if (allowance.lt(fundAmount)) {
+        const tx = await contract.approve(jobLauncherAddress, fundAmount);
         const receipt = await tx.wait();
         console.log(receipt);
       }
@@ -117,9 +119,10 @@ export const JobRequest = ({
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      onFail();
+      if (err.name === 'AxiosError') onFail(err.response.data);
+      else onFail(err.message);
     }
 
     setIsLoading(false);
