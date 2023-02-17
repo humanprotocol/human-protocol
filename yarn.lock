@@ -15149,10 +15149,12 @@ match-all@^1.2.6:
   integrity sha512-0EESkXiTkWzrQQntBu2uzKvLu6vVkUGz40nGPbSZuegcfE5UuSzNjLaIu76zJWuaT/2I3Z/8M06OlUOZLGwLlQ==
 
 matchstick-as@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.5.1.tgz#dd2983811e1f346a1d7607c82a354f12a93b8e2b"
-  integrity sha512-4mClFCu+wGoKH0V7u058U2lel7IJGcAABtPuq6u1jEUmV86ATWQWNw1x6S0zNUG5GJUBuq6Ghb0qBI1Cjx+KoA==
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.5.0.tgz#cdafc1ef49d670b9cbe98e933bc2a5cb7c450aeb"
+  integrity sha512-4K619YDH+so129qt4RB4JCNxaFwJJYLXPc7drpG+/mIj86Cfzg6FKs/bA91cnajmS1CLHdhHl9vt6Kd6Oqvfkg==
   dependencies:
+    "@graphprotocol/graph-ts" "^0.27.0"
+    assemblyscript "^0.19.20"
     wabt "1.0.24"
 
 mcl-wasm@^0.7.1:
