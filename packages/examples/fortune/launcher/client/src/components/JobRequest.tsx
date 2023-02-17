@@ -1,5 +1,4 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
-import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
 import {
   Box,
   Button,
@@ -48,7 +47,6 @@ export const JobRequest = ({
   const { data: signer } = useSigner();
   const chainId = useChainId();
   const { switchNetwork } = useSwitchNetwork();
-  const [lastEscrowAddress, setLastEscrowAddress] = useState('');
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
     chainId: SUPPORTED_CHAIN_IDS.includes(ChainId.LOCALHOST)
       ? ChainId.LOCALHOST
@@ -71,7 +69,7 @@ export const JobRequest = ({
     const regex = /^[0-9\b]+$/;
     if (fieldName !== 'fortunesRequired') {
       setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
-    } else if (regex.test(fieldValue)) {
+    } else if (regex.test(fieldValue) || fieldValue === '') {
       setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
     }
   };
@@ -124,24 +122,6 @@ export const JobRequest = ({
 
     setIsLoading(false);
   };
-
-  const fetchLastEscrow = async (factoryAddress: string | undefined) => {
-    if (factoryAddress && signer) {
-      const contract = new ethers.Contract(
-        factoryAddress,
-        EscrowFactoryABI,
-        signer
-      );
-      const address = await contract.lastEscrow();
-      setLastEscrowAddress(address);
-    }
-  };
-
-  useEffect(() => {
-    fetchLastEscrow(
-      ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.factoryAddress
-    );
-  }, [jobRequest.chainId, signer]);
 
   return (
     <RoundedBox sx={{ p: '50px 140px' }}>
@@ -251,11 +231,6 @@ export const JobRequest = ({
             />
           </FormControl>
         </Box>
-      </Box>
-      <Box my={2}>
-        <Typography variant="body2">
-          Last Escrow: {lastEscrowAddress}
-        </Typography>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 8 }}>
         <Button

@@ -1,6 +1,8 @@
+import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
 import Box from '@mui/material/Box';
 import { Grid, Link, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import React, { useEffect, useState } from 'react';
 import {
   FortuneStages,
   FortuneFundingMethod,
@@ -14,8 +16,13 @@ import {
   FundingMethodType,
   JobLaunchResponse,
 } from 'src/components/types';
+import { useSigner, useChainId } from 'wagmi';
+import { ChainId, ESCROW_NETWORKS } from './constants';
 
 function App() {
+  const { data: signer } = useSigner();
+  const chainId = useChainId();
+  const [lastEscrowAddress, setLastEscrowAddress] = useState('');
   const [status, setStatus] = useState<FortuneStageStatus>(
     FortuneStageStatus.FUNDING_METHOD
   );
@@ -45,6 +52,22 @@ function App() {
     setJobResponse({ escrowAddress: '', exchangeUrl: '' });
     setStatus(FortuneStageStatus.FUNDING_METHOD);
   };
+
+  const fetchLastEscrow = async (factoryAddress: string | undefined) => {
+    if (factoryAddress && signer) {
+      const contract = new ethers.Contract(
+        factoryAddress,
+        EscrowFactoryABI,
+        signer
+      );
+      const address = await contract.lastEscrow();
+      setLastEscrowAddress(address);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastEscrow(ESCROW_NETWORKS[chainId as ChainId]?.factoryAddress);
+  }, [chainId, signer]);
 
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
@@ -125,6 +148,11 @@ function App() {
                   onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
                 />
               )}
+            </Box>
+            <Box my={2}>
+              <Typography variant="body2">
+                Last Escrow: {lastEscrowAddress}
+              </Typography>
             </Box>
           </Grid>
         </Grid>
