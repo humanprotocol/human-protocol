@@ -26,3 +26,8 @@ export type CreatePaymentType = {
   paymentMethodType?: string;
   name?: string;
 };
+
+export type JobLaunchResponse = {
+  escrowAddress: string;
+  exchangeUrl: string;
+};

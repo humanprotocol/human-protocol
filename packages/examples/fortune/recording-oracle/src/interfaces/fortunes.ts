@@ -12,7 +12,7 @@ export interface IFortuneResults {
   escrowAddress: string;
   chainId: number;
   fortunes: {
-    [workerAddress: string]: IFortuneStorage;
+    [workerAddress: string]: IFortuneStorage[];
   };
 }
 

@@ -1,6 +1,8 @@
+import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
 import Box from '@mui/material/Box';
 import { Grid, Link, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { ethers } from 'ethers';
+import React, { useEffect, useState } from 'react';
 import {
   FortuneStages,
   FortuneFundingMethod,
@@ -10,15 +12,27 @@ import {
   FortuneLaunchSuccess,
   FortuneLaunchFail,
 } from 'src/components';
-import { FortuneStageStatus, FundingMethodType } from 'src/components/types';
+import {
+  FortuneStageStatus,
+  FundingMethodType,
+  JobLaunchResponse,
+} from 'src/components/types';
+import { useSigner, useChainId } from 'wagmi';
+import { ChainId, ESCROW_NETWORKS } from './constants';
 
 function App() {
+  const { data: signer } = useSigner();
+  const chainId = useChainId();
+  const [lastEscrowAddress, setLastEscrowAddress] = useState('');
   const [status, setStatus] = useState<FortuneStageStatus>(
     FortuneStageStatus.FUNDING_METHOD
   );
   const [fundingMethod, setFundingMethod] =
     useState<FundingMethodType>('crypto');
-  const [escrowAddress, setEscrowAddress] = useState<string>('');
+  const [jobResponse, setJobResponse] = useState<JobLaunchResponse>({
+    escrowAddress: '',
+    exchangeUrl: '',
+  });
 
   const handleChangeFundingMethod = (method: FundingMethodType) => {
     setFundingMethod(method);
@@ -29,10 +43,31 @@ function App() {
     setStatus(status > 0 ? status - 1 : 0);
   };
 
-  const handleOnSuccess = (escrowAddress: string) => {
-    setEscrowAddress(escrowAddress);
+  const handleOnSuccess = (data: JobLaunchResponse) => {
+    setJobResponse(data);
     setStatus(FortuneStageStatus.LAUNCH_SUCCESS);
   };
+
+  const handleCreateNewEscrow = () => {
+    setJobResponse({ escrowAddress: '', exchangeUrl: '' });
+    setStatus(FortuneStageStatus.FUNDING_METHOD);
+  };
+
+  const fetchLastEscrow = async (factoryAddress: string | undefined) => {
+    if (factoryAddress && signer) {
+      const contract = new ethers.Contract(
+        factoryAddress,
+        EscrowFactoryABI,
+        signer
+      );
+      const address = await contract.lastEscrow();
+      setLastEscrowAddress(address);
+    }
+  };
+
+  useEffect(() => {
+    fetchLastEscrow(ESCROW_NETWORKS[chainId as ChainId]?.factoryAddress);
+  }, [chainId, signer]);
 
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
@@ -114,13 +149,21 @@ function App() {
                 )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
-                <FortuneLaunchSuccess escrowAddress={escrowAddress} />
+                <FortuneLaunchSuccess
+                  jobResponse={jobResponse}
+                  onCreateNewEscrow={handleCreateNewEscrow}
+                />
               )}
               {status === FortuneStageStatus.LAUNCH_FAIL && (
                 <FortuneLaunchFail
                   onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
                 />
               )}
+            </Box>
+            <Box my={2}>
+              <Typography variant="body2">
+                Last Escrow: {lastEscrowAddress}
+              </Typography>
             </Box>
           </Grid>
         </Grid>

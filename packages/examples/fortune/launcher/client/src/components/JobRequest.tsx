@@ -18,17 +18,21 @@ import {
   ESCROW_NETWORKS,
   ChainId,
   HM_TOKEN_DECIMALS,
-} from 'src/constants';
-import React, { useState } from 'react';
+} from '../constants';
+import React, { useEffect, useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
 import { RoundedBox } from './RoundedBox';
-import { FortuneJobRequestType, FundingMethodType } from './types';
+import {
+  FortuneJobRequestType,
+  FundingMethodType,
+  JobLaunchResponse,
+} from './types';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
-  onSuccess: (escrowAddress: string) => void;
+  onSuccess: (response: JobLaunchResponse) => void;
   onFail: () => void;
 };
 
@@ -62,7 +66,12 @@ export const JobRequest = ({
     fieldName: string,
     fieldValue: any
   ) => {
-    setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    const regex = /^[0-9\b]+$/;
+    if (fieldName !== 'fortunesRequired') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    } else if (regex.test(fieldValue) || fieldValue === '') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    }
   };
 
   const handleLaunch = async () => {
@@ -90,12 +99,20 @@ export const JobRequest = ({
         setIsLoading(false);
         return;
       }
-      const tx = await contract.approve(
-        jobLauncherAddress,
-        ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
-      );
-      const receipt = await tx.wait();
-      console.log(receipt);
+      const allowance = await contract.allowance(address, jobLauncherAddress);
+
+      if (
+        allowance.lt(
+          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+        )
+      ) {
+        const tx = await contract.approve(
+          jobLauncherAddress,
+          ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+        );
+        const receipt = await tx.wait();
+        console.log(receipt);
+      }
 
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
@@ -159,6 +176,8 @@ export const JobRequest = ({
               <FormControl fullWidth>
                 <TextField
                   placeholder="Fortunes Requested"
+                  type="number"
+                  inputProps={{ min: 0, step: 1 }}
                   value={jobRequest.fortunesRequired}
                   onChange={(e) =>
                     handleJobRequestFormFieldChange(

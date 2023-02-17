@@ -9,7 +9,7 @@ export interface IEscrowStorage {
 }
 
 export interface IWorkerFortuneStorage {
-  [workerAddress: string]: IFortuneStorage;
+  [workerAddress: string]: IFortuneStorage[];
 }
 
 export interface IFortuneStorage {

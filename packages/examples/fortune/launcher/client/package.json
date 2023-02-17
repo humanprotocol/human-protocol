@@ -30,7 +30,7 @@
     "start": "cross-env GENERATE_SOURCEMAP=false react-scripts start",
     "start-prod": "serve -s build",
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "react-scripts test",
+    "test": "vitest -u",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -50,5 +50,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^3.1.0",
+    "vitest": "^0.28.5"
   }
 }
