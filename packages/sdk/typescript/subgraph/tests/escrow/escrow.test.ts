@@ -98,7 +98,7 @@ describe('Escrow', () => {
     // Escrow
     assert.fieldEquals(
       'LaunchedEscrow',
-      escrowAddressString,
+      escrowAddress.toHex(),
       'status',
       'Pending'
     );
@@ -183,10 +183,15 @@ describe('Escrow', () => {
     );
 
     // Escrow
-    assert.fieldEquals('LaunchedEscrow', escrowAddressString, 'status', 'Paid');
     assert.fieldEquals(
       'LaunchedEscrow',
-      escrowAddressString,
+      escrowAddress.toHex(),
+      'status',
+      'Paid'
+    );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddress.toHex(),
       'amountPaid',
       '2'
     );
