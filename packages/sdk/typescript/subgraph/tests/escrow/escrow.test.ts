@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import {
   afterAll,
   beforeAll,
@@ -10,6 +10,7 @@ import {
   beforeEach,
 } from 'matchstick-as/assembly';
 
+import { LaunchedEscrow } from '../../generated/schema';
 import {
   handleIntermediateStorage,
   handlePending,
@@ -27,6 +28,16 @@ const escrowAddress = '0xA16081F360e3847006dB660bae1c6d1b2e17eC2A';
 describe('Escrow', () => {
   beforeAll(() => {
     dataSourceMock.setAddress(escrowAddress);
+
+    const launchedEscrow = new LaunchedEscrow(escrowAddress);
+    launchedEscrow.token = Address.zero();
+    launchedEscrow.from = Address.zero();
+    launchedEscrow.timestamp = BigInt.fromI32(0);
+    launchedEscrow.amountAllocated = BigInt.fromI32(0);
+    launchedEscrow.amountPayout = BigInt.fromI32(0);
+    launchedEscrow.status = 'Launched';
+
+    launchedEscrow.save();
   });
 
   afterAll(() => {

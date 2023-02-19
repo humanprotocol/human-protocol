@@ -115,6 +115,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   entity.escrow = event.address;
   entity.bulkCount = event.params._bulkCount;
   entity.txId = event.params._txId;
+  entity.amountPaid = event.params._amountPaid;
   entity.block = event.block.number;
   entity.timestamp = event.block.timestamp;
   entity.transaction = event.transaction.hash;
