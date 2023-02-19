@@ -192,7 +192,7 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'LaunchedEscrow',
       escrowAddress.toHex(),
-      'amountPaid',
+      'amountPayout',
       '2'
     );
   });
