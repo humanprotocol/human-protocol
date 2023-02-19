@@ -1,5 +1,4 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts';
-import { LaunchedEscrow } from 'generated/schema';
 import {
   describe,
   test,
@@ -8,6 +7,7 @@ import {
   beforeAll,
 } from 'matchstick-as/assembly';
 
+import { LaunchedEscrow } from '../../generated/schema';
 import {
   handleAllocationClosed,
   handleStakeAllocated,
