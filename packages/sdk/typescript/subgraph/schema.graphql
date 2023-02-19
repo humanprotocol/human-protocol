@@ -4,6 +4,9 @@ type LaunchedEscrow @entity {
   from: Bytes! # address
   timestamp: BigInt!
   count: BigInt
+  amountAllocated: BigInt!
+  amountPayout: BigInt!
+  status: String! # string
 }
 
 type ISEvent @entity {
@@ -27,6 +30,7 @@ type BulkTransferEvent @entity {
   escrow: Bytes! # address
   bulkCount: BigInt!
   txId: BigInt!
+  amountPaid: BigInt!
   block: BigInt!
   timestamp: BigInt!
   transaction: Bytes!
@@ -128,6 +132,7 @@ type Leader @entity {
   amountWithdrawn: BigInt!
   amountSlashed: BigInt!
   reputation: BigInt!
+  reward: BigInt!
   amountJobsLaunched: BigInt!
 }
 
@@ -195,6 +200,16 @@ type AllocationClosedEvent @entity {
   staker: Bytes! # address
   amount: BigInt!
   escrow: Bytes! # address
+  block: BigInt!
+  timestamp: BigInt!
+  transaction: Bytes!
+}
+
+type RewardAddedEvent @entity {
+  id: ID!
+  escrow: Bytes! # address
+  staker: Bytes! # address
+  amount: BigInt!
   block: BigInt!
   timestamp: BigInt!
   transaction: Bytes!

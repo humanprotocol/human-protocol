@@ -514,7 +514,7 @@ describe('Escrow', function () {
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
           .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients.length);
+          .withArgs(anyValue, recepients.length, 8, true);
       });
     });
 

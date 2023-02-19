@@ -48,6 +48,8 @@ export function createPendingEvent(manifest: string, hash: string): Pending {
 export function createBulkTransferEvent(
   txId: i32,
   bulkCount: i32,
+  amountPaid: i32,
+  isPartial: boolean,
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
@@ -61,9 +63,19 @@ export function createBulkTransferEvent(
     'hash',
     ethereum.Value.fromI32(bulkCount)
   );
+  const amountPaidParam = new ethereum.EventParam(
+    '_amountPaid',
+    ethereum.Value.fromI32(amountPaid)
+  );
+  const isPartialParam = new ethereum.EventParam(
+    '_isPartial',
+    ethereum.Value.fromBoolean(isPartial)
+  );
 
   newBTEvent.parameters.push(txIdParam);
   newBTEvent.parameters.push(bulkCountParam);
+  newBTEvent.parameters.push(amountPaidParam);
+  newBTEvent.parameters.push(isPartialParam);
 
   return newBTEvent;
 }

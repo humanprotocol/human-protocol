@@ -23,5 +23,10 @@
     "address": "0xc9Fe39c4b6e1d7A2991355Af159956982DADf842",
     "startBlock": 8403040,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
+    "startBlock": 8403036,
+    "abi": "./node_modules/@human-protocol/core/abis/RewardPool.json"
   }
 }
