@@ -43,6 +43,7 @@ export function createOrLoadLeader(address: Address): Leader {
     leader.lockedUntilTimestamp = BigInt.fromI32(0);
     leader.amountSlashed = BigInt.fromI32(0);
     leader.amountWithdrawn = BigInt.fromI32(0);
+    leader.reward = BigInt.fromI32(0);
     leader.reputation = BigInt.fromI32(0);
     leader.amountJobsLaunched = BigInt.fromI32(0);
   }
