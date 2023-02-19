@@ -1,38 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import getWeb3 from '../../utils/web3';
 import factoryAbi from '@human-protocol/core/abis/EscrowFactory.json';
-import { ESCROW_FACTORY_ADDRESS } from '../../constants/constants';
+import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_MX_ADDRESS } from '../../constants/constants';
+import { useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
+import EscrowFactory from '../mx/service/escrow-factory.service';
+import { FactoryInterface } from '../escrow-interface.service';
+import { Web3EscrowFactory } from '../web3/service/escrow-factory.service';
 
 export default function CreateEscrow() {
   const [escrow, setEscrow] = useState('');
   const [lastEscrow, setLastEscrow] = useState('');
-  const web3 = getWeb3();
-  const escrowFactory = new web3.eth.Contract(
-    factoryAbi as [],
-    ESCROW_FACTORY_ADDRESS
+  const [escrowContractAddress, setEscrowContractAddress] = useState('');
+  const [escrowFactory, setEscrowFactory] = useState<FactoryInterface>(
+    new Web3EscrowFactory(
+      factoryAbi as [],
+      ESCROW_FACTORY_ADDRESS
+    )
   );
+  const isMxLoggedId = useGetIsLoggedIn();
+
+  useEffect(() => {
+    if (isMxLoggedId) {
+      setEscrowContractAddress(ESCROW_FACTORY_MX_ADDRESS);
+      setEscrowFactory(new EscrowFactory());
+    } else {
+      setEscrowContractAddress(ESCROW_FACTORY_ADDRESS)
+    }
+  }, [isMxLoggedId]);
 
   useEffect(() => {
     (async function () {
-      const lastEscrowAddr = await escrowFactory.methods.lastEscrow().call();
-
+      const lastEscrowAddr = await escrowFactory.getLastEscrowAddress();
       setLastEscrow(lastEscrowAddr);
     })();
-  }, [escrowFactory.methods]);
+  }, [escrowFactory]);
 
   const create = async () => {
-    const accounts = await web3.eth.getAccounts();
-    const mainAccount = accounts[0];
-
-    const createdEscrow = await escrowFactory.methods
-      .createEscrow([mainAccount])
-      .send({ from: mainAccount });
+    let createdEscrow = await escrowFactory.createJob();
     setEscrow(createdEscrow.events.Launched.returnValues.escrow);
   };
 
   return (
     <div className="escrow-create">
-      <span> Factory address {ESCROW_FACTORY_ADDRESS}</span>
+      <span> Factory address {escrowContractAddress}</span>
       <span> Last escrow created {lastEscrow} </span>
       <span> Escrow created: {escrow} </span>
       <button onClick={create}> Create the Escrow </button>

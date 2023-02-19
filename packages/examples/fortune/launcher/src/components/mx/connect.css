@@ -1,0 +1,32 @@
+.mx-login {
+    display: grid;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: auto;
+    margin-top: 1rem;
+    box-shadow: 0px 0px 25px 5px rgba(0, 0, 0, 0.06);
+}
+
+.dapp-core-component__main__btn {
+    margin: 0 !important;
+    margin-top: 1rem !important;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.45rem;
+    outline: none;
+    border: none;
+    background-color: #6309ff;
+    transition: 0.2s ease-out;
+}
+
+.dapp-core-component__main__btn:hover, .dapp-core-component__main__btn:focus {
+    background-color: #440295;
+    color: white;
+    transition: 0.2s ease-in;
+}
+
+.mx-container {
+    display: contents;
+}

@@ -1,0 +1,314 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.65.0-nightly",
+            "commitHash": "750bd1a7ff3e010611b97ee75d30b7cbf5f3a03c",
+            "commitDate": "2022-09-14",
+            "channel": "Nightly",
+            "short": "rustc 1.65.0-nightly (750bd1a7f 2022-09-14)"
+        },
+        "contractCrate": {
+            "name": "escrow",
+            "version": "0.1.0"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.39.2"
+        }
+    },
+    "name": "EscrowContract",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "token",
+                "type": "EgldOrEsdtTokenIdentifier"
+            },
+            {
+                "name": "canceler",
+                "type": "Address"
+            },
+            {
+                "name": "duration",
+                "type": "u64"
+            },
+            {
+                "name": "trusted_callers",
+                "type": "variadic<Address>",
+                "multi_arg": true
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "setup",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "reputation_oracle",
+                    "type": "Address"
+                },
+                {
+                    "name": "recording_oracle",
+                    "type": "Address"
+                },
+                {
+                    "name": "reputation_oracle_stake",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "recording_oracle_stake",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "cancel",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "abort",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "complete",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "storeResults",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getIntermediateResults",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "UrlHashPair"
+                }
+            ]
+        },
+        {
+            "name": "getFinalResults",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "UrlHashPair"
+                }
+            ]
+        },
+        {
+            "name": "bulkPayOut",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "payments",
+                    "type": "variadic<tuple<Address,BigUint>>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "final_results",
+                    "type": "optional<UrlHashPair>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getOracles",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "OraclePair"
+                }
+            ]
+        },
+        {
+            "name": "deposit",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "addTrustedHandlers",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "trusted_handlers",
+                    "type": "variadic<Address>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getBalance",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getToken",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "EgldOrEsdtTokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getStatus",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "EscrowStatus"
+                }
+            ]
+        },
+        {
+            "name": "getExpiration",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getManifest",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "UrlHashPair"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "identifier": "pending",
+            "inputs": [
+                {
+                    "name": "url",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "hash",
+                    "type": "bytes",
+                    "indexed": true
+                }
+            ]
+        }
+    ],
+    "hasCallback": false,
+    "types": {
+        "EscrowStatus": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Launched",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Pending",
+                    "discriminant": 1
+                },
+                {
+                    "name": "Partial",
+                    "discriminant": 2
+                },
+                {
+                    "name": "Paid",
+                    "discriminant": 3
+                },
+                {
+                    "name": "Complete",
+                    "discriminant": 4
+                },
+                {
+                    "name": "Cancelled",
+                    "discriminant": 5
+                }
+            ]
+        },
+        "Oracle": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "stake",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "OraclePair": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "reputation",
+                    "type": "Oracle"
+                },
+                {
+                    "name": "recording",
+                    "type": "Oracle"
+                }
+            ]
+        },
+        "UrlHashPair": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "url",
+                    "type": "bytes"
+                },
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                }
+            ]
+        }
+    }
+}

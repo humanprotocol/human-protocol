@@ -3,3 +3,6 @@ output/
 
 # Rust targets
 target/
+
+# Interactions Results
+*.interaction.json

@@ -50,3 +50,7 @@ button {
 button:hover {
   background-color: rgb(221, 221, 221);
 }
+
+.connect-btn {
+  margin-top: 10px;
+}
