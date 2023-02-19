@@ -1,4 +1,4 @@
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
 import {
   afterAll,
   beforeAll,
@@ -23,13 +23,18 @@ import {
   createBulkTransferEvent,
 } from './fixtures';
 
-const escrowAddress = '0xA16081F360e3847006dB660bae1c6d1b2e17eC2A';
+const escrowAddressString = '0xA16081F360e3847006dB660bae1c6d1b2e17eC2A';
+const escrowAddress = Address.fromString(escrowAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
-    dataSourceMock.setAddress(escrowAddress);
+    dataSourceMock.setReturnValues(
+      escrowAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
 
-    const launchedEscrow = new LaunchedEscrow(escrowAddress);
+    const launchedEscrow = new LaunchedEscrow(escrowAddress.toHex());
     launchedEscrow.token = Address.zero();
     launchedEscrow.from = Address.zero();
     launchedEscrow.timestamp = BigInt.fromI32(0);
@@ -91,7 +96,12 @@ describe('Escrow', () => {
     );
 
     // Escrow
-    assert.fieldEquals('LaunchedEscrow', escrowAddress, 'status', 'Pending');
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddressString,
+      'status',
+      'Pending'
+    );
   });
 
   test('Should properly handle BulkTransfer events', () => {
@@ -173,8 +183,13 @@ describe('Escrow', () => {
     );
 
     // Escrow
-    assert.fieldEquals('LaunchedEscrow', escrowAddress, 'status', 'Paid');
-    assert.fieldEquals('LaunchedEscrow', escrowAddress, 'amountPaid', '2');
+    assert.fieldEquals('LaunchedEscrow', escrowAddressString, 'status', 'Paid');
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddressString,
+      'amountPaid',
+      '2'
+    );
   });
 
   describe('Statistics', () => {
