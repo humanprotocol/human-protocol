@@ -6505,7 +6505,7 @@ assemblyscript@0.19.10:
     binaryen "101.0.0-nightly.20210723"
     long "^4.0.0"
 
-assemblyscript@0.19.23:
+assemblyscript@0.19.23, assemblyscript@^0.19.20:
   version "0.19.23"
   resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.19.23.tgz#16ece69f7f302161e2e736a0f6a474e6db72134c"
   integrity sha512-fwOQNZVTMga5KRsfY80g7cpOl4PsFQczMwHzdtgoqLXaYhkhavufKb0sB0l3T1DUxpAufA0KNhlbpuuhZUwxMA==

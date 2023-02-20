@@ -57,3 +57,12 @@ export const RAW_LEADER_QUERY = (address: string) => `{
     amountJobsLaunched
   }
 }`;
+
+export const RAW_DATA_SAVED_EVENTS_QUERY = `{
+  dataSavedEvents(where: {key: $key, leader: $leader}, orderBy: timestamp, orderDirection: desc) {
+    leader
+    key
+    value
+    timestamp
+  }
+}`;

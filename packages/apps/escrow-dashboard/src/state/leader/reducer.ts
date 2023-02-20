@@ -11,7 +11,11 @@ import {
 } from '@reduxjs/toolkit/dist/matchers';
 import stringify from 'fast-json-stable-stringify';
 import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
-import { RAW_LEADERS_QUERY, RAW_LEADER_QUERY } from 'src/queries';
+import {
+  RAW_DATA_SAVED_EVENTS_QUERY,
+  RAW_LEADERS_QUERY,
+  RAW_LEADER_QUERY,
+} from 'src/queries';
 import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
 
@@ -83,20 +87,18 @@ const getLeaders = async (subgraphUrl: string) => {
   return await gqlFetch(subgraphUrl!, RAW_LEADERS_QUERY)
     .then((res) => res.json())
     .then((json) =>
-      json.data.leaders
-        .map((leader: any) => ({
-          address: leader.address,
-          role: leader.role,
-          amountStaked: Number(leader.amountStaked),
-          amountAllocated: Number(leader.amountAllocated),
-          amountLocked: Number(leader.amountLocked),
-          amountSlashed: Number(leader.amountSlashed),
-          amountWithdrawn: Number(leader.amountWithdrawn),
-          lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
-          reputation: Number(leader.reputation),
-          amountJobsLaunched: Number(leader.amountJobsLaunched),
-        }))
-        .filter((leader: any) => !!leader.role)
+      json.data.leaders.map((leader: any) => ({
+        address: leader.address,
+        role: leader.role,
+        amountStaked: Number(leader.amountStaked),
+        amountAllocated: Number(leader.amountAllocated),
+        amountLocked: Number(leader.amountLocked),
+        amountSlashed: Number(leader.amountSlashed),
+        amountWithdrawn: Number(leader.amountWithdrawn),
+        lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+        reputation: Number(leader.reputation),
+        amountJobsLaunched: Number(leader.amountJobsLaunched),
+      }))
     )
     .catch((err) => []);
 };
@@ -105,7 +107,10 @@ const getLeader = async (
   subgraphUrl: string,
   address: string
 ): Promise<Omit<LeaderData, 'chainId'> | undefined> => {
-  return await gqlFetch(subgraphUrl!, RAW_LEADER_QUERY(address))
+  const leaderData: Omit<LeaderData, 'chainId'> | undefined = await gqlFetch(
+    subgraphUrl!,
+    RAW_LEADER_QUERY(address)
+  )
     .then((res) => res.json())
     .then((json) => ({
       address: json.data.leader.address,
@@ -120,6 +125,19 @@ const getLeader = async (
       amountJobsLaunched: Number(json.data.leader.amountJobsLaunched),
     }))
     .catch((err) => undefined);
+
+  if (leaderData) {
+    const urls = await gqlFetch(subgraphUrl!, RAW_DATA_SAVED_EVENTS_QUERY, {
+      key: 'url',
+      leader: leaderData.address,
+    })
+      .then((res) => res.json())
+      .then((json) =>
+        json.data.dataSavedEvents.map((event: { value: any }) => event.value)
+      );
+
+    return { ...leaderData, urls };
+  }
 };
 
 export const setChainId = createAction<ChainId>('leader/setChainId');
