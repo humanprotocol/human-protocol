@@ -22,7 +22,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 export default function ColorTextFields() {
   const [open, setOpen] = useState(false);
 
-  
+
   const { address } = useAccount();
   const [key, setKey] = useState<string>("");
   const [value, setValue] = useState<string>("");
@@ -32,8 +32,8 @@ export default function ColorTextFields() {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const { refetch } = useContractRead({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "get",
     args: [address, key],
   });
@@ -45,7 +45,7 @@ export default function ColorTextFields() {
     try {
       const { data } = await refetch();
       setValue(await showIPFS(data!.toString()));
-      
+
     } catch (e) {
       if(e instanceof Error){
         setError(e.message)
@@ -69,7 +69,7 @@ export default function ColorTextFields() {
               privateKey: await openpgp.readPrivateKey({ armoredKey: privkey }),
               passphrase: password,
             });
- 
+
       const message = await openpgp.readMessage({
         armoredMessage: value, // parse armored message
       });
@@ -85,9 +85,9 @@ export default function ColorTextFields() {
         setDecrypted("");
         setOpen(true);
         setError(e.message)
-        
+
       }
-      
+
     }
   }
   return (

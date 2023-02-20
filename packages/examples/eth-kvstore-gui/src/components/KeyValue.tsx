@@ -31,15 +31,16 @@ export default function KeyValue() {
     setError("")
   };
 
-  
+
   const { config } = usePrepareContractWrite({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "set",
     args: [key, value],
   });
   const { writeAsync } = useContractWrite({
     ...config,
+    mode: 'recklesslyUnprepared',
     onSuccess() {
       setOpen(true);
       setLoading(false);
@@ -74,7 +75,7 @@ export default function KeyValue() {
       const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
       const message=await openpgp.createMessage({ text: value });
       const encrypted = await openpgp.encrypt({
-        message, 
+        message,
         encryptionKeys: publicKey,
         config: {
           preferredCompressionAlgorithm: openpgp.enums.compression.zlib,
@@ -86,20 +87,20 @@ export default function KeyValue() {
         recklesslySetUnpreparedArgs: [key, cid]
       });
 
-      
+
     } catch (e) {
       if (e instanceof Error) {
         setOpen(false);
         setLoading(false);
         setError(e.message)
       }
-      
+
     }
   }
   const {address} = useAccount();
   const { refetch } = useContractRead({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "get",
     args: [address, "public_key"],
   });
@@ -120,7 +121,7 @@ export default function KeyValue() {
             Transaction success
           </Alert>
         </Grid>}
-          
+
           {error.length>0 && <Grid container justifyContent="center" className="marginBottom2">
           <Alert onClose={handleClose} severity="error" className="alertWidth">
             {error}
