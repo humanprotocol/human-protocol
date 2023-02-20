@@ -1,47 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import getWeb3 from './utils/web3';
-import { Escrow } from './components/Escrow';
+import React from 'react';
+
 import './App.css';
+import {
+  DappProvider,
+  AxiosInterceptorContext
+} from '@multiversx/sdk-dapp/wrappers';
+import {
+  walletConnectV2ProjectId ,
+  sampleAuthenticatedDomains,
+  MX_ENVIRONMENT
+} from './constants/constants';
+import {
+  TransactionsToastList,
+  SignTransactionsModals,
+  NotificationModal
+} from '@multiversx/sdk-dapp/UI';
+import Layout from './components/mx/Layout';
+
 
 function App() {
-  const web3 = getWeb3();
-  const [isMetamaskInstalled, setIsMetamaskInstalled] = useState(false);
-  const [isMetamaskConnected, setIsMetamaskConnected] = useState(false);
-
-  useEffect(() => {
-    (async function () {
-      const { ethereum } = window;
-      if (typeof ethereum !== 'undefined' && ethereum.isMetaMask) {
-        setIsMetamaskInstalled(true);
-        const accounts = await web3.eth.getAccounts();
-        if (accounts.length > 0) {
-          setIsMetamaskConnected(true);
-        }
-      }
-    })();
-  }, [web3.eth]);
-
-  const connect = async () => {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    setIsMetamaskConnected(true);
-  }
-
   return (
-    <div className="App">
-      <header className="App-header">
-        {!isMetamaskInstalled &&
-          (<p> Metamask not installed</p>)
-        }
-        {!isMetamaskConnected &&
-          (<button onClick={connect}> Connect </button>)
-        }
-        {
-          isMetamaskConnected &&
-          (<Escrow />)
-        }
-      </header>
-    </div>
-  )
+    <AxiosInterceptorContext.Provider>
+      <AxiosInterceptorContext.Interceptor
+        authenticatedDomanis={sampleAuthenticatedDomains}
+      >
+        <DappProvider
+          environment={MX_ENVIRONMENT}
+          customNetworkConfig={{
+            name: 'customConfig',
+            apiTimeout: 3000,
+            walletConnectV2ProjectId
+          }}>
+            <AxiosInterceptorContext.Listener />
+            <TransactionsToastList />
+            <NotificationModal />
+            <SignTransactionsModals className='custom-class-for-modals' />
+            <Layout />
+        </DappProvider>
+      </AxiosInterceptorContext.Interceptor>
+    </AxiosInterceptorContext.Provider>
+  );
 }
 
 export default App;

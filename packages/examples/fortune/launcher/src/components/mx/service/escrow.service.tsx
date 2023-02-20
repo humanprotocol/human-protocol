@@ -10,7 +10,6 @@ import {
   SmartContract,
   SmartContractAbi,
   TokenPayment,
-  Transaction,
   TypedOutcomeBundle
 } from '@multiversx/sdk-core/';
 import BigNumber from 'bignumber.js';
@@ -20,8 +19,6 @@ import { EscrowInterface, SetupPayload } from 'src/components/escrow-interface.s
 
 const abiRegistry = AbiRegistry.create(escrowAbi);
 const abi = new SmartContractAbi(abiRegistry);
-const networkProxy: string =
-  proxyNetwork || 'https://devnet-gateway.elrond.com';
 
 type UrlHashPair = {
   url: string;
@@ -40,7 +37,7 @@ export class EscrowService implements EscrowInterface{
       address: contractAdress,
       abi
     });
-    this.proxyProvider = new ProxyNetworkProvider(networkProxy);
+    this.proxyProvider = new ProxyNetworkProvider(proxyNetwork);
   }
 
   async getRecordingOracle(): Promise<any> {

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import EscrowABI from '@human-protocol/core/abis/Escrow.json';
-import getWeb3 from '../../utils/web3';
 import sendFortune from '../../services/RecordingOracle/RecordingClient';
 import './Escrow.css';
+import { useGetAccountInfo } from '@multiversx/sdk-dapp/hooks';
+import { EscrowService } from 'src/services/mx/escrow.service';
+import { Web3EscrowContract } from 'src/services/web3/escrow.service';
+import { EscrowInterface } from 'src/services/common/escrow-interface.service';
+import getWeb3 from 'src/utils/web3';
 
-const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
 function parseQuery(qs: any) {
   const result : string[] = [];
@@ -36,6 +38,8 @@ function parseQuery(qs: any) {
   return result;
 }
 export const Escrow = () => {
+  const { address } = useGetAccountInfo();
+  const isMxLoggedIn = Boolean(address);
   const web3 = getWeb3();
   const [escrow, setEscrow] = useState('');
   const [fortune, setFortune] = useState('');
@@ -45,31 +49,41 @@ export const Escrow = () => {
 
   const setMainEscrow = useCallback(async (address: string) => {
     setEscrow(address);
-    const Escrow = new web3.eth.Contract(EscrowABI as [], address);
 
-    const escrowSt = await Escrow.methods.status().call();
-    setEscrowStatus(statusesMap[escrowSt]);
+    let escrowAdress = address;
+    if (!isMxLoggedIn) {
+      escrowAdress = web3.utils.toChecksumAddress(address);
+    }
 
-    const balance = await Escrow.methods.getBalance().call();
-    setBalance(web3.utils.fromWei(balance, 'ether'));
+    var Escrow: EscrowInterface;
+    if (isMxLoggedIn) {
+      Escrow = new EscrowService(escrowAdress);
+    } else {
+      Escrow = new Web3EscrowContract(escrowAdress);
+    }
 
-    const manifestUrl = await Escrow.methods.manifestUrl().call();
+    const escrowSt = await Escrow.getStatus();
+    setEscrowStatus(escrowSt);
+
+    const balance = await Escrow.getBalance();
+    setBalance(balance);
+
+    const manifestUrl = await Escrow.getManifest();
     if (manifestUrl) {
       const manifestContent = (await axios.get(manifestUrl)).data;
 
       setRecordingOracleUrl(manifestContent.recording_oracle_url);
     }
     return;
-  }, [web3.eth.Contract, web3.utils])
+  }, [isMxLoggedIn, web3.utils]);
 
   useEffect(() => {
     const qs: any = parseQuery(window.location.search);
     const address = qs.address;
-    if (web3.utils.isAddress(address)) {
-      setMainEscrow(web3.utils.toChecksumAddress(address));
-    }
-  }, [setMainEscrow, web3.utils]);
-  
+
+    setMainEscrow(address);
+  }, [setMainEscrow]);
+
   const send = async () => {
     await sendFortune(escrow, fortune, recordingOracleUrl);
     alert('Your fortune has been submitted');
@@ -77,13 +91,12 @@ export const Escrow = () => {
     return;
   }
 
-
   return (
     <div className="escrow-container">
       <div className="escrow-view">
         <div>
           <input onChange={(e) => setEscrow(e.target.value)} value={escrow} data-testid="escrowAddress"/>
-          <button type="button" onClick={() => setMainEscrow(web3.utils.toChecksumAddress(escrow))}> Confirm </button>
+          <button type="button" onClick={() => setMainEscrow(escrow)}> Confirm </button>
         </div>
         <span> Fill the exchange address to pass the fortune to the recording oracle</span>
         <span> <b>Address: </b> {escrow} </span>

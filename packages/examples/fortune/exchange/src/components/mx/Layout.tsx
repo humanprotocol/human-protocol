@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-
-import { useGetAccount } from '@multiversx/sdk-dapp/hooks';
-import { logout } from '@multiversx/sdk-dapp/utils';
 import getWeb3 from 'src/utils/web3';
-import Escrow from '../escrow';
+import { Escrow } from '../Escrow';
 import LoginView from './Login';
+import { logout } from '@multiversx/sdk-dapp/utils';
+import { useGetAccount } from '@multiversx/sdk-dapp/hooks/account';
 
-import '../../App.css';
 
 function Layout() {
   const web3 = getWeb3();
@@ -39,6 +37,8 @@ function Layout() {
 
   return (
     <div className="App">
+      <header className="App-header">
+      <div className="App">
         <header className="App-header">
         { !isMetamaskInstalled && (<p> Metamask not installed</p>) }
         { (!isMetamaskConnected && !isMxLoggedIn2) && (<button onClick={connect}> Connect </button>) }
@@ -49,7 +49,9 @@ function Layout() {
         { isMxLoggedIn2 && <button className='btn btn-link' onClick={handleLogout}> Logout </button> }
         </header>
     </div>
-  );
+      </header>
+    </div>
+  )
 }
 
 export default Layout;
