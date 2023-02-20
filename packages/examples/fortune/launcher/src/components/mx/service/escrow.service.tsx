@@ -4,6 +4,7 @@ import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
 import {
   AbiRegistry,
   Address,
+  IPlainTransactionObject,
   Interaction,
   ResultsParser,
   SmartContract,
@@ -28,6 +29,7 @@ type UrlHashPair = {
 };
 
 
+
 export class EscrowService implements EscrowInterface{
   contract: SmartContract;
   proxyProvider: ProxyNetworkProvider;
@@ -41,17 +43,25 @@ export class EscrowService implements EscrowInterface{
     this.proxyProvider = new ProxyNetworkProvider(networkProxy);
   }
 
-  getRecordingOracle(): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getRecordingOracle(): Promise<any> {
+    const oracles = await this.getOracles();
+
+    return oracles?.recording?.address?.toString();
   }
-  getRecordingOracleStake(): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getRecordingOracleStake(): Promise<any> {
+    const oracles = await this.getOracles();
+
+    return oracles?.recording?.stake?.valueOf();
   }
-  getReputationOracle(): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getReputationOracle(): Promise<any> {
+    const oracles = await this.getOracles();
+
+    return oracles?.reputation?.address?.toString();
   }
-  getReputationOracleStake(): Promise<any> {
-    throw new Error('Method not implemented.');
+  async getReputationOracleStake(): Promise<any> {
+    const oracles = await this.getOracles();
+
+    return oracles?.reputation?.stake?.valueOf();
   }
 
   async getStatus(): Promise<string> {
@@ -77,20 +87,14 @@ export class EscrowService implements EscrowInterface{
     const interaction = this.contract.methods.getManifest();
     const { firstValue } = await this.performQuery(interaction);
 
-    return {
-      url: firstValue?.valueOf()?.url.toString(),
-      hash: firstValue?.valueOf()?.hash.toString()
-    };
+    return firstValue?.valueOf()?.url.toString();
   }
 
   async getFinalResults(): Promise<UrlHashPair> {
     const interaction = this.contract.methods.getFinalResults();
     const { firstValue } = await this.performQuery(interaction);
 
-    return {
-      url: firstValue?.valueOf()?.fields[0].name,
-      hash: firstValue?.valueOf()?.fields[1].name
-    };
+    return firstValue?.valueOf()?.fields[0].name;
   }
 
   async getOracles(): Promise<any> {
@@ -125,7 +129,7 @@ export class EscrowService implements EscrowInterface{
       successMessage: 'Escrow funded'
     };
 
-    return await this.performCall(tx, txDisplay);
+    return await this.performCall(tx.toPlainObject(), txDisplay);
   }
 
   async setupEscrow(data: SetupPayload): Promise<any> {
@@ -149,11 +153,11 @@ export class EscrowService implements EscrowInterface{
       successMessage: 'Escrow setup complete'
     };
 
-    return await this.performCall(tx, txDisplay);
+    return await this.performCall(tx.toPlainObject(), txDisplay);
   }
 
   private async performCall(
-    tx: Transaction,
+    tx: IPlainTransactionObject,
     txDisplay: object
   ): Promise<{
     success: boolean;

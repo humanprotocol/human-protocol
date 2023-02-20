@@ -1,23 +1,27 @@
 import { EscrowInterface, SetupPayload } from "src/components/escrow-interface.service";
 import getWeb3 from "src/utils/web3";
 import { Contract } from "web3-eth-contract";
-import { AbiItem } from 'web3-utils';
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import { HMT_ADDRESS } from "src/constants/constants";
+import EscrowABI from '@human-protocol/core/abis/Escrow.json';
+
+const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
 
 export class Web3EscrowContract implements EscrowInterface{
     contract:  Contract;
     proxyProvider: null;
 
-    constructor(abi: AbiItem[], address: string) {
+    constructor(address: string) {
         let web3 = getWeb3();
-        this.contract = new web3.eth.Contract(abi, address);;
+        this.contract = new web3.eth.Contract(EscrowABI as [], address);;
         this.proxyProvider = null;
     }
 
     async getStatus(): Promise<any> {
-        return await this.contract.methods.status().call();
+        let escrowSt = await this.contract.methods.status().call();
+
+        return statusesMap[escrowSt]
     }
 
     async getBalance(): Promise<any> {

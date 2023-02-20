@@ -16,7 +16,7 @@ pub trait EscrowFactoryContract {
 
         let mut arguments = ManagedArgBuffer::new();
         arguments.push_arg(job_token);
-        arguments.push_arg(canceller);
+        arguments.push_arg(canceller.clone());
         arguments.push_arg(JOB_CONTRACT_DURATION.to_be_bytes());
         for trusted_handler in trusted_handlers {
             arguments.push_arg(trusted_handler);
@@ -32,6 +32,7 @@ pub trait EscrowFactoryContract {
             );
 
         self.jobs().insert(job_address.clone());
+        self.last_job_address(canceller).set(&job_address);
 
         job_address
     }
@@ -63,4 +64,8 @@ pub trait EscrowFactoryContract {
     #[view]
     #[storage_mapper("token")]
     fn token(&self) -> SingleValueMapper<EgldOrEsdtTokenIdentifier>;
+
+    #[view(getLastJobAddress)]
+    #[storage_mapper("last_job_address")]
+    fn last_job_address(&self, address: ManagedAddress) -> SingleValueMapper<ManagedAddress>;
 }

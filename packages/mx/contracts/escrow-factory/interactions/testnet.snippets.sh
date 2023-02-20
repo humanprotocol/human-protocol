@@ -3,10 +3,20 @@ PROXY="https://testnet-gateway.elrond.com"
 CHAIN_ID="T"
 
 # UPDATE THIS AFTER EACH DEPLOY
-CONTRACT_ADDRESS="erd1qqqqqqqqqqqqqpgqe08akwnhcqwj0ttjtcavfnt4a860w63x6u7sdacxtl"
+CONTRACT_ADDRESS="erd1qqqqqqqqqqqqqpgqcwpdzh0v8ard0c2rrn9k6sg33fuymfr2l8ksxkteux"
 
 deploy() {
     mxpy --verbose contract deploy --recall-nonce \
+        --metadata-payable \
+        --pem=${WALLET_PEM} \
+        --gas-limit=100000000 \
+        --proxy=${PROXY} --chain=${CHAIN_ID} \
+        --bytecode="output/escrow-factory.wasm" \
+        --outfile="deploy.interaction.json" --send || return
+}
+
+upgrade() {
+    mxpy --verbose contract upgrade ${CONTRACT_ADDRESS} --recall-nonce \
         --metadata-payable \
         --pem=${WALLET_PEM} \
         --gas-limit=100000000 \

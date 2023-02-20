@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import EscrowABI from '@human-protocol/core/abis/Escrow.json';
-import { REC_ORACLE_ADDRESS, REP_ORACLE_ADDRESS} from '../../constants/constants';
+import { REC_ORACLE_ADDRESS, REC_ORACLE_ADDRESS_MX, REP_ORACLE_ADDRESS, REP_ORACLE_ADDRESS_MX} from '../../constants/constants';
 import { EscrowInterface } from '../escrow-interface.service';
 import { Web3EscrowContract } from '../web3/service/escrow.service';
-import { useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
+import { useGetAccountInfo, useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
 import { EscrowService } from '../mx/service/escrow.service';
 
 
-const statusesMap = ['Launched', 'Pending', 'Partial', 'Paid', 'Complete', 'Cancelled'];
 
 export default function Escrow() {
 
@@ -27,22 +25,22 @@ export default function Escrow() {
   const [balance, setBalance] = useState('');
 
   const [exchangeUrl, setExchangeUrl] = useState('');
-  const isMxLoggedId = useGetIsLoggedIn();
+  const { address } = useGetAccountInfo();
 
 
 
-  const setMainEscrow = async (address: string) => {
-    setEscrow(address);
+  const setMainEscrow = async (escrowAddress: string) => {
+    setEscrow(escrowAddress);
 
     var Escrow: EscrowInterface;
-    if (isMxLoggedId) {
-      Escrow = new EscrowService(address);
+    if (Boolean(address)) {
+      Escrow = new EscrowService(escrowAddress);
     } else {
-      Escrow = new Web3EscrowContract(EscrowABI as [], address);
+      Escrow = new Web3EscrowContract(escrowAddress);
     }
 
     const escrowSt = await Escrow.getStatus();
-    setEscrowStatus(statusesMap[escrowSt]);
+    setEscrowStatus(escrowSt);
 
     const recOracleAddr = await Escrow.getRecordingOracle();
     setRecordingOracle(recOracleAddr);
@@ -64,7 +62,7 @@ export default function Escrow() {
 
     if (manifest) {
       const exchangeOracleUrl = (await axios.get(manifest)).data.exchange_oracle_url;
-      setExchangeUrl(`${exchangeOracleUrl}?address=${address}`);
+      setExchangeUrl(`${exchangeOracleUrl}?address=${escrowAddress}`);
     }
 
     const balance = await Escrow.getBalance();
@@ -96,22 +94,24 @@ export default function Escrow() {
         {finalResultsUrl && <a href={finalResultsUrl} rel="noreferrer noopener" target="_blank"> Final Results </a>}
      </span>
       { escrowStatus === 'Launched' && (
-        <EscrowControls escrowAddr={escrow} onUpdate={() => setMainEscrow(escrow)} isMxLoggedId={isMxLoggedId} />
+        <EscrowControls escrowAddr={escrow} onUpdate={() => setMainEscrow(escrow)} />
         )}
     </div>
   )
 }
 
 
-function EscrowControls({escrowAddr, onUpdate, isMxLoggedId}: any) {
-  const [recOracleAddr, setRecOracleAddr] = useState(REC_ORACLE_ADDRESS)
+function EscrowControls({escrowAddr, onUpdate}: any) {
+  const { address } = useGetAccountInfo();
+
+  const [recOracleAddr, setRecOracleAddr] = useState(Boolean(address) ? REC_ORACLE_ADDRESS_MX : REC_ORACLE_ADDRESS)
   const [recOracleStake, setRecOracleStake] = useState(10)
-  const [repOracleAddr, setRepOracleAddr] = useState(REP_ORACLE_ADDRESS)
+  const [repOracleAddr, setRepOracleAddr] = useState(Boolean(address) ? REP_ORACLE_ADDRESS_MX : REP_ORACLE_ADDRESS)
   const [repOracleStake, setRepOracleStake] = useState(10)
   const [manifestUrl, setManifestUrl] = useState('')
   const [hmt, setHmt] = useState(0);
 
-  const Escrow = isMxLoggedId ? new EscrowService(escrowAddr) : new Web3EscrowContract(EscrowABI as [], escrowAddr);
+  const Escrow = Boolean(address) ? new EscrowService(escrowAddr) : new Web3EscrowContract(escrowAddr);
 
   const fundEscrow = async () => {
     if (hmt <= 0) {

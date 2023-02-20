@@ -15,10 +15,11 @@ export type SetupPayload = {
 export interface FactoryInterface {
     contract: SmartContract | Contract;
     proxyProvider: ProxyNetworkProvider | null;
+    blockchainType: string;
 
     createJob(trusted_handler?: any): Promise<any>;
     getTxOutcome(txHash: any): Promise<any>;
-    getLastEscrowAddress(): Promise<any>;
+    getLastEscrowAddress(address?: any): Promise<any>;
 }
 
 export interface EscrowInterface {

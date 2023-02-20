@@ -112,7 +112,8 @@ async function fetchEscrowAmountsAsync() {
     const provider = new providers.JsonRpcProvider(rpcUrl);
     fs.readFile(path.join(__dirname, `./abis/EscrowFactory_${network}_${factoryAddress}.json`),'utf8', async function (error, data) {
         if (error) {
-            return console.log("error");
+            return     console.log(address);
+            "error");
         }
         const contract = new Contract(factoryAddress, data, provider);
         const escrowAmount = await contract.counter();

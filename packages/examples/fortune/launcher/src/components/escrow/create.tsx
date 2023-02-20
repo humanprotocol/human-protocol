@@ -1,42 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import factoryAbi from '@human-protocol/core/abis/EscrowFactory.json';
 import { ESCROW_FACTORY_ADDRESS, ESCROW_FACTORY_MX_ADDRESS } from '../../constants/constants';
-import { useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
+import { useGetAccountInfo, useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
 import EscrowFactory from '../mx/service/escrow-factory.service';
 import { FactoryInterface } from '../escrow-interface.service';
 import { Web3EscrowFactory } from '../web3/service/escrow-factory.service';
+import { Address } from '@multiversx/sdk-core/out';
 
 export default function CreateEscrow() {
+  const isMxLoggedIn = useGetIsLoggedIn();
+  const { address } = useGetAccountInfo();
   const [escrow, setEscrow] = useState('');
   const [lastEscrow, setLastEscrow] = useState('');
   const [escrowContractAddress, setEscrowContractAddress] = useState('');
   const [escrowFactory, setEscrowFactory] = useState<FactoryInterface>(
-    new Web3EscrowFactory(
-      factoryAbi as [],
-      ESCROW_FACTORY_ADDRESS
-    )
+    !Boolean(address) ? new Web3EscrowFactory() : new EscrowFactory()
   );
-  const isMxLoggedId = useGetIsLoggedIn();
 
   useEffect(() => {
-    if (isMxLoggedId) {
+    if (isMxLoggedIn) {
       setEscrowContractAddress(ESCROW_FACTORY_MX_ADDRESS);
       setEscrowFactory(new EscrowFactory());
     } else {
       setEscrowContractAddress(ESCROW_FACTORY_ADDRESS)
     }
-  }, [isMxLoggedId]);
+  }, [isMxLoggedIn]);
 
   useEffect(() => {
     (async function () {
-      const lastEscrowAddr = await escrowFactory.getLastEscrowAddress();
+      let userAddress: Address | null = null;
+      if (address !== undefined) {
+        userAddress = new Address(address);
+      }
+
+      const lastEscrowAddr = await escrowFactory.getLastEscrowAddress(userAddress);
       setLastEscrow(lastEscrowAddr);
     })();
-  }, [escrowFactory]);
+  }, [escrowFactory, address]);
 
   const create = async () => {
-    let createdEscrow = await escrowFactory.createJob();
-    setEscrow(createdEscrow.events.Launched.returnValues.escrow);
+    let addr;
+    if (Boolean(address)) {
+      addr = new Address(address);
+    } else {
+      addr = null;
+    }
+
+    let createdEscrow = await escrowFactory.createJob(addr);
+    setEscrow(createdEscrow);
+    setLastEscrow(createdEscrow);
   };
 
   return (

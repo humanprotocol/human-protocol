@@ -1,11 +1,11 @@
 {
     "buildInfo": {
         "rustc": {
-            "version": "1.65.0-nightly",
-            "commitHash": "750bd1a7ff3e010611b97ee75d30b7cbf5f3a03c",
-            "commitDate": "2022-09-14",
+            "version": "1.69.0-nightly",
+            "commitHash": "75a0be98f25a4b9de5afa0e15eb016e7f9627032",
+            "commitDate": "2023-02-05",
             "channel": "Nightly",
-            "short": "rustc 1.65.0-nightly (750bd1a7f 2022-09-14)"
+            "short": "rustc 1.69.0-nightly (75a0be98f 2023-02-05)"
         },
         "contractCrate": {
             "name": "escrow-factory",
@@ -95,6 +95,21 @@
             "outputs": [
                 {
                     "type": "EgldOrEsdtTokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getLastJobAddress",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Address"
                 }
             ]
         }
