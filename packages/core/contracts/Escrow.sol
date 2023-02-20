@@ -23,7 +23,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
-    event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
+    event BulkTransfer(
+        uint256 indexed _txId,
+        uint256 _bulkCount,
+        uint256 _amountPaid,
+        bool _isPartial
+    );
     event Cancelled();
     event Completed();
 
@@ -230,6 +235,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
 
+        uint256 _amountPaid = 0;
         for (uint256 i = 0; i < _recipients.length; ++i) {
             uint256 amount = finalAmounts[i];
             if (amount == 0) {
@@ -237,6 +243,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             }
             finalAmounts[i] = 0;
             _safeTransfer(_recipients[i], amount);
+            _amountPaid += amount;
         }
 
         delete finalAmounts;
@@ -263,7 +270,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status = EscrowStatuses.Paid;
             }
         }
-        emit BulkTransfer(_txId, _recipients.length);
+        emit BulkTransfer(
+            _txId,
+            _recipients.length,
+            _amountPaid,
+            status == EscrowStatuses.Partial
+        );
         return true;
     }
 

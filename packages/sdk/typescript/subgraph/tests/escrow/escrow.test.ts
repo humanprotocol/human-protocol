@@ -1,8 +1,16 @@
-import { store, BigInt } from '@graphprotocol/graph-ts';
-import { describe, test, assert, clearStore } from 'matchstick-as/assembly';
+import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
+import {
+  afterAll,
+  beforeAll,
+  describe,
+  test,
+  assert,
+  clearStore,
+  dataSourceMock,
+  beforeEach,
+} from 'matchstick-as/assembly';
 
-import { ISEvent } from '../../generated/schema';
-
+import { LaunchedEscrow } from '../../generated/schema';
 import {
   handleIntermediateStorage,
   handlePending,
@@ -15,117 +23,90 @@ import {
   createBulkTransferEvent,
 } from './fixtures';
 
-describe('Generic Entity case', () => {
-  test('Should correctly get ISEvents entity details', () => {
-    const DUMMY_ID = '0x0-0x0';
+const escrowAddressString = '0xA16081F360e3847006dB660bae1c6d1b2e17eC2A';
+const escrowAddress = Address.fromString(escrowAddressString);
 
-    const intermediateStorageEvent = new ISEvent(DUMMY_ID);
-    intermediateStorageEvent.timestamp = BigInt.fromI32(10000);
-    intermediateStorageEvent._url = 'test.com';
-    intermediateStorageEvent.count = BigInt.fromI32(1);
-    intermediateStorageEvent._hash = 'testhash';
+describe('Escrow', () => {
+  beforeAll(() => {
+    dataSourceMock.setReturnValues(
+      escrowAddressString,
+      'rinkeby',
+      new DataSourceContext()
+    );
 
-    intermediateStorageEvent.save();
+    const launchedEscrow = new LaunchedEscrow(escrowAddress.toHex());
+    launchedEscrow.token = Address.zero();
+    launchedEscrow.from = Address.zero();
+    launchedEscrow.timestamp = BigInt.fromI32(0);
+    launchedEscrow.amountAllocated = BigInt.fromI32(0);
+    launchedEscrow.amountPayout = BigInt.fromI32(0);
+    launchedEscrow.status = 'Launched';
 
-    assert.fieldEquals('ISEvent', DUMMY_ID, 'timestamp', '10000');
-    assert.fieldEquals('ISEvent', DUMMY_ID, 'count', '1');
-    assert.fieldEquals('ISEvent', DUMMY_ID, '_url', 'test.com');
-    assert.fieldEquals('ISEvent', DUMMY_ID, '_hash', 'testhash');
-
-    store.remove('ISEvent', DUMMY_ID);
+    launchedEscrow.save();
   });
-});
 
-describe('EscrowStatistics entity', () => {
-  test('Should properly calculate IntermediateStorage event in statistics', () => {
+  afterAll(() => {
+    dataSourceMock.resetValues();
+  });
+
+  test('should properly handle IntermediateStorage event', () => {
     const newIS = createISEvent('test.com', 'is_hash_1');
-    const newIS1 = createISEvent('test.com', 'is_hash_1');
-
     handleIntermediateStorage(newIS);
-    handleIntermediateStorage(newIS1);
+
+    const id = `${newIS.transaction.hash.toHex()}-${newIS.logIndex.toString()}-${
+      newIS.block.timestamp
+    }`;
 
     assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'pendingEventCount',
-      '0'
+      'ISEvent',
+      id,
+      'timestamp',
+      newIS.block.timestamp.toString()
     );
-    assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'intermediateStorageEventCount',
-      '2'
-    );
-    assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'bulkTransferEventCount',
-      '0'
-    );
-
-    clearStore();
+    assert.fieldEquals('ISEvent', id, '_url', newIS.params._url.toString());
+    assert.fieldEquals('ISEvent', id, '_hash', newIS.params._hash.toString());
   });
 
-  test('Should properly calculate Pending event in statistics', () => {
+  test('Should properly handle Pending event', () => {
     const newPending1 = createPendingEvent('test.com', 'is_hash_1');
-    const newPending2 = createPendingEvent('test.com', 'is_hash_1');
 
     handlePending(newPending1);
-    handlePending(newPending2);
+
+    const id = `${newPending1.transaction.hash.toHex()}-${newPending1.logIndex.toString()}-${
+      newPending1.block.timestamp
+    }`;
 
     assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'pendingEventCount',
-      '2'
+      'PEvent',
+      id,
+      'timestamp',
+      newPending1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'intermediateStorageEventCount',
-      '0'
+      'PEvent',
+      id,
+      '_url',
+      newPending1.params.manifest.toString()
     );
     assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'bulkTransferEventCount',
-      '0'
+      'PEvent',
+      id,
+      '_hash',
+      newPending1.params.hash.toString()
     );
 
-    clearStore();
+    // Escrow
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddress.toHex(),
+      'status',
+      'Pending'
+    );
   });
 
-  test('Should properly calculate BulkTransfser event in statistics', () => {
-    handleBulkTransfer(createBulkTransferEvent(1, 5, BigInt.fromI32(11)));
-    handleBulkTransfer(createBulkTransferEvent(2, 4, BigInt.fromI32(11)));
-
-    assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'pendingEventCount',
-      '0'
-    );
-    assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'intermediateStorageEventCount',
-      '0'
-    );
-    assert.fieldEquals(
-      'EscrowStatistics',
-      STATISTICS_ENTITY_ID,
-      'bulkTransferEventCount',
-      '2'
-    );
-
-    clearStore();
-  });
-});
-
-describe('Escrow entity', () => {
-  test('Should properly index bulk transfers', () => {
-    const bulk1 = createBulkTransferEvent(1, 2, BigInt.fromI32(10));
-    const bulk2 = createBulkTransferEvent(3, 4, BigInt.fromI32(11));
+  test('Should properly handle BulkTransfer events', () => {
+    const bulk1 = createBulkTransferEvent(1, 2, 1, false, BigInt.fromI32(10));
+    const bulk2 = createBulkTransferEvent(3, 4, 1, false, BigInt.fromI32(11));
 
     handleBulkTransfer(bulk1);
     handleBulkTransfer(bulk2);
@@ -162,7 +143,6 @@ describe('Escrow entity', () => {
       'txId',
       bulk1.params._txId.toString()
     );
-
     assert.fieldEquals(
       'BulkTransferEvent',
       id1,
@@ -195,7 +175,6 @@ describe('Escrow entity', () => {
       'txId',
       bulk2.params._txId.toString()
     );
-
     assert.fieldEquals(
       'BulkTransferEvent',
       id2,
@@ -203,6 +182,106 @@ describe('Escrow entity', () => {
       bulk2.transaction.hash.toHexString()
     );
 
-    clearStore();
+    // Escrow
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddress.toHex(),
+      'status',
+      'Paid'
+    );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddress.toHex(),
+      'amountPayout',
+      '2'
+    );
+  });
+
+  describe('Statistics', () => {
+    beforeEach(() => {
+      clearStore();
+    });
+
+    test('Should properly calculate IntermediateStorage event in statistics', () => {
+      const newIS = createISEvent('test.com', 'is_hash_1');
+      const newIS1 = createISEvent('test.com', 'is_hash_1');
+
+      handleIntermediateStorage(newIS);
+      handleIntermediateStorage(newIS1);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'pendingEventCount',
+        '0'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'intermediateStorageEventCount',
+        '2'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'bulkTransferEventCount',
+        '0'
+      );
+    });
+
+    test('Should properly calculate Pending event in statistics', () => {
+      const newPending1 = createPendingEvent('test.com', 'is_hash_1');
+      const newPending2 = createPendingEvent('test.com', 'is_hash_1');
+
+      handlePending(newPending1);
+      handlePending(newPending2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'pendingEventCount',
+        '2'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'intermediateStorageEventCount',
+        '0'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'bulkTransferEventCount',
+        '0'
+      );
+    });
+
+    test('Should properly calculate BulkTransfser event in statistics', () => {
+      handleBulkTransfer(
+        createBulkTransferEvent(1, 5, 1, false, BigInt.fromI32(11))
+      );
+      handleBulkTransfer(
+        createBulkTransferEvent(2, 4, 1, false, BigInt.fromI32(11))
+      );
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'pendingEventCount',
+        '0'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'intermediateStorageEventCount',
+        '0'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'bulkTransferEventCount',
+        '2'
+      );
+    });
   });
 });

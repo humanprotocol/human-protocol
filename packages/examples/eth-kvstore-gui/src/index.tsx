@@ -9,12 +9,13 @@ import {
 } from "@rainbow-me/rainbowkit";
 import "./styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
-import { chain, configureChains, createClient, WagmiConfig } from "wagmi";
+import { configureChains, createClient, WagmiConfig } from "wagmi";
+import * as chain from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, provider } = configureChains(
-  [chain.polygonMumbai, chain.localhost, chain.mainnet, chain.ropsten, chain.rinkeby],
+  [chain.polygonMumbai, chain.localhost, chain.mainnet],
   [
     alchemyProvider({ apiKey: process.env.REACT_APP_ALCHEMY_ID as string }),
     publicProvider(),

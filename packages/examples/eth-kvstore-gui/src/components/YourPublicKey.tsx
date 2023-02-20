@@ -22,8 +22,8 @@ export default function YourPublicKey() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const { refetch } = useContractRead({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "get",
     args: [address, "public_key"],
     async onSuccess(data: Result) {
