@@ -3,6 +3,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { addFortune } from './services/fortune';
+import { Mnemonic, UserSigner } from '@multiversx/sdk-wallet/out';
 
 const app = express();
 
@@ -18,14 +19,29 @@ const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
+const mnemonicKey = process.env.MX_MNEMONIC_KEY || '';
+
+const mnemonic = Mnemonic.fromString(mnemonicKey).deriveKey(0);
+const mxSigner = new UserSigner(mnemonic);
+
 app.use(bodyParser.json());
 
 app.use(cors());
 
+app.get('/ping', (req, res) => {
+  return res.status(200).send('pong');
+});
+
 app.post('/job/results', async (req, res) => {
   try {
     const { workerAddress, escrowAddress, fortune } = req.body;
-    const err = await addFortune(web3, workerAddress, escrowAddress, fortune);
+    const err = await addFortune(
+      web3,
+      mxSigner,
+      workerAddress,
+      escrowAddress,
+      fortune
+    );
     if (err) {
       console.log(err.message);
       return res.status(400).send(err);
