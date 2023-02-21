@@ -27,10 +27,6 @@
   "workspaces": {
     "packages": [
       "packages/**"
-    ],
-    "nohoist": [
-      "**/*wagmi/",
-      "**/*wagmi/core"
     ]
   },
   "devDependencies": {
