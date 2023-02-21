@@ -27,7 +27,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "react-swipeable-views": "^0.14.0",
-    "wagmi": "^0.11.5",
+    "wagmi": "^0.11.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
