@@ -1,12 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import Web3 from 'web3';
-import { bulkPayOut, bulkPaid, getBalance } from './services/escrow';
-import {
-  filterAddressesToReward,
-  calculateRewardForWorker,
-} from './services/rewards';
+import { calculateRewardForWorker } from './services/rewards';
 import { uploadResults } from './services/s3';
+import { initMxSigner, initWeb3, processAddress } from './utils/utils';
+import { Address } from '@multiversx/sdk-core/out';
+import { getServiceForAddress } from './utils/utils';
+import { Web3Service } from './utils/web3.service';
 
 const app = express();
 const privKey =
@@ -15,11 +14,10 @@ const privKey =
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
 
-const web3 = new Web3(ethHttpServer);
-const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
+const mnemonicKey = process.env.MX_MNEMONIC_KEY || '';
 
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
+const web3 = initWeb3(ethHttpServer, privKey);
+const mxSigner = initMxSigner(mnemonicKey);
 
 app.use(bodyParser.json());
 
@@ -33,15 +31,24 @@ app.post('/job/results', async (req, res) => {
         .send({ message: 'Fortunes are not specified or empty' });
     }
 
-    if (!web3.utils.isAddress(escrowAddress)) {
+    let processedEscrowAddress: Address | string;
+    try {
+      processedEscrowAddress = processAddress(escrowAddress, web3);
+    } catch (e) {
       return res
         .status(400)
         .send({ message: 'Escrow address is empty or invalid' });
     }
 
-    const balance = await getBalance(web3, escrowAddress);
+    const escrowContract = getServiceForAddress(
+      processedEscrowAddress,
+      web3,
+      mxSigner
+    );
 
-    const workerAddresses = filterAddressesToReward(web3, fortunes);
+    const balance = await escrowContract.getBalance();
+
+    const workerAddresses = escrowContract.filterAddressesToReward(fortunes);
     const rewards = calculateRewardForWorker(balance, workerAddresses);
 
     // TODO calculate the URL hash(?)
@@ -50,8 +57,7 @@ app.post('/job/results', async (req, res) => {
       escrowAddress
     );
     const resultHash = resultsUrl;
-    await bulkPayOut(
-      web3,
+    await escrowContract.bulkPayOut(
       escrowAddress,
       workerAddresses,
       rewards,
@@ -59,8 +65,10 @@ app.post('/job/results', async (req, res) => {
       resultHash
     );
 
-    if (!(await bulkPaid(web3, escrowAddress))) {
-      return res.status(400).send({ message: "Payout couldn't be done" });
+    if (escrowContract instanceof Web3Service) {
+      if (!(await escrowContract.bulkPaid())) {
+        return res.status(400).send({ message: "Payout couldn't be done" });
+      }
     }
 
     return res.status(200).send({ message: 'Escrow has been completed' });
