@@ -17,3 +17,8 @@ export type FortuneJobRequestType = {
   fundAmount: string;
   jobRequester: string;
 };
+
+export type JobLaunchResponse = {
+  escrowAddress: string;
+  exchangeUrl: string;
+};
