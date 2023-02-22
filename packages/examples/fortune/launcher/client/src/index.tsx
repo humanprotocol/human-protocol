@@ -2,6 +2,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { RouterProvider } from 'react-router-dom';
 import { WagmiConfig, createClient, configureChains, Chain } from 'wagmi';
 import {
   goerli,
@@ -16,8 +17,8 @@ import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { router } from './router';
 import theme from './theme';
 
 window.Buffer = window.Buffer || require('buffer').Buffer;
@@ -78,7 +79,7 @@ root.render(
     <WagmiConfig client={client}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <RouterProvider router={router} />
       </ThemeProvider>
     </WagmiConfig>
   </React.StrictMode>
