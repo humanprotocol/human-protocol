@@ -136,7 +136,7 @@ const getLeader = async (
         json.data.dataSavedEvents.map((event: { value: any }) => event.value)
       );
 
-    return { ...leaderData, urls };
+    return { ...leaderData, url: urls[0] };
   }
 };
 

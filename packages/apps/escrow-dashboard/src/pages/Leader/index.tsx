@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   CircularProgress,
   Grid,
   Paper,
@@ -57,18 +58,53 @@ export const LeaderDetailPage: React.FC = (): React.ReactElement => {
         <Box>Not Found</Box>
       ) : (
         <>
-          <Box display="flex" alignItems="center" flexWrap="wrap">
+          <Box
+            display="flex"
+            alignItems="center"
+            flexWrap="wrap"
+            gap={{ xs: 3, sm: 4 }}
+          >
             <ViewTitle title="Address" iconUrl={addressSvg} />
-            {!isMobile && (
-              <CopyAddressButton address={currentLeader.address} ml={6} />
+            {!isMobile && <CopyAddressButton address={currentLeader.address} />}
+            {!isMobile ? (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                flex={1}
+              >
+                <NetworkSelect value={currentLeader.chainId} disabled />
+                {currentLeader.url && (
+                  <Button
+                    href={currentLeader.url}
+                    target="_blank"
+                    variant="outlined"
+                    sx={{ minWidth: 240 }}
+                  >
+                    Exchange
+                  </Button>
+                )}
+              </Box>
+            ) : (
+              <Box ml="auto">
+                <NetworkSelect value={currentLeader.chainId} disabled />
+              </Box>
             )}
-            <Box ml="auto">
-              <NetworkSelect value={currentLeader.chainId} disabled />
-            </Box>
           </Box>
           {isMobile && (
             <Box mt={{ xs: 4, md: 6 }}>
               <CopyAddressButton address={currentLeader.address} />
+              {currentLeader.url && (
+                <Button
+                  href={currentLeader.url}
+                  target="_blank"
+                  variant="outlined"
+                  sx={{ mt: 3 }}
+                  fullWidth
+                >
+                  Exchange
+                </Button>
+              )}
             </Box>
           )}
           <Grid container spacing={4} mt={{ xs: 0, md: 4 }}>

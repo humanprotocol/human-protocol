@@ -12,5 +12,5 @@ export interface LeaderData {
   lockedUntilTimestamp: number;
   reputation: number;
   amountJobsLaunched: number;
-  urls?: string[];
+  url?: string;
 }
