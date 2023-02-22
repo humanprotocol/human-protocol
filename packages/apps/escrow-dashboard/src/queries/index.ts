@@ -66,3 +66,12 @@ export const RAW_DATA_SAVED_EVENTS_QUERY = `{
     timestamp
   }
 }`;
+
+export const RAW_LEADER_ESCROWS_QUERY = (address: string) => `{
+  launchedEscrows(from: "${address}", orderBy: amountAllocated, orderDirection: desc) {
+    id
+    amountAllocated
+    amountPayout
+    status
+  }
+}`;

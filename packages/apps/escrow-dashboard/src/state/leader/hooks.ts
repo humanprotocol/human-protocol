@@ -3,7 +3,11 @@ import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 import { AppState, useAppDispatch } from 'src/state';
 
-import { fetchLeaderAsync, fetchLeadersAsync } from './reducer';
+import {
+  fetchLeaderAsync,
+  fetchLeaderEscrowsAsync,
+  fetchLeadersAsync,
+} from './reducer';
 import { LeaderData } from './types';
 
 export const useLeadersData = () => {
@@ -20,6 +24,9 @@ export const useFetchLeaderData = (chainId?: string, address?: string) => {
   useSlowRefreshEffect(() => {
     if (chainId && address) {
       dispatch(fetchLeaderAsync({ chainId: +chainId as ChainId, address }));
+      dispatch(
+        fetchLeaderEscrowsAsync({ chainId: +chainId as ChainId, address })
+      );
     }
   }, [dispatch, chainId, address]);
 };

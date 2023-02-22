@@ -14,12 +14,13 @@ import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
 import {
   RAW_DATA_SAVED_EVENTS_QUERY,
   RAW_LEADERS_QUERY,
+  RAW_LEADER_ESCROWS_QUERY,
   RAW_LEADER_QUERY,
 } from 'src/queries';
 import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
 
-import { LeaderData } from './types';
+import { LeaderData, LeaderEscrowData } from './types';
 
 type LeadersType = { [chainId in ChainId]?: LeaderData[] };
 
@@ -32,6 +33,9 @@ interface LeaderState {
 
   currentLeader?: LeaderData;
   currentLeaderLoaded?: boolean;
+
+  leaderEscrows?: LeaderEscrowData[];
+  leaderEscrowsLoaded?: boolean;
 }
 
 const initialState: LeaderState = {
@@ -63,26 +67,6 @@ export const fetchLeadersAsync = createAsyncThunk<
   return leaders;
 });
 
-export const fetchLeaderAsync = createAsyncThunk<
-  LeaderData,
-  { chainId: ChainId; address: string },
-  { state: AppState }
->('leader/fetchLeaderAsync', async ({ chainId, address }) => {
-  const leader = await getLeader(
-    ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-    address
-  );
-
-  if (!leader) {
-    throw new Error('Error fetching leader detail');
-  }
-
-  return {
-    ...leader,
-    chainId: chainId,
-  };
-});
-
 const getLeaders = async (subgraphUrl: string) => {
   return await gqlFetch(subgraphUrl!, RAW_LEADERS_QUERY)
     .then((res) => res.json())
@@ -102,6 +86,26 @@ const getLeaders = async (subgraphUrl: string) => {
     )
     .catch((err) => []);
 };
+
+export const fetchLeaderAsync = createAsyncThunk<
+  LeaderData,
+  { chainId: ChainId; address: string },
+  { state: AppState }
+>('leader/fetchLeaderAsync', async ({ chainId, address }) => {
+  const leader = await getLeader(
+    ESCROW_NETWORKS[chainId]?.subgraphUrl!,
+    address
+  );
+
+  if (!leader) {
+    throw new Error('Error fetching leader detail');
+  }
+
+  return {
+    ...leader,
+    chainId: chainId,
+  };
+});
 
 const getLeader = async (
   subgraphUrl: string,
@@ -140,6 +144,31 @@ const getLeader = async (
   }
 };
 
+export const fetchLeaderEscrowsAsync = createAsyncThunk<
+  LeaderEscrowData[],
+  { chainId: ChainId; address: string },
+  { state: AppState }
+>('leader/fetchLeaderEscrowsAsync', async ({ chainId, address }) => {
+  return await getLeaderEscrows(
+    ESCROW_NETWORKS[chainId]?.subgraphUrl!,
+    address
+  );
+});
+
+const getLeaderEscrows = async (subgraphUrl: string, address: string) => {
+  return await gqlFetch(subgraphUrl!, RAW_LEADER_ESCROWS_QUERY(address))
+    .then((res) => res.json())
+    .then((json) =>
+      json.data.launchedEscrows.map((escrow: any) => ({
+        address: escrow.id,
+        amountAllocated: Number(escrow.amountAllocated),
+        amountPayout: Number(escrow.amountPayout),
+        status: escrow.status,
+      }))
+    )
+    .catch((err) => []);
+};
+
 export const setChainId = createAction<ChainId>('leader/setChainId');
 
 type UnknownAsyncThunkFulfilledOrPendingAction =
@@ -171,24 +200,44 @@ export default createReducer(initialState, (builder) => {
     state.currentLeader = action.payload;
     state.currentLeaderLoaded = true;
   });
-  builder.addMatcher(isAnyOf(fetchLeaderAsync.rejected), (state, action) => {
+  builder.addCase(fetchLeaderAsync.rejected, (state, action) => {
     state.currentLeaderLoaded = true;
   });
 
+  builder.addCase(fetchLeaderEscrowsAsync.fulfilled, (state, action) => {
+    state.leaderEscrows = action.payload;
+    state.leaderEscrowsLoaded = true;
+  });
+  builder.addCase(fetchLeaderEscrowsAsync.rejected, (state, action) => {
+    state.leaderEscrowsLoaded = true;
+  });
+
   builder.addMatcher(
-    isAnyOf(fetchLeadersAsync.pending, fetchLeaderAsync.pending),
+    isAnyOf(
+      fetchLeadersAsync.pending,
+      fetchLeaderAsync.pending,
+      fetchLeaderEscrowsAsync.pending
+    ),
     (state, action) => {
       state.loadingKeys[serializeLoadingKey(action, 'pending')] = true;
     }
   );
   builder.addMatcher(
-    isAnyOf(fetchLeadersAsync.fulfilled, fetchLeaderAsync.pending),
+    isAnyOf(
+      fetchLeadersAsync.fulfilled,
+      fetchLeaderAsync.fulfilled,
+      fetchLeaderEscrowsAsync.fulfilled
+    ),
     (state, action) => {
       state.loadingKeys[serializeLoadingKey(action, 'fulfilled')] = false;
     }
   );
   builder.addMatcher(
-    isAnyOf(fetchLeadersAsync.rejected, fetchLeaderAsync.rejected),
+    isAnyOf(
+      fetchLeadersAsync.rejected,
+      fetchLeaderAsync.rejected,
+      fetchLeaderEscrowsAsync.rejected
+    ),
     (state, action) => {
       state.loadingKeys[serializeLoadingKey(action, 'rejected')] = false;
     }

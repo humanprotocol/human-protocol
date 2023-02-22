@@ -14,3 +14,10 @@ export interface LeaderData {
   amountJobsLaunched: number;
   url?: string;
 }
+
+export interface LeaderEscrowData {
+  address: string;
+  amountAllocated: number;
+  amountPayout: number;
+  status: string;
+}

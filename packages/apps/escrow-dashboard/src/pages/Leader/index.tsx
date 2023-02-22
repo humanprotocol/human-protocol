@@ -26,16 +26,7 @@ import { CopyAddressButton } from 'src/components/CopyAddressButton';
 import { NetworkSelect } from 'src/components/NetworkSelect';
 import { ESCROW_NETWORKS } from 'src/constants';
 import { AppState } from 'src/state';
-import { useFetchLeaderData, useLeaderByAddress } from 'src/state/leader/hooks';
-
-const DATA = [
-  {
-    escrow: '0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0',
-    stake: 30000,
-    payouts: 1000,
-    status: 'Launched',
-  },
-];
+import { useFetchLeaderData } from 'src/state/leader/hooks';
 
 export const LeaderDetailPage: React.FC = (): React.ReactElement => {
   const theme = useTheme();
@@ -44,9 +35,12 @@ export const LeaderDetailPage: React.FC = (): React.ReactElement => {
 
   useFetchLeaderData(chainId, address);
 
-  const { currentLeader, currentLeaderLoaded } = useSelector(
-    (state: AppState) => state.leader
-  );
+  const {
+    currentLeader,
+    currentLeaderLoaded,
+    leaderEscrowsLoaded,
+    leaderEscrows,
+  } = useSelector((state: AppState) => state.leader);
 
   return (
     <PageWrapper>
@@ -175,40 +169,58 @@ export const LeaderDetailPage: React.FC = (): React.ReactElement => {
           </Grid>
           <Box mt={4}>
             <Typography mb={4} variant="h6" color="primary">
-              Stakes
+              Escrows
             </Typography>
-            <TableContainer
-              component={Paper}
-              sx={{
-                borderRadius: '16px',
-                boxShadow:
-                  '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2);',
-              }}
-            >
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Escrow</TableCell>
-                    <TableCell align="left">Stake</TableCell>
-                    <TableCell align="left">Payouts</TableCell>
-                    <TableCell align="left">Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {DATA.map((item) => (
-                    <TableRow
-                      key={item.escrow}
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                      <TableCell align="left">{item.escrow}</TableCell>
-                      <TableCell align="left">{item.stake} HMT</TableCell>
-                      <TableCell align="left">{item.payouts} HMT</TableCell>
-                      <TableCell align="left">{item.status}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            {!leaderEscrowsLoaded ? (
+              <Box display="flex" justifyContent="center" alignItems="center">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <TableContainer
+                component={Paper}
+                sx={{
+                  borderRadius: '16px',
+                  boxShadow:
+                    '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2);',
+                }}
+              >
+                {!leaderEscrows?.length ? (
+                  <Box padding={2} display="flex" justifyContent="center">
+                    No escrows launched yet
+                  </Box>
+                ) : (
+                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Escrow</TableCell>
+                        <TableCell align="left">Allocated</TableCell>
+                        <TableCell align="left">Payouts</TableCell>
+                        <TableCell align="left">Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {leaderEscrows.map((escrow) => (
+                        <TableRow
+                          key={escrow.address}
+                          sx={{
+                            '&:last-child td, &:last-child th': { border: 0 },
+                          }}
+                        >
+                          <TableCell align="left">{escrow.address}</TableCell>
+                          <TableCell align="left">
+                            {escrow.amountAllocated} HMT
+                          </TableCell>
+                          <TableCell align="left">
+                            {escrow.amountPayout} HMT
+                          </TableCell>
+                          <TableCell align="left">{escrow.status}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </TableContainer>
+            )}
           </Box>
         </>
       )}
