@@ -145,11 +145,11 @@ templates:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
       eventHandlers:
-        - event: IntermediateStorage(string,string)
+        - event: IntermediateStorage(address,string,string)
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
-        - event: BulkTransfer(indexed uint256,uint256,uint256,bool)
+        - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
           handler: handleBulkTransfer
         - event: Cancelled()
           handler: handleCancelled

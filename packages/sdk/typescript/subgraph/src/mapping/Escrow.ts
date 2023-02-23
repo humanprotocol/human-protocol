@@ -8,9 +8,11 @@ import {
   EscrowStatistics,
   ISEvent,
   LaunchedEscrow,
+  Payment,
   PEvent,
+  Worker,
 } from '../../generated/schema';
-import { BigInt, dataSource } from '@graphprotocol/graph-ts';
+import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
 import {
   updateIntermediateStorageEventDayData,
   updatePendingEventDayData,
@@ -29,6 +31,21 @@ export function constructStatsEntity(): EscrowStatistics {
   entity.totalEscrowCount = BigInt.fromI32(0);
 
   return entity;
+}
+
+export function createOrLoadWorker(address: Address): Worker {
+  let worker = Worker.load(address.toHex());
+
+  if (!worker) {
+    worker = new Worker(address.toHex());
+
+    worker.address = address;
+    worker.amountReceived = BigInt.fromI32(0);
+    worker.amountJobsSolved = BigInt.fromI32(0);
+    worker.amountJobsSolvedPaid = BigInt.fromI32(0);
+  }
+
+  return worker;
 }
 
 export function handleIntermediateStorage(event: IntermediateStorage): void {
@@ -59,6 +76,10 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 
   statsEntity.save();
   entity.save();
+
+  const worker = createOrLoadWorker(event.params._sender);
+  worker.amountJobsSolved = worker.amountJobsSolved.plus(BigInt.fromI32(1));
+  worker.save();
 
   updateIntermediateStorageEventDayData(event);
 }
@@ -113,12 +134,17 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   const entity = new BulkTransferEvent(id);
 
   entity.escrow = event.address;
-  entity.bulkCount = event.params._bulkCount;
-  entity.txId = event.params._txId;
-  entity.amountPaid = event.params._amountPaid;
+  entity.bulkCount = BigInt.fromI32(event.params._recipients.length);
   entity.block = event.block.number;
   entity.timestamp = event.block.timestamp;
   entity.transaction = event.transaction.hash;
+  entity.txId = event.params._txId;
+
+  const amountPaid = event.params._amounts.reduce(
+    (a, b) => a.plus(b),
+    BigInt.fromI32(0)
+  );
+  entity.amountPaid = amountPaid;
 
   let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
 
@@ -142,10 +168,23 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = event.params._isPartial ? 'Partially Paid' : 'Paid';
-    escrowEntity.amountPayout = escrowEntity.amountPayout.plus(
-      event.params._amountPaid
-    );
+    escrowEntity.amountPayout = escrowEntity.amountPayout.plus(amountPaid);
     escrowEntity.save();
+  }
+  for (let i = 0; i < event.params._recipients.length; i++) {
+    const worker = createOrLoadWorker(event.params._recipients[i]);
+    worker.amountReceived = event.params._amounts[i];
+    worker.amountJobsSolvedPaid = worker.amountJobsSolvedPaid.plus(
+      BigInt.fromI32(1)
+    );
+    worker.save();
+    const id = `${event.transaction.hash.toHex()}-${event.params._recipients[
+      i
+    ].toHex()}`;
+    const payment = new Payment(id);
+    payment.address = event.params._recipients[i];
+    payment.amount = event.params._amounts[i];
+    payment.save();
   }
 }
 

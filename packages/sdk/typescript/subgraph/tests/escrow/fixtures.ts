@@ -7,11 +7,19 @@ import {
   BulkTransfer,
 } from '../../generated/templates/Escrow/Escrow';
 
-export function createISEvent(url: string, hash: string): IntermediateStorage {
+export function createISEvent(
+  sender: string,
+  url: string,
+  hash: string
+): IntermediateStorage {
   const newIntermediateStorageEvent = changetype<IntermediateStorage>(
     newMockEvent()
   );
   newIntermediateStorageEvent.parameters = [];
+  const senderParam = new ethereum.EventParam(
+    '_sender',
+    ethereum.Value.fromString(sender)
+  );
   const urlParam = new ethereum.EventParam(
     '_url',
     ethereum.Value.fromString(url)
@@ -21,6 +29,7 @@ export function createISEvent(url: string, hash: string): IntermediateStorage {
     ethereum.Value.fromString(hash)
   );
 
+  newIntermediateStorageEvent.parameters.push(senderParam);
   newIntermediateStorageEvent.parameters.push(urlParam);
   newIntermediateStorageEvent.parameters.push(hashParam);
 
@@ -47,8 +56,8 @@ export function createPendingEvent(manifest: string, hash: string): Pending {
 
 export function createBulkTransferEvent(
   txId: i32,
-  bulkCount: i32,
-  amountPaid: i32,
+  recipients: string[],
+  amounts: i32[],
   isPartial: boolean,
   timestamp: BigInt
 ): BulkTransfer {
@@ -59,13 +68,13 @@ export function createBulkTransferEvent(
     '_txId',
     ethereum.Value.fromI32(txId)
   );
-  const bulkCountParam = new ethereum.EventParam(
-    'hash',
-    ethereum.Value.fromI32(bulkCount)
+  const recipientsParam = new ethereum.EventParam(
+    '_recipients',
+    ethereum.Value.fromStringArray(recipients)
   );
-  const amountPaidParam = new ethereum.EventParam(
-    '_amountPaid',
-    ethereum.Value.fromI32(amountPaid)
+  const amountsParam = new ethereum.EventParam(
+    '_amounts',
+    ethereum.Value.fromI32Array(amounts)
   );
   const isPartialParam = new ethereum.EventParam(
     '_isPartial',
@@ -73,8 +82,8 @@ export function createBulkTransferEvent(
   );
 
   newBTEvent.parameters.push(txIdParam);
-  newBTEvent.parameters.push(bulkCountParam);
-  newBTEvent.parameters.push(amountPaidParam);
+  newBTEvent.parameters.push(recipientsParam);
+  newBTEvent.parameters.push(amountsParam);
   newBTEvent.parameters.push(isPartialParam);
 
   return newBTEvent;

@@ -214,3 +214,17 @@ type RewardAddedEvent @entity {
   timestamp: BigInt!
   transaction: Bytes!
 }
+
+type Worker @entity {
+  id: ID!
+  address: Bytes!
+  amountReceived: BigInt!
+  amountJobsSolved: BigInt!
+  amountJobsSolvedPaid: BigInt!
+}
+
+type Payment @entity {
+  id: ID!
+  address: Bytes!
+  amount: BigInt!
+}

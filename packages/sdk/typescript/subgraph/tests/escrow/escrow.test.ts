@@ -50,7 +50,11 @@ describe('Escrow', () => {
   });
 
   test('should properly handle IntermediateStorage event', () => {
-    const newIS = createISEvent('test.com', 'is_hash_1');
+    const newIS = createISEvent(
+      '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+      'test.com',
+      'is_hash_1'
+    );
     handleIntermediateStorage(newIS);
 
     const id = `${newIS.transaction.hash.toHex()}-${newIS.logIndex.toString()}-${
@@ -62,6 +66,12 @@ describe('Escrow', () => {
       id,
       'timestamp',
       newIS.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'ISEvent',
+      id,
+      '_sender',
+      newIS.params._sender.toString()
     );
     assert.fieldEquals('ISEvent', id, '_url', newIS.params._url.toString());
     assert.fieldEquals('ISEvent', id, '_hash', newIS.params._hash.toString());
@@ -105,8 +115,28 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle BulkTransfer events', () => {
-    const bulk1 = createBulkTransferEvent(1, 2, 1, false, BigInt.fromI32(10));
-    const bulk2 = createBulkTransferEvent(3, 4, 1, false, BigInt.fromI32(11));
+    const bulk1 = createBulkTransferEvent(
+      1,
+      [
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+      ],
+      [0.5, 0.5],
+      false,
+      BigInt.fromI32(10)
+    );
+    const bulk2 = createBulkTransferEvent(
+      3,
+      [
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+      ],
+      [0.25, 0.25, 0.25, 0.25],
+      false,
+      BigInt.fromI32(11)
+    );
 
     handleBulkTransfer(bulk1);
     handleBulkTransfer(bulk2);
@@ -134,8 +164,8 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'BulkTransferEvent',
       id1,
-      'bulkCount',
-      bulk1.params._bulkCount.toString()
+      'recipients',
+      bulk1.params._recipients.toString()
     );
     assert.fieldEquals(
       'BulkTransferEvent',
@@ -166,8 +196,8 @@ describe('Escrow', () => {
     assert.fieldEquals(
       'BulkTransferEvent',
       id2,
-      'bulkCount',
-      bulk2.params._bulkCount.toString()
+      'recipients',
+      bulk1.params._recipients.toString()
     );
     assert.fieldEquals(
       'BulkTransferEvent',
@@ -203,8 +233,16 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate IntermediateStorage event in statistics', () => {
-      const newIS = createISEvent('test.com', 'is_hash_1');
-      const newIS1 = createISEvent('test.com', 'is_hash_1');
+      const newIS = createISEvent(
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        'test.com',
+        'is_hash_1'
+      );
+      const newIS1 = createISEvent(
+        '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+        'test.com',
+        'is_hash_1'
+      );
 
       handleIntermediateStorage(newIS);
       handleIntermediateStorage(newIS1);
@@ -258,10 +296,33 @@ describe('Escrow', () => {
 
     test('Should properly calculate BulkTransfser event in statistics', () => {
       handleBulkTransfer(
-        createBulkTransferEvent(1, 5, 1, false, BigInt.fromI32(11))
+        createBulkTransferEvent(
+          1,
+          [
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          ],
+          [0.2, 0.2, 0.2, 0.2, 0.2],
+          false,
+          BigInt.fromI32(11)
+        )
       );
       handleBulkTransfer(
-        createBulkTransferEvent(2, 4, 1, false, BigInt.fromI32(11))
+        createBulkTransferEvent(
+          2,
+          [
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+            '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+          ],
+          [0.25, 0.25, 0.25, 0.25],
+          false,
+          BigInt.fromI32(11)
+        )
       );
 
       assert.fieldEquals(
