@@ -59,6 +59,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 
   // Entity fields can be set based on event parameters
   entity.timestamp = event.block.timestamp;
+  entity.sender = event.params._sender;
   entity._url = event.params._url;
   entity._hash = event.params._hash;
 
@@ -173,14 +174,16 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   }
   for (let i = 0; i < event.params._recipients.length; i++) {
     const worker = createOrLoadWorker(event.params._recipients[i]);
-    worker.amountReceived = event.params._amounts[i];
+    worker.amountReceived = worker.amountJobsSolvedPaid.plus(
+      event.params._amounts[i]
+    );
     worker.amountJobsSolvedPaid = worker.amountJobsSolvedPaid.plus(
       BigInt.fromI32(1)
     );
     worker.save();
     const id = `${event.transaction.hash.toHex()}-${event.params._recipients[
       i
-    ].toHex()}`;
+    ].toHex()}-${i}`;
     const payment = new Payment(id);
     payment.address = event.params._recipients[i];
     payment.amount = event.params._amounts[i];

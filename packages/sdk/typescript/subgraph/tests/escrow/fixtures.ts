@@ -1,5 +1,5 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, BigInt } from '@graphprotocol/graph-ts';
+import { ethereum, BigInt, Address } from '@graphprotocol/graph-ts';
 
 import {
   IntermediateStorage,
@@ -8,7 +8,7 @@ import {
 } from '../../generated/templates/Escrow/Escrow';
 
 export function createISEvent(
-  sender: string,
+  sender: Address,
   url: string,
   hash: string
 ): IntermediateStorage {
@@ -18,7 +18,7 @@ export function createISEvent(
   newIntermediateStorageEvent.parameters = [];
   const senderParam = new ethereum.EventParam(
     '_sender',
-    ethereum.Value.fromString(sender)
+    ethereum.Value.fromAddress(sender)
   );
   const urlParam = new ethereum.EventParam(
     '_url',
@@ -56,7 +56,7 @@ export function createPendingEvent(manifest: string, hash: string): Pending {
 
 export function createBulkTransferEvent(
   txId: i32,
-  recipients: string[],
+  recipients: Address[],
   amounts: i32[],
   isPartial: boolean,
   timestamp: BigInt
@@ -70,7 +70,7 @@ export function createBulkTransferEvent(
   );
   const recipientsParam = new ethereum.EventParam(
     '_recipients',
-    ethereum.Value.fromStringArray(recipients)
+    ethereum.Value.fromAddressArray(recipients)
   );
   const amountsParam = new ethereum.EventParam(
     '_amounts',

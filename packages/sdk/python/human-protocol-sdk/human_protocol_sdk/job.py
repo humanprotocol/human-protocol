@@ -1459,7 +1459,8 @@ class Job:
         Trying to download the results with the wrong key fails.
 
         >>> results = {"results": True}
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key)
+        >>> sender = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
         True
         >>> rep_oracle_false_priv_key = b"59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         >>> job.intermediate_results(rep_oracle_false_priv_key)
