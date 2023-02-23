@@ -3,7 +3,9 @@
 cat << EOF > pyscript.py
 #!/usr/bin/python3
 import json
-from basemodels import Manifest, Preprocess
+# from basemodels import Manifest, Preprocess
+from basemodels.pydantic.manifest.manifest import Manifest
+from basemodels.pydantic.manifest.data.preprocess import Preprocess
 
 def export_json_schema(cls, file_name):
     with open(file_name, "w") as outfile:
