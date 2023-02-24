@@ -7,6 +7,7 @@ import {
   useTheme,
 } from '@mui/material';
 import * as React from 'react';
+import { useParams } from 'react-router-dom';
 import addressSvg from 'src/assets/address.svg';
 import { PageWrapper, ViewTitle } from 'src/components';
 import { CardTextRow } from 'src/components/Cards';
@@ -17,24 +18,20 @@ import { NetworkSelect } from 'src/components/NetworkSelect';
 export const EscrowDetailPage: React.FC = (): React.ReactElement => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
+  const { chainId, address } = useParams();
 
   return (
     <PageWrapper>
       <Box display="flex" alignItems="center" flexWrap="wrap">
         <ViewTitle title="Address" iconUrl={addressSvg} />
-        {!isMobile && (
-          <CopyAddressButton
-            address="0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0"
-            ml={6}
-          />
-        )}
+        {!isMobile && <CopyAddressButton address={address || ''} ml={6} />}
         <Box ml="auto">
-          <NetworkSelect />
+          <NetworkSelect value={chainId} disabled />
         </Box>
       </Box>
       {isMobile && (
         <Box mt={{ xs: 4, md: 6 }}>
-          <CopyAddressButton address="0xF0245F6251Bef9447A08766b9DA2B07b28aD80B0" />
+          <CopyAddressButton address={address || ''} />
         </Box>
       )}
       <Grid container spacing={4} mt={{ xs: 0, md: 4 }}>

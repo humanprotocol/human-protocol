@@ -38,7 +38,7 @@ export const routes: Array<Route> = [
   {
     key: 'escrow-detail-route',
     title: 'Escrow',
-    path: '/escrow/:address',
+    path: '/escrow/:chainId/:address',
     component: Escrow,
   },
   {
