@@ -11,18 +11,21 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { getProvider } from '@wagmi/core';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { useState } from 'react';
-import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
+import { useEffect, useState } from 'react';
 import {
   ChainId,
+  Currencies,
   ESCROW_NETWORKS,
   HM_TOKEN_DECIMALS,
   SUPPORTED_CHAIN_IDS,
-} from '../constants';
+} from 'src/constants';
 import { RoundedBox } from './RoundedBox';
 import {
+  CreatePaymentType,
   FortuneJobRequestType,
   FundingMethodType,
   JobLaunchResponse,
@@ -43,10 +46,9 @@ export const JobRequest = ({
   onSuccess,
   onFail,
 }: JobRequestProps) => {
-  const { address } = useAccount();
-  const { data: signer } = useSigner();
-  const chainId = useChainId();
-  const { switchNetwork } = useSwitchNetwork();
+  const provider = getProvider();
+  const stripe = useStripe();
+  const elements = useElements();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
     chainId: SUPPORTED_CHAIN_IDS.includes(ChainId.LOCALHOST)
       ? ChainId.LOCALHOST
@@ -60,7 +62,13 @@ export const JobRequest = ({
     fundAmount: '',
     jobRequester: '',
   });
+  const [paymentData, setPaymentData] = useState<CreatePaymentType>({
+    amount: '',
+    currency: 'USD',
+    name: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenAmount, setTokenAmount] = useState(0);
 
   const handleJobRequestFormFieldChange = (
     fieldName: string,
@@ -74,29 +82,54 @@ export const JobRequest = ({
     }
   };
 
-  const handleLaunch = async () => {
-    if (!signer || !address) return;
+  const handlePaymentDataFormFieldChange = (
+    fieldName: string,
+    fieldValue: any
+  ) => {
+    setPaymentData({ ...paymentData, [fieldName]: fieldValue });
+  };
 
-    if (chainId !== jobRequest.chainId) {
-      switchNetwork?.(jobRequest.chainId);
+  useEffect(() => {
+    const getHMTPrice = async () => {
+      const currentPrice = (
+        await axios.get(
+          `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=${paymentData.currency.toLowerCase()}`
+        )
+      ).data['human-protocol'][paymentData.currency.toLowerCase()];
+      setTokenAmount(Number(paymentData.amount) / currentPrice);
+    };
+    getHMTPrice();
+  }, [paymentData.amount, paymentData.currency]);
+
+  const handleLaunch = async () => {
+    if (!stripe || !elements) {
+      // Stripe.js has not yet loaded.
+      // Make sure to disable form submission until Stripe.js has loaded.
+      alert('Stripe.js has not yet loaded.');
       return;
     }
-
     setIsLoading(true);
     const data: FortuneJobRequestType = {
       ...jobRequest,
-      jobRequester: address,
+      fundAmount: tokenAmount.toString(),
       token: ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress!,
+      fiat: true,
     };
     try {
-      const contract = new ethers.Contract(data.token, HMTokenABI, signer);
+      console.log('data.token', data.token);
+      const contract = new ethers.Contract(data.token, HMTokenABI, provider);
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
         alert('Job Launcher address is missing');
         setIsLoading(false);
         return;
       }
-      const balance = await contract.balanceOf(address);
+      console.log('a');
+      console.log('jobLauncherAddress', jobLauncherAddress);
+      console.log(contract);
+      const balance = await contract.balanceOf(jobLauncherAddress);
+      console.log('balance', balance);
+
       const fundAmount = ethers.utils.parseUnits(
         data.fundAmount,
         HM_TOKEN_DECIMALS
@@ -104,19 +137,31 @@ export const JobRequest = ({
       if (balance.lt(fundAmount)) {
         throw new Error('Balance not enough for funding the escrow');
       }
-
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
-      await axios.post(`${baseUrl}/check-escrow`, data);
+      console.log(await axios.post(`${baseUrl}/check-escrow`, data));
 
-      const allowance = await contract.allowance(address, jobLauncherAddress);
+      const clientSecret = (
+        await axios.post(`${baseUrl}/create-payment-intent`, {
+          currency: paymentData.currency.toLowerCase(),
+          amount: (Number(paymentData.amount) * 100).toString(),
+        })
+      )?.data?.clientSecret;
 
-      if (allowance.lt(fundAmount)) {
-        const tx = await contract.approve(jobLauncherAddress, fundAmount);
-        const receipt = await tx.wait();
-        console.log(receipt);
-      }
+      const card = elements.getElement(CardElement);
+      if (!card) return;
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: card,
+            billing_details: {
+              name: paymentData.name,
+            },
+          },
+        });
+      if (stripeError) throw new Error(stripeError.message);
 
       onLaunch();
+      data.paymentId = paymentIntent?.id;
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
     } catch (err: any) {
@@ -179,8 +224,6 @@ export const JobRequest = ({
               <FormControl fullWidth>
                 <TextField
                   placeholder="Fortunes Requested"
-                  type="number"
-                  inputProps={{ min: 0, step: 1 }}
                   value={jobRequest.fortunesRequired}
                   onChange={(e) =>
                     handleJobRequestFormFieldChange(
@@ -201,6 +244,15 @@ export const JobRequest = ({
               }
             />
           </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              placeholder="Job Requester Address"
+              value={jobRequest.jobRequester}
+              onChange={(e) =>
+                handleJobRequestFormFieldChange('jobRequester', e.target.value)
+              }
+            />
+          </FormControl>
         </Box>
         <Box
           sx={{
@@ -211,32 +263,95 @@ export const JobRequest = ({
             display: 'flex',
             flexDirection: 'column',
             gap: 3,
+            width: '30vw',
           }}
         >
           <Typography variant="body2" color="primary">
             Funds
           </Typography>
-          <Box>
+          <FormControl>
             <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
-              Token
+              Card
             </Typography>
             <RoundedBox sx={{ p: 2 }}>
-              <Typography variant="body2" fontWeight={500} color="primary">
-                {ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.hmtAddress}
-              </Typography>
+              <CardElement id="card" />
             </RoundedBox>
-          </Box>
-          <FormControl>
-            <TextField
-              placeholder="Amount"
-              value={jobRequest.fundAmount}
-              onChange={(e) =>
-                handleJobRequestFormFieldChange('fundAmount', e.target.value)
-              }
-            />
           </FormControl>
+          <FormControl>
+            <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
+              Name on Card
+            </Typography>
+            <RoundedBox sx={{ p: 2 }}>
+              <TextField
+                fullWidth
+                variant="standard"
+                placeholder="John Smith"
+                value={paymentData.name}
+                onChange={(e) =>
+                  handlePaymentDataFormFieldChange('name', e.target.value)
+                }
+              />
+            </RoundedBox>
+          </FormControl>
+          <Grid container sx={{ width: '100%' }} spacing={3}>
+            <Grid item xs={12} sm={12} md={6}>
+              <FormControl fullWidth>
+                <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
+                  Amount
+                </Typography>
+                <RoundedBox sx={{ p: 2 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="10"
+                    variant="standard"
+                    value={paymentData.amount}
+                    onChange={(e) =>
+                      handlePaymentDataFormFieldChange('amount', e.target.value)
+                    }
+                  />
+                </RoundedBox>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={12} md={6}>
+              <FormControl fullWidth>
+                <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
+                  Currency
+                </Typography>
+                <RoundedBox sx={{ p: 1 }}>
+                  <Select
+                    size="small"
+                    variant="filled"
+                    value={paymentData.currency}
+                    onChange={(e) =>
+                      handlePaymentDataFormFieldChange(
+                        'currency',
+                        e.target.value
+                      )
+                    }
+                    sx={{ background: 'white', width: '95%', ml: 1 }}
+                  >
+                    {Currencies.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        {name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </RoundedBox>
+              </FormControl>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
+      {tokenAmount !== 0 && (
+        <Typography
+          variant="body2"
+          color="primary"
+          sx={{ mb: 1, mt: 1, display: 'flex', justifyContent: 'flex-end' }}
+        >
+          Escrow will be funded with {tokenAmount}HMT aprox.
+        </Typography>
+      )}
+      {tokenAmount === 0 && <br></br>}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 8 }}>
         <Button
           variant="outlined"

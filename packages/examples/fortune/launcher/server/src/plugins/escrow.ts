@@ -81,11 +81,31 @@ class Escrow {
     fundAmount: string
   ) {
     const hmtoken = new web3.eth.Contract(HMTokenAbi as [], tokenAddress);
-    const allowance = await hmtoken.methods
-      .allowance(jobRequester, web3.eth.defaultAccount)
-      .call();
-    const balance = await hmtoken.methods.balanceOf(jobRequester).call();
-    return allowance >= fundAmount && balance >= fundAmount;
+    const allowance = web3.utils.toBN(
+      await hmtoken.methods
+        .allowance(jobRequester, web3.eth.defaultAccount)
+        .call()
+    );
+    const balance = web3.utils.toBN(
+      await hmtoken.methods.balanceOf(jobRequester).call()
+    );
+    return (
+      allowance.gte(web3.utils.toBN(fundAmount)) &&
+      balance.gte(web3.utils.toBN(fundAmount))
+    );
+  }
+
+  async checkBalance(
+    web3: Web3,
+    tokenAddress: string,
+    jobRequester: string,
+    fundAmount: string
+  ) {
+    const hmtoken = new web3.eth.Contract(HMTokenAbi as [], tokenAddress);
+    const balance = web3.utils.toBN(
+      await hmtoken.methods.balanceOf(jobRequester).call()
+    );
+    return balance.gte(web3.utils.toBN(fundAmount));
   }
 
   async createEscrow(
@@ -116,13 +136,23 @@ class Escrow {
     fundAmount: string
   ) {
     const hmtoken = new web3.eth.Contract(HMTokenAbi as [], tokenAddress);
-    const gas = await hmtoken.methods
-      .transferFrom(jobRequester, escrowAddress, fundAmount)
-      .estimateGas({ from: web3.eth.defaultAccount });
-    const gasPrice = await web3.eth.getGasPrice();
-    await hmtoken.methods
-      .transferFrom(jobRequester, escrowAddress, fundAmount)
-      .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+    if (jobRequester === web3.eth.defaultAccount) {
+      const gas = await hmtoken.methods
+        .transfer(escrowAddress, fundAmount)
+        .estimateGas({ from: web3.eth.defaultAccount });
+      const gasPrice = await web3.eth.getGasPrice();
+      await hmtoken.methods
+        .transfer(escrowAddress, fundAmount)
+        .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+    } else {
+      const gas = await hmtoken.methods
+        .transferFrom(jobRequester, escrowAddress, fundAmount)
+        .estimateGas({ from: web3.eth.defaultAccount });
+      const gasPrice = await web3.eth.getGasPrice();
+      await hmtoken.methods
+        .transferFrom(jobRequester, escrowAddress, fundAmount)
+        .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+    }
   }
 
   checkCurseWords(text: string): boolean {

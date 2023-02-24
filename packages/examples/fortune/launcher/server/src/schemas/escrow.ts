@@ -12,6 +12,8 @@ export const escrow = {
       minLength: 2,
       pattern: '^0x[a-fA-F0-9]{40}$',
     },
+    paymentId: { type: 'string' },
+    fiat: { type: 'boolean', default: 'false' },
   },
   required: [
     'chainId',

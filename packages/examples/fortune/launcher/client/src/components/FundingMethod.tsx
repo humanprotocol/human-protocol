@@ -76,9 +76,8 @@ export const FundingMethod = ({ onChange }: FundingMethodProps) => {
             variant="outlined"
             sx={{ mt: 2.5, minWidth: '200px' }}
             onClick={() => onChange('fiat')}
-            disabled
           >
-            Fiat (Coming soon)
+            Fiat
           </Button>
         </Box>
       </RoundedBox>

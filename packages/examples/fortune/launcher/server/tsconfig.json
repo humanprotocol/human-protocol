@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "outDir": "build",
-    "lib": ["es2020"]
+    "lib": ["es2020"],
+    "useUnknownInCatchVariables": false
   },
   "include": ["src/**/*"],
   "exclude": ["tests"]
