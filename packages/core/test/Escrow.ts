@@ -176,7 +176,11 @@ describe('Escrow', function () {
         const result = await (
           await escrow
             .connect(reputationOracle)
-            .storeResults(MOCK_URL, MOCK_HASH)
+            .storeResults(
+              await externalAddress.getAddress(),
+              MOCK_URL,
+              MOCK_HASH
+            )
         ).wait();
 
         expect(result.events?.[0].event).to.equal(
@@ -196,7 +200,13 @@ describe('Escrow', function () {
       });
       it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow.connect(externalAddress).storeResults(MOCK_URL, MOCK_HASH)
+          escrow
+            .connect(externalAddress)
+            .storeResults(
+              await externalAddress.getAddress(),
+              MOCK_URL,
+              MOCK_HASH
+            )
         ).to.be.revertedWith('Address calling not trusted');
       });
 
@@ -205,7 +215,13 @@ describe('Escrow', function () {
           .connect(owner)
           .addTrustedHandlers([await reputationOracle.getAddress()]);
         await expect(
-          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH)
+          escrow
+            .connect(reputationOracle)
+            .storeResults(
+              await externalAddress.getAddress(),
+              MOCK_URL,
+              MOCK_HASH
+            )
         ).to.be.revertedWith('Escrow not in Pending or Partial status state');
       });
     });
@@ -219,10 +235,16 @@ describe('Escrow', function () {
 
       it('Should emit an event on intermediate storage', async function () {
         await expect(
-          await escrow.connect(owner).storeResults(MOCK_URL, MOCK_HASH)
+          await escrow
+            .connect(owner)
+            .storeResults(
+              await externalAddress.getAddress(),
+              MOCK_URL,
+              MOCK_HASH
+            )
         )
           .to.emit(escrow, 'IntermediateStorage')
-          .withArgs(MOCK_URL, MOCK_HASH);
+          .withArgs(await externalAddress.getAddress(), MOCK_URL, MOCK_HASH);
       });
     });
 
@@ -237,7 +259,11 @@ describe('Escrow', function () {
         const result = await (
           await escrow
             .connect(reputationOracle)
-            .storeResults(MOCK_URL, MOCK_HASH)
+            .storeResults(
+              await externalAddress.getAddress(),
+              MOCK_URL,
+              MOCK_HASH
+            )
         ).wait();
 
         expect(result.events?.[0].event).to.equal(
@@ -514,7 +540,7 @@ describe('Escrow', function () {
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
           .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients.length, 8, true);
+          .withArgs(anyValue, recepients, [8], true);
       });
     });
 

@@ -12,6 +12,7 @@ type LaunchedEscrow @entity {
 type ISEvent @entity {
   id: ID!
   timestamp: BigInt!
+  sender: Bytes!
   _url: String! # string
   _hash: String! # string
   count: BigInt
@@ -213,4 +214,18 @@ type RewardAddedEvent @entity {
   block: BigInt!
   timestamp: BigInt!
   transaction: Bytes!
+}
+
+type Worker @entity {
+  id: ID!
+  address: Bytes!
+  amountReceived: BigInt!
+  amountJobsSolved: BigInt!
+  amountJobsSolvedPaid: BigInt!
+}
+
+type Payment @entity {
+  id: ID!
+  address: Bytes!
+  amount: BigInt!
 }

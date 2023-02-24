@@ -25,6 +25,8 @@ import {
 
 const escrowAddressString = '0xA16081F360e3847006dB660bae1c6d1b2e17eC2A';
 const escrowAddress = Address.fromString(escrowAddressString);
+const workerAddressString = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
+const workerAddress = Address.fromString(workerAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -50,7 +52,7 @@ describe('Escrow', () => {
   });
 
   test('should properly handle IntermediateStorage event', () => {
-    const newIS = createISEvent('test.com', 'is_hash_1');
+    const newIS = createISEvent(workerAddress, 'test.com', 'is_hash_1');
     handleIntermediateStorage(newIS);
 
     const id = `${newIS.transaction.hash.toHex()}-${newIS.logIndex.toString()}-${
@@ -63,6 +65,7 @@ describe('Escrow', () => {
       'timestamp',
       newIS.block.timestamp.toString()
     );
+    assert.fieldEquals('ISEvent', id, 'sender', newIS.params._sender.toHex());
     assert.fieldEquals('ISEvent', id, '_url', newIS.params._url.toString());
     assert.fieldEquals('ISEvent', id, '_hash', newIS.params._hash.toString());
   });
@@ -105,8 +108,20 @@ describe('Escrow', () => {
   });
 
   test('Should properly handle BulkTransfer events', () => {
-    const bulk1 = createBulkTransferEvent(1, 2, 1, false, BigInt.fromI32(10));
-    const bulk2 = createBulkTransferEvent(3, 4, 1, false, BigInt.fromI32(11));
+    const bulk1 = createBulkTransferEvent(
+      1,
+      [workerAddress, workerAddress],
+      [1, 1],
+      false,
+      BigInt.fromI32(10)
+    );
+    const bulk2 = createBulkTransferEvent(
+      3,
+      [workerAddress, workerAddress, workerAddress, workerAddress],
+      [1, 1, 1, 1],
+      false,
+      BigInt.fromI32(11)
+    );
 
     handleBulkTransfer(bulk1);
     handleBulkTransfer(bulk2);
@@ -131,12 +146,7 @@ describe('Escrow', () => {
       'block',
       bulk1.block.number.toString()
     );
-    assert.fieldEquals(
-      'BulkTransferEvent',
-      id1,
-      'bulkCount',
-      bulk1.params._bulkCount.toString()
-    );
+    assert.fieldEquals('BulkTransferEvent', id1, 'bulkCount', '2');
     assert.fieldEquals(
       'BulkTransferEvent',
       id1,
@@ -148,6 +158,35 @@ describe('Escrow', () => {
       id1,
       'transaction',
       bulk1.transaction.hash.toHexString()
+    );
+
+    // Payments Bulk 1
+    const idP1 = `${bulk1.transaction.hash.toHex()}-${bulk1.params._recipients[0].toHex()}-${0}`;
+    assert.fieldEquals(
+      'Payment',
+      idP1,
+      'address',
+      bulk1.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP1,
+      'amount',
+      bulk1.params._amounts[0].toString()
+    );
+
+    const idP2 = `${bulk1.transaction.hash.toHex()}-${bulk1.params._recipients[1].toHex()}-${1}`;
+    assert.fieldEquals(
+      'Payment',
+      idP2,
+      'address',
+      bulk1.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP2,
+      'amount',
+      bulk1.params._amounts[0].toString()
     );
 
     // Bulk 2
@@ -163,12 +202,7 @@ describe('Escrow', () => {
       'block',
       bulk2.block.number.toString()
     );
-    assert.fieldEquals(
-      'BulkTransferEvent',
-      id2,
-      'bulkCount',
-      bulk2.params._bulkCount.toString()
-    );
+    assert.fieldEquals('BulkTransferEvent', id2, 'bulkCount', '4');
     assert.fieldEquals(
       'BulkTransferEvent',
       id2,
@@ -182,6 +216,62 @@ describe('Escrow', () => {
       bulk2.transaction.hash.toHexString()
     );
 
+    // Payments Bulk 2
+    const idP3 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[0].toHex()}-${0}`;
+    assert.fieldEquals(
+      'Payment',
+      idP3,
+      'address',
+      bulk2.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP3,
+      'amount',
+      bulk2.params._amounts[0].toString()
+    );
+
+    const idP4 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[1].toHex()}-${1}`;
+    assert.fieldEquals(
+      'Payment',
+      idP4,
+      'address',
+      bulk2.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP4,
+      'amount',
+      bulk2.params._amounts[0].toString()
+    );
+    const idP5 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[2].toHex()}-${2}`;
+    assert.fieldEquals(
+      'Payment',
+      idP5,
+      'address',
+      bulk2.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP5,
+      'amount',
+      bulk2.params._amounts[0].toString()
+    );
+
+    const idP6 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[3].toHex()}-${3}`;
+    assert.fieldEquals(
+      'Payment',
+      idP6,
+      'address',
+      bulk2.params._recipients[0].toHex()
+    );
+    assert.fieldEquals(
+      'Payment',
+      idP6,
+      'amount',
+      bulk2.params._amounts[0].toString()
+    );
+
     // Escrow
     assert.fieldEquals(
       'LaunchedEscrow',
@@ -193,7 +283,16 @@ describe('Escrow', () => {
       'LaunchedEscrow',
       escrowAddress.toHex(),
       'amountPayout',
-      '2'
+      '6'
+    );
+
+    // Worker
+    assert.fieldEquals('Worker', workerAddress.toHex(), 'amountReceived', '6');
+    assert.fieldEquals(
+      'Worker',
+      workerAddress.toHex(),
+      'amountJobsSolvedPaid',
+      '6'
     );
   });
 
@@ -203,8 +302,8 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate IntermediateStorage event in statistics', () => {
-      const newIS = createISEvent('test.com', 'is_hash_1');
-      const newIS1 = createISEvent('test.com', 'is_hash_1');
+      const newIS = createISEvent(workerAddress, 'test.com', 'is_hash_1');
+      const newIS1 = createISEvent(workerAddress, 'test.com', 'is_hash_1');
 
       handleIntermediateStorage(newIS);
       handleIntermediateStorage(newIS1);
@@ -258,10 +357,28 @@ describe('Escrow', () => {
 
     test('Should properly calculate BulkTransfser event in statistics', () => {
       handleBulkTransfer(
-        createBulkTransferEvent(1, 5, 1, false, BigInt.fromI32(11))
+        createBulkTransferEvent(
+          1,
+          [
+            workerAddress,
+            workerAddress,
+            workerAddress,
+            workerAddress,
+            workerAddress,
+          ],
+          [1, 1, 1, 1, 1],
+          false,
+          BigInt.fromI32(11)
+        )
       );
       handleBulkTransfer(
-        createBulkTransferEvent(2, 4, 1, false, BigInt.fromI32(11))
+        createBulkTransferEvent(
+          2,
+          [workerAddress, workerAddress, workerAddress, workerAddress],
+          [1, 1, 1, 1],
+          false,
+          BigInt.fromI32(11)
+        )
       );
 
       assert.fieldEquals(

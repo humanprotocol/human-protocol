@@ -2362,9 +2362,9 @@
   integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
 
 "@human-protocol/core@workspace:*":
-  version "1.0.40"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.40.tgz#1d57064ab50309a01becaec424e4e4b9a7362fa0"
-  integrity sha512-WabAZcUH6E+xtaAbWTKMd7BcHqe70hyj4kj4vMQwBDHB7mnmmOU8ddk85r2kk021ImYGcLkLwZhpet9BDG11vQ==
+  version "1.0.41"
+  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.41.tgz#e0094c86d27297082ad58735c1dbabf604223b8d"
+  integrity sha512-NZ/QYHDCQ7/NXTaB7KDk+EPPiNQ/BJG5H5/xELpECCyoiFS0vsKXSkasqejw2iKa9wIhn2tk7p8gJLFkbObepQ==
 
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"

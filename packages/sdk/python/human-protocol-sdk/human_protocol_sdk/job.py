@@ -895,7 +895,9 @@ class Job:
 
         return self.status() == Status.Cancelled
 
-    def store_intermediate_results(self, results: Dict, pub_key: bytes) -> bool:
+    def store_intermediate_results(
+        self, results: Dict, pub_key: bytes, sender: str
+    ) -> bool:
         """Recording Oracle stores intermediate results with Reputation Oracle's public key to S3
         and updates the contract's state.
 
@@ -916,7 +918,8 @@ class Job:
         Storing intermediate results uploads and updates results url correctly.
 
         >>> results = {"results": True}
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key)
+        >>> sender = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
         True
         >>> rep_oracle_priv_key = b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         >>> job.intermediate_results(rep_oracle_priv_key)
@@ -928,7 +931,7 @@ class Job:
         True
         >>> job.setup()
         True
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key)
+        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
         True
 
         >>> multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a")]
@@ -943,12 +946,13 @@ class Job:
 
         >>> job.gas_payer_priv = "657b6497a355a3982928d5515d48a84870f057c4d16923eb1d104c0afada9aa8"
         >>> job.multi_credentials = [("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"), ("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d")]
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key)
+        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
         False
 
         Args:
             results (Dict): intermediate results of the Recording Oracle.
             pub_key (bytes): public key of the Reputation Oracle.
+            sender (str): sender address of results
 
         Returns:
             returns True if contract's state is updated and IPFS upload succeeds.
@@ -967,7 +971,7 @@ class Job:
         self.intermediate_manifest_hash = hash_
         self.intermediate_manifest_url = url
 
-        func_args = [url, hash_]
+        func_args = [sender, url, hash_]
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
@@ -1455,7 +1459,8 @@ class Job:
         Trying to download the results with the wrong key fails.
 
         >>> results = {"results": True}
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key)
+        >>> sender = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
         True
         >>> rep_oracle_false_priv_key = b"59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         >>> job.intermediate_results(rep_oracle_false_priv_key)
