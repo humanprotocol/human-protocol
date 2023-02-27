@@ -134,10 +134,10 @@ export class EscrowService implements EscrowInterface{
     const networkConfig = await this.proxyProvider.getNetworkConfig();
     const tx = this.contract.methods
       .setup([
-        data.recording_oracle,
         data.reputation_oracle,
-        new BigNumber(data.recording_oracle_stake),
+        data.recording_oracle,
         new BigNumber(data.reputation_oracle_stake),
+        new BigNumber(data.recording_oracle_stake),
         data.url,
         data.hash
       ])
