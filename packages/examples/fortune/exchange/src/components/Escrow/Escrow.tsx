@@ -93,7 +93,7 @@ export const Escrow = () => {
       account = accounts[0];
     }
     await sendFortune(account, escrow, fortune, recordingOracleUrl);
-    alert('Your fortune has been submitted');
+
     setFortune('');
     return;
   }

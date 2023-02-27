@@ -11,8 +11,18 @@ const sendFortune = async (
         escrowAddress: escrow,
         fortune
     };
-    await axios.post(recordingOracleUrl, body);
-    return;
+    try {
+        await axios.post(recordingOracleUrl, body)
+    } catch (err: any) {
+        if (err.response) {
+            console.log(err.response.data.message);
+            alert(err.response.data.message);
+            return;
+        }
+    }
+
+    alert('Fortune added successfully');
+    return
 }
 
 export default sendFortune;
