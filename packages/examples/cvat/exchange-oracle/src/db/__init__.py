@@ -1,0 +1,15 @@
+import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+
+from src.config import Config
+
+DATABASE_URL = Config.postgres_config.connection_url()
+engine = sqlalchemy.create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, bind=engine)
+
+Base = declarative_base()
+
+
+def create_db_objects() -> None:
+    Base.metadata.create_all(engine)
