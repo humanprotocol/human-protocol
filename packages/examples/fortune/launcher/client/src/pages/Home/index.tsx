@@ -113,7 +113,7 @@ function HomePage() {
                       Submit Fortunes
                     </Typography>
                     <Button
-                      href="/submit"
+                      href="/jobs"
                       variant="contained"
                       sx={{ mt: 12, minWidth: '200px' }}
                     >

@@ -105,4 +105,4 @@ export const LeaderboardView = ({
       </Grid>
     </Grid>
   );
-};
+}; 
