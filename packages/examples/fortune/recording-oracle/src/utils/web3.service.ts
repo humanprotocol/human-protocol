@@ -12,7 +12,7 @@ const statusesMap = [
   'Cancelled',
 ];
 
-export class Web3Serice implements EscrowContract {
+export class Web3Service implements EscrowContract {
   contract: Contract;
   networkProvider: null;
   web3: Web3;

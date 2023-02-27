@@ -12,7 +12,7 @@ import {
 } from './storage';
 import { MxService } from '../utils/mx.service';
 import { Address } from '@multiversx/sdk-core/out';
-import { Web3Serice } from '../utils/web3.service';
+import { Web3Service } from '../utils/web3.service';
 import { UserSigner } from '@multiversx/sdk-wallet/out';
 
 function processAddress(escrowAddress: string, web3: Web3): string | Address {
@@ -31,12 +31,12 @@ function initContract(
   escrowAddress: string | Address,
   web3: Web3,
   mxSigner: UserSigner
-): MxService | Web3Serice {
+): MxService | Web3Service {
   if (escrowAddress instanceof Address) {
     return new MxService(escrowAddress, mxSigner);
   }
 
-  return new Web3Serice(escrowAddress, web3);
+  return new Web3Service(escrowAddress, web3);
 }
 
 function checkCorrectOracleAddress(
@@ -46,17 +46,19 @@ function checkCorrectOracleAddress(
 ) {
   if (recOracleAddress instanceof Address) {
     const oracleAddress = mxSigner.getAddress();
-    if (oracleAddress !== recOracleAddress) {
+    if (oracleAddress == recOracleAddress) {
       throw new Error('Recording oracle address is not correct');
     }
   } else {
-    if (web3.utils.isAddress(recOracleAddress)) {
-      if (
-        web3.utils.toChecksumAddress(recOracleAddress) !==
-        web3.utils.toChecksumAddress(web3.eth.defaultAccount as string)
-      ) {
-        throw new Error('Recording oracle address is not correct');
-      }
+    if (!web3.utils.isAddress(recOracleAddress)) {
+      throw new Error('Recording oracle address is not correct');
+    }
+
+    if (
+      web3.utils.toChecksumAddress(recOracleAddress) !==
+      web3.utils.toChecksumAddress(web3.eth.defaultAccount as string)
+    ) {
+      throw new Error('Recording oracle address is not correct');
     }
   }
 }
@@ -78,7 +80,7 @@ export async function addFortune(
     };
   }
 
-  let escrowContract: MxService | Web3Serice;
+  let escrowContract: MxService | Web3Service;
   try {
     escrowContract = initContract(processedEscrowAddress, web3, mxSigner);
   } catch (e) {
@@ -92,7 +94,7 @@ export async function addFortune(
   } catch (e) {
     return {
       field: 'workerAddress',
-      message: 'Valid ethereum address required',
+      message: 'Valid address required',
     };
   }
 
@@ -104,9 +106,18 @@ export async function addFortune(
   }
 
   const escrowRecOracleAddr = await escrowContract.getRecordingOracleAddress();
+  let processedRecOracleAddress: string | Address;
+  try {
+    processedRecOracleAddress = processAddress(escrowRecOracleAddr, web3);
+  } catch (e) {
+    return {
+      data: 'recordingEscrowAddress',
+      message: 'Valid recording escrow address required',
+    };
+  }
 
   try {
-    checkCorrectOracleAddress(escrowRecOracleAddr, web3, mxSigner);
+    checkCorrectOracleAddress(processedRecOracleAddress, web3, mxSigner);
   } catch (e) {
     return {
       field: 'escrowAddress',
@@ -123,6 +134,7 @@ export async function addFortune(
   }
 
   const manifestUrl = await escrowContract.getEscrowManifestUrl();
+
   const {
     fortunes_requested: fortunesRequested,
     reputation_oracle_url: reputationOracleUrl,
@@ -150,7 +162,12 @@ export async function addFortune(
   // TODO calculate the URL hash(?)
   const resultHash = resultUrl;
 
-  await escrowContract.storeResults(resultUrl, resultHash);
+  try {
+    await escrowContract.storeResults(resultUrl, resultHash);
+  } catch (e) {
+    console.error('Cannot store results', e);
+    return { error: 'Cannot store results' };
+  }
 
   if (fortunes.length === fortunesRequested) {
     await bulkPayout(reputationOracleUrl, escrowAddress, fortunes);

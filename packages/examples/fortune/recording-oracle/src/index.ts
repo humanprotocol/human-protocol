@@ -4,6 +4,9 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { addFortune } from './services/fortune';
 import { Mnemonic, UserSigner } from '@multiversx/sdk-wallet/out';
+import * as dotenv from 'dotenv';
+import { initSigner } from './utils/mx.service';
+dotenv.config();
 
 const app = express();
 
@@ -19,10 +22,10 @@ const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
-const mnemonicKey = process.env.MX_MNEMONIC_KEY || '';
+const mnemonicPath =
+  process.env.MX_MNEMONIC_PATH || './mx-wallets/HUMAN-test-recording.mnemonic';
 
-const mnemonic = Mnemonic.fromString(mnemonicKey).deriveKey(0);
-const mxSigner = new UserSigner(mnemonic);
+const mxSigner = initSigner(mnemonicPath);
 
 app.use(bodyParser.json());
 

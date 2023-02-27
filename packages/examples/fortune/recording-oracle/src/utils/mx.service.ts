@@ -11,7 +11,10 @@ import {
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import { EscrowContract } from './contract.interface';
 import escrowAbi from '../abi/escrow.abi.json';
-import { UserSigner } from '@multiversx/sdk-wallet/out';
+import { Mnemonic, UserSigner } from '@multiversx/sdk-wallet/out';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+dotenv.config();
 
 const abiRegistry = AbiRegistry.create(escrowAbi);
 const abi = new SmartContractAbi(abiRegistry);
@@ -19,63 +22,10 @@ const proxyNetwork =
   process.env.MX_PROXY_NETWORK || 'https://devnet-gateway.multiversx.com';
 
 const gasLimit = process.env.MX_GAS_LIMIT || 6000000;
-
 type Oracle = {
   address: Address;
   stake: number;
 };
-import { EscrowContract } from './contract.interface';
-import { Contract } from 'web3-eth-contract';
-import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
-import Web3 from 'web3';
-
-const statusesMap = [
-  'Launched',
-  'Pending',
-  'Partial',
-  'Paid',
-  'Complete',
-  'Cancelled',
-];
-
-export class Web3Serice implements EscrowContract {
-  contract: Contract;
-  networkProvider: null;
-  web3: Web3;
-
-  constructor(address: string, web3: Web3) {
-    this.contract = new Contract(EscrowAbi as [], address);
-    this.networkProvider = null;
-    this.web3 = web3;
-  }
-
-  async getRecordingOracleAddress(): Promise<string> {
-    return await this.contract.methods.recordingOracle().call();
-  }
-
-  async getEscrowStatus(): Promise<string> {
-    const res = await this.contract.methods.status().call();
-
-    return statusesMap[res];
-  }
-
-  async getEscrowManifestUrl(): Promise<string> {
-    return await this.contract.methods.manifestUrl().call();
-  }
-
-  async storeResults(resultsUrl: string, resultHash: string): Promise<unknown> {
-    const gasNeeded = await this.contract.methods
-      .storeResults(resultsUrl, resultHash)
-      .estimateGas({ from: this.web3.eth.defaultAccount });
-    const gasPrice = await this.web3.eth.getGasPrice();
-
-    const result = await this.contract.methods
-      .storeResults(resultsUrl, resultHash)
-      .send({ from: this.web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
-
-    return result;
-  }
-}
 
 type QueryResult = {
   recording: Oracle;
@@ -169,4 +119,11 @@ export class MxService implements EscrowContract {
       interaction.getEndpoint()
     );
   }
+}
+
+export function initSigner(walletMnemonicPath: string): UserSigner {
+  const mnemonicData = fs.readFileSync(walletMnemonicPath, 'utf8');
+  const mnemonic = Mnemonic.fromString(mnemonicData).deriveKey(0);
+
+  return new UserSigner(mnemonic);
 }
