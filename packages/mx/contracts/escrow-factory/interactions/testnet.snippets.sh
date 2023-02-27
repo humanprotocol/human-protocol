@@ -1,13 +1,13 @@
-WALLET_PEM="~/erd-wallets/TestShard1.pem"
+WALLET_PEM="~/erd-wallets/HUMAN.pem"
 PROXY="https://testnet-gateway.elrond.com"
 CHAIN_ID="T"
 
 # UPDATE THIS AFTER EACH DEPLOY
-CONTRACT_ADDRESS="erd1qqqqqqqqqqqqqpgqcwpdzh0v8ard0c2rrn9k6sg33fuymfr2l8ksxkteux"
+CONTRACT_ADDRESS="erd1qqqqqqqqqqqqqpgqlucetxjl3c2yxrn4dhy8xkm6kh6ptac99cus2jsw3j"
 
 deploy() {
     mxpy --verbose contract deploy --recall-nonce \
-        --metadata-payable \
+        --metadata-payable --metadata-payable-by-sc\
         --pem=${WALLET_PEM} \
         --gas-limit=100000000 \
         --proxy=${PROXY} --chain=${CHAIN_ID} \

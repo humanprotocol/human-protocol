@@ -27,7 +27,7 @@ pub trait EscrowFactoryContract {
                 self.blockchain().get_gas_left(),
                 &BigUint::zero(),
                 &self.job_template_address().get(),
-                CodeMetadata::DEFAULT,
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE | CodeMetadata::PAYABLE_BY_SC,
                 &arguments,
             );
 
