@@ -104,7 +104,7 @@ export class Job {
           alchemy: alchemyKey,
           infura: infuraKey,
         })
-      : new ethers.providers.JsonRpcProvider();
+      : new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
 
     this.providerData = {
       provider,
