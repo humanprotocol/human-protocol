@@ -1,8 +1,11 @@
 import { AbiRegistry, SmartContractAbi, SmartContract, Address, Interaction, TypedOutcomeBundle, ResultsParser } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
 import escrowAbi from './abi/escrow.abi.json';
-import { proxyNetwork } from '../../constants/constants';
+import { apiNetwork, proxyNetwork } from '../../constants/constants';
 import { EscrowInterface } from '../common/escrow-interface.service';
+import axios from 'axios';
+import BigNumber from 'bignumber.js';
+
 
 
 const abiRegistry = AbiRegistry.create(escrowAbi);
@@ -35,12 +38,29 @@ export class EscrowService implements EscrowInterface{
     }
   }
 
+  async getToken(): Promise<string> {
+    const interaction = this.contract.methods.getToken();
+    const { firstValue } = await this.performQuery(interaction);
+
+    return firstValue?.valueOf();
+  }
+
+  async getDecimals(tokenId: string): Promise<number> {
+
+    const resp = await axios.get(`${apiNetwork}/tokens/${tokenId}`)
+
+    return resp?.data?.decimals;
+  }
+
   async getBalance(): Promise<string> {
     const interaction = this.contract.methods.getBalance();
     const response = await this.performQuery(interaction);
     const firstValue = response.firstValue?.valueOf();
 
-    return firstValue.toString();
+    const tokenId = await this.getToken();
+    const decimals = await this.getDecimals(tokenId);
+    
+    return new BigNumber(firstValue.toString()).shiftedBy(-decimals).toString();
   }
 
   async getManifest(): Promise<string> {

@@ -85,7 +85,14 @@ export const Escrow = () => {
   }, [setMainEscrow]);
 
   const send = async () => {
-    await sendFortune(escrow, fortune, recordingOracleUrl);
+    let account: string;
+    if (isMxLoggedIn) {
+      account = address;
+    } else {
+      const accounts = await web3.eth.getAccounts();
+      account = accounts[0];
+    }
+    await sendFortune(account, escrow, fortune, recordingOracleUrl);
     alert('Your fortune has been submitted');
     setFortune('');
     return;
