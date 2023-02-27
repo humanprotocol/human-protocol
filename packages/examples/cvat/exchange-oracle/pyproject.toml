@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "exchange-oracle"
+version = "0.1.0"
+description = "An example of decentralized exchange oracle with CVAT as annotation instrument"
+authors = ["Sergey Dzeranov <sergey@hmt.ai>"]
+readme = "README.md"
+packages = [{include = "exchange_oracle"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.92.0"
+uvicorn = "^0.20.0"
+python-dotenv = "^0.21.1"
+sqlalchemy = "^2.0.4"
+psycopg2 = "^2.9.5"
+sqlalchemy-utils = "^0.40.0"
+web3 = "^6.0.0b11"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+pre-commit = "^3.0.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
