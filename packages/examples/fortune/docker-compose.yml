@@ -12,9 +12,10 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_PASS}
     volumes:
       - ./${MANIFEST_FILE}:/tmp/manifests/docker-manifest.json
+      - ./${MX_MANIFEST_FILE}:/tmp/manifests/mx-manifest.json
     entrypoint: 'sh'
     command:
-      -c "mkdir -p /data/manifests && cp /tmp/manifests/docker-manifest.json /data/manifests/manifest.json && minio server /data --console-address ':9001'"
+      -c "mkdir -p /data/manifests && cp /tmp/manifests/docker-manifest.json /data/manifests/manifest.json && cp /tmp/manifests/mx-manifest.json /data/manifests/mx-manifest.json && minio server /data --console-address ':9001'"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 5s
