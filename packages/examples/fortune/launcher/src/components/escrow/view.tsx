@@ -3,7 +3,7 @@ import axios from 'axios';
 import { REC_ORACLE_ADDRESS, REC_ORACLE_ADDRESS_MX, REP_ORACLE_ADDRESS, REP_ORACLE_ADDRESS_MX} from '../../constants/constants';
 import { EscrowInterface } from '../escrow-interface.service';
 import { Web3EscrowContract } from '../web3/service/escrow.service';
-import { useGetAccountInfo, useGetIsLoggedIn } from '@multiversx/sdk-dapp/hooks';
+import { useGetAccountInfo } from '@multiversx/sdk-dapp/hooks';
 import { EscrowService } from '../mx/service/escrow.service';
 
 

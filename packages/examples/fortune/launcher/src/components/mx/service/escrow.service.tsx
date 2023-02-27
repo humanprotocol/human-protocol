@@ -14,7 +14,7 @@ import {
 } from '@multiversx/sdk-core/';
 import BigNumber from 'bignumber.js';
 import escrowAbi from './abi/escrow.abi.json';
-import { gasLimit, HMT_DECIMALS, HMT_TOKEN, proxyNetwork } from '../../../constants/constants';
+import { gasLimit, HMT_DECIMALS, HMT_TOKEN, proxyNetwork, setupGasLimit } from '../../../constants/constants';
 import { EscrowInterface, SetupPayload } from 'src/components/escrow-interface.service';
 
 const abiRegistry = AbiRegistry.create(escrowAbi);
@@ -77,7 +77,7 @@ export class EscrowService implements EscrowInterface{
     const response = await this.performQuery(interaction);
     const firstValue = response.firstValue?.valueOf();
 
-    return parseInt(firstValue);
+    return new BigNumber(parseInt(firstValue)).shiftedBy(-HMT_DECIMALS).toNumber();
   }
 
   async getManifest(): Promise<UrlHashPair> {
@@ -107,6 +107,7 @@ export class EscrowService implements EscrowInterface{
     sessionId: string | null;
   }> {
     const networkConfig = await this.proxyProvider.getNetworkConfig();
+
     const tx = this.contract.methods
       .deposit([])
       .withSingleESDTTransfer(
@@ -140,7 +141,7 @@ export class EscrowService implements EscrowInterface{
         data.url,
         data.hash
       ])
-      .withGasLimit(gasLimit)
+      .withGasLimit(setupGasLimit)
       .withChainID(networkConfig.ChainID)
       .buildTransaction();
 

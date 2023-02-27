@@ -12,15 +12,17 @@ export const TOOLS_API_URL = 'https://tools.multiversx.com';
 export const sampleAuthenticatedDomains = [TOOLS_API_URL];
 
 export const proxyNetwork = process.env.REACT_APP_MX_PROXY_NETWORK || 'https://devnet-gateway.multiversx.com';
+export const apiNetwork = process.env.REACT_APP_MX_API_NETWORK || 'https://devnet-api.multiversx.com';
 export const apiTimeout = 6000;
 export const gasLimit = 10000000;
+export const setupGasLimit = 30000000;
 
 export const REC_ORACLE_ADDRESS_MX = process.env.REACT_APP_REC_ORACLE_MX_ADDRESS || 'erd1w73dll00g2q96rqvj7gms00uey5s94z9fqjjj9ecgx2tpeyh8hxqpzgryr';
 export const REP_ORACLE_ADDRESS_MX = process.env.REACT_APP_REP_ORACLE_MX_ADDRESS || 'erd17rw0ugxew767mwluxwu75gqg3m500qu7ktxfufn8tsf5dxxh6dds3nyt8w';
 export const ESCROW_FACTORY_MX_ADDRESS = process.env.REACT_APP_ESCROW_FACTORY_MX_ADDRESS || 'erd17rw0ugxew767mwluxwu75gqg3m500qu7ktxfufn8tsf5dxxh6dds3nyt8w';
 
 export const HMT_TOKEN = process.env.REACT_APP_HMT_MX_TOKEN || 'HMT';
-export const HMT_DECIMALS = Number(process.env.REACT_APP_HTM_MX_DECIMALS) || 4;
+export const HMT_DECIMALS = Number(process.env.REACT_APP_HMT_MX_DECIMALS || 6);
 
 let _mx_env = process.env.REACT_APP_MX_ENVIRONMENT || 'devnet';
 export const MX_ENVIRONMENT = _mx_env === 'mainnet' ? EnvironmentsEnum.mainnet : _mx_env === 'testnet' ? EnvironmentsEnum.testnet : EnvironmentsEnum.devnet;
