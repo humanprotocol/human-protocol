@@ -18,7 +18,7 @@ export class Web3Service implements EscrowContract {
   web3: Web3;
 
   constructor(address: string, web3: Web3) {
-    this.contract = new Contract(EscrowAbi as [], address);
+    this.contract = new web3.eth.Contract(EscrowAbi as [], address);
     this.networkProvider = null;
     this.web3 = web3;
   }
@@ -49,4 +49,14 @@ export class Web3Service implements EscrowContract {
 
     return result;
   }
+}
+
+export function initWeb3(ethHttpServer: string, privKey: string): Web3 {
+  const web3 = new Web3(ethHttpServer);
+  const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
+
+  web3.eth.accounts.wallet.add(account);
+  web3.eth.defaultAccount = account.address;
+
+  return web3;
 }

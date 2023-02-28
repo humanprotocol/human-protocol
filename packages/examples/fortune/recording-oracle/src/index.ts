@@ -6,6 +6,7 @@ import { addFortune } from './services/fortune';
 import { Mnemonic, UserSigner } from '@multiversx/sdk-wallet/out';
 import * as dotenv from 'dotenv';
 import { initSigner } from './utils/mx.service';
+import { initWeb3 } from './utils/web3.service';
 dotenv.config();
 
 const app = express();
@@ -16,16 +17,12 @@ const privKey =
   process.env.ETH_PRIVATE_KEY ||
   '59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d'; // ganaches priv key
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
-const web3 = new Web3(ethHttpServer);
-const account = web3.eth.accounts.privateKeyToAccount(`0x${privKey}`);
-
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
 
 const mnemonicPath =
   process.env.MX_MNEMONIC_PATH || './mx-wallets/HUMAN-test-recording.mnemonic';
 
 const mxSigner = initSigner(mnemonicPath);
+const web3 = initWeb3(ethHttpServer, privKey);
 
 app.use(bodyParser.json());
 
