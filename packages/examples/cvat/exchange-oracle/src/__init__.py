@@ -4,7 +4,6 @@ from fastapi import FastAPI
 import src.log
 from src.api import init_api
 from src.error_handlers import setup_error_handlers
-from src.db import create_db_objects
 
 
 app = FastAPI(
@@ -26,5 +25,4 @@ setup_error_handlers(app)
 @app.on_event("startup")
 async def startup_event():
     logger = logging.getLogger("app")
-    create_db_objects()
-    logger.info("Database setup completed")
+    logger.info("Exchange Oracle is up and running!")
