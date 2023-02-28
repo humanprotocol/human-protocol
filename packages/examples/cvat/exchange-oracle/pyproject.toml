@@ -15,6 +15,7 @@ sqlalchemy = "^2.0.4"
 psycopg2 = "^2.9.5"
 sqlalchemy-utils = "^0.40.0"
 web3 = "^6.0.0b11"
+alembic = "^1.9.4"
 
 
 [tool.poetry.group.dev.dependencies]
