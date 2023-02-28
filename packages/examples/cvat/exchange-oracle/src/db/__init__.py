@@ -9,7 +9,3 @@ engine = sqlalchemy.create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, bind=engine)
 
 Base = declarative_base()
-
-
-def create_db_objects() -> None:
-    Base.metadata.create_all(engine)
