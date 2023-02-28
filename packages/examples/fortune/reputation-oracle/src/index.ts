@@ -2,10 +2,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { calculateRewardForWorker } from './services/rewards';
 import { uploadResults } from './services/s3';
-import { initMxSigner, initWeb3, processAddress } from './utils/utils';
+import { initSigner, initWeb3, processAddress } from './utils/utils';
 import { Address } from '@multiversx/sdk-core/out';
 import { getServiceForAddress } from './utils/utils';
 import { Web3Service } from './utils/web3.service';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const privKey =
@@ -13,11 +15,11 @@ const privKey =
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 const ethHttpServer = process.env.ETH_HTTP_SERVER || 'http://127.0.0.1:8545';
 const port = process.env.PORT || 3006;
-
-const mnemonicKey = process.env.MX_MNEMONIC_KEY || '';
+const MX_MNEMONIC_PATH =
+  process.env.MX_MNEMONIC_KEY || './mx-wallets/HUMAN-test-reputation.mnemonic';
 
 const web3 = initWeb3(ethHttpServer, privKey);
-const mxSigner = initMxSigner(mnemonicKey);
+const mxSigner = initSigner(MX_MNEMONIC_PATH);
 
 app.use(bodyParser.json());
 
@@ -34,10 +36,12 @@ app.post('/job/results', async (req, res) => {
     let processedEscrowAddress: Address | string;
     try {
       processedEscrowAddress = processAddress(escrowAddress, web3);
-    } catch (e) {
-      return res
-        .status(400)
-        .send({ message: 'Escrow address is empty or invalid' });
+    } catch (ex) {
+      if (ex instanceof Error) {
+        return res.status(400).send({ message: ex.message });
+      }
+
+      return res.status(400).send({ message: 'Invalid escrow address' });
     }
 
     const escrowContract = getServiceForAddress(
@@ -56,9 +60,9 @@ app.post('/job/results', async (req, res) => {
       fortunes.map(({ fortune }) => fortune),
       escrowAddress
     );
+
     const resultHash = resultsUrl;
     await escrowContract.bulkPayOut(
-      escrowAddress,
       workerAddresses,
       rewards,
       resultsUrl,

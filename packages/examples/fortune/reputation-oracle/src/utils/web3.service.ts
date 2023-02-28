@@ -2,7 +2,6 @@ import { Contract } from 'web3-eth-contract';
 import EscrowAbi from '@human-protocol/core/abis/Escrow.json';
 import Web3 from 'web3';
 import { EscrowContract } from './escrow.interface';
-import { UserSigner } from '@multiversx/sdk-wallet/out';
 
 export class Web3Service implements EscrowContract {
   contract: Contract;
@@ -10,7 +9,7 @@ export class Web3Service implements EscrowContract {
   serviceIdentity: Web3;
 
   constructor(address: string, serviceIdentity: Web3) {
-    this.contract = new Contract(EscrowAbi as [], address);
+    this.contract = new serviceIdentity.eth.Contract(EscrowAbi as [], address);
     this.networkProvider = null;
     this.serviceIdentity = serviceIdentity;
   }
@@ -20,7 +19,6 @@ export class Web3Service implements EscrowContract {
   }
 
   async bulkPayOut(
-    escrowAddress: string,
     workerAddresses: string[],
     rewards: string[],
     resultsUrl: string,

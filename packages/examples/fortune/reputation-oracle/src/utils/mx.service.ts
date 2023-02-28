@@ -1,5 +1,6 @@
 import {
   AbiRegistry,
+  Account,
   Address,
   AddressValue,
   Field,
@@ -7,6 +8,8 @@ import {
   ResultsParser,
   SmartContract,
   SmartContractAbi,
+  StringValue,
+  Struct,
   Tuple,
   TupleType,
   TypedOutcomeBundle,
@@ -15,10 +18,12 @@ import {
   VariadicValue,
 } from '@multiversx/sdk-core/out';
 import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers/out';
-import { EscrowContract } from './escrow.interface';
+import { AddressFortune, EscrowContract } from './escrow.interface';
 
 import escrowAbi from '../abi/escrow.abi.json';
 import { UserSigner } from '@multiversx/sdk-wallet/out';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const abiRegistry = AbiRegistry.create(escrowAbi);
 const abi = new SmartContractAbi(abiRegistry);
@@ -27,7 +32,7 @@ const proxyNetwork =
 
 const gasLimit = process.env.MX_GAS_LIMIT || 6000000;
 
-export type Payment = [string, string];
+export type Payment = [Address, number];
 
 export class MxService implements EscrowContract {
   contract: SmartContract;
@@ -51,9 +56,9 @@ export class MxService implements EscrowContract {
     return Number(firstValue);
   }
 
-  filterAddressesToReward(addressFortunesEntries: any[]): string[] {
-    const filteredResults: any = [];
-    const tmpHashMap: any = {};
+  filterAddressesToReward(addressFortunesEntries: AddressFortune[]): Address[] {
+    const filteredResults: AddressFortune[] = [];
+    const tmpHashMap: { [fortune: string]: boolean } = {};
 
     addressFortunesEntries.forEach((fortuneEntry) => {
       const { fortune } = fortuneEntry;
@@ -65,17 +70,19 @@ export class MxService implements EscrowContract {
       filteredResults.push(fortuneEntry);
     });
 
-    return filteredResults.map((fortune: { worker: any }) => fortune.worker);
+    return filteredResults
+      .map((fortune: { worker: string }) => fortune.worker)
+      .map(Address.fromString);
   }
 
-  private toVariadicType(data: Array<Payment>): VariadicValue {
+  private toVariadicType(data: Payment[]): VariadicValue {
     const tupleType = new TupleType();
     const variadicType = new VariadicType(tupleType);
     const items: Tuple[] = [];
     for (const payment of data) {
       const [workerAddress, reward] = payment;
       const tuple = new Tuple(tupleType, [
-        new Field(new AddressValue(new Address(workerAddress))),
+        new Field(new AddressValue(workerAddress)),
         new Field(new U64Value(reward)),
       ]);
 
@@ -85,14 +92,52 @@ export class MxService implements EscrowContract {
     return new VariadicValue(variadicType, items);
   }
 
-  bulkPayOut(
-    escrowAddress: string,
-    workerAddresses: string[],
-    rewards: string[],
+  private async updateAccountData(): Promise<number> {
+    const walletAddress = this.serviceIdentity.getAddress();
+    const account = new Account(walletAddress);
+    const accountOnNetwork = await this.networkProvider.getAccount(
+      walletAddress
+    );
+    account.update(accountOnNetwork);
+
+    return account.nonce.valueOf();
+  }
+
+  async bulkPayOut(
+    workerAddresses: Address[],
+    rewards: number[],
     resultsUrl: string,
     resultHash: string
   ): Promise<unknown> {
-    throw new Error();
+    const payments: Payment[] = workerAddresses.map((workerAddress, index) => [
+      workerAddress,
+      rewards[index],
+    ]);
+
+    const variadicTypePayments = this.toVariadicType(payments);
+    const urlHashPairType = abiRegistry.getStruct('UrlHashPair');
+    const interaction = this.contract.methodsExplicit.bulkPayOut([
+      variadicTypePayments,
+      new Struct(urlHashPairType, [
+        new Field(new StringValue(resultsUrl)),
+        new Field(new StringValue(resultHash)),
+      ]),
+    ]);
+
+    const nonce = await this.updateAccountData();
+    const networkConfig = await this.networkProvider.getNetworkConfig();
+
+    const tx = interaction
+      .withChainID(networkConfig.ChainID)
+      .withGasLimit(Number(gasLimit))
+      .withNonce(nonce)
+      .buildTransaction();
+
+    await this.serviceIdentity.sign(tx);
+
+    const txHash = await this.networkProvider.sendTransaction(tx);
+
+    return txHash;
   }
 
   private async performQuery(

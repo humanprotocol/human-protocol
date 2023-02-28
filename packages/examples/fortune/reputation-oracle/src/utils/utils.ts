@@ -4,13 +4,14 @@ import Web3 from 'web3';
 import { EscrowContract } from './escrow.interface';
 import { MxService } from './mx.service';
 import { Web3Service } from './web3.service';
+import fs from 'fs';
 
 export function processAddress(address: string, web3: Web3): string | Address {
   if (web3.utils.isAddress(address)) {
     return address;
   }
   try {
-    return new Address(address);
+    return Address.fromString(address);
   } catch (e) {
     throw new Error(`Invalid address: ${address}`);
   }
@@ -38,8 +39,9 @@ export function initWeb3(ethHttpServer: string, privKey: string): Web3 {
   return web3;
 }
 
-export function initMxSigner(privKey: string): UserSigner {
-  const mnemonic = Mnemonic.fromString(privKey).deriveKey(0);
+export function initSigner(walletMnemonicPath: string): UserSigner {
+  const mnemonicData = fs.readFileSync(walletMnemonicPath, 'utf8');
+  const mnemonic = Mnemonic.fromString(mnemonicData).deriveKey(0);
 
   return new UserSigner(mnemonic);
 }
