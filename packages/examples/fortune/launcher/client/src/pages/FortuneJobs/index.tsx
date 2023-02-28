@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import Box from '@mui/material/Box';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import fortuneImg from 'src/assets/fortune.png';
 
 const DATA = [
@@ -56,6 +57,8 @@ const DATA = [
 ];
 
 export default function FortuneJobsPage() {
+  const navigate = useNavigate();
+
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
       <Box
@@ -129,6 +132,7 @@ export default function FortuneJobsPage() {
                     'th,td': { borderBottom: '1px solid #CACFE8' },
                     '&:last-child td, &:last-child th': { border: 0 },
                   }}
+                  onClick={() => navigate(`/jobs/${row.escrow}`)}
                 >
                   <TableCell component="th" scope="row">
                     {row.id}

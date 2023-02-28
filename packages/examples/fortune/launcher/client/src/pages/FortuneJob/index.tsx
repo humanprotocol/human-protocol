@@ -7,16 +7,29 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import escrowSvg from 'src/assets/escrow.svg';
 import fortuneImg from 'src/assets/fortune.png';
 import { CardContainer, CardTextRow, CopyAddressButton } from 'src/components';
+import CheckFilledIcon from 'src/components/Icons/CheckFilledIcon';
+import WalletModal from 'src/components/WalletModal';
+import { useAccount } from 'wagmi';
 
 export default function FortuneJobPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const { chainId, address } = useParams();
+  const { address } = useParams();
+  const { address: userAddress, isConnected } = useAccount();
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (isConnected && walletModalOpen) {
+      setWalletModalOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
@@ -96,93 +109,142 @@ export default function FortuneJobPage() {
         <Grid container spacing={4} mt={{ xs: 0, md: 4 }}>
           <Grid item xs={12}>
             <CardContainer densed>
-              <Box
-                sx={{
-                  background: '#f9faff',
-                  borderRadius: '8px',
-                  p: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  mb: 3,
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+              {!userAddress ? (
+                <Box
+                  sx={{
+                    background: '#f9faff',
+                    borderRadius: '8px',
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 3,
+                  }}
                 >
-                  <img
-                    src={fortuneImg}
-                    alt="fortune"
-                    style={{ width: 36, height: '100%' }}
-                  />
-                  This is a Fortune Request with pending jobs, anyone can
-                  submit.
-                </Typography>
-                <Button variant="contained">Connect Wallet to Submit</Button>
-              </Box>
-              <Grid container spacing={2} mb={3}>
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ background: '#f9faff', borderRadius: '8px', p: 3 }}
-                >
-                  <Box sx={{ p: 3 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{ display: 'flex', alignItems: 'center', gap: 3 }}
-                    >
-                      <img
-                        src={fortuneImg}
-                        alt="fortune"
-                        style={{ width: 36, height: '100%' }}
-                      />
-                      Fortune Submission
-                    </Typography>
-                    <Stack spacing={2}>
-                      <CardTextRow label="Title" value="Title Here" />
-                      <CardTextRow
-                        label="Description"
-                        value="Lorem Ipsum Dolor Sit Amet"
-                      />
-                      <CardTextRow label="Fortunes Required" value="2" />
-                      <CardTextRow
-                        label="Exchagne Address"
-                        value="0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
-                      />
-                      <CardTextRow label="Status" value="Status" />
-                      <CardTextRow label="Balance" value="1" />
-                    </Stack>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      height: '100%',
-                      px: 4,
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'center',
-                      flexDirection: 'column',
-                    }}
+                  <Typography
+                    variant="body2"
+                    sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
                   >
-                    <Typography
+                    <img
+                      src={fortuneImg}
+                      alt="fortune"
+                      style={{ width: 36, height: '100%' }}
+                    />
+                    This is a Fortune Request with pending jobs, anyone can
+                    submit.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => setWalletModalOpen(true)}
+                  >
+                    Connect Wallet to Submit
+                  </Button>
+                </Box>
+              ) : (
+                <Grid container spacing={2} mb={3}>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                    sx={{ background: '#f9faff', borderRadius: '8px', p: 3 }}
+                  >
+                    <Box sx={{ p: 3 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 3,
+                          mb: 2.5,
+                        }}
+                      >
+                        <img
+                          src={fortuneImg}
+                          alt="fortune"
+                          style={{ width: 36, height: '100%' }}
+                        />
+                        Fortune Submission
+                      </Typography>
+                      <Stack spacing={2}>
+                        <CardTextRow label="Title" value="Title Here" />
+                        <CardTextRow
+                          label="Description"
+                          value="Lorem Ipsum Dolor Sit Amet"
+                        />
+                        <CardTextRow label="Fortunes Required" value="2" />
+                        <CardTextRow
+                          label="Exchagne Address"
+                          value="0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4"
+                        />
+                        <CardTextRow label="Status" value="Status" />
+                        <CardTextRow label="Balance" value="1" />
+                      </Stack>
+                    </Box>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={6}
+                    sx={{ background: '#f9faff', borderRadius: '8px', p: 3 }}
+                  >
+                    <Box
                       sx={{
-                        border: '3px solid #320a8d',
-                        borderRadius: '8px',
-                        px: 1.5,
-                        py: 2,
-                        width: '100%',
-                        mb: 4.5,
+                        height: '100%',
+                        px: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
                       }}
                     >
-                      Fortune 1 text here
-                    </Typography>
-                    <Button variant="contained">Submit Fortune</Button>
-                  </Box>
+                      {!isSubmitted ? (
+                        <>
+                          <Typography
+                            sx={{
+                              border: '3px solid #320a8d',
+                              borderRadius: '8px',
+                              px: 1.5,
+                              py: 2,
+                              width: '100%',
+                              mb: 4.5,
+                            }}
+                          >
+                            Fortune 1 text here
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            onClick={() => setIsSubmitted(true)}
+                          >
+                            Submit Fortune
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <CheckFilledIcon sx={{ mb: 2.5 }} />
+                          <Typography
+                            variant="h6"
+                            fontWeight={500}
+                            textAlign="center"
+                            sx={{ width: '100%', mb: 2.5 }}
+                          >
+                            Success!
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            textAlign="center"
+                            sx={{ width: '100%', mb: 5 }}
+                          >
+                            Success message here. Next call to action call.
+                          </Typography>
+                          <Button variant="contained" sx={{ width: 240 }}>
+                            CTA
+                          </Button>
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
                 </Grid>
-              </Grid>
+              )}
               <Typography
                 variant="body2"
                 color="primary"
@@ -278,6 +340,10 @@ export default function FortuneJobPage() {
           </Grid>
         </Grid>
       </Box>
+      <WalletModal
+        open={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+      />
     </Box>
   );
 }
