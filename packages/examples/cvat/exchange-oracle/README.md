@@ -23,12 +23,34 @@ For deployment it is required to have PostgreSQL(v14.4)
 2. ./bin/start_dev.sh
 ```
 
+### Environemt
+Env example file: [.env.example](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/.env.example)
 
-There are no migrations yet on the project. All schemas are created during the first run
-So if you are making any changes to the schemas you have to delete all tables and other objects in the database manually
-to apply these changes. For development environment get credentials from the `src/config.py`
+Config: [config file](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/src/config.py)
 
 
-## Endpoints and API schema
+### Migrations
+To simplify the process and use `--autogenerate` flag, you need to import a new model to `/alembic/env.py`
+Example: [Alembic env file](https://github.com/humanprotocol/human-protocol/blob/feat/cvat/exchange-oracle/packages/examples/cvat/exchange-oracle/alembic/env.py)
+
+
+Adding new migration:
+```
+alembic revision --autogenerate -m "your-migration-name"
+```
+
+Upgrade:
+```
+alembic upgrade head
+```
+
+Downgrade:
+```
+alembic downgrade -{number of migrations}
+```
+
+
+
+### Endpoints and API schema
 
 Available at `/docs` route
