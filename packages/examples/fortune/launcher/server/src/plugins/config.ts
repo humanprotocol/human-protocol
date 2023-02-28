@@ -23,6 +23,9 @@ const ConfigSchema = Type.Strict(
     EX_ORACLE_URL: Type.String(),
     REC_ORACLE_PERCENTAGE_FEE: Type.Number(),
     REP_ORACLE_PERCENTAGE_FEE: Type.Number(),
+    STRIPE_PUBLISHABLE_KEY: Type.String(),
+    STRIPE_SECRET_KEY: Type.String(),
+    STRIPE_WEBHOOK_SECRET: Type.String(),
   })
 );
 

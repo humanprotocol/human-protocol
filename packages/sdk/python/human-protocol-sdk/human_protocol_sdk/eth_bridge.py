@@ -383,7 +383,11 @@ def get_staking(staking_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contr
     return contract
 
 
-def get_pub_key_from_addr(wallet_addr: str, hmt_server_addr: str = None) -> bytes:
+def get_pub_key_from_addr(
+    wallet_addr: str,
+    hmt_server_addr: str = None,
+    kvstore_contract: str = KVSTORE_CONTRACT,
+) -> bytes:
     """
     Given a wallet address, uses the kvstore to pull down the public key for a user
     in the hmt universe, defined by the kvstore key `hmt_pub_key`.  Works with the
@@ -431,8 +435,8 @@ def get_pub_key_from_addr(wallet_addr: str, hmt_server_addr: str = None) -> byte
         "{}/KVStore.sol/KVStore.json".format(ABIS_FOLDER)
     )
 
-    kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=contract_interface["abi"])
-    addr_pub_key = kvstore.functions.get(GAS_PAYER, "hmt_pub_key").call(
+    kvstore = w3.eth.contract(address=kvstore_contract, abi=contract_interface["abi"])
+    addr_pub_key = kvstore.functions.get(wallet_addr, "hmt_pub_key").call(
         {"from": GAS_PAYER}
     )
 

@@ -11,10 +11,13 @@ import {
   bsc,
   bscTestnet,
 } from 'wagmi/chains';
+import axios from 'axios';
 import { publicProvider } from 'wagmi/providers/public';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -69,19 +72,26 @@ const client = createClient({
   provider,
   webSocketProvider,
 });
+const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+axios.get(`${baseUrl}/config`).then((r) =>
+  loadStripe(r.data.publishableKey).then((stripePromise) =>
+    root.render(
+      <React.StrictMode>
+        <WagmiConfig client={client}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Elements stripe={stripePromise}>
+              <App />
+            </Elements>
+          </ThemeProvider>
+        </WagmiConfig>
+      </React.StrictMode>
+    )
+  )
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <WagmiConfig client={client}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </WagmiConfig>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

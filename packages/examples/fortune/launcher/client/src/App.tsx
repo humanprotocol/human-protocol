@@ -7,6 +7,7 @@ import {
   FortuneStages,
   FortuneFundingMethod,
   FortuneJobRequest,
+  FortuneFiatJobRequest,
   FortuneLaunch,
   FortuneLaunchSuccess,
   FortuneLaunchFail,
@@ -32,6 +33,7 @@ function App() {
     escrowAddress: '',
     exchangeUrl: '',
   });
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChangeFundingMethod = (method: FundingMethodType) => {
     setFundingMethod(method);
@@ -39,8 +41,7 @@ function App() {
   };
 
   const handleBack = () => {
-    setFundingMethod('crypto');
-    setStatus(FortuneStageStatus.JOB_REQUEST);
+    setStatus(status > 0 ? status - 1 : 0);
   };
 
   const handleOnSuccess = (data: JobLaunchResponse) => {
@@ -51,6 +52,11 @@ function App() {
   const handleCreateNewEscrow = () => {
     setJobResponse({ escrowAddress: '', exchangeUrl: '' });
     setStatus(FortuneStageStatus.FUNDING_METHOD);
+  };
+
+  const handleOnError = (message: string) => {
+    setErrorMessage(message);
+    setStatus(FortuneStageStatus.LAUNCH_FAIL);
   };
 
   const fetchLastEscrow = async (factoryAddress: string | undefined) => {
@@ -127,15 +133,26 @@ function App() {
               {status === FortuneStageStatus.FUNDING_METHOD && (
                 <FortuneFundingMethod onChange={handleChangeFundingMethod} />
               )}
-              {status === FortuneStageStatus.JOB_REQUEST && (
-                <FortuneJobRequest
-                  fundingMethod={fundingMethod}
-                  onBack={handleBack}
-                  onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
-                  onSuccess={handleOnSuccess}
-                  onFail={() => setStatus(FortuneStageStatus.LAUNCH_FAIL)}
-                />
-              )}
+              {status === FortuneStageStatus.JOB_REQUEST &&
+                fundingMethod === 'crypto' && (
+                  <FortuneJobRequest
+                    fundingMethod={fundingMethod}
+                    onBack={handleBack}
+                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                    onSuccess={handleOnSuccess}
+                    onFail={handleOnError}
+                  />
+                )}
+              {status === FortuneStageStatus.JOB_REQUEST &&
+                fundingMethod === 'fiat' && (
+                  <FortuneFiatJobRequest
+                    fundingMethod={fundingMethod}
+                    onBack={handleBack}
+                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                    onSuccess={handleOnSuccess}
+                    onFail={handleOnError}
+                  />
+                )}
               {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
               {status === FortuneStageStatus.LAUNCH_SUCCESS && (
                 <FortuneLaunchSuccess
@@ -145,6 +162,7 @@ function App() {
               )}
               {status === FortuneStageStatus.LAUNCH_FAIL && (
                 <FortuneLaunchFail
+                  message={errorMessage}
                   onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
                 />
               )}
