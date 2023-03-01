@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="human-protocol-basemodels",
+    name="humanprotocol-basemodels",
     author="HUMAN Protocol",
     description="Common data models shared by various components of the Human Protocol stack",
     url="https://github.com/humanprotocol/human-protocol/packages/sdk/python/human-protocol-basemodels",
