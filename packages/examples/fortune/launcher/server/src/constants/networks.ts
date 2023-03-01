@@ -93,5 +93,5 @@ export const ESCROW_NETWORKS: {
   //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
   //   factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
   //   hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
-  //},
+  // },
 };
