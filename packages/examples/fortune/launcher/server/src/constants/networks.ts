@@ -9,6 +9,7 @@ export enum ChainId {
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export interface IEscrowNetwork {
@@ -85,5 +86,12 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
     factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
     hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+  },
+  [ChainId.SKALE]: {
+    chainId: ChainId.SKALE,
+    title: 'Skale',
+    rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    factoryAddress: '0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF',
+    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
   },
 };

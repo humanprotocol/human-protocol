@@ -170,8 +170,8 @@ const config: HardhatUserConfig = {
         network: 'skale',
         chainId: 1273227453,
         urls: {
-          apiURL: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/api',
-          browserURL: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
+          apiURL: process.env.SKALE_BROWSER_API_URL || '',
+          browserURL: process.env.SKALE_BROWSER_URL || '',
         },
       },
     ],
