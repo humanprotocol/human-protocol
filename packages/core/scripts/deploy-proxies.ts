@@ -35,13 +35,6 @@ async function main() {
       escrowFactoryContract.address
     )
   );
-  /*
-  const KVStore = await ethers.getContractFactory('KVStore');
-  const kvStoreContract = await KVStore.deploy();
-  await kvStoreContract.deployed();
-
-  console.log('KVStore Address: ', kvStoreContract.address);
-*/
   const RewardPool = await ethers.getContractFactory('RewardPool');
   const rewardPoolContract = await upgrades.deployProxy(
     RewardPool,
