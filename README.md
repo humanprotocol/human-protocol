@@ -1,6 +1,5 @@
 <p align="center">
 <a href="https://www.humanprotocol.org/"><img src="https://user-images.githubusercontent.com/104898604/201488028-2b0f29cb-c620-484f-991f-4a8b16efd7cc.png" /></a></p>
-<style>tr,td,th { border: none !important; background: none !important; }</style>
 
 | | | | |
 | --- | --- | --- | --- |
