@@ -31,8 +31,7 @@ export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
   [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
-  [ChainId.SKALE]: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67'
-  
+  [ChainId.SKALE]: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
 };
 
 export interface IEscrowNetwork {
@@ -225,16 +224,15 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
-    subgraphUrl: 'https://api.thegraph.com/'
-    factoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
+    subgraphUrl: 'https://api.thegraph.com/',
+    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
     oldSubgraphUrl: '',
-    oldFactoryAddress: '',
+    oldFactoryAddress: 'to0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
     kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
     // Wagmi hasn't been implemented yet
     wagmiChain: {} as Chain,
   },
-
 };
 
 export const FAST_INTERVAL = 10_000;

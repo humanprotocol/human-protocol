@@ -87,16 +87,15 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
   },
-
-  [ChainId.SKALE]: {
+  /*[ChainId.SKALE]: {
     chainId: ChainId.SKALE,
-    title: 'Skale',
-    scanUrl: '',
+    title: 'SKALE Human Protocol chain',
+    scanUrl: ' https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     subgraphUrl: '',
-    factoryAddress: '0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF',
+    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
-  },
+  },*/
   // [ChainId.MOONBEAM]: {
   //   chainId: ChainId.MOONBEAM,
   //   title: 'Moonbeam',
