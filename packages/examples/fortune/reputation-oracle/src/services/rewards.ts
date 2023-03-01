@@ -35,8 +35,9 @@ export function filterAddressesToReward(
       }
 
       tmpHashMap[fortune] = true;
-      filteredWorkers.push(workerAddress);
       reputationValues.push({ workerAddress, reputation: 1 });
+      if (!filteredWorkers.includes(workerAddress))
+        filteredWorkers.push(workerAddress);
     });
   });
   const workerAddresses = filteredWorkers.map(web3.utils.toChecksumAddress);
