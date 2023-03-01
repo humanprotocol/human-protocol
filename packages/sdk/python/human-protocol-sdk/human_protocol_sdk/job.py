@@ -3,7 +3,15 @@ import logging
 import os
 from decimal import Decimal
 from enum import Enum
-from typing import Dict, List, Tuple, Optional, Any, TypedDict
+from typing import (
+    Dict,
+    List,
+    Tuple,
+    Optional,
+    Any,
+    TypedDict,
+    Union
+)
 
 from basemodels import Manifest
 from eth_keys import keys
@@ -1941,7 +1949,7 @@ class Job:
                     return True
         return False
 
-    def _find_operator(self, addr: Optional[str]) -> Tuple[str, str] | None:
+    def _find_operator(self, addr: Optional[str]) -> Union[Tuple[str, str], None]:
         """
         Find the operator to execute the transaction from trusted wallets.
 
