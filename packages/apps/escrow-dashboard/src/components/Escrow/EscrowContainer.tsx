@@ -18,6 +18,7 @@ import {
 } from 'src/state/escrow/hooks';
 import { setChainId as setEscrowChainId } from 'src/state/escrow/reducer';
 import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
+import { useSwitchNetwork } from 'wagmi';
 
 import { EscrowView } from './EscrowView';
 
@@ -44,6 +45,7 @@ export const EscrowContainer: React.FC<
 > = (): React.ReactElement => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
+  const { switchNetwork } = useSwitchNetwork();
 
   usePollEventsData();
 
@@ -55,6 +57,8 @@ export const EscrowContainer: React.FC<
   const handleChangeChain = (_e: React.SyntheticEvent, id: ChainId) => {
     dispatch(setEscrowChainId(id));
     dispatch(setLeaderChainId(id));
+
+    switchNetwork?.(id);
   };
 
   return (

@@ -11,8 +11,10 @@ import { styled } from '@mui/material/styles';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import React from 'react';
 import profileSvg from 'src/assets/profile.svg';
+import { ChainId, ESCROW_NETWORKS } from 'src/constants';
+import useWalletBalance from 'src/hooks/useWalletBalance';
 import { shortenAddress } from 'src/utils';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId } from 'wagmi';
 import WalletModal from '../WalletModal';
 import CopyLinkIcon from '../Icons/CopyLinkIcon';
 import OpenInNewIcon from '../Icons/OpenInNewIcon';
@@ -41,6 +43,7 @@ const ProfileMenu = styled((props: MenuProps) => (
 
 export default function ConnectButton() {
   const { address } = useAccount();
+  const chainId = useChainId();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -52,6 +55,12 @@ export default function ConnectButton() {
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const toggleWalletModal = () => setModalOpen(!modalOpen);
+
+  const walletBalance = useWalletBalance();
+
+  const network = ESCROW_NETWORKS[chainId as ChainId];
+  const accountUrl = `${network?.scanUrl}/address/${address}`;
+  const tokenUrl = `${network?.scanUrl}/token/${network?.hmtAddress}`;
 
   if (!address) {
     return (
@@ -97,19 +106,31 @@ export default function ConnectButton() {
             </Typography>
           </Box>
           <Stack direction="row" sx={{ ml: 3 }} spacing="10px">
-            <IconButton color="primary" sx={{ background: '#F6F7FE' }}>
+            <IconButton
+              color="primary"
+              sx={{ background: '#F6F7FE' }}
+              onClick={() => navigator.clipboard.writeText(address)}
+            >
               <CopyLinkIcon />
             </IconButton>
-            <IconButton color="primary" sx={{ background: '#F6F7FE' }}>
+            <IconButton
+              color="primary"
+              sx={{ background: '#F6F7FE' }}
+              onClick={() => window.open(accountUrl)}
+            >
               <OpenInNewIcon />
             </IconButton>
-            <IconButton color="primary" sx={{ background: '#F6F7FE' }}>
+            <IconButton
+              color="primary"
+              sx={{ background: '#F6F7FE' }}
+              onClick={() => window.open(tokenUrl)}
+            >
               <OpenInNewIcon />
             </IconButton>
           </Stack>
         </Box>
         <Typography variant="h4" fontWeight={600} textAlign="center" mt={4}>
-          34,000 HMT
+          {walletBalance?.formatted} HMT
         </Typography>
         <Typography
           color="text.secondary"
@@ -117,7 +138,9 @@ export default function ConnectButton() {
           textAlign="center"
           mt={1}
         >
-          $999 USD
+          {walletBalance?.formatted && walletBalance?.usdPrice
+            ? `$ ${Number(walletBalance.formatted) * walletBalance.usdPrice}`
+            : ''}
         </Typography>
         <Stack sx={{ mt: 8 }} spacing={1.5}>
           <Button variant="outlined">Profile</Button>
