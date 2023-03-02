@@ -1,4 +1,5 @@
 import uuid
+from typing import Union
 from fastapi import APIRouter, Header
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
@@ -16,7 +17,7 @@ router = APIRouter()
     description="Consumes a webhook from a job launcher",
 )
 def save_webhook(
-    jl_webhook: JLWebhook, human_signature: str | None = Header(default=None)
+    jl_webhook: JLWebhook, human_signature: Union[str, None] = Header(default=None)
 ):
     with SessionLocal.begin() as session:
         webhook_id = create_webhook(session, jl_webhook, human_signature)
