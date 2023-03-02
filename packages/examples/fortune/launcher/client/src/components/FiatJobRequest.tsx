@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { getProvider } from '@wagmi/core';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
@@ -46,7 +45,6 @@ export const JobRequest = ({
   onSuccess,
   onFail,
 }: JobRequestProps) => {
-  const provider = getProvider();
   const stripe = useStripe();
   const elements = useElements();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
@@ -62,6 +60,7 @@ export const JobRequest = ({
     fundAmount: '',
     jobRequester: '',
   });
+  const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
   const [paymentData, setPaymentData] = useState<CreatePaymentType>({
     amount: '',
     currency: 'USD',
@@ -100,6 +99,14 @@ export const JobRequest = ({
     };
     getHMTPrice();
   }, [paymentData.amount, paymentData.currency]);
+
+  useEffect(() => {
+    setProvider(
+      new ethers.providers.JsonRpcProvider(
+        ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.rpcUrl
+      )
+    );
+  }, [jobRequest.chainId]);
 
   const handleLaunch = async () => {
     if (!stripe || !elements) {
