@@ -5,10 +5,10 @@ from .constants import Networks
 
 
 def to_checksum_addr(addr: str) -> str:
-    if not Web3.is_address(addr):
+    if not Web3.isAddress(addr):
         raise ValueError("Address is not a correct Web3 address")
 
-    return Web3.to_checksum_address(addr)
+    return Web3.toChecksumAddress(addr)
 
 
 class JLWebhook(BaseModel):
