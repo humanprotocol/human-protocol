@@ -168,9 +168,11 @@ function App() {
               )}
             </Box>
             <Box my={2}>
-              <Typography variant="body2">
-                Last Escrow: {lastEscrowAddress}
-              </Typography>
+              {lastEscrowAddress && (
+                <Typography variant="body2">
+                  Last Escrow: {lastEscrowAddress}
+                </Typography>
+              )}
             </Box>
           </Grid>
         </Grid>

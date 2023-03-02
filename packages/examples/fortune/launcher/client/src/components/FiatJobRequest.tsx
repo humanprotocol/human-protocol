@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { getProvider } from '@wagmi/core';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
@@ -46,7 +45,6 @@ export const JobRequest = ({
   onSuccess,
   onFail,
 }: JobRequestProps) => {
-  const provider = getProvider();
   const stripe = useStripe();
   const elements = useElements();
   const [jobRequest, setJobRequest] = useState<FortuneJobRequestType>({
@@ -62,6 +60,7 @@ export const JobRequest = ({
     fundAmount: '',
     jobRequester: '',
   });
+  const [provider, setProvider] = useState<ethers.providers.JsonRpcProvider>();
   const [paymentData, setPaymentData] = useState<CreatePaymentType>({
     amount: '',
     currency: 'USD',
@@ -101,6 +100,14 @@ export const JobRequest = ({
     getHMTPrice();
   }, [paymentData.amount, paymentData.currency]);
 
+  useEffect(() => {
+    setProvider(
+      new ethers.providers.JsonRpcProvider(
+        ESCROW_NETWORKS[jobRequest.chainId as ChainId]?.rpcUrl
+      )
+    );
+  }, [jobRequest.chainId]);
+
   const handleLaunch = async () => {
     if (!stripe || !elements) {
       // Stripe.js has not yet loaded.
@@ -116,7 +123,6 @@ export const JobRequest = ({
       fiat: true,
     };
     try {
-      console.log('data.token', data.token);
       const contract = new ethers.Contract(data.token, HMTokenABI, provider);
       const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
@@ -124,11 +130,7 @@ export const JobRequest = ({
         setIsLoading(false);
         return;
       }
-      console.log('a');
-      console.log('jobLauncherAddress', jobLauncherAddress);
-      console.log(contract);
       const balance = await contract.balanceOf(jobLauncherAddress);
-      console.log('balance', balance);
 
       const fundAmount = ethers.utils.parseUnits(
         data.fundAmount,
@@ -138,7 +140,7 @@ export const JobRequest = ({
         throw new Error('Balance not enough for funding the escrow');
       }
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
-      console.log(await axios.post(`${baseUrl}/check-escrow`, data));
+      await axios.post(`${baseUrl}/check-escrow`, data);
 
       const clientSecret = (
         await axios.post(`${baseUrl}/create-payment-intent`, {
@@ -165,7 +167,7 @@ export const JobRequest = ({
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
     } catch (err: any) {
-      console.log(err);
+      console.error(err);
       if (err.name === 'AxiosError') onFail(err.response.data);
       else onFail(err.message);
     }
