@@ -2,7 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Success } from 'src/components/Faucet/Success';
+import { RequestData } from 'src/components/Faucet/RequestData';
+
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import {
   Providers,
@@ -12,7 +13,7 @@ import {
 } from '../../../../tests/utils';
 import { MockConnector } from '@wagmi/core/connectors/mock';
 
-describe('when rendered Success component', () => {
+describe('when rendered RequestData component', () => {
   it('should render `text` prop', async () => {
     const client = setupClient({
       connectors: [
@@ -25,7 +26,7 @@ describe('when rendered Success component', () => {
       ],
     });
     await act(async () => {
-      render(<Success txHash="" />, {
+      render(<RequestData />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <Providers client={client}>
             <RainbowKitProvider chains={testChains} modalSize="compact">
@@ -35,16 +36,11 @@ describe('when rendered Success component', () => {
         ),
       });
     });
-    expect(screen.getByText(/Request Complete!/)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /Congratulations, 10 testnet HMT was sent to your account/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Contract address:/)).toBeInTheDocument();
   });
 });
 
-it('Success component renders correctly, corresponds to the snapshot', () => {
+it('RequestData component renders correctly, corresponds to the snapshot', () => {
   const client = setupClient({
     connectors: [
       new MockConnector({
@@ -59,7 +55,7 @@ it('Success component renders correctly, corresponds to the snapshot', () => {
     .create(
       <Providers client={client}>
         <RainbowKitProvider chains={testChains} modalSize="compact">
-          <Success txHash="" />
+          <RequestData />
         </RainbowKitProvider>
       </Providers>
     )

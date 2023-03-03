@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import React, { Dispatch, useState } from 'react';
-import { ChainId, ESCROW_NETWORKS, TESTNET_CHAIN_IDS } from 'src/constants';
+import { ChainId, ESCROW_NETWORKS, TESTNET_CHAIN_IDS } from '../../constants';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
