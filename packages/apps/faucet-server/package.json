@@ -4,7 +4,7 @@
   "description": "This is a faucet for private Ethereum testnet.",
   "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8549\" \"jest\"",
     "start": "cross-env NODE_ENV=development ts-node src/index.ts"
   },
   "author": "",

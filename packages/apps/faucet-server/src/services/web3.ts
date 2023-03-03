@@ -1,7 +1,7 @@
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
 import Web3 from 'web3';
 
-export const getWeb3 = async (rpcUrl: string): Promise<Web3> => {
+export const getWeb3 = (rpcUrl: string): Web3 => {
   const web3 = new Web3(rpcUrl);
   const faucetAccount = web3.eth.accounts.privateKeyToAccount(
     `0x${process.env.PRIVATE_KEY}`
@@ -35,7 +35,6 @@ export const sendFunds = async (
       )
       .estimateGas({ from: web3.eth.defaultAccount });
     const gasPrice = await web3.eth.getGasPrice();
-
     const receipt = await HMT.methods
       .transfer(
         toAddress,

@@ -35,7 +35,7 @@ app.get('/stats', async (_request: Request, response: Response) => {
       message: 'Invalid Chain Id',
     });
 
-  const web3 = await getWeb3(network.rpcUrl);
+  const web3 = getWeb3(network.rpcUrl);
   response.send({
     account: web3.eth.defaultAccount,
     balance: await getFaucetBalance(web3, network.hmtAddress),
@@ -98,7 +98,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     });
   }
 
-  const web3 = await getWeb3(network.rpcUrl);
+  const web3 = getWeb3(network.rpcUrl);
   const txHash = await sendFunds(web3, network.hmtAddress, toAddress);
 
   if (txHash) {
