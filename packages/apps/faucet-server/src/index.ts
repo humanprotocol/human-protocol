@@ -1,14 +1,15 @@
 /* eslint-disable no-console */
 import dotenv from 'dotenv';
 dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
-import path from 'path';
-import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import Web3 from 'web3';
-import NodeCache from 'node-cache';
-import async from 'async';
 import cors from 'cors';
-import hmtAbi from '@human-protocol/core/abis/HMToken.json';
+import express, { Request, Response } from 'express';
+import NodeCache from 'node-cache';
+import path from 'path';
+import Web3 from 'web3';
+import { ChainId, FAUCET_NETWORKS } from './constants/networks';
+import { lastSendType } from './interfaces/lastSendType';
+import { getFaucetBalance, getWeb3, sendFunds } from './services/web3';
 
 // init express
 const app = express();
@@ -18,82 +19,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 const port = process.env.APP_PORT;
 
-// init web3
-const web3 = new Web3(process.env.RPC_URL as string);
-const faucetAccount = web3.eth.accounts.privateKeyToAccount(
-  `0x${process.env.PRIVATE_KEY}`
-);
-web3.eth.accounts.wallet.add(faucetAccount);
-web3.eth.defaultAccount = faucetAccount.address;
-const HMT = new web3.eth.Contract(hmtAbi as [], process.env.HMT_ADDRESS);
-
 // init cache
 const blockList = new NodeCache();
 
 // init queue
-interface lastSendType {
-  time: number;
-  address: string;
-  txHash: string;
-}
 const lastSend: lastSendType[] = [];
-const sendQueue = async.queue(async (task: { address: string }) => {
-  console.log(`donating to ${task.address}`);
-  const txHash = await sendFunds(task.address);
-
-  if (txHash) {
-    lastSend.push({ time: Date.now(), address: task.address, txHash: txHash });
-    while (lastSend.length > 5) lastSend.shift();
-
-    // waiting payoutFrequency sec
-    await new Promise((resolve) =>
-      setTimeout(resolve, Number(process.env.PAYOUT_FRECUENCY) * 1000)
-    );
-  }
-}, 1);
-
-sendQueue.drain();
-
-const getFaucetBalance = async () => {
-  const balance = web3.utils.fromWei(
-    await HMT.methods.balanceOf(faucetAccount.address).call(),
-    'ether'
-  );
-  return balance;
-};
-
-const sendFunds = async (toAddress: string): Promise<string | undefined> => {
-  let txHash = '';
-  try {
-    const gasNeeded = await HMT.methods
-      .transfer(
-        toAddress,
-        Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
-      )
-      .estimateGas({ from: web3.eth.defaultAccount });
-    const gasPrice = await web3.eth.getGasPrice();
-    const receipt = await HMT.methods
-      .transfer(
-        toAddress,
-        Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
-      )
-      .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
-    console.log(`Transaction successful with hash: ${receipt.transactionHash}`);
-    txHash = receipt.transactionHash;
-  } catch (err) {
-    console.log(err);
-    return undefined;
-  }
-
-  return txHash;
-};
 
 app.get('/stats', async (_request: Request, response: Response) => {
+  const chainId = Number(_request.query.chainId);
+  // Check for valid network
+  const network = FAUCET_NETWORKS[chainId as ChainId];
+  if (!network)
+    return response.status(200).json({
+      status: false,
+      message: 'Invalid Chain Id',
+    });
+
+  const web3 = await getWeb3(network.rpcUrl);
   response.send({
-    account: faucetAccount.address,
-    balance: await getFaucetBalance(),
+    account: web3.eth.defaultAccount,
+    balance: await getFaucetBalance(web3, network.hmtAddress),
     dailyLimit: process.env.DAILY_LIMIT,
-    blockNumber: await web3.eth.getBlockNumber(),
   });
 });
 
@@ -102,9 +48,19 @@ app.get('/queue', async (_request: Request, response: Response) => {
 });
 
 app.post('/faucet', async (request: Request, response: Response) => {
+  const chainId = request.body.chainId;
   const toAddress = request.body.address.replace(' ', '');
+
+  // Check for valid network
+  const network = FAUCET_NETWORKS[chainId as ChainId];
+  if (!network)
+    return response.status(200).json({
+      status: false,
+      message: 'Invalid Chain Id',
+    });
+
   // check for valid Eth address
-  if (!web3.utils.isAddress(toAddress))
+  if (!Web3.utils.isAddress(toAddress))
     return response.status(200).json({
       status: false,
       message:
@@ -125,7 +81,7 @@ app.post('/faucet', async (request: Request, response: Response) => {
     const waitTime: number = Number(blockList.getTtl(ipAddress)) - Date.now();
     return response.status(200).json({
       status: false,
-      message: `Your ip address has already requested testnet ETH today :) The remaining time for next request is ${msToTime(
+      message: `Your ip address has already requested testnet ETH today. The remaining time for next request is ${msToTime(
         waitTime
       )}`,
     });
@@ -136,21 +92,24 @@ app.post('/faucet', async (request: Request, response: Response) => {
     const waitTime: number = Number(blockList.getTtl(toAddress)) - Date.now();
     return response.status(200).json({
       status: false,
-      message: `Your wallet address has already requested testnet ETH today :) The remaining time for next request is ${msToTime(
+      message: `Your wallet address has already requested testnet ETH today. The remaining time for next request is ${msToTime(
         waitTime
       )}.`,
     });
   }
 
-  const prevTx = sendQueue.length();
-  if (prevTx >= 5) {
-    return response.status(200).json({
-      status: false,
-      message: 'The faucet queue is full. Please try again later.',
+  const web3 = await getWeb3(network.rpcUrl);
+  const txHash = await sendFunds(web3, network.hmtAddress, toAddress);
+
+  if (txHash) {
+    lastSend.push({
+      time: Date.now(),
+      address: toAddress,
+      txHash: txHash,
     });
+    while (lastSend.length > 5) lastSend.shift();
   }
 
-  sendQueue.push({ address: toAddress });
   if (Number(process.env.IP_WAITING_TIME) > 0)
     blockList.set(ipAddress, true, Number(process.env.IP_WAITING_TIME));
   if (Number(process.env.ADDRESS_WAITING_TIME) > 0)
@@ -158,7 +117,8 @@ app.post('/faucet', async (request: Request, response: Response) => {
 
   return response.status(200).json({
     status: true,
-    message: `Testnet ETH request added to the queue (${prevTx} tasks remaining). Enjoy!`,
+    message: `Requested successfully`,
+    txHash: txHash,
   });
 });
 
