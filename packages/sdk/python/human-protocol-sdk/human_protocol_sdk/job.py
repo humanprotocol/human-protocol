@@ -3,15 +3,7 @@ import logging
 import os
 from decimal import Decimal
 from enum import Enum
-from typing import (
-    Dict,
-    List,
-    Tuple,
-    Optional,
-    Any,
-    TypedDict,
-    Union
-)
+from typing import Dict, List, Tuple, Optional, Any, TypedDict, Union
 
 from basemodels import Manifest
 from eth_keys import keys
