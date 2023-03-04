@@ -65,7 +65,7 @@ export interface IEscrowNetwork {
   factoryAddress: string;
 
   kvstoreAddress: string;
-  wagmiChain: skaleWagmiHP;
+  wagmiChain: Chain;
   oldSubgraphUrl: string;
   oldFactoryAddress: string;
 }
