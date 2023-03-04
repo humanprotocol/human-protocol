@@ -11,6 +11,27 @@ import {
   avalanche,
 } from 'wagmi/chains';
 
+const wagmiSkaleHP = {
+  id: 1273227453,
+  name: 'Skale Human Protocol chain',
+  name: 'skale',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Skale FUEL',
+    symbol: 'sFUEL',
+  },
+  rpcUrls: {
+    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Skale Explorer',
+      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    },
+  },
+} as Chain;
+
 export enum ChainId {
   ALL = -1,
   MAINNET = 1,
@@ -44,7 +65,7 @@ export interface IEscrowNetwork {
   factoryAddress: string;
 
   kvstoreAddress: string;
-  wagmiChain: Chain;
+  wagmiChain: skaleWagmiHP;
   oldSubgraphUrl: string;
   oldFactoryAddress: string;
 }
@@ -230,8 +251,8 @@ export const ESCROW_NETWORKS: {
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
     kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
-    // Wagmi hasn't been implemented yet
-    wagmiChain: {} as Chain,
+    // Add custom wagmi
+    wagmiChain: wagmiSkaleHP,
   },
 };
 
