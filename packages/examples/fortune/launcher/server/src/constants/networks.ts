@@ -9,6 +9,7 @@ export enum ChainId {
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export interface IEscrowNetwork {
@@ -86,4 +87,11 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
     hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
   },
+  // [ChainId.SKALE]: {
+  //   chainId: ChainId.SKALE,
+  //   title: 'SKALE Human Protocol chain',
+  //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  //   factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
+  //   hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+  // },
 };
