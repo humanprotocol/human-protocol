@@ -11,9 +11,6 @@
     "url": "https://github.com/humanprotocol/human-protocol/issues"
   },
   "title": "Human Protocol Foundation",
-  "engines": {
-    "node": "16.x"
-  },
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -33,14 +30,13 @@
     "typeorm:revert-migration": "npm run typeorm -- -d src/ormconfig.ts migration:revert",
     "prebuild": "rimraf dist/",
     "prepublish": "npm run build",
-    "start": "cross-env NODE_ENV=${NODE_ENV:=development} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
-    "start:dev": "cross-env NODE_ENV=${NODE_ENV:=development} tsc",
-    "start:production": "cross-env NODE_ENV=${NODE_ENV:=production} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
-    "start:staging": "cross-env NODE_ENV=${NODE_ENV:=staging} node .",
-    "test": "cross-env NODE_ENV=${NODE_ENV:=test} jest --config jest.config.json --detectOpenHandles"
+    "start": "NODE_ENV=${NODE_ENV:=development} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
+    "start:dev": "NODE_ENV=${NODE_ENV:=development} tsc",
+    "start:production": "NODE_ENV=${NODE_ENV:=production} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
+    "start:staging": "NODE_ENV=${NODE_ENV:=staging} node .",
+    "test": "NODE_ENV=${NODE_ENV:=test} jest --config jest.config.json --detectOpenHandles"
   },
   "dependencies": {
-    "nestjs-minio-client": "^2.0.0",
     "@ethersproject/providers": "^5.7.2",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.3.9",
@@ -58,7 +54,9 @@
     "express": "4.18.2",
     "express-session": "1.17.3",
     "helmet": "^6.0.1",
+    "minio": "^7.0.32",
     "nestjs-ethers": "^2.0.3",
+    "nestjs-minio-client": "^2.0.0",
     "pg": "^8.9.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "7.3.0",
@@ -68,7 +66,6 @@
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {
-    "@gemunion/cross-env": "0.0.3",
     "@gemunion/eslint-config": "0.1.9",
     "@nestjs/testing": "^9.3.9",
     "@openzeppelin/contracts": "^4.7.3",
@@ -77,8 +74,8 @@
     "@types/express": "4.17.13",
     "@types/express-session": "1.17.4",
     "@types/jest": "26.0.24",
-    "@types/mocha": "^9.1.1",
     "@types/minio": "7.0.17",
+    "@types/mocha": "^9.1.1",
     "@types/node": "14.17.9",
     "@types/supertest": "2.0.11",
     "@types/uuid": "8.3.1",
@@ -86,27 +83,15 @@
     "@typescript-eslint/eslint-plugin": "4.29.2",
     "@typescript-eslint/parser": "4.29.2",
     "chai": "^4.3.6",
-    "dotenv": "^16.0.2",
-    "eslint": "7.32.0",
-    "eslint-config-prettier": "8.3.0",
     "eslint-config-standard": "16.0.3",
     "eslint-import-resolver-ts": "0.4.2",
     "eslint-plugin-import": "2.24.0",
-    "eslint-plugin-jest": "24.4.0",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-prettier": "3.4.0",
     "eslint-plugin-promise": "5.1.0",
     "eslint-plugin-standard": "4.1.0",
     "ethereum-types": "^3.7.1",
     "ethers": "^5.7.0",
-    "husky": "4.3.8",
-    "jest": "27.0.6",
-    "lint-staged": "11.1.2",
-    "prettier": "2.3.2",
     "rimraf": "^3.0.2",
-    "tsc-watch": "^6.0.0",
-    "ts-jest": "^29.0.3",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.3"
+    "tsc-watch": "^6.0.0"
   }
 }
