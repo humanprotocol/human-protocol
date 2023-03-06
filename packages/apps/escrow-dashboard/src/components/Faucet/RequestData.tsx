@@ -12,7 +12,13 @@ import {
 } from '@mui/material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import React, { Dispatch, useState } from 'react';
-import { ChainId, ESCROW_NETWORKS, TESTNET_CHAIN_IDS } from '../../constants';
+import { Link } from 'react-router-dom';
+import {
+  ChainId,
+  ESCROW_NETWORKS,
+  FAUCET_CHAIN_IDS,
+  IEscrowNetwork,
+} from '../../constants';
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -25,18 +31,21 @@ export const RequestData = ({
   step,
   setStep,
   setTxHash,
+  network,
+  setNetwork,
 }: {
   step: number;
   setStep: Dispatch<number>;
   setTxHash: Dispatch<string>;
+  network: IEscrowNetwork;
+  setNetwork: Dispatch<IEscrowNetwork>;
 }) => {
-  const [chainId, setChainId] = useState<ChainId>(ChainId.POLYGON_MUMBAI);
   const [address, setAddress] = useState<string>('');
   const [error, setError] = useState<string>('');
 
   const handleSubmit = async () => {
     setStep(1);
-    const payload = { address: address, chainId: chainId };
+    const payload = { address: address, chainId: network.chainId };
     const response = await fetch(
       `${process.env.REACT_APP_FAUCET_SERVER_API}/faucet`,
       {
@@ -90,10 +99,12 @@ export const RequestData = ({
             <Select
               label="Network"
               variant="outlined"
-              value={chainId}
-              onChange={(e) => setChainId(Number(e.target.value))}
+              value={network.chainId}
+              onChange={(e) =>
+                setNetwork(ESCROW_NETWORKS[Number(e.target.value) as ChainId]!)
+              }
             >
-              {TESTNET_CHAIN_IDS.map((chainId) => (
+              {FAUCET_CHAIN_IDS.map((chainId) => (
                 <MenuItem key={chainId} value={chainId}>
                   {ESCROW_NETWORKS[chainId]?.title}
                 </MenuItem>
@@ -169,7 +180,7 @@ export const RequestData = ({
                   }
             }
           >
-            Contract address:
+            Token address:
           </Typography>
         </Grid>
 
@@ -193,7 +204,12 @@ export const RequestData = ({
                   }
             }
           >
-            {ESCROW_NETWORKS[chainId]?.hmtAddress}
+            <Link
+              to={network?.scanUrl + '/address/' + network?.hmtAddress}
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              {network?.hmtAddress}
+            </Link>
           </Typography>
         </Grid>
       </Grid>

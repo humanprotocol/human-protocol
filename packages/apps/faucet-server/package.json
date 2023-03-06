@@ -1,9 +1,10 @@
 {
-  "name": "testnet-faucet",
+  "name": "@human-protocol/faucet-server",
   "version": "1.0.0",
-  "description": "This is a faucet for private Ethereum testnet.",
+  "description": "Human Protocol faucet for private Ethereum testnet.",
   "main": "src/index.ts",
   "scripts": {
+    "lint": "eslint src",
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8549\" \"jest\"",
     "start": "cross-env NODE_ENV=development ts-node src/index.ts"
   },

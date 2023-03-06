@@ -1,6 +1,14 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
+import { IEscrowNetwork } from '../../constants';
 
-export const Success = ({ txHash }: { txHash: string }) => {
+export const Success = ({
+  txHash,
+  network,
+}: {
+  txHash: string;
+  network: IEscrowNetwork;
+}) => {
   return (
     <Paper>
       <Grid
@@ -60,7 +68,12 @@ export const Success = ({ txHash }: { txHash: string }) => {
             }}
           >
             <Typography align="justify" variant="body2" color="primary">
-              {txHash}
+              <Link
+                to={network?.scanUrl + '/tx/' + txHash}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                {txHash}
+              </Link>
             </Typography>
           </Paper>
         </Grid>
@@ -72,7 +85,7 @@ export const Success = ({ txHash }: { txHash: string }) => {
             window.location.href = '/';
           }}
         >
-          CTA
+          Home
         </Button>
       </Grid>
     </Paper>

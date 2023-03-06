@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { ChainId, ESCROW_NETWORKS, IEscrowNetwork } from '../../constants';
 import { RequestData } from './RequestData';
 import { Success } from './Success';
 const steps = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
@@ -15,6 +16,9 @@ const steps = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
 export const FaucetView = (): React.ReactElement => {
   const [step, setStep] = useState<number>(0);
   const [txHash, setTxHash] = useState<string>('');
+  const [network, setNetwork] = useState<IEscrowNetwork>(
+    ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!
+  );
   return (
     <Grid container>
       <Grid
@@ -58,9 +62,11 @@ export const FaucetView = (): React.ReactElement => {
                 step={step}
                 setStep={setStep}
                 setTxHash={setTxHash}
+                network={network}
+                setNetwork={setNetwork}
               />
             )}
-            {step === 2 && <Success txHash={txHash} />}
+            {step === 2 && <Success txHash={txHash} network={network} />}
           </Box>
         </Grid>
       </Grid>
