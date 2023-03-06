@@ -47,7 +47,7 @@ export const RequestData = ({
     setStep(1);
     const payload = { address: address, chainId: network.chainId };
     const response = await fetch(
-      `${process.env.REACT_APP_FAUCET_SERVER_API}/faucet`,
+      `${process.env.REACT_APP_FAUCET_SERVER_URL}/faucet`,
       {
         method: 'POST',
         headers: {
