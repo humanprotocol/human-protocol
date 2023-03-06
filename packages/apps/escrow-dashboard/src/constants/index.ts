@@ -14,7 +14,7 @@ import {
 const wagmiSkaleHP = {
   id: 1273227453,
   name: 'Skale Human Protocol chain',
-  name: 'skale',
+  network: 'skale',
   nativeCurrency: {
     decimals: 18,
     name: 'Skale FUEL',
@@ -81,6 +81,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.AVALANCHE,
+  ChainId.SKALE,
 ];
 
 export const TESTNET_CHAIN_IDS = [
