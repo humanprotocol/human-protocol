@@ -4,6 +4,7 @@
   "description": "Human Protocol faucet for private Ethereum testnet.",
   "main": "src/index.ts",
   "scripts": {
+    "build": "tsc",
     "lint": "eslint src",
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8549\" \"jest\"",
     "start": "cross-env NODE_ENV=development ts-node src/index.ts"
