@@ -50,3 +50,27 @@ export const sendFunds = async (
 
   return txHash;
 };
+
+export const checkFaucetBalance = async (web3: Web3, hmtAddress: string) => {
+  if ((await getFaucetBalance(web3, hmtAddress)) < process.env.DAILY_LIMIT)
+    return false;
+
+  const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
+  const gasNeeded = await HMT.methods
+    .transfer(
+      web3.eth.defaultAccount,
+      Web3.utils.toWei(process.env.DAILY_LIMIT as string, 'ether')
+    )
+    .estimateGas({ from: web3.eth.defaultAccount });
+  const gasPrice = await web3.eth.getGasPrice();
+  const balance = await web3.eth.getBalance(web3.eth.defaultAccount);
+
+  if (
+    web3.utils
+      .toBN(balance)
+      .cmp(web3.utils.toBN(gasNeeded).mul(web3.utils.toBN(gasPrice))) === -1
+  )
+    return false;
+
+  return true;
+};

@@ -9,7 +9,13 @@ import path from 'path';
 import Web3 from 'web3';
 import { ChainId, FAUCET_NETWORKS } from './constants/networks';
 import { lastSendType } from './interfaces/lastSendType';
-import { getFaucetBalance, getWeb3, sendFunds } from './services/web3';
+import {
+  checkFaucetBalance,
+  getFaucetBalance,
+  getWeb3,
+  sendFunds,
+} from './services/web3';
+import { sendSlackMessage } from './services/slack';
 
 // init express
 const app = express();
@@ -99,6 +105,14 @@ app.post('/faucet', async (request: Request, response: Response) => {
   }
 
   const web3 = getWeb3(network.rpcUrl);
+
+  if (!(await checkFaucetBalance(web3, network.hmtAddress))) {
+    sendSlackMessage(network.title);
+    return response.status(200).json({
+      status: false,
+      message: 'Faucet out of balance.',
+    });
+  }
   const txHash = await sendFunds(web3, network.hmtAddress, toAddress);
 
   if (txHash) {

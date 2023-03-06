@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: `.env.development` });
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
 import { describe, expect, it } from '@jest/globals';
-import { getFaucetBalance, sendFunds } from './web3';
+import { checkFaucetBalance, getFaucetBalance, sendFunds } from './web3';
 import { Contract } from 'web3-eth-contract';
 import Web3 from 'web3';
 
@@ -61,5 +61,18 @@ describe('Faucet', () => {
         .sub(web3.utils.toBN(web3.utils.toWei('10', 'ether')))
         .toString()
     );
+  });
+
+  it('Check balance', async () => {
+    expect(await checkFaucetBalance(web3, token.options.address)).toBeTruthy();
+
+    await token.methods
+      .transfer(
+        externalUser,
+        await token.methods.balanceOf(owner.address).call()
+      )
+      .send({ from: owner.address });
+
+    expect(await checkFaucetBalance(web3, token.options.address)).toBeFalsy();
   });
 });
