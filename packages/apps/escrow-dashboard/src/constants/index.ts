@@ -81,7 +81,6 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.AVALANCHE,
-  ChainId.SKALE,
 ];
 
 export const TESTNET_CHAIN_IDS = [
