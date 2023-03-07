@@ -16,6 +16,8 @@ psycopg2 = "^2.9.5"
 sqlalchemy-utils = "^0.40.0"
 alembic = "^1.9.4"
 web3 = "^5.31.3"
+httpx = "^0.23.3"
+pytest = "^7.2.2"
 
 
 [tool.poetry.group.dev.dependencies]
