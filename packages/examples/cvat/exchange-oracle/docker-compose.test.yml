@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14.4
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: 'test'
+      POSTGRES_USER: 'test'
+      POSTGRES_DB: 'exchange_oracle_test'
+      PGDATA: '/var/lib/postgresql/data/pgdata'
+    ports:
+      - 5432:5432
+    command: ["postgres", "-c", "log_statement=all"]
+
+volumes:
+  postgres:    
