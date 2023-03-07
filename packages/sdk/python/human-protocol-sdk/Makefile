@@ -7,9 +7,17 @@ build-contracts:
 format:
 	pipenv run black .
 
+start-minio:
+	docker compose -f ./minio/docker-compose.yml up -d
+
+stop-minio:
+	docker compose -f ./minio/docker-compose.yml down -v
+
 run-test:
 	make build-contracts
+	make start-minio
 	./scripts/run-test.sh
+	make stop-minio
 
 build-package:
 	make clean-package
