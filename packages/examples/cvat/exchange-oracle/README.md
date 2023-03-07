@@ -54,3 +54,12 @@ alembic downgrade -{number of migrations}
 ### Endpoints and API schema
 
 Available at `/docs` route
+
+
+### Tests
+
+To run tests
+```
+docker-compose -f docker-compose.test.yml up -d
+pytest
+```
