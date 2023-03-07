@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
+  "buildCommand": "yarn workspace @human-protocol/faucet-server build",
   "installCommand": "yarn install",
   "outputDirectory": "build",
   "builds": [
