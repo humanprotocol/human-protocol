@@ -23,6 +23,10 @@ const NAV_LINKS: NavLink[] = [
     title: 'KV Store',
     href: '/kvstore',
   },
+  {
+    title: 'Faucet',
+    href: '/faucet',
+  },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
 
