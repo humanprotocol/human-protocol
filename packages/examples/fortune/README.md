@@ -83,7 +83,7 @@ The job creation is now complete!
 In Metamask, using your Job Requester account:
 1. Navigate to [Job Launcher](https://job-launcher-client.vercel.app/) to access the Job Launcher.
 3. Click on Fiat.
-4. Fill the job request form and click on "Fund and Request Job" (in fortunes requested choose 2). Use `4242424242424242` as the card number.
+4. Fill the job request form and click on "Fund and Request Job" (in fortunes requested choose 2). Use `4242424242424242` as the card number, any number as CVC and a future date as expiration date.
 5. Wait until the job is created and you should see your escrow address.
 
 The job creation is now complete!

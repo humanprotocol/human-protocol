@@ -41,4 +41,4 @@ yarn test
 4. Give to the project a name.
 5. Choose the root directory as `packages/examples/fortune/launcher/server`
 6. Leave Build and Output Settings section empty, it will use `vercel.json` config.
-7. Set Environnment Variables from `.env.development` with your own values.
+7. Set Environnment Variables from `.env.development` with your own values. (You will need to create an Stripe account https://stripe.com/)
