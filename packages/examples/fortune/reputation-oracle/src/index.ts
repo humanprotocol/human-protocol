@@ -2,11 +2,15 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { calculateRewardForWorker } from './services/rewards';
 import { uploadResults } from './services/s3';
-import { initSigner, initWeb3, processAddress } from './utils/utils';
 import { Address } from '@multiversx/sdk-core/out';
-import { getServiceForAddress } from './utils/utils';
-import { Web3Service } from './utils/web3.service';
 import * as dotenv from 'dotenv';
+import {
+  initWeb3,
+  initSigner,
+  processAddress,
+  getServiceForAddress,
+} from './utils/utils';
+import { Web3Service } from './utils/web3.service';
 dotenv.config();
 
 const app = express();
@@ -62,12 +66,16 @@ app.post('/job/results', async (req, res) => {
     );
 
     const resultHash = resultsUrl;
-    await escrowContract.bulkPayOut(
-      workerAddresses,
-      rewards,
-      resultsUrl,
-      resultHash
-    );
+    try {
+      await escrowContract.bulkPayOut(
+        workerAddresses,
+        rewards,
+        resultsUrl,
+        resultHash
+      );
+    } catch (e) {
+      return res.status(400).send({ message: "Payout couldn't be done" });
+    }
 
     if (escrowContract instanceof Web3Service) {
       if (!(await escrowContract.bulkPaid())) {
