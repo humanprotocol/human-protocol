@@ -1,5 +1,5 @@
 # Job Launcher client
-Job Launcher client is the GUI to allow Human Protocol users can create jobs.
+Job Launcher client is the GUI to allow Human Protocol users to create jobs.
 
 ## Development
 
@@ -34,3 +34,17 @@ at project directory
 ```bash
 $ yarn test
 ``` 
+
+## Deployment on Vercel
+1. On Github fork this repository. (Skip this step for Human Protocol team)
+2. Then go to your Vercel dashboard and click on Add New... Project.
+3. Choose the forked repository or this repository if you are on Human Protocol team.
+4. Give to the project a name.
+5. Choose the root directory as `packages/examples/fortune/launcher/client`
+6. In Build and Output Settings section set these values:
+    - Build Command: `yarn workspace @human-protocol/job-launcher-client build`
+    - Output Directory: `build`
+    - Install Command: `yarn install`
+7. Set Environnment Variables:
+    - REACT_APP_JOB_LAUNCHER_ADDRESS
+    - REACT_APP_JOB_LAUNCHER_SERVER_URL
