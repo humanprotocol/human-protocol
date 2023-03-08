@@ -142,10 +142,10 @@ export default function ConnectButton() {
             ? `$ ${Number(walletBalance.formatted) * walletBalance.usdPrice}`
             : ''}
         </Typography>
-        <Stack sx={{ mt: 8 }} spacing={1.5}>
+        {/* <Stack sx={{ mt: 8 }} spacing={1.5}>
           <Button variant="outlined">Profile</Button>
           <Button variant="outlined">Another Option</Button>
-        </Stack>
+        </Stack> */}
       </ProfileMenu>
     </>
   );

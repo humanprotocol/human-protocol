@@ -28,6 +28,10 @@ type NavLink = {
 const NAV_LINKS: NavLink[] = [
   { title: 'Leaderboard', href: '/leaderboard' },
   { title: 'KV Store', href: '/kvstore' },
+  {
+    title: 'Faucet',
+    href: '/faucet',
+  },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
 
@@ -37,6 +41,11 @@ const Header: React.FC = (): React.ReactElement => {
   const theme = useTheme();
   const isDownLg = useMediaQuery(theme.breakpoints.down('lg'));
   const isDownMd = useMediaQuery(theme.breakpoints.down('md'));
+
+  /**
+   * @TODO: Remove the flag once it's implemented
+   */
+  const showSearchBox = false;
 
   const toggleDrawer = () => setDrawerOpen(!drawerOpen);
 
@@ -89,7 +98,7 @@ const Header: React.FC = (): React.ReactElement => {
           >
             {searchOpen ? (
               <Box display="flex" alignItems="center" width="100%">
-                <SearchBox />
+                {showSearchBox && <SearchBox />}
                 <IconButton
                   color="primary"
                   sx={{ ml: 2 }}
@@ -115,7 +124,7 @@ const Header: React.FC = (): React.ReactElement => {
                 </Link>
                 {!isDownLg && (
                   <Box sx={{ minWidth: '400px' }}>
-                    <SearchBox />
+                    {showSearchBox && <SearchBox />}
                   </Box>
                 )}
                 {!isDownMd && (

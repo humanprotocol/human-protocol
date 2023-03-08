@@ -1,5 +1,6 @@
 import { Box, IconButton, Typography } from '@mui/material';
 import React from 'react';
+import copy from 'copy-to-clipboard';
 import CopyLinkIcon from '../Icons/CopyLinkIcon';
 
 type CopyAddressButtonProps = {
@@ -11,6 +12,10 @@ export function CopyAddressButton({
   address,
   ...rest
 }: CopyAddressButtonProps) {
+  const handleClickCopy = () => {
+    copy(address);
+  };
+
   return (
     <Box
       display="flex"
@@ -34,7 +39,7 @@ export function CopyAddressButton({
       >
         {address}
       </Typography>
-      <IconButton color="primary">
+      <IconButton color="primary" onClick={handleClickCopy}>
         <CopyLinkIcon />
       </IconButton>
     </Box>
