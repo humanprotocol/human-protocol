@@ -5,3 +5,4 @@ export { EscrowDetailPage as Escrow } from './Escrow';
 export { ProfilePage as Profile } from './Profile';
 export { OwnerPage as Owner } from './Owner';
 export { KvstorePage as Kvstore } from './Kvstore';
+export { FaucetPage as Faucet } from './Faucet';

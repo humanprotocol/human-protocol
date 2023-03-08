@@ -1,12 +1,14 @@
 import { FC } from 'react';
+
 import {
-  Main,
-  Leaderboard,
+  Escrow,
+  Faucet,
   Kvstore,
   Leader,
-  Escrow,
-  Profile,
+  Leaderboard,
+  Main,
   Owner,
+  Profile,
 } from 'src/pages';
 
 interface Route {
@@ -58,5 +60,11 @@ export const routes: Array<Route> = [
     title: 'KV Store',
     path: '/kvstore',
     component: Kvstore,
+  },
+  {
+    key: 'faucet-route',
+    title: 'Faucet',
+    path: '/faucet',
+    component: Faucet,
   },
 ];

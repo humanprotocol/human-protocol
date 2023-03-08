@@ -71,6 +71,14 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.AVALANCHE_TESTNET,
 ];
 
+export const FAUCET_CHAIN_IDS = [
+  ChainId.GOERLI,
+  ChainId.BSC_TESTNET,
+  ChainId.POLYGON_MUMBAI,
+  ChainId.MOONBASE_ALPHA,
+  ChainId.AVALANCHE_TESTNET,
+];
+
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: IEscrowNetwork;
 } = {
