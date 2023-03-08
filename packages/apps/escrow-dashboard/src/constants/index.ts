@@ -287,13 +287,16 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
     subgraphUrl: 'https://api.thegraph.com/',
-    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
-    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
-    oldSubgraphUrl: '',
-    oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
-    kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
     // Add custom wagmi
     wagmiChain: wagmiSkaleHP,
+
+    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
+    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+    stakingAddress: '',
+    kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
+
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
   },
 };
 
