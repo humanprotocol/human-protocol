@@ -91,6 +91,7 @@ class StripeClient {
     // See the documentation [0] for the full list of supported parameters.
     //
     // [0] https://stripe.com/docs/api/payment_intents/create
+    console.log(this.stripeClient);
     const paymentIntent = await this.stripeClient.paymentIntents.create(params);
 
     // Send publishable key and PaymentIntent details to client
