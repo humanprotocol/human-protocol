@@ -11,6 +11,27 @@ import {
   avalanche,
 } from 'wagmi/chains';
 
+const wagmiSkaleHP = {
+  id: 1273227453,
+  name: 'Skale Human Protocol chain',
+  network: 'skale',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Skale FUEL',
+    symbol: 'sFUEL',
+  },
+  rpcUrls: {
+    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Skale Explorer',
+      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    },
+  },
+} as Chain;
+
 export enum ChainId {
   ALL = -1,
   MAINNET = 1,
@@ -24,12 +45,14 @@ export enum ChainId {
   MOONBASE_ALPHA = 1287,
   AVALANCHE_TESTNET = 43113,
   AVALANCHE = 43114,
+  SKALE = 1273227453,
 }
 
 export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
   [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
+  [ChainId.SKALE]: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
 };
 
 export interface IEscrowNetwork {
@@ -223,6 +246,21 @@ export const ESCROW_NETWORKS: {
     oldFactoryAddress: '',
     kvstoreAddress: '0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df',
     wagmiChain: avalanche,
+  },
+  [ChainId.SKALE]: {
+    chainId: ChainId.SKALE,
+    title: 'SKALE Human Protocol Chain',
+    scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
+    rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    // Subgraph hasn't been implemented yet
+    subgraphUrl: 'https://api.thegraph.com/',
+    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
+    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
+    kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
+    // Add custom wagmi
+    wagmiChain: wagmiSkaleHP,
   },
 };
 
