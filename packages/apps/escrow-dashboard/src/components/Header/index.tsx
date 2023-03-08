@@ -119,7 +119,7 @@ const Header: React.FC = (): React.ReactElement => {
                 >
                   <img src={logoSvg} alt="logo" />
                   <Typography variant="h6" color="primary" ml="10px">
-                    Scan
+                    Dashboard
                   </Typography>
                 </Link>
                 {!isDownLg && (
