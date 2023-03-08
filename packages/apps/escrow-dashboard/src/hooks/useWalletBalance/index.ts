@@ -1,5 +1,5 @@
-import { ESCROW_NETWORKS, ChainId } from 'src/constants/index';
-import useHMTPrice from 'src/hooks/useHMTPrice';
+import { ESCROW_NETWORKS, ChainId } from '../../constants';
+import useHMTPrice from '../../hooks/useHMTPrice';
 import { Address, useAccount, useBalance, useChainId } from 'wagmi';
 
 export default function useWalletBalance() {
