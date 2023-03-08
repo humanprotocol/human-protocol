@@ -78,7 +78,7 @@ const Header: React.FC = (): React.ReactElement => {
             >
               <img src="/images/logo.svg" alt="logo" />
               <Typography variant="h6" color="primary" ml="10px">
-                Scan
+                Dashboard
               </Typography>
             </Link>
             <Box
