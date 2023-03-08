@@ -106,7 +106,9 @@ You should see account balance for Worker 1 and 2 has increased by the relevant 
 
 ## Running Locally with Node
 
-First we must get a new WalletConnect projectID. To do so go to https://cloud.walletconnect.com and register a new project. Once we get that, go to Exchange directory and complete the environment variables file with the projectId obtained.
+First we must get:
+- A new WalletConnect projectID. To do so go to https://cloud.walletconnect.com and register a new project. Once we get that, go to Exchange directory and complete the environment variables file with the projectId obtained.
+- Stripe keys from https://stripe.com and set them in environment variables of job launcher server.
 
 Then execute the following command:
 
