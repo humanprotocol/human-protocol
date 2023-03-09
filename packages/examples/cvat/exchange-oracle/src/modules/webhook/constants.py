@@ -3,7 +3,8 @@ from src.config import Config
 
 
 class Networks(str, Enum):
-    network_id = Config.network_config.network_id
+    polygon_mainnet = Config.polygon_mainnet.network_id
+    polygon_mumbai = Config.polygon_mumbai.network_id
 
 
 class WebhookTypes(str, Enum):
