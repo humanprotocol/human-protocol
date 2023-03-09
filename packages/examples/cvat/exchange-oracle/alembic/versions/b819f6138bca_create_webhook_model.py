@@ -24,7 +24,6 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("signature", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
-        sa.Column("url", sqlalchemy_utils.types.url.URLType(), nullable=False),
         sa.Column("network_id", sa.String(), nullable=False),
         sa.Column(
             "type",
@@ -52,7 +51,6 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("escrow_address"),
-        sa.UniqueConstraint("url"),
     )
     op.create_index(op.f("ix_webhooks_id"), "webhooks", ["id"], unique=False)
     op.create_index(
