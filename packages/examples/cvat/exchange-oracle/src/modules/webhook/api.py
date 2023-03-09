@@ -42,7 +42,6 @@ def create_webhook(db: Session, jl_webhook: JLWebhook, signature: str):
             network_id=jl_webhook.network,
             type=WebhookTypes.jl_webhook.value,
             status=WebhookStatuses.pending.value,
-            url=jl_webhook.s3_url,
             # .lower() is to conform s3 bucket naming rules
             # https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
         )
