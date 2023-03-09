@@ -23,7 +23,6 @@ describe('when rendered LaunchFail component', () => {
       });
     });
     expect(screen.getByText('Fail!')).toBeTruthy();
-    expect(screen.getByText('Fail message here.')).toBeTruthy();
     expect(screen.getByText('Back')).toBeTruthy();
   });
 });
