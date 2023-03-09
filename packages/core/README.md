@@ -33,28 +33,22 @@ npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 
 # Upgrade contracts with proxy
 
-1. Create a new script in `./scripts/`.
+1. Create a .env file in the root folder of core package, with the following variables(this is an example to update EscrowFactory on Polygon Mumbai, if you want to upgrade
+   more proxies you need to add the corresponding addresses. Also, for other networks `check hardhat.config.ts`):
 
-2. Then, using the method upgradeProxy from `@openzeppelin/hardhat-upgrades` you can upgrade the deployed instance to a new version.
-   The new version can be a different contract, or you can just modify the existing contract and recompile it - the plugin will note it changed
-
-Script example ([ESCROW_FACTORY_ADDRESS] = escrow factory address in the chosen network):
 ```bash
-const { ethers, upgrades } = require('hardhat');
-
-async function main() {
-  const EscrowFactoryV2 = await ethers.getContractFactory('EscrowFactoryV2');
-  const EscrowFactory = await upgrades.upgradeProxy([ESCROW_FACTORY_ADDRESS], EscrowFactoryV2);
-  console.log('EscrowFactory upgraded');
-}
-
-main();
+ETH_POLYGON_MUMBAI_URL=
+PRIVATE_KEY=
+POLYGONSCAN_API_KEY=
+ESCROW_FACTORY_ADDRESS=
 ```
 
-3. Deploy the upgraded contract runing this ([SCRIPT_NAME] = name of new script created and [NETWORK_NAME] = network name from `hardhat.config.ts`):
+2. Open `./scripts/upgrade-proxies.ts` and add all the proxies you actually need to upgrade.
+
+3. Deploy the upgraded contract runing this ([NETWORK_NAME] = network name from `hardhat.config.ts`):
 
 ```bash
-npx hardhat run scripts/[SCRIPT_NAME] --network [NETWORK_NAME]
+yarn upgrade:proxy --network [NETWORK_NAME]
 ```
 
 4. Verify the contract runing the following line:
