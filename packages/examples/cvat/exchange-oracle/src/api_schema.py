@@ -1,7 +1,7 @@
 # pylint: disable=too-few-public-methods
 """ Schema for API input&output"""
 
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -28,7 +28,7 @@ class SupportedNetwork(BaseModel):
     network_id: str
     hmt_addr: Optional[str]
     escrow_factory_addr: Optional[str]
-    public_key: Optional[str]
+    addr: Optional[str]
 
 
 class MetaResponse(BaseModel):
@@ -36,4 +36,4 @@ class MetaResponse(BaseModel):
 
     message: str
     version: str
-    supported_network: SupportedNetwork
+    supported_networks: List[SupportedNetwork]
