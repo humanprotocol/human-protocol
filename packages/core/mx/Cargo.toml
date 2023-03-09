@@ -1,0 +1,31 @@
+[workspace]
+
+members = [
+
+    # Common contract paths
+    "contracts/common-structs",
+
+    # Escrow contract paths
+    "contracts/escrow",
+    "contracts/escrow/meta",
+
+    # Escrow factory contract paths
+    "contracts/escrow-factory",
+    "contracts/escrow-factory/meta",
+
+    # KV Store contract paths
+    "contracts/kv-store",
+    "contracts/kv-store/meta",
+
+    # Reputation contract paths
+    "contracts/reputation",
+    "contracts/reputation/meta",
+
+    # Rewards pool contract paths
+    "contracts/rewards-pool",
+    "contracts/rewards-pool/meta",
+
+    # Staking contract paths
+    "contracts/staking",
+    "contracts/staking/meta",
+]
