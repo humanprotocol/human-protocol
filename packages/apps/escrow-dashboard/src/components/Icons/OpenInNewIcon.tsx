@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function OpenInNewIcon(props: SvgIconProps) {
+export const OpenInNewIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="24" height="24" viewBox="0 0 24 24" fill="none" {...props}>
       <path
@@ -10,4 +10,4 @@ export default function OpenInNewIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

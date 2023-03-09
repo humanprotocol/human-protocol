@@ -1,6 +1,6 @@
 import { ChainId } from 'src/constants';
 
-export interface LeaderData {
+export type LeaderData = {
   chainId: ChainId;
   address: string;
   role: string;
@@ -13,11 +13,11 @@ export interface LeaderData {
   reputation: number;
   amountJobsLaunched: number;
   url?: string;
-}
+};
 
-export interface LeaderEscrowData {
+export type LeaderEscrowData = {
   address: string;
   amountAllocated: number;
   amountPayout: number;
   status: string;
-}
+};

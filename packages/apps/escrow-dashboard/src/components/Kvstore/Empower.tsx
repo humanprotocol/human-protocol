@@ -1,14 +1,13 @@
+import { Done as DoneIcon } from '@mui/icons-material';
 import { Grid, Paper, Typography, Box, Button } from '@mui/material';
-import DoneIcon from '@mui/icons-material/Done';
-import React, { Dispatch } from 'react';
+import { Dispatch, FC } from 'react';
 
-export const Empower = ({
-  refetch,
-  setPublicKey,
-}: {
+export type EmpowerProps = {
   refetch: any;
   setPublicKey: Dispatch<string>;
-}): React.ReactElement => {
+};
+
+export const Empower: FC<EmpowerProps> = ({ refetch, setPublicKey }) => {
   async function finish() {
     try {
       const { data } = await refetch();
@@ -18,6 +17,7 @@ export const Empower = ({
       }
     }
   }
+
   return (
     <Grid container>
       <Grid item container direction="row" justifyContent="center">

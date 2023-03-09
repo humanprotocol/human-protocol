@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Encrypt } from 'src/components/Kvstore/Encrypt';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { Encrypt } from '../Encrypt';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered Encrypt component', () => {
   it('should render `text` prop', async () => {
@@ -20,7 +19,7 @@ describe('when rendered Encrypt component', () => {
       ],
     });
     await act(async () => {
-      render(<Encrypt />, {
+      render(<Encrypt publicKey="" />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <Providers client={client}>{children}</Providers>
         ),
@@ -41,12 +40,10 @@ it('Encrypt component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <Encrypt />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Encrypt publicKey="" />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

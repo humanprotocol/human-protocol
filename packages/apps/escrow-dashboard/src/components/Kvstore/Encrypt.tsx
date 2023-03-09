@@ -1,29 +1,22 @@
-import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
-import React, { useState } from 'react';
-import * as openpgp from 'openpgp';
-import { NFTStorage } from 'nft.storage';
-import { useWaitForTransaction, useContractWrite, useNetwork } from 'wagmi';
-import { ESCROW_NETWORKS, ChainId } from '../../constants';
 import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-const client = new NFTStorage({
-  token: process.env.REACT_APP_NFT_STORAGE_API as string,
-});
-export const Encrypt = ({
-  publicKey,
-}: {
+import * as openpgp from 'openpgp';
+import { FC, useState } from 'react';
+import { useWaitForTransaction, useContractWrite, useNetwork } from 'wagmi';
+
+import { Alert } from '../Alert';
+import { NFT_STORAGE_CLIENT } from './constants';
+
+import { ESCROW_NETWORKS, ChainId } from 'src/constants';
+
+export type EncryptProps = {
   publicKey: string;
-}): React.ReactElement => {
+};
+
+export const Encrypt: FC<EncryptProps> = ({ publicKey }) => {
   const { chain } = useNetwork();
   const [key, setKey] = useState('');
-
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
@@ -45,6 +38,7 @@ export const Encrypt = ({
       setLoading(false);
     },
   });
+
   useWaitForTransaction({
     hash: data?.hash,
     onSuccess(data) {
@@ -57,6 +51,7 @@ export const Encrypt = ({
       setLoading(false);
     },
   });
+
   async function storeKeyValue() {
     setLoading(true);
     setError('');
@@ -79,7 +74,7 @@ export const Encrypt = ({
         },
       });
       const someData = new Blob([encrypted1 as string]);
-      const cid = await client.storeBlob(someData);
+      const cid = await NFT_STORAGE_CLIENT.storeBlob(someData);
       await writeAsync?.({ recklesslySetUnpreparedArgs: [key, cid] });
       setEncrypted(encrypted1 as string);
     } catch (e) {

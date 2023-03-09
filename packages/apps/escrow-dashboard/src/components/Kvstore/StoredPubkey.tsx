@@ -1,29 +1,24 @@
-import { Grid, Paper, Typography, Box, Button } from '@mui/material';
-import React, { Dispatch, useState } from 'react';
-import { showIPFS } from '../../services/index';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Box, Button, Grid, Paper, Snackbar, Typography } from '@mui/material';
+import { Dispatch, FC, useState } from 'react';
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { Alert } from '../Alert';
+import { showIPFS } from 'src/services';
 
-export const StoredPubkey = ({
-  publicKey,
-  setPublicKey,
-  refetch,
-  setStep,
-  setPage,
-}: {
+export type StoredPubkeyProps = {
   publicKey: string;
   setPublicKey: Dispatch<string>;
   refetch: any;
   setStep: Dispatch<number>;
   setPage: Dispatch<number>;
-}): React.ReactElement => {
+};
+
+export const StoredPubkey: FC<StoredPubkeyProps> = ({
+  publicKey,
+  setPublicKey,
+  refetch,
+  setStep,
+  setPage,
+}) => {
   const [copy, setCopy] = useState<boolean>(false);
 
   async function refresh() {

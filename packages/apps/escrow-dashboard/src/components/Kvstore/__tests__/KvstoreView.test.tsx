@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { KvstoreView } from 'src/components/Kvstore/KvstoreView';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { KvstoreView } from '../KvstoreView';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered KvstoreView component', () => {
   it('should render `text` prop', async () => {
@@ -45,12 +44,10 @@ it('KvstoreView component renders correctly, corresponds to the snapshot', () =>
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <KvstoreView />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <KvstoreView />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

@@ -12,15 +12,16 @@ import {
 } from '@reduxjs/toolkit/dist/matchers';
 import { Contract, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
+
+import { AppState } from '..';
+import { EscrowEventDayData, EscrowStats } from './types';
+
+import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
+import rinkebyEscrowAmount from 'src/history-data/rinkeby_EscrowAmount.json';
 import rinkebyEscrowEvents from 'src/history-data/rinkeby_EscrowEvents.json';
 import rinkebyEscrowStats from 'src/history-data/rinkeby_EscrowStats.json';
-import rinkebyEscrowAmount from 'src/history-data/rinkeby_EscrowAmount.json';
-import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
 import { RAW_ESCROW_STATS_QUERY, RAW_EVENT_DAY_DATA_QUERY } from 'src/queries';
-import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
-
-import { EscrowEventDayData, EscrowStats } from './types';
 
 type EscrowEventsType = { [chainId in ChainId]?: EscrowEventDayData[] };
 
@@ -28,7 +29,7 @@ type EscrowStatsType = { [chainId in ChainId]?: EscrowStats };
 
 type EscrowAmountsType = { [chainId in ChainId]?: number };
 
-interface EscrowState {
+type EscrowState = {
   loadingKeys: Record<string, boolean>;
   chainId: ChainId;
   events: EscrowEventsType;
@@ -37,7 +38,7 @@ interface EscrowState {
   statsLoaded: boolean;
   amounts: EscrowAmountsType;
   amountsLoaded: boolean;
-}
+};
 
 const initialState: EscrowState = {
   loadingKeys: {},

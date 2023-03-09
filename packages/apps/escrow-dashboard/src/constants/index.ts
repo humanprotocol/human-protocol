@@ -11,6 +11,8 @@ import {
   avalanche,
 } from 'wagmi/chains';
 
+import { EscrowNetwork } from 'src/types';
+
 const wagmiSkaleHP = {
   id: 1273227453,
   name: 'Skale Human Protocol chain',
@@ -55,23 +57,6 @@ export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.SKALE]: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
 };
 
-export interface IEscrowNetwork {
-  chainId: number;
-  title: string;
-  scanUrl: string;
-  rpcUrl: string;
-  subgraphUrl: string;
-  wagmiChain: Chain;
-
-  hmtAddress: string;
-  factoryAddress: string;
-  stakingAddress: string;
-  kvstoreAddress: string;
-
-  oldSubgraphUrl: string;
-  oldFactoryAddress: string;
-}
-
 export const SUPPORTED_CHAIN_IDS = [
   ChainId.RINKEBY,
   ChainId.GOERLI,
@@ -103,7 +88,7 @@ export const FAUCET_CHAIN_IDS = [
 ];
 
 export const ESCROW_NETWORKS: {
-  [chainId in ChainId]?: IEscrowNetwork;
+  [chainId in ChainId]?: EscrowNetwork;
 } = {
   // TODO: Remove Rinkeby from supported chainlist
   [ChainId.RINKEBY]: {

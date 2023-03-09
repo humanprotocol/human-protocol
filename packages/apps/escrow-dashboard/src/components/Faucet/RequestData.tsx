@@ -10,35 +10,28 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import React, { Dispatch, useState } from 'react';
+import { Dispatch, FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ChainId,
-  ESCROW_NETWORKS,
-  FAUCET_CHAIN_IDS,
-  IEscrowNetwork,
-} from '../../constants';
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { Alert } from '../Alert';
 
-export const RequestData = ({
+import { ChainId, ESCROW_NETWORKS, FAUCET_CHAIN_IDS } from 'src/constants';
+import { EscrowNetwork } from 'src/types';
+
+export type RequestDataProps = {
+  step: number;
+  setStep: Dispatch<number>;
+  setTxHash: Dispatch<string>;
+  network: EscrowNetwork;
+  setNetwork: Dispatch<EscrowNetwork>;
+};
+
+export const RequestData: FC<RequestDataProps> = ({
   step,
   setStep,
   setTxHash,
   network,
   setNetwork,
-}: {
-  step: number;
-  setStep: Dispatch<number>;
-  setTxHash: Dispatch<string>;
-  network: IEscrowNetwork;
-  setNetwork: Dispatch<IEscrowNetwork>;
 }) => {
   const [address, setAddress] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -47,7 +40,7 @@ export const RequestData = ({
     setStep(1);
     const payload = { address: address, chainId: network.chainId };
     const response = await fetch(
-      `${process.env.REACT_APP_FAUCET_SERVER_URL}/faucet`,
+      `${import.meta.env.VITE_APP_FAUCET_SERVER_URL}/faucet`,
       {
         method: 'POST',
         headers: {
