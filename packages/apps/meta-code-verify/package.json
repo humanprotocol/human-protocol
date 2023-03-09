@@ -1,0 +1,37 @@
+{
+  "name": "meta-code-verify",
+  "version": "0.1.0",
+  "description": "Browser extensions to verify code running in the browser against a published manifest",
+  "main": "none",
+  "repository": "git@github.com:facebookincubator/meta-code-verify.git",
+  "author": "Richard Hansen <rrh@fb.com>",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": "^18.0.0"
+  },
+  "scripts": {
+    "build-local-dev": "yarn makeBundle",
+    "watch": "yarn run rollup --config --watch",
+    "lint": "yarn makePrettier && yarn run eslint src/js/**",
+    "makeBundle": "yarn run rollup -c",
+    "makePrettier": "yarn run prettier --write \"src/**/*.js\" \"build/**/*.mjs\"",
+    "test": "yarn lint && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-eslint": "^8.0.2",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/chrome": "^0.0.213",
+    "@types/jest": "^29.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/parser": "^5.52.0",
+    "eslint": "^7.32.0",
+    "jest": "^27.1.0",
+    "prettier": "^2.3.2",
+    "rollup": "^2.56.3",
+    "ts-jest": "^27.1.0",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
+  }
+}
