@@ -22,12 +22,22 @@ class Postgres:
         return f"postgresql://{Postgres.user}:{Postgres.password}@{Postgres.host}:{Postgres.port}/{Postgres.database}"
 
 
-class NetworkConfig:
-    network_id = os.environ.get("BLOCKCHAIN_NETWORK", 1)
-    hmt_addr = os.environ.get("HMT_ADDRESS", 1)
-    factory_addr = os.environ.get("ESCROW_FACTORY_ADDRESS", 1)
-    public_key = os.environ.get("PUBLIC_KEY", 1)
-    private_key = os.environ.get("PRIVATE_KEY", 2)
+class PolygonMainnetConfig:
+    network_id = "polygon_mainnet"
+    rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
+    hmt_addr = os.environ.get("POLYGON_MAINNET_HMT_ADDR")
+    factory_addr = os.environ.get("POLYGON_MAINNET_FACTORY_ADDR")
+    private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
+    addr = os.environ.get("POLYGON_MAINNET_ADDR")
+
+
+class PolygonMumbaiConfig:
+    network_id = "polygon_mumbai"
+    rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
+    hmt_addr = os.environ.get("POLYGON_MUMBAI_HMT_ADDR")
+    factory_addr = os.environ.get("POLYGON_MUMBAI_FACTORY_ADDR")
+    private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
+    addr = os.environ.get("POLYGON_MUMBAI_ADDR")
 
 
 class Config:
@@ -35,5 +45,7 @@ class Config:
     environment = os.environ.get("ENVIRONMENT", "development")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
 
-    network_config = NetworkConfig
+    polygon_mainnet = PolygonMainnetConfig
+    polygon_mumbai = PolygonMumbaiConfig
+
     postgres_config = Postgres
