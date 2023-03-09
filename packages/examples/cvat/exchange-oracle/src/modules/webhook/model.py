@@ -1,6 +1,5 @@
 # pylint: disable=too-few-public-methods
 from sqlalchemy import Column, String, DateTime, Enum
-from sqlalchemy_utils import URLType
 from sqlalchemy.sql import func
 from sqlalchemy.dialects import postgresql
 
@@ -14,7 +13,6 @@ class Webhook(Base):
     id = Column(String, primary_key=True, index=True)
     signature = Column(String, unique=True, index=True, nullable=False)
     escrow_address = Column(String(42), unique=True, nullable=False)
-    url = Column(URLType, unique=True, nullable=False)
     network_id = Column(String, Enum(Networks), nullable=False)
     type = Column(Enum(WebhookTypes))
     status = Column(Enum(WebhookStatuses), server_default=WebhookStatuses.pending.value)
