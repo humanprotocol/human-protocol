@@ -13,20 +13,23 @@ greet_router = APIRouter()
     "/", description="Endpoint describing the API", response_model=MetaResponse
 )
 def meta_route() -> MetaResponse:
-    network = Config.network_config
+    networks = [Config.polygon_mainnet, Config.polygon_mumbai]
 
-    network_info = {
-        "network_id": network.network_id,
-        "hmt_addr": network.hmt_addr,
-        "escrow_factory_addr": network.factory_addr,
-        "public_key": network.public_key,
-    }
+    networks_info = [
+        {
+            "network_id": network.network_id,
+            "hmt_addr": network.hmt_addr,
+            "escrow_factory_addr": network.factory_addr,
+            "addr": network.addr,
+        }
+        for network in networks
+    ]
 
     return MetaResponse.parse_obj(
         dict(
             message="Exchange Oracle API",
             version="0.1.0",
-            supported_network=network_info,
+            supported_networks=networks_info,
         )
     )
 
