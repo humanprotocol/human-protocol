@@ -16,7 +16,6 @@
     "faucet-server:start": "yarn workspace @human-protocol/faucet-server start",
     "faucet-server:test": "yarn workspace @human-protocol/faucet-server test",
     "faucet-server:lint": "yarn workspace @human-protocol/faucet-server lint",
-    "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
@@ -24,7 +23,7 @@
     "basemodels:test": "yarn workspace @human-protocol/basemodels test",
     "basemodels:lint": "yarn workspace @human-protocol/basemodels lint",
     "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:sdk:test npm:basemodels:test npm:faucet-server:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint",
     "prepare": "husky install"
   },
   "workspaces": {
