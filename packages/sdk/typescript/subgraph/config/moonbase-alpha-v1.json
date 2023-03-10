@@ -1,6 +1,10 @@
 {
   "network": "mbase",
   "description": "Human subgraph on Moonbase Alpha network",
+  "graft": {
+    "base": "QmbJKZNX7mN6QDvVcf9aNeuH1PJjG2qpFjQqRJzmYhfZtM",
+    "block": 3912594
+  },
   "EscrowFactory": {
     "address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
     "startBlock": 3648028,

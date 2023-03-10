@@ -1,6 +1,7 @@
 import { RewardAddedEvent } from '../../generated/schema';
 import { RewardAdded } from '../../generated/RewardPool/RewardPool';
 import { createOrLoadLeader } from './Staking';
+import { BigInt } from '@graphprotocol/graph-ts';
 
 export function handleRewardAdded(event: RewardAdded): void {
   // Entities can be loaded from the store using a string ID; this ID
@@ -24,6 +25,7 @@ export function handleRewardAdded(event: RewardAdded): void {
 
   const leader = createOrLoadLeader(event.params.slasher);
 
-  leader.reward = leader.reward.plus(entity.amount);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  leader.reward = entity.amount.plus(leader.reward! || BigInt.fromI32(0));
   leader.save();
 }

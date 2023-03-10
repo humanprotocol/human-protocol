@@ -34,7 +34,7 @@ export function handleLaunched(event: Launched): void {
 
   updateEscrowAmountDayData(event);
 
-  const leader = createOrLoadLeader(entity.from);
+  const leader = createOrLoadLeader(event.transaction.from);
 
   leader.amountJobsLaunched = leader.amountJobsLaunched.plus(BigInt.fromI32(1));
   leader.save();

@@ -25,6 +25,28 @@ describe('Escrow tests', async () => {
     await stake(web3Client, network);
   });
 
+  test('Should not have balance', async () => {
+    expect(
+      await escrow.checkBalance(
+        web3Client,
+        network.hmtAddress,
+        jobRequester,
+        web3Client.utils.toWei('10000', 'ether')
+      )
+    ).eq(false);
+  });
+
+  test('Should have balance', async () => {
+    expect(
+      await escrow.checkBalance(
+        web3Client,
+        network.hmtAddress,
+        jobRequester,
+        web3Client.utils.toWei('10', 'ether')
+      )
+    ).eq(true);
+  });
+
   test('Should not be approved', async () => {
     expect(
       await escrow.checkApproved(

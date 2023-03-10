@@ -169,7 +169,10 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = event.params._isPartial ? 'Partially Paid' : 'Paid';
-    escrowEntity.amountPayout = escrowEntity.amountPayout.plus(amountPaid);
+    escrowEntity.amountPayout = amountPaid.plus(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      escrowEntity.amountPayout! || BigInt.fromI32(0)
+    );
     escrowEntity.save();
   }
   for (let i = 0; i < event.params._recipients.length; i++) {

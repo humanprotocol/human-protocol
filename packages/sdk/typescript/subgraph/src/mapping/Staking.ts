@@ -187,9 +187,10 @@ export function handleStakeSlashed(event: StakeSlashed): void {
   // Update escrow entity
   const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
   if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated.minus(
-      event.params.tokens
-    );
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.minus(event.params.tokens)
+      : null;
     escrowEntity.save();
   }
 }
@@ -223,9 +224,10 @@ export function handleStakeAllocated(event: StakeAllocated): void {
   // Update escrow entity
   const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
   if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated.plus(
-      event.params.tokens
-    );
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.plus(event.params.tokens)
+      : event.params.tokens;
     escrowEntity.save();
   }
 }
@@ -259,9 +261,10 @@ export function handleAllocationClosed(event: AllocationClosed): void {
   // Update escrow entity
   const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
   if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated.minus(
-      event.params.tokens
-    );
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.minus(entity.amount)
+      : null;
     escrowEntity.save();
   }
 }
