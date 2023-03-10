@@ -32,4 +32,12 @@ members = [
     # Staking mock contract paths
     "contracts/staking-mock",
     "contracts/staking-mock/meta",
+
+    # Rewards pool mock contract paths
+    "contracts/rewards-pool-mock",
+    "contracts/rewards-pool-mock/meta",
+
+    # Escrow mock contract paths
+    "contracts/escrow-mock",
+    "contracts/escrow-mock/meta",
 ]

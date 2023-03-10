@@ -18,7 +18,7 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     staking_mock
     (
-        getStakedTokens
+        getStaker
     )
 }
 

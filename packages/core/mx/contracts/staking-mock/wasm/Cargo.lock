@@ -44,6 +44,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "common-structs"
+version = "0.1.0"
+dependencies = [
+ "multiversx-sc",
+]
+
+[[package]]
 name = "endian-type"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -204,6 +211,7 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 name = "staking-mock"
 version = "0.1.0"
 dependencies = [
+ "common-structs",
  "multiversx-sc",
 ]
 

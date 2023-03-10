@@ -94,11 +94,15 @@ pub trait EscrowBaseModule {
         self.blockchain().get_sc_balance(&contract_token, 0)
     }
 
+    #[view(getStatus)]
+    fn get_status(&self) -> EscrowStatus {
+        self.status().get()
+    }
+
     #[view(getToken)]
     #[storage_mapper("token")]
     fn token(&self) -> SingleValueMapper<EgldOrEsdtTokenIdentifier>;
 
-    #[view(getStatus)]
     #[storage_mapper("status")]
     fn status(&self) -> SingleValueMapper<EscrowStatus>;
 

@@ -107,11 +107,15 @@ impl<T: ManagedTypeApi> Staker<T> {
     }
 
     pub fn release(&mut self, tokens: &BigUint<T>) {
-        self.token_staked = &self.tokens_allocated - tokens;
+        self.token_staked -= tokens;
     }
 
     pub fn allocate(&mut self, tokens: &BigUint<T>) {
         self.tokens_allocated += tokens;
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.token_staked == 0 && self.tokens_allocated == 0 && self.tokens_locked == 0
     }
 }
 

@@ -1,21 +1,26 @@
+use common_structs::stakes::Staker;
+
 multiversx_sc::imports!();
 
 mod staking_proxy {
+    use common_structs::stakes::Staker;
+
     multiversx_sc::imports!();
 
     #[multiversx_sc::proxy]
     pub trait StakingContract {
-        #[endpoint(getStakedTokens)]
-        fn get_staked_tokens(&self, address: ManagedAddress) -> BigUint;
+
+        #[endpoint(getStaker)]
+        fn get_staker(&self, staker: ManagedAddress) -> Staker<Self::Api>;
     }
 }
 
 #[multiversx_sc::module]
 pub trait StakingProxyModule {
 
-    fn get_staked_proxy(&self, address: ManagedAddress) -> BigUint {
+    fn get_staker(&self, address: ManagedAddress) -> Staker<Self::Api> {
         self.staking_proxy(self.staking_contract_address().get())
-            .get_staked_tokens(address)
+            .get_staker(address)
             .execute_on_dest_context()
     }
 

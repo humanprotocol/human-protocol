@@ -62,9 +62,11 @@ pub trait StakingContract:
         let mut staker = self.get_or_create_staker(&caller);
 
         let total_stake = staker.tokens_secure_stake() + &payment.amount;
-        require!(total_stake >= self.minimum_stake().get(), "Amount is less than minimum stake");
+        require!(total_stake >= self.minimum_stake().get(), "Total stake is below the minimum threshold");
 
         staker.deposit(&payment.amount);
+        self.stakes(&caller).set(&staker);
+        self.stakers().update(|stakers| stakers.push(caller.clone()));
         self.stake_deposited_event(&caller, &payment.amount);
     }
 
@@ -79,7 +81,7 @@ pub trait StakingContract:
         require!(staker.tokens_available() >= tokens, "Insufficient amount to unstake");
 
         let new_stake = staker.tokens_secure_stake() - &tokens;
-        require!(new_stake >= self.minimum_stake().get(), "Total stake is below the minimum threshold");
+        require!(new_stake == 0 || new_stake >= self.minimum_stake().get(), "Total stake is below the minimum threshold");
 
         let block_number = self.blockchain().get_block_nonce();
         let tokens_to_withdraw = staker.tokens_withdrawable(block_number);
@@ -100,6 +102,18 @@ pub trait StakingContract:
 
         let mut staker = self.stakes(&caller).get();
         self.withdraw(&mut staker, &caller);
+
+        if staker.is_empty() {
+            let mut stakers = self.stakers().get();
+            for (i, staker) in stakers.iter().enumerate() {
+                if *staker == caller {
+                    stakers.remove(i);
+                    self.stakers().set(&stakers);
+                    self.stakes(&caller).clear();
+                    return
+                }
+            }
+        }
         self.stakes(&caller).set(staker);
     }
 
@@ -145,7 +159,7 @@ pub trait StakingContract:
         require!(staker.tokens_available() >= tokens, "Insufficient amount of tokens in the stake");
 
         let allocation_state = self.get_escrow_allocation_state(&escrow_address);
-        require!(allocation_state == AllocationState::Active, "Allocation already exists");
+        require!(allocation_state == AllocationState::Null, "Allocation already exists");
 
         let block_nonce = self.blockchain().get_block_nonce();
         let new_allocation = Allocation {
@@ -164,9 +178,11 @@ pub trait StakingContract:
 
     #[endpoint(closeAllocation)]
     fn close_allocation(&self, escrow_address: ManagedAddress) {
+        self.require_only_staker();
+
         let allocation_state = self.get_escrow_allocation_state(&escrow_address);
         require!(allocation_state == AllocationState::Completed, "Allocation has no completed state");
-        require!(self.allocations(&escrow_address).is_empty(), "Allocation does not exist on this escrow");
+        require!(!self.allocations(&escrow_address).is_empty(), "Allocation does not exist on this escrow");
 
         let mut allocation = self.allocations(&escrow_address).get();
         allocation.closed_at = self.blockchain().get_block_nonce();
@@ -263,7 +279,10 @@ pub trait StakingContract:
     }
 
     fn get_escrow_allocation_state(&self, escrow_address: &ManagedAddress) -> AllocationState {
-        require!(!self.allocations(&escrow_address).is_empty(), "No allocations found for this escrow");
+        if self.allocations(escrow_address).is_empty() {
+            return AllocationState::Null;
+        }
+
         let allocation = self.allocations(&escrow_address).get();
         let escrow_status = self.get_status(&escrow_address);
 
@@ -280,6 +299,12 @@ pub trait StakingContract:
         }
 
         AllocationState::Closed
+    }
+
+    fn require_only_staker(&self){
+        let caller = self.blockchain().get_caller();
+        let stakers = self.stakers().get();
+        require!(stakers.contains(&caller), "Only stakers can call this function");
     }
 
     /// Staking token id
@@ -299,7 +324,7 @@ pub trait StakingContract:
     fn stakers(&self) -> SingleValueMapper<ManagedVec<ManagedAddress>>;
 
     /// Allocations
-    #[view(getAllocation)] // TODO: Check this later
+    #[view(getAllocation)] 
     #[storage_mapper("allocations")]
     fn allocations(&self, escrow_address: &ManagedAddress) -> SingleValueMapper<Allocation<Self::Api>>;
 

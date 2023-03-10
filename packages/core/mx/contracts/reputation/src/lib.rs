@@ -18,8 +18,8 @@ pub trait ReputationContract: proxy::StakingProxyModule {
     #[endpoint(addReputation)]
     fn add_reputation(&self, workers: MultiValueEncoded<Worker<Self::Api>>) {
         let staker_address = self.blockchain().get_caller();
-        let staker_staked = self.get_staked_proxy(staker_address.clone());
-        require!(staker_staked >= self.staking_minimum_amount().get(), "Needs to stake HMT tokens to modify reputations.");
+        let staker = self.get_staker(staker_address.clone());
+        require!(staker.tokens_available() >= self.staking_minimum_amount().get(), "Needs to stake HMT tokens to modify reputations.");
 
         for worker in workers.into_iter() {
             let reputation = self.reputations(&worker.worker_address).get();

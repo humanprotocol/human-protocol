@@ -12,8 +12,10 @@ mod escrow_proxy {
 
     #[multiversx_sc::proxy]
     pub trait EscrowContract {
+
         #[view(getStatus)]
         fn get_status(&self) -> EscrowStatus;
+        
     }
 }
 
