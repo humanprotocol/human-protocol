@@ -77,7 +77,7 @@ where
                         reputation: worker.reputation
                     });
                 }
-                sc.add_reputation(workers_wrapped)
+                sc.add_reputations(workers_wrapped)
             });
 
         match expected_err {

@@ -11,12 +11,12 @@ pub trait ReputationContract: proxy::StakingProxyModule {
 
     #[init]
     fn init(&self, staking_contract_address: ManagedAddress, staking_minimum_amount: BigUint) {
-        self.staking_contract_address().set_if_empty(&staking_contract_address);
-        self.staking_minimum_amount().set_if_empty(&staking_minimum_amount);
+        self.staking_contract_address().set(&staking_contract_address);
+        self.staking_minimum_amount().set(&staking_minimum_amount);
     }
 
-    #[endpoint(addReputation)]
-    fn add_reputation(&self, workers: MultiValueEncoded<Worker<Self::Api>>) {
+    #[endpoint(addReputations)]
+    fn add_reputations(&self, workers: MultiValueEncoded<Worker<Self::Api>>) {
         let staker_address = self.blockchain().get_caller();
         let staker = self.get_staker(staker_address.clone());
         require!(staker.tokens_available() >= self.staking_minimum_amount().get(), "Needs to stake HMT tokens to modify reputations.");
@@ -25,14 +25,14 @@ pub trait ReputationContract: proxy::StakingProxyModule {
             let reputation = self.reputations(&worker.worker_address).get();
 
             if ((&reputation + &worker.reputation) > MAX_REPUTATION) ||
-                (reputation == 0 && (&worker.reputation + 5_000u64) > MAX_REPUTATION) {
+                (reputation == 0 && (&worker.reputation + 50u64) > MAX_REPUTATION) {
                 self.reputations(&worker.worker_address).set(MAX_REPUTATION);
-            } else if (reputation == 0 && (&worker.reputation + 5_000u64) < MIN_REPUTATION) ||
+            } else if (reputation == 0 && (&worker.reputation + 50u64) < MIN_REPUTATION) ||
                     ((reputation + worker.reputation) < MIN_REPUTATION && reputation != 0) {
                 self.reputations(&worker.worker_address).set(MIN_REPUTATION);
             } else {
                 if reputation == 0 {
-                    let new_worker_reputation = worker.reputation + 5_000u64;
+                    let new_worker_reputation = worker.reputation + 50u64;
                     self.reputations(&worker.worker_address).set(new_worker_reputation);
                 } else {
                     let new_worker_reputation = reputation + worker.reputation;
@@ -72,9 +72,6 @@ pub trait ReputationContract: proxy::StakingProxyModule {
 
     #[view(getRewards)]
     fn get_rewards(&self, balance: BigUint, workers: MultiValueEncoded<ManagedAddress>) -> MultiValueEncoded<BigUint> {
-        require!(balance > 0, "Balance should be greater than 0");
-        require!(workers.len() > 0, "Workers should be greater than 0");
-
         let mut returned_values: MultiValueEncoded<BigUint> = MultiValueEncoded::new();
         let mut total_reputation = 0u64;
 

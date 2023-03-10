@@ -36,13 +36,13 @@ fn test_add_reputation_setting_max_reputation() {
     let user = setup.create_user();
     let worker1 = setup.create_user();
 
-    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 1_000 }];
+    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 10 }];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 6_000);
+    setup.check_reputation(&worker1, 60);
 
-    let workers2 = vec![WorkerTest { worker_address: worker1.clone(), reputation: 7_000 }];
+    let workers2 = vec![WorkerTest { worker_address: worker1.clone(), reputation: 70 }];
     setup.add_reputation(&user, &workers2, None);
-    setup.check_reputation(&worker1, 10_000);
+    setup.check_reputation(&worker1, 100);
 }
 
 #[test]
@@ -56,9 +56,9 @@ fn test_add_reputation_min_reputation_amount_given() {
     let user = setup.create_user();
     let worker1 = setup.create_user();
 
-    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 500 }];
+    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 5 }];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 5_500);
+    setup.check_reputation(&worker1, 55);
 }
 
 #[test]
@@ -72,13 +72,13 @@ fn test_add_reputation_to_the_current_amount() {
     let user = setup.create_user();
     let worker1 = setup.create_user();
 
-    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 500 }];
+    let workers = vec![WorkerTest { worker_address: worker1.clone(), reputation: 5 }];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 5_500);
+    setup.check_reputation(&worker1, 55);
 
-    let workers2 = vec![WorkerTest { worker_address: worker1.clone(), reputation: 500 }];
+    let workers2 = vec![WorkerTest { worker_address: worker1.clone(), reputation: 5 }];
     setup.add_reputation(&user, &workers2, None);
-    setup.check_reputation(&worker1, 6_000);
+    setup.check_reputation(&worker1, 60);
 }
 
 #[test]
@@ -94,12 +94,12 @@ fn test_add_multiple_workers_reputation() {
     let worker2 = setup.create_user();
 
     let workers = vec![
-        WorkerTest { worker_address: worker1.clone(), reputation: 500 },
-        WorkerTest { worker_address: worker2.clone(), reputation: 500 }
+        WorkerTest { worker_address: worker1.clone(), reputation: 5 },
+        WorkerTest { worker_address: worker2.clone(), reputation: 5 }
     ];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 5_500);
-    setup.check_reputation(&worker2, 5_500);
+    setup.check_reputation(&worker1, 55);
+    setup.check_reputation(&worker2, 55);
 }
 
 #[test]
@@ -115,16 +115,16 @@ fn test_get_reputations() {
     let worker2 = setup.create_user();
 
     let workers = vec![
-        WorkerTest { worker_address: worker1.clone(), reputation: 500 },
-        WorkerTest { worker_address: worker2.clone(), reputation: 2_000 }
+        WorkerTest { worker_address: worker1.clone(), reputation: 5 },
+        WorkerTest { worker_address: worker2.clone(), reputation: 20 }
     ];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 5_500);
-    setup.check_reputation(&worker2, 7_000);
+    setup.check_reputation(&worker1, 55);
+    setup.check_reputation(&worker2, 70);
 
     let workers_payload = vec![
-        WorkerTest { worker_address: worker1.clone(), reputation: 5_500 },
-        WorkerTest { worker_address: worker2.clone(), reputation: 7_000 }
+        WorkerTest { worker_address: worker1.clone(), reputation: 55 },
+        WorkerTest { worker_address: worker2.clone(), reputation: 70 }
     ];
 
     setup.check_get_reputations_view(vec![&worker1, &worker2], &workers_payload);
@@ -157,12 +157,12 @@ fn test_get_rewards() {
     let worker2 = setup.create_user();
 
     let workers = vec![
-        WorkerTest { worker_address: worker1.clone(), reputation: 500 },
-        WorkerTest { worker_address: worker2.clone(), reputation: 2_000 }
+        WorkerTest { worker_address: worker1.clone(), reputation: 5 },
+        WorkerTest { worker_address: worker2.clone(), reputation: 20 }
     ];
     setup.add_reputation(&user, &workers, None);
-    setup.check_reputation(&worker1, 5_500);
-    setup.check_reputation(&worker2, 7_000);
+    setup.check_reputation(&worker1, 55);
+    setup.check_reputation(&worker2, 70);
 
     setup.get_rewards(68_000000, vec![&worker1, &worker2], None);
 }
