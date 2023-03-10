@@ -1,5 +1,8 @@
 import { Grid, Paper, Typography, Button } from '@mui/material';
 import React, { Dispatch } from 'react';
+
+import keySvg from '../../assets/key.svg';
+
 export const GenerateOrImport = ({
   setStep,
   setPage,
@@ -21,7 +24,7 @@ export const GenerateOrImport = ({
           }}
         >
           {' '}
-          <img width="100" src="/images/key.svg" alt="lbank" />{' '}
+          <img width="100" src={keySvg} alt="lbank" />{' '}
           <Typography sx={{ marginTop: 3 }} variant="body2" color="primary">
             If you already have your public key import it, if not generate it
           </Typography>

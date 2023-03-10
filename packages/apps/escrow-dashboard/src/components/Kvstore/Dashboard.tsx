@@ -1,10 +1,11 @@
 import { Grid, Box, Tabs, Tab } from '@mui/material';
 import React, { useState, useEffect, Dispatch } from 'react';
-import ViewTitle from '../ViewTitle';
+import { ViewTitle } from '../ViewTitle';
 
 import { StoredPubkey } from './StoredPubkey';
 import { Decrypt } from './Decrypt';
 import { Encrypt } from './Encrypt';
+import smallKeySvg from '../../assets/small_key.svg';
 import { showIPFS } from '../../services/index';
 
 export const Dashboard = ({
@@ -46,7 +47,7 @@ export const Dashboard = ({
           alignItems="center"
           flexWrap="wrap"
         >
-          <ViewTitle title="ETH KV Store" iconUrl="/images/small_key.svg" />
+          <ViewTitle title="ETH KV Store" iconUrl={smallKeySvg} />
         </Box>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
           {pubkey.trim().length > 0 && (

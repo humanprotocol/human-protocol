@@ -4,14 +4,8 @@ import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { ImportPubkey } from 'src/components/Kvstore/ImportPubkey';
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered ImportPubkey component', () => {
   it('should render `text` prop', async () => {
@@ -28,11 +22,7 @@ describe('when rendered ImportPubkey component', () => {
     await act(async () => {
       render(<ImportPubkey />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>
-            <RainbowKitProvider chains={testChains} modalSize="compact">
-              {children}
-            </RainbowKitProvider>
-          </Providers>
+          <Providers client={client}>{children}</Providers>
         ),
       });
     });
@@ -54,9 +44,7 @@ it('ImportPubkey component renders correctly, corresponds to the snapshot', () =
   const tree = renderer
     .create(
       <Providers client={client}>
-        <RainbowKitProvider chains={testChains} modalSize="compact">
-          <ImportPubkey />
-        </RainbowKitProvider>
+        <ImportPubkey />
       </Providers>
     )
     .toJSON();

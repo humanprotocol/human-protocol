@@ -1,6 +1,13 @@
-import { BigInt } from '@graphprotocol/graph-ts';
-import { describe, test, assert, clearStore } from 'matchstick-as/assembly';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
+import {
+  describe,
+  test,
+  assert,
+  clearStore,
+  beforeAll,
+} from 'matchstick-as/assembly';
 
+import { LaunchedEscrow } from '../../generated/schema';
 import {
   handleAllocationClosed,
   handleStakeAllocated,
@@ -19,7 +26,34 @@ import {
   createStakeWithdrawnEvent,
 } from './fixtures';
 
+const escrow1AddressString = '0xD979105297fB0eee83F7433fC09279cb5B94fFC7';
+const escrow1Address = Address.fromString(escrow1AddressString);
+const escrow2AddressString = '0x92a2eEF7Ff696BCef98957a0189872680600a95A';
+const escrow2Address = Address.fromString(escrow2AddressString);
+
 describe('Staking', () => {
+  beforeAll(() => {
+    const launchedEscrow1 = new LaunchedEscrow(escrow1Address.toHex());
+    launchedEscrow1.token = Address.zero();
+    launchedEscrow1.from = Address.zero();
+    launchedEscrow1.timestamp = BigInt.fromI32(0);
+    launchedEscrow1.amountAllocated = BigInt.fromI32(0);
+    launchedEscrow1.amountPayout = BigInt.fromI32(0);
+    launchedEscrow1.status = 'Launched';
+
+    launchedEscrow1.save();
+
+    const launchedEscrow2 = new LaunchedEscrow(escrow2Address.toHex());
+    launchedEscrow2.token = Address.zero();
+    launchedEscrow2.from = Address.zero();
+    launchedEscrow2.timestamp = BigInt.fromI32(0);
+    launchedEscrow2.amountAllocated = BigInt.fromI32(0);
+    launchedEscrow2.amountPayout = BigInt.fromI32(0);
+    launchedEscrow2.status = 'Launched';
+
+    launchedEscrow2.save();
+  });
+
   test('Should properly index StakingDeposited events', () => {
     const data1 = createStakeDepositedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC6',
@@ -545,6 +579,20 @@ describe('Staking', () => {
       'amountAllocated',
       '50'
     );
+
+    // Escrow
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow1Address.toHexString(),
+      'amountAllocated',
+      '30'
+    );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow2Address.toHex(),
+      'amountAllocated',
+      '50'
+    );
   });
 
   test('Should properly index StakeSlashed events', () => {
@@ -733,6 +781,20 @@ describe('Staking', () => {
       'amountSlashed',
       '10'
     );
+
+    // Escrow
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow1Address.toHexString(),
+      'amountAllocated',
+      '20'
+    );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow2Address.toHex(),
+      'amountAllocated',
+      '40'
+    );
   });
 
   test('Should properly index AllocationClosed events', () => {
@@ -909,6 +971,20 @@ describe('Staking', () => {
       data2.params.staker.toHexString(),
       'amountSlashed',
       '10'
+    );
+
+    // Escrow
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow1Address.toHexString(),
+      'amountAllocated',
+      '0'
+    );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrow2Address.toHex(),
+      'amountAllocated',
+      '0'
     );
 
     clearStore();

@@ -43,8 +43,8 @@ export default function GeneratePGP() {
     setOpen(false);
   };
   const { config } = usePrepareContractWrite({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "set",
     args: ["public_key", cid],
   });
@@ -97,7 +97,7 @@ export default function GeneratePGP() {
         setPublicKey("");
         setError(e.message);
       }
-      
+
     }
   }
 
@@ -115,7 +115,7 @@ export default function GeneratePGP() {
       if(e instanceof Error){
         setError(e.message);
       }
-      
+
     }
   }
   async function storeKV() {
@@ -125,7 +125,7 @@ export default function GeneratePGP() {
       if(e instanceof Error){
         setError(e.message);
       }
-      
+
     }
   }
 
@@ -140,7 +140,7 @@ export default function GeneratePGP() {
         { open && <Grid
           container
           justifyContent="center"
-          
+
         >
           <Alert onClose={handleClose} severity="success" className="alertWidth">
             Transaction success
@@ -150,7 +150,7 @@ export default function GeneratePGP() {
         {error.length > 0 && <Grid
           container
           justifyContent="center"
-        
+
         >
           <Alert onClose={handleClose} severity="error" className="alertWidth">
             {error}
@@ -212,7 +212,7 @@ export default function GeneratePGP() {
             disabled={loading}
             variant="contained"
             onClick={downloadKey}
-           
+
           >
             Download Key
           </Button>}
@@ -221,7 +221,7 @@ export default function GeneratePGP() {
           {(loading || publicKey) && <Button
             disabled={loading || !write}
             className="marginBottom10"
-            
+
             variant="contained"
             onClick={storeKV}
           >

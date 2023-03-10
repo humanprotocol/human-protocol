@@ -21,9 +21,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
     event TrustedHandlerAdded(address _handler);
-    event IntermediateStorage(string _url, string _hash);
+    event IntermediateStorage(address _sender, string _url, string _hash);
     event Pending(string manifest, string hash);
-    event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
+    event BulkTransfer(
+        uint256 indexed _txId,
+        address[] _recipients,
+        uint256[] _amounts,
+        bool _isPartial
+    );
     event Cancelled();
     event Completed();
 
@@ -84,7 +89,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return 0;
     }
 
-    function addTrustedHandlers(address[] memory _handlers) public {
+    function addTrustedHandlers(address[] memory _handlers) public override {
         require(
             areTrustedHandlers[msg.sender],
             'Address calling cannot add trusted handlers'
@@ -107,7 +112,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         string memory _url,
         string memory _hash,
         uint256 _solutionsRequested
-    ) external trusted notExpired {
+    ) external override trusted notExpired {
         require(
             _reputationOracle != address(0),
             'Invalid or missing token spender'
@@ -139,7 +144,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit Pending(manifestUrl, manifestHash);
     }
 
-    function abort() external trusted notComplete notPaid {
+    function abort() external override trusted notComplete notPaid {
         if (getBalance() != 0) {
             cancel();
         }
@@ -148,6 +153,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     function cancel()
         public
+        override
         trusted
         notBroke
         notComplete
@@ -161,7 +167,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
-    function complete() external notExpired {
+    function complete() external override notExpired {
         require(
             areTrustedHandlers[msg.sender],
             'Address calling is not trusted'
@@ -172,16 +178,17 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     function storeResults(
+        address _sender,
         string memory _url,
         string memory _hash
-    ) external trusted notExpired {
+    ) external override trusted notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
             'Escrow not in Pending or Partial status state'
         );
         _storeResult(_url, _hash);
-        emit IntermediateStorage(_url, _hash);
+        emit IntermediateStorage(_sender, _url, _hash);
     }
 
     function bulkPayOut(
@@ -192,6 +199,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _txId
     )
         external
+        override
         trusted
         notBroke
         notLaunched
@@ -230,6 +238,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
 
+        uint256[] memory _amountsPaid = new uint256[](_recipients.length);
         for (uint256 i = 0; i < _recipients.length; ++i) {
             uint256 amount = finalAmounts[i];
             if (amount == 0) {
@@ -237,6 +246,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             }
             finalAmounts[i] = 0;
             _safeTransfer(_recipients[i], amount);
+            _amountsPaid[i] = amount;
         }
 
         delete finalAmounts;
@@ -263,7 +273,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status = EscrowStatuses.Paid;
             }
         }
-        emit BulkTransfer(_txId, _recipients.length);
+        emit BulkTransfer(
+            _txId,
+            _recipients,
+            _amountsPaid,
+            status == EscrowStatuses.Partial
+        );
         return true;
     }
 

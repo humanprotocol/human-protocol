@@ -22,13 +22,14 @@ export default function ImportButton({
   loading:boolean;
 }) {
   const { config } = usePrepareContractWrite({
-    addressOrName: process.env.REACT_APP_CONTRACT as string,
-    contractInterface: KVStore,
+    address: process.env.REACT_APP_CONTRACT as `0x${string}`,
+    abi: KVStore,
     functionName: "set",
     args: ["", ""],
   });
   const { writeAsync } = useContractWrite({
     ...config,
+    mode: 'recklesslyUnprepared',
     onSuccess() {
       setOpen(true);
       setLoading(false);
@@ -55,7 +56,7 @@ export default function ImportButton({
       await writeAsync?.({
         recklesslySetUnpreparedArgs: ["public_key", cid2],
       });
-    
+
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);

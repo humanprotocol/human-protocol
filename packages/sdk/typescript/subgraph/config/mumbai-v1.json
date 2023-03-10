@@ -1,6 +1,10 @@
 {
   "network": "mumbai",
   "description": "Human subgraph on Polygon Mumbai testnet",
+  "graft": {
+    "base": "QmTh4hgMLQzspGW28HY4tNVa6eKGwJ6JmEiuUhExRFcJEx",
+    "block": 32938638
+  },
   "EscrowFactory": {
     "address": "0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d",
     "startBlock": 31433945,
@@ -23,5 +27,15 @@
     "address": "0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807",
     "startBlock": 31433948,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE",
+    "startBlock": 31433950,
+    "abi": "./node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "Reputation": {
+    "address": "0xC522463d36f76b881bE66484e3068F11e7038Ace",
+    "startBlock": 31433953,
+    "abi": "./node_modules/@human-protocol/core/abis/Reputation.json"
   }
 }

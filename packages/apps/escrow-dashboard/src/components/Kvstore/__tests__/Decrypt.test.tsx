@@ -4,14 +4,8 @@ import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
 import { Decrypt } from 'src/components/Kvstore/Decrypt';
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { MockConnector } from 'wagmi/connectors/mock';
 
 describe('when rendered Decrypt component', () => {
   it('should render `text` prop', async () => {
@@ -28,11 +22,7 @@ describe('when rendered Decrypt component', () => {
     await act(async () => {
       render(<Decrypt />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>
-            <RainbowKitProvider chains={testChains} modalSize="compact">
-              {children}
-            </RainbowKitProvider>
-          </Providers>
+          <Providers client={client}>{children}</Providers>
         ),
       });
     });
@@ -56,9 +46,7 @@ it('Decrypt component renders correctly, corresponds to the snapshot', () => {
   const tree = renderer
     .create(
       <Providers client={client}>
-        <RainbowKitProvider chains={testChains} modalSize="compact">
-          <Decrypt />
-        </RainbowKitProvider>
+        <Decrypt />
       </Providers>
     )
     .toJSON();

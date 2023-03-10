@@ -3,11 +3,13 @@ import { useDispatch } from 'react-redux';
 
 import escrow from './escrow/reducer';
 import token from './token/reducer';
+import leader from './leader/reducer';
 
 const store = configureStore({
   reducer: {
     escrow,
     token,
+    leader,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ thunk: true }),
 });

@@ -28,17 +28,18 @@ export class Escrow {
   async storeResults(
     web3: Web3,
     escrowAddress: string,
+    workerAddress: string,
     resultsUrl: string,
     resultHash: string
   ) {
     const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
     const gasNeeded = await Escrow.methods
-      .storeResults(resultsUrl, resultHash)
+      .storeResults(workerAddress, resultsUrl, resultHash)
       .estimateGas({ from: web3.eth.defaultAccount });
     const gasPrice = await web3.eth.getGasPrice();
 
     const result = await Escrow.methods
-      .storeResults(resultsUrl, resultHash)
+      .storeResults(workerAddress, resultsUrl, resultHash)
       .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
 
     return result;

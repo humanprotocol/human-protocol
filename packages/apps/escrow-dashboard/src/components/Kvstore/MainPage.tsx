@@ -9,7 +9,10 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-import { CustomConnectButton } from './CustomConnectButton';
+import keySvg from '../../assets/key.svg';
+import walletSvg from '../../assets/wallet.svg';
+
+import ConnectButton from '../ConnectButton';
 const steps = ['Get Public Key', 'Add Public Key', 'Empower Human Scan'];
 export const MainPage = (): React.ReactElement => {
   return (
@@ -34,7 +37,7 @@ export const MainPage = (): React.ReactElement => {
           justifyContent="flex-start"
           alignItems="flex-start"
         >
-          <img width="100" src="/images/key.svg" alt="lbank" />{' '}
+          <img width="100" src={keySvg} alt="lbank" />{' '}
           <div>
             <Typography variant="h4" color="primary">
               Empower HUMAN Scan
@@ -103,7 +106,7 @@ export const MainPage = (): React.ReactElement => {
                   }}
                 >
                   {' '}
-                  <img width="100" src="/images/wallet.svg" alt="lbank" />{' '}
+                  <img width="100" src={walletSvg} alt="lbank" />{' '}
                   <Typography
                     sx={{ marginTop: 3 }}
                     variant="body2"
@@ -123,7 +126,7 @@ export const MainPage = (): React.ReactElement => {
                     marginBottom: { xs: 1, sm: 1, md: 10, lg: 7 },
                   }}
                 >
-                  <CustomConnectButton />
+                  <ConnectButton />
                 </Grid>
               </Grid>
             </Paper>

@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "pino-pretty": "^9.1.1",
-    "ts-node": "^10.9.1",
     "vitest": "^0.28.1"
   },
   "scripts": {
