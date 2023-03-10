@@ -7,7 +7,7 @@
   },
   "EscrowFactory": {
     "address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
-    "startBlock": 8630704,
+    "startBlock": 8403038,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
