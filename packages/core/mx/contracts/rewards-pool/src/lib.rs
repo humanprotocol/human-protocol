@@ -1,9 +1,8 @@
 #![no_std]
 
-use constants::{Rewards, Reward};
-
 pub mod constants;
 
+use constants::{Rewards, Reward};
 multiversx_sc::imports!();
 
 #[multiversx_sc::contract]
@@ -21,6 +20,8 @@ pub trait RewardsPoolContract {
         self.staking_contract_address().set_if_empty(staking_contract_address);
     }
 
+    /// Add rewards record
+    /// Protocol fee is deduced from the rewards amount
     #[payable("*")]
     #[endpoint(addReward)]
     fn add_reward(&self, escrow_address: ManagedAddress, slasher: ManagedAddress) {
@@ -39,27 +40,27 @@ pub trait RewardsPoolContract {
         }
 
         let rewards_after_fee = tokens - &protocol_fee;
-        let new_reward_entry = Reward {
-            escrow_address: escrow_address.clone(),
-            slasher: slasher.clone(),
-            tokens: rewards_after_fee.clone(),
-        };
+        if rewards_after_fee > 0 {
+            let new_reward_entry = Reward {
+                escrow_address: escrow_address.clone(),
+                slasher: slasher.clone(),
+                tokens: rewards_after_fee.clone(),
+            };
+            self.rewards(&escrow_address).update(|rewards| rewards.push(new_reward_entry));
+        }
 
         self.total_fee().update(|total_fee| *total_fee += &protocol_fee);
-        self.rewards(&escrow_address).update(|rewards| rewards.push(new_reward_entry));
         self.rewards_added_event(escrow_address, slasher, rewards_after_fee);
     }
 
+    /// Distribute rewards for allocation
     #[endpoint(distributeRewards)]
-    fn distribute_rewards(&self, escrow_address: &ManagedAddress) {
-        let rewards_for_escrow = self.rewards(escrow_address).get();
-
-        let rewards_token = self.rewards_token().get();
+    fn distribute_rewards(&self, escrow_address: ManagedAddress) {
+        let rewards_for_escrow = self.rewards(&escrow_address).get();
         for reward in rewards_for_escrow.iter() {
-            self.send().direct_esdt(&reward.slasher, &rewards_token, 0, &reward.tokens);
+            self.send().direct_esdt(&reward.slasher, &self.rewards_token().get(), 0, &reward.tokens);
         }
-
-        self.rewards(escrow_address).clear();
+        self.rewards(&escrow_address).clear();
     }
 
     #[only_owner]
@@ -91,6 +92,7 @@ pub trait RewardsPoolContract {
     #[storage_mapper("protocol_fee")]
     fn protocol_fee(&self) -> SingleValueMapper<BigUint>;
 
+    #[view(getTotalFee)]
     #[storage_mapper("total_fee")]
     fn total_fee(&self) -> SingleValueMapper<BigUint>;
 

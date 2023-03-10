@@ -908,6 +908,7 @@ dependencies = [
  "multiversx-sc",
  "multiversx-sc-scenario",
  "num-bigint",
+ "staking-mock",
 ]
 
 [[package]]
@@ -1099,6 +1100,23 @@ version = "0.0.0"
 dependencies = [
  "multiversx-sc-meta",
  "staking",
+]
+
+[[package]]
+name = "staking-mock"
+version = "0.1.0"
+dependencies = [
+ "multiversx-sc",
+ "multiversx-sc-scenario",
+ "num-bigint",
+]
+
+[[package]]
+name = "staking-mock-meta"
+version = "0.0.0"
+dependencies = [
+ "multiversx-sc-meta",
+ "staking-mock",
 ]
 
 [[package]]

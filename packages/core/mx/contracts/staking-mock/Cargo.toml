@@ -1,5 +1,5 @@
 [package]
-name = "reputation"
+name = "staking-mock"
 version = "0.1.0"
 authors = [
     "Vlad Nedelcu <vlad.nedelcu@buidly.com>"
@@ -10,14 +10,11 @@ publish = false
 [lib]
 path = "src/lib.rs"
 
+[dev-dependencies]
+num-bigint = "0.4.2"
+
 [dependencies.multiversx-sc]
 version = "0.39.2"
 
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.39.2"
-
-[dev-dependencies.num-bigint]
-version = "0.4.2"
-
-[dev-dependencies.staking-mock]
-path = "../staking-mock"

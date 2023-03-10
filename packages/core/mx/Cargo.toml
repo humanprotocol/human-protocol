@@ -28,4 +28,8 @@ members = [
     # Staking contract paths
     "contracts/staking",
     "contracts/staking/meta",
+
+    # Staking mock contract paths
+    "contracts/staking-mock",
+    "contracts/staking-mock/meta",
 ]

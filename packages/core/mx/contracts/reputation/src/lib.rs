@@ -1,10 +1,9 @@
 #![no_std]
 
-use constants::{Worker, MAX_REPUTATION, MIN_REPUTATION};
-
 pub mod constants;
 pub mod proxy;
 
+use constants::{Worker, MAX_REPUTATION, MIN_REPUTATION};
 multiversx_sc::imports!();
 
 #[multiversx_sc::contract]
@@ -26,14 +25,14 @@ pub trait ReputationContract: proxy::StakingProxyModule {
             let reputation = self.reputations(&worker.worker_address).get();
 
             if ((&reputation + &worker.reputation) > MAX_REPUTATION) ||
-                (reputation == 0 && (&worker.reputation + 50u64) > MAX_REPUTATION) {
+                (reputation == 0 && (&worker.reputation + 5_000u64) > MAX_REPUTATION) {
                 self.reputations(&worker.worker_address).set(MAX_REPUTATION);
-            } else if (reputation == 0 && (&worker.reputation + 50u64) < MAX_REPUTATION) ||
+            } else if (reputation == 0 && (&worker.reputation + 5_000u64) < MIN_REPUTATION) ||
                     ((reputation + worker.reputation) < MIN_REPUTATION && reputation != 0) {
                 self.reputations(&worker.worker_address).set(MIN_REPUTATION);
             } else {
                 if reputation == 0 {
-                    let new_worker_reputation = worker.reputation + 50u64;
+                    let new_worker_reputation = worker.reputation + 5_000u64;
                     self.reputations(&worker.worker_address).set(new_worker_reputation);
                 } else {
                     let new_worker_reputation = reputation + worker.reputation;
@@ -91,7 +90,6 @@ pub trait ReputationContract: proxy::StakingProxyModule {
             let reward = &balance * reputation / total_reputation;
             returned_values.push(reward);
         }
-
         returned_values
     }
 

@@ -1,8 +1,9 @@
 use kv_store::KVStoreContract;
 use multiversx_sc::types::Address;
-use multiversx_sc_scenario::{DebugApi, testing_framework::{BlockchainStateWrapper, ContractObjWrapper}, rust_biguint, managed_buffer};
+use multiversx_sc_scenario::{DebugApi, rust_biguint, managed_buffer};
+use multiversx_sc_scenario::testing_framework::{BlockchainStateWrapper, ContractObjWrapper};
 
-pub const WASM_PATH: &'static str = "output/kv-store.wasm";
+pub const WASM_PATH: &'static str = "../output/kv-store.wasm";
 
 pub struct KVSetup<Builder>
 where
