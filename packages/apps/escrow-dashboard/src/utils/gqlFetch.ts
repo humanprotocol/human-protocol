@@ -4,11 +4,13 @@ export const gqlFetch = (
   variables?: any,
   headers?: any
 ) =>
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  url && url.length
+    ? fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+        },
+        body: JSON.stringify({ query, variables }),
+      })
+    : Promise.reject(new Error('No URL provided'));
