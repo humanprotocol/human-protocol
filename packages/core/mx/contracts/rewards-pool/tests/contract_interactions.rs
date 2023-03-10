@@ -45,8 +45,8 @@ where
             .execute_tx(&owner_address, &contract_wrapper, &rust_zero, |sc| {
                 sc.init(
                     managed_token_id!(HMT_TOKEN),
-                    managed_biguint!(PROTOCOL_FEE) * managed_biguint!(10u64).pow(HMT_TOKEN_DECIMALS as u32),
                     managed_address!(mock_staking_contract.address_ref()),
+                    managed_biguint!(PROTOCOL_FEE) * managed_biguint!(10u64).pow(HMT_TOKEN_DECIMALS as u32),
                 )
             })
             .assert_ok();
@@ -80,8 +80,7 @@ where
     pub fn check_rewards_entry_exists(&mut self, escrow_address: &Address, slasher: &Address, expected_rewards: u64) {
         self.b_wrapper
             .execute_query(&self.c_wrapper, |sc| {
-                let rewards = sc.rewards(&managed_address!(escrow_address)).get();
-                for reward in rewards.iter() {
+                for reward in  sc.rewards(&managed_address!(escrow_address)).iter() {
                     if reward.slasher == managed_address!(slasher) {
                         assert_eq!(reward.tokens, managed_biguint!(expected_rewards));
                         return;
@@ -94,8 +93,7 @@ where
     pub fn check_rewards_entry_none(&mut self, escrow_address: &Address, slasher: &Address) {
         self.b_wrapper
             .execute_query(&self.c_wrapper, |sc| {
-                let rewards = sc.rewards(&managed_address!(escrow_address)).get();
-                for reward in rewards.iter() {
+                for reward in sc.rewards(&managed_address!(escrow_address)).iter() {
                     if reward.slasher == managed_address!(slasher) {
                         assert!(false)
                     }
