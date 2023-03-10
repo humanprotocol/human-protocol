@@ -20,6 +20,9 @@ version = "0.39.2"
 [dependencies.escrow]
 path = "../escrow"
 
+[dependencies.staking-mock]
+path = "../staking-mock"
+
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.39.2"
 

@@ -1,71 +1,80 @@
 #![no_std]
+pub mod proxy;
+
 multiversx_sc::imports!();
 
-const JOB_CONTRACT_DURATION: u64 = 100 * 24 * 60 * 60;  // 100 days
+pub const STANDARD_DURATION: u64 = 8640000;
 
 #[multiversx_sc::contract]
-pub trait EscrowFactoryContract {
+pub trait EscrowFactoryContract: proxy::StakingProxyModule {
 
     #[init]
-    fn init(&self) {}
+    fn init(&self, staking: ManagedAddress) {
+        self.staking_contract_address().set(&staking);
+    }
 
-    #[endpoint(createJob)]
-    fn create_job(&self, trusted_handlers: MultiValueEncoded<ManagedAddress>) -> ManagedAddress {
-        let canceller = self.blockchain().get_caller();
-        let job_token = self.token().get();
+    #[endpoint(createEscrow)]
+    fn create_escrow(
+        &self,
+        token: TokenIdentifier,
+        trusted_handlers: MultiValueEncoded<ManagedAddress>
+    ) -> ManagedAddress {
+        let caller = self.blockchain().get_caller();
+        let has_available_stake = self.has_available_stake(&caller);
+        require!(has_available_stake, "Needs to stake HMT tokens to create an escrow");
 
         let mut arguments = ManagedArgBuffer::new();
-        arguments.push_arg(job_token);
-        arguments.push_arg(canceller.clone());
-        arguments.push_arg(JOB_CONTRACT_DURATION.to_be_bytes());
-        for trusted_handler in trusted_handlers {
-            arguments.push_arg(trusted_handler);
+        arguments.push_arg(token);
+        arguments.push_arg(caller);
+        arguments.push_arg(STANDARD_DURATION);
+        for handler in trusted_handlers.into_iter() {
+            arguments.push_arg(handler);
         }
 
-        let (job_address, _) = Self::Api::send_api_impl()
+        let (escrow_address, _) = Self::Api::send_api_impl()
             .deploy_from_source_contract(
                 self.blockchain().get_gas_left(),
                 &BigUint::zero(),
-                &self.job_template_address().get(),
-                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE | CodeMetadata::PAYABLE_BY_SC,
-                &arguments,
+                &self.escrow_template_address().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC | CodeMetadata::PAYABLE,
+                &arguments
             );
 
-        self.jobs().insert(job_address.clone());
-        self.last_job_address(canceller).set(&job_address);
+        let counter = self.counter().get();
+        self.escrow_counter(&escrow_address).set(counter);
+        self.counter().set(counter + 1);
 
-        job_address
+        escrow_address
     }
 
-    #[view(hasJob)]
-    fn has_job(&self, address: ManagedAddress) -> bool {
-        self.jobs().contains(&address)
+    #[view(isChild)]
+    fn is_child(&self, address: ManagedAddress) -> bool {
+        self.escrow_counter(&address).get() == self.counter().get()
+    }
+
+    #[view(hasEscrow)]
+    fn has_escrow(&self, address: ManagedAddress) -> bool {
+        !self.escrow_counter(&address).is_empty()
     }
 
     #[only_owner]
     #[endpoint(setTemplateAddress)]
     fn set_template_address(&self, address: ManagedAddress) {
-        self.job_template_address().set(&address);
+        self.escrow_template_address().set(&address);
     }
 
-    #[only_owner]
-    #[endpoint(setToken)]
-    fn set_token(&self, token: EgldOrEsdtTokenIdentifier) {
-        self.token().set(&token);
-    }
+    #[view(getTemplateAddress)]
+    #[storage_mapper("escrow_template_address")]
+    fn escrow_template_address(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[storage_mapper("job_template_address")]
-    fn job_template_address(&self) -> SingleValueMapper<ManagedAddress>;
+    #[view(getEscrowCounter)]
+    #[storage_mapper("escrow_counter")]
+    fn escrow_counter(&self, escrow_address: &ManagedAddress) -> SingleValueMapper<u64>;
 
-    #[view]
-    #[storage_mapper("jobs")]
-    fn jobs(&self) -> SetMapper<ManagedAddress>;
+    #[view(getCounter)]
+    #[storage_mapper("counter")]
+    fn counter(&self) -> SingleValueMapper<u64>;
 
-    #[view]
-    #[storage_mapper("token")]
-    fn token(&self) -> SingleValueMapper<EgldOrEsdtTokenIdentifier>;
-
-    #[view(getLastJobAddress)]
-    #[storage_mapper("last_job_address")]
-    fn last_job_address(&self, address: ManagedAddress) -> SingleValueMapper<ManagedAddress>;
+    #[storage_mapper("last_escrow")]
+    fn last_escrow(&self) -> SingleValueMapper<ManagedAddress>;
 }
