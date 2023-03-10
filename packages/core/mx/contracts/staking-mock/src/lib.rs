@@ -22,4 +22,9 @@ pub trait StakingMockContract {
             tokens_locked_until: 0
         }
     }
+
+    #[view(hasAvailableStake)]
+    fn has_available_stake(&self, _address: ManagedAddress) -> bool {
+        true
+    }
 }

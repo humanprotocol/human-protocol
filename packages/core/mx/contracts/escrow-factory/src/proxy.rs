@@ -7,7 +7,7 @@ mod staking_proxy {
     #[multiversx_sc::proxy]
     pub trait StakingContract {
 
-        #[endpoint(hasAvailableStake)]
+        #[view(hasAvailableStake)]
         fn has_available_stake(&self, staker: ManagedAddress) -> bool;
     }
 }
