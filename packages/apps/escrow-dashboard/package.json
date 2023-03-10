@@ -60,7 +60,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start-prod": "serve -s build",
-    "test": "vitest run",
+    "test": "vitest -u",
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
     "format": "npm run format:prettier && npm run format:lint"
