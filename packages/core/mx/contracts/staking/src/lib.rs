@@ -56,7 +56,6 @@ pub trait StakingContract:
         let payment = self.call_value().single_esdt();
         require!(payment.token_identifier == self.staking_token().get(), "Invalid token");
         require!(payment.token_nonce == 0, "Invalid token nonce");
-        require!(payment.amount >= self.minimum_stake().get(), "Amount is less than minimum stake");
 
         let caller = self.blockchain().get_caller();
         let mut staker = self.get_or_create_staker(&caller);
@@ -324,7 +323,7 @@ pub trait StakingContract:
     fn stakers(&self) -> SingleValueMapper<ManagedVec<ManagedAddress>>;
 
     /// Allocations
-    #[view(getAllocation)] 
+    #[view(getAllocation)]
     #[storage_mapper("allocations")]
     fn allocations(&self, escrow_address: &ManagedAddress) -> SingleValueMapper<Allocation<Self::Api>>;
 
