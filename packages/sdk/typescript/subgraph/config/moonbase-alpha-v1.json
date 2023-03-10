@@ -3,11 +3,11 @@
   "description": "Human subgraph on Moonbase Alpha network",
   "graft": {
     "base": "QmbJKZNX7mN6QDvVcf9aNeuH1PJjG2qpFjQqRJzmYhfZtM",
-    "block": 25486227
+    "block": 3912594
   },
   "EscrowFactory": {
     "address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
-    "startBlock": 3648028,
+    "startBlock": 3912594,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {

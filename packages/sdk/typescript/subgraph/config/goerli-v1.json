@@ -3,11 +3,11 @@
   "description": "Human subgraph on goerli network",
   "graft": {
     "base": "QmPbnu8R54f2L2uKbLcW5VNKCwXs6yW5B9LaEDY77Zsr7u",
-    "block": 25486227
+    "block": 8630704
   },
   "EscrowFactory": {
     "address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
-    "startBlock": 8403038,
+    "startBlock": 8630704,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {

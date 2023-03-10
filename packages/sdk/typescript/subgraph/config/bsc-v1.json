@@ -3,11 +3,11 @@
   "description": "Human subgraph on Binance Smart Chain network",
   "graft": {
     "base": "QmUgxDMX74Mcd86vrBmkqaGCvN4BdXK9TS17vKgfRpqHJx",
-    "block": 25486227
+    "block": 27921409
   },
   "EscrowFactory": {
     "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
-    "startBlock": 25486222,
+    "startBlock": 27921409,
     "abi": "./node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
