@@ -58,6 +58,7 @@
   },
   "resolutions": {
     "ejs": "^3.0.0",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "node-forge": "^1.0.0"
   }
 }
