@@ -17,7 +17,8 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
     fn create_escrow(
         &self,
         token: TokenIdentifier,
-        trusted_handlers: MultiValueEncoded<ManagedAddress>
+        token_bulk_max_value: BigUint,
+        trusted_handlers: MultiValueEncoded<ManagedAddress>,
     ) -> ManagedAddress {
         let caller = self.blockchain().get_caller();
         let has_available_stake = self.has_available_stake(&caller);
@@ -27,6 +28,7 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
         arguments.push_arg(token.clone());
         arguments.push_arg(caller);
         arguments.push_arg(STANDARD_DURATION);
+        arguments.push_arg(token_bulk_max_value);
         for handler in trusted_handlers.into_iter() {
             arguments.push_arg(handler);
         }

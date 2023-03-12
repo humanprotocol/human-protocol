@@ -44,8 +44,8 @@ where
                     managed_token_id!(HMT_TOKEN),
                     managed_address!(&owner_address),
                     10000u64,
+                    managed_biguint!(bulk_max_count),
                     trusted_handlers,
-                    managed_biguint!(bulk_max_count)
                 )
             })
             .assert_ok();

@@ -15,7 +15,7 @@ fn test_deploy_factory() {
 }
 
 #[test]
-fn test_deploy_escrow_contract() {
+fn bulk_max_count() {
     let mut setup = EscrowFactorySetup::new(
         escrow_factory::contract_obj,
         escrow::contract_obj,

@@ -36,7 +36,7 @@ fn test_stake_not_minimum_amount() {
 
     let staker1 = setup.create_address();
     setup.set_staker_balance(1, &staker1);
-    setup.stake(&staker1, 500_000, Some("Amount is less than minimum stake"));
+    setup.stake(&staker1, 500_000, Some("Total stake is below the minimum threshold"));
 }
 
 #[test]

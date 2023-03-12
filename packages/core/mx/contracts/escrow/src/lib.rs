@@ -17,8 +17,8 @@ pub trait EscrowContract {
         token: TokenIdentifier,
         canceler: ManagedAddress,
         duration: u64,
-        trusted_callers: MultiValueEncoded<ManagedAddress>,
         bulk_max_value: BigUint,
+        trusted_callers: MultiValueEncoded<ManagedAddress>,
     ) {
         self.token().set(token);
         self.status().set(EscrowStatus::Launched);
@@ -192,7 +192,7 @@ pub trait EscrowContract {
             if balance == 0 && status == EscrowStatus::Partial {
                 status = EscrowStatus::Paid;
             }
-            
+
             self.status().set(status);
         }
 

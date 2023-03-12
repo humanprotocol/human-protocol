@@ -1,6 +1,6 @@
 use multiversx_sc::types::{Address, MultiValueEncoded};
 
-use multiversx_sc_scenario::{DebugApi, rust_biguint, managed_address, managed_token_id};
+use multiversx_sc_scenario::{DebugApi, rust_biguint, managed_address, managed_token_id, managed_biguint};
 use multiversx_sc_scenario::testing_framework::{BlockchainStateWrapper, ContractObjWrapper};
 
 pub const FACTORY_WASM_PATH: &'static str = "../output/escrow-factory.wasm";
@@ -96,6 +96,7 @@ where
                 }
                 sc.create_escrow(
                     managed_token_id!(HMT_TOKEN),
+                    managed_biguint!(100_000_000u64),
                     trusted_handlers_wrapper
                 );
             })
