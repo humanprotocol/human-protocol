@@ -25,7 +25,7 @@ pub trait StakingContract:
         minimum_stake: BigUint,
         lock_period: u64,
     ) {
-        self.staking_token().set_if_empty(&staking_token);
+        self.staking_token().set(&staking_token);
         self.set_minimum_stake(minimum_stake);
         self.set_lock_period(lock_period);
     }
@@ -65,7 +65,11 @@ pub trait StakingContract:
 
         staker.deposit(&payment.amount);
         self.stakes(&caller).set(&staker);
-        self.stakers().update(|stakers| stakers.push(caller.clone()));
+
+        let stakers = self.stakers().get();
+        if !stakers.contains(&caller) {
+            self.stakers().update(|stakers| stakers.push(caller.clone()));
+        }
         self.stake_deposited_event(&caller, &payment.amount);
     }
 

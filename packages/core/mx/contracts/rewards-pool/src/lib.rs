@@ -15,7 +15,7 @@ pub trait RewardsPoolContract {
         staking_contract_address: ManagedAddress,
         protocol_fee: BigUint,
     ) {
-        self.rewards_token().set_if_empty(rewards_token);
+        self.rewards_token().set(rewards_token);
         self.protocol_fee().set(protocol_fee);
         self.staking_contract_address().set(staking_contract_address);
     }
@@ -39,15 +39,13 @@ pub trait RewardsPoolContract {
         }
 
         let rewards_after_fee = tokens - &protocol_fee;
-        if rewards_after_fee > 0 {
-            let new_reward_entry = Reward {
-                escrow_address: escrow_address.clone(),
-                slasher: slasher.clone(),
-                tokens: rewards_after_fee.clone(),
-            };
+        let new_reward_entry = Reward {
+            escrow_address: escrow_address.clone(),
+            slasher: slasher.clone(),
+            tokens: rewards_after_fee.clone(),
+        };
 
-            self.rewards(&escrow_address).push(&new_reward_entry);
-        }
+        self.rewards(&escrow_address).push(&new_reward_entry);
 
         self.total_fee().update(|total_fee| *total_fee += &protocol_fee);
         self.rewards_added_event(escrow_address, slasher, rewards_after_fee);
