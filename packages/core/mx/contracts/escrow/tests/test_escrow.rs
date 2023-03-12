@@ -1,267 +1,319 @@
 mod interactions;
 use interactions::*;
-use multiversx_sc::codec::multi_types::OptionalValue;
-use multiversx_sc::types::{ManagedAddress, MultiValueEncoded, BigUint};
-use multiversx_sc_scenario::{
-    rust_biguint,
-    managed_address,
-    managed_biguint,
-    managed_buffer,
-};
-use multiversx_sc_scenario::multiversx_chain_vm::tx_mock::TxContextRef;
-use escrow::{
-    contract_obj, EscrowContract,
-    base::EscrowBaseModule, status::EscrowStatus, constants::UrlHashPair
-};
 
 
 #[test]
-fn test_job_setup() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
+fn test_add_trusted_handler() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
+    let handler = setup.create_user_account();
 
-    let reputation_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
-    let recording_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
 
-    blockchain_wrapper.set_esdt_balance(&owner_address, OTHER_TOKEN, &rust_biguint!(100u64));
-    blockchain_wrapper
-        .execute_tx(&owner_address, &contract_wrapper, &rust_biguint!(0u64), |sc|{
-            let rep_oracle_address = managed_address!(&reputation_oracle);
-            let rec_oracle_address = managed_address!(&recording_oracle);
-
-            sc.setup(
-                rep_oracle_address,
-                rec_oracle_address,
-                managed_biguint!(5u64),
-                managed_biguint!(7u64),
-                managed_buffer!(b"http://example.com"),
-                managed_buffer!(b"test-hash")
-            );
-
-            let new_callers: Vec<ManagedAddress<TxContextRef>> = vec![managed_address!(&reputation_oracle), managed_address!(&recording_oracle)];
-            let has_all_callers = new_callers.iter().all(|caller| sc.trusted_callers().contains(caller));
-
-            assert!(has_all_callers);
-        })
-        .assert_ok();
+    let another_handler = setup.create_user_account();
+    setup.add_trusted_handler_as_caller(&another_handler, &handler);
 }
 
 #[test]
-fn test_job_cancel() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
+fn test_escrow_setup_stake_out_of_bounds() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
 
-    blockchain_wrapper.set_esdt_balance(&owner_address, HMT_TOKEN, &rust_biguint!(100u64));
-    blockchain_wrapper
-        .execute_esdt_transfer(
-            owner_address,
-            &setup.contract_wrapper,
-            HMT_TOKEN,
-            0,
-            &rust_biguint!(5u64), |sc| {
-                sc.deposit();
-            })
-        .assert_ok();
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
 
-    let current_balance = blockchain_wrapper.get_esdt_balance(&owner_address, HMT_TOKEN, 0);
-    assert_eq!(current_balance, rust_biguint!(100u64) - rust_biguint!(5u64));
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
 
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc|{
-            sc.cancel()
-        })
-        .assert_ok();
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        80u64,
+        90u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
 
-    let current_balance = blockchain_wrapper.get_esdt_balance(&owner_address, HMT_TOKEN, 0);
-    assert_eq!(current_balance, rust_biguint!(100u64));
+        Some("Stake out of bounds")
+    );
+}
 
-    blockchain_wrapper.execute_query(contract_wrapper, |sc|{
-        let current_status = sc.status().get();
-        let expected_status = EscrowStatus::Cancelled;
+#[test]
+fn test_escrow_setup() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
 
-        assert_eq!(current_status, expected_status);
-    }).assert_ok();
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
+
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
+
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+}
+
+#[test]
+fn test_escrow_cancel() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
+
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
+
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
+
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
+
+    setup.check_owner_balance(0);
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+    setup.set_contract_balance(100);
+
+    setup.cancel();
+
+    setup.check_status(common_structs::escrow::EscrowStatus::Cancelled);
+    setup.check_owner_balance(100);
 }
 
 #[test]
 fn test_store_results() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
 
-    let test_url = b"http://example.com";
-    let test_hash = b"test-hash";
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
 
-    // Set status to PENDING
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc|{
-            sc.status().set(EscrowStatus::Pending);
-        })
-        .assert_ok();
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
 
-    // Store results
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc|{
-            sc.store_results(managed_buffer!(test_url), managed_buffer!(test_hash));
-        })
-        .assert_ok();
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
 
-    // Check if the intermediate results match the storage
-    blockchain_wrapper
-        .execute_query(contract_wrapper, |sc| {
-            let results = sc.get_intermediate_results();
-            let expected_results = UrlHashPair::new(managed_buffer!(test_url), managed_buffer!(test_hash));
-            assert_eq!(results, expected_results);
-        })
-        .assert_ok();
-
-}
-
-#[test]
-fn test_job_complete() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
-
-    // Set status to PAID
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc|{
-            sc.status().set(EscrowStatus::Paid);
-        })
-        .assert_ok();
-
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc|{
-            sc.complete()
-        })
-        .assert_ok();
-
-    blockchain_wrapper.execute_query(contract_wrapper, |sc| {
-        let status = sc.status().get();
-        assert_eq!(status, EscrowStatus::Complete);
-    }).assert_ok()
-}
-
-#[test]
-fn test_job_abort() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
-
-    blockchain_wrapper
-        .execute_tx(&owner_address, contract_wrapper, &rust_biguint!(0u64), |sc| {
-            sc.abort()
-        })
-        .assert_ok();
+    let solution = b"https://test-solution.com/";
+    let solution_hash = b"test-hash";
+    setup.store_results(&handler, solution, solution_hash);
+    setup.check_final_solutions(solution, solution_hash);
 }
 
 #[test]
 fn test_bulk_payout_partial() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
-    let reputation_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
-    let recording_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
-    let test_url = b"http://example.com";
-    let test_hash = b"test-hash";
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
 
-    blockchain_wrapper.set_esdt_balance(contract_wrapper.address_ref(), HMT_TOKEN, &rust_biguint!(10u64));
-    blockchain_wrapper
-    .execute_tx(&owner_address, &contract_wrapper, &rust_biguint!(0u64), |sc|{
-        let rep_oracle_address = managed_address!(&reputation_oracle);
-        let rec_oracle_address = managed_address!(&recording_oracle);
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
 
-        sc.setup(
-            rep_oracle_address,
-            rec_oracle_address,
-            managed_biguint!(7u64),
-            managed_biguint!(3u64),
-            managed_buffer!(b"http://example.com"),
-            managed_buffer!(b"test-hash")
-        );
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
 
-        let new_callers: Vec<ManagedAddress<TxContextRef>> = vec![managed_address!(&reputation_oracle), managed_address!(&recording_oracle)];
-        let has_all_callers = new_callers.iter().all(|caller| sc.trusted_callers().contains(caller));
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
 
-        assert!(has_all_callers);
-    })
-    .assert_ok();
+    setup.check_owner_balance(0);
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+    let balance = setup.get_token_amount(8);
+    let deposit = setup.get_token_amount(7);
+    setup.set_balance(&handler, balance);
+    setup.deposit(&handler, deposit);
 
-    blockchain_wrapper.execute_tx(owner_address, contract_wrapper, &rust_biguint!(0u64), |sc| {
-        let mut payments: MultiValueEncoded<TxContextRef, (ManagedAddress<TxContextRef>, BigUint<TxContextRef>)> = MultiValueEncoded::new();
-        payments.push((managed_address!(&reputation_oracle), managed_biguint!(5u64)));
-        payments.push((managed_address!(&recording_oracle), managed_biguint!(4u64)));
-        let final_results: UrlHashPair<TxContextRef> = UrlHashPair::new(managed_buffer!(test_url), managed_buffer!(test_hash));
+    let account1 = setup.create_user_account();
 
-        sc.bulk_pay_out(payments, OptionalValue::Some(final_results));
-    }).assert_ok();
+    let recipients = vec![account1.clone()];
+    let solution = b"https://test-solution.com/";
+    let solution_hash = b"test-hash";
 
-    blockchain_wrapper.execute_query(contract_wrapper, |sc| {
-        let current_status = sc.status().get();
-        let expected_status = EscrowStatus::Partial;
-
-        assert_eq!(current_status, expected_status);
-    }).assert_ok()
+    setup.bulk_payout(
+        &recipients,
+        &vec![setup.get_token_amount(4)],
+        solution,
+        solution_hash,
+        0
+    );
+    setup.check_status(common_structs::escrow::EscrowStatus::Partial);
+    setup.check_balance(&reputation_oracle, 400_000);
+    setup.check_balance(&recording_oracle, 400_000);
+    setup.check_balance(&account1, setup.get_token_amount(4) - 400_000 - 400_000);
 }
 
 #[test]
-fn test_bulk_payout_full() {
-    let mut setup = setup_contract(contract_obj);
-    let blockchain_wrapper = &mut setup.blockchain_wrapper;
-    let contract_wrapper = &setup.contract_wrapper;
-    let owner_address = &setup.owner_address;
-    let reputation_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
-    let recording_oracle = blockchain_wrapper.create_user_account(&rust_biguint!(0u64));
-    let test_url = b"http://example.com";
-    let test_hash = b"test-hash";
-    let contract_balance = rust_biguint!(100u64);
+fn test_bulk_payout_complete() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
 
-    blockchain_wrapper.set_esdt_balance(contract_wrapper.address_ref(), HMT_TOKEN, &contract_balance);
-    blockchain_wrapper
-        .execute_tx(&owner_address, &contract_wrapper, &rust_biguint!(0u64), |sc|{
-            let rep_oracle_address = managed_address!(&reputation_oracle);
-            let rec_oracle_address = managed_address!(&recording_oracle);
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
 
-            sc.setup(
-                rep_oracle_address,
-                rec_oracle_address,
-                managed_biguint!(5u64),
-                managed_biguint!(7u64),
-                managed_buffer!(b"http://example.com"),
-                managed_buffer!(b"test-hash")
-            );
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
 
-            let new_callers: Vec<ManagedAddress<TxContextRef>> = vec![managed_address!(&reputation_oracle), managed_address!(&recording_oracle)];
-            let has_all_callers = new_callers.iter().all(|caller| sc.trusted_callers().contains(caller));
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
 
-            assert!(has_all_callers);
-        })
-        .assert_ok();
+    setup.check_owner_balance(0);
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+    let balance = setup.get_token_amount(8);
+    let deposit = setup.get_token_amount(7);
+    setup.set_balance(&handler, balance);
+    setup.deposit(&handler, deposit);
 
-    blockchain_wrapper
-        .execute_tx(owner_address, contract_wrapper, &rust_biguint!(0u64), |sc| {
-            let mut payments: MultiValueEncoded<TxContextRef, (ManagedAddress<TxContextRef>, BigUint<TxContextRef>)> = MultiValueEncoded::new();
-            payments.push((managed_address!(&reputation_oracle), managed_biguint!(50u64)));
-            payments.push((managed_address!(&recording_oracle), managed_biguint!(50u64)));
-            let final_results: UrlHashPair<TxContextRef> = UrlHashPair::new(managed_buffer!(test_url), managed_buffer!(test_hash));
+    let account1 = setup.create_user_account();
+    let account2 = setup.create_user_account();
 
-            sc.bulk_pay_out(payments, OptionalValue::Some(final_results));
-        })
-        .assert_ok();
+    let recipients = vec![account1.clone(), account2.clone()];
+    let solution = b"https://test-solution.com/";
+    let solution_hash = b"test-hash";
 
-    blockchain_wrapper
-        .execute_query(contract_wrapper, |sc| {
-            let current_status = sc.status().get();
-            let expected_status = EscrowStatus::Paid;
+    setup.bulk_payout(
+        &recipients,
+        &vec![setup.get_token_amount(4), setup.get_token_amount(3)],
+        solution,
+        solution_hash,
+        0
+    );
+    setup.check_status(common_structs::escrow::EscrowStatus::Paid);
+    setup.check_balance(&reputation_oracle, 700_000);
+    setup.check_balance(&recording_oracle, 700_000);
+    setup.check_balance(&account1, setup.get_token_amount(4) - 400_000 - 400_000);
+    setup.check_balance(&account2, setup.get_token_amount(3) - 300_000 - 300_000);
 
-            assert_eq!(current_status, expected_status);
-        }).assert_ok()
+}
+
+
+#[test]
+fn test_complete_escrow() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
+
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
+
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
+
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
+
+    setup.check_owner_balance(0);
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+    let balance = setup.get_token_amount(8);
+    let deposit = setup.get_token_amount(7);
+    setup.set_balance(&handler, balance);
+    setup.deposit(&handler, deposit);
+
+    let account1 = setup.create_user_account();
+    let account2 = setup.create_user_account();
+
+    let recipients = vec![account1.clone(), account2.clone()];
+    let solution = b"https://test-solution.com/";
+    let solution_hash = b"test-hash";
+
+    setup.bulk_payout(
+        &recipients,
+        &vec![setup.get_token_amount(4), setup.get_token_amount(3)],
+        solution,
+        solution_hash,
+        0
+    );
+
+    setup.complete(None);
+}
+
+#[test]
+fn test_job_abort() {
+    let mut setup = EscrowSetup::new(escrow::contract_obj);
+
+    let handler = setup.create_user_account();
+    setup.add_trusted_handler_as_owner(&handler);
+    setup.check_trusted_handler(&handler);
+
+    let reputation_oracle = setup.create_user_account();
+    let recording_oracle = setup.create_user_account();
+
+    setup.check_status(common_structs::escrow::EscrowStatus::Launched);
+    setup.escrow_setup(
+        &handler,
+        &reputation_oracle,
+        &recording_oracle,
+        10u64,
+        10u64,
+        b"https://url.test/",
+        b"test-hash",
+        2,
+        None
+    );
+
+    setup.check_owner_balance(0);
+    setup.check_status(common_structs::escrow::EscrowStatus::Pending);
+    let balance = setup.get_token_amount(8);
+    let deposit = setup.get_token_amount(7);
+    setup.set_balance(&handler, balance);
+    setup.deposit(&handler, deposit);
+
+    setup.abort();
+
+    setup.check_owner_balance(deposit);
 }

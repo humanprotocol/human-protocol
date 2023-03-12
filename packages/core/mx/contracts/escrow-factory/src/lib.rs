@@ -24,7 +24,7 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
         require!(has_available_stake, "Needs to stake HMT tokens to create an escrow");
 
         let mut arguments = ManagedArgBuffer::new();
-        arguments.push_arg(token);
+        arguments.push_arg(token.clone());
         arguments.push_arg(caller);
         arguments.push_arg(STANDARD_DURATION);
         for handler in trusted_handlers.into_iter() {
@@ -43,6 +43,8 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
         let counter = self.counter().get();
         self.escrow_counter(&escrow_address).set(counter);
         self.counter().set(counter + 1);
+
+        self.escrow_launched_event(escrow_address.clone(), token);
 
         escrow_address
     }
@@ -77,4 +79,11 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
 
     #[storage_mapper("last_escrow")]
     fn last_escrow(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[event("escrow_launched")]
+    fn escrow_launched_event(
+        &self,
+        #[indexed] escrow_address: ManagedAddress,
+        #[indexed] token: TokenIdentifier
+    );
 }

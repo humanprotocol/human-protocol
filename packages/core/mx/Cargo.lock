@@ -306,6 +306,7 @@ dependencies = [
 name = "escrow"
 version = "0.1.0"
 dependencies = [
+ "common-structs",
  "multiversx-sc",
  "multiversx-sc-scenario",
  "num-bigint",

@@ -11,11 +11,14 @@ publish = false
 [lib]
 path = "src/lib.rs"
 
-[dev-dependencies]
-num-bigint = "0.4.2"
+[dependencies.common-structs]
+path = "../common-structs"
 
 [dependencies.multiversx-sc]
 version = "0.39.2"
 
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.39.2"
+
+[dev-dependencies]
+num-bigint = "0.4.2"

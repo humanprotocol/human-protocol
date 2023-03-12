@@ -2,30 +2,54 @@
 multiversx_sc::imports!();
 
 pub mod status;
-pub mod base;
 pub mod constants;
 
-use status::EscrowStatus;
-use constants::OraclePair;
-use constants::UrlHashPair;
+use common_structs::escrow::EscrowStatus;
+
+use crate::constants::BULK_MAX_COUNT;
 
 #[multiversx_sc::contract]
-pub trait EscrowContract: base::EscrowBaseModule {
+pub trait EscrowContract {
 
     #[init]
     fn init(
         &self,
-        token: EgldOrEsdtTokenIdentifier,
+        token: TokenIdentifier,
         canceler: ManagedAddress,
         duration: u64,
-        trusted_callers: MultiValueEncoded<ManagedAddress>
+        trusted_callers: MultiValueEncoded<ManagedAddress>,
+        bulk_max_value: BigUint,
     ) {
-        self.init_base(token, duration, trusted_callers);
+        self.token().set(token);
+        self.status().set(EscrowStatus::Launched);
+        let expiration = self.blockchain().get_block_timestamp() + duration;
+        self.duration().set(expiration);
         self.launcher().set(self.blockchain().get_caller());
-        self.canceler().set(canceler);
+        self.canceler().set(&canceler);
+        self.bulk_max_value().set(bulk_max_value);
+        for caller in trusted_callers {
+            self.trusted_callers().insert(caller.clone());
+        }
+        self.trusted_callers().insert(self.blockchain().get_caller());
+        self.trusted_callers().insert(canceler);
     }
 
-    #[endpoint]
+    #[view(getBalance)]
+    fn get_balance(&self) -> BigUint {
+        let contract_token = self.token().get();
+
+        self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::esdt(contract_token), 0)
+    }
+
+    #[endpoint(addTrustedHandlers)]
+    fn add_trusted_handlers(&self, trusted_handlers: MultiValueEncoded<ManagedAddress>) {
+        self.require_trusted();
+        for caller in trusted_handlers {
+            self.trusted_callers().insert(caller.clone());
+        }
+    }
+
+    #[endpoint(setup)]
     fn setup(
         &self,
         reputation_oracle: ManagedAddress,
@@ -34,41 +58,34 @@ pub trait EscrowContract: base::EscrowBaseModule {
         recording_oracle_stake: BigUint,
         url: ManagedBuffer,
         hash: ManagedBuffer,
+        solution_requested: u64
     ) {
         self.require_trusted();
         self.require_not_expired();
         require!(self.status().get() == EscrowStatus::Launched, "Contract is not launched");
+        require!(solution_requested > 0, "Invalid or missing solutions");
 
         let total_stake = &reputation_oracle_stake + &recording_oracle_stake;
         require!(total_stake <= 100_u64, "Stake out of bounds");
 
-        self.oracle_pair().set(&OraclePair::new(
-            &reputation_oracle,
-            reputation_oracle_stake,
-            &recording_oracle,
-            recording_oracle_stake
-        ));
+        self.reputation_oracle().set(&reputation_oracle);
+        self.recording_oracle().set(&recording_oracle);
+        self.reputation_oracle_stake().set(reputation_oracle_stake);
+        self.recording_oracle_stake().set(recording_oracle_stake);
 
         self.trusted_callers().insert(recording_oracle);
         self.trusted_callers().insert(reputation_oracle);
-        self.manifest().set(&UrlHashPair::new(url.clone(), hash.clone()));
+
+        self.manifest_hash().set(&hash);
+        self.manifest_url().set(&url);
+
+        self.remaining_solutions().set(solution_requested);
+
         self.status().set(EscrowStatus::Pending);
         self.pending_event(url, hash);
     }
 
-    #[endpoint]
-    fn cancel(&self) {
-        self.require_trusted();
-        self.require_status(&[EscrowStatus::Launched, EscrowStatus::Pending, EscrowStatus::Partial]);
-        self.require_not_broke();
-
-        let balance: BigUint = self.get_balance();
-        self.send().direct(&self.canceler().get(), &self.token().get(), 0, &balance);
-
-        self.status().set(EscrowStatus::Cancelled)
-    }
-
-    #[endpoint]
+    #[endpoint(abort)]
     fn abort(&self) {
         self.require_trusted();
         self.require_status(&[EscrowStatus::Launched, EscrowStatus::Pending, EscrowStatus::Partial]);
@@ -80,7 +97,19 @@ pub trait EscrowContract: base::EscrowBaseModule {
         }
     }
 
-    #[endpoint]
+    #[endpoint(cancel)]
+    fn cancel(&self) {
+        self.require_trusted();
+        self.require_status(&[EscrowStatus::Launched, EscrowStatus::Pending, EscrowStatus::Partial]);
+        self.require_not_broke();
+
+        let balance: BigUint = self.get_balance();
+        self.send().direct_esdt(&self.canceler().get(), &self.token().get(), 0, &balance);
+
+        self.status().set(EscrowStatus::Cancelled)
+    }
+
+    #[endpoint(complete)]
     fn complete(&self) {
         self.require_trusted();
         self.require_not_expired();
@@ -89,91 +118,237 @@ pub trait EscrowContract: base::EscrowBaseModule {
     }
 
     #[endpoint(storeResults)]
-    fn store_results(&self, url: ManagedBuffer, hash: ManagedBuffer) {
+    fn store_results_endpoint(&self, url: ManagedBuffer, hash: ManagedBuffer) {
         self.require_trusted();
         self.require_not_expired();
-        self.require_status(&[EscrowStatus::Pending, EscrowStatus::Partial]);
-        self.intermediate_results().set(UrlHashPair::new(url, hash));
-    }
+        let status = self.status().get();
+        require!(
+            status == EscrowStatus::Pending || status == EscrowStatus::Partial,
+            "Escrow not in Pending or Partial status state"
+        );
 
-    #[view(getIntermediateResults)]
-    fn get_intermediate_results(&self) -> UrlHashPair<Self::Api> {
-        require!(!self.intermediate_results().is_empty(), "intermediate results are not set");
-        self.intermediate_results().get()
-    }
-
-    #[view(getFinalResults)]
-    fn get_final_results(&self) -> UrlHashPair<Self::Api> {
-        require!(!self.final_results().is_empty(), "final results are not set");
-        self.final_results().get()
-    }
-
-    fn transfer_fee(
-        &self,
-        mut from_amount: BigUint,
-        mut to_amount: BigUint,
-        original_amount: &BigUint,
-        percentage: &BigUint,
-    ) -> (BigUint, BigUint) {
-        let transferred_amount = original_amount * percentage / BigUint::from(100_u64);
-        from_amount -= &transferred_amount;
-        to_amount += &transferred_amount;
-        (from_amount, to_amount)
+        self.store_results(&url, &hash);
+        self.intermediate_storage_event(url, hash);
     }
 
     #[endpoint(bulkPayOut)]
-    fn bulk_pay_out(
+    fn bulk_payout(
         &self,
-        payments: MultiValueEncoded<(ManagedAddress, BigUint)>,
-        final_results: OptionalValue<UrlHashPair<Self::Api>>,
-    ) {
+        recipients: MultiValueEncoded<ManagedAddress>,
+        amounts: MultiValueEncoded<BigUint>,
+        url: ManagedBuffer,
+        hash: ManagedBuffer,
+        tx_id: u64,
+    ) -> bool {
         self.require_trusted();
+        self.require_not_broke();
         self.require_not_expired();
         self.require_status(&[EscrowStatus::Pending, EscrowStatus::Partial]);
-        self.require_not_broke();
-        self.require_max_recipients(payments.len());
+        self.require_max_recipients(recipients.len());
 
-        let mut payments_total = BigUint::zero();
-        for (_, amount) in payments.clone() {
-            payments_total += amount;
+        require!(recipients.len() == amounts.len(), "Recipients and amounts length mismatch");
+
+        let mut balance = self.get_balance();
+        let mut bulk_paid: bool = false;
+        let mut aggregate_bulk_amount = BigUint::zero();
+        for amount in amounts.clone().into_iter() {
+            aggregate_bulk_amount += amount;
         }
 
-        self.require_payments_not_zero(&payments_total);
-        self.require_sufficient_balance(&payments_total);
-
-        let token = self.token().get();
-        let oracles = self.oracle_pair().get();
-
-        let mut recording_fee = BigUint::zero();
-        let mut reputation_fee = BigUint::zero();
-
-        for (to, amount) in payments {
-            let mut payout = amount.clone();
-            (payout, reputation_fee) = self.transfer_fee(payout, reputation_fee, &amount, &oracles.reputation.stake);
-            (payout, recording_fee) = self.transfer_fee(payout, recording_fee, &amount, &oracles.recording.stake);
-            self.send().direct(&to, &token, 0, &payout);
+        require!(aggregate_bulk_amount < self.bulk_max_value().get(), "Bulk value too high");
+        if balance < aggregate_bulk_amount {
+            return bulk_paid
         }
 
-        self.send().direct(&oracles.reputation.address, &token, 0, &reputation_fee);
-        self.send().direct(&oracles.recording.address, &token, 0, &recording_fee);
+        self.store_results(&url, &hash);
 
-        let next_status = if self.get_balance() != 0 {
-            EscrowStatus::Partial
-        } else {
-            EscrowStatus::Paid
-        };
-        self.status().set(&next_status);
+        let (reputation_oracle_fee, recording_oracle_fee, final_amounts) = self.finalize_payouts(&amounts);
 
-        if let Some(results) = final_results.into_option() {
-            self.final_results().set(&results);
+        for (i, recipient) in recipients.clone().into_iter().enumerate() {
+            let amount = final_amounts.get(i);
+            if *amount == 0 {
+                continue
+            }
+            self.send().direct_esdt(&recipient, &self.token().get(), 0, &amount);
+        }
+
+        self.send().direct_esdt(&self.reputation_oracle().get(), &self.token().get(), 0, &reputation_oracle_fee);
+        self.send().direct_esdt(&self.recording_oracle().get(), &self.token().get(), 0, &recording_oracle_fee);
+
+        bulk_paid = true;
+        balance = self.get_balance();
+        let mut status = self.get_status();
+        if bulk_paid {
+            if status == EscrowStatus::Pending {
+                self.remaining_solutions().update(|x| *x -= recipients.len() as u64);
+                status = EscrowStatus::Partial;
+            }
+
+            if balance > 0 && status == EscrowStatus::Partial && self.remaining_solutions().get() == 0 {
+                self.send().direct_esdt(&self.canceler().get(), &self.token().get(), 0, &balance);
+                status = EscrowStatus::Paid;
+            }
+
+            if balance == 0 && status == EscrowStatus::Partial {
+                status = EscrowStatus::Paid;
+            }
+            
+            self.status().set(status);
+        }
+
+        self.bulk_transfer_event(tx_id, recipients.len() as u64);
+        true
+    }
+
+    fn finalize_payouts(&self, amounts: &MultiValueEncoded<BigUint>) -> (BigUint, BigUint, ManagedVec<BigUint>){
+        let mut reputation_oracle_fee = BigUint::zero();
+        let mut recording_oracle_fee = BigUint::zero();
+
+        let mut final_amounts: ManagedVec<BigUint> = ManagedVec::new();
+
+        for given_amount in amounts.clone().into_iter() {
+            let single_reputation_oracle_fee = self.reputation_oracle_stake().get() * &given_amount / BigUint::from(100_u64);
+            let single_recording_oracle_fee = self.recording_oracle_stake().get() * &given_amount / BigUint::from(100_u64);
+            let amount = given_amount - &single_reputation_oracle_fee - &single_recording_oracle_fee;
+            reputation_oracle_fee = &reputation_oracle_fee + &single_reputation_oracle_fee;
+            recording_oracle_fee = &recording_oracle_fee + &single_recording_oracle_fee;
+
+            final_amounts.push(amount);
+        }
+
+        (reputation_oracle_fee, recording_oracle_fee, final_amounts)
+    }
+
+    fn store_results(&self, url: &ManagedBuffer, hash: &ManagedBuffer) {
+        let write_on_chain = url.len() != 0 || hash.len() != 0;
+        if write_on_chain {
+            self.final_results_url().set(url);
+            self.final_results_hash().set(hash);
         }
     }
 
-    #[view(getOracles)]
-    fn get_oracles(&self) -> OraclePair<Self::Api> {
-        self.oracle_pair().get()
+    fn require_not_broke(&self) {
+        let balance: BigUint = self.get_balance();
+        require!(balance != 0, "Contract out of funds")
+    }
+
+    fn require_trusted(&self) {
+        let current_caller = self.blockchain().get_caller();
+        let is_launcher = self.launcher().get() == current_caller;
+        let is_trusted_handler = self.trusted_callers().contains(&current_caller);
+
+        require!(is_launcher || is_trusted_handler, "Caller is not trusted")
+    }
+
+    fn require_not_expired(&self) {
+        require!(self.duration().get() > self.blockchain().get_block_timestamp(), "Contract expired");
+    }
+
+    fn require_status(&self, allowed_status: &[EscrowStatus]) {
+        let current_status = self.status().get();
+        require!(
+            allowed_status
+                .iter()
+                .any(|status| current_status == *status),
+            "Wrong status"
+        );
+    }
+
+    fn require_sufficient_balance(&self, payments_total: &BigUint){
+        let current_balance = self.get_balance();
+
+        require!(payments_total <= &current_balance, "Not enough funds for payment");
+    }
+
+    fn require_payments_not_zero(&self, payments_total: &BigUint) {
+        require!(payments_total > &BigUint::zero(), "Cannot process payments with 0 amount")
+    }
+
+    fn require_max_recipients(&self, recipients: usize) {
+        require!(recipients < BULK_MAX_COUNT, "Too many recipients");
+    }
+
+    #[endpoint(deposit)]
+    #[payable("*")]
+    fn deposit(&self){
+        self.require_trusted();
+        self.require_not_expired();
+        self.require_status(&[EscrowStatus::Launched, EscrowStatus::Pending, EscrowStatus::Partial]);
+
+        let payment = self.call_value().single_esdt();
+        require!(payment.token_identifier == self.token().get(), "Wrong payment token");
+    }
+
+    #[view(getStatus)]
+    fn get_status(&self) -> EscrowStatus {
+        self.status().get()
     }
 
     #[event("pending")]
     fn pending_event(&self, #[indexed] url: ManagedBuffer, #[indexed] hash: ManagedBuffer);
+
+    #[view(getRemainingSolutions)]
+    #[storage_mapper("remaining_solutions")]
+    fn remaining_solutions(&self) -> SingleValueMapper<u64>;
+
+    #[view(getToken)]
+    #[storage_mapper("token")]
+    fn token(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    #[storage_mapper("status")]
+    fn status(&self) -> SingleValueMapper<EscrowStatus>;
+
+    #[view(getDuration)]
+    #[storage_mapper("duration")]
+    fn duration(&self) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("trusted_callers")]
+    fn trusted_callers(&self) -> SetMapper<ManagedAddress>;
+
+    #[storage_mapper("manifest_url")]
+    fn manifest_url(&self) -> SingleValueMapper<ManagedBuffer>;
+
+    #[storage_mapper("manifest_hash")]
+    fn manifest_hash(&self) -> SingleValueMapper<ManagedBuffer>;
+
+    #[storage_mapper("final_results_url")]
+    fn final_results_url(&self) -> SingleValueMapper<ManagedBuffer>;
+
+    #[storage_mapper("final_results_hash")]
+    fn final_results_hash(&self) -> SingleValueMapper<ManagedBuffer>;
+
+    #[storage_mapper("launcher")]
+    fn launcher(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("canceler")]
+    fn canceler(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("reputation_oracle")]
+    fn reputation_oracle(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("reputation_oracle_stake")]
+    fn reputation_oracle_stake(&self) -> SingleValueMapper<BigUint>;
+
+    #[storage_mapper("recording_oracle")]
+    fn recording_oracle(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[storage_mapper("recording_oracle_stake")]
+    fn recording_oracle_stake(&self) -> SingleValueMapper<BigUint>;
+
+    #[storage_mapper("bulk_max_value")]
+    fn bulk_max_value(&self) -> SingleValueMapper<BigUint>;
+
+    #[event("intermediate_storage")]
+    fn intermediate_storage_event(
+        &self,
+        #[indexed] url: ManagedBuffer,
+        #[indexed] hash: ManagedBuffer
+    );
+
+    #[event("bulk_transfer")]
+    fn bulk_transfer_event(
+        &self,
+        #[indexed] tx_id: u64,
+        bulk_count: u64
+    );
 }
