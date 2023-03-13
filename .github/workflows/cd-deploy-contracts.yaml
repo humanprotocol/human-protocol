@@ -116,7 +116,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            **/*.js
+            **/*.sol
 
       - name: List all changed files
         run: |
