@@ -1,10 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Success } from 'src/components/Kvstore/Success';
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { Success, SuccessProps } from '../Success';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered Success component', () => {
   it('should render `text` prop', async () => {
@@ -19,11 +19,16 @@ describe('when rendered Success component', () => {
       ],
     });
     await act(async () => {
-      render(<Success keys={{ publicKey: '', privateKey: '' }} />, {
-        wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>{children}</Providers>
-        ),
-      });
+      render(
+        <Success
+          {...({ keys: { publicKey: '', privateKey: '' } } as SuccessProps)}
+        />,
+        {
+          wrapper: ({ children }: { children: React.ReactNode }) => (
+            <Providers client={client}>{children}</Providers>
+          ),
+        }
+      );
     });
     expect(screen.getByText(/Success!/)).toBeInTheDocument();
   });
@@ -40,12 +45,12 @@ it('Success component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <Success keys={{ publicKey: '', privateKey: '' }} />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Success
+        {...({ keys: { publicKey: '', privateKey: '' } } as SuccessProps)}
+      />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

@@ -7,18 +7,23 @@ import {
   Stepper,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
-import { ChainId, ESCROW_NETWORKS, IEscrowNetwork } from '../../constants';
+import { FC, useState } from 'react';
+
 import { RequestData } from './RequestData';
 import { Success } from './Success';
-const steps = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
 
-export const FaucetView = (): React.ReactElement => {
+import { ChainId, ESCROW_NETWORKS } from 'src/constants';
+import { EscrowNetwork } from 'src/types';
+
+const STEPS = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
+
+export const FaucetView: FC = () => {
   const [step, setStep] = useState<number>(0);
   const [txHash, setTxHash] = useState<string>('');
-  const [network, setNetwork] = useState<IEscrowNetwork>(
+  const [network, setNetwork] = useState<EscrowNetwork>(
     ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!
   );
+
   return (
     <Grid container>
       <Grid
@@ -48,9 +53,9 @@ export const FaucetView = (): React.ReactElement => {
               {' '}
               <Box sx={{ width: '100%' }}>
                 <Stepper activeStep={step}>
-                  {steps.map((label) => (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
+                  {STEPS.map((step) => (
+                    <Step key={step}>
+                      <StepLabel>{step}</StepLabel>
                     </Step>
                   ))}
                 </Stepper>

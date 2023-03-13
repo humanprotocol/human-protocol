@@ -1,0 +1,1 @@
+export { EscrowDetail } from './EscrowDetail';

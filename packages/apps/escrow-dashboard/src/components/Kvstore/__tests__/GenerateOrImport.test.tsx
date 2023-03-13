@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { GenerateOrImport } from 'src/components/Kvstore/GenerateOrImport';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { GenerateOrImport, GenerateOrImportProps } from '../GenerateOrImport';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered GenerateOrImport component', () => {
   it('should render `text` prop', async () => {
@@ -20,7 +19,7 @@ describe('when rendered GenerateOrImport component', () => {
       ],
     });
     await act(async () => {
-      render(<GenerateOrImport />, {
+      render(<GenerateOrImport {...({} as GenerateOrImportProps)} />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <Providers client={client}>{children}</Providers>
         ),
@@ -41,12 +40,10 @@ it('GenerateOrImport component renders correctly, corresponds to the snapshot', 
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <GenerateOrImport />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <GenerateOrImport {...({} as GenerateOrImportProps)} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

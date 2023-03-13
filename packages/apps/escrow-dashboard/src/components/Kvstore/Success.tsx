@@ -1,29 +1,20 @@
-import { Grid, Paper, Typography, Button } from '@mui/material';
+import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { Button, Grid, Paper, Snackbar, Typography } from '@mui/material';
 import { saveAs } from 'file-saver';
 import JSzip from 'jszip';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { Key } from './index';
-import React, { Dispatch, useState, useEffect } from 'react';
+import { Dispatch, useState, useEffect, FC } from 'react';
 import {
   useWaitForTransaction,
   useContractWrite,
   usePrepareContractWrite,
   useNetwork,
 } from 'wagmi';
-import KVStore from '@human-protocol/core/abis/KVStore.json';
-import { ESCROW_NETWORKS, ChainId } from '../../constants';
-import { NFTStorage } from 'nft.storage';
-const client = new NFTStorage({
-  token: process.env.REACT_APP_NFT_STORAGE_API as string,
-});
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { Alert } from '../Alert';
+import { NFT_STORAGE_CLIENT } from './constants';
+import { Key } from './types';
+
+import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
 async function downloadKey(
   publicKey: string,
@@ -53,7 +44,7 @@ async function saveToNFTStorage(
 ) {
   try {
     const someData = new Blob([publicKey]);
-    const cid = await client.storeBlob(someData);
+    const cid = await NFT_STORAGE_CLIENT.storeBlob(someData);
     setCid(cid);
   } catch (e) {
     if (e instanceof Error) {
@@ -62,17 +53,14 @@ async function saveToNFTStorage(
   }
 }
 
-export const Success = ({
-  setStep,
-  setPage,
-  keys,
-  what,
-}: {
+export type SuccessProps = {
   keys: Key;
   setStep: Dispatch<number>;
   setPage: Dispatch<number>;
   what: string;
-}) => {
+};
+
+export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
   const { chain } = useNetwork();
   const [copy, setCopy] = useState<boolean>(false);
   const [error, setError] = useState<string>('');

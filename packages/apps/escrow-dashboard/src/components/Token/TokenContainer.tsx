@@ -1,17 +1,13 @@
-import * as React from 'react';
 import { Box } from '@mui/material';
+import { FC } from 'react';
 
-import tokenSvg from 'src/assets/token.svg';
-import { ViewTitle } from 'src/components/ViewTitle';
-import { usePollTokenStats } from 'src/state/token/hooks';
-
+import { ViewTitle } from '../ViewTitle';
 import { TokenView } from './TokenView';
 
-interface ITokenContainer {}
+import tokenSvg from 'src/assets/token.svg';
+import { usePollTokenStats } from 'src/state/token/hooks';
 
-export const TokenContainer: React.FC<
-  ITokenContainer
-> = (): React.ReactElement => {
+export const TokenContainer: FC = () => {
   usePollTokenStats();
 
   return (

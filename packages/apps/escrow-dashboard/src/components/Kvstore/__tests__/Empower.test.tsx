@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Empower } from 'src/components/Kvstore/Empower';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { Empower, EmpowerProps } from '../Empower';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered Empower component', () => {
   it('should render `text` prop', async () => {
@@ -20,7 +19,7 @@ describe('when rendered Empower component', () => {
       ],
     });
     await act(async () => {
-      render(<Empower />, {
+      render(<Empower {...({} as EmpowerProps)} />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
           <Providers client={client}>{children}</Providers>
         ),
@@ -41,12 +40,10 @@ it('Empower component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <Empower />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Empower {...({} as EmpowerProps)} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

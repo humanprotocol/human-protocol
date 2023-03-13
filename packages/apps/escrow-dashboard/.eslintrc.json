@@ -21,17 +21,8 @@
     "sourceType": "module"
   },
   "rules": {
-    "consistent-return": 0,
-    "import/prefer-default-export": 0,
-    "no-case-declarations": 0,
-    "no-alert": 0,
-    "no-console": 0,
-    "no-underscore-dangle": 0,
-    "no-unused-vars": 0,
-    "react/jsx-filename-extension": 0,
-    "react/prop-types": 0,
-    "react/no-unescaped-entities": 0,
-    "react/require-default-props": 0,
+    "no-console": "warn",
+    "no-unused-vars": "off",
     "import/extensions": [
       "error",
       "ignorePackages",
@@ -42,10 +33,22 @@
         "tsx": "never"
       }
     ],
-    "import/named": 0,
-    "@typescript-eslint/no-empty-function": 0,
-    "@typescript-eslint/no-empty-interface": 0,
-    "@typescript-eslint/no-var-requires": 0,
+    "import/order": [
+      "error",
+      {
+        "pathGroups": [
+          {
+            "pattern": "~/**",
+            "group": "external"
+          }
+        ],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": ["error"],
     "prettier/prettier": ["error"]
   },
   "overrides": [

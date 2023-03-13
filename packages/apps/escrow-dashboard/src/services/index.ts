@@ -3,6 +3,7 @@ const Timeout = (time: number) => {
   setTimeout(() => controller.abort(), time * 1000);
   return controller;
 };
+
 export const showIPFS = async (ipfs: string): Promise<string> => {
   const res = await fetch(`https://nftstorage.link/ipfs/${ipfs}`, {
     signal: Timeout(10).signal,

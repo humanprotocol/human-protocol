@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function MoonbeamIcon(props: SvgIconProps) {
+export const MoonbeamIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="20" height="17" viewBox="0 0 20 17" fill="none" {...props}>
       <g clipPath="url(#clip0_291_7076)">
@@ -73,4 +73,4 @@ export default function MoonbeamIcon(props: SvgIconProps) {
       </defs>
     </SvgIcon>
   );
-}
+};

@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function HumanIcon(props: SvgIconProps) {
+export const HumanIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="12" height="16" viewBox="0 0 12 16" fill="none" {...props}>
       <path
@@ -12,4 +12,4 @@ export default function HumanIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

@@ -1,8 +1,8 @@
-export { Main } from './Main';
-export { LeaderboardPage as Leaderboard } from './Leaderboard';
-export { LeaderDetailPage as Leader } from './Leader';
-export { EscrowDetailPage as Escrow } from './Escrow';
-export { ProfilePage as Profile } from './Profile';
-export { OwnerPage as Owner } from './Owner';
-export { KvstorePage as Kvstore } from './Kvstore';
-export { FaucetPage as Faucet } from './Faucet';
+export * from './EscrowDetail';
+export * from './Faucet';
+export * from './Leaderboard';
+export * from './LeaderDetail';
+export * from './Kvstore';
+export * from './Main';
+export * from './Owner';
+export * from './Profile';

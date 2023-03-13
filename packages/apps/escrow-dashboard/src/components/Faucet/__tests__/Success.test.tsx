@@ -1,14 +1,14 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Success } from '../Success';
 import { MemoryRouter } from 'react-router-dom';
+import { create } from 'react-test-renderer';
+
+import { Success, SuccessProps } from '../Success';
 
 describe('when rendered Success component', () => {
   it('should render `text` prop', async () => {
     await act(async () => {
-      render(<Success />, { wrapper: MemoryRouter });
+      render(<Success {...({} as SuccessProps)} />, { wrapper: MemoryRouter });
     });
     expect(screen.getByText(/Request Complete!/)).toBeInTheDocument();
     expect(
@@ -20,12 +20,10 @@ describe('when rendered Success component', () => {
 });
 
 it('Success component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(
-      <MemoryRouter>
-        <Success />
-      </MemoryRouter>
-    )
-    .toJSON();
+  const tree = create(
+    <MemoryRouter>
+      <Success {...({} as SuccessProps)} />
+    </MemoryRouter>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

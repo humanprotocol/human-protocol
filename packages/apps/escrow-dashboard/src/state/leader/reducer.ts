@@ -10,6 +10,9 @@ import {
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
 import stringify from 'fast-json-stable-stringify';
+
+import { LeaderData, LeaderEscrowData } from './types';
+
 import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
 import {
   RAW_DATA_SAVED_EVENTS_QUERY,
@@ -20,11 +23,9 @@ import {
 import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
 
-import { LeaderData, LeaderEscrowData } from './types';
-
 type LeadersType = { [chainId in ChainId]?: LeaderData[] };
 
-interface LeaderState {
+type LeaderState = {
   loadingKeys: Record<string, boolean>;
   chainId: ChainId;
 
@@ -36,7 +37,7 @@ interface LeaderState {
 
   leaderEscrows?: LeaderEscrowData[];
   leaderEscrowsLoaded?: boolean;
-}
+};
 
 const initialState: LeaderState = {
   loadingKeys: {},

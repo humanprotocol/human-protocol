@@ -1,14 +1,15 @@
 import { useSelector } from 'react-redux';
-import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
-import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
-import { AppState, useAppDispatch } from 'src/state';
 
+import { AppState, useAppDispatch } from '..';
 import {
   fetchLeaderAsync,
   fetchLeaderEscrowsAsync,
   fetchLeadersAsync,
 } from './reducer';
 import { LeaderData } from './types';
+
+import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const useLeadersData = () => {
   const dispatch = useAppDispatch();
