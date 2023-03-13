@@ -59,8 +59,10 @@
   },
   "resolutions": {
     "ejs": "^3.0.0",
+    "gluegun": "^5.0.0",
     "mocha": "^10.0.0",
     "node-fetch": "^2.6.7",
-    "node-forge": "^1.0.0"
+    "node-forge": "^1.0.0",
+    "qrcode": "^1.5.0"
   }
 }
