@@ -1,4 +1,4 @@
-import CloseIcon from '@mui/icons-material/Close';
+import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
   Checkbox,
@@ -18,8 +18,9 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import {
   ChainId,
   ESCROW_NETWORKS,
@@ -36,12 +37,12 @@ type LeaderboardViewProps = {
   closeFilter?: () => void;
 };
 
-export const LeaderboardView = ({
+export const LeaderboardView: FC<LeaderboardViewProps> = ({
   showAll = true,
   filterOpen = false,
   openFilter,
   closeFilter,
-}: LeaderboardViewProps): React.ReactElement => {
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedRoles, setSelectedRoles] = useState<string[]>(ROLES);

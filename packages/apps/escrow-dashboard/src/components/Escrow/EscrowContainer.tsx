@@ -1,4 +1,3 @@
-import React, { ReactElement } from 'react';
 import {
   Box,
   CircularProgress,
@@ -7,8 +6,20 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import { FC, ReactElement } from 'react';
+import { useSwitchNetwork } from 'wagmi';
+
+import {
+  BinanceSmartChainIcon,
+  EthereumIcon,
+  HumanIcon,
+  MoonbeamIcon,
+  PolygonIcon,
+} from '../Icons';
+import { ViewTitle } from '../ViewTitle';
+import { EscrowView } from './EscrowView';
+
 import networkSvg from 'src/assets/network.svg';
-import { ViewTitle } from 'src/components/ViewTitle';
 import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useAppDispatch } from 'src/state';
 import {
@@ -18,17 +29,6 @@ import {
 } from 'src/state/escrow/hooks';
 import { setChainId as setEscrowChainId } from 'src/state/escrow/reducer';
 import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
-import { useSwitchNetwork } from 'wagmi';
-
-import { EscrowView } from './EscrowView';
-
-import BinanceSmartChainIcon from '../Icons/BinanceSmartChainIcon';
-import EthereumIcon from '../Icons/EthreumIcon';
-import HumanIcon from '../Icons/HumanIcon';
-import MoonbeamIcon from '../Icons/MoonbeamIcon';
-import PolygonIcon from '../Icons/PolygonIcon';
-
-interface IEscrowContainer {}
 
 const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.RINKEBY]: <EthereumIcon />,
@@ -40,9 +40,7 @@ const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.MOONBEAM]: <MoonbeamIcon />,
 };
 
-export const EscrowContainer: React.FC<
-  IEscrowContainer
-> = (): React.ReactElement => {
+export const EscrowContainer: FC = () => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
   const { switchNetwork } = useSwitchNetwork();

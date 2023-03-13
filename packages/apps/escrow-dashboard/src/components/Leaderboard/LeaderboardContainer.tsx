@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Box,
   Button,
@@ -7,24 +6,24 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
+import { FC, useState } from 'react';
+import { useSelector } from 'react-redux';
+
+import { FilterListFilledIcon } from '../Icons';
+import { ViewTitle } from '../ViewTitle';
+import { LeaderboardView } from './LeaderboardView';
 
 import userSvg from 'src/assets/user.svg';
-import { ViewTitle } from 'src/components/ViewTitle';
-
-import { LeaderboardView } from './LeaderboardView';
-import FilterListFilledIcon from '../Icons/FilterListFilled';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { AppState } from 'src/state';
 import { useLeadersData } from 'src/state/leader/hooks';
 
-interface ILeaderboardContainer {
+type LeaderboardContainerProps = {
   showAll?: boolean;
-}
+};
 
-export const LeaderboardContainer: React.FC<ILeaderboardContainer> = ({
+export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
   showAll = true,
-}): React.ReactElement => {
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);

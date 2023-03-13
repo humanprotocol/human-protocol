@@ -1,10 +1,10 @@
 import { FC } from 'react';
 
 import {
-  Escrow,
+  EscrowDetail,
   Faucet,
   Kvstore,
-  Leader,
+  LeaderDetail,
   Leaderboard,
   Main,
   Owner,
@@ -35,13 +35,13 @@ export const routes: Array<Route> = [
     key: 'leader-detail-route',
     title: 'Leader',
     path: '/leader/:chainId/:address',
-    component: Leader,
+    component: LeaderDetail,
   },
   {
     key: 'escrow-detail-route',
     title: 'Escrow',
     path: '/escrow/:chainId/:address',
-    component: Escrow,
+    component: EscrowDetail,
   },
   {
     key: 'profile-route',

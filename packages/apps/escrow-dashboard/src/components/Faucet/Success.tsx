@@ -1,14 +1,15 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { IEscrowNetwork } from '../../constants';
 
-export const Success = ({
-  txHash,
-  network,
-}: {
+import { EscrowNetwork } from 'src/types';
+
+export type SuccessProps = {
   txHash: string;
-  network: IEscrowNetwork;
-}) => {
+  network: EscrowNetwork;
+};
+
+export const Success: FC<SuccessProps> = ({ txHash, network }) => {
   return (
     <Paper>
       <Grid

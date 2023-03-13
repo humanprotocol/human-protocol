@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function DiscordIcon(props: SvgIconProps) {
+export const BinanceSmartChainIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="21" height="23" viewBox="0 0 21 23" fill="none" {...props}>
       <path
@@ -46,4 +46,4 @@ export default function DiscordIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

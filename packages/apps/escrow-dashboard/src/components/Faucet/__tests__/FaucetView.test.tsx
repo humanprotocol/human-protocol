@@ -1,9 +1,9 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { FaucetView } from '../FaucetView';
 import { MemoryRouter } from 'react-router-dom';
+import { create } from 'react-test-renderer';
+
+import { FaucetView } from '../FaucetView';
 
 describe('when rendered AfterConnect component', () => {
   it('should render `text` prop', async () => {
@@ -15,12 +15,10 @@ describe('when rendered AfterConnect component', () => {
 });
 
 it('AfterConnect component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(
-      <MemoryRouter>
-        <FaucetView />
-      </MemoryRouter>
-    )
-    .toJSON();
+  const tree = create(
+    <MemoryRouter>
+      <FaucetView />
+    </MemoryRouter>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

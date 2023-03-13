@@ -1,11 +1,11 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { MainPage } from 'src/components/Kvstore/MainPage';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { MainPage } from '../MainPage';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered MainPage component', () => {
   it('should render `text` prop', async () => {
@@ -41,12 +41,10 @@ it('MainPage component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <MainPage />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <MainPage />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

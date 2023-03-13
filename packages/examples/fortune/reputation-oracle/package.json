@@ -7,13 +7,10 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
-    "@babel/preset-typescript": "^7.18.6",
-    "@jest/globals": "^29.3.1",
     "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.14",
-    "@types/minio": "^7.0.14",
-    "@types/node": "^18.11.9"
+    "@types/minio": "^7.0.14"
   },
   "dependencies": {
     "@human-protocol/core": "workspace:*",

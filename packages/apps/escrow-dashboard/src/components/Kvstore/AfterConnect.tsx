@@ -1,28 +1,36 @@
 import {
+  Box,
   Grid,
   Paper,
-  Typography,
-  Box,
-  Stepper,
   Step,
+  Stepper,
   StepLabel,
+  Typography,
 } from '@mui/material';
-import React, { useState, Dispatch } from 'react';
+import { useState, Dispatch, FC } from 'react';
+
+import { STEPS } from './constants';
+import { Empower } from './Empower';
 import { GenerateOrImport } from './GenerateOrImport';
 import { GeneratePubkey } from './GeneratePubkey';
-import { Success } from './Success';
 import { ImportPubkey } from './ImportPubkey';
-import { Empower } from './Empower';
-import { Key } from './index';
-interface StepPage {
+import { Success } from './Success';
+import { Key } from './types';
+
+type StepPage = {
   step: number;
   setStep: Dispatch<number>;
   page: number;
   setPage: Dispatch<number>;
-}
-const steps = ['Get Public Key', 'Add Public Key', 'Empower Human Scan'];
+};
 
-export const AfterConnect = ({
+export type AfterConnectProps = {
+  pubkeyExist: boolean;
+  refetch: any;
+  setPublicKey: Dispatch<string>;
+} & StepPage;
+
+export const AfterConnect: FC<AfterConnectProps> = ({
   step,
   setStep,
   page,
@@ -30,12 +38,9 @@ export const AfterConnect = ({
   pubkeyExist,
   refetch,
   setPublicKey,
-}: {
-  pubkeyExist: boolean;
-  refetch: any;
-  setPublicKey: Dispatch<string>;
-} & StepPage): React.ReactElement => {
+}) => {
   const [key, setKey] = useState<Key>({ publicKey: '', privateKey: '' });
+
   return (
     <Grid container>
       <Grid
@@ -65,9 +70,9 @@ export const AfterConnect = ({
               {' '}
               <Box sx={{ width: '100%' }}>
                 <Stepper activeStep={step}>
-                  {steps.map((label) => (
-                    <Step key={label}>
-                      <StepLabel>{label}</StepLabel>
+                  {STEPS.map((step) => (
+                    <Step key={step}>
+                      <StepLabel>{step}</StepLabel>
                     </Step>
                   ))}
                 </Stepper>

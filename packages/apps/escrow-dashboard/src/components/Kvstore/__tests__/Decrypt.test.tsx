@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Decrypt } from 'src/components/Kvstore/Decrypt';
-
-import { Providers, setupClient, getSigners } from '../../../../tests/utils';
+import { create } from 'react-test-renderer';
 import { MockConnector } from 'wagmi/connectors/mock';
+
+import { Decrypt } from '../Decrypt';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered Decrypt component', () => {
   it('should render `text` prop', async () => {
@@ -43,12 +42,10 @@ it('Decrypt component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <Decrypt />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Decrypt />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

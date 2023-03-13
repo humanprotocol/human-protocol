@@ -10,8 +10,8 @@
     "lint:fix": "eslint . --fix",
     "build": "tsc",
     "start:prod": "ts-node build/src/index.js",
-    "start": "cross-env NODE_ENV=development cross-env ts-node ./src/index.ts",
-    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8547\" \"sleep 10 && cross-env RPC_PORT=8547 yarn workspace @human-protocol/core deploy:local && cross-env RPC_PORT=8547 vitest --run\""
+    "start": "NODE_ENV=development ts-node ./src/index.ts",
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8547\" \"sleep 10 && RPC_PORT=8547 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8547 vitest --run\""
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,6 @@
     "ajv": "^8.11.2",
     "aws-sdk": "^2.1294.0",
     "axios": "^1.2.2",
-    "dotenv": "^16.0.3",
     "env-schema": "^5.1.1",
     "fastify": "^4.10.2",
     "fastify-plugin": "^3.0.1",
@@ -46,16 +45,9 @@
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.226.0",
-    "@types/node": "^18.11.15",
     "@types/uuid": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.45.0",
-    "@typescript-eslint/parser": "^5.45.0",
     "esbuild": "^0.14.54",
-    "eslint": "^8.28.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
     "pino-pretty": "^8.1.0",
-    "prettier": "^2.8.0",
     "tsx": "^3.12.1",
     "vitest": "^0.25.8"
   }

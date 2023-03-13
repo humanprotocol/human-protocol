@@ -1,10 +1,12 @@
 import { Box, Button, Grid, IconButton, Link, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import dayjs from 'dayjs';
-import React, { useMemo } from 'react';
+import { FC, useMemo } from 'react';
+
+import { CardBarChart, CardStackedBarChart } from '../Cards';
+import { CopyFilledIcon } from '../Icons';
+
 import lowAmountEscrowSvg from 'src/assets/low-amount-escrow.svg';
-import { CardBarChart, CardStackedBarChart } from 'src/components/Cards';
-import CopyFilledIcon from 'src/components/Icons/CopyFilledIcon';
 import { ChainId, ESCROW_NETWORKS } from 'src/constants';
 import { useChainId, useEscrowDataByChainID } from 'src/state/escrow/hooks';
 
@@ -24,7 +26,7 @@ const CopyAddressButton = ({ address }: { address?: string }) => (
   </IconButton>
 );
 
-export const EscrowView = () => {
+export const EscrowView: FC = () => {
   const chainId = useChainId();
   const escrowData = useEscrowDataByChainID();
 

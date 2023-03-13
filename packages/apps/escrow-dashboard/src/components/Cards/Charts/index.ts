@@ -1,4 +1,2 @@
-import CardBarChart from './BarChart';
-import CardStackedBarChart from './StackedBarChart';
-
-export { CardBarChart, CardStackedBarChart };
+export { BarChart } from './BarChart';
+export { StackedBarChart } from './StackedBarChart';

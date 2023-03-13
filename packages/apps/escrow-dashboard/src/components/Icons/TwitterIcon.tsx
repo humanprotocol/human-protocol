@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function TwitterIcon(props: SvgIconProps) {
+export const TwitterIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="26" height="20" viewBox="0 0 26 20" fill="none" {...props}>
       <path
@@ -13,4 +13,4 @@ export default function TwitterIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

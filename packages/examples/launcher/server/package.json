@@ -1,8 +1,0 @@
-{
-    "private": "true",
-    "name": "@human-protocol/jl-server",
-    "version": "1.0.0",
-    "description": "Human Protocol Job Launcher Server",
-    "license": "MIT"
-  }
-  
