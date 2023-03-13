@@ -94,7 +94,9 @@ jobs:
         name: Install dependencies
       - run: yarn compile
         name: Compile smart contracts
+        working-directory: ./packages/core
       - run: yarn upgrade:proxy --network ${{ matrix.network.name }}
+        working-directory: ./packages/core
         name: Upgrade proxy contracts
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
