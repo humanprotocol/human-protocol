@@ -116,8 +116,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           separator: ','
-          files: |
-            packages/core/contracts/*.sol
+          files: packages/core/contracts/*.sol
 
       - name: List all changed files
         run: |
