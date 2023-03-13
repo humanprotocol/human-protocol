@@ -1,0 +1,19 @@
+name: Faucet server check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  faucet-server-test:
+    name: Faucet Server Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn faucet-server:test
+        name: Run faucet-server test

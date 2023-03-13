@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import numeral from 'numeral';
-import React from 'react';
+import { FC } from 'react';
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -9,28 +9,24 @@ import {
   XAxis,
 } from 'recharts';
 
-import { CardContainer } from '../Container';
+import { Container } from '../Container';
 
-interface ISeries {
+type Series = {
   date: string;
   value: number;
-}
+};
 
-interface IBarChartProps {
+type BarChartProps = {
   title: string;
   totalValue?: string | number;
-  series: ISeries[];
-}
+  series: Series[];
+};
 
-export default function BarChart({
-  title,
-  totalValue,
-  series,
-}: IBarChartProps) {
+export const BarChart: FC<BarChartProps> = ({ title, totalValue, series }) => {
   const theme = useTheme();
 
   return (
-    <CardContainer>
+    <Container>
       <Typography variant="body2" color="primary" fontWeight={600} mb="4px">
         {title}
       </Typography>
@@ -55,6 +51,6 @@ export default function BarChart({
           </RechartsBarChart>
         </ResponsiveContainer>
       </Box>
-    </CardContainer>
+    </Container>
   );
-}
+};

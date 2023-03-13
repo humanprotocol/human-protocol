@@ -1,9 +1,11 @@
 import { Grid } from '@mui/material';
-import * as React from 'react';
-import { CardTextBlock } from 'src/components/Cards';
+import { FC } from 'react';
+
+import { CardTextBlock } from '../Cards';
+
 import { useTokenStatsByChainId } from 'src/state/token/hooks';
 
-export const TokenView: React.FC = (): React.ReactElement => {
+export const TokenView: FC = () => {
   const { totalTransferEventCount, holders, totalSupply } =
     useTokenStatsByChainId();
 

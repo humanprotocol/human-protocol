@@ -1,25 +1,29 @@
-import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
-import ListSubheader from '@mui/material/ListSubheader';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import React, { Dispatch, useState, ChangeEvent } from 'react';
+import {
+  Key as KeyIcon,
+  UploadFile as UploadFileIcon,
+} from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Grid,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+  Paper,
+  Snackbar,
+  Typography,
+  TextField,
+} from '@mui/material';
 import { readKey } from 'openpgp/lightweight';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { Key } from './index';
-import { showGithubPGP } from '../../services/index';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import KeyIcon from '@mui/icons-material/Key';
+import { Dispatch, useState, ChangeEvent, FC } from 'react';
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { Alert } from '../Alert';
+import { Key } from './types';
+import { showGithubPGP } from 'src/services';
+
 const handleFile = async (
   e: ProgressEvent<FileReader>,
   setError: Dispatch<string>,
@@ -92,20 +96,22 @@ async function getGithubGPGFile(
   }
 }
 
-export const ImportPubkey = ({
-  setStep,
-  setPage,
-  setKey,
-  pubkeyExist,
-  refetch,
-  setPublicKey,
-}: {
+export type ImportPubkeyProps = {
   setStep: Dispatch<number>;
   setPage: Dispatch<number>;
   setKey: Dispatch<Key>;
   pubkeyExist: boolean;
   refetch: any;
   setPublicKey: Dispatch<string>;
+};
+
+export const ImportPubkey: FC<ImportPubkeyProps> = ({
+  setStep,
+  setPage,
+  setKey,
+  pubkeyExist,
+  refetch,
+  setPublicKey,
 }) => {
   const [choose, setChoose] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -113,6 +119,7 @@ export const ImportPubkey = ({
   const [publicKeys, setPublicKeys] = useState<
     Array<{ raw_key: string; key_id: string; name: string }>
   >([]);
+
   async function goBack() {
     try {
       if (pubkeyExist) {
@@ -132,6 +139,7 @@ export const ImportPubkey = ({
       }
     }
   }
+
   return (
     <Paper>
       <Snackbar

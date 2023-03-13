@@ -23,10 +23,10 @@ describe('when rendered FundingMethod component', () => {
       });
     });
     expect(screen.getByText('Crypto')).toBeTruthy();
-    expect(screen.getByText('Fiat (Coming soon)')).toBeTruthy();
+    expect(screen.getByText('Fiat')).toBeTruthy();
   });
 
-  it('Fiat button should be disabled', async () => {
+  it('Crypto and fiat buttons should be enabled', async () => {
     const client = setupClient({
       connectors: [
         new MockConnector({ options: { signer: getSigners()[0]! } }),
@@ -42,7 +42,8 @@ describe('when rendered FundingMethod component', () => {
       });
     });
 
-    expect(screen.getByText('Fiat (Coming soon)')).toBeDisabled();
+    expect(screen.getByText('Crypto')).toBeEnabled();
+    expect(screen.getByText('Fiat')).toBeEnabled();
   });
 });
 

@@ -8,6 +8,7 @@ import {
 } from '../../generated/Staking/Staking';
 import {
   AllocationClosedEvent,
+  LaunchedEscrow,
   Leader,
   LeaderStatistics,
   StakeAllocatedEvent,
@@ -28,11 +29,11 @@ export function constructStatsEntity(): LeaderStatistics {
   return entity;
 }
 
-export function createOrLoadLeader(id: string, address: Address): Leader {
-  let leader = Leader.load(id);
+export function createOrLoadLeader(address: Address): Leader {
+  let leader = Leader.load(address.toHex());
 
   if (!leader) {
-    leader = new Leader(id);
+    leader = new Leader(address.toHex());
 
     leader.address = address;
     leader.role = '';
@@ -42,6 +43,7 @@ export function createOrLoadLeader(id: string, address: Address): Leader {
     leader.lockedUntilTimestamp = BigInt.fromI32(0);
     leader.amountSlashed = BigInt.fromI32(0);
     leader.amountWithdrawn = BigInt.fromI32(0);
+    leader.reward = BigInt.fromI32(0);
     leader.reputation = BigInt.fromI32(0);
     leader.amountJobsLaunched = BigInt.fromI32(0);
   }
@@ -68,8 +70,7 @@ export function handleStakeDeposited(event: StakeDeposited): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   // Increase leader count for new leader
   if (
@@ -114,8 +115,7 @@ export function handleStakeLocked(event: StakeLocked): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   leader.amountLocked = entity.amount;
   leader.lockedUntilTimestamp = entity.lockedUntilTimestamp;
@@ -142,8 +142,7 @@ export function handleStakeWithdrawn(event: StakeWithdrawn): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   leader.amountLocked = leader.amountLocked.minus(entity.amount);
   if (leader.amountLocked.equals(BigInt.fromI32(0))) {
@@ -177,14 +176,23 @@ export function handleStakeSlashed(event: StakeSlashed): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   leader.amountSlashed = leader.amountSlashed.plus(entity.amount);
   leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
   leader.amountStaked = leader.amountStaked.minus(entity.amount);
 
   leader.save();
+
+  // Update escrow entity
+  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
+  if (escrowEntity) {
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.minus(event.params.tokens)
+      : null;
+    escrowEntity.save();
+  }
 }
 
 export function handleStakeAllocated(event: StakeAllocated): void {
@@ -207,12 +215,21 @@ export function handleStakeAllocated(event: StakeAllocated): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   leader.amountAllocated = leader.amountAllocated.plus(entity.amount);
 
   leader.save();
+
+  // Update escrow entity
+  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
+  if (escrowEntity) {
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.plus(event.params.tokens)
+      : event.params.tokens;
+    escrowEntity.save();
+  }
 }
 
 export function handleAllocationClosed(event: AllocationClosed): void {
@@ -235,10 +252,19 @@ export function handleAllocationClosed(event: AllocationClosed): void {
 
   entity.save();
 
-  const leaderId = event.params.staker.toHex();
-  const leader = createOrLoadLeader(leaderId, event.params.staker);
+  const leader = createOrLoadLeader(event.params.staker);
 
   leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
 
   leader.save();
+
+  // Update escrow entity
+  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
+  if (escrowEntity) {
+    escrowEntity.amountAllocated = escrowEntity.amountAllocated
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        escrowEntity.amountAllocated!.minus(entity.amount)
+      : null;
+    escrowEntity.save();
+  }
 }

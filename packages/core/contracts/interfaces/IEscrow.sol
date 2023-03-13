@@ -32,7 +32,11 @@ interface IEscrow {
 
     function complete() external;
 
-    function storeResults(string memory _url, string memory _hash) external;
+    function storeResults(
+        address _worker,
+        string memory _url,
+        string memory _hash
+    ) external;
 
     function bulkPayOut(
         address[] memory _recipients,

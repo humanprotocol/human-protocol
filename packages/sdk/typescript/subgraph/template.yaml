@@ -1,5 +1,10 @@
 specVersion: 0.0.5
 description: '{{ description }}'
+features:
+  - grafting
+graft:
+  base: {{ graft.base }}
+  block: {{ graft.block }}
 schema:
   file: ./schema.graphql
 dataSources:
@@ -107,6 +112,26 @@ dataSources:
         - event: AllocationClosed(indexed address,uint256,indexed address,uint256)
           handler: handleAllocationClosed
       file: ./src/mapping/Staking.ts
+  - kind: ethereum
+    name: RewardPool
+    network: '{{ network }}'
+    source:
+      abi: RewardPool
+      address: '{{ RewardPool.address }}'
+      startBlock: {{ RewardPool.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - RewardAdded
+      abis:
+        - name: RewardPool
+          file: '{{{ RewardPool.abi }}}'
+      eventHandlers:
+        - event: RewardAdded(indexed address,indexed address,uint256)
+          handler: handleRewardAdded
+      file: ./src/mapping/RewardPool.ts
 templates:
   - name: Escrow
     kind: ethereum/contract
@@ -125,9 +150,13 @@ templates:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
       eventHandlers:
-        - event: IntermediateStorage(string,string)
+        - event: IntermediateStorage(address,string,string)
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending
-        - event: BulkTransfer(indexed uint256,uint256)
+        - event: BulkTransfer(indexed uint256,address[],uint256[],bool)
           handler: handleBulkTransfer
+        - event: Cancelled()
+          handler: handleCancelled
+        - event: Completed()
+          handler: handleCompleted

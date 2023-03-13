@@ -3,6 +3,7 @@ import { Launched } from '../../generated/EscrowFactory/EscrowFactory';
 import { EscrowStatistics, LaunchedEscrow } from '../../generated/schema';
 import { Escrow } from '../../generated/templates';
 import { constructStatsEntity, STATISTICS_ENTITY_ID } from './Escrow';
+import { createOrLoadLeader } from './Staking';
 import { updateEscrowAmountDayData } from './utils/dayUpdates';
 
 export function handleLaunched(event: Launched): void {
@@ -13,19 +14,28 @@ export function handleLaunched(event: Launched): void {
   entity.token = event.params.token;
   entity.from = event.transaction.from;
   entity.timestamp = event.block.timestamp;
+  entity.amountAllocated = BigInt.fromI32(0);
+  entity.amountPayout = BigInt.fromI32(0);
+  entity.status = 'Launched';
 
   let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
   if (!statsEntity) {
     statsEntity = constructStatsEntity();
   }
-  entity.count = statsEntity.totalEscrowCount + BigInt.fromI32(1);
-  statsEntity.totalEscrowCount += BigInt.fromI32(1);
-
+  statsEntity.totalEscrowCount = statsEntity.totalEscrowCount.plus(
+    BigInt.fromI32(1)
+  );
   statsEntity.save();
+  entity.count = statsEntity.totalEscrowCount;
 
   // Entities can be written to the store with `.save()`
   entity.save();
   Escrow.create(event.params.escrow);
 
   updateEscrowAmountDayData(event);
+
+  const leader = createOrLoadLeader(event.transaction.from);
+
+  leader.amountJobsLaunched = leader.amountJobsLaunched.plus(BigInt.fromI32(1));
+  leader.save();
 }

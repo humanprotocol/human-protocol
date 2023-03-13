@@ -2,17 +2,17 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
 import escrow from './escrow/reducer';
+import leader from './leader/reducer';
 import token from './token/reducer';
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
     escrow,
     token,
+    leader,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ thunk: true }),
 });
-
-export default store;
 
 export type AppState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

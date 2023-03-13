@@ -13,24 +13,22 @@
     "escrow-dashboard:start": "yarn workspace @human-protocol/escrow-dashboard start",
     "escrow-dashboard:test": "yarn workspace @human-protocol/escrow-dashboard test",
     "escrow-dashboard:lint": "yarn workspace @human-protocol/escrow-dashboard lint",
-    "eth-kvstore:lint": "yarn workspace @human-protocol/eth-kvstore-gui lint",
+    "faucet-server:start": "yarn workspace @human-protocol/faucet-server start",
+    "faucet-server:test": "yarn workspace @human-protocol/faucet-server test",
+    "faucet-server:lint": "yarn workspace @human-protocol/faucet-server lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
     "sdk:lint": "yarn workspace @human-protocol/sdk lint",
     "basemodels:test": "yarn workspace @human-protocol/basemodels test",
     "basemodels:lint": "yarn workspace @human-protocol/basemodels lint",
-    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:sdk:test npm:basemodels:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:eth-kvstore:lint npm:sdk:lint npm:basemodels:lint",
+    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:sdk:test npm:basemodels:test npm:faucet-server:test",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint",
     "prepare": "husky install"
   },
   "workspaces": {
     "packages": [
       "packages/**"
-    ],
-    "nohoist": [
-      "**/*wagmi/",
-      "**/*wagmi/core"
     ]
   },
   "devDependencies": {
@@ -38,6 +36,7 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.18.6",
+    "@jest/globals": "^29.3.1",
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
@@ -57,5 +56,11 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
+  },
+  "resolutions": {
+    "ejs": "^3.0.0",
+    "mocha": "^10.0.0",
+    "node-fetch": "^2.6.7",
+    "node-forge": "^1.0.0"
   }
 }

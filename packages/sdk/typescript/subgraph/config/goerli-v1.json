@@ -1,6 +1,10 @@
 {
   "network": "goerli",
   "description": "Human subgraph on goerli network",
+  "graft": {
+    "base": "QmPbnu8R54f2L2uKbLcW5VNKCwXs6yW5B9LaEDY77Zsr7u",
+    "block": 8630704
+  },
   "EscrowFactory": {
     "address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
     "startBlock": 8403038,
@@ -23,5 +27,15 @@
     "address": "0xc9Fe39c4b6e1d7A2991355Af159956982DADf842",
     "startBlock": 8403040,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4",
+    "startBlock": 8403042,
+    "abi": "./node_modules/@human-protocol/core/abis/RewardPool.json"
+  },
+  "Reputation": {
+    "address": "0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405",
+    "startBlock": 8403044,
+    "abi": "./node_modules/@human-protocol/core/abis/Reputation.json"
   }
 }

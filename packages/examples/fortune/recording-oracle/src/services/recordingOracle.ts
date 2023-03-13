@@ -191,6 +191,7 @@ export async function processFortunes(
   await plugins.escrow.storeResults(
     web3,
     fortune.escrowAddress,
+    fortune.workerAddress,
     fortuneResultsUrl,
     fortuneResultsHash
   );

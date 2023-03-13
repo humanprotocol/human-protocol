@@ -1,35 +1,42 @@
 import { Grid, Box, Tabs, Tab } from '@mui/material';
-import React, { useState, useEffect, Dispatch } from 'react';
-import ViewTitle from '../ViewTitle';
+import { useState, useEffect, Dispatch, FC } from 'react';
 
-import { StoredPubkey } from './StoredPubkey';
+import { ViewTitle } from '../ViewTitle';
 import { Decrypt } from './Decrypt';
 import { Encrypt } from './Encrypt';
-import { showIPFS } from '../../services/index';
+import { StoredPubkey } from './StoredPubkey';
 
-export const Dashboard = ({
-  publicKey,
-  refetch,
-  setPublicKey,
-  setStep,
-  setPage,
-}: {
+import smallKeySvg from 'src/assets/small_key.svg';
+import { showIPFS } from 'src/services';
+
+export type DashboardProps = {
   publicKey: string;
   refetch: any;
   setPublicKey: Dispatch<string>;
   setStep: Dispatch<number>;
   setPage: Dispatch<number>;
-}): React.ReactElement => {
-  const [value, setValue] = React.useState(0);
+};
+
+export const Dashboard: FC<DashboardProps> = ({
+  publicKey,
+  refetch,
+  setPublicKey,
+  setStep,
+  setPage,
+}) => {
+  const [value, setValue] = useState(0);
   const [pubkey, setPubkey] = useState<string>('');
+
   useEffect(() => {
     if (publicKey.trim().length !== 0) {
       showIPFS(publicKey).then((a) => setPubkey(a));
     }
   }, [publicKey]);
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
   return (
     <Grid container>
       <Grid
@@ -46,7 +53,7 @@ export const Dashboard = ({
           alignItems="center"
           flexWrap="wrap"
         >
-          <ViewTitle title="ETH KV Store" iconUrl="/images/small_key.svg" />
+          <ViewTitle title="ETH KV Store" iconUrl={smallKeySvg} />
         </Box>
         <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
           {pubkey.trim().length > 0 && (

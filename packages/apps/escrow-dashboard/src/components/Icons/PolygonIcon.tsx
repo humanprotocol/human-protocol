@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function PolygonIcon(props: SvgIconProps) {
+export const PolygonIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="17" height="15" viewBox="0 0 17 15" fill="none" {...props}>
       <path
@@ -10,4 +10,4 @@ export default function PolygonIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

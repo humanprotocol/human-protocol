@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function GithubIcon(props: SvgIconProps) {
+export const GithubIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="27" height="25" viewBox="0 0 27 25" fill="none" {...props}>
       <path
@@ -12,4 +12,4 @@ export default function GithubIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

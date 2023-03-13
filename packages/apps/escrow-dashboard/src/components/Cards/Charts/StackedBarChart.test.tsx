@@ -1,10 +1,8 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { CardStackedBarChart } from 'src/components/Cards';
+import { create } from 'react-test-renderer';
 
-global.ResizeObserver = require('resize-observer-polyfill');
+import { StackedBarChart } from './StackedBarChart';
 
 const mock = {
   allEscrowAmount: 100,
@@ -16,11 +14,11 @@ const mock = {
   ],
 };
 
-describe('when rendered CardStackedBarChart component', () => {
+describe('when rendered StackedBarChart component', () => {
   it('should render passed prop `allEscrowAmount`', async () => {
     await act(() => {
       render(
-        <CardStackedBarChart
+        <StackedBarChart
           series={mock.series}
           allEscrowAmount={mock.allEscrowAmount}
           pendingEventCount={mock.pendingEventCount}
@@ -33,7 +31,7 @@ describe('when rendered CardStackedBarChart component', () => {
   it('should render passed prop `pendingEventCount`', async () => {
     await act(() => {
       render(
-        <CardStackedBarChart
+        <StackedBarChart
           series={mock.series}
           allEscrowAmount={mock.allEscrowAmount}
           pendingEventCount={mock.pendingEventCount}
@@ -45,14 +43,12 @@ describe('when rendered CardStackedBarChart component', () => {
 });
 
 it('CardBarChart component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(
-      <CardStackedBarChart
-        series={mock.series}
-        allEscrowAmount={mock.allEscrowAmount}
-        pendingEventCount={mock.pendingEventCount}
-      />
-    )
-    .toJSON();
+  const tree = create(
+    <StackedBarChart
+      series={mock.series}
+      allEscrowAmount={mock.allEscrowAmount}
+      pendingEventCount={mock.pendingEventCount}
+    />
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });
