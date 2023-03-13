@@ -85,6 +85,23 @@ jobs:
           ]
       fail-fast: true
       max-parallel: 3
+    env:
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
+      ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
+      ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
+      ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
+      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
+      ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
+      ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
+      ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
+      ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+      POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+      BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
+      MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
+      SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
+      SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
+      SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -98,7 +115,8 @@ jobs:
         uses: tj-actions/verify-changed-files@v13
         id: verify-changed-files
         with:
-          files: ./packages/core/contracts/*.sol
+          files: |
+            **/*.sol
 
       - name: Run step only when any of the above files change.
         if: steps.verify-changed-files.outputs.files_changed == 'true'
@@ -111,22 +129,6 @@ jobs:
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
-          ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
-          ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
-          ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-          ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
-          ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
-          ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-          ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-          BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
-          MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-          SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
-          SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
-          SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
 
       - name: Upgrade Staking Proxy
         if: contains(steps.verify-changed-files.outputs.changed_files, 'Staking')
@@ -134,22 +136,6 @@ jobs:
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
-          ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
-          ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
-          ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-          ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
-          ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
-          ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-          ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-          BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
-          MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-          SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
-          SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
-          SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
 
       - name: Upgrade Reward Pool Proxy
         if: contains(steps.verify-changed-files.outputs.changed_files, 'RewardPool')
@@ -157,22 +143,6 @@ jobs:
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
-          ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
-          ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
-          ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-          ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
-          ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
-          ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-          ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-          BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
-          MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-          SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
-          SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
-          SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
 
       - name: Upgrade Reputation Proxy
         if: contains(steps.verify-changed-files.outputs.changed_files, 'Reputation')
@@ -180,19 +150,3 @@ jobs:
         working-directory: ./packages/core
         env:
           REPUTATION_ADDRESS: ${{ matrix.network.reputation }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
-          ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
-          ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
-          ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-          ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
-          ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
-          ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-          ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
-          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-          POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
-          BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
-          MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-          SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
-          SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
-          SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
