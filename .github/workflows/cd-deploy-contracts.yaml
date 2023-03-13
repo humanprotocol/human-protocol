@@ -111,41 +111,42 @@ jobs:
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
 
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v13
-        id: verify-changed-files
+      - name: Get changed sol files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
         with:
           files: |
-            **/*.sol
+            **/*.js
 
-      - name: Run step only when any of the above files change.
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+      - name: List all changed files
         run: |
-          echo "Changed files: ${{ steps.verify-changed-files.outputs.changed_files }}"
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
 
       - name: Upgrade Escrow Factory Proxy
-        if: contains(steps.verify-changed-files.outputs.changed_files, 'EscrowFactory')
+        if: contains(steps.verify-changed-files.outputs.only_changed, 'EscrowFactory')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
 
       - name: Upgrade Staking Proxy
-        if: contains(steps.verify-changed-files.outputs.changed_files, 'Staking')
+        if: contains(steps.verify-changed-files.outputs.only_changed, 'Staking')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
 
       - name: Upgrade Reward Pool Proxy
-        if: contains(steps.verify-changed-files.outputs.changed_files, 'RewardPool')
+        if: contains(steps.verify-changed-files.outputs.only_changed, 'RewardPool')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
 
       - name: Upgrade Reputation Proxy
-        if: contains(steps.verify-changed-files.outputs.changed_files, 'Reputation')
+        if: contains(steps.verify-changed-files.outputs.only_changed, 'Reputation')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
