@@ -60,7 +60,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start-prod": "serve -s build",
+    "start-prod": "serve -s dist",
     "test": "vitest -u",
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
