@@ -125,28 +125,28 @@ jobs:
           echo ${{ steps.changed-files.outputs.all_changed_files }}
 
       - name: Upgrade Escrow Factory Proxy
-        if: contains(steps.verify-changed-files.outputs.all_changed_files, 'Reputation')
+        if: ${{ contains(steps.verify-changed-files.outputs.all_changed_files, 'Reputation') }}
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
 
       - name: Upgrade Staking Proxy
-        if: contains('packages/core/contracts/Reputation.sol', 'Reputation')
+        if: ${{ contains(toJSON(steps.verify-changed-files.outputs.all_changed_files), 'Reputation') }}
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
 
       - name: Upgrade Reward Pool Proxy
-        if: contains(steps.verify-changed-files.outputs.all_changed_files, 'packages/core/contracts/Reputation.sol')
+        if: contains(toJSON(steps.verify-changed-files.outputs.all_changed_files), 'Reputation')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
 
       - name: Upgrade Reputation Proxy
-        if: contains('packages/core/contracts/Reputation.sol', 'packages/core/contracts/Reputation.sol')
+        if: contains(toJSON(steps.verify-changed-files.outputs.all_changed_files), 'Reputation')
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
