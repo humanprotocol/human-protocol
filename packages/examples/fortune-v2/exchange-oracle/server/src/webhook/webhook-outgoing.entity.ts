@@ -4,7 +4,7 @@ import { NS } from "../common/constants";
 import { BaseEntity } from "../database/base.entity";
 import { IWebhook, WebhookStatus } from "../common/decorators";
 
-@Entity({ schema: NS, name: "webhook_incomming" })
+@Entity({ schema: NS, name: "webhook_incoming" })
 export class WebhookOutgoingEntity extends BaseEntity implements IWebhook {
   @Column({ type: "text" })
   public signature: string;

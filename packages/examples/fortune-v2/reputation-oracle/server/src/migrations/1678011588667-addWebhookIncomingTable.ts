@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
 import { NS } from "../common/constants";
 
-export class addWebhookIncommingTable1678011588667 implements MigrationInterface {
+export class addWebhookIncomingTable1678011588667 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(`
-          CREATE TYPE ${NS}.webhook_incomming_status_enum AS ENUM (
+          CREATE TYPE ${NS}.webhook_incoming_status_enum AS ENUM (
             'PENDING',
             'COMPLETED',
             'FAILED'
@@ -12,7 +12,7 @@ export class addWebhookIncommingTable1678011588667 implements MigrationInterface
         `);
 
     const table = new Table({
-      name: `${NS}.webhook_incomming`,
+      name: `${NS}.webhook_incoming`,
       columns: [
         {
           name: "id",
@@ -44,7 +44,7 @@ export class addWebhookIncommingTable1678011588667 implements MigrationInterface
         },
         {
           name: "status",
-          type: `${NS}.webhook_incomming_status_enum`,
+          type: `${NS}.webhook_incoming_status_enum`,
         },
         {
           name: "created_at",
@@ -65,7 +65,7 @@ export class addWebhookIncommingTable1678011588667 implements MigrationInterface
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.dropTable(`${NS}.webhook_incomming`);
-    await queryRunner.query(`DROP TYPE ${NS}.webhook_incomming_status_enum;`);
+    await queryRunner.dropTable(`${NS}.webhook_incoming`);
+    await queryRunner.query(`DROP TYPE ${NS}.webhook_incoming_status_enum;`);
   }
 }
