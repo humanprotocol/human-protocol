@@ -1,13 +1,12 @@
 import uuid
 from typing import Union
-from fastapi import APIRouter, Header, Depends
+from fastapi import APIRouter, Header
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
+from src.db import SessionLocal
 from .model import Webhook
 from .api_schema import JLWebhook, JLWebhookResponse
 from .constants import WebhookTypes, WebhookStatuses
-
-from src.db import deps
 
 router = APIRouter()
 
@@ -19,19 +18,19 @@ router = APIRouter()
 def save_webhook(
     jl_webhook: JLWebhook,
     human_signature: Union[str, None] = Header(default=None),
-    db: Session = Depends(deps.get_db),
 ):
-    webhook_id = create_webhook(db, jl_webhook, human_signature)
+    with SessionLocal.begin() as session:
+        webhook_id = create_webhook(session, jl_webhook, human_signature)
 
     return JLWebhookResponse(id=webhook_id)
 
 
-def create_webhook(db: Session, jl_webhook: JLWebhook, signature: str):
+def create_webhook(session: Session, jl_webhook: JLWebhook, signature: str):
     """
     Create a webhook received from Job Launcher. Only one webhook per escrow will be stored.
     """
     existing_webhook_query = select(Webhook).where(Webhook.signature == signature)
-    existing_webhook = db.execute(existing_webhook_query).scalars().first()
+    existing_webhook = session.execute(existing_webhook_query).scalars().first()
 
     if existing_webhook is None:
         webhook_id = str(uuid.uuid4())
@@ -46,9 +45,7 @@ def create_webhook(db: Session, jl_webhook: JLWebhook, signature: str):
             # https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
         )
 
-        db.add(webhook)
-        db.commit()
-        db.refresh(webhook)
+        session.add(webhook)
 
         return webhook_id
     return existing_webhook.id

@@ -5,7 +5,7 @@ from sqlalchemy.dialects import postgresql
 
 
 from .constants import Networks, WebhookTypes, WebhookStatuses
-from src.db.base_class import Base
+from src.db import Base
 
 
 class Webhook(Base):
