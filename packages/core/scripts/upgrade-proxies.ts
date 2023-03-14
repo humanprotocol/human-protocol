@@ -3,20 +3,17 @@ import { ethers, upgrades } from 'hardhat';
 
 async function main() {
   const escrowFactoryAddress = process.env.ESCROW_FACTORY_ADDRESS;
-  if (!escrowFactoryAddress) {
-    console.error('ESCROW_FACTORY_ADDRESS env variable missing');
-  }
   const stakingAddress = process.env.STAKING_ADDRESS;
-  if (!stakingAddress) {
-    console.error('STAKING_ADDRESS env variable missing');
-  }
   const reputationAddress = process.env.REPUTATION_ADDRESS;
-  if (!reputationAddress) {
-    console.error('REPUTATION_ADDRESS env variable missing');
-  }
   const rewardPoolAddress = process.env.REWARD_POOL_ADDRESS;
-  if (!rewardPoolAddress) {
-    console.error('REWARD_POOL_ADDRESS env variable missing');
+
+  if (
+    !escrowFactoryAddress &&
+    !stakingAddress &&
+    !rewardPoolAddress &&
+    !reputationAddress
+  ) {
+    console.error('Env variable missing');
   }
 
   if (escrowFactoryAddress) {
