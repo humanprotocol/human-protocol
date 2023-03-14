@@ -111,6 +111,10 @@ jobs:
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
 
+      - name: Compile smart contracts
+        run: yarn compile
+        working-directory: ./packages/core
+
       - name: Check changes in EscrowFactory files
         id: check-escrow-factory
         uses: tj-actions/changed-files@v35
