@@ -129,30 +129,17 @@ jobs:
             reputation:
               - 'packages/core/contracts/Reputation.sol'
 
-      # - name: Check changes in Staking file
-      #   id: check-staking
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     files: packages/core/contracts/Staking.sol
-
-      # - name: Check changes in Reward Pool file
-      #   id: check-reward-pool
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     files: packages/core/contracts/RewardPool.sol
-
-      # - name: Check changes in Reputation file
-      #   id: check-reputation
-      #   uses: tj-actions/changed-files@v35
-      #   with:
-      #     files: packages/core/contracts/Reputation.sol
-
       - name: Upgrade Escrow Factory Proxy
         if: steps.filter.outputs.escrow_factory == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
+
+      - name: Verify Escrow Factory Proxy
+        if: steps.filter.outputs.escrow_factory == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.escrow_factory }}
+        working-directory: ./packages/core
 
       - name: Upgrade Staking Proxy
         if: steps.filter.outputs.staking == 'true'
@@ -161,6 +148,11 @@ jobs:
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
 
+      - name: Verify Staking Proxy
+        if: steps.filter.outputs.staking == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.staking }}
+        working-directory: ./packages/core
+
       - name: Upgrade Reward Pool Proxy
         if: steps.filter.outputs.reward_pool == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
@@ -168,9 +160,19 @@ jobs:
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
 
+      - name: Verify Reward Pool Proxy
+        if: steps.filter.outputs.reward_pool == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reward_pool }}
+        working-directory: ./packages/core
+
       - name: Upgrade Reputation Proxy
         if: steps.filter.outputs.reputation == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REPUTATION_ADDRESS: ${{ matrix.network.reputation }}
+
+      - name: Verify Reputation Proxy
+        if: steps.filter.outputs.reputation == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reputation }}
+        working-directory: ./packages/core
