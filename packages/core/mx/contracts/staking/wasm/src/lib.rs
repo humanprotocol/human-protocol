@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           17
+// Endpoints:                           18
 // Async Callback (empty):               1
-// Total number of exported functions:  19
+// Total number of exported functions:  20
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -35,6 +35,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStaker
         getListOfStakers
         getAllocation
+        getRewardsPoolContractAddress
     )
 }
 

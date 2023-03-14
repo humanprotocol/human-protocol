@@ -4,6 +4,8 @@ pub mod constants;
 pub mod proxy;
 
 use constants::{Worker, MAX_REPUTATION, MIN_REPUTATION};
+
+use crate::constants::REPUTATION_BUFFER;
 multiversx_sc::imports!();
 
 #[multiversx_sc::contract]
@@ -25,14 +27,14 @@ pub trait ReputationContract: proxy::StakingProxyModule {
             let reputation = self.reputations(&worker.worker_address).get();
 
             if ((&reputation + &worker.reputation) > MAX_REPUTATION) ||
-                (reputation == 0 && (&worker.reputation + 50u64) > MAX_REPUTATION) {
+                (reputation == 0 && (&worker.reputation + REPUTATION_BUFFER) > MAX_REPUTATION) {
                 self.reputations(&worker.worker_address).set(MAX_REPUTATION);
-            } else if (reputation == 0 && (&worker.reputation + 50u64) < MIN_REPUTATION) ||
+            } else if (reputation == 0 && (&worker.reputation + REPUTATION_BUFFER) < MIN_REPUTATION) ||
                     ((reputation + worker.reputation) < MIN_REPUTATION && reputation != 0) {
                 self.reputations(&worker.worker_address).set(MIN_REPUTATION);
             } else {
                 if reputation == 0 {
-                    let new_worker_reputation = worker.reputation + 50u64;
+                    let new_worker_reputation = worker.reputation + REPUTATION_BUFFER;
                     self.reputations(&worker.worker_address).set(new_worker_reputation);
                 } else {
                     let new_worker_reputation = reputation + worker.reputation;
@@ -74,16 +76,18 @@ pub trait ReputationContract: proxy::StakingProxyModule {
     fn get_rewards(&self, balance: BigUint, workers: MultiValueEncoded<ManagedAddress>) -> MultiValueEncoded<BigUint> {
         let mut returned_values: MultiValueEncoded<BigUint> = MultiValueEncoded::new();
         let mut total_reputation = 0u64;
+        let mut workers_reputations: ManagedVec<u64> = ManagedVec::new();
 
         for worker in workers.clone().into_iter() {
             let reputation = self.reputations(&worker).get();
             total_reputation += &reputation;
+            workers_reputations.push(reputation);
         }
 
         require!(total_reputation != 0, "Total reputation is 0");
 
-        for worker in workers.into_iter() {
-            let reputation = self.reputations(&worker).get();
+        for (i, _) in workers.into_iter().enumerate() {
+            let reputation = workers_reputations.get(i);
             let reward = &balance * reputation / total_reputation;
             returned_values.push(reward);
         }

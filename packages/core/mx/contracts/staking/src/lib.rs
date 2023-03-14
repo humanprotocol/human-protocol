@@ -66,9 +66,9 @@ pub trait StakingContract:
         staker.deposit(&payment.amount);
         self.stakes(&caller).set(&staker);
 
-        let stakers = self.stakers().get();
-        if !stakers.contains(&caller) {
-            self.stakers().update(|stakers| stakers.push(caller.clone()));
+        let mut stakers_handler = self.stakers();
+        if !stakers_handler.contains(&caller) {
+            stakers_handler.insert(caller.clone());
         }
         self.stake_deposited_event(&caller, &payment.amount);
     }
@@ -101,17 +101,17 @@ pub trait StakingContract:
     #[endpoint(withdraw)]
     fn withdraw_endpoint(&self) {
         let caller = self.blockchain().get_caller();
-        require!(!self.stakes(&caller).is_empty(), "Caller is not a staker");
+        let stakes_handler = self.stakes(&caller);
+        require!(!stakes_handler.is_empty(), "Caller is not a staker");
 
-        let mut staker = self.stakes(&caller).get();
+        let mut staker = stakes_handler.get();
         self.withdraw(&mut staker, &caller);
 
         if staker.is_empty() {
-            let mut stakers = self.stakers().get();
-            for (i, staker) in stakers.iter().enumerate() {
-                if *staker == caller {
-                    stakers.remove(i);
-                    self.stakers().set(&stakers);
+            let mut stakers_handler = self.stakers();
+            for staker in stakers_handler.iter() {
+                if staker == caller {
+                    stakers_handler.swap_remove(&staker);
                     self.stakes(&caller).clear();
                     return
                 }
@@ -129,8 +129,9 @@ pub trait StakingContract:
         escrow_address: ManagedAddress,
         tokens: BigUint,
     ) {
-        require!(!self.stakes(&staker_address).is_empty(), "Invalid address for staker");
-        let mut staker = self.stakes(&staker_address).get();
+        let stakes_handler = self.stakes(&staker_address);
+        require!(!stakes_handler.is_empty(), "Invalid address for staker");
+        let mut staker = stakes_handler.get();
 
         require!(!self.allocations(&escrow_address).is_empty(), "Invalid address for escrow");
         let mut allocation = self.allocations(&escrow_address).get();
@@ -144,19 +145,22 @@ pub trait StakingContract:
         staker.release(&tokens);
         allocation.tokens = allocation.tokens - &tokens;
 
-        self.stakes(&staker_address).set(&staker);
+        stakes_handler.set(&staker);
         self.allocations(&escrow_address).set(&allocation);
 
-        let rewards_payment = EsdtTokenPayment::new(self.staking_token().get(), 0, tokens.clone());
+        let rewards_pool_contract_address = self.rewards_pool_contract_address().get();
+        self.send().direct_esdt(&rewards_pool_contract_address, &self.staking_token().get(), 0, &tokens);
+
+        self.add_reward(escrow_address.clone(), slasher.clone(), tokens.clone(), rewards_pool_contract_address);
         self.emit_stake_slashed_event(&staker_address, &escrow_address, &slasher, &tokens);
-        self.add_rewards(rewards_payment, escrow_address, slasher);
     }
 
     #[endpoint(allocate)]
     fn allocate(&self, escrow_address: ManagedAddress, tokens: BigUint) {
         let caller = self.blockchain().get_caller();
-        require!(!self.stakes(&caller).is_empty(), "Caller is not a staker");
-        let mut staker = self.stakes(&caller).get();
+        let stakes_handler = self.stakes(&caller);
+        require!(!stakes_handler.is_empty(), "Caller is not a staker");
+        let mut staker = stakes_handler.get();
 
         require!(tokens > 0, "Allocation tokens must be greater than 0");
         require!(staker.tokens_available() >= tokens, "Insufficient amount of tokens in the stake");
@@ -169,13 +173,13 @@ pub trait StakingContract:
             escrow_address: escrow_address.clone(),
             staker: caller.clone(),
             tokens: tokens.clone(),
-            created_at: self.blockchain().get_block_nonce(),
+            created_at: block_nonce,
             closed_at: 0
         };
 
         self.allocations(&escrow_address).set(&new_allocation);
         staker.allocate(&tokens);
-        self.stakes(&caller).set(&staker);
+        stakes_handler.set(&staker);
         self.emit_stake_allocated_event(&caller, &escrow_address, &tokens, block_nonce);
     }
 
@@ -205,13 +209,23 @@ pub trait StakingContract:
     /// Getter that returns if an staker has any stake.
     #[view(hasStake)]
     fn has_stake(&self, staker: ManagedAddress) -> bool {
-        let stake = self.stakes(&staker).get();
+        let stakes_handler = self.stakes(&staker);
+        if stakes_handler.is_empty() {
+            return false
+        }
+
+        let stake = stakes_handler.get();
         stake.token_staked > 0
     }
 
     #[view(hasAvailableStake)]
     fn has_available_stake(&self, staker: ManagedAddress) -> bool {
-        let stake = self.stakes(&staker).get();
+        let stakes_handler = self.stakes(&staker);
+        if stakes_handler.is_empty() {
+            return false
+        }
+
+        let stake = stakes_handler.get();
         stake.tokens_available() > 0
     }
 
@@ -244,17 +258,17 @@ pub trait StakingContract:
 
     #[view(getListOfStakers)]
     fn get_list_of_stakers(&self) -> MultiValue2<MultiValueEncoded<ManagedAddress>, MultiValueEncoded<Staker<Self::Api>>> {
-        let stakers_addresses_vec = self.stakers().get();
-        let stakers_addresses = MultiValueEncoded::from(stakers_addresses_vec);
-
-        if stakers_addresses.len() == 0 {
+        let stakers_handler = self.stakers();
+        if stakers_handler.len() == 0 {
             return MultiValue2((MultiValueEncoded::new(), MultiValueEncoded::new()));
         }
 
         let mut stakers_list: MultiValueEncoded<Staker<Self::Api>> = MultiValueEncoded::new();
-        for staker in stakers_addresses.clone().into_iter() {
+        let mut stakers_addresses: MultiValueEncoded<ManagedAddress> = MultiValueEncoded::new();
+        for staker in stakers_handler.iter(){
             let stake = self.stakes(&staker).get();
             stakers_list.push(stake);
+            stakers_addresses.push(staker);
         }
 
         MultiValue2((stakers_addresses, stakers_list))
@@ -306,9 +320,9 @@ pub trait StakingContract:
 
     fn require_only_staker(&self){
         let caller = self.blockchain().get_caller();
-        let stakers = self.stakers().get();
-        require!(stakers.contains(&caller), "Only stakers can call this function");
+        require!(self.stakers().contains(&caller), "Only stakers can call this function");
     }
+
 
     /// Staking token id
     #[storage_mapper("staking_token")]
@@ -324,7 +338,7 @@ pub trait StakingContract:
 
     /// List of stakers
     #[storage_mapper("stakers")]
-    fn stakers(&self) -> SingleValueMapper<ManagedVec<ManagedAddress>>;
+    fn stakers(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     /// Allocations
     #[view(getAllocation)]
@@ -333,4 +347,9 @@ pub trait StakingContract:
 
     #[storage_mapper("stakes")]
     fn stakes(&self, staker: &ManagedAddress) -> SingleValueMapper<Staker<Self::Api>>;
+
+    #[view(getRewardsPoolContractAddress)]
+    #[storage_mapper("rewards_pool_contract_address")]
+    fn rewards_pool_contract_address(&self) -> SingleValueMapper<ManagedAddress>;
+
 }

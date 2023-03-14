@@ -11,14 +11,10 @@ pub trait RewardsPoolMockContract {
 
     }
 
-    #[payable("*")]
-    #[endpoint(addRewards)]
-    fn add_rewards(&self, _escrow_address: ManagedAddress, _slasher: ManagedAddress) {
+    #[endpoint(addReward)]
+    fn add_reward(&self, _escrow_address: ManagedAddress, _slasher: ManagedAddress, _tokens: BigUint) {
         require!(self.blockchain().get_caller() == self.staking_contract_address().get(), "Only staking contract can call this function");
-        let payment = self.call_value().single_esdt();
-
-        require!(payment.token_nonce == 0, "Invalid token nonce");
-        require!(payment.amount > 0, "Amount must be greater than 0");
+        require!(_tokens > 0, "Amount must be greater than 0");
     }
 
     #[endpoint(setStakingContractAddress)]

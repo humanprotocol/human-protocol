@@ -38,15 +38,15 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
                 self.blockchain().get_gas_left(),
                 &BigUint::zero(),
                 &self.escrow_template_address().get(),
-                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC | CodeMetadata::PAYABLE,
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE,
                 &arguments
             );
 
-        let counter = self.counter().get();
+        let counter = self.counter().get() + 1;
         self.escrow_counter(&escrow_address).set(counter);
-        self.counter().set(counter + 1);
+        self.counter().set(counter);
 
-        self.escrow_launched_event(escrow_address.clone(), token);
+        self.escrow_launched_event(token, escrow_address.clone());
 
         escrow_address
     }
@@ -85,7 +85,7 @@ pub trait EscrowFactoryContract: proxy::StakingProxyModule {
     #[event("escrow_launched")]
     fn escrow_launched_event(
         &self,
-        #[indexed] escrow_address: ManagedAddress,
-        #[indexed] token: TokenIdentifier
+        #[indexed] token: TokenIdentifier,
+        #[indexed] escrow_address: ManagedAddress
     );
 }

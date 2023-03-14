@@ -22,16 +22,15 @@ pub trait RewardsPoolContract {
 
     /// Add rewards record
     /// Protocol fee is deduced from the rewards amount
-    #[payable("*")]
     #[endpoint(addReward)]
-    fn add_reward(&self, escrow_address: ManagedAddress, slasher: ManagedAddress) {
+    fn add_reward(
+        &self,
+        escrow_address: ManagedAddress,
+        slasher: ManagedAddress,
+        tokens: BigUint
+    ) {
         self.require_only_staking();
 
-        let payment = self.call_value().single_esdt();
-        require!(payment.token_identifier == self.rewards_token().get(), "Invalid token");
-        require!(payment.token_nonce == 0, "Invalid token nonce");
-
-        let tokens = payment.amount;
         let protocol_fee = self.protocol_fee().get();
         if tokens < protocol_fee {
             self.total_fee().update(|total_fee| *total_fee += tokens);
@@ -54,8 +53,9 @@ pub trait RewardsPoolContract {
     /// Distribute rewards for allocation
     #[endpoint(distributeRewards)]
     fn distribute_rewards(&self, escrow_address: ManagedAddress) {
+        let rewards_token = self.rewards_token().get();
         for reward in self.rewards(&escrow_address).iter() {
-            self.send().direct_esdt(&reward.slasher, &self.rewards_token().get(), 0, &reward.tokens);
+            self.send().direct_esdt(&reward.slasher, &rewards_token, 0, &reward.tokens);
         }
         self.rewards(&escrow_address).clear();
     }
@@ -63,7 +63,7 @@ pub trait RewardsPoolContract {
     #[only_owner]
     #[endpoint(withdraw)]
     fn withdraw(&self) {
-        let total_fee = self.total_fee().get();
+        let total_fee = self.total_fee().take();
         let rewards_token = self.rewards_token().get();
         let caller = self.blockchain().get_caller();
         self.send().direct_esdt(&caller, &rewards_token, 0, &total_fee);

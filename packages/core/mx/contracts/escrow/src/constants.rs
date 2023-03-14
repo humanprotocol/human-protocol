@@ -2,6 +2,7 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 pub const BULK_MAX_COUNT: usize = 100;
+pub const MAX_STAKE_PERCENTAGE: u64 = 100;
 
 
 #[derive(TopEncode, TopDecode, NestedEncode, NestedDecode, TypeAbi, Clone)]

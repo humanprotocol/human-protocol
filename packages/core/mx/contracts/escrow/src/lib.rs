@@ -6,7 +6,7 @@ pub mod constants;
 
 use common_structs::escrow::EscrowStatus;
 
-use crate::constants::BULK_MAX_COUNT;
+use crate::constants::{BULK_MAX_COUNT, MAX_STAKE_PERCENTAGE};
 
 #[multiversx_sc::contract]
 pub trait EscrowContract {
@@ -20,18 +20,20 @@ pub trait EscrowContract {
         bulk_max_value: BigUint,
         trusted_callers: MultiValueEncoded<ManagedAddress>,
     ) {
-        self.token().set(token);
-        self.status().set(EscrowStatus::Launched);
+        self.token().set_if_empty(token);
+        self.status().set_if_empty(EscrowStatus::Launched);
         let expiration = self.blockchain().get_block_timestamp() + duration;
-        self.duration().set(expiration);
-        self.launcher().set(self.blockchain().get_caller());
-        self.canceler().set(&canceler);
-        self.bulk_max_value().set(bulk_max_value);
-        for caller in trusted_callers {
-            self.trusted_callers().insert(caller.clone());
+        self.duration().set_if_empty(expiration);
+        self.launcher().set_if_empty(self.blockchain().get_caller());
+        self.canceler().set_if_empty(&canceler);
+        self.bulk_max_value().set_if_empty(bulk_max_value);
+        if self.trusted_callers().is_empty() {
+            for caller in trusted_callers {
+                self.trusted_callers().insert(caller.clone());
+            }
+            self.trusted_callers().insert(self.blockchain().get_caller());
+            self.trusted_callers().insert(canceler);
         }
-        self.trusted_callers().insert(self.blockchain().get_caller());
-        self.trusted_callers().insert(canceler);
     }
 
     #[view(getBalance)]
@@ -54,8 +56,8 @@ pub trait EscrowContract {
         &self,
         reputation_oracle: ManagedAddress,
         recording_oracle: ManagedAddress,
-        reputation_oracle_stake: BigUint,
-        recording_oracle_stake: BigUint,
+        reputation_oracle_stake: u64,
+        recording_oracle_stake: u64,
         url: ManagedBuffer,
         hash: ManagedBuffer,
         solution_requested: u64
@@ -66,10 +68,10 @@ pub trait EscrowContract {
         require!(solution_requested > 0, "Invalid or missing solutions");
 
         let total_stake = &reputation_oracle_stake + &recording_oracle_stake;
-        require!(total_stake <= 100_u64, "Stake out of bounds");
+        require!(total_stake <= MAX_STAKE_PERCENTAGE, "Stake out of bounds");
 
-        self.reputation_oracle().set(&reputation_oracle);
-        self.recording_oracle().set(&recording_oracle);
+        self.reputation_oracle_address().set(&reputation_oracle);
+        self.recording_oracle_address().set(&recording_oracle);
         self.reputation_oracle_stake().set(reputation_oracle_stake);
         self.recording_oracle_stake().set(recording_oracle_stake);
 
@@ -115,6 +117,7 @@ pub trait EscrowContract {
         self.require_not_expired();
         self.require_status(&[EscrowStatus::Paid]);
         self.status().set(EscrowStatus::Complete);
+        self.completed_event();
     }
 
     #[endpoint(storeResults)]
@@ -149,7 +152,6 @@ pub trait EscrowContract {
         require!(recipients.len() == amounts.len(), "Recipients and amounts length mismatch");
 
         let mut balance = self.get_balance();
-        let mut bulk_paid: bool = false;
         let mut aggregate_bulk_amount = BigUint::zero();
         for amount in amounts.clone().into_iter() {
             aggregate_bulk_amount += amount;
@@ -157,7 +159,7 @@ pub trait EscrowContract {
 
         require!(aggregate_bulk_amount < self.bulk_max_value().get(), "Bulk value too high");
         if balance < aggregate_bulk_amount {
-            return bulk_paid
+            return false
         }
 
         self.store_results(&url, &hash);
@@ -172,29 +174,28 @@ pub trait EscrowContract {
             self.send().direct_esdt(&recipient, &self.token().get(), 0, &amount);
         }
 
-        self.send().direct_esdt(&self.reputation_oracle().get(), &self.token().get(), 0, &reputation_oracle_fee);
-        self.send().direct_esdt(&self.recording_oracle().get(), &self.token().get(), 0, &recording_oracle_fee);
+        self.send().direct_esdt(&self.reputation_oracle_address().get(), &self.token().get(), 0, &reputation_oracle_fee);
+        self.send().direct_esdt(&self.recording_oracle_address().get(), &self.token().get(), 0, &recording_oracle_fee);
 
-        bulk_paid = true;
         balance = self.get_balance();
         let mut status = self.get_status();
-        if bulk_paid {
-            if status == EscrowStatus::Pending {
-                self.remaining_solutions().update(|x| *x -= recipients.len() as u64);
-                status = EscrowStatus::Partial;
-            }
 
-            if balance > 0 && status == EscrowStatus::Partial && self.remaining_solutions().get() == 0 {
-                self.send().direct_esdt(&self.canceler().get(), &self.token().get(), 0, &balance);
-                status = EscrowStatus::Paid;
-            }
-
-            if balance == 0 && status == EscrowStatus::Partial {
-                status = EscrowStatus::Paid;
-            }
-
-            self.status().set(status);
+        if status == EscrowStatus::Pending {
+            self.remaining_solutions().update(|x| *x -= recipients.len() as u64);
+            status = EscrowStatus::Partial;
         }
+
+        if balance > 0 && status == EscrowStatus::Partial && self.remaining_solutions().get() == 0 {
+            self.send().direct_esdt(&self.canceler().get(), &self.token().get(), 0, &balance);
+            status = EscrowStatus::Paid;
+        }
+
+        if balance == 0 && status == EscrowStatus::Partial {
+            status = EscrowStatus::Paid;
+        }
+
+        self.status().set(status);
+
 
         self.bulk_transfer_event(tx_id, recipients.len() as u64);
         true
@@ -203,12 +204,14 @@ pub trait EscrowContract {
     fn finalize_payouts(&self, amounts: &MultiValueEncoded<BigUint>) -> (BigUint, BigUint, ManagedVec<BigUint>){
         let mut reputation_oracle_fee = BigUint::zero();
         let mut recording_oracle_fee = BigUint::zero();
+        let reputation_oracle_stake = self.reputation_oracle_stake().get();
+        let recording_oracle_stake = self.recording_oracle_stake().get();
 
         let mut final_amounts: ManagedVec<BigUint> = ManagedVec::new();
 
         for given_amount in amounts.clone().into_iter() {
-            let single_reputation_oracle_fee = self.reputation_oracle_stake().get() * &given_amount / BigUint::from(100_u64);
-            let single_recording_oracle_fee = self.recording_oracle_stake().get() * &given_amount / BigUint::from(100_u64);
+            let single_reputation_oracle_fee = &given_amount * reputation_oracle_stake / BigUint::from(MAX_STAKE_PERCENTAGE);
+            let single_recording_oracle_fee = &given_amount * recording_oracle_stake / BigUint::from(MAX_STAKE_PERCENTAGE);
             let amount = given_amount - &single_reputation_oracle_fee - &single_recording_oracle_fee;
             reputation_oracle_fee = &reputation_oracle_fee + &single_reputation_oracle_fee;
             recording_oracle_fee = &recording_oracle_fee + &single_recording_oracle_fee;
@@ -268,8 +271,8 @@ pub trait EscrowContract {
         require!(recipients < BULK_MAX_COUNT, "Too many recipients");
     }
 
-    #[endpoint(deposit)]
     #[payable("*")]
+    #[endpoint(deposit)]
     fn deposit(&self){
         self.require_trusted();
         self.require_not_expired();
@@ -303,7 +306,7 @@ pub trait EscrowContract {
     fn duration(&self) -> SingleValueMapper<u64>;
 
     #[storage_mapper("trusted_callers")]
-    fn trusted_callers(&self) -> SetMapper<ManagedAddress>;
+    fn trusted_callers(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     #[storage_mapper("manifest_url")]
     fn manifest_url(&self) -> SingleValueMapper<ManagedBuffer>;
@@ -323,17 +326,17 @@ pub trait EscrowContract {
     #[storage_mapper("canceler")]
     fn canceler(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[storage_mapper("reputation_oracle")]
-    fn reputation_oracle(&self) -> SingleValueMapper<ManagedAddress>;
+    #[storage_mapper("reputation_oracle_address")]
+    fn reputation_oracle_address(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[storage_mapper("reputation_oracle_stake")]
-    fn reputation_oracle_stake(&self) -> SingleValueMapper<BigUint>;
+    fn reputation_oracle_stake(&self) -> SingleValueMapper<u64>;
 
-    #[storage_mapper("recording_oracle")]
-    fn recording_oracle(&self) -> SingleValueMapper<ManagedAddress>;
+    #[storage_mapper("recording_oracle_address")]
+    fn recording_oracle_address(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[storage_mapper("recording_oracle_stake")]
-    fn recording_oracle_stake(&self) -> SingleValueMapper<BigUint>;
+    fn recording_oracle_stake(&self) -> SingleValueMapper<u64>;
 
     #[storage_mapper("bulk_max_value")]
     fn bulk_max_value(&self) -> SingleValueMapper<BigUint>;
@@ -351,4 +354,7 @@ pub trait EscrowContract {
         #[indexed] tx_id: u64,
         bulk_count: u64
     );
+
+    #[event("completed")]
+    fn completed_event(&self);
 }

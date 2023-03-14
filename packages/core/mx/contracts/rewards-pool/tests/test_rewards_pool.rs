@@ -23,11 +23,11 @@ fn test_add_rewards_new_entry_rewards_after_fee_0() {
 
     let escrow1 = setup.create_address();
     let slasher1 = setup.create_address();
-    let payment_amount = 1_000_000; // 1 HMT
+    let tokens = 1_000_000; // 1 HMT
 
-    setup.add_rewards_by_staker(&escrow1, &slasher1, payment_amount, None);
-    setup.check_total_fee(payment_amount);
-    setup.check_rewards_entry_none(&escrow1, &slasher1);
+    setup.make_reward_payment(tokens);
+    setup.add_rewards_by_staker(&escrow1, &slasher1, tokens, None);
+    setup.check_total_fee(tokens);
 }
 
 #[test]
@@ -55,7 +55,9 @@ fn test_distribute_rewards() {
     let slasher1_payment = 5_000_000; // 5 HMT
     let slasher2_payment = 3_000_000; // 3 HMT
 
+    setup.make_reward_payment(slasher1_payment);
     setup.add_rewards_by_staker(&escrow1, &slasher1, slasher1_payment, None);
+    setup.make_reward_payment(slasher2_payment);
     setup.add_rewards_by_staker(&escrow1, &slasher2, slasher2_payment, None);
 
     setup.check_total_fee(2_000_000);
@@ -78,7 +80,9 @@ fn test_withdraw_fees() {
     let slasher1_payment = 5_000_000; // 5 HMT
     let slasher2_payment = 3_000_000; // 3 HMT
 
+    setup.make_reward_payment(slasher1_payment);
     setup.add_rewards_by_staker(&escrow1, &slasher1, slasher1_payment, None);
+    setup.make_reward_payment(slasher2_payment);
     setup.add_rewards_by_staker(&escrow1, &slasher2, slasher2_payment, None);
     setup.check_total_fee(2_000_000);
     setup.check_owner_balance(0);

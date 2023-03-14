@@ -106,8 +106,8 @@ where
                 sc.setup(
                     managed_address!(reputation_oracle),
                     managed_address!(recording_oracle),
-                    managed_biguint!(reputation_oracle_stake),
-                    managed_biguint!(recording_oracle_stake),
+                    reputation_oracle_stake,
+                    recording_oracle_stake,
                     managed_buffer!(url),
                     managed_buffer!(hash),
                     solution_requested

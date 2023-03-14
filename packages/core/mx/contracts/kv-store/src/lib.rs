@@ -18,8 +18,17 @@ pub trait KVStoreContract {
     fn set(&self, key: ManagedBuffer, value: ManagedBuffer) {
         let sender = self.blockchain().get_caller();
         self.store(&sender, &key).set(&value);
+        self.data_saved(sender, key, value);
     }
 
     #[storage_mapper("store")]
     fn store(&self, sender: &ManagedAddress, key: &ManagedBuffer) -> SingleValueMapper<ManagedBuffer>;
+
+    #[event("data_saved")]
+    fn data_saved(
+        &self,
+        #[indexed] sender: ManagedAddress,
+        #[indexed] key: ManagedBuffer,
+        value: ManagedBuffer
+    );
 }
