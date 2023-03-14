@@ -1,7 +1,6 @@
 #![no_std]
 multiversx_sc::imports!();
 
-pub mod status;
 pub mod constants;
 
 use common_structs::escrow::EscrowStatus;

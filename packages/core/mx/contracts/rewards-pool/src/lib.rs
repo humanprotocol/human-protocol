@@ -15,9 +15,9 @@ pub trait RewardsPoolContract {
         staking_contract_address: ManagedAddress,
         protocol_fee: BigUint,
     ) {
-        self.rewards_token().set(rewards_token);
-        self.protocol_fee().set(protocol_fee);
-        self.staking_contract_address().set(staking_contract_address);
+        self.rewards_token().set_if_empty(rewards_token);
+        self.protocol_fee().set_if_empty(protocol_fee);
+        self.staking_contract_address().set_if_empty(staking_contract_address);
     }
 
     /// Add rewards record
@@ -89,11 +89,8 @@ pub trait RewardsPoolContract {
     #[endpoint(setRewardsToken)]
     fn set_rewards_token(&self, rewards_token: TokenIdentifier) {
         let total_fee = self.total_fee().get();
-        let old_rewards_token = self.rewards_token().get();
         if total_fee > 0 {
-            let caller = self.blockchain().get_caller();
-            self.send().direct_esdt(&caller, &old_rewards_token, 0, &total_fee);
-            self.total_fee().clear();
+            self.withdraw();
         }
 
         self.rewards_token().set(&rewards_token);

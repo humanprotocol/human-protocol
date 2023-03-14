@@ -18,7 +18,7 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     rewards_pool_mock
     (
-        addRewards
+        addReward
         setStakingContractAddress
     )
 }
