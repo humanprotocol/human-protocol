@@ -113,26 +113,6 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
         return returnedValues;
     }
 
-    function getRewards4(
-        int256 balance,
-        address[] memory _workers
-    ) public view returns (int256[] memory) {
-        int256[] memory returnedValues = new int256[](_workers.length);
-        int256 totalReputation = 0;
-
-        for (uint256 i = 0; i < _workers.length; i++) {
-            totalReputation = totalReputation.add(reputations[_workers[i]]);
-        }
-
-        for (uint256 i = 0; i < _workers.length; i++) {
-            returnedValues[i] = balance.mul(reputations[_workers[i]]).div(
-                totalReputation
-            );
-        }
-
-        return returnedValues;
-    }
-
     function setMinimumStake(uint256 _minimumStake) external onlyOwner {
         _setMinimumStake(_minimumStake);
     }

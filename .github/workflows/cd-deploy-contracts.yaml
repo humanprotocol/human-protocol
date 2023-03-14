@@ -2,8 +2,8 @@ name: Deploy contracts
 
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
 
 jobs:
   deploy-contracts:
@@ -12,55 +12,55 @@ jobs:
     strategy:
       matrix:
         network: [
-            # {
-            #   name: goerli,
-            #   escrow_factory: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
-            #   staking: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
-            #   reward_pool: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
-            #   reputation: '0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405',
-            # },
-            # {
-            #   name: polygon,
-            #   escrow_factory: '0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB',
-            #   staking: '0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29',
-            #   reward_pool: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
-            #   # reputation:
-            # },
+            {
+              name: goerli,
+              escrow_factory: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
+              staking: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
+              reward_pool: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
+              reputation: '0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405',
+            },
+            {
+              name: polygon,
+              escrow_factory: '0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB',
+              staking: '0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29',
+              reward_pool: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
+              # reputation:
+            },
             {
               name: polygonMumbai,
               escrow_factory: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
               staking: '0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac',
               reward_pool: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
-              reputation: '0xB7D097367e5054d07A4916DEBD4D7c454C4D298c',
+              reputation: '0xC522463d36f76b881bE66484e3068F11e7038Ace',
             },
-            # {
-            #   name: bsc,
-            #   escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-            #   staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
-            #   reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
-            #   # reputation:
-            # },
-            # {
-            #   name: bscTestnet,
-            #   escrow_factory: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
-            #   staking: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
-            #   reward_pool: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
-            #   reputation: '0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98',
-            # },
-            # {
-            #   name: moonbeam,
-            #   escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-            #   staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
-            #   reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
-            #   # reputation:
-            # },
-            # {
-            #   name: moonbaseAlpha,
-            #   escrow_factory: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
-            #   staking: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
-            #   reward_pool: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
-            #   reputation: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
-            # },
+            {
+              name: bsc,
+              escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+              staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+              reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
+              # reputation:
+            },
+            {
+              name: bscTestnet,
+              escrow_factory: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
+              staking: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
+              reward_pool: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+              reputation: '0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98',
+            },
+            {
+              name: moonbeam,
+              escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+              staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+              reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
+              # reputation:
+            },
+            {
+              name: moonbaseAlpha,
+              escrow_factory: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+              staking: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
+              reward_pool: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
+              reputation: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+            },
             # {
             #   name: avalanche,
             #   escrow_factory,
