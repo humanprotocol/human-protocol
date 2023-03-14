@@ -28,6 +28,9 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     // Reward pool address
     address public override rewardPool;
 
+    // Escrow factory address
+    address public override escrowFactory;
+
     // Minimum amount of tokens an staker needs to stake
     uint256 public minimumStake;
 
@@ -103,6 +106,11 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     event SetRewardPool(address indexed rewardPool);
 
+    /**
+     * @dev Emitted when `owner` set new value for `escrowFactory`.
+     */
+    event SetEscrowFactory(address indexed escrowFactory);
+
     function initialize(
         address _token,
         uint256 _minimumStake,
@@ -177,6 +185,26 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         require(_rewardPool != address(0), 'Must be a valid address');
         rewardPool = _rewardPool;
         emit SetRewardPool(_rewardPool);
+    }
+
+    /**
+     * @dev Set the escrow factory.
+     * @param _escrowFactory Escrow factory address
+     */
+    function setEscrowFactory(
+        address _escrowFactory
+    ) external override onlyOwner {
+        _setEscrowFactory(_escrowFactory);
+    }
+
+    /**
+     * @dev Set the escrow factory.
+     * @param _escrowFactory Escrow factory address
+     */
+    function _setEscrowFactory(address _escrowFactory) private {
+        require(_escrowFactory != address(0), 'Must be a valid address');
+        escrowFactory = _escrowFactory;
+        emit SetEscrowFactory(_escrowFactory);
     }
 
     /**
@@ -263,7 +291,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         if (
             allocation.createdAt != 0 &&
             allocation.tokens > 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Pending
+            escrowStatus == IEscrow.EscrowStatuses.Launched
         ) {
             return AllocationState.Pending;
         }
@@ -277,7 +305,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         if (
             allocation.closedAt == 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Complete
+            escrowStatus == IEscrow.EscrowStatuses.Completed
         ) {
             return AllocationState.Completed;
         }
@@ -340,7 +368,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function stake(uint256 _tokens) external override {
         require(_tokens > 0, 'Must be a positive number');
 
-        Stakes.Staker memory staker = stakes[msg.sender];
+        Stakes.Staker memory staker = stakes[_msgSender()];
         require(
             staker.tokensSecureStake().add(_tokens) >= minimumStake,
             'Total stake is below the minimum threshold'
@@ -348,23 +376,25 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         if (staker.tokensStaked == 0) {
             staker = Stakes.Staker(0, 0, 0, 0);
-            stakes[msg.sender] = staker;
-            stakers.push(msg.sender);
+            stakes[_msgSender()] = staker;
+            stakers.push(_msgSender());
         }
 
-        _safeTransferFrom(msg.sender, address(this), _tokens);
+        _safeTransferFrom(_msgSender(), address(this), _tokens);
 
-        stakes[msg.sender].deposit(_tokens);
+        stakes[_msgSender()].deposit(_tokens);
 
-        emit StakeDeposited(msg.sender, _tokens);
+        emit StakeDeposited(_msgSender(), _tokens);
     }
 
     /**
      * @dev Unstake tokens from the staker stake, lock them until lock period expires.
      * @param _tokens Amount of tokens to unstake
      */
-    function unstake(uint256 _tokens) external override onlyStaker(msg.sender) {
-        Stakes.Staker storage staker = stakes[msg.sender];
+    function unstake(
+        uint256 _tokens
+    ) external override onlyStaker(_msgSender()) {
+        Stakes.Staker storage staker = stakes[_msgSender()];
 
         require(staker.tokensStaked > 0, 'Must be a positive number');
         require(_tokens > 0, 'Must be a positive number');
@@ -381,13 +411,13 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         uint256 tokensToWithdraw = staker.tokensWithdrawable();
         if (tokensToWithdraw > 0) {
-            _withdraw(msg.sender);
+            _withdraw(_msgSender());
         }
 
         staker.lockTokens(_tokens, lockPeriod);
 
         emit StakeLocked(
-            msg.sender,
+            _msgSender(),
             staker.tokensLocked,
             staker.tokensLockedUntil
         );
@@ -396,8 +426,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Withdraw staker tokens based on the locking period.
      */
-    function withdraw() external override onlyStaker(msg.sender) {
-        _withdraw(msg.sender);
+    function withdraw() external override onlyStaker(_msgSender()) {
+        _withdraw(_msgSender());
     }
 
     /**
@@ -462,8 +492,23 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function allocate(
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlyStaker(msg.sender) {
-        _allocate(msg.sender, _escrowAddress, _tokens);
+    ) external override onlyStaker(_msgSender()) {
+        _allocate(_msgSender(), _escrowAddress, _tokens);
+    }
+
+    /**
+     * @dev Allocate available tokens to an escrow from staker.
+     *      Can be only called from escrow factory.
+     * @param _staker Staker address to allocate funds from.
+     * @param _escrowAddress The allocationID will work to identify collected funds related to this allocation
+     * @param _tokens Amount of tokens to allocate
+     */
+    function allocateFrom(
+        address _staker,
+        address _escrowAddress,
+        uint256 _tokens
+    ) external override onlyEscrowFactory {
+        _allocate(_staker, _escrowAddress, _tokens);
     }
 
     /**
@@ -479,7 +524,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     ) private {
         require(_escrowAddress != address(0), 'Must be a valid address');
         require(
-            stakes[msg.sender].tokensAvailable() >= _tokens,
+            stakes[_msgSender()].tokensAvailable() >= _tokens,
             'Insufficient amount of tokens in the stake'
         );
         require(_tokens > 0, 'Must be a positive number');
@@ -513,7 +558,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     function closeAllocation(
         address _escrowAddress
-    ) external override onlyStaker(msg.sender) {
+    ) external override onlyStaker(_msgSender()) {
         _closeAllocation(_escrowAddress);
     }
 
@@ -567,6 +612,11 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     modifier onlyStaker(address _staker) {
         Stakes.Staker memory staker = stakes[_staker];
         require(staker.tokensStaked > 0, 'Caller is not a staker');
+        _;
+    }
+
+    modifier onlyEscrowFactory() {
+        require(_msgSender() == escrowFactory, 'Caller is not escrow factory');
         _;
     }
 

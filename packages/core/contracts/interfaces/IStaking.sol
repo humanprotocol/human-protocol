@@ -47,11 +47,15 @@ interface IStaking {
 
     function rewardPool() external view returns (address);
 
+    function escrowFactory() external view returns (address);
+
     function setMinimumStake(uint256 _minimumStake) external;
 
     function setLockPeriod(uint32 _lockPeriod) external;
 
     function setRewardPool(address _rewardPool) external;
+
+    function setEscrowFactory(address _escrowFactory) external;
 
     function isAllocation(address _escrowAddress) external view returns (bool);
 
@@ -87,6 +91,12 @@ interface IStaking {
     ) external;
 
     function allocate(address escrowAddress, uint256 _tokens) external;
+
+    function allocateFrom(
+        address staker,
+        address escorwAddress,
+        uint256 tokens
+    ) external;
 
     function closeAllocation(address _escrowAddress) external;
 

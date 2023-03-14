@@ -34,27 +34,57 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function createEscrow(
         address token,
-        address[] memory trustedHandlers
-    ) public returns (address) {
-        bool hasAvailableStake = IStaking(staking).hasAvailableStake(
-            msg.sender
+        address exchangeOracle,
+        address reputationOracle,
+        address recordingOracle,
+        uint256 reputationOracleStake,
+        uint256 recordingOracleStake,
+        string memory manifestUrl,
+        string memory manifestHash,
+        uint256 solutionsRequested,
+        uint256 allocationAmount
+    ) public {
+        require(
+            IStaking(staking).hasAvailableStake(_msgSender()),
+            'Job launcher Needs to stake HMT tokens to create an escrow.'
         );
         require(
-            hasAvailableStake == true,
-            'Needs to stake HMT tokens to create an escrow.'
+            IStaking(staking).hasAvailableStake(exchangeOracle),
+            'Exchange Oracle needs to stake HMT tokens to create an escrow.'
+        );
+        require(
+            IStaking(staking).hasAvailableStake(reputationOracle),
+            'Reputation Oracle needs to stake HMT tokens to create an escrow.'
+        );
+        require(
+            IStaking(staking).hasAvailableStake(recordingOracle),
+            'Recording Oracle needs to stake HMT tokens to create an escrow.'
         );
 
         Escrow escrow = new Escrow(
             token,
-            payable(msg.sender),
+            _msgSender(),
             STANDARD_DURATION,
-            trustedHandlers
+            exchangeOracle,
+            reputationOracle,
+            recordingOracle,
+            reputationOracleStake,
+            recordingOracleStake,
+            manifestUrl,
+            manifestHash,
+            solutionsRequested
         );
+
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
+        IStaking(staking).allocateFrom(
+            _msgSender(),
+            lastEscrow,
+            allocationAmount
+        );
+
         emit Launched(token, lastEscrow);
-        return lastEscrow;
     }
 
     function isChild(address _child) public view returns (bool) {
