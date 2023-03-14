@@ -123,11 +123,11 @@ jobs:
             escrow_factory:
               - 'packages/core/contracts/Escrow*.sol'
             staking:
-              - 'packages/core/contracts/Staking.sol
+              - 'packages/core/contracts/Staking.sol'
             reward_pool:
-              - 'packages/core/contracts/RewardPool.sol
+              - 'packages/core/contracts/RewardPool.sol'
             reputation:
-              - 'packages/core/contracts/Reputation.sol
+              - 'packages/core/contracts/Reputation.sol'
 
       # - name: Check changes in Staking file
       #   id: check-staking
