@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
+import { MockConnector } from '@wagmi/core/connectors/mock';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
+import { create } from 'react-test-renderer';
 import { LaunchSuccess } from 'src/components/LaunchSuccess';
 import { Providers, setupClient, getSigners } from 'tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
 
 const jobResponse = {
   escrowAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
@@ -20,7 +20,6 @@ describe('when rendered LaunchSuccess component', () => {
       ],
     });
 
-    // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {
       render(
         <LaunchSuccess jobResponse={jobResponse} onCreateNewEscrow={() => 1} />,
@@ -43,12 +42,10 @@ it('LaunchSuccess component renders correctly, corresponds to the snapshot', () 
   const client = setupClient({
     connectors: [new MockConnector({ options: { signer: getSigners()[0]! } })],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <LaunchSuccess jobResponse={jobResponse} onCreateNewEscrow={() => 1} />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <LaunchSuccess jobResponse={jobResponse} onCreateNewEscrow={() => 1} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

@@ -1,8 +1,10 @@
 import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
-import Box from '@mui/material/Box';
 import { Grid, Link, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
 import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
+import { useSigner, useChainId } from 'wagmi';
+import { ChainId, ESCROW_NETWORKS } from './constants';
 import {
   FortuneStages,
   FortuneFundingMethod,
@@ -17,8 +19,6 @@ import {
   FundingMethodType,
   JobLaunchResponse,
 } from 'src/components/types';
-import { useSigner, useChainId } from 'wagmi';
-import { ChainId, ESCROW_NETWORKS } from './constants';
 
 function App() {
   const { data: signer } = useSigner();

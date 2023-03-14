@@ -15,13 +15,6 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
-import {
-  ChainId,
-  Currencies,
-  ESCROW_NETWORKS,
-  HM_TOKEN_DECIMALS,
-  SUPPORTED_CHAIN_IDS,
-} from 'src/constants';
 import { RoundedBox } from './RoundedBox';
 import {
   CreatePaymentType,
@@ -29,6 +22,13 @@ import {
   FundingMethodType,
   JobLaunchResponse,
 } from './types';
+import {
+  ChainId,
+  Currencies,
+  ESCROW_NETWORKS,
+  HM_TOKEN_DECIMALS,
+  SUPPORTED_CHAIN_IDS,
+} from 'src/constants';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
