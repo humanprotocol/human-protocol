@@ -113,7 +113,7 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
         return returnedValues;
     }
 
-    function getRewards3(
+    function getRewards4(
         int256 balance,
         address[] memory _workers
     ) public view returns (int256[] memory) {
