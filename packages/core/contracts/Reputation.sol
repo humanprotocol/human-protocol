@@ -18,6 +18,7 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
     // Staking contract address
     address public staking;
     uint256 public minimumStake;
+
     int256 private constant MIN_REPUTATION = 1;
     int256 private constant MAX_REPUTATION = 100;
     mapping(address => int256) public reputations;
@@ -112,7 +113,7 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
         return returnedValues;
     }
 
-    function getRewards2(
+    function getRewards3(
         int256 balance,
         address[] memory _workers
     ) public view returns (int256[] memory) {
