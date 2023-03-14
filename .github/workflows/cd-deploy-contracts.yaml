@@ -31,7 +31,7 @@ jobs:
               escrow_factory: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
               staking: '0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac',
               reward_pool: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
-              reputation: '0xC522463d36f76b881bE66484e3068F11e7038Ace',
+              reputation: '0xe47EE213FA056BdfE75FE70E33EdAb221ec7F8dC',
             },
             # {
             #   name: bsc,

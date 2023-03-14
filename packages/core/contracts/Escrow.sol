@@ -356,6 +356,4 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(duration > block.timestamp, 'Contract expired'); // solhint-disable-line not-rely-on-time
         _;
     }
-
-    /** TEST 14*/
 }
