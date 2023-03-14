@@ -130,6 +130,4 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
     uint256[43] private __gap;
-
-    /** TEST*/
 }
