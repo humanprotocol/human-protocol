@@ -115,55 +115,61 @@ jobs:
         run: yarn compile
         working-directory: ./packages/core
 
-      - name: Check changes in EscrowFactory files
-        id: check-escrow-factory
-        uses: tj-actions/changed-files@v35
+      - name: Check changes in files
+        uses: dorny/paths-filter@v2
+        id: filter
         with:
-          files: |
-            packages/core/contracts/Escrow.sol
-            packages/core/contracts/EscrowFactory.sol
+          filters: |
+            escrow_factory:
+              - 'packages/core/contracts/Escrow*.sol'
+            staking:
+              - 'packages/core/contracts/Staking.sol
+            reward_pool:
+              - 'packages/core/contracts/RewardPool.sol
+            reputation:
+              - 'packages/core/contracts/Reputation.sol
 
-      - name: Check changes in Staking file
-        id: check-staking
-        uses: tj-actions/changed-files@v35
-        with:
-          files: packages/core/contracts/Staking.sol
+      # - name: Check changes in Staking file
+      #   id: check-staking
+      #   uses: tj-actions/changed-files@v35
+      #   with:
+      #     files: packages/core/contracts/Staking.sol
 
-      - name: Check changes in Reward Pool file
-        id: check-reward-pool
-        uses: tj-actions/changed-files@v35
-        with:
-          files: packages/core/contracts/RewardPool.sol
+      # - name: Check changes in Reward Pool file
+      #   id: check-reward-pool
+      #   uses: tj-actions/changed-files@v35
+      #   with:
+      #     files: packages/core/contracts/RewardPool.sol
 
-      - name: Check changes in Reputation file
-        id: check-reputation
-        uses: tj-actions/changed-files@v35
-        with:
-          files: packages/core/contracts/Reputation.sol
+      # - name: Check changes in Reputation file
+      #   id: check-reputation
+      #   uses: tj-actions/changed-files@v35
+      #   with:
+      #     files: packages/core/contracts/Reputation.sol
 
       - name: Upgrade Escrow Factory Proxy
-        if: steps.check-escrow-factory.any_changed == 'true'
+        if: steps.filter.outputs.escrow_factory == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
 
       - name: Upgrade Staking Proxy
-        if: steps.check-staking.outputs.any_changed == 'true'
+        if: steps.filter.outputs.staking == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
 
       - name: Upgrade Reward Pool Proxy
-        if: steps.check-reward-pool.outputs.any_changed == 'true'
+        if: steps.filter.outputs.reward_pool == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
 
       - name: Upgrade Reputation Proxy
-        if: steps.check-reputation.outputs.any_changed == 'true'
+        if: steps.filter.outputs.reputation == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
