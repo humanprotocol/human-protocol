@@ -115,9 +115,9 @@ jobs:
         id: check-escrow-factory
         uses: tj-actions/changed-files@v35
         with:
-          files: | 
-          packages/core/contracts/Escrow.sol
-          packages/core/contracts/EscrowFactory.sol
+          files: |
+            packages/core/contracts/Escrow.sol
+            packages/core/contracts/EscrowFactory.sol
 
       - name: Check changes in Staking file
         id: check-staking
