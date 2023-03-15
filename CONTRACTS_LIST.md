@@ -91,7 +91,7 @@
 |2022/10/24                  | EthKVStore     | 0xd232c1426CF0653cE8a71DC98bCfDf10c471c114 | N/A                                        |
 |                            | Reputation     |                                            |                                            |
 
-|🟢 SKALE Chain (Mainnet)        | Contract       | Address                                    | Proxy                                      |
+|🟢 SKALE Human Protocol Chain (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2023/01/18                  | HMToken        | 0xa91B2C7d9704aeE8918460fc4375866e2c415A67 | N/A                                        |
 |2023/02/28                  | EscrowFactory  | 0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF | 0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c |
