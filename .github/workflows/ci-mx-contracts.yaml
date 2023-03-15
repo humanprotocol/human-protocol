@@ -6,13 +6,15 @@ on:
       - 'main'
   pull_request:
 
-permissions:
-  checks: write
-  pull-requests: write
-
 env:
-  MX_DIR_PATH: packages/core/mx
   RUST_TOOLCHAIN: nightly-2022-12-08
+  VMTOOLS_VERSION: v1.4.60
+  PIP_MXPY_ARGS: multiversx-sdk-cli==v6.0.0
+  CLIPPY_ARGS: --all-targets --all-features
+
+defaults:
+  run:
+    working-directory: ./packages/core/mx/
 
 jobs:
   rust_test:
@@ -27,8 +29,7 @@ jobs:
       - name: Run the rust tests
         env:
           RUSTFLAGS: ""
-        run: |
-          cd ${MX_DIR_PATH}
+        run:
           cargo test
 
   clippy_check:
@@ -44,5 +45,5 @@ jobs:
         env:
           RUSTFLAGS: ""
         with:
-          github_token: ${{ secrets.token }}
-          clippy_flags: ${{ inputs.clippy-args }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: ${{ env.CLIPPY_ARGS}}
