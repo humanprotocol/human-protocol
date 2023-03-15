@@ -1,6 +1,7 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
+import { ChainId } from 'src/constants';
 
 import { EscrowNetwork } from 'src/types';
 
@@ -54,7 +55,9 @@ export const Success: FC<SuccessProps> = ({ txHash, network }) => {
             align="center"
             width={'100%'}
           >
-            Congratulations, 10 testnet HMT was sent to your account
+            {network?.chainId === ChainId.SKALE
+              ? 'Congratulations, sFUEL sent to your account'
+              : 'Congratulations, 10 testnet HMT was sent to your account'}
           </Typography>
         </Grid>
 

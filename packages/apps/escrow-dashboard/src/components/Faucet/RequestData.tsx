@@ -147,7 +147,13 @@ export const RequestData: FC<RequestDataProps> = ({
               },
             }}
           >
-            {step === 1 ? 'Sending tokens' : 'Send me'}
+            {step === 1
+              ? network?.chainId === ChainId.SKALE
+                ? 'Mining sFUEL'
+                : 'Sending tokens'
+              : network?.chainId === ChainId.SKALE
+              ? 'Send sFUEL'
+              : 'Send me'}
           </Button>
         </Grid>
         <Grid
@@ -173,10 +179,11 @@ export const RequestData: FC<RequestDataProps> = ({
                   }
             }
           >
-            Token address:
+            {network?.chainId === ChainId.SKALE
+              ? 'Will top up sFUEL balance on SKALE'
+              : 'Token address:'}
           </Typography>
         </Grid>
-
         <Grid
           item
           container
@@ -198,10 +205,16 @@ export const RequestData: FC<RequestDataProps> = ({
             }
           >
             <Link
-              to={network?.scanUrl + '/address/' + network?.hmtAddress}
+              to={
+                network?.chainId === ChainId.SKALE
+                  ? network?.scanUrl
+                  : network?.scanUrl + '/address/' + network?.hmtAddress
+              }
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
-              {network?.hmtAddress}
+              {network?.chainId === ChainId.SKALE
+                ? 'Link to SKALE Explorer'
+                : network?.hmtAddress}
             </Link>
           </Typography>
         </Grid>
