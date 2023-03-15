@@ -7,30 +7,26 @@ interface IEscrow {
         Launched,
         Exchanged,
         Recorded,
-        Paid,
         Completed,
         Cancelled
     }
 
+    struct OracleWithFee {
+        address oracle;
+        uint256 feePercentage;
+    }
+
     function status() external view returns (EscrowStatuses);
 
-    function exchange() external;
+    function exchange(string memory _url, string memory _hash) external;
 
-    function storeResults(
-        address _worker,
-        string memory _url,
-        string memory _hash
-    ) external;
+    function record(string memory _url, string memory _hash) external;
 
     function bulkPayOut(
+        uint256 _txId,
         address[] memory _recipients,
-        uint256[] memory _amounts,
-        uint256 _txId
+        uint256[] memory _amounts
     ) external;
-
-    function complete() external;
-
-    function abort() external;
 
     function cancel() external;
 }

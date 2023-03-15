@@ -19,17 +19,20 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
     bytes4 private constant FUNC_SELECTOR_TRANSFER =
         bytes4(keccak256('transfer(address,uint256)'));
 
-    string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
+    string private constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
+    uint256 private constant MAX_ORACLE_FEE_PERCENTAGE = 20;
+    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
+    uint32 private constant BULK_MAX_COUNT = 100;
 
     event Launched(
         address _launcher,
-        string _manifest,
-        string _hash,
-        uint256 _solutionsRequested,
+        string _manifestUrl,
+        string _manifestHash,
+        uint256 _requiredSubmissions,
         uint256 _duration
     );
-    event Exchanged();
-    event IntermediateStorage(address _worker, string _url, string _hash);
+    event Exchanged(string _url, string _hash);
+    event Recorded(string _url, string _hash);
     event BulkTransfer(
         uint256 indexed _txId,
         address[] _recipients,
@@ -47,11 +50,9 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
     address public reputationOracle;
     address public canceler;
 
-    uint256 public recordingOracleStake;
-    uint256 public reputationOracleStake;
-
-    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
-    uint32 private constant BULK_MAX_COUNT = 100;
+    uint256 public exchangeOracleFeePercentage;
+    uint256 public recordingOracleFeePercentage;
+    uint256 public reputationOracleFeePercentage;
 
     address public token;
 
@@ -59,6 +60,8 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
     string public manifestHash;
     uint256 public remainingSolutions;
 
+    string public rawResultsUrl;
+    string public rawResultsHash;
     string public finalResultsUrl;
     string public finalResultsHash;
 
@@ -66,79 +69,101 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
     constructor(
         address _token,
-        address _canceler,
+        string memory _manifestUrl,
+        string memory _manifestHash,
+        uint256 _requiredSubmissions,
         uint256 _duration,
-        address _exchangeOracle,
-        address _reputationOracle,
-        address _recordingOracle,
-        uint256 _reputationOracleStake,
-        uint256 _recordingOracleStake,
-        string memory _url,
-        string memory _hash,
-        uint256 _solutionsRequested
+        address _canceler,
+        OracleWithFee memory _exchangeOracle,
+        OracleWithFee memory _reputationOracle,
+        OracleWithFee memory _recordingOracle
     ) {
         require(_token != address(0), ERROR_ZERO_ADDRESS);
+
+        require(bytes(_manifestUrl).length != 0, 'Missing manifest url');
+        require(bytes(_manifestHash).length != 0, 'Missing manifest hash');
+        require(_requiredSubmissions != 0, 'Missing required submissions');
+        require(_duration != 0, 'Missing duration');
+
         require(_canceler != address(0), ERROR_ZERO_ADDRESS);
-        require(_exchangeOracle != address(0), ERROR_ZERO_ADDRESS);
-        require(_reputationOracle != address(0), ERROR_ZERO_ADDRESS);
-        require(_recordingOracle != address(0), ERROR_ZERO_ADDRESS);
-        require(_solutionsRequested > 0, 'Invalid or missing solutions');
+        require(_exchangeOracle.oracle != address(0), ERROR_ZERO_ADDRESS);
+        require(_reputationOracle.oracle != address(0), ERROR_ZERO_ADDRESS);
+        require(_recordingOracle.oracle != address(0), ERROR_ZERO_ADDRESS);
         require(
-            _reputationOracleStake.add(_recordingOracleStake) <= 100,
-            'Stake out of bounds'
+            _exchangeOracle
+                .feePercentage
+                .add(_reputationOracle.feePercentage)
+                .add(_recordingOracle.feePercentage) <=
+                MAX_ORACLE_FEE_PERCENTAGE,
+            'Fee percentage out of bounds'
         );
 
         token = _token;
         launcher = _msgSender();
         canceler = _canceler;
-        exchangeOracle = _exchangeOracle;
-        reputationOracle = _reputationOracle;
-        recordingOracle = _recordingOracle;
+        exchangeOracle = _exchangeOracle.oracle;
+        reputationOracle = _reputationOracle.oracle;
+        recordingOracle = _recordingOracle.oracle;
 
-        reputationOracleStake = _reputationOracleStake;
-        recordingOracleStake = _recordingOracleStake;
+        exchangeOracleFeePercentage = _exchangeOracle.feePercentage;
+        reputationOracleFeePercentage = _reputationOracle.feePercentage;
+        recordingOracleFeePercentage = _recordingOracle.feePercentage;
 
-        manifestUrl = _url;
-        manifestHash = _hash;
-        remainingSolutions = _solutionsRequested;
+        manifestUrl = _manifestUrl;
+        manifestHash = _manifestHash;
+        remainingSolutions = _requiredSubmissions;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
 
         status = EscrowStatuses.Launched;
-        emit Launched(launcher, _url, _hash, _solutionsRequested, _duration);
+        emit Launched(
+            launcher,
+            _manifestUrl,
+            _manifestHash,
+            _requiredSubmissions,
+            _duration
+        );
     }
 
-    function exchange() external override notExpired {
+    function exchange(
+        string memory _url,
+        string memory _hash
+    ) external override notExpired {
         require(_msgSender() == exchangeOracle, 'Invalid handler');
+        require(bytes(_url).length != 0, 'Missing url');
+        require(bytes(_hash).length != 0, 'Missing hash');
         require(
             status == EscrowStatuses.Launched,
             'Escrow not in Launched state'
         );
 
+        rawResultsUrl = _url;
+        rawResultsHash = _hash;
         status = EscrowStatuses.Exchanged;
-        emit Exchanged();
+        emit Exchanged(_url, _hash);
     }
 
-    function storeResults(
-        address _worker,
+    function record(
         string memory _url,
         string memory _hash
     ) external override notExpired {
         require(_msgSender() == recordingOracle, 'Invalid handler');
+        require(bytes(_url).length != 0, 'Missing url');
+        require(bytes(_hash).length != 0, 'Missing hash');
         require(
             status == EscrowStatuses.Exchanged,
             'Escrow not in Exchanged state'
         );
 
-        _storeResult(_url, _hash);
-
+        finalResultsUrl = _url;
+        finalResultsHash = _hash;
         status = EscrowStatuses.Recorded;
-        emit IntermediateStorage(_worker, _url, _hash);
+        emit Recorded(_url, _hash);
     }
 
     function bulkPayOut(
+        uint256 _txId,
         address[] memory _recipients,
-        uint256[] memory _amounts,
-        uint256 _txId
+        uint256[] memory _amounts
     ) external override notExpired nonReentrant {
         require(_msgSender() == reputationOracle, 'Invalid handler');
         require(
@@ -161,10 +186,14 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
-        require(balance < aggregatedBulkAmount, 'Not enough balance to payout');
+        require(
+            aggregatedBulkAmount <= balance,
+            'Not enough balance to payout'
+        );
 
         (
             uint256[] memory finalAmounts,
+            uint256 exchangeOracleFee,
             uint256 reputationOracleFee,
             uint256 recordingOracleFee
         ) = _finalizePayouts(_amounts);
@@ -176,39 +205,35 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
             }
         }
 
+        _safeTransfer(exchangeOracle, exchangeOracleFee);
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        balance = getBalance();
         remainingSolutions = remainingSolutions.sub(_recipients.length);
 
         bool _isPartial = true;
 
-        if (remainingSolutions == 0 || balance == 0) {
-            if (balance > 0) {
+        if (remainingSolutions == 0) {
+            balance = getBalance();
+
+            if (balance != 0) {
                 _safeTransfer(canceler, balance);
             }
+
             _isPartial = false;
-            status = EscrowStatuses.Paid;
+            status = EscrowStatuses.Completed;
+            emit Completed();
         }
 
         emit BulkTransfer(_txId, _recipients, finalAmounts, _isPartial);
     }
 
-    function complete() external override notExpired {
-        require(_msgSender() == reputationOracle, 'Invalid handler');
-        require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
+    function cancel() public override trusted nonReentrant {
+        require(
+            status != EscrowStatuses.Completed,
+            'Escrow in Completed state'
+        );
 
-        status = EscrowStatuses.Completed;
-        emit Completed();
-    }
-
-    function abort() external override trusted notComplete notPaid {
-        cancel();
-        selfdestruct(payable(canceler));
-    }
-
-    function cancel() public override trusted notComplete notPaid nonReentrant {
         uint256 balance = getBalance();
 
         if (balance != 0) {
@@ -231,29 +256,52 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
     function _finalizePayouts(
         uint256[] memory _amounts
-    ) internal view returns (uint256[] memory, uint256, uint256) {
+    ) internal view returns (uint256[] memory, uint256, uint256, uint256) {
         uint256[] memory finalAmounts = new uint256[](_amounts.length);
+        uint256 exchangeOracleFee = 0;
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
-            uint256 singleReputationOracleFee = reputationOracleStake
-                .mul(_amounts[j])
-                .div(100);
-            uint256 singleRecordingOracleFee = recordingOracleStake
-                .mul(_amounts[j])
-                .div(100);
-            uint256 amount = _amounts[j].sub(singleReputationOracleFee).sub(
-                singleRecordingOracleFee
-            );
-            reputationOracleFee = reputationOracleFee.add(
-                singleReputationOracleFee
-            );
-            recordingOracleFee = recordingOracleFee.add(
-                singleRecordingOracleFee
-            );
-            finalAmounts[j] = amount;
+            uint256 totalOracleFee = 0;
+
+            {
+                uint256 singleExchangeOracleFee = exchangeOracleFeePercentage
+                    .mul(_amounts[j])
+                    .div(100);
+                exchangeOracleFee = exchangeOracleFee.add(
+                    singleExchangeOracleFee
+                );
+                totalOracleFee = totalOracleFee.add(singleExchangeOracleFee);
+            }
+
+            {
+                uint256 singleReputationOracleFee = reputationOracleFeePercentage
+                        .mul(_amounts[j])
+                        .div(100);
+                reputationOracleFee = reputationOracleFee.add(
+                    singleReputationOracleFee
+                );
+                totalOracleFee = totalOracleFee.add(singleReputationOracleFee);
+            }
+
+            {
+                uint256 singleRecordingOracleFee = recordingOracleFeePercentage
+                    .mul(_amounts[j])
+                    .div(100);
+                recordingOracleFee = recordingOracleFee.add(
+                    singleRecordingOracleFee
+                );
+                totalOracleFee = totalOracleFee.add(singleRecordingOracleFee);
+            }
+
+            finalAmounts[j] = _amounts[j].sub(totalOracleFee);
         }
-        return (finalAmounts, reputationOracleFee, recordingOracleFee);
+        return (
+            finalAmounts,
+            exchangeOracleFee,
+            reputationOracleFee,
+            recordingOracleFee
+        );
     }
 
     function _safeTransfer(address to, uint256 value) internal {
@@ -277,19 +325,6 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
                 _msgSender() == recordingOracle,
             'Not trusted handler'
         );
-        _;
-    }
-
-    modifier notComplete() {
-        require(
-            status != EscrowStatuses.Completed,
-            'Escrow in Completed state'
-        );
-        _;
-    }
-
-    modifier notPaid() {
-        require(status != EscrowStatuses.Paid, 'Escrow in Paid state');
         _;
     }
 

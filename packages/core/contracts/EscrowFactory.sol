@@ -2,14 +2,16 @@
 
 pragma solidity >=0.6.2;
 
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
 import './interfaces/IStaking.sol';
+import './interfaces/IEscrow.sol';
 import './Escrow.sol';
 
 contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
-    // all Escrows will have this duration.
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
 
@@ -34,15 +36,16 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function createEscrow(
         address token,
-        address exchangeOracle,
-        address reputationOracle,
-        address recordingOracle,
-        uint256 reputationOracleStake,
-        uint256 recordingOracleStake,
+        uint256 allocationAmount,
         string memory manifestUrl,
         string memory manifestHash,
-        uint256 solutionsRequested,
-        uint256 allocationAmount
+        uint256 requiredSubmissions,
+        address exchangeOracle,
+        uint256 exchangeOracleFeePercentage,
+        address reputationOracle,
+        uint256 reputationOracleFeePercentage,
+        address recordingOracle,
+        uint256 recordingOracleFeePercentage
     ) public {
         require(
             IStaking(staking).hasAvailableStake(_msgSender()),
@@ -63,21 +66,30 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
         Escrow escrow = new Escrow(
             token,
-            _msgSender(),
-            STANDARD_DURATION,
-            exchangeOracle,
-            reputationOracle,
-            recordingOracle,
-            reputationOracleStake,
-            recordingOracleStake,
             manifestUrl,
             manifestHash,
-            solutionsRequested
+            requiredSubmissions,
+            STANDARD_DURATION,
+            _msgSender(),
+            IEscrow.OracleWithFee({
+                oracle: exchangeOracle,
+                feePercentage: exchangeOracleFeePercentage
+            }),
+            IEscrow.OracleWithFee({
+                oracle: reputationOracle,
+                feePercentage: reputationOracleFeePercentage
+            }),
+            IEscrow.OracleWithFee({
+                oracle: recordingOracle,
+                feePercentage: recordingOracleFeePercentage
+            })
         );
 
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
+
+        // Allocate the staking tokens
         IStaking(staking).allocateFrom(
             _msgSender(),
             lastEscrow,
