@@ -7,6 +7,7 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export const ESCROW_NETWORKS: {
@@ -54,4 +55,11 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   },
+  // [ChainId.SKALE]: {
+  //   chainId: ChainId.SKALE,
+  //   title: 'SKALE Human Protocol chain',
+  //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  //   factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
+  //   hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+  // },
 };

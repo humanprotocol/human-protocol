@@ -12,7 +12,7 @@ import {
   walletConnectProvider,
 } from '@web3modal/ethereum';
 import { configureChains, createClient } from 'wagmi';
-import { fortune } from './chains';
+import { fortune, wagmiSkaleHP } from './chains';
 
 // 1. Get projectID at https://cloud.walletconnect.com
 if (!process.env.REACT_APP_WALLETCONNECT_PROJECT_ID) {
@@ -28,6 +28,7 @@ const chains = [
   mainnet,
   polygon,
   bsc,
+  wagmiSkaleHP,
   goerli,
   polygonMumbai,
   bscTestnet,
