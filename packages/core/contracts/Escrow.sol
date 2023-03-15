@@ -228,7 +228,14 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
         emit BulkTransfer(_txId, _recipients, finalAmounts, _isPartial);
     }
 
-    function cancel() public override trusted nonReentrant {
+    function cancel() public override nonReentrant {
+        require(
+            _msgSender() == launcher ||
+                _msgSender() == exchangeOracle ||
+                _msgSender() == reputationOracle ||
+                _msgSender() == recordingOracle,
+            'Not trusted handler'
+        );
         require(
             status != EscrowStatuses.Completed,
             'Escrow in Completed state'
@@ -306,26 +313,6 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
     function _safeTransfer(address to, uint256 value) internal {
         SafeERC20.safeTransfer(IERC20(token), to, value);
-    }
-
-    function _storeResult(string memory _url, string memory _hash) internal {
-        bool writeOnchain = bytes(_hash).length != 0 || bytes(_url).length != 0;
-        if (writeOnchain) {
-            // Be sure both of them are not zero
-            finalResultsUrl = _url;
-            finalResultsHash = _hash;
-        }
-    }
-
-    modifier trusted() {
-        require(
-            _msgSender() == launcher ||
-                _msgSender() == exchangeOracle ||
-                _msgSender() == reputationOracle ||
-                _msgSender() == recordingOracle,
-            'Not trusted handler'
-        );
-        _;
     }
 
     modifier notExpired() {
