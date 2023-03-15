@@ -12,8 +12,8 @@ $ yarn
 Before running the client app, you need to make sure that you have correct environment variables.
 
 ```
-REACT_APP_JOB_LAUNCHER_SERVER_URL=<Job launcher back-end API url>
-REACT_APP_JOB_LAUNCHER_ADDRESS=<Job launcher contract address>
+VITE_APP_JOB_LAUNCHER_SERVER_URL=<Job launcher back-end API url>
+VITE_APP_JOB_LAUNCHER_ADDRESS=<Job launcher contract address>
 ```
 
 Now run this command to start fortune launcher client.
@@ -46,5 +46,5 @@ $ yarn test
     - Output Directory: `build`
     - Install Command: `yarn install`
 7. Set Environnment Variables:
-    - REACT_APP_JOB_LAUNCHER_ADDRESS
-    - REACT_APP_JOB_LAUNCHER_SERVER_URL
+    - VITE_APP_JOB_LAUNCHER_ADDRESS
+    - VITE_APP_JOB_LAUNCHER_SERVER_URL

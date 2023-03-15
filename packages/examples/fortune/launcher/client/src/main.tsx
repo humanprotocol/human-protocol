@@ -73,7 +73,7 @@ const client = createClient({
   provider,
   webSocketProvider,
 });
-const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+const baseUrl = import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL;
 axios.get(`${baseUrl}/config`).then((r) =>
   loadStripe(r.data.publishableKey).then((stripePromise) =>
     root.render(
