@@ -3,9 +3,12 @@ import { Module } from "@nestjs/common";
 import { PaymentService } from "./payment.service";
 import { MinioModule } from 'nestjs-minio-client';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PaymentEntity } from "./payment.entity";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([PaymentEntity]),
     ConfigModule,
     MinioModule.registerAsync({
       imports: [ConfigModule],

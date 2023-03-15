@@ -4,6 +4,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import path from "path";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { NS } from "../common/constants";
+import { WebhookIncomingEntity } from "../webhook/webhook-incoming.entity";
+import { WebhookOutgoingEntity } from "../webhook/webhook-outgoing.entity";
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
 
@@ -17,7 +19,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
         return {
           name: "default",
           type: "postgres",
-          entities: [],
+          entities: [WebhookIncomingEntity, WebhookOutgoingEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,

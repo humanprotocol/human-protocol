@@ -3,22 +3,15 @@ import { IBase } from "./base";
 
 export interface IJob extends IBase {
   userId: number;
-  networkId: string;
+  chainId: number;
   dataUrl: string;
-  datasetLength: number;
   labels: string[];
-  annotationsPerImage: number;
+  requestsRequired: number;
+  requesterTitle: string;
   requesterDescription: string;
   requesterAccuracyTarget: number;
-  recordingOracleAddress: string;
-  reputationOracleAddress: string;
-  exchangeOracleAddress: string;
-  recordingOracleUrl: string;
-  reputationOracleUrl: string;
-  exchangeOracleUrl: string;
-  tokenAddress: string;
+  escrowAddress: string;
   price: number;
-  fee: number;
   mode: JobMode;
   requestType: JobRequestType;
   status: JobStatus;
@@ -26,13 +19,9 @@ export interface IJob extends IBase {
 
 export enum JobStatus {
   PENDING = "PENDING",
-  PAID = "PAID",
-  ESCROW_CREATED = "ESCROW_CREATED",
-  ESCROW_SETUP = "ESCROW_SETUP",
   LAUNCHED = "LAUNCHED",
-  COMPLETE = "COMPLETE",
-  CANCELLED = "CANCELLED",
-  REJECTED = "REJECTED",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
 }
 
 export enum EscrowStatus {
@@ -45,10 +34,12 @@ export enum EscrowStatus {
 
 export enum JobMode {
   BATCH = "BATCH",
+  DESCRIPTIVE = "DESCRIPTIVE",
 }
 
 export enum JobRequestType {
   IMAGE_LABEL_BINARY = "IMAGE_LABEL_BINARY",
+  FORTUNE = "FORTUNE",
 }
 
 export const Job = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
