@@ -15,6 +15,12 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     uint256 constant STANDARD_DURATION = 8640000;
     string constant ERROR_ZERO_ADDRESS = 'EscrowFactory: Zero Address';
 
+    struct DepositData {
+        address depositor;
+        uint256 amount;
+        uint256 allocationAmount;
+    }
+
     uint256 public counter;
     mapping(address => uint256) public escrowCounters;
     address public lastEscrow;
@@ -36,8 +42,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function createEscrow(
         address token,
-        uint256 amount,
-        uint256 allocationAmount,
+        DepositData memory depositData,
         string memory manifestUrl,
         string memory manifestHash,
         uint256 requiredSubmissions,
@@ -63,6 +68,15 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         require(
             IStaking(staking).hasAvailableStake(recordingOracle),
             'Recording Oracle needs to stake HMT tokens to create an escrow.'
+        );
+        require(depositData.depositor != address(0), ERROR_ZERO_ADDRESS);
+        require(
+            depositData.amount > 0,
+            'EscrowFactory: Invalid deposit amount'
+        );
+        require(
+            depositData.allocationAmount > 0,
+            'EscrowFactory: Invalid allocation amount'
         );
 
         Escrow escrow = new Escrow(
@@ -91,13 +105,18 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         lastEscrow = address(escrow);
 
         // Deposit the escrow
-        _safeTransferFrom(token, _msgSender(), lastEscrow, amount);
+        _safeTransferFrom(
+            token,
+            depositData.depositor,
+            lastEscrow,
+            depositData.amount
+        );
 
         // Allocate the staking tokens
         IStaking(staking).allocateFrom(
             _msgSender(),
             lastEscrow,
-            allocationAmount
+            depositData.allocationAmount
         );
 
         emit Launched(token, lastEscrow);

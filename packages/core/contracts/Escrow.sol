@@ -18,7 +18,10 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
         bytes4(keccak256('balanceOf(address)'));
 
     string private constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
-    uint256 private constant MAX_ORACLE_FEE_PERCENTAGE = 20;
+    /*
+     * @TODO: Oracle fee percentage maximum threshold could be re-defined.
+     */
+    uint256 private constant MAX_ORACLE_FEE_PERCENTAGE = 100;
     uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
