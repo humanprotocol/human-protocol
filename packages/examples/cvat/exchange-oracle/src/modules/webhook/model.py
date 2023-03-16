@@ -1,11 +1,10 @@
 # pylint: disable=too-few-public-methods
 from sqlalchemy import Column, String, DateTime, Enum
 from sqlalchemy.sql import func
-from sqlalchemy.dialects import postgresql
 
 
 from .constants import Networks, WebhookTypes, WebhookStatuses
-from src.db.base_class import Base
+from src.db import Base
 
 
 class Webhook(Base):
