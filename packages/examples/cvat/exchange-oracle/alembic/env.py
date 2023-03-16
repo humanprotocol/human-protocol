@@ -22,7 +22,9 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.db.base import Base
+from src.db import Base
+from src.modules.webhook.model import Webhook
+from src.modules.cvat.model import Task, Job
 
 target_metadata = Base.metadata
 
