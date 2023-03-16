@@ -1,7 +1,11 @@
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
 import Web3 from 'web3';
 import { ChainId } from '../constants/networks';
-import { AnonymousParams, AnonymousPoW, TransactionParams } from '@skaleproject/pow-ethers';
+import {
+  AnonymousParams,
+  AnonymousPoW,
+  TransactionParams,
+} from '@skaleproject/pow-ethers';
 
 export const getWeb3 = (rpcUrl: string): Web3 => {
   const web3 = new Web3(rpcUrl);
@@ -13,8 +17,15 @@ export const getWeb3 = (rpcUrl: string): Web3 => {
   return web3;
 };
 
-export const getFaucetBalance = async (web3: Web3, hmtAddress: string, faucetAddress?: string) => {
-  if ((await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() && faucetAddress)
+export const getFaucetBalance = async (
+  web3: Web3,
+  hmtAddress: string,
+  faucetAddress?: string
+) => {
+  if (
+    (await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() &&
+    faucetAddress
+  )
     return await web3.eth.getBalance(faucetAddress);
   const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
   const balance = web3.utils.fromWei(
@@ -33,9 +44,14 @@ export const sendFunds = async (
   const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
   let txHash = '';
   try {
-    if ((await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() && faucetAddress) {
+    if (
+      (await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() &&
+      faucetAddress
+    ) {
       const currentProvider = web3.currentProvider as any;
-      const skalePOW = new AnonymousPoW({ rpcUrl: currentProvider.host } as AnonymousParams);
+      const skalePOW = new AnonymousPoW({
+        rpcUrl: currentProvider.host,
+      } as AnonymousParams);
       const txParams = {
         to: faucetAddress,
         data: '0x0c11dedd000000000000000000000000' + toAddress.slice(2),
@@ -67,11 +83,21 @@ export const sendFunds = async (
   return txHash;
 };
 
-export const checkFaucetBalance = async (web3: Web3, hmtAddress: string, faucetAddress?: string) => {
-  if ((await getFaucetBalance(web3, hmtAddress, faucetAddress)) < process.env.DAILY_LIMIT)
+export const checkFaucetBalance = async (
+  web3: Web3,
+  hmtAddress: string,
+  faucetAddress?: string
+) => {
+  if (
+    (await getFaucetBalance(web3, hmtAddress, faucetAddress)) <
+    process.env.DAILY_LIMIT
+  )
     return false;
 
-  if ((await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() && faucetAddress)
+  if (
+    (await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() &&
+    faucetAddress
+  )
     return true;
 
   const HMT = new web3.eth.Contract(hmtAbi as [], hmtAddress);
