@@ -104,7 +104,7 @@ jobs:
       ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
       ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-      ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
+      # ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
       POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
