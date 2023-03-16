@@ -40,6 +40,28 @@ class PolygonMumbaiConfig:
     addr = os.environ.get("POLYGON_MUMBAI_ADDR")
 
 
+class CronConfig:
+    process_incoming_webhooks_int = os.environ.get(
+        "PROCESS_INCOMING_WEBHOOKS_INT", 3000
+    )
+    process_incoming_webhooks_chunk_size = os.environ.get(
+        "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
+    )
+
+
+class CvatConfig:
+    cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
+    cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
+    cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
+    cvat_admin_user_id = int(os.environ.get("CVAT_ADMIN_USER_ID", 1))
+
+    cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
+    cvat_job_segment_size = int(os.environ.get("CVAT_JOB_SEGMENT_SIZE", 150))
+    cvat_default_image_quality = int(os.environ.get("CVAT_DEFAULT_IMAGE_QUALITY", 70))
+
+    cvat_incoming_webhooks_url = os.environ.get("CVAT_INCOMING_WEBHOOKS_URL")
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -49,3 +71,5 @@ class Config:
     polygon_mumbai = PolygonMumbaiConfig
 
     postgres_config = Postgres
+    cron_config = CronConfig
+    cvat_config = CvatConfig
