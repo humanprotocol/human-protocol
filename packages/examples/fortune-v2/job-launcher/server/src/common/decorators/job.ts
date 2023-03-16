@@ -6,7 +6,7 @@ export interface IJob extends IBase {
   chainId: number;
   dataUrl: string;
   labels: string[];
-  requestsRequired: number;
+  submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
   requesterAccuracyTarget: number;
@@ -19,7 +19,10 @@ export interface IJob extends IBase {
 
 export enum JobStatus {
   PENDING = "PENDING",
+  PAID = "PAID",
   LAUNCHED = "LAUNCHED",
+  EXCHANGED = "EXCHANGED",
+  RECORDED = "RECORDED",
   COMPLETED = "COMPLETED",
   FAILED = "FAILED",
 }

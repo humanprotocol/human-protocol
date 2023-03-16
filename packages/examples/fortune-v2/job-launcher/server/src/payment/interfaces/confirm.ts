@@ -1,3 +1,4 @@
 export interface IPaymentConfirmDto {
-  paymentId: string
+  jobId: number;
+  paymentId: string;
 }

@@ -13,7 +13,7 @@ export class PaymentEntity extends BaseEntity implements IPayment {
   @Column({ type: "int" })
   public amount: number;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   public clientSecret: string;
 
   @Column({

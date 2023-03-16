@@ -17,7 +17,7 @@ export class JobEntity extends BaseEntity implements IJob {
   public data: string;
 
   @Column({ type: "int" })
-  public requestsRequired: number;
+  public submissionsRequired: number;
 
   @Column("varchar", { array: true })
   public labels: string[];

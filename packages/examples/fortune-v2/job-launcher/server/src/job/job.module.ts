@@ -8,6 +8,7 @@ import { JobController } from "./job.controller";
 import { JobCron } from "./job.cron";
 import { StorageModule } from "../storage/storage.module";
 import { HttpModule } from "@nestjs/axios";
+import { PaymentModule } from "../payment/payment.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { HttpModule } from "@nestjs/axios";
     ConfigModule,
     StorageModule,
     HttpModule,
+    PaymentModule
   ],
   controllers: [JobController],
   providers: [Logger, JobService, JobCron],
