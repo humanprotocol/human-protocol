@@ -36,6 +36,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function createEscrow(
         address token,
+        uint256 amount,
         uint256 allocationAmount,
         string memory manifestUrl,
         string memory manifestHash,
@@ -89,6 +90,9 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
 
+        // Deposit the escrow
+        _safeTransferFrom(token, _msgSender(), lastEscrow, amount);
+
         // Allocate the staking tokens
         IStaking(staking).allocateFrom(
             _msgSender(),
@@ -105,6 +109,15 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function hasEscrow(address _address) public view returns (bool) {
         return escrowCounters[_address] != 0;
+    }
+
+    function _safeTransferFrom(
+        address token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
+        SafeERC20.safeTransferFrom(IERC20(token), from, to, value);
     }
 
     // solhint-disable-next-line no-empty-blocks

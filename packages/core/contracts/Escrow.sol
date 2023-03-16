@@ -16,8 +16,6 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
     bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
         bytes4(keccak256('balanceOf(address)'));
-    bytes4 private constant FUNC_SELECTOR_TRANSFER =
-        bytes4(keccak256('transfer(address,uint256)'));
 
     string private constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
     uint256 private constant MAX_ORACLE_FEE_PERCENTAGE = 20;
