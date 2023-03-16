@@ -68,21 +68,18 @@ async function main() {
 
   if (reputationAddress) {
     const Reputation = await ethers.getContractFactory('Reputation');
-    await upgrades.forceImport(reputationAddress, Reputation, {
-      kind: 'uups',
-    });
-    // const reputationContract = await upgrades.upgradeProxy(
-    //   reputationAddress,
-    //   Reputation
-    // );
-    // await reputationContract.deployed();
-    // console.log('Reputation Proxy Address: ', reputationContract.address);
-    // console.log(
-    //   'New Reputation Implementation Address: ',
-    //   await upgrades.erc1967.getImplementationAddress(
-    //     reputationContract.address
-    //   )
-    // );
+    const reputationContract = await upgrades.upgradeProxy(
+      reputationAddress,
+      Reputation
+    );
+    await reputationContract.deployed();
+    console.log('Reputation Proxy Address: ', reputationContract.address);
+    console.log(
+      'New Reputation Implementation Address: ',
+      await upgrades.erc1967.getImplementationAddress(
+        reputationContract.address
+      )
+    );
   }
 }
 
