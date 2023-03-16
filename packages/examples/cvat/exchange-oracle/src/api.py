@@ -1,9 +1,11 @@
 """ API endpoints """
 from fastapi import APIRouter, FastAPI
+
 from .api_schema import ValidationErrorResponse, ResponseError, MetaResponse
 from .config import Config
 
 from .modules.webhook.api import router as webhook_router
+from .modules.cvat.api import router as cvat_router
 
 
 greet_router = APIRouter()
@@ -46,5 +48,6 @@ def init_api(app: FastAPI) -> FastAPI:
 
     app.include_router(greet_router)
     app.include_router(webhook_router, prefix="/webhook", responses=default_responses)
+    app.include_router(cvat_router, prefix="/webhook", responses=default_responses)
 
     return app
