@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - packages/core/**
+      - packages/core/contracts/**
       - .github/workflows/cd-deploy-contracts.yaml
 
 jobs:
