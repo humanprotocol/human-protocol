@@ -74,6 +74,6 @@ export const REPUTATION_NETWORKS: {
     chainId: ChainId.MOONBASE_ALPHA,
     title: 'Moonbase Alpha',
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-    reputationAddress: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+    reputationAddress: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
   },
 };

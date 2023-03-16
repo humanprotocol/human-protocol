@@ -66,12 +66,12 @@
 
 |🟠 Moonbase Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
-|2022/05/31                  | HMToken        | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 | N/A                                        |
-|2023/03/10                  | EscrowFactory  | 0x4DCB3906A65B77f6a588087652E6Dd9685d1F67f | 0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB |
-|2023/01/30                  | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92 |
-|2023/01/30                  | RewardPool     | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 | 0x2bfA592DBDaF434DDcbb893B1916120d181DAD18 |
+|2023/03/16                  | HMToken        | 0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3 | N/A                                        |
+|2023/03/16                  | EscrowFactory  | 0x4DCB3906A65B77f6a588087652E6Dd9685d1F67f | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed |
+|2023/03/16                  | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0xBFC7009F3371F93F3B54DdC8caCd02914a37495c |
+|2023/03/16                  | RewardPool     | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
 |2023/01/30                  | EthKVStore     | 0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d | N/A                                        |
-|2023/01/30                  | Reputation     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29 |
+|2023/03/16                  | Reputation     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
 
 |🟢 Avalanche (Mainnet)      | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -93,8 +93,8 @@
 
 |🟢 SKALE Human Protocol Chain (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
-|2023/01/18                 | HMToken        | 0xa91B2C7d9704aeE8918460fc4375866e2c415A67 | N/A                                        |
-|2023/02/28                 | EscrowFactory  | 0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF | 0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c |
+|2023/01/18                  | HMToken        | 0xa91B2C7d9704aeE8918460fc4375866e2c415A67 | N/A                                        |
+|2023/02/28                  | EscrowFactory  | 0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF | 0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c |
 |2023/02/28                  | Staking        | 0x1D9f5Dc3078e9F734E4749f98176C2370516447f | 0xcc98Ad1C0915e271650e43714B20272AC947Ba9A |
 |2023/02/28                  | RewardPool     | 0xca8745D76588C2aa8bA13E8ef14E986b8A74EE3E | 0xEc321ec45dDfBE9049550d461818f4E7759bBE89 |
 |2023/02/28                  | EthKVStore     | 0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6 | N/A                                        |
@@ -130,7 +130,7 @@
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/05/31                  | EscrowFactory  | 0x3Cd0B117Be4CC1e31c8d7d1eD8b32208a2820902 |                                            |
 |2022/05/31                  | EthKVStore     | 0x64009ca5fb4b34769F7240c6073FEc34bf5b64E3 | N/A                                        |
-|2023/01/30                  | EscrowFactory  | 0xD8c35adC3b386d092846a93015220b7Fe8efD938 | 0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB |
+|2022/05/31                  | HMToken        | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 | N/A                                        |
 
 |🟢 Polygon (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|

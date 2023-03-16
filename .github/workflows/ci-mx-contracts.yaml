@@ -1,0 +1,49 @@
+name: CI MX Contracts
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+env:
+  RUST_TOOLCHAIN: nightly-2022-12-08
+  VMTOOLS_VERSION: v1.4.60
+  PIP_MXPY_ARGS: multiversx-sdk-cli==v6.0.0
+  CLIPPY_ARGS: --all-targets --all-features
+
+defaults:
+  run:
+    working-directory: ./packages/core/mx/
+
+jobs:
+  rust_test:
+    name: Rust tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Run the rust tests
+        env:
+          RUSTFLAGS: ""
+        run:
+          cargo test
+
+  clippy_check:
+    name: Clippy linter check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: clippy
+      - uses: giraffate/clippy-action@v1
+        env:
+          RUSTFLAGS: ""
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: ${{ env.CLIPPY_ARGS}}
