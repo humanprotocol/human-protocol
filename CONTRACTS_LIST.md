@@ -66,12 +66,12 @@
 
 |🟠 Moonbase Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
-|2022/05/31                  | HMToken        | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 | N/A                                        |
-|2023/03/10                  | EscrowFactory  | 0x4DCB3906A65B77f6a588087652E6Dd9685d1F67f | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed |
-|2023/01/30                  | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0xBFC7009F3371F93F3B54DdC8caCd02914a37495c |
-|2023/01/30                  | RewardPool     | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
+|2023/03/16                  | HMToken        | 0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3 | N/A                                        |
+|2023/03/16                  | EscrowFactory  | 0x4DCB3906A65B77f6a588087652E6Dd9685d1F67f | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed |
+|2023/03/16                  | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0xBFC7009F3371F93F3B54DdC8caCd02914a37495c |
+|2023/03/16                  | RewardPool     | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
 |2023/01/30                  | EthKVStore     | 0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d | N/A                                        |
-|2023/01/30                  | Reputation     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
+|2023/03/16                  | Reputation     | 0xF09f451eC04cAb1b1FAe98C86F45291B00E52b03 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
 
 |🟢 Avalanche (Mainnet)      | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -130,6 +130,7 @@
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/05/31                  | EscrowFactory  | 0x3Cd0B117Be4CC1e31c8d7d1eD8b32208a2820902 |                                            |
 |2022/05/31                  | EthKVStore     | 0x64009ca5fb4b34769F7240c6073FEc34bf5b64E3 | N/A                                        |
+|2022/05/31                  | HMToken        | 0xe4C8eC5d057EacF40060b2174627a4941a5c8127 | N/A                                        |
 
 |🟢 Polygon (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
