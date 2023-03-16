@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "exchange_oracle"}]
 
 [tool.poetry.dependencies]
-python = "3.9.2"
+python = "^3.10"
 fastapi = "^0.92.0"
 uvicorn = "^0.20.0"
 python-dotenv = "^0.21.1"

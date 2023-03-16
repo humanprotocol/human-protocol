@@ -1,17 +1,16 @@
 import logging
+from sqlalchemy import update
 
 from src.db import SessionLocal
 from src.config import CronConfig
-from src.modules.webhook.service import get_pending_webhooks
 
-from src.utils.cvat import (
-    create_cloudstorage,
-    create_project,
-    create_task,
-    put_task_data,
-)
+from src.modules.cvat.cvat_calls import job_creation_process
 from src.utils.escrow import check_escrow_status, get_manifest
 from src.utils.helpers import parse_manifest
+
+from .model import Webhook, WebhookStatuses
+from .service import get_pending_webhooks
+
 
 LOG_MODULE = "[cron][webhook][process_incoming]"
 
@@ -33,10 +32,15 @@ def process_incoming_webhooks() -> None:
                 check_escrow_status(webhook.escrow_address)
                 manifest = get_manifest(webhook.escrow_address)
                 (bucket_name, region, labels) = parse_manifest(manifest)
-                cloudstorage = create_cloudstorage(bucket_name, region)
-                project = create_project(webhook.escrow_address, labels)
-                task = create_task(project.id, webhook.escrow_address)
-                put_task_data(task.id, cloudstorage)
+                job_creation_process(
+                    webhook.escrow_address, labels, bucket_name, region
+                )
+                upd = (
+                    update(Webhook)
+                    .where(Webhook.id == webhook.id)
+                    .values(status=WebhookStatuses.completed)
+                )
+                session.execute(upd)
 
         logger.info(f"{LOG_MODULE} Finishing cron job")
         return None

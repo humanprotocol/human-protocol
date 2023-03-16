@@ -12,8 +12,23 @@ configuration = Configuration(
 )
 
 
+def job_creation_process(
+    escrow_address: str, labels: list, bucket_name: str, region: str
+):
+    # Create a cloudstorage on CVAT for not storing datasets on CVAT instance
+    cloudstorage = 35  # = create_cloudstorage(bucket_name, region)
+    # Creating a project on CVAT. Necessary because otherwise webhooks aren't available
+    project = create_project(escrow_address, labels)
+    # Setup webhooks for a project (on job:update)
+    setup_cvat_webhooks(project.id)
+    # Task creation
+    task = create_task(project.id, escrow_address)
+    # Actual job creation on CVAT. Async process.
+    put_task_data(task.id, cloudstorage)
+
+
 # Not using cvat sdk because it fails to create cloudstorages because of the schema error
-def create_cloudstorage(bucket_name: str, region: str):
+def create_cloudstorage(bucket_name: str, region: str) -> int:
     cloudstorage_payload = {
         "provider_type": "AWS_S3_BUCKET",
         "resource": bucket_name,
@@ -37,7 +52,7 @@ def create_cloudstorage(bucket_name: str, region: str):
     return cvat_cloudstorage_id
 
 
-def create_project(escrow_address: str, labels: list):
+def create_project(escrow_address: str, labels: list) -> Dict:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         project_write_request = models.ProjectWriteRequest(
@@ -50,6 +65,32 @@ def create_project(escrow_address: str, labels: list):
             return data
         except exceptions.ApiException as e:
             logger.error(f"Exception when calling projects_api.create: {e}")
+
+
+# Not using cvat sdk because it throws error on creation because of the schema error
+def setup_cvat_webhooks(project_id: int) -> Dict:
+    logger = logging.getLogger("app")
+    webhook_payload = {
+        "target_url": Config.cvat_config.cvat_incoming_webhooks_url,
+        "description": "job upd",
+        "project_id": project_id,
+        "type": "project",
+        "content_type": "application/json",
+        "events": ["update:job", "create:task"],
+        "is_active": True,
+        "secret": "test",
+    }
+
+    setup_webhook_response = requests.post(
+        url=f"{Config.cvat_config.cvat_url}/api/webhooks",
+        auth=(Config.cvat_config.cvat_admin, Config.cvat_config.cvat_admin_pass),
+        json=webhook_payload,
+    )
+
+    setup_webhook_response.raise_for_status()
+    setup_webhook = setup_webhook_response.json()
+
+    return setup_webhook
 
 
 def create_task(project_id: int, escrow_address: str) -> Dict:
@@ -92,6 +133,7 @@ def put_task_data(task_id: int, cloudstorage_id: int) -> None:
         data_request = models.DataRequest(
             chunk_size=Config.cvat_config.cvat_job_segment_size,
             cloud_storage_id=cloudstorage_id,
+            image_quality=Config.cvat_config.cvat_default_image_quality,
             server_files=content,
             use_cache=True,
             use_zip_chunks=True,
