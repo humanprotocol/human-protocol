@@ -2005,7 +2005,7 @@
     "@ethersproject/constants" "^5.7.0"
     "@ethersproject/logger" "^5.7.0"
 
-"@ethersproject/wallet@5.7.0":
+"@ethersproject/wallet@5.7.0", "@ethersproject/wallet@^5.7.0":
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/@ethersproject/wallet/-/wallet-5.7.0.tgz#4e5d0790d96fe21d61d38fb40324e6c7ef350b2d"
   integrity sha512-MhmXlJXEJFBFVKrDLB4ZdDzxcBxQ3rLyCkhNqVu3CDYvR97E+8r01UgrI+TI99Le+aYm/in/0vp86guJuM7FCA==
@@ -3813,6 +3813,20 @@
   integrity sha512-OAPJUAtgeINhh/TAlUID4QTs53Njm7xzddaVlEs/SXwgtiD1tW22zAB/W1wdqfrpmikgaWQ9Fw6Ws+hsiRm5Vg==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
+
+"@skaleproject/pow-ethers@^0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@skaleproject/pow-ethers/-/pow-ethers-0.2.4.tgz#8fcdd7ee4d2e389916804d7c6d077511f086a77d"
+  integrity sha512-Ld2luziwmVKTt2sm8JHfHMZC3SxzvMZyQIvLNS+b1TWriHamchqvNHAiCmnXZQvCOvWqiufPzUCOPVa4Izr3RQ==
+  dependencies:
+    "@ethersproject/providers" "^5.7.2"
+    "@ethersproject/wallet" "^5.7.0"
+    "@skaleproject/pow" "*"
+
+"@skaleproject/pow@*":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@skaleproject/pow/-/pow-0.1.2.tgz#84e8366fa62f4bdb279cb4cee6e7c362cf22bf3f"
+  integrity sha512-ZpisYqfqniNJYc9To8VY3N21FqfzGOusUwsU6q46d1kkbQgPg1Tj2H3F+jCSKW+j/5xgaB2N74Q7DBdu+4yT4Q==
 
 "@solana/buffer-layout@^4.0.0":
   version "4.0.1"

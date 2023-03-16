@@ -16,6 +16,7 @@ import { ChainId, ESCROW_NETWORKS } from 'src/constants';
 import { EscrowNetwork } from 'src/types';
 
 const STEPS = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
+const STEPS_FOR_SKALE = ['Wallet Address', 'Send sFUEL', 'Confirmation'];
 
 export const FaucetView: FC = () => {
   const [step, setStep] = useState<number>(0);
@@ -53,11 +54,17 @@ export const FaucetView: FC = () => {
               {' '}
               <Box sx={{ width: '100%' }}>
                 <Stepper activeStep={step}>
-                  {STEPS.map((step) => (
-                    <Step key={step}>
-                      <StepLabel>{step}</StepLabel>
-                    </Step>
-                  ))}
+                  {network?.chainId === ChainId.SKALE
+                    ? STEPS_FOR_SKALE.map((step) => (
+                        <Step key={step}>
+                          <StepLabel>{step}</StepLabel>
+                        </Step>
+                      ))
+                    : STEPS.map((step) => (
+                        <Step key={step}>
+                          <StepLabel>{step}</StepLabel>
+                        </Step>
+                      ))}
                 </Stepper>
               </Box>
             </Paper>
