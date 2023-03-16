@@ -16,6 +16,10 @@
     {
       "address": "0xC522463d36f76b881bE66484e3068F11e7038Ace",
       "kind": "uups"
+    },
+    {
+      "address": "0xB7D097367e5054d07A4916DEBD4D7c454C4D298c",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -847,7 +851,11 @@
             "numberOfBytes": "1"
           }
         }
-      }
+      },
+      "allAddresses": [
+        "0x7B9f9Dc6c157899C1Eb1c6B86f94855cC2F537dF",
+        "0x328F30940b470AcbD26B8CC4034f41663AABC737"
+      ]
     }
   }
 }
