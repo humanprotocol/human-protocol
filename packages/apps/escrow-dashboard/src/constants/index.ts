@@ -224,7 +224,7 @@ export const ESCROW_NETWORKS: {
     wagmiChain: moonbaseAlpha,
 
     factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
-    hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
     stakingAddress: '0xBFC7009F3371F93F3B54DdC8caCd02914a37495c',
     kvstoreAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
 
