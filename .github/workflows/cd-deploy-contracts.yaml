@@ -65,10 +65,10 @@ jobs:
             },
             {
               name: moonbaseAlpha,
-              escrow_factory: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
-              staking: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
-              reward_pool: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
-              reputation: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+              escrow_factory: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
+              staking: '0xBFC7009F3371F93F3B54DdC8caCd02914a37495c',
+              reward_pool: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
+              reputation: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
               private_key: TESTNET_PRIVATE_KEY,
             },
             # {

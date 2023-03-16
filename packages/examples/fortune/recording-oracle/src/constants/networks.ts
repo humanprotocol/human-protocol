@@ -45,7 +45,7 @@ export const ESCROW_NETWORKS: {
   //   chainId: ChainId.MOONBASE_ALPHA,
   //   title: 'Moonbase Alpha',
   //   rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-  //   factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+  //   factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
   //   hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
   // },
   [ChainId.LOCALHOST]: {
