@@ -4,6 +4,16 @@
 
 - EscrowFactory
 
+- HMToken
+
+- Staking
+
+- Reward Pool
+
+- KVStore
+
+- Reputation
+
 # Deploy contracts with proxy to a live network
 
 1. Create a .env file in the root folder of core package, with the following variables(this is an example for Polygon Mumbai, for other networks `check hardhat.config.ts`):
@@ -45,13 +55,19 @@ ESCROW_FACTORY_ADDRESS=
 
 2. Open `./scripts/upgrade-proxies.ts` and add all the proxies you actually need to upgrade.
 
-3. Deploy the upgraded contract runing this ([NETWORK_NAME] = network name from `hardhat.config.ts`):
+3. Compile the contract runing this:
+
+```bash
+yarn compile
+```
+
+4. Deploy the upgraded contract runing this ([NETWORK_NAME] = network name from `hardhat.config.ts`):
 
 ```bash
 yarn upgrade:proxy --network [NETWORK_NAME]
 ```
 
-4. Verify the contract runing the following line:
+5. Verify the contract runing the following line:
 
 ```bash
 npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]

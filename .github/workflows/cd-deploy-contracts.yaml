@@ -1,0 +1,201 @@
+name: Deploy contracts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-contracts:
+    name: Deploy contracts
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        network: [
+            {
+              name: goerli,
+              escrow_factory: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
+              staking: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
+              reward_pool: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
+              reputation: '0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405',
+              private_key: TESTNET_PRIVATE_KEY,
+            },
+            {
+              name: polygon,
+              escrow_factory: '0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB',
+              staking: '0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29',
+              reward_pool: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
+              # reputation:
+              private_key: MAINNET_PRIVATE_KEY,
+            },
+            {
+              name: polygonMumbai,
+              escrow_factory: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
+              staking: '0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac',
+              reward_pool: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
+              reputation: '0xC522463d36f76b881bE66484e3068F11e7038Ace',
+              private_key: TESTNET_PRIVATE_KEY,
+            },
+            {
+              name: bsc,
+              escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+              staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+              reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
+              # reputation:
+              private_key: MAINNET_PRIVATE_KEY,
+            },
+            {
+              name: bscTestnet,
+              escrow_factory: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
+              staking: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
+              reward_pool: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+              reputation: '0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98',
+              private_key: TESTNET_PRIVATE_KEY,
+            },
+            {
+              name: moonbeam,
+              escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+              staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+              reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
+              # reputation:
+              private_key: MAINNET_PRIVATE_KEY,
+            },
+            {
+              name: moonbaseAlpha,
+              escrow_factory: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+              staking: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
+              reward_pool: '0x2bfA592DBDaF434DDcbb893B1916120d181DAD18',
+              reputation: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
+              private_key: TESTNET_PRIVATE_KEY,
+            },
+            # {
+            #   name: avalanche,
+            #   escrow_factory,
+            #   staking,
+            #   reward_pool,
+            #   reputation,
+            #   private_key,
+            # },
+            # {
+            #   name: avalancheTestnet,
+            #   escrow_factory,
+            #   staking,
+            #   reward_pool,
+            #   reputation,
+            #   private_key,
+            # },
+            # {
+            #   name: skale,
+            #   escrow_factory: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
+            #   staking: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
+            #   reward_pool: '0xEc321ec45dDfBE9049550d461818f4E7759bBE89',
+            #   reputation:
+            #   private_key:,
+            # },
+          ]
+      fail-fast: true
+      max-parallel: 3
+    env:
+      PRIVATE_KEY: ${{ secrets[matrix.network.private_key] }}
+      ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
+      ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
+      ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
+      ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
+      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
+      ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
+      ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
+      # ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
+      ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+      POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
+      BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
+      MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
+      # SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
+      # SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
+      # SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --global yarn && yarn --ignore-scripts
+
+      - name: Check changes in files
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            escrow_factory:
+              - 'packages/core/contracts/Escrow*.sol'
+            staking:
+              - 'packages/core/contracts/Staking.sol'
+            reward_pool:
+              - 'packages/core/contracts/RewardPool.sol'
+            reputation:
+              - 'packages/core/contracts/Reputation.sol'
+
+      - name: Compile smart contracts
+        if: |
+          steps.filter.outputs.escrow_factory == 'true' ||
+          steps.filter.outputs.staking == 'true' ||
+          steps.filter.outputs.reward_pool == 'true' ||
+          steps.filter.outputs.reputation == 'true'
+        run: yarn compile
+        working-directory: ./packages/core
+
+      - name: Upgrade Escrow Factory Proxy
+        if: steps.filter.outputs.escrow_factory == 'true'
+        run: yarn upgrade:proxy --network ${{ matrix.network.name }}
+        working-directory: ./packages/core
+        env:
+          ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
+
+      - name: Verify Escrow Factory Proxy
+        if: steps.filter.outputs.escrow_factory == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.escrow_factory }}
+        working-directory: ./packages/core
+
+      - name: Upgrade Staking Proxy
+        if: steps.filter.outputs.staking == 'true'
+        run: yarn upgrade:proxy --network ${{ matrix.network.name }}
+        working-directory: ./packages/core
+        env:
+          STAKING_ADDRESS: ${{ matrix.network.staking }}
+
+      - name: Verify Staking Proxy
+        if: steps.filter.outputs.staking == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.staking }}
+        working-directory: ./packages/core
+
+      - name: Upgrade Reward Pool Proxy
+        if: steps.filter.outputs.reward_pool == 'true'
+        run: yarn upgrade:proxy --network ${{ matrix.network.name }}
+        working-directory: ./packages/core
+        env:
+          REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
+
+      - name: Verify Reward Pool Proxy
+        if: steps.filter.outputs.reward_pool == 'true'
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reward_pool }}
+        working-directory: ./packages/core
+
+      - name: Upgrade Reputation Proxy
+        if: steps.filter.outputs.reputation == 'true' && matrix.network.reputation != ''
+        run: yarn upgrade:proxy --network ${{ matrix.network.name }}
+        working-directory: ./packages/core
+        env:
+          REPUTATION_ADDRESS: ${{ matrix.network.reputation }}
+
+      - name: Verify Reputation Proxy
+        if: steps.filter.outputs.reputation == 'true' && matrix.network.reputation != ''
+        run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reputation }}
+        working-directory: ./packages/core
+
+      - name: Commit changes
+        if: ${{ success() }}
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: './packages/core/.openzeppelin'
+          message: 'chore(generated): update generated network data automatically'
+          default_author: github_actions
