@@ -247,6 +247,13 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
             _safeTransfer(canceler, balance);
         }
 
+        uint256 ethBalance = address(this).balance;
+
+        if (ethBalance != 0) {
+            (bool sent, ) = canceler.call{value: ethBalance}('');
+            require(sent, 'Failed to send Ether');
+        }
+
         status = EscrowStatuses.Cancelled;
         emit Cancelled();
     }
