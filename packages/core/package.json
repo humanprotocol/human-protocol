@@ -19,7 +19,7 @@
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",
-    "upgrade:proxy": "yarn compile && hardhat run scripts/upgrade-proxies.ts",
+    "upgrade:proxy": "hardhat run scripts/upgrade-proxies.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
