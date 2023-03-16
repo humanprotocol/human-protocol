@@ -76,7 +76,7 @@ export const FAUCET_NETWORKS: {
     chainId: ChainId.MOONBASE_ALPHA,
     title: 'Moonbase Alpha',
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-    hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
   },
   [ChainId.SKALE]: {
     chainId: ChainId.SKALE,
