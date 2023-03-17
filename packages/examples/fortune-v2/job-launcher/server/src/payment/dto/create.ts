@@ -1,10 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum } from "class-validator";
+import { IsEnum, IsNumber, isNumber, Min } from "class-validator";
 import { IPaymentCreateDto } from "../interfaces";
 import { Currency, MethodType } from "../../common/decorators";
 
 export class PaymentCreateDto implements IPaymentCreateDto {
   @ApiProperty()
+  @IsNumber()
+  @Min(10)
   public amount: number
 
   @ApiProperty({

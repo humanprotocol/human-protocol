@@ -13,7 +13,6 @@ export class JobService {
   private readonly logger = new Logger(JobService.name);
 
   constructor(
-    private readonly jobService: JobService,
     private readonly paymentService: PaymentService,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,

@@ -20,7 +20,7 @@ export enum Crypto {
 }
 
 export enum MethodType {
-  CARD = "CARD",
+  CARD = "card",
 }
 
 export enum PaymentStatus {

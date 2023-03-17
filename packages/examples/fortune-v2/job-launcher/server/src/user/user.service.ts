@@ -99,7 +99,9 @@ export class UserService {
         password: this.createPasswordHash(password),
         type: UserType.REQUESTER,
         status: UserStatus.ACTIVE,
-        stripeCustomerId: customerId
+        stripeCustomerId: customerId,
+        privateKey: "pk",
+        publicKey: "pk"
       })
       .save();
   }

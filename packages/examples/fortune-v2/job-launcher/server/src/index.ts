@@ -10,7 +10,7 @@ import helmet from "helmet";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
 
   const configService: ConfigService = app.get(ConfigService);
 
@@ -26,8 +26,6 @@ async function bootstrap() {
   });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-
-  app.use(helmet());
 
   app.use(
     session({
@@ -49,7 +47,9 @@ async function bootstrap() {
   SwaggerModule.setup("swagger", app, document);
 
   const host = configService.get<string>("HOST", "localhost");
-  const port = configService.get<string>("PORT", "3000");
+  const port = configService.get<string>("PORT", "5000");
+
+  //app.use(helmet());
 
   await app.listen(port, host, () => {
     console.info(`API server is running on http://${host}:${port}`);
@@ -57,3 +57,4 @@ async function bootstrap() {
 }
 
 void bootstrap();
+

@@ -5,6 +5,7 @@ import { MinioModule } from 'nestjs-minio-client';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentEntity } from "./payment.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { PaymentController } from "./payment.controller";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
       },
     }),
   ],
+  controllers: [PaymentController],
   providers: [PaymentService],
   exports: [PaymentService],
 })

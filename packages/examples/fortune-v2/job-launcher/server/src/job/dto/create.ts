@@ -19,11 +19,6 @@ export class JobFortuneCreateDto implements IJobFortuneCreateDto {
   @ApiProperty()
   @IsNumber()
   @IsPositive()
-  public requesterAccuracyTarget: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
   public price: number;
 }
 

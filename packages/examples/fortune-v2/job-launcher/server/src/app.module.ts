@@ -14,6 +14,8 @@ import { StorageModule } from "./storage/storage.module";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { TokenModule } from "./token/token.module";
+import { JobModule } from "./job/job.module";
+import { PaymentModule } from "./payment/payment.module";
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -26,10 +28,10 @@ const ethersModules = networks.map(network => {
 
 @Module({
   providers: [
-    {
+    /*{
       provide: APP_GUARD,
       useClass: JwtHttpGuard,
-    },
+    },*/
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
@@ -55,7 +57,9 @@ const ethersModules = networks.map(network => {
     HealthModule,
     AuthModule,
     UserModule,
-    TokenModule
+    TokenModule,
+    JobModule,
+    PaymentModule
   ],
   controllers: [AppController],
 })

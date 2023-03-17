@@ -39,9 +39,9 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
           logger: typeOrmLoggerService,
           host: configService.get<string>("POSTGRES_HOST", "localhost"),
           port: configService.get<number>("POSTGRES_PORT", 5432),
-          username: configService.get<string>("POSTGRES_USER", "hmt"),
-          password: configService.get<string>("POSTGRES_PASSWORD", "hmt"),
-          database: configService.get<string>("POSTGRES_DB", "hmt-exchange-oracle"),
+          username: configService.get<string>("POSTGRES_USER", "fortune"),
+          password: configService.get<string>("POSTGRES_PASSWORD", "fortune"),
+          database: configService.get<string>("POSTGRES_DB", "hmt-job-launcher"),
           keepConnectionAlive: configService.get<string>("NODE_ENV") === "test",
           migrationsRun: configService.get<string>("MIGRATIONS_RUN") === "true",
         };

@@ -25,6 +25,10 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
               isPrimary: true
             },
             {
+              name: "job_id",
+              type: "int",
+            },
+            {
               name: "payment_id",
               type: "varchar"
             },
@@ -79,7 +83,7 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
       }
     
       public async down(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.dropTable(`${NS}.job`);
+        await queryRunner.dropTable(`${NS}.payment`);
         await queryRunner.query(`DROP TYPE ${NS}.payment_status_enum;`);
       }
 

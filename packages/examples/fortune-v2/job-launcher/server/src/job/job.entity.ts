@@ -1,9 +1,10 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from "typeorm";
 
 import { NS } from "../common/constants";
 import { BaseEntity } from "../database/base.entity";
 import { IJob, JobStatus, JobMode, JobRequestType } from "../common/decorators";
 import { UserEntity } from "../user/user.entity";
+import { PaymentEntity } from "../payment/payment.entity";
 
 @Entity({ schema: NS, name: "job" })
 export class JobEntity extends BaseEntity implements IJob {
@@ -49,9 +50,16 @@ export class JobEntity extends BaseEntity implements IJob {
   })
   public status: JobStatus;
 
-  @JoinColumn()
-  @OneToOne(_type => UserEntity)
-  public user: UserEntity;
+  //@JoinColumn()
+  //@ManyToOne(_type => UserEntity)
+  //public user: UserEntity;
+  //@JoinColumn()
+  @ManyToOne(() => UserEntity, (user) => user.jobs, { eager: true })
+  requester: UserEntity;
+
+  //@JoinColumn()
+  @OneToMany(() => PaymentEntity, (payment) => payment.job)
+  payments: PaymentEntity[];
 
   @Column({ type: "int" })
   public userId: number;

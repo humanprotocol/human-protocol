@@ -49,10 +49,12 @@ export class PaymentService {
     customerId: string, 
     dto: IPaymentCreateDto
   ) {
-    const { amount, currency, paymentMethodType, paymentMethodOptions } = dto;
+    const { amount, currency, paymentMethodType } = dto;
+    const paymentMethodOptions = {};
+
     const params: Stripe.PaymentIntentCreateParams = {
       payment_method_types: [paymentMethodType],
-      amount: amount,
+      amount: amount * 100,
       currency: currency,
     };
 
@@ -80,7 +82,6 @@ export class PaymentService {
       params.customer = customerId;
     }
 
-    // TODO: Deprecate optional params on create payment intent stage
     if (paymentMethodOptions) {
       params.payment_method_options = paymentMethodOptions;
     }
