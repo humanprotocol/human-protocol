@@ -59,7 +59,8 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
     string public manifestUrl;
     string public manifestHash;
-    uint256 public remainingSolutions;
+    uint256 public remainingSubmissions;
+    uint256 public remainingPayouts;
 
     string public rawResultsUrl;
     string public rawResultsHash;
@@ -112,7 +113,8 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
         manifestUrl = _manifestUrl;
         manifestHash = _manifestHash;
-        remainingSolutions = _requiredSubmissions;
+        remainingSubmissions = _requiredSubmissions;
+        remainingPayouts = _requiredSubmissions;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
 
         status = EscrowStatuses.Launched;
@@ -157,7 +159,11 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
 
         finalResultsUrl = _url;
         finalResultsHash = _hash;
-        status = EscrowStatuses.Recorded;
+        remainingSubmissions = remainingSubmissions - 1;
+
+        if (remainingSubmissions == 0) {
+            status = EscrowStatuses.Recorded;
+        }
         emit Recorded(_url, _hash);
     }
 
@@ -177,8 +183,8 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
             "Amount of recipients and values don't match"
         );
         require(
-            _recipients.length < BULK_MAX_COUNT &&
-                _recipients.length <= remainingSolutions,
+            _recipients.length <= BULK_MAX_COUNT &&
+                _recipients.length <= remainingPayouts,
             'Too many recipients'
         );
         uint256 balance = getBalance();
@@ -210,11 +216,11 @@ contract Escrow is IEscrow, Context, ReentrancyGuard {
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        remainingSolutions = remainingSolutions.sub(_recipients.length);
+        remainingPayouts = remainingPayouts.sub(_recipients.length);
 
         bool _isPartial = true;
 
-        if (remainingSolutions == 0) {
+        if (remainingPayouts == 0) {
             balance = getBalance();
 
             if (balance != 0) {
