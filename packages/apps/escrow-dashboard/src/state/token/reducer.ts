@@ -5,9 +5,13 @@ import {
   UnknownAsyncThunkPendingAction,
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
-import BigNumber from 'bignumber.js';
+import BigNumberJS from 'bignumber.js';
 import { Contract, ethers, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
+
+import { AppState } from '..';
+import { TokenStats } from './types';
+
 import {
   ChainId,
   SUPPORTED_CHAIN_IDS,
@@ -15,18 +19,15 @@ import {
   HM_TOKEN_DECIMALS,
 } from 'src/constants';
 import { RAW_TOKEN_STATS_QUERY } from 'src/queries';
-import { AppState } from 'src/state';
 import { gqlFetch } from 'src/utils/gqlFetch';
-
-import { TokenStats } from './types';
 
 type TokenStatsType = { [chainId in ChainId]?: TokenStats };
 
-interface TokenState {
+type TokenState = {
   loadingKeys: Record<string, boolean>;
   stats: TokenStatsType;
   statsLoaded: boolean;
-}
+};
 
 const initialState: TokenState = {
   loadingKeys: {},
@@ -77,7 +78,7 @@ export const fetchTokenStatsAsync = createAsyncThunk<
       const provider = new providers.JsonRpcProvider(rpcUrl);
       const contract = new Contract(hmtAddress, HMTokenABI, provider);
       const totalSupplyBN = await contract.totalSupply();
-      stats.totalSupply = new BigNumber(
+      stats.totalSupply = new BigNumberJS(
         ethers.utils.formatUnits(totalSupplyBN, HM_TOKEN_DECIMALS)
       ).toJSON();
       tokenStats[chainId] = stats;

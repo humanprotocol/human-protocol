@@ -1,14 +1,15 @@
 import { useSelector } from 'react-redux';
-import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
-import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
-import { AppState, useAppDispatch } from 'src/state';
 
+import { AppState, useAppDispatch } from '..';
 import {
   fetchEscrowAmountsAsync,
   fetchEscrowEventsAsync,
   fetchEscrowStatsAsync,
 } from './reducer';
 import { EscrowData } from './types';
+
+import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
+import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const usePollEventsData = () => {
   const dispatch = useAppDispatch();
@@ -101,7 +102,6 @@ export const useEscrowDataByChainID = (): EscrowData => {
     .sort((x, y) => Number(y.timestamp) - Number(x.timestamp))
     .slice(0, 30)
     .reverse();
-  console.log(escrowData);
   return escrowData;
 };
 

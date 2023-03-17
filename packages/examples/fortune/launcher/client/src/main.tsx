@@ -45,10 +45,40 @@ const fortune: Chain = {
   },
 };
 
+const wagmiSkaleHP: Chain = {
+  id: 1273227453,
+  name: 'Skale Human Protocol chain',
+  network: 'skale',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Skale FUEL',
+    symbol: 'sFUEL',
+  },
+  rpcUrls: {
+    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Skale Explorer',
+      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    },
+  },
+};
+
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet, fortune],
+  [
+    goerli,
+    mainnet,
+    polygon,
+    wagmiSkaleHP,
+    polygonMumbai,
+    bsc,
+    bscTestnet,
+    fortune,
+  ],
   [publicProvider()]
 );
 

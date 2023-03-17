@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function BitfinexIcon(props: SvgIconProps) {
+export const BitfinexIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="19" height="19" viewBox="0 0 19 19" fill="none" {...props}>
       <path
@@ -14,4 +14,4 @@ export default function BitfinexIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

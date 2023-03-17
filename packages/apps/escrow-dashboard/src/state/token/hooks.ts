@@ -1,11 +1,12 @@
-import BigNumber from 'bignumber.js';
+import BigNumberJS from 'bignumber.js';
 import { useSelector } from 'react-redux';
+
+import { AppState, useAppDispatch } from '..';
+import { useChainId } from '../escrow/hooks';
+import { fetchTokenStatsAsync } from './reducer';
+
 import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
-import { AppState, useAppDispatch } from 'src/state';
-import { useChainId } from '../escrow/hooks';
-
-import { fetchTokenStatsAsync } from './reducer';
 
 export const usePollTokenStats = () => {
   const dispatch = useAppDispatch();
@@ -27,7 +28,7 @@ export const useTokenStatsByChainId = () => {
     const tokenStats = {
       totalTransferEventCount: 0,
       holders: 0,
-      totalSupply: new BigNumber(0),
+      totalSupply: new BigNumberJS(0),
     };
 
     SUPPORTED_CHAIN_IDS.forEach((chainId) => {
@@ -36,7 +37,7 @@ export const useTokenStatsByChainId = () => {
           stats[chainId]?.totalTransferEventCount!;
         tokenStats.holders += stats[chainId]?.holders!;
         tokenStats.totalSupply = tokenStats.totalSupply.plus(
-          new BigNumber(token.stats[chainId]?.totalSupply ?? '0')
+          new BigNumberJS(token.stats[chainId]?.totalSupply ?? '0')
         );
       }
     });

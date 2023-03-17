@@ -1,3 +1,5 @@
+import { Provider, WebSocketProvider } from '@wagmi/core';
+import { Wallet, providers } from 'ethers';
 import {
   CreateClientConfig,
   WagmiConfig,
@@ -5,16 +7,9 @@ import {
   Chain,
   createClient,
 } from 'wagmi';
-import { MockConnector } from '@wagmi/core/connectors/mock';
-import { Wallet, providers } from 'ethers';
-import type { Provider, WebSocketProvider } from '@wagmi/core';
-import {
-  foundry,
-  goerli,
-  mainnet,
-  optimism,
-  polygon,
-} from '@wagmi/core/chains';
+import { foundry, goerli, mainnet, optimism, polygon } from 'wagmi/chains';
+import { MockConnector } from 'wagmi/connectors/mock';
+
 type Config = Partial<CreateClientConfig>;
 function getNetwork(chain: Chain) {
   return {
@@ -175,10 +170,12 @@ export function setupClient(config: Config = {}) {
     ...config,
   });
 }
+
 type ProvidersProps = {
   children: React.ReactNode;
   client?: WagmiConfigProps['client'];
 };
+
 export function Providers({
   children,
   client = setupClient(),

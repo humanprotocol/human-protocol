@@ -41,7 +41,6 @@
     "@human-protocol/core": "^1.0.12",
     "aws-sdk": "^2.1255.0",
     "crypto": "^1.0.1",
-    "dotenv": "^16.0.3",
     "ethers": "^5.7.2",
     "secp256k1": "^4.0.3",
     "winston": "^3.8.2"

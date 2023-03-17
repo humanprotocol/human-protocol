@@ -1,10 +1,8 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { CardBarChart } from 'src/components/Cards';
+import { create } from 'react-test-renderer';
 
-global.ResizeObserver = require('resize-observer-polyfill');
+import { BarChart } from './BarChart';
 
 const mock = {
   title: 'Title',
@@ -16,11 +14,11 @@ const mock = {
   ],
 };
 
-describe('when rendered CardBarChart component', () => {
+describe('when rendered BarChart component', () => {
   it('should render passed prop `title`', async () => {
     await act(() => {
       render(
-        <CardBarChart
+        <BarChart
           title={mock.title}
           totalValue={mock.totalValue}
           series={mock.series}
@@ -33,7 +31,7 @@ describe('when rendered CardBarChart component', () => {
   it('should render passed prop `totalValue`', async () => {
     await act(() => {
       render(
-        <CardBarChart
+        <BarChart
           title={mock.title}
           totalValue={mock.totalValue}
           series={mock.series}
@@ -44,15 +42,13 @@ describe('when rendered CardBarChart component', () => {
   });
 });
 
-it('CardBarChart component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(
-      <CardBarChart
-        title={mock.title}
-        totalValue={mock.totalValue}
-        series={mock.series}
-      />
-    )
-    .toJSON();
+it('BarChart component renders correctly, corresponds to the snapshot', () => {
+  const tree = create(
+    <BarChart
+      title={mock.title}
+      totalValue={mock.totalValue}
+      series={mock.series}
+    />
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

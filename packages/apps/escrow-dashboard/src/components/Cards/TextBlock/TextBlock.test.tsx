@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
-import { CardTextBlock } from 'src/components/Cards';
+import { create } from 'react-test-renderer';
+
+import { TextBlock } from './TextBlock';
 
 const mock = {
   value: 'Value',
@@ -10,19 +10,19 @@ const mock = {
 
 describe('when rendered CardBarChart component', () => {
   it('should render passed prop `value`', () => {
-    render(<CardTextBlock value={mock.value} title={mock.title} />);
+    render(<TextBlock value={mock.value} title={mock.title} />);
     expect(screen.findByLabelText(mock.value)).toBeTruthy();
   });
 
   it('should render passed prop `title`', () => {
-    render(<CardTextBlock value={mock.value} title={mock.title} />);
+    render(<TextBlock value={mock.value} title={mock.title} />);
     expect(screen.findByLabelText(mock.title)).toBeTruthy();
   });
 });
 
-it('CardTextBlock component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(<CardTextBlock value={mock.value} title={mock.title} />)
-    .toJSON();
+it('TextBlock component renders correctly, corresponds to the snapshot', () => {
+  const tree = create(
+    <TextBlock value={mock.value} title={mock.title} />
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

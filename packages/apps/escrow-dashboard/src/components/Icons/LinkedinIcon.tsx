@@ -1,7 +1,7 @@
 import SvgIcon, { SvgIconProps } from '@mui/material/SvgIcon';
-import React from 'react';
+import { FC } from 'react';
 
-export default function LinkedinIcon(props: SvgIconProps) {
+export const LinkedinIcon: FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon width="26" height="24" viewBox="0 0 26 24" fill="none" {...props}>
       <path
@@ -13,4 +13,4 @@ export default function LinkedinIcon(props: SvgIconProps) {
       />
     </SvgIcon>
   );
-}
+};

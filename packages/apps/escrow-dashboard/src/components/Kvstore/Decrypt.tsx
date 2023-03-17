@@ -1,28 +1,25 @@
+import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { Close as CloseIcon } from '@mui/icons-material';
 import {
-  Grid,
-  Paper,
-  Typography,
   Box,
   Button,
-  TextField,
   Divider,
+  Grid,
+  Paper,
+  Snackbar,
+  TextField,
+  Typography,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import React, { useState, ChangeEvent } from 'react';
-import KVStore from '@human-protocol/core/abis/KVStore.json';
-import { showIPFS } from '../../services';
-import { useContractRead, useAccount, useNetwork } from 'wagmi';
 import * as openpgp from 'openpgp';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { ESCROW_NETWORKS, ChainId } from '../../constants';
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-export const Decrypt = (): React.ReactElement => {
+import { useState, ChangeEvent, FC } from 'react';
+import { useContractRead, useAccount, useNetwork } from 'wagmi';
+
+import { Alert } from '../Alert';
+
+import { ESCROW_NETWORKS, ChainId } from 'src/constants';
+import { showIPFS } from 'src/services';
+
+export const Decrypt: FC = () => {
   const { chain } = useNetwork();
   const [key, setKey] = useState('');
   const [passphrase, setPassphrase] = useState('');
@@ -33,6 +30,7 @@ export const Decrypt = (): React.ReactElement => {
   const [copy, setCopy] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [filename, setFilename] = useState<string>('');
+
   const { address } = useAccount();
   const { refetch } = useContractRead({
     address: ESCROW_NETWORKS[chain?.id as ChainId]
@@ -41,6 +39,7 @@ export const Decrypt = (): React.ReactElement => {
     functionName: 'get',
     args: [address, key],
   });
+
   async function getValue() {
     setLoading(true);
     try {
@@ -54,6 +53,7 @@ export const Decrypt = (): React.ReactElement => {
       }
     }
   }
+
   const handleFile = async (e: ProgressEvent<FileReader>) => {
     setLoading(true);
     setPrivkey('');

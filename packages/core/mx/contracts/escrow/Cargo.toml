@@ -1,0 +1,24 @@
+[package]
+name = "escrow"
+version = "0.1.0"
+authors = [
+    "Claudiu-Marcel Bruda <claudiu.bruda@elrond.com>",
+    "Vlad Nedelcu <vlad.nedelcu@buidly.com>"
+]
+edition = "2018"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.common-structs]
+path = "../common-structs"
+
+[dependencies.multiversx-sc]
+version = "0.39.5"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.39.5"
+
+[dev-dependencies]
+num-bigint = "0.4.2"

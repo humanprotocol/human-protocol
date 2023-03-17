@@ -1,16 +1,20 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { RequestData } from '../RequestData';
 import { MemoryRouter } from 'react-router-dom';
-import { ChainId, ESCROW_NETWORKS } from '../../../constants';
+import { create } from 'react-test-renderer';
+
+import { RequestData, RequestDataProps } from '../RequestData';
+
+import { ChainId, ESCROW_NETWORKS } from 'src/constants';
 
 describe('when rendered AfterConnect component', () => {
   it('should render `text` prop', async () => {
     await act(async () => {
       render(
-        <RequestData network={ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!} />,
+        <RequestData
+          {...({} as RequestDataProps)}
+          network={ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!}
+        />,
         { wrapper: MemoryRouter }
       );
     });
@@ -19,12 +23,13 @@ describe('when rendered AfterConnect component', () => {
 });
 
 it('AfterConnect component renders correctly, corresponds to the snapshot', () => {
-  const tree = renderer
-    .create(
-      <MemoryRouter>
-        <RequestData network={ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!} />
-      </MemoryRouter>
-    )
-    .toJSON();
+  const tree = create(
+    <MemoryRouter>
+      <RequestData
+        {...({} as RequestDataProps)}
+        network={ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!}
+      />
+    </MemoryRouter>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

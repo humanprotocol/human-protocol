@@ -1,0 +1,1 @@
+export { LeaderDetail } from './LeaderDetail';

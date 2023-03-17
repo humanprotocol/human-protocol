@@ -1,40 +1,35 @@
 import {
+  Button,
   Grid,
   Paper,
-  Typography,
+  Snackbar,
   Stack,
-  Button,
   TextField,
+  Typography,
 } from '@mui/material';
-import React, { Dispatch, useState } from 'react';
 import { generateKey } from 'openpgp/lightweight';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { Key } from './index';
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { Dispatch, FC, useState } from 'react';
 
-let regex =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+import { Alert } from '../Alert';
+import { PUBKEY_REGEX } from './constants';
+import { Key } from './types';
 
-export const GeneratePubkey = ({
-  setStep,
-  setPage,
-  setKey,
-  pubkeyExist,
-  refetch,
-  setPublicKey,
-}: {
+export type GeneratePubkeyProps = {
   setStep: Dispatch<number>;
   setPage: Dispatch<number>;
   setKey: Dispatch<Key>;
   pubkeyExist: boolean;
   refetch: any;
   setPublicKey: Dispatch<string>;
+};
+
+export const GeneratePubkey: FC<GeneratePubkeyProps> = ({
+  setStep,
+  setPage,
+  setKey,
+  pubkeyExist,
+  refetch,
+  setPublicKey,
 }) => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -43,6 +38,7 @@ export const GeneratePubkey = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [emailError, setEmailError] = useState<boolean>(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState<string>('');
+
   async function goBack() {
     try {
       if (pubkeyExist) {
@@ -59,6 +55,7 @@ export const GeneratePubkey = ({
       }
     }
   }
+
   async function generate() {
     try {
       if (name.length === 0 || email.length === 0 || passphrase.length === 0) {
@@ -67,7 +64,7 @@ export const GeneratePubkey = ({
 
         return;
       }
-      if (!regex.test(email)) {
+      if (!PUBKEY_REGEX.test(email)) {
         setEmailError(true);
         setEmailErrorMessage("email doesn't use correct format");
         return;
@@ -88,6 +85,7 @@ export const GeneratePubkey = ({
       if (e instanceof Error) setErrorMessage(e.message);
     }
   }
+
   return (
     <Paper>
       <Stack spacing={7}>
