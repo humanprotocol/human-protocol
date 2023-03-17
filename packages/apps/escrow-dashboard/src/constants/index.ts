@@ -9,30 +9,10 @@ import {
   moonbaseAlpha,
   avalancheFuji,
   avalanche,
+  skaleHumanProtocol,
 } from 'wagmi/chains';
 
 import { EscrowNetwork } from 'src/types';
-
-const wagmiSkaleHP = {
-  id: 1273227453,
-  name: 'Skale Human Protocol chain',
-  network: 'skale',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Skale FUEL',
-    symbol: 'sFUEL',
-  },
-  rpcUrls: {
-    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Skale Explorer',
-      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    },
-  },
-} as Chain;
 
 export enum ChainId {
   ALL = -1,
@@ -273,8 +253,7 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
     subgraphUrl: 'https://api.thegraph.com/',
-    // Add custom wagmi
-    wagmiChain: wagmiSkaleHP,
+    wagmiChain: skaleHumanProtocol,
 
     factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
