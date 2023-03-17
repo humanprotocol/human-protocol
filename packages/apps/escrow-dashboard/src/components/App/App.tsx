@@ -9,10 +9,12 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { publicProvider } from 'wagmi/providers/public';
 
 import { Layout } from '../Layout';
-
 import { ESCROW_NETWORKS, ChainId } from 'src/constants';
+
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
+
+export const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
 const chain = Object.values(ESCROW_NETWORKS)
   .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
@@ -45,7 +47,8 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        qrcode: true,
+        showQrModal: true,
+        projectId: projectId || '',
       },
     }),
   ],
