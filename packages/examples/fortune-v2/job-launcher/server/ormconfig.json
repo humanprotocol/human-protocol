@@ -1,0 +1,16 @@
+[
+    {
+      "name": "default",
+      "type": "postgres",
+      "host": "localhost",
+      "port": 5432,
+      "username": "fortune",
+      "password": "fortune",
+      "database": "hmt-job-launcher",
+      "entities": ["dist/**/*.entity{ .ts,.js}"],
+      "synchronize": false,
+      "migrations": ["dist/migrations/*{.ts,.js}"],
+      "migrationsTableName": "migrations_typeorm",
+      "migrationsRun": true
+    }
+  ]
