@@ -1,6 +1,7 @@
 import { BadGatewayException, Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { MinioService } from 'nestjs-minio-client';
+import { StorageDataType } from "../common/constants/storage";
 
 @Injectable()
 export class StorageService {
@@ -16,18 +17,26 @@ export class StorageService {
     this.s3BaseUrl = configService.get('S3_BASE_URL');
   }
 
-  async saveData(fileName: string, data: any) {
+  async saveData(dataType: StorageDataType, fileName: string, data: any) {
     const bucketExists = await this.minioService.client.bucketExists(this.s3BucketName);
+    
     if (!bucketExists) {
       await this.minioService.client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
     }
+    
     await this.minioService.client.putObject(
       this.s3BucketName,
-      `${fileName}.json`,
+      `${Date.now()}-${dataType}-${fileName}.json`,
       JSON.stringify(data),
       { 'Content-Type': 'application/json' }
     );
     return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}.json`;
+  }
+
+  async isBucketValid(dataUrl: string) {
+    // TODO: Get bucket name from data url
+    const bucketName = "Some name"
+    return this.minioService.client.getBucketPolicy(bucketName)
   }
 
   async listAllBuckets() {

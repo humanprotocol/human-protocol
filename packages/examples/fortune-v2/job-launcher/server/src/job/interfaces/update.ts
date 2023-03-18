@@ -3,4 +3,6 @@ import { IJobCommonDto } from "../../common/dto/job-common";
 
 export interface IJobUpdateDto extends IJobCommonDto {
   status?: JobStatus;
+  retriesCount?: number;
+  waitUntil?: Date;
 }

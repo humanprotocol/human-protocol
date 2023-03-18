@@ -21,6 +21,7 @@ export class addJobTable1677868006407 implements MigrationInterface {
         await queryRunner.query(`
           CREATE TYPE ${NS}.job_status_enum AS ENUM (
             'PENDING',
+            'PAID',
             'LAUNCHED',
             'FAILED',
             'COMPLETED'
@@ -44,7 +45,7 @@ export class addJobTable1677868006407 implements MigrationInterface {
               type: "varchar"
             },
             {
-              name: "requests_required",
+              name: "submissions_required",
               type: "int",
             },
             {
@@ -71,11 +72,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
               isNullable: true,
             },
             {
-              name: "data",
-              type: "text",
-              isNullable: true,
-            },
-            {
               name: "requester_accuracy_target",
               type: "decimal",
               isNullable: true,
@@ -98,11 +94,20 @@ export class addJobTable1677868006407 implements MigrationInterface {
               type: `${NS}.job_status_enum`,
             },
             {
+              name: "retries_count",
+              type: "int",
+              default: 0,
+            },
+            {
               name: "created_at",
               type: "timestamptz",
             },
             {
               name: "updated_at",
+              type: "timestamptz",
+            },
+            {
+              name: "wait_until",
               type: "timestamptz",
             },
           ],

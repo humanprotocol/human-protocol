@@ -15,6 +15,8 @@ export interface IJob extends IBase {
   mode: JobMode;
   requestType: JobRequestType;
   status: JobStatus;
+  retriesCount?: number;
+  waitUntil: Date;
 }
 
 export enum JobStatus {

@@ -1,9 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNumber, IsPositive, IsString, IsUrl, Matches } from "class-validator";
+import { IsArray, IsEnum, IsNumber, IsPositive, IsString, IsUrl, Matches } from "class-validator";
+import { ChainId } from "../../common/constants/networks";
 
 import { IJobFortuneCreateDto, IJobCvatCreateDto } from "../interfaces";
 
 export class JobFortuneCreateDto implements IJobFortuneCreateDto {
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+  
   @ApiProperty()
   @IsNumber()
   public fortunesRequired: number;
@@ -23,6 +30,12 @@ export class JobFortuneCreateDto implements IJobFortuneCreateDto {
 }
 
 export class JobCvatCreateDto implements IJobCvatCreateDto {
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
   @ApiProperty()
   @IsUrl()
   @Matches (/(s3-|s3\.)?(.*)\.amazonaws\.com/, {

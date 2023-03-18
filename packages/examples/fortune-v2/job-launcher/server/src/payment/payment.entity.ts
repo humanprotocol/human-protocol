@@ -29,7 +29,7 @@ export class PaymentEntity extends BaseEntity implements IPayment {
   public errorMessage: string;
 
   @Column({ type: "varchar" })
-  public method: string;
+  public methodType: string;
 
   @Column({
     type: "enum",

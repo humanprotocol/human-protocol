@@ -7,7 +7,7 @@ export interface IPayment extends IBase {
   currency: Currency;
   customer: string;
   errorMessage: string;
-  method: string;
+  methodType: string;
   status: PaymentStatus;
 }
 
