@@ -19,6 +19,7 @@ export class JwtHttpGuard extends AuthGuard("jwt-http") implements CanActivate {
         return true;
       }
 
+      //return true;
       console.error(e);
       throw new UnauthorizedException("Unauthorized");
     });

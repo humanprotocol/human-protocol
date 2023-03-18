@@ -50,6 +50,7 @@ export class addJobTable1677868006407 implements MigrationInterface {
             {
               name: "requester_title",
               type: "varchar",
+              isNullable: true,
             },
             {
               name: "requester_description",
@@ -58,11 +59,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
             {
               name: "price",
               type: "decimal"
-            },
-            {
-              name: "dataset_length",
-              type: "int",
-              isNullable: true
             },
             {
               name: "labels",
@@ -86,21 +82,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
             },
             {
               name: "escrow_address",
-              type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "exchange_oracle_address",
-              type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "recording_oracle_address",
-              type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "reputation_oracle_address",
               type: "varchar",
               isNullable: true,
             },

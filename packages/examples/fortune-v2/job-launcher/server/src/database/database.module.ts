@@ -3,7 +3,12 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import path from "path";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
+import { AuthEntity } from "../auth/auth.entity";
 import { NS } from "../common/constants";
+import { JobEntity } from "../job/job.entity";
+import { PaymentEntity } from "../payment/payment.entity";
+import { TokenEntity } from "../token/token.entity";
+import { UserEntity } from "../user/user.entity";
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
 
@@ -17,7 +22,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
         return {
           name: "default",
           type: "postgres",
-          entities: [],
+          entities: [AuthEntity, TokenEntity, UserEntity, JobEntity, PaymentEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
@@ -34,9 +39,9 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
           logger: typeOrmLoggerService,
           host: configService.get<string>("POSTGRES_HOST", "localhost"),
           port: configService.get<number>("POSTGRES_PORT", 5432),
-          username: configService.get<string>("POSTGRES_USER", "hmt"),
-          password: configService.get<string>("POSTGRES_PASSWORD", "hmt"),
-          database: configService.get<string>("POSTGRES_DB", "hmt-exchange-oracle"),
+          username: configService.get<string>("POSTGRES_USER", "fortune"),
+          password: configService.get<string>("POSTGRES_PASSWORD", "fortune"),
+          database: configService.get<string>("POSTGRES_DB", "hmt-job-launcher"),
           keepConnectionAlive: configService.get<string>("NODE_ENV") === "test",
           migrationsRun: configService.get<string>("MIGRATIONS_RUN") === "true",
         };

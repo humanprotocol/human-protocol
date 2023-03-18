@@ -1,9 +1,10 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 import { Exclude } from "class-transformer";
 
 import { NS } from "../common/constants";
 import { BaseEntity } from "../database/base.entity";
 import { IUser, UserStatus, UserType } from "../common/decorators";
+import { JobEntity } from "../job/job.entity";
 
 @Entity({ schema: NS, name: "user" })
 export class UserEntity extends BaseEntity implements IUser {
@@ -35,4 +36,7 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
+
+  @OneToMany(() => JobEntity, (job) => job.requester)
+  jobs: JobEntity[];
 }
