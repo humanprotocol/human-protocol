@@ -18,3 +18,24 @@ export const fortune: Chain = {
     },
   },
 };
+
+export const wagmiSkaleHP: Chain = {
+  id: 1273227453,
+  name: 'Skale Human Protocol chain',
+  network: 'skale',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Skale FUEL',
+    symbol: 'sFUEL',
+  },
+  rpcUrls: {
+    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Skale Explorer',
+      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    },
+  },
+};

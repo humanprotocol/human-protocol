@@ -19,7 +19,7 @@
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",
-    "upgrade:proxy": "yarn compile && hardhat run scripts/upgrade-proxies.ts",
+    "upgrade:proxy": "hardhat run scripts/upgrade-proxies.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
@@ -64,7 +64,7 @@
     "openpgp": "5.5.0",
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solidity-coverage": "^0.8.2",
-    "tenderly": "^0.3.0",
+    "tenderly": "^0.4.0",
     "typechain": "^8.1.1",
     "xdeployer": "1.1.20"
   },

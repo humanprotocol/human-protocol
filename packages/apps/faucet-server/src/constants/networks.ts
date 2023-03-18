@@ -8,6 +8,7 @@ export enum ChainId {
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export interface IHmtNetwork {
@@ -15,6 +16,7 @@ export interface IHmtNetwork {
   title: string;
   rpcUrl: string;
   hmtAddress: string;
+  faucetAddress?: string;
 }
 
 export const FAUCET_NETWORKS: {
@@ -74,6 +76,13 @@ export const FAUCET_NETWORKS: {
     chainId: ChainId.MOONBASE_ALPHA,
     title: 'Moonbase Alpha',
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-    hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
+  },
+  [ChainId.SKALE]: {
+    chainId: ChainId.SKALE,
+    title: 'SKALE Human Protocol chain',
+    rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+    faucetAddress: '0xb51a0E538c76C82e76757dc6D5a3938136C03c0C',
   },
 };

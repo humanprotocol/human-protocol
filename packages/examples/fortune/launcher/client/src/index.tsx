@@ -10,6 +10,7 @@ import {
   polygonMumbai,
   bsc,
   bscTestnet,
+  skaleHumanProtocol,
 } from 'wagmi/chains';
 import axios from 'axios';
 import { publicProvider } from 'wagmi/providers/public';
@@ -47,7 +48,7 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet, fortune],
+  [goerli, mainnet, polygon, skaleHumanProtocol, polygonMumbai, bsc, bscTestnet, fortune],
   [publicProvider()]
 );
 

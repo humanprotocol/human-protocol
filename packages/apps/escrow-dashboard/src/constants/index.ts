@@ -9,30 +9,10 @@ import {
   moonbaseAlpha,
   avalancheFuji,
   avalanche,
+  skaleHumanProtocol,
 } from 'wagmi/chains';
 
 import { EscrowNetwork } from 'src/types';
-
-const wagmiSkaleHP = {
-  id: 1273227453,
-  name: 'Skale Human Protocol chain',
-  network: 'skale',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Skale FUEL',
-    symbol: 'sFUEL',
-  },
-  rpcUrls: {
-    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Skale Explorer',
-      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    },
-  },
-} as Chain;
 
 export enum ChainId {
   ALL = -1,
@@ -85,6 +65,7 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
+  ChainId.SKALE,
 ];
 
 export const ESCROW_NETWORKS: {
@@ -222,9 +203,9 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1',
     wagmiChain: moonbaseAlpha,
 
-    factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
-    hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
-    stakingAddress: '0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92',
+    factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
+    stakingAddress: '0xBFC7009F3371F93F3B54DdC8caCd02914a37495c',
     kvstoreAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
 
     oldSubgraphUrl: '',
@@ -272,8 +253,7 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
     subgraphUrl: 'https://api.thegraph.com/',
-    // Add custom wagmi
-    wagmiChain: wagmiSkaleHP,
+    wagmiChain: skaleHumanProtocol,
 
     factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',

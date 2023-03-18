@@ -1,0 +1,23 @@
+[package]
+name = "staking-mock"
+version = "0.1.0"
+authors = [
+    "Vlad Nedelcu <vlad.nedelcu@buidly.com>"
+]
+edition = "2018"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+num-bigint = "0.4.2"
+
+[dependencies.common-structs]
+path = "../common-structs"
+
+[dependencies.multiversx-sc]
+version = "0.39.5"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.39.5"

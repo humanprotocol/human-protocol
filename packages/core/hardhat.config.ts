@@ -123,7 +123,6 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-
     skale: {
       chainId: 1273227453,
       url: process.env.ETH_SKALE_URL || '',
