@@ -7,6 +7,11 @@ export enum Job {
   NotCreated = "Job has not been created"
 }
 
+export enum Escrow {
+  NotFound = "Escrow not found",
+  NotCreated = "Escrow has not been created"
+}
+
 export enum User {
   NotFound = "User not found",
   DuplicateUsername = "Duplicate username",

@@ -14,9 +14,6 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: "varchar" })
   public dataUrl: string;
 
-  @Column({ type: "text" })
-  public data: string;
-
   @Column({ type: "int" })
   public submissionsRequired: number;
 
@@ -63,4 +60,10 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @Column({ type: "int" })
   public userId: number;
+
+  @Column({ type: "int" })
+  public retriesCount: number;
+  
+  @Column({ type: "timestamptz" })
+  public waitUntil: Date;
 }

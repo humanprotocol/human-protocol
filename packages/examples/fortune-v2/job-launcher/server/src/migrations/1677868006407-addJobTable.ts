@@ -93,11 +93,20 @@ export class addJobTable1677868006407 implements MigrationInterface {
               type: `${NS}.job_status_enum`,
             },
             {
+              name: "retries_count",
+              type: "int",
+              default: 0,
+            },
+            {
               name: "created_at",
               type: "timestamptz",
             },
             {
               name: "updated_at",
+              type: "timestamptz",
+            },
+            {
+              name: "wait_until",
               type: "timestamptz",
             },
           ],
