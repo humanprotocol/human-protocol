@@ -18,9 +18,11 @@ export class StorageService {
 
   async saveData(fileName: string, data: any) {
     const bucketExists = await this.minioService.client.bucketExists(this.s3BucketName);
+    
     if (!bucketExists) {
       await this.minioService.client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
     }
+    
     await this.minioService.client.putObject(
       this.s3BucketName,
       `${fileName}.json`,
@@ -28,6 +30,12 @@ export class StorageService {
       { 'Content-Type': 'application/json' }
     );
     return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}.json`;
+  }
+
+  async isBucketValid(dataUrl: string) {
+    // TODO: Get bucket name from data url
+    const bucketName = "Some name"
+    return this.minioService.client.getBucketPolicy(bucketName)
   }
 
   async listAllBuckets() {

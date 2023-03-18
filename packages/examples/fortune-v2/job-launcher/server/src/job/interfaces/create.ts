@@ -1,4 +1,5 @@
 export interface IJobFortuneCreateDto {
+  chainId: number;
   fortunesRequired: number;
   requesterTitle: string;
   requesterDescription: string;
@@ -6,6 +7,7 @@ export interface IJobFortuneCreateDto {
 }
 
 export interface IJobCvatCreateDto {
+  chainId: number;
   dataUrl: string;
   annotationsPerImage: number;
   labels: string[];

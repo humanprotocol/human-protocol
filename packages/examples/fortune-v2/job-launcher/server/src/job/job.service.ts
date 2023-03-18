@@ -1,12 +1,13 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { BadGatewayException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { Repository } from "typeorm";
-import { JobStatus } from "../common/decorators";
+import { JobMode, JobRequestType, JobStatus } from "../common/decorators";
 import { PaymentService } from "../payment/payment.service";
 import { IJobCvatCreateDto, IJobFortuneCreateDto, IJobLaunchDto } from "./interfaces";
 import { JobEntity } from "./job.entity";
 import * as errors from "../common/constants/errors";
+import { StorageService } from "../storage/storage.service";
 
 @Injectable()
 export class JobService {
@@ -16,15 +17,76 @@ export class JobService {
     private readonly paymentService: PaymentService,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,
+    private readonly storageService: StorageService,
   ) {}
 
-  public createFortuneJob(userId: number, dto: IJobFortuneCreateDto) {
-    // TODO: Save data to database
-  } 
+  public async createFortuneJob(userId: number, dto: IJobFortuneCreateDto): Promise<number> {
+    const { chainId, fortunesRequired, requesterDescription, price } = dto;
 
-  public createCvatJob(userId: number, dto: IJobCvatCreateDto) {
-    // TODO: Save data to database
-  } 
+    // TODO: Implement encryption algorithm https://github.com/humanprotocol/human-protocol/issues/290
+
+    const jobEntity = await this.jobEntityRepository
+      .create({
+        chainId,
+        userId,
+        submissionsRequired: fortunesRequired,
+        requesterDescription,
+        price,
+        mode: JobMode.BATCH,
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+        status: JobStatus.PENDING,
+      })
+      .save();
+
+    if (!jobEntity) {
+      this.logger.log(errors.Job.NotCreated, JobService.name);
+      throw new NotFoundException(errors.Job.NotCreated);
+    }
+    
+    await jobEntity.save();
+
+    // TODO: Save data to the bucket
+
+    return jobEntity.id;
+  }
+
+  public async createCvatJob(userId: number, dto: IJobCvatCreateDto): Promise<number> {
+    const { chainId, dataUrl, annotationsPerImage, labels, requesterDescription, requesterAccuracyTarget, price } = dto;
+
+    if (!await this.storageService.isBucketValid(dataUrl)) {
+      this.logger.log(errors.Bucket.NotPublic, JobService.name);
+      throw new NotFoundException(errors.Bucket.NotPublic);
+    }
+
+    // TODO: Implement encryption algorithm https://github.com/humanprotocol/human-protocol/issues/290
+
+    const jobEntity = await this.jobEntityRepository
+      .create({
+        chainId,
+        userId,
+        dataUrl,
+        submissionsRequired: annotationsPerImage,
+        labels,
+        requesterDescription,
+        requesterAccuracyTarget,
+        price,
+        mode: JobMode.BATCH,
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+        status: JobStatus.PENDING,
+      })
+      .save();
+
+    if (!jobEntity) {
+      this.logger.log(errors.Job.NotCreated, JobService.name);
+      throw new NotFoundException(errors.Job.NotCreated);
+    }
+    
+    await jobEntity.save();
+
+    // TODO: Save data to the bucket
+
+    return jobEntity.id;
+  }
 
   public async confirmPayment(customerId: string, dto: IJobLaunchDto): Promise<boolean> {
     const jobEntity = await this.jobEntityRepository.findOne({ id: dto.jobId });

@@ -44,7 +44,7 @@ export class addJobTable1677868006407 implements MigrationInterface {
               type: "varchar"
             },
             {
-              name: "requests_required",
+              name: "submissions_required",
               type: "int",
             },
             {
@@ -68,11 +68,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
             {
               name: "data_url",
               type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "data",
-              type: "text",
               isNullable: true,
             },
             {

@@ -114,7 +114,7 @@ export class PaymentService {
           clientSecret: paymentData.client_secret || "",
           errorMessage: paymentData.last_payment_error?.message,
           customer: customerId,
-          method: MethodType.CARD,
+          methodType: MethodType.CARD,
           status: PaymentStatus.FAILED,
           jobId: dto.jobId
         })
@@ -130,7 +130,7 @@ export class PaymentService {
         clientSecret: paymentData.client_secret || "",
         errorMessage: paymentData?.last_payment_error?.message,
         customer: customerId,
-        method: MethodType.CARD,
+        methodType: MethodType.CARD,
         status: PaymentStatus.SUCCEEDED,
         jobId: dto.jobId
       })
