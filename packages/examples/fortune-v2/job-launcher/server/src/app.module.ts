@@ -28,10 +28,10 @@ const ethersModules = networks.map(network => {
 
 @Module({
   providers: [
-    /*{
+    {
       provide: APP_GUARD,
       useClass: JwtHttpGuard,
-    },*/
+    },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

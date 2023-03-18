@@ -103,44 +103,49 @@ export class PaymentService {
   }
 
   public async confirmPayment(customerId: string, dto: IPaymentConfirmDto): Promise<number> {
-    const paymentData = await this.getPayment(dto.paymentId)
+    try {
+      const paymentData = await this.getPayment(dto.paymentId)
+      
+      if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
+        await this.paymentEntityRepository
+          .create({
+            paymentId: paymentData.id,
+            amount: paymentData.amount,
+            currency: Currency.USD,
+            clientSecret: paymentData.client_secret || "",
+            errorMessage: paymentData.last_payment_error?.message,
+            customer: customerId,
+            methodType: MethodType.CARD,
+            status: PaymentStatus.FAILED,
+            jobId: dto.jobId
+          })
+          .save();
+      }
 
-    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
-      await this.paymentEntityRepository
+  
+      const paymentEntity = await this.paymentEntityRepository
         .create({
           paymentId: paymentData.id,
           amount: paymentData.amount,
           currency: Currency.USD,
           clientSecret: paymentData.client_secret || "",
-          errorMessage: paymentData.last_payment_error?.message,
+          errorMessage: paymentData?.last_payment_error?.message,
           customer: customerId,
           methodType: MethodType.CARD,
-          status: PaymentStatus.FAILED,
+          status: PaymentStatus.SUCCEEDED,
           jobId: dto.jobId
         })
         .save();
-    }
 
- 
-    const paymentEntity = await this.paymentEntityRepository
-      .create({
-        paymentId: paymentData.id,
-        amount: paymentData.amount,
-        currency: Currency.USD,
-        clientSecret: paymentData.client_secret || "",
-        errorMessage: paymentData?.last_payment_error?.message,
-        customer: customerId,
-        methodType: MethodType.CARD,
-        status: PaymentStatus.SUCCEEDED,
-        jobId: dto.jobId
-      })
-      .save();
-
-    if (!paymentEntity) {
-      this.logger.log(errors.User.NotFound, PaymentService.name);
+      if (!paymentEntity) {
+        this.logger.log(errors.User.NotFound, PaymentService.name);
+        throw new NotFoundException(errors.Payment.NotFound);
+      }
+      return paymentEntity.id;
+    } catch (e) {
+      this.logger.log(errors.Payment.NotFound, PaymentService.name);
       throw new NotFoundException(errors.Payment.NotFound);
     }
-    return paymentEntity.id;
   }
 
   private async getPayment(paymentId: string): Promise<Stripe.Response<Stripe.PaymentIntent>> {

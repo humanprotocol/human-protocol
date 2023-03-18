@@ -21,6 +21,7 @@ export class addJobTable1677868006407 implements MigrationInterface {
         await queryRunner.query(`
           CREATE TYPE ${NS}.job_status_enum AS ENUM (
             'PENDING',
+            'PAID',
             'LAUNCHED',
             'FAILED',
             'COMPLETED'

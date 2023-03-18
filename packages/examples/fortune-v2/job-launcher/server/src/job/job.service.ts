@@ -38,18 +38,20 @@ export class JobService {
   ) {}
 
   public async createFortuneJob(userId: number, dto: IJobFortuneCreateDto): Promise<number> {
-    const { chainId, fortunesRequired, requesterDescription, price } = dto;
+    const { chainId, fortunesRequired, requesterTitle, requesterDescription, price } = dto;
 
     const jobEntity = await this.jobEntityRepository
       .create({
         chainId,
         userId,
         submissionsRequired: fortunesRequired,
+        requesterTitle,
         requesterDescription,
         price,
-        mode: JobMode.BATCH,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+        mode: JobMode.DESCRIPTIVE,
+        requestType: JobRequestType.FORTUNE,
         status: JobStatus.PENDING,
+        waitUntil: new Date()
       })
       .save();
 
@@ -101,7 +103,7 @@ export class JobService {
       throw new NotFoundException(errors.Job.NotFound);
     }
 
-    this.paymentService.confirmPayment(customerId, dto)
+    await this.paymentService.confirmPayment(customerId, dto)
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();

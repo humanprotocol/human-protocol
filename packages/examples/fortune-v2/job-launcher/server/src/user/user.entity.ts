@@ -37,6 +37,6 @@ export class UserEntity extends BaseEntity implements IUser {
   })
   public status: UserStatus;
 
-  @OneToMany(() => JobEntity, (job) => job.requester)
+  @OneToMany(() => JobEntity, (job) => job.user)
   jobs: JobEntity[];
 }
