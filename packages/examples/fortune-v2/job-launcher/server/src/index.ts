@@ -51,7 +51,7 @@ async function bootstrap() {
 
   // app.use(helmet());
 
-  await app.listen(port, host, () => {
+  await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });
 }
