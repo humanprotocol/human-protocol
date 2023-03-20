@@ -10,7 +10,7 @@ import { UserService } from "./user.service";
 import { UserSeedModule } from "./user.seed.module";
 import { UserSeedService } from "./user.seed.service";
 import { UserEntity } from "./user.entity";
-import { UserStatus } from "../common/decorators";
+import { UserStatus } from "../common/enums/user";
 
 describe("UserService", () => {
   let userService: UserService;

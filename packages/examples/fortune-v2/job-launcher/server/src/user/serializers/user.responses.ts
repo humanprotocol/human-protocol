@@ -1,4 +1,4 @@
-import { UserStatus, UserType } from "../../common/decorators";
+import { UserStatus, UserType } from "../../common/enums/user";
 import { UserEntity } from "../user.entity";
 
 export interface IUserDto {

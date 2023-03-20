@@ -1,4 +1,5 @@
-import { IBase } from "./base";
+import { IBase } from "../decorators/base";
+import { Currency, PaymentStatus } from "../enums/payment";
 
 export interface IPayment extends IBase {
   paymentId: string;
@@ -9,21 +10,4 @@ export interface IPayment extends IBase {
   errorMessage: string;
   methodType: string;
   status: PaymentStatus;
-}
-
-export enum Currency {
-  USD = "USD",
-}
-
-export enum Crypto {
-  HMT = "HMT",
-}
-
-export enum MethodType {
-  CARD = "card",
-}
-
-export enum PaymentStatus {
-  FAILED = "FAILED",
-  SUCCEEDED = "SUCCEEDED",
 }

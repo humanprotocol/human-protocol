@@ -3,10 +3,9 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { SortDirection } from "../common/collection";
-import { JobStatus } from "../common/decorators";
+import { JobStatus } from "../common/enums/job";
 import { JobEntity } from "./job.entity";
 import { JobService } from "./job.service";
-
 
 @Injectable()
 export class JobCron {
@@ -25,17 +24,17 @@ export class JobCron {
       // Use wait_until param
       const jobEntity = await this.jobEntityRepository.findOne({
         where: {
-          status: JobStatus.PAID
+          status: JobStatus.PAID,
         },
         order: {
           createdAt: SortDirection.ASC,
         },
       });
-  
+
       if (!jobEntity) return;
-  
-      await this.jobService.launchJob(jobEntity)
-    } catch(e) {
+
+      await this.jobService.launchJob(jobEntity);
+    } catch (e) {
       return;
     }
   }

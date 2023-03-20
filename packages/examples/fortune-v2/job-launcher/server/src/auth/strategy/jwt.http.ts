@@ -5,7 +5,7 @@ import { ConfigService } from "@nestjs/config";
 
 import { UserEntity } from "../../user/user.entity";
 import { UserService } from "../../user/user.service";
-import { UserStatus } from "../../common/decorators";
+import { UserStatus } from "../../common/enums/user";
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, "jwt-http") {

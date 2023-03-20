@@ -1,4 +1,4 @@
-import { JobMode, JobRequestType, JobStatus } from "../../common/decorators";
+import { JobMode, JobRequestType } from "../../common/enums/job";
 import { JobEntity } from "../job.entity";
 
 export interface IManifestDto {

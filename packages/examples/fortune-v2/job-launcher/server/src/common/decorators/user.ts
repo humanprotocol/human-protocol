@@ -1,4 +1,5 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { UserStatus, UserType } from "../enums/user";
 import { IBase } from "./base";
 
 export interface IUser extends IBase {
@@ -10,17 +11,6 @@ export interface IUser extends IBase {
   stripeCustomerId: string;
   status: UserStatus;
   type: UserType;
-}
-
-export enum UserStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  PENDING = "PENDING",
-}
-
-export enum UserType {
-  OPERATOR = "OPERATOR",
-  REQUESTER = "REQUESTER",
 }
 
 export const User = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {

@@ -1,5 +1,6 @@
 import { v4 } from "uuid";
-import { IUser, UserStatus, UserType } from "../decorators";
+import { IUser } from "../decorators";
+import { UserStatus, UserType } from "../enums/user";
 
 export const generateTestUser = (data: Partial<IUser> = {}): Partial<IUser> => {
   return Object.assign(

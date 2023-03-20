@@ -3,8 +3,9 @@ import { Exclude } from "class-transformer";
 
 import { NS } from "../common/constants";
 import { BaseEntity } from "../database/base.entity";
-import { IUser, UserStatus, UserType } from "../common/decorators";
+import { IUser } from "../common/decorators";
 import { JobEntity } from "../job/job.entity";
+import { UserStatus, UserType } from "../common/enums/user";
 
 @Entity({ schema: NS, name: "user" })
 export class UserEntity extends BaseEntity implements IUser {
@@ -37,6 +38,6 @@ export class UserEntity extends BaseEntity implements IUser {
   })
   public status: UserStatus;
 
-  @OneToMany(() => JobEntity, (job) => job.user)
+  @OneToMany(() => JobEntity, job => job.user)
   jobs: JobEntity[];
 }
