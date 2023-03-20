@@ -5,20 +5,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`
-          CREATE TYPE ${NS}.job_mode_enum AS ENUM (
-            'BATCH',
-            'DESCRIPTIVE'
-          );
-        `);
-    
-        await queryRunner.query(`
-          CREATE TYPE ${NS}.job_request_type_enum AS ENUM (
-            'IMAGE_LABEL_BINARY',
-            'FORTUNE'
-          );
-        `);
-    
-        await queryRunner.query(`
           CREATE TYPE ${NS}.job_status_enum AS ENUM (
             'PENDING',
             'PAID',
@@ -45,49 +31,13 @@ export class addJobTable1677868006407 implements MigrationInterface {
               type: "varchar"
             },
             {
-              name: "submissions_required",
-              type: "int",
-            },
-            {
-              name: "requester_title",
+              name: "manifest_url",
               type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "requester_description",
-              type: "varchar",
-            },
-            {
-              name: "price",
-              type: "decimal"
-            },
-            {
-              name: "labels",
-              type: "varchar[]",
-              isNullable: true,
-            },
-            {
-              name: "data_url",
-              type: "varchar",
-              isNullable: true,
-            },
-            {
-              name: "requester_accuracy_target",
-              type: "decimal",
-              isNullable: true,
             },
             {
               name: "escrow_address",
               type: "varchar",
               isNullable: true,
-            },
-            {
-              name: "mode",
-              type: `${NS}.job_mode_enum`,
-            },
-            {
-              name: "request_type",
-              type: `${NS}.job_request_type_enum`,
             },
             {
               name: "status",
@@ -126,8 +76,6 @@ export class addJobTable1677868006407 implements MigrationInterface {
     
       public async down(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.dropTable(`${NS}.job`);
-        await queryRunner.query(`DROP TYPE ${NS}.job_mode_enum;`);
-        await queryRunner.query(`DROP TYPE ${NS}.job_request_type_enum;`);
         await queryRunner.query(`DROP TYPE ${NS}.job_status_enum;`);
       }
 
