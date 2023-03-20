@@ -65,7 +65,8 @@
     "typeorm": "0.2.43",
     "typeorm-naming-strategies": "^4.1.0",
     "uuid": "^9.0.0",
-    "zxcvbn": "^4.4.2"
+    "zxcvbn": "^4.4.2",
+    "bip39": "^3.1.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^9.3.9",
