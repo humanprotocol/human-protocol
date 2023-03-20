@@ -54,7 +54,6 @@ const { chains, provider, webSocketProvider } = configureChains(
 
 export const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
-console.log(projectId);
 // Set up client
 const client = createClient({
   autoConnect: true,

@@ -9,8 +9,8 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 import { publicProvider } from 'wagmi/providers/public';
 
 import { Layout } from '../Layout';
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
+import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
 
