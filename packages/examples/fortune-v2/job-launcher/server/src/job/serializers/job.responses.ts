@@ -1,9 +1,8 @@
 import { JobMode, JobRequestType } from "../../common/enums/job";
-import { JobEntity } from "../job.entity";
 
 export interface IManifestDto {
   chainId: number;
-  escrowAddress: string;
+  escrowAddress?: string;
   dataUrl?: string;
   labels?: string[];
   submissionsRequired: number;
@@ -14,16 +13,3 @@ export interface IManifestDto {
   requestType: JobRequestType;
   mode: JobMode;
 }
-
-export const manifestFormatter = (jobEntity: JobEntity): IManifestDto => {
-  return {
-    ...jobEntity,
-    chainId: jobEntity.chainId,
-    escrowAddress: jobEntity.escrowAddress,
-    submissionsRequired: jobEntity.submissionsRequired,
-    requesterDescription: jobEntity.requesterDescription,
-    price: jobEntity.price,
-    mode: jobEntity.mode,
-    requestType: jobEntity.requestType,
-  };
-};
