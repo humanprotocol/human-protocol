@@ -44,6 +44,7 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.BSC_TESTNET,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
+  ChainId.SKALE,
   ChainId.MOONBEAM,
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
@@ -252,12 +253,12 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
-    subgraphUrl: 'https://api.thegraph.com/',
+    subgraphUrl: 'http://35.205.94.59:8000/subgraphs/name/skale-human',
     wagmiChain: skaleHumanProtocol,
 
     factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
-    stakingAddress: '',
+    stakingAddress: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
     kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
 
     oldSubgraphUrl: '',

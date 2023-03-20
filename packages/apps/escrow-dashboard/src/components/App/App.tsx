@@ -14,7 +14,7 @@ import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
 
-export const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
+const projectId = import.meta.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
 const chain = Object.values(ESCROW_NETWORKS)
   .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
