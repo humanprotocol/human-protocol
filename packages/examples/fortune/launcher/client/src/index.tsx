@@ -52,7 +52,7 @@ const { chains, provider, webSocketProvider } = configureChains(
   [publicProvider()]
 );
 
-export const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
+const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
 // Set up client
 const client = createClient({
