@@ -1,5 +1,5 @@
 import { IBase } from "../decorators/base";
-import { Currency, PaymentStatus } from "../enums/payment";
+import { Currency, PaymentStatus } from "../enums/currencies";
 
 export interface IPayment extends IBase {
   paymentId: string;

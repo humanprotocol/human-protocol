@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import Stripe from "stripe";
 import { Repository } from "typeorm";
 import * as errors from "../common/constants/errors";
-import { Currency, MethodType, PaymentStatus } from "../common/enums/payment";
+import { Currency, MethodType, PaymentStatus } from "../common/enums/currencies";
 import { IPaymentConfirmDto, IPaymentCreateDto } from "./interfaces";
 import { PaymentEntity } from "./payment.entity";
 

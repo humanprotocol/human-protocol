@@ -1,17 +1,16 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { firstValueFrom } from "rxjs";
+import { COINGECKO_API_URL } from "../common/constants";
 
 @Injectable()
 export class CurrencyService {
   constructor(private readonly httpService: HttpService) {}
 
-  public async getHMTPrice(amount: number, currency: string) {
+  public async getRate(token_name: string, currency: string) {
     const { data } = await firstValueFrom(
-      await this.httpService.get(
-        `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=${currency}`,
-      ),
+      await this.httpService.get(`${COINGECKO_API_URL}?ids=${token_name}&vs_currencies=${currency}`),
     );
-    return amount / data["human-protocol"][currency];
+    return data[token_name][currency];
   }
 }

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { NS } from "../common/constants";
 import { IPayment } from "../common/decorators";
-import { Currency, PaymentStatus } from "../common/enums/payment";
+import { Currency, PaymentStatus } from "../common/enums/currencies";
 import { BaseEntity } from "../database/base.entity";
 import { JobEntity } from "../job/job.entity";
 

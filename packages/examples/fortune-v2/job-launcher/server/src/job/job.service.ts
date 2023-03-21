@@ -18,8 +18,8 @@ import { StorageDataType } from "../common/constants/storage";
 import { JobMode, JobRequestType, JobStatus } from "../common/enums/job";
 import { encrypt } from "../common/helpers";
 import { IKeyPair } from "../common/interfaces/encryption";
-import Escrow from "../contracts/Escrow.sol/Escrow.json";
-import EscrowFactory from "../contracts/EscrowFactory.sol/EscrowFactory.json";
+import Escrow from "@human-protocol/core/abis/Escrow.json";
+import EscrowFactory from "@human-protocol/core/abis/EscrowFactory.json";
 import { PaymentService } from "../payment/payment.service";
 import { StorageService } from "../storage/storage.service";
 import { IJobCvatCreateDto, IJobFortuneCreateDto, IJobLaunchDto } from "./interfaces";
@@ -153,7 +153,7 @@ export class JobService {
 
       const escrowFactory: Contract = this.ethersContract.create(
         this.configService.get<string>("WEB3_ESCROW_FACTORY_ADDRESS", ""),
-        EscrowFactory.abi,
+        EscrowFactory,
       );
 
       // TODO: Implement SDK instead of using ABI https://github.com/humanprotocol/human-protocol/issues/309
@@ -182,7 +182,7 @@ export class JobService {
         throw new NotFoundException("Escrow address does not exists");
       }
 
-      const escrow: Contract = this.ethersContract.create(jobEntity.escrowAddress, Escrow.abi);
+      const escrow: Contract = this.ethersContract.create(jobEntity.escrowAddress, Escrow);
 
       const gasLimitSetup = await escrow
         .connect(operator)

@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNumber, isNumber, Min } from "class-validator";
-import { Currency, MethodType } from "../../common/enums/payment";
+import { Currency, MethodType } from "../../common/enums/currencies";
 import { IPaymentCreateDto } from "../interfaces";
 
 export class PaymentCreateDto implements IPaymentCreateDto {

@@ -55,3 +55,7 @@ export enum PaymentStatus {
   FAILED = "FAILED",
   SUCCEEDED = "SUCCEEDED",
 }
+
+export enum CoingeckoId {
+  hmt = "human-protocol",
+}
