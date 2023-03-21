@@ -16,6 +16,7 @@ import { UserModule } from "./user/user.module";
 import { TokenModule } from "./token/token.module";
 import { JobModule } from "./job/job.module";
 import { PaymentModule } from "./payment/payment.module";
+import { CurrencyModule } from "./currency/currency.module";
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -59,7 +60,8 @@ const ethersModules = networks.map(network => {
     UserModule,
     TokenModule,
     JobModule,
-    PaymentModule
+    PaymentModule,
+    CurrencyModule,
   ],
   controllers: [AppController],
 })

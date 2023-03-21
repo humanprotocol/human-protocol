@@ -1,4 +1,4 @@
-import { JobMode, JobRequestType } from "../../common/decorators";
+import { JobMode, JobRequestType } from "../../common/enums/job";
 
 export interface IManifestDto {
   chainId: number;

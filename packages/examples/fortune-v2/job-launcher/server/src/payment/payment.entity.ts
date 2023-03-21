@@ -1,9 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { NS } from "../common/constants";
-import { Currency, IPayment, PaymentStatus } from "../common/decorators";
+import { IPayment } from "../common/decorators";
+import { Currency, PaymentStatus } from "../common/enums/currencies";
 import { BaseEntity } from "../database/base.entity";
 import { JobEntity } from "../job/job.entity";
-
 
 @Entity({ schema: NS, name: "payment" })
 export class PaymentEntity extends BaseEntity implements IPayment {
@@ -24,7 +24,7 @@ export class PaymentEntity extends BaseEntity implements IPayment {
 
   @Column({ type: "varchar", nullable: true })
   public customer: string;
-  
+
   @Column({ type: "text", nullable: true })
   public errorMessage: string;
 
@@ -38,7 +38,7 @@ export class PaymentEntity extends BaseEntity implements IPayment {
   public status: PaymentStatus;
 
   @JoinColumn()
-  @ManyToOne(() => JobEntity, (job) => job.payments)
+  @ManyToOne(() => JobEntity, job => job.payments)
   public job: JobEntity;
 
   @Column({ type: "int" })

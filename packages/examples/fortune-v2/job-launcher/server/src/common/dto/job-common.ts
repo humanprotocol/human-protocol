@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEnum, IsNumber, IsPositive, IsString, IsUrl } from "class-validator";
-import { JobRequestType } from "../decorators";
+import { JobRequestType } from "../enums/job";
 
 export interface IJobCommonDto {
   networkId?: string;

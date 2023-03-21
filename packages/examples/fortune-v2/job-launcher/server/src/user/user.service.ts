@@ -9,8 +9,8 @@ import { IUserCreateDto, IUserUpdateDto } from "./interfaces";
 import { IValidatePasswordDto } from "../auth/interfaces";
 import * as errors from "../common/constants/errors";
 import { AuthEntity } from "../auth/auth.entity";
-import { UserStatus, UserType } from "../common/decorators";
 import { PaymentService } from "../payment/payment.service";
+import { UserStatus, UserType } from "../common/enums/user";
 
 @Injectable()
 export class UserService {
@@ -22,7 +22,7 @@ export class UserService {
     @InjectRepository(AuthEntity)
     private readonly authEntityRepository: Repository<AuthEntity>,
     private readonly configService: ConfigService,
-    private readonly paymentService: PaymentService
+    private readonly paymentService: PaymentService,
   ) {}
 
   public async update(where: FindConditions<UserEntity>, dto: Partial<IUserUpdateDto>): Promise<UserEntity> {
@@ -90,7 +90,7 @@ export class UserService {
 
     await this.checkEmail(email, 0);
 
-    const customerId = await this.paymentService.createCustomer(email)
+    const customerId = await this.paymentService.createCustomer(email);
 
     return this.userEntityRepository
       .create({
@@ -101,7 +101,7 @@ export class UserService {
         status: UserStatus.ACTIVE,
         stripeCustomerId: customerId,
         privateKey: "pk",
-        publicKey: "pk"
+        publicKey: "pk",
       })
       .save();
   }

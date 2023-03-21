@@ -19,7 +19,7 @@ import {
 } from "./interfaces";
 import { IJwt } from "../common/jwt";
 import { TokenType } from "../token/token.entity";
-import { UserStatus } from "../common/decorators";
+import { UserStatus } from "../common/enums/user";
 
 @Injectable()
 export class AuthService {
