@@ -42,29 +42,22 @@ Take a note of the AWS region for the S3 bucket you just created, your API Key a
 ## Installation
 5. When installing for the first time it will be necessary to run a database migration.  To do so you should set execute the following command in your terminal:
 
-`export MIGRATIONS_RUN=true`
-
 
 6. Clone this repo to your local machine and change directory into the cloned repo:
    
-`git clone git@github.com:humanprotocol/job-launcher-server.git && cd job-launcher-server` 
+`git clone git@github.com:humanprotocol/human-protocol.git` 
 
+7. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
 
-7. Install using npm
+8. Install using yarn
    
-`npm i`
+`yarn install`
 
-8. Populate the .env file with the values you noted down in steps 2, 3 and 4.  
+9. Run migrations using yarn
 
-Postgres - you will need to update the following fields:
-POSTGRES_USER=<ENTER USERNAME>
-POSTGRES_PASSWORD=<ENTER PASSWORD >
-POSTGRES_DB=<ENTER DB NAME>
+`yarn run migration:run`
 
-EMAIL_FROM=<ENTER YOUR FROM EMAIL>
+`yarn run migration:create <MIGRATION_NAME>` - Create new migration 
 
-AWS S3 API Key and Secret:
-AWS_ACCESS_KEY_ID=<ENTER YOUR API ACCESS KEY>
-AWS_SECRET_ACCESS_KEY=<ENTER YOUR API SECRET KEY>
-AWS_REGION=<<ENTER AWS S3 BUCKET REGION>>
+`yarn run migration:revert` - Revert latest migration
 

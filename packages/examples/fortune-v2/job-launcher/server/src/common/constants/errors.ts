@@ -25,4 +25,5 @@ export enum Payment {
 
 export enum Bucket {
   NotPublic = "Bucket is not public",
+  UnableSaveFile = "Unable to save file.",
 }

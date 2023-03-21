@@ -5,16 +5,8 @@ import { IBase } from "./base";
 export interface IJob extends IBase {
   userId: number;
   chainId: number;
-  dataUrl: string;
-  labels: string[];
-  submissionsRequired: number;
-  requesterTitle: string;
-  requesterDescription: string;
-  requesterAccuracyTarget: number;
+  manifestUrl: string;
   escrowAddress: string;
-  price: number;
-  mode: JobMode;
-  requestType: JobRequestType;
   status: JobStatus;
   retriesCount?: number;
   waitUntil: Date;
