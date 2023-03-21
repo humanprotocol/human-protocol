@@ -253,7 +253,8 @@ export const ESCROW_NETWORKS: {
     scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
     // Subgraph hasn't been implemented yet
-    subgraphUrl: 'http://35.205.94.59:8000/subgraphs/name/skale-human',
+    subgraphUrl:
+      'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
     wagmiChain: skaleHumanProtocol,
 
     factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
