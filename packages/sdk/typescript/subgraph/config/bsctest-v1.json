@@ -2,7 +2,7 @@
   "network": "chapel",
   "description": "Human subgraph on Binance Smart Chain testnet",
   "graft": {
-    "base": "QmbGNG1zg2ryt7bJoHW1UG9fFNFwqiLRqh18SHjwbRCNuB",
+    "base": "QmWBwBRNQfdyd8GEcjrqsPokiC4P4vY9cgfYw66sGXQEqp",
     "block": 27921409
   },
   "EscrowFactory": {

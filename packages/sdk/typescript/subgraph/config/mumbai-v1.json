@@ -2,7 +2,7 @@
   "network": "mumbai",
   "description": "Human subgraph on Polygon Mumbai testnet",
   "graft": {
-    "base": "QmTh4hgMLQzspGW28HY4tNVa6eKGwJ6JmEiuUhExRFcJEx",
+    "base": "QmXoAAEHTkmakBFMhURhvk4KCjVtQYDu4EKvfLxXShB8sU",
     "block": 32938638
   },
   "EscrowFactory": {
