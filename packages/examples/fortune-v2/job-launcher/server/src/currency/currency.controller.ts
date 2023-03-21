@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { RolesGuard } from "../common/guards";
 
@@ -13,7 +13,7 @@ export class CurrencyController {
 
   @UseGuards(RolesGuard)
   @Get("/rates")
-  public async createCurrencyIntent(@Query() data: GetRateDto): Promise<any> {
+  public async getRate(@Query() data: GetRateDto): Promise<any> {
     return this.currencyService.getRate(data.token, data.currency);
   }
 }
