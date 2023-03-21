@@ -58,7 +58,6 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
-  ChainId.SKALE,
 ];
 
 export const FAUCET_CHAIN_IDS = [
