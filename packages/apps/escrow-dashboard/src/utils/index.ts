@@ -1,4 +1,7 @@
 import { getAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber';
+import { formatUnits } from '@ethersproject/units';
+import { HM_TOKEN_DECIMALS } from 'src/constants';
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: any): string | false {
@@ -16,4 +19,8 @@ export function shortenAddress(address: string, chars = 4): string {
     throw Error(`Invalid 'address' parameter '${address}'.`);
   }
   return `${parsed.substring(0, chars + 2)}...${parsed.substring(42 - chars)}`;
+}
+
+export function formatAmount(amount: string) {
+  return formatUnits(BigNumber.from(amount), HM_TOKEN_DECIMALS);
 }
