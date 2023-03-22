@@ -1,6 +1,6 @@
 {
   "private": "true",
-  "name": "@human-protocol/fortune",
+  "name": "@human-protocol/fortune-v2",
   "version": "1.0.0",
   "description": "Human Protocol Fortune V2",
   "license": "MIT",
