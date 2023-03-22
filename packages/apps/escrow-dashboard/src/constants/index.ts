@@ -260,7 +260,7 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
     hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
     stakingAddress: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
-    kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
+    kvstoreAddress: '0xE1055607327b1be2080D31211dCDC4D9338CaF4A',
 
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',

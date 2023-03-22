@@ -92,8 +92,8 @@ jobs:
             #   escrow_factory: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
             #   staking: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
             #   reward_pool: '0xEc321ec45dDfBE9049550d461818f4E7759bBE89',
-            #   reputation:
-            #   private_key:,
+            #   # reputation:
+            #   private_key: MAINNET_PRIVATE_KEY,
             # },
           ]
       fail-fast: true
