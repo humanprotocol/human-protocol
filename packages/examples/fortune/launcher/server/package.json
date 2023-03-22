@@ -4,7 +4,6 @@
   "description": "Job Launcher Server",
   "main": "index.ts",
   "license": "MIT",
-  "private": false,
   "dependencies": {
     "@fastify/cors": "^8.2.0",
     "@human-protocol/core": "workspace:*",

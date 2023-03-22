@@ -2,7 +2,6 @@
   "name": "exchange",
   "version": "0.1.0",
   "license": "MIT",
-  "private": false,
   "dependencies": {
     "@human-protocol/core": "workspace:*",
     "@testing-library/jest-dom": "^5.16.5",

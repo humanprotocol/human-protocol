@@ -1,5 +1,4 @@
 {
-  "private": "true",
   "name": "@human-protocol/escrow-dashboard",
   "version": "1.0.0",
   "description": "Human Protocol Escrow Dashboard",
