@@ -252,7 +252,6 @@ export const ESCROW_NETWORKS: {
     title: 'SKALE Human Protocol Chain',
     scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    // Subgraph hasn't been implemented yet
     subgraphUrl:
       'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
     wagmiChain: skaleHumanProtocol,
