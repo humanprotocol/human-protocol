@@ -91,7 +91,7 @@ export const ESCROW_NETWORKS: {
   //   chainId: ChainId.SKALE,
   //   title: 'SKALE Human Protocol chain',
   //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-  //   factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
-  //   hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+  //   factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
+  //   hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
   // },
 };

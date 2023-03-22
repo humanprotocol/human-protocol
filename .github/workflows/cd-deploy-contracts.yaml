@@ -89,9 +89,9 @@ jobs:
             # },
             # {
             #   name: skale,
-            #   escrow_factory: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
-            #   staking: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
-            #   reward_pool: '0xEc321ec45dDfBE9049550d461818f4E7759bBE89',
+            #   escrow_factory: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
+            #   staking: '0x79F37FB9C210910733c16228AC4D14a8e32C11BD',
+            #   reward_pool: '0x881218246c25C6898aE96145259584340153aDA2',
             #   # reputation:
             #   private_key: MAINNET_PRIVATE_KEY,
             # },

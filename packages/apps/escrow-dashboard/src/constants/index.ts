@@ -34,7 +34,7 @@ export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
   [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
   [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
-  [ChainId.SKALE]: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+  [ChainId.SKALE]: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
 };
 
 export const SUPPORTED_CHAIN_IDS = [
@@ -256,13 +256,13 @@ export const ESCROW_NETWORKS: {
       'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
     wagmiChain: skaleHumanProtocol,
 
-    factoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
-    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
-    stakingAddress: '0xcc98Ad1C0915e271650e43714B20272AC947Ba9A',
+    factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
+    hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
+    stakingAddress: '0x79F37FB9C210910733c16228AC4D14a8e32C11BD',
     kvstoreAddress: '0xE1055607327b1be2080D31211dCDC4D9338CaF4A',
 
     oldSubgraphUrl: '',
-    oldFactoryAddress: '0x1cE8d1820D60fF792bd6E59EbFf3C9b1089808c0',
+    oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
   },
 };
 
