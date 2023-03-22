@@ -33,6 +33,8 @@ jobs:
           #   graph: avalanche
           # - name: fuji
           #   graph: fuji
+          # - name: skale
+          #   graph: skale
       fail-fast: true
       max-parallel: 3
     steps:

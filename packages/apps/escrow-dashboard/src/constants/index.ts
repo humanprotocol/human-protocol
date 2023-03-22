@@ -252,7 +252,6 @@ export const ESCROW_NETWORKS: {
     title: 'SKALE Human Protocol Chain',
     scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    // Subgraph hasn't been implemented yet
     subgraphUrl:
       'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
     wagmiChain: skaleHumanProtocol,
@@ -260,7 +259,7 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
     hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
     stakingAddress: '0x79F37FB9C210910733c16228AC4D14a8e32C11BD',
-    kvstoreAddress: '0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6',
+    kvstoreAddress: '0xE1055607327b1be2080D31211dCDC4D9338CaF4A',
 
     oldSubgraphUrl: '',
     oldFactoryAddress: '0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c',
