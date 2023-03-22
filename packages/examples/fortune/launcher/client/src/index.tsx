@@ -48,7 +48,16 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, skaleHumanProtocol, polygonMumbai, bsc, bscTestnet, fortune],
+  [
+    goerli,
+    mainnet,
+    polygon,
+    skaleHumanProtocol,
+    polygonMumbai,
+    bsc,
+    bscTestnet,
+    fortune,
+  ],
   [publicProvider()]
 );
 
@@ -66,7 +75,9 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        qrcode: true,
+        // TODO: Use env variable
+        projectId: '3f3dfb0c13adb204729f96e101072fa9',
+        showQrModal: true,
       },
     }),
   ],
