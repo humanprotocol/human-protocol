@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Node
-        run: yarn --ignore-scripts
+        run: yarn
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:

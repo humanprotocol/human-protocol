@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: npm install --global yarn && yarn --ignore-scripts
+      - run: npm install --global yarn && yarn
         name: Install dependencies
       - run: yarn sdk:test
         name: Run Node.js SDK test

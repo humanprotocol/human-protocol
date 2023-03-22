@@ -37,7 +37,7 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
+      - run: yarn
         name: Install dependencies
       - run: yarn global add @graphprotocol/graph-cli
         name: Install Graph CLI

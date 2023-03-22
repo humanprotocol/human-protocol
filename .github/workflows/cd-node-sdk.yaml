@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: yarn --ignore-scripts
+      - run: yarn
         name: Install dependencies
       - name: Change Node.js SDK version
         uses: jossef/action-set-json-field@v2
