@@ -61,6 +61,8 @@ const { chains, provider, webSocketProvider } = configureChains(
   [publicProvider()]
 );
 
+const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
+
 // Set up client
 const client = createClient({
   autoConnect: true,
@@ -75,9 +77,8 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        // TODO: Use env variable
-        projectId: '3f3dfb0c13adb204729f96e101072fa9',
         showQrModal: true,
+        projectId: projectId || ''
       },
     }),
   ],
