@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn
-        name: Install Dependencies
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
       - run: yarn lint
         name: Run lint

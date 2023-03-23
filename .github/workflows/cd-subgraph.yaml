@@ -40,8 +40,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn
-        name: Install dependencies
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
       - run: yarn global add @graphprotocol/graph-cli
         name: Install Graph CLI
       - run: graph auth --product hosted-service ${API_KEY}

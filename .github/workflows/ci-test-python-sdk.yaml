@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn
-        name: Install dependencies
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:

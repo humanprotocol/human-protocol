@@ -121,8 +121,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install --global yarn && yarn
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
 
       - name: Check changes in files
         uses: dorny/paths-filter@v2

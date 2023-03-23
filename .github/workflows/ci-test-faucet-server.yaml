@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn
-        name: Install dependencies
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
       - run: yarn faucet-server:test
         name: Run faucet server test

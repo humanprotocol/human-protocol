@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn
-        name: Install dependencies
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
       - name: Change Package version
         uses: jossef/action-set-json-field@v2
         with:
