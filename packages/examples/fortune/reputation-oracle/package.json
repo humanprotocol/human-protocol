@@ -1,5 +1,5 @@
 {
-  "name": "reputation-oracle",
+  "name": "@human-protocol/fortune-reputation-oracle",
   "version": "1.0.0",
   "description": "fortune reputation oracle",
   "main": "index.ts",

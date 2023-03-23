@@ -9,8 +9,7 @@
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8549\" \"jest\"",
     "start": "NODE_ENV=development ts-node src/index.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@human-protocol/core": "workspace:*",
     "@skaleproject/pow-ethers": "^0.2.4",

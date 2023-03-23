@@ -1,5 +1,5 @@
 {
-  "name": "exchange",
+  "name": "@human-protocol/fortune-exchange",
   "version": "0.1.0",
   "license": "MIT",
   "dependencies": {
