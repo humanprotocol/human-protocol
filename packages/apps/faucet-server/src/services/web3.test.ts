@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: `.env.development` });
-import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
+import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol/HMToken.json';
 import { describe, expect, it } from '@jest/globals';
 import { checkFaucetBalance, getFaucetBalance, sendFunds } from './web3';
 import { Contract } from 'web3-eth-contract';
