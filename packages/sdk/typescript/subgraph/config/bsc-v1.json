@@ -2,7 +2,7 @@
   "network": "bsc",
   "description": "Human subgraph on Binance Smart Chain network",
   "graft": {
-    "base": "QmUgxDMX74Mcd86vrBmkqaGCvN4BdXK9TS17vKgfRpqHJx",
+    "base": "QmP6joMhhLqWWRUr6fVnGFbfc1ee4HtHWP6CuN7iKVLPko",
     "block": 26346846
   },
   "EscrowFactory": {

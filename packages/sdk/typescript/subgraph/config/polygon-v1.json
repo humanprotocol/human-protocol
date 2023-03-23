@@ -2,7 +2,7 @@
   "network": "matic",
   "description": "Human subgraph on Polygon network",
   "graft": {
-    "base": "Qmdvzc16C8z5pt25BftZ3SCciNNp7AsDmgP41qMhaMk8ex",
+    "base": "Qma3yKiXyPJXJUDjxh1AHMbTMmyqWJ2ZmD5M71eQfTn6zL",
     "block": 40187285
   },
   "EscrowFactory": {
