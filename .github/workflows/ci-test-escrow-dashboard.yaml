@@ -13,7 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: npm install --global yarn && yarn
-        name: Install dependencies
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📥 Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
       - run: yarn escrow-dashboard:test
         name: Run escrow-dashboard test

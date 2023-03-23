@@ -10,7 +10,7 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "pretest": "NETWORK=goerli-v1 yarn generate",
-    "test": "graph test",
+    "test": "graph test -f",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ posix4e/humansubgraph",
     "quickstart:matic": "NETWORK=polygon yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",
     "quickstart:goerli": "NETWORK=goerli yarn generate && graph create --node http://localhost:8020/ posix4e/humansubgraph",

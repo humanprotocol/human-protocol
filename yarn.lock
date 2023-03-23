@@ -6634,9 +6634,9 @@ __metadata:
   linkType: hard
 
 "@types/scheduler@npm:*":
-  version: 0.16.2
-  resolution: "@types/scheduler@npm:0.16.2"
-  checksum: b6b4dcfeae6deba2e06a70941860fb1435730576d3689225a421280b7742318d1548b3d22c1f66ab68e414f346a9542f29240bc955b6332c5b11e561077583bc
+  version: 0.16.3
+  resolution: "@types/scheduler@npm:0.16.3"
+  checksum: 2b0aec39c24268e3ce938c5db2f2e77f5c3dd280e05c262d9c2fe7d890929e4632a6b8e94334017b66b45e4f92a5aa42ba3356640c2a1175fa37bef2f5200767
   languageName: node
   linkType: hard
 
@@ -12343,9 +12343,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.4.284":
-  version: 1.4.335
-  resolution: "electron-to-chromium@npm:1.4.335"
-  checksum: a3c9ee2412427ed0853f065f1dde64db1b567abf53d5e50e8cfba1544af4bda970f59a4f4df3dad81078c948b3277dffb42042e6a859288246d68b58db81a555
+  version: 1.4.336
+  resolution: "electron-to-chromium@npm:1.4.336"
+  checksum: 40ddd46ded7acb7aa45d8e98e5077f5dee59e75199cd150635bb3d207d33d5acb3c94359ca167127dac9edfde753645426ec93affe1d9e149a5cc42f3c989cc6
   languageName: node
   linkType: hard
 
