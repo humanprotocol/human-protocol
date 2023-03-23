@@ -64,6 +64,5 @@
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0"
-  },
-  "packageManager": "yarn@3.5.0"
+  }
 }

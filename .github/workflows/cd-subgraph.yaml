@@ -37,6 +37,9 @@ jobs:
       max-parallel: 3
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - run: yarn
         name: Install dependencies
       - run: yarn global add @graphprotocol/graph-cli
