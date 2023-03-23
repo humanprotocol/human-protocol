@@ -14,6 +14,8 @@ import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
 
+const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
+
 const chain = Object.values(ESCROW_NETWORKS)
   .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
   .map(({ wagmiChain }) => wagmiChain);
@@ -45,9 +47,8 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        // TODO: Use env variable
-        projectId: '3f3dfb0c13adb204729f96e101072fa9',
         showQrModal: true,
+        projectId: projectId || '',
       },
     }),
   ],
