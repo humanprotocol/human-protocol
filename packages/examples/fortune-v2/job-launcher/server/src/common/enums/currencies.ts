@@ -44,11 +44,17 @@ export enum Currency {
 }
 
 export enum Crypto {
-  HMT = "HMT",
+  HMT = "hmt",
 }
 
 export enum MethodType {
   CARD = "card",
+}
+
+export enum PaymentType {
+  DEPOSIT = "DEPOSIT",
+  REFUND = "REFUND",
+  WITHDRAWAL = "WITHDRAWAL",
 }
 
 export enum PaymentStatus {

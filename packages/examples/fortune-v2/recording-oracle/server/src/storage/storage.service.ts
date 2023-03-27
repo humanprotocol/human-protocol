@@ -1,6 +1,8 @@
-import { BadGatewayException, Inject, Injectable, Logger } from "@nestjs/common";
+import { BadGatewayException, BadRequestException, ForbiddenException, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { MinioService } from "nestjs-minio-client";
+import { MinioService } from 'nestjs-minio-client';
+import { StorageDataType } from "../common/enums/storage";
+import * as errors from "../common/enums/errors";
 
 @Injectable()
 export class StorageService {
@@ -8,23 +10,38 @@ export class StorageService {
   private s3BucketName;
   private s3BaseUrl;
 
-  constructor(private readonly configService: ConfigService, private readonly minioService: MinioService) {
-    this.s3BucketName = configService.get("S3_BUCKET_NAME");
-    this.s3BaseUrl = configService.get("S3_BASE_URL");
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly minioService: MinioService
+  ) {
+    this.s3BucketName = configService.get('S3_BUCKET_NAME');
+    this.s3BaseUrl = configService.get('S3_BASE_URL');
   }
 
-  async saveData(fileName: string, data: any) {
-    const bucketExists = await this.minioService.client.bucketExists(this.s3BucketName);
-    if (!bucketExists) {
-      await this.minioService.client.makeBucket(process.env.S3_BUCKET_NAME as string, "");
+  public async saveData(dataType: StorageDataType, fileName: string, data: string): Promise<string> {
+    try {
+      const bucketExists = await this.minioService.client.bucketExists(this.s3BucketName);
+      
+      if (!bucketExists) {
+        await this.minioService.client.makeBucket(process.env.S3_BUCKET_NAME as string, '');
+      }
+      
+      const timestamp = Date.now();
+
+      await this.minioService.client.putObject(
+        this.s3BucketName,
+        `${timestamp}-${dataType}-${fileName}.json`,
+        data,
+        { 'Content-Type': 'application/json' }
+      );
+      return `${this.s3BaseUrl}/${this.s3BucketName}/${timestamp}-${dataType}-${fileName}.json`;
+    } catch(e) {
+      this.logger.log(errors.Bucket.UnableSaveFile, StorageService.name);
+      throw new BadRequestException(errors.Bucket.UnableSaveFile);
     }
-    await this.minioService.client.putObject(this.s3BucketName, `${fileName}.json`, JSON.stringify(data), {
-      "Content-Type": "application/json",
-    });
-    return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}.json`;
   }
 
-  async listAllBuckets() {
+  public async listAllBuckets() {
     return this.minioService.client.listBuckets();
   }
 }

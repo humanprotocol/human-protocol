@@ -8,6 +8,7 @@ import { useContainer } from "class-validator";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
+import {  getSignedData, sign, verify } from "./common/helpers";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
@@ -52,6 +53,50 @@ async function bootstrap() {
   // app.use(helmet());
 
   await app.listen(port, host, async () => {
+    //const keyPair = await generateKeyPair()
+
+    const keyPair_1 = {
+      mnemonic: configService.get<string>("MNEMONIC", "MNEMONIC"),
+      privateKey: configService.get<string>("PGP_PRIVATE_KEY", "PGP_PRIVATE_KEY"),
+      publicKey: configService.get<string>("PGP_PUBLIC_KEY", "PGP_PUBLIC_KEY"),
+    }
+
+    const keyPair_2 = {
+      mnemonic: configService.get<string>("MNEMONIC_2", "MNEMONIC"),
+      privateKey: configService.get<string>("PGP_PRIVATE_KEY_2", "PGP_PRIVATE_KEY"),
+      publicKey: configService.get<string>("PGP_PUBLIC_KEY_2", "PGP_PUBLIC_KEY"),
+    }
+
+    const keyPair_3 = {
+      mnemonic: configService.get<string>("MNEMONIC_3", "MNEMONIC"),
+      privateKey: configService.get<string>("PGP_PRIVATE_KEY_3", "PGP_PRIVATE_KEY"),
+      publicKey: configService.get<string>("PGP_PUBLIC_KEY_3", "PGP_PUBLIC_KEY"),
+    }
+
+    const payload = {
+      escrowAddress: "0x0000000000000000000000000000000000000000",
+      chainId: 80001
+    }
+    const signatureData = {
+      mnemonic: configService.get<string>("MNEMONIC", "MNEMONIC"),
+      privateKey: configService.get<string>("PGP_PRIVATE_KEY", "PGP_PRIVATE_KEY"),
+      publicKey: configService.get<string>("PGP_PUBLIC_KEY", "PGP_PUBLIC_KEY"),
+      message: JSON.stringify(payload)
+    }
+
+    
+    console.log(1111)
+    const signedMessage = await sign(signatureData)
+    console.log(signedMessage)
+    console.log(22222)
+    const signedObj = await getSignedData(signedMessage)
+    console.log(signedObj)
+    console.log(33333)
+
+    signatureData.message = signedMessage
+    console.log(await verify(signatureData))
+
+
     console.info(`API server is running on http://${host}:${port}`);
   });
 }

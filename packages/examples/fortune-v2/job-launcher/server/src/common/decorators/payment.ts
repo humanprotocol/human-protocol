@@ -1,13 +1,10 @@
 import { IBase } from "../decorators/base";
-import { Currency, PaymentStatus } from "../enums/currencies";
+import { Currency, PaymentType } from "../enums/currencies";
 
 export interface IPayment extends IBase {
-  paymentId: string;
+  paymentId?: string;
+  clientSecret?: string;
   amount: number;
-  clientSecret: string;
   currency: Currency;
-  customer: string;
-  errorMessage: string;
-  methodType: string;
-  status: PaymentStatus;
+  type: PaymentType;
 }

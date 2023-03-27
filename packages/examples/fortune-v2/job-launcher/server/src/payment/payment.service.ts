@@ -4,7 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import Stripe from "stripe";
 import { Repository } from "typeorm";
 import * as errors from "../common/constants/errors";
-import { Currency, MethodType, PaymentStatus } from "../common/enums/currencies";
+import { Currency, MethodType, PaymentStatus, PaymentType } from "../common/enums/currencies";
 import { IPaymentConfirmDto, IPaymentCreateDto } from "./interfaces";
 import { PaymentEntity } from "./payment.entity";
 
@@ -84,7 +84,7 @@ export class PaymentService {
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
     return {
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: paymentIntent.client_secret
     };
   }
 
@@ -98,19 +98,8 @@ export class PaymentService {
       const paymentData = await this.getPayment(dto.paymentId);
 
       if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
-        await this.paymentEntityRepository
-          .create({
-            paymentId: paymentData.id,
-            amount: paymentData.amount,
-            currency: Currency.USD,
-            clientSecret: paymentData.client_secret || "",
-            errorMessage: paymentData.last_payment_error?.message,
-            customer: customerId,
-            methodType: MethodType.CARD,
-            status: PaymentStatus.FAILED,
-            jobId: dto.jobId,
-          })
-          .save();
+        this.logger.log(errors.Payment.NotSuccess, PaymentService.name);
+        throw new NotFoundException(errors.Payment.NotSuccess);
       }
 
       const paymentEntity = await this.paymentEntityRepository
@@ -119,16 +108,12 @@ export class PaymentService {
           amount: paymentData.amount,
           currency: Currency.USD,
           clientSecret: paymentData.client_secret || "",
-          errorMessage: paymentData?.last_payment_error?.message,
-          customer: customerId,
-          methodType: MethodType.CARD,
-          status: PaymentStatus.SUCCEEDED,
-          jobId: dto.jobId,
+          type: PaymentType.DEPOSIT,
         })
         .save();
 
       if (!paymentEntity) {
-        this.logger.log(errors.User.NotFound, PaymentService.name);
+        this.logger.log(errors.Payment.NotFound, PaymentService.name);
         throw new NotFoundException(errors.Payment.NotFound);
       }
       return paymentEntity.id;

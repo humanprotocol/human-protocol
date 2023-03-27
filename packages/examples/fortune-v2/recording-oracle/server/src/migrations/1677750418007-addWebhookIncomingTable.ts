@@ -30,12 +30,7 @@ export class addWebhookIncomingTable1677750418007 implements MigrationInterface 
         },
         {
           name: "escrow_address",
-          type: "varchar",
-          isUnique: true,
-        },
-        {
-          name: "s3_url",
-          type: "varchar",
+          type: "varchar"
         },
         {
           name: "retries_count",

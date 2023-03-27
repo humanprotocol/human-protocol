@@ -8,9 +8,10 @@ import { useContainer } from "class-validator";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
+import {  getSignedData, sign, verify } from "./common/helpers";
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
 
   const configService: ConfigService = app.get(ConfigService);
 
@@ -26,8 +27,6 @@ async function bootstrap() {
   });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-
-  app.use(helmet());
 
   app.use(
     session({
@@ -49,11 +48,14 @@ async function bootstrap() {
   SwaggerModule.setup("swagger", app, document);
 
   const host = configService.get<string>("HOST", "localhost");
-  const port = configService.get<string>("PORT", "3000");
+  const port = configService.get<string>("PORT", "5000");
 
-  await app.listen(port, host, () => {
+  // app.use(helmet());
+
+  await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });
 }
 
 void bootstrap();
+

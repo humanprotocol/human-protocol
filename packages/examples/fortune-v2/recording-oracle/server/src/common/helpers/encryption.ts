@@ -86,7 +86,7 @@ export async function verify(data: IVerifyMessage): Promise<boolean> {
   }
 }
 
-export async function getSignedData(message: string): Promise<object> { 
+export async function getSignedData(message: string): Promise<any> { 
   const signedMessage = await openpgp.readCleartextMessage({
       cleartextMessage: message
   });

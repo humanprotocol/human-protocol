@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { UserType } from "../decorators";
 
 @Injectable()
 export class SignatureGuard implements CanActivate {
