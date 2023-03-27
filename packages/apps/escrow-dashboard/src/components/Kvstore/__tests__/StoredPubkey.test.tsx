@@ -1,17 +1,11 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { StoredPubkey } from 'src/components/Kvstore/StoredPubkey';
+import { create } from 'react-test-renderer';
+import { MockConnector } from 'wagmi/connectors/mock';
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { StoredPubkey, StoredPubkeyProps } from '../StoredPubkey';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered StoredPubkey component', () => {
   it('should render `text` prop', async () => {
@@ -26,13 +20,9 @@ describe('when rendered StoredPubkey component', () => {
       ],
     });
     await act(async () => {
-      render(<StoredPubkey />, {
+      render(<StoredPubkey {...({} as StoredPubkeyProps)} />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>
-            <RainbowKitProvider chains={testChains} modalSize="compact">
-              {children}
-            </RainbowKitProvider>
-          </Providers>
+          <Providers client={client}>{children}</Providers>
         ),
       });
     });
@@ -51,14 +41,10 @@ it('StoredPubkey component renders correctly, corresponds to the snapshot', () =
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <RainbowKitProvider chains={testChains} modalSize="compact">
-          <StoredPubkey />
-        </RainbowKitProvider>
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <StoredPubkey {...({} as StoredPubkeyProps)} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

@@ -5,6 +5,7 @@ import {
   polygonMumbai,
   bsc,
   bscTestnet,
+  skaleHumanProtocol
 } from 'wagmi/chains';
 import {
   EthereumClient,
@@ -28,6 +29,7 @@ const chains = [
   mainnet,
   polygon,
   bsc,
+  skaleHumanProtocol,
   goerli,
   polygonMumbai,
   bscTestnet,

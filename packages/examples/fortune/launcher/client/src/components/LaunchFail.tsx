@@ -3,17 +3,18 @@ import React from 'react';
 import { RoundedBox } from './RoundedBox';
 
 type LaunchFailProps = {
+  message: string;
   onBack: () => void;
 };
 
-export const LaunchFail = ({ onBack }: LaunchFailProps) => {
+export const LaunchFail = ({ message, onBack }: LaunchFailProps) => {
   return (
     <RoundedBox sx={{ py: 20, textAlign: 'center' }}>
       <Typography variant="h6" fontWeight={500} color="primary" mb={2}>
         Fail!
       </Typography>
       <Typography variant="body2" color="primary">
-        Fail message here.
+        {message}
       </Typography>
       <Button
         sx={{ mt: 5, minWidth: '200px' }}

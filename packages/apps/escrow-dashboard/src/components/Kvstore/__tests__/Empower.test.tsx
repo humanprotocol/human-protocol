@@ -1,17 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { Empower } from 'src/components/Kvstore/Empower';
+import { create } from 'react-test-renderer';
+import { MockConnector } from 'wagmi/connectors/mock';
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Empower, EmpowerProps } from '../Empower';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered Empower component', () => {
   it('should render `text` prop', async () => {
@@ -26,13 +19,9 @@ describe('when rendered Empower component', () => {
       ],
     });
     await act(async () => {
-      render(<Empower />, {
+      render(<Empower {...({} as EmpowerProps)} />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>
-            <RainbowKitProvider chains={testChains} modalSize="compact">
-              {children}
-            </RainbowKitProvider>
-          </Providers>
+          <Providers client={client}>{children}</Providers>
         ),
       });
     });
@@ -51,14 +40,10 @@ it('Empower component renders correctly, corresponds to the snapshot', () => {
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <RainbowKitProvider chains={testChains} modalSize="compact">
-          <Empower />
-        </RainbowKitProvider>
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Empower {...({} as EmpowerProps)} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

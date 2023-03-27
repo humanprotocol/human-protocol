@@ -123,6 +123,12 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    skale: {
+      chainId: 1273227453,
+      url: process.env.ETH_SKALE_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -156,7 +162,18 @@ const config: HardhatUserConfig = {
       bscTestnet: process.env.BSC_API_KEY || '',
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
+      skale: process.env.SKALE_API_KEY || '',
     },
+    customChains: [
+      {
+        network: 'skale',
+        chainId: 1273227453,
+        urls: {
+          apiURL: process.env.SKALE_BROWSER_API_URL || '',
+          browserURL: process.env.SKALE_BROWSER_URL || '',
+        },
+      },
+    ],
   },
   mocha: {
     timeout: 200000,

@@ -1,0 +1,29 @@
+[package]
+name = "staking"
+version = "0.1.0"
+authors = [
+    "Vlad Nedelcu <vlad.nedelcu@buidly.com>"
+]
+edition = "2018"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.multiversx-sc]
+version = "0.39.5"
+
+[dependencies.common-structs]
+path = "../common-structs"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.39.5"
+
+[dev-dependencies.num-bigint]
+version = "0.4.2"
+
+[dev-dependencies.rewards-pool-mock]
+path = "../rewards-pool-mock"
+
+[dev-dependencies.escrow-mock]
+path = "../escrow-mock"

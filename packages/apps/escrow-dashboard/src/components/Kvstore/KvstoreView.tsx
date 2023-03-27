@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { MainPage } from './MainPage';
+import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { useState, useEffect, FC } from 'react';
+import { useAccount, useContractRead, useNetwork } from 'wagmi';
+
 import { AfterConnect } from './AfterConnect';
 import { Dashboard } from './Dashboard';
-import { useAccount, useContractRead, useNetwork } from 'wagmi';
-import KVStore from '@human-protocol/core/abis/KVStore.json';
-import { ESCROW_NETWORKS, ChainId } from '../../constants';
-export const KvstoreView = (): React.ReactElement => {
+import { MainPage } from './MainPage';
+
+import { ESCROW_NETWORKS, ChainId } from 'src/constants';
+
+export const KvstoreView: FC = () => {
   const { isConnected, address } = useAccount();
   const { chain } = useNetwork();
   const [publicKey, setPublicKey] = useState<string>('');
@@ -19,6 +22,7 @@ export const KvstoreView = (): React.ReactElement => {
     functionName: 'get',
     args: [address, 'public_key'],
   });
+
   useEffect(() => {
     if (publicKey?.trim().length === 0) {
       setStep(0);
@@ -29,6 +33,7 @@ export const KvstoreView = (): React.ReactElement => {
       setPubkeyExist(true);
     }
   }, [data, chain, publicKey]);
+
   return (
     <>
       {!isConnected && <MainPage />}

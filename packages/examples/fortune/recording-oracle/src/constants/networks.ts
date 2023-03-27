@@ -7,6 +7,7 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export const ESCROW_NETWORKS: {
@@ -44,8 +45,8 @@ export const ESCROW_NETWORKS: {
   //   chainId: ChainId.MOONBASE_ALPHA,
   //   title: 'Moonbase Alpha',
   //   rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-  //   factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
-  //   hmtAddress: '0xe4C8eC5d057EacF40060b2174627a4941a5c8127',
+  //   factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
+  //   hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
   // },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
@@ -54,4 +55,11 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     hmtAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
   },
+  // [ChainId.SKALE]: {
+  //   chainId: ChainId.SKALE,
+  //   title: 'SKALE Human Protocol chain',
+  //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  //   factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
+  //   hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
+  // },
 };

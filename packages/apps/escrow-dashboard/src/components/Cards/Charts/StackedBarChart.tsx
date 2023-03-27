@@ -1,6 +1,6 @@
 import { Box, Grid, Typography, useTheme } from '@mui/material';
 import numeral from 'numeral';
-import React from 'react';
+import { FC } from 'react';
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -9,29 +9,29 @@ import {
   XAxis,
 } from 'recharts';
 
-import { CardContainer } from '../Container';
+import { Container } from '../Container';
 
-interface IStackSeries {
+type StackSeries = {
   date: string;
   dailyEscrowAmounts: number;
   dailyPendingEvents: number;
-}
+};
 
-interface IStackedBarChart {
-  series: IStackSeries[];
+type StackedBarChartProps = {
+  series: StackSeries[];
   allEscrowAmount?: string | number;
   pendingEventCount?: string | number;
-}
+};
 
-export default function StackedBarChart({
+export const StackedBarChart: FC<StackedBarChartProps> = ({
   series,
   allEscrowAmount,
   pendingEventCount,
-}: IStackedBarChart) {
+}) => {
   const theme = useTheme();
 
   return (
-    <CardContainer>
+    <Container>
       <Grid container>
         <Grid item container justifyContent="center" xs={12} sm={12} md={4}>
           <Grid item xs={12} sm={6} md={12}>
@@ -93,6 +93,6 @@ export default function StackedBarChart({
           </Box>
         </Grid>
       </Grid>
-    </CardContainer>
+    </Container>
   );
-}
+};

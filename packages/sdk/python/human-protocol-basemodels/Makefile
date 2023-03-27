@@ -9,3 +9,7 @@ run-test:
 
 generate-json:
 	./scripts/export-json-schema.sh
+
+build-package:
+	make clean-package
+	python3 setup.py sdist bdist_wheel

@@ -1,5 +1,5 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
-import { ethereum, BigInt } from '@graphprotocol/graph-ts';
+import { ethereum, BigInt, Address } from '@graphprotocol/graph-ts';
 
 import {
   IntermediateStorage,
@@ -7,11 +7,19 @@ import {
   BulkTransfer,
 } from '../../generated/templates/Escrow/Escrow';
 
-export function createISEvent(url: string, hash: string): IntermediateStorage {
+export function createISEvent(
+  sender: Address,
+  url: string,
+  hash: string
+): IntermediateStorage {
   const newIntermediateStorageEvent = changetype<IntermediateStorage>(
     newMockEvent()
   );
   newIntermediateStorageEvent.parameters = [];
+  const senderParam = new ethereum.EventParam(
+    '_sender',
+    ethereum.Value.fromAddress(sender)
+  );
   const urlParam = new ethereum.EventParam(
     '_url',
     ethereum.Value.fromString(url)
@@ -21,6 +29,7 @@ export function createISEvent(url: string, hash: string): IntermediateStorage {
     ethereum.Value.fromString(hash)
   );
 
+  newIntermediateStorageEvent.parameters.push(senderParam);
   newIntermediateStorageEvent.parameters.push(urlParam);
   newIntermediateStorageEvent.parameters.push(hashParam);
 
@@ -47,7 +56,9 @@ export function createPendingEvent(manifest: string, hash: string): Pending {
 
 export function createBulkTransferEvent(
   txId: i32,
-  bulkCount: i32,
+  recipients: Address[],
+  amounts: i32[],
+  isPartial: boolean,
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
@@ -57,13 +68,23 @@ export function createBulkTransferEvent(
     '_txId',
     ethereum.Value.fromI32(txId)
   );
-  const bulkCountParam = new ethereum.EventParam(
-    'hash',
-    ethereum.Value.fromI32(bulkCount)
+  const recipientsParam = new ethereum.EventParam(
+    '_recipients',
+    ethereum.Value.fromAddressArray(recipients)
+  );
+  const amountsParam = new ethereum.EventParam(
+    '_amounts',
+    ethereum.Value.fromI32Array(amounts)
+  );
+  const isPartialParam = new ethereum.EventParam(
+    '_isPartial',
+    ethereum.Value.fromBoolean(isPartial)
   );
 
   newBTEvent.parameters.push(txIdParam);
-  newBTEvent.parameters.push(bulkCountParam);
+  newBTEvent.parameters.push(recipientsParam);
+  newBTEvent.parameters.push(amountsParam);
+  newBTEvent.parameters.push(isPartialParam);
 
   return newBTEvent;
 }

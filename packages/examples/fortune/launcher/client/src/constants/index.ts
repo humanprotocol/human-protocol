@@ -8,6 +8,7 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
   LOCALHOST = 1338,
+  SKALE = 1273227453,
 }
 
 export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
@@ -17,6 +18,7 @@ export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
+  ChainId.SKALE,
 ];
 
 export const SUPPORTED_CHAIN_IDS =
@@ -85,6 +87,15 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
   },
+  // [ChainId.SKALE]: {
+  //   chainId: ChainId.SKALE,
+  //   title: 'SKALE Human Protocol chain',
+  //   scanUrl: 'https://wan-red-ain.explorer.mainnet.skalenodes.com/',
+  //   rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  //   subgraphUrl: 'https://graph-skale.humanprotocol.org/subgraphs/name/skale-human',
+  //   factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
+  //   hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
+  // },
   // [ChainId.MOONBEAM]: {
   //   chainId: ChainId.MOONBEAM,
   //   title: 'Moonbeam',
@@ -107,3 +118,48 @@ export const ESCROW_NETWORKS: {
 };
 
 export const HM_TOKEN_DECIMALS = 18;
+
+export const Currencies = [
+  'USD',
+  'EUR',
+  'AED',
+  'ARS',
+  'AUD',
+  'BDT',
+  'BMD',
+  'BRL',
+  'CAD',
+  'CHF',
+  'CLP',
+  'CNY',
+  'CZK',
+  'DKK',
+  'GBP',
+  'HKD',
+  'HUF',
+  'IDR',
+  'ILS',
+  'INR',
+  'JPY',
+  'KRW',
+  'LKR',
+  'MMK',
+  'MXN',
+  'MYR',
+  'NGN',
+  'NOK',
+  'NZD',
+  'PHP',
+  'PKR',
+  'PLN',
+  'RUB',
+  'SAR',
+  'SEK',
+  'SGD',
+  'THB',
+  'TRY',
+  'TWD',
+  'UAH',
+  'VND',
+  'ZAR',
+];

@@ -13,7 +13,7 @@ export interface ReputationEntry {
 
 export function filterAddressesToReward(
   web3: Web3,
-  fortunesEntries: { [key: string]: FortuneEntry },
+  fortunesEntries: { [key: string]: FortuneEntry[] },
   recordingOracleAddress: string
 ) {
   const filteredWorkers: string[] = [];
@@ -22,20 +22,23 @@ export function filterAddressesToReward(
   let errorRecordingOracle = false;
 
   Object.keys(fortunesEntries).forEach((workerAddress) => {
-    const { fortune, score } = fortunesEntries[workerAddress];
-    if (tmpHashMap[fortune] || checkBadWords(fortune)) {
-      reputationValues.push({ workerAddress, reputation: -1 });
-      if (score) {
+    fortunesEntries[workerAddress].forEach((fortuneEntry) => {
+      const { fortune, score } = fortuneEntry;
+      if (tmpHashMap[fortune] || checkBadWords(fortune)) {
+        reputationValues.push({ workerAddress, reputation: -1 });
+        if (score) {
+          errorRecordingOracle = true;
+        }
+        return;
+      } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && !score) {
         errorRecordingOracle = true;
       }
-      return;
-    } else if (!tmpHashMap[fortune] && !checkBadWords(fortune) && !score) {
-      errorRecordingOracle = true;
-    }
 
-    tmpHashMap[fortune] = true;
-    filteredWorkers.push(workerAddress);
-    reputationValues.push({ workerAddress, reputation: 1 });
+      tmpHashMap[fortune] = true;
+      reputationValues.push({ workerAddress, reputation: 1 });
+      if (!filteredWorkers.includes(workerAddress))
+        filteredWorkers.push(workerAddress);
+    });
   });
   const workerAddresses = filteredWorkers.map(web3.utils.toChecksumAddress);
   if (errorRecordingOracle) {

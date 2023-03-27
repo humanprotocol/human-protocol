@@ -23,12 +23,6 @@ jobs:
         run: pip install pipenv
       - name: Python test
         working-directory: ./packages/sdk/python/human-protocol-sdk
-        env:
-          ESCROW_AWS_ACCESS_KEY_ID: ${{ secrets.ESCROW_AWS_ACCESS_KEY_ID }}
-          ESCROW_AWS_SECRET_ACCESS_KEY: ${{ secrets.ESCROW_AWS_SECRET_ACCESS_KEY }}
-          ESCROW_RESULTS_AWS_S3_ACCESS_KEY_ID: ${{ secrets.ESCROW_RESULTS_AWS_S3_ACCESS_KEY_ID }}
-          ESCROW_RESULTS_AWS_S3_SECRET_ACCESS_KEY: ${{ secrets.ESCROW_RESULTS_AWS_S3_SECRET_ACCESS_KEY }}
-          ESCROW_ENDPOINT_URL: https://storage.googleapis.com
         run: |
           pipenv install --dev
           make run-test

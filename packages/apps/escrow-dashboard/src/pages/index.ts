@@ -1,3 +1,8 @@
-export { Main } from './Main';
-export { LeaderboardPage as Leaderboard } from './Leaderboard';
-export { KvstorePage as Kvstore } from './Kvstore';
+export * from './EscrowDetail';
+export * from './Faucet';
+export * from './Leaderboard';
+export * from './LeaderDetail';
+export * from './Kvstore';
+export * from './Main';
+export * from './Owner';
+export * from './Profile';

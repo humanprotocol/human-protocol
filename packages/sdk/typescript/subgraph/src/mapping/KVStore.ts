@@ -20,9 +20,8 @@ export function handleDataSaved(event: DataSaved): void {
   entity.save();
 
   // Update leader role, if necessary
-  if (entity.key === 'role') {
-    const leaderId = event.params.sender.toHex();
-    const leader = createOrLoadLeader(leaderId, event.params.sender);
+  if (entity.key == 'role') {
+    const leader = createOrLoadLeader(event.params.sender);
 
     leader.role = entity.value;
     leader.save();

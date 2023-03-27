@@ -1,3 +1,1 @@
-import CardTextBlock from './TextBlock';
-
-export { CardTextBlock };
+export { TextBlock } from './TextBlock';

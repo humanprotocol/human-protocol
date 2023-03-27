@@ -13,23 +13,27 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import {
-  SUPPORTED_CHAIN_IDS,
-  ESCROW_NETWORKS,
-  ChainId,
-  HM_TOKEN_DECIMALS,
-} from 'src/constants';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAccount, useChainId, useSigner, useSwitchNetwork } from 'wagmi';
+import {
+  ChainId,
+  ESCROW_NETWORKS,
+  HM_TOKEN_DECIMALS,
+  SUPPORTED_CHAIN_IDS,
+} from '../constants';
 import { RoundedBox } from './RoundedBox';
-import { FortuneJobRequestType, FundingMethodType } from './types';
+import {
+  FortuneJobRequestType,
+  FundingMethodType,
+  JobLaunchResponse,
+} from './types';
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
   onBack: () => void;
   onLaunch: () => void;
-  onSuccess: (escrowAddress: string) => void;
-  onFail: () => void;
+  onSuccess: (response: JobLaunchResponse) => void;
+  onFail: (message: string) => void;
 };
 
 export const JobRequest = ({
@@ -62,7 +66,12 @@ export const JobRequest = ({
     fieldName: string,
     fieldValue: any
   ) => {
-    setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    const regex = /^[0-9\b]+$/;
+    if (fieldName !== 'fortunesRequired') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    } else if (regex.test(fieldValue) || fieldValue === '') {
+      setJobRequest({ ...jobRequest, [fieldName]: fieldValue });
+    }
   };
 
   const handleLaunch = async () => {
@@ -87,20 +96,33 @@ export const JobRequest = ({
         setIsLoading(false);
         return;
       }
-      const tx = await contract.approve(
-        jobLauncherAddress,
-        ethers.utils.parseUnits(data.fundAmount, HM_TOKEN_DECIMALS)
+      const balance = await contract.balanceOf(address);
+      const fundAmount = ethers.utils.parseUnits(
+        data.fundAmount,
+        HM_TOKEN_DECIMALS
       );
-      const receipt = await tx.wait();
-      console.log(receipt);
+      if (balance.lt(fundAmount)) {
+        throw new Error('Balance not enough for funding the escrow');
+      }
 
       const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      await axios.post(`${baseUrl}/check-escrow`, data);
+
+      const allowance = await contract.allowance(address, jobLauncherAddress);
+
+      if (allowance.lt(fundAmount)) {
+        const tx = await contract.approve(jobLauncherAddress, fundAmount);
+        const receipt = await tx.wait();
+        console.log(receipt);
+      }
+
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      onFail();
+      if (err.name === 'AxiosError') onFail(err.response.data);
+      else onFail(err.message);
     }
 
     setIsLoading(false);
@@ -157,6 +179,8 @@ export const JobRequest = ({
               <FormControl fullWidth>
                 <TextField
                   placeholder="Fortunes Requested"
+                  type="number"
+                  inputProps={{ min: 0, step: 1 }}
                   value={jobRequest.fortunesRequired}
                   onChange={(e) =>
                     handleJobRequestFormFieldChange(

@@ -9,58 +9,81 @@ const fortunes = {};
 
 describe('Rewards', () => {
   it('Filter duplicated fortune', async () => {
-    fortunes[worker1] = {
-      score: true,
-      fortune: 'fortune',
-    };
-    fortunes[worker2] = {
-      score: false,
-      fortune: 'fortune',
-    };
-    fortunes[worker3] = {
-      score: true,
-      fortune: 'fortune1',
-    };
+    fortunes[worker1] = [
+      {
+        score: true,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker2] = [
+      {
+        score: false,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker3] = [
+      {
+        score: true,
+        fortune: 'fortune1',
+      },
+    ];
     const result = filterAddressesToReward(new Web3(), fortunes, recOracle);
 
     expect(result.workerAddresses).toStrictEqual([worker1, worker3]);
   });
 
   it('Check fortune bad words', async () => {
-    fortunes[worker1] = {
-      score: false,
-      fortune: 'damn',
-    };
-    fortunes[worker2] = {
-      score: true,
-      fortune: 'fortune',
-    };
-    fortunes[worker3] = {
-      score: false,
-      fortune: 'shit should be blocked',
-    };
+    fortunes[worker1] = [
+      {
+        score: false,
+        fortune: 'damn',
+      },
+    ];
+    fortunes[worker2] = [
+      {
+        score: false,
+        fortune: 'shit',
+      },
+      {
+        score: true,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker3] = [
+      {
+        score: false,
+        fortune: 'shit should be blocked',
+      },
+    ];
     const result = filterAddressesToReward(new Web3(), fortunes, recOracle);
     expect(result.workerAddresses).toStrictEqual([worker2]);
     expect(result.reputationValues[0].reputation).toStrictEqual(-1);
-    expect(result.reputationValues[1].reputation).toStrictEqual(1);
-    expect(result.reputationValues[2].reputation).toStrictEqual(-1);
-    expect(result.reputationValues[3].workerAddress).toStrictEqual(recOracle);
-    expect(result.reputationValues[3].reputation).toStrictEqual(1);
+    expect(result.reputationValues[1].reputation).toStrictEqual(-1);
+    expect(result.reputationValues[2].reputation).toStrictEqual(1);
+    expect(result.reputationValues[3].reputation).toStrictEqual(-1);
+    expect(result.reputationValues[4].workerAddress).toStrictEqual(recOracle);
+    expect(result.reputationValues[4].reputation).toStrictEqual(1);
   });
 
   it('Check recording oracle reputation', async () => {
-    fortunes[worker1] = {
-      score: true,
-      fortune: 'fortune',
-    };
-    fortunes[worker2] = {
-      score: false,
-      fortune: 'fortune',
-    };
-    fortunes[worker3] = {
-      score: false,
-      fortune: 'shit should be blocked',
-    };
+    fortunes[worker1] = [
+      {
+        score: true,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker2] = [
+      {
+        score: false,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker3] = [
+      {
+        score: false,
+        fortune: 'shit should be blocked',
+      },
+    ];
     let result = filterAddressesToReward(new Web3(), fortunes, recOracle);
     expect(result.reputationValues[0].reputation).toStrictEqual(1);
     expect(result.reputationValues[1].reputation).toStrictEqual(-1);
@@ -68,36 +91,48 @@ describe('Rewards', () => {
     expect(result.reputationValues[3].workerAddress).toStrictEqual(recOracle);
     expect(result.reputationValues[3].reputation).toStrictEqual(1);
 
-    fortunes[worker1] = {
-      score: true,
-      fortune: 'fortune',
-    };
-    fortunes[worker2] = {
-      score: false,
-      fortune: 'fortune',
-    };
-    fortunes[worker3] = {
-      score: true,
-      fortune: 'shit should be blocked',
-    };
+    fortunes[worker1] = [
+      {
+        score: true,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker2] = [
+      {
+        score: false,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker3] = [
+      {
+        score: true,
+        fortune: 'shit should be blocked',
+      },
+    ];
     result = filterAddressesToReward(new Web3(), fortunes, recOracle);
     expect(result.reputationValues[0].reputation).toStrictEqual(1);
     expect(result.reputationValues[1].reputation).toStrictEqual(-1);
     expect(result.reputationValues[2].reputation).toStrictEqual(-1);
     expect(result.reputationValues[3].reputation).toStrictEqual(-1);
 
-    fortunes[worker1] = {
-      score: false,
-      fortune: 'fortune',
-    };
-    fortunes[worker2] = {
-      score: false,
-      fortune: 'fortune',
-    };
-    fortunes[worker3] = {
-      score: false,
-      fortune: 'shit should be blocked',
-    };
+    fortunes[worker1] = [
+      {
+        score: false,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker2] = [
+      {
+        score: false,
+        fortune: 'fortune',
+      },
+    ];
+    fortunes[worker3] = [
+      {
+        score: false,
+        fortune: 'shit should be blocked',
+      },
+    ];
     result = filterAddressesToReward(new Web3(), fortunes, recOracle);
     expect(result.reputationValues[0].reputation).toStrictEqual(1);
     expect(result.reputationValues[1].reputation).toStrictEqual(-1);

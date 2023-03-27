@@ -54,7 +54,7 @@ export class S3Client {
       JSON.stringify(data),
       { 'Content-Type': 'application/json' }
     );
-    return `${this.s3BaseUrl}/${this.s3BucketName}/${fileName}.json`;
+    return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}.json`;
   }
 }
 

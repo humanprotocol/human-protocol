@@ -1,17 +1,10 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
 import { act } from 'react-dom/test-utils';
-import { GeneratePubkey } from 'src/components/Kvstore/GeneratePubkey';
+import { create } from 'react-test-renderer';
+import { MockConnector } from 'wagmi/connectors/mock';
 
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import {
-  Providers,
-  setupClient,
-  getSigners,
-  testChains,
-} from '../../../../tests/utils';
-import { MockConnector } from '@wagmi/core/connectors/mock';
+import { GeneratePubkey, GeneratePubkeyProps } from '../GeneratePubkey';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('when rendered GeneratePubkey component', () => {
   it('should render `text` prop', async () => {
@@ -26,13 +19,9 @@ describe('when rendered GeneratePubkey component', () => {
       ],
     });
     await act(async () => {
-      render(<GeneratePubkey />, {
+      render(<GeneratePubkey {...({} as GeneratePubkeyProps)} />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
-          <Providers client={client}>
-            <RainbowKitProvider chains={testChains} modalSize="compact">
-              {children}
-            </RainbowKitProvider>
-          </Providers>
+          <Providers client={client}>{children}</Providers>
         ),
       });
     });
@@ -51,14 +40,10 @@ it('GeneratePubkey component renders correctly, corresponds to the snapshot', ()
       }),
     ],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <RainbowKitProvider chains={testChains} modalSize="compact">
-          <GeneratePubkey />
-        </RainbowKitProvider>
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <GeneratePubkey {...({} as GeneratePubkeyProps)} />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

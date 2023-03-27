@@ -104,7 +104,7 @@ export class Job {
           alchemy: alchemyKey,
           infura: infuraKey,
         })
-      : new ethers.providers.JsonRpcProvider();
+      : new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
 
     this.providerData = {
       provider,
@@ -611,9 +611,13 @@ export class Job {
    * Uploads intermediate result to the storage, and saves the URL/Hash on-chain.
    *
    * @param {Result} result - Intermediate result
+   * @param {String} sender - Sender address of the result
    * @returns {Promise<boolean>} - True if the intermediate result is stored successfully.
    */
-  async storeIntermediateResults(result: Result): Promise<boolean> {
+  async storeIntermediateResults(
+    result: Result,
+    sender: string
+  ): Promise<boolean> {
     if (!this.providerData?.reputationOracle) {
       this._logError(ErrorReputationOracleMissing);
       return false;
@@ -641,6 +645,7 @@ export class Job {
     const resultStored = await this._raffleExecute(
       this.contractData.escrow,
       'storeResults',
+      sender,
       key,
       hash
     );

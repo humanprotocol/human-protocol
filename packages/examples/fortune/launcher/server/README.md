@@ -16,7 +16,7 @@ Job Launcher server is an API that allows Human Protocol users to create jobs.
 
 
 ## Run locally
-1. Create a copy of .env.test and call it .env:
+1. Create a copy of .env.development and call it .env:
 
 ```bash
 cp .env.test .env
@@ -33,3 +33,12 @@ yarn start
 ```bash
 yarn test
 ```
+
+## Deployment on Vercel
+1. On Github fork this repository. (Skip this step for Human Protocol team)
+2. Then go to your Vercel dashboard and click on Add New... Project.
+3. Choose the forked repository or this repository if you are on Human Protocol team.
+4. Give to the project a name.
+5. Choose the root directory as `packages/examples/fortune/launcher/server`
+6. Leave Build and Output Settings section empty, it will use `vercel.json` config.
+7. Set Environnment Variables from `.env.development` with your own values. (You will need to create an Stripe account https://stripe.com/)

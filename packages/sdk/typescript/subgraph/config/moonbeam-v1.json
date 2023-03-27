@@ -1,6 +1,10 @@
 {
   "network": "moonbeam",
   "description": "Human subgraph on Moonbeam network",
+  "graft": {
+    "base": "QmfPG7dSeccKtGYvQACFwVAWm4K3nfFkz6JjbYAMY9iXq5",
+    "block": 3116433
+  },
   "EscrowFactory": {
     "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
     "startBlock": 2904819,
@@ -23,5 +27,10 @@
     "address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
     "startBlock": 2904821,
     "abi": "./node_modules/@human-protocol/core/abis/KVStore.json"
+  },
+  "RewardPool": {
+    "address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
+    "startBlock": 2904825,
+    "abi": "./node_modules/@human-protocol/core/abis/RewardPool.json"
   }
 }

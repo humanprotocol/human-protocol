@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/core",
   "description": "Human Protocol Core Smart Contracts",
-  "version": "1.0.39",
+  "version": "1.0.41",
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
@@ -9,7 +9,7 @@
     "typechain-types/**/*.ts"
   ],
   "scripts": {
-    "clean": "hardhat clean && rm -rf abis cache",
+    "clean": "hardhat clean && rm -rf abis cache artifacts",
     "precompile": "npm run clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
@@ -19,6 +19,7 @@
     "deploy": "hardhat run scripts/deploy.ts",
     "deploy:local": "yarn deploy --network localhost",
     "deploy:proxy": "hardhat run scripts/deploy-proxies.ts",
+    "upgrade:proxy": "hardhat run scripts/upgrade-proxies.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
@@ -49,7 +50,7 @@
     "@openzeppelin/contracts": "^4.8.0",
     "@openzeppelin/contracts-upgradeable": "^4.8.0",
     "@openzeppelin/hardhat-upgrades": "^1.22.0",
-    "@tenderly/hardhat-tenderly": "^1.1.6",
+    "@tenderly/hardhat-tenderly": "^1.5.3",
     "@typechain/ethers-v5": "^10.1.1",
     "@typechain/hardhat": "^6.1.4",
     "@types/chai": "^4.3.3",
@@ -63,7 +64,7 @@
     "openpgp": "5.5.0",
     "prettier-plugin-solidity": "^1.0.0-beta.24",
     "solidity-coverage": "^0.8.2",
-    "tenderly": "^0.3.0",
+    "tenderly": "^0.4.0",
     "typechain": "^8.1.1",
     "xdeployer": "1.1.20"
   },

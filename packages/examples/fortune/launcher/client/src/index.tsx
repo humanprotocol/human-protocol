@@ -10,11 +10,15 @@ import {
   polygonMumbai,
   bsc,
   bscTestnet,
+  skaleHumanProtocol,
 } from 'wagmi/chains';
+import axios from 'axios';
 import { publicProvider } from 'wagmi/providers/public';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -44,9 +48,20 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, polygonMumbai, bsc, bscTestnet, fortune],
+  [
+    goerli,
+    mainnet,
+    polygon,
+    skaleHumanProtocol,
+    polygonMumbai,
+    bsc,
+    bscTestnet,
+    fortune,
+  ],
   [publicProvider()]
 );
+
+const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
 // Set up client
 const client = createClient({
@@ -62,26 +77,34 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        qrcode: true,
+        showQrModal: true,
+        projectId: projectId || ''
       },
     }),
   ],
   provider,
   webSocketProvider,
 });
+const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+axios.get(`${baseUrl}/config`).then((r) =>
+  loadStripe(r.data.publishableKey).then((stripePromise) =>
+    root.render(
+      <React.StrictMode>
+        <WagmiConfig client={client}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Elements stripe={stripePromise}>
+              <App />
+            </Elements>
+          </ThemeProvider>
+        </WagmiConfig>
+      </React.StrictMode>
+    )
+  )
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <WagmiConfig client={client}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </WagmiConfig>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
