@@ -6,11 +6,12 @@ import { EthersModule } from "nestjs-ethers";
 
 import { AppController } from "./app.controller";
 import { DatabaseModule } from "./database/database.module";
-import { RolesGuard } from "./common/guards";
+import { JwtHttpGuard } from "./common/guards";
 import { HttpValidationPipe } from "./common/pipes";
 import { HealthModule } from "./health/health.module";
 import { networkMap, networks } from "./common/interfaces/networks";
 import { StorageModule } from "./storage/storage.module";
+import { WebhookModule } from "./webhook/webhook.module";
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -25,7 +26,7 @@ const ethersModules = networks.map(network => {
   providers: [
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: JwtHttpGuard,
     },
     {
       provide: APP_PIPE,
@@ -43,6 +44,7 @@ const ethersModules = networks.map(network => {
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV as string}`,
     }),
+    WebhookModule,
     StorageModule,
     DatabaseModule,
     HealthModule,

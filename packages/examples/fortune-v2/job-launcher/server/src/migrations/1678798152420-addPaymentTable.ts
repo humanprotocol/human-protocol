@@ -5,14 +5,10 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {    
         await queryRunner.query(`
-          CREATE TYPE ${NS}.payment_status_enum AS ENUM (
-            'CANCELED',
-            'PROCESSING',
-            'REQUIRES_ACTION',
-            'REQUIRES_CAPTURE',
-            'REQUIRES_CONFIRMATION',
-            'REQUIRES_PAYMENT_METHOD',
-            'SUCCEEDED'
+          CREATE TYPE ${NS}.payment_type_enum AS ENUM (
+            'DEPOSIT',
+            'REFUND',
+            'WITHDRAWAL'
           );
         `);
     
@@ -25,12 +21,13 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
               isPrimary: true
             },
             {
-              name: "job_id",
+              name: "user_id",
               type: "int",
             },
             {
               name: "payment_id",
-              type: "varchar"
+              type: "varchar",
+              isNullable: true,
             },
             {
               name: "amount",
@@ -38,27 +35,16 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
             },
             {
               name: "client_secret",
-              type: "varchar"
-            },
-            {
-              name: "customer",
-              type: "varchar"
-            },
-            {
-              name: "error_message",
-              type: "text"
+              type: "varchar",
+              isNullable: true,
             },
             {
               name: "currency",
               type: "varchar"
             },
             {
-              name: "method_type",
-              type: "varchar",
-            },
-            {
-              name: "status",
-              type: `${NS}.payment_status_enum`,
+              name: "type",
+              type: `${NS}.payment_type_enum`,
             },
             {
               name: "created_at",
@@ -71,9 +57,9 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
           ],
           foreignKeys: [
             {
-              columnNames: ["job_id"],
+              columnNames: ["user_id"],
               referencedColumnNames: ["id"],
-              referencedTableName: `${NS}.job`,
+              referencedTableName: `${NS}.user`,
               onDelete: "CASCADE",
             },
           ],
@@ -84,7 +70,7 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
     
       public async down(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.dropTable(`${NS}.payment`);
-        await queryRunner.query(`DROP TYPE ${NS}.payment_status_enum;`);
+        await queryRunner.query(`DROP TYPE ${NS}.payment_type_enum;`);
       }
 
 }

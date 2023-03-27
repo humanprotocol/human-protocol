@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard } from "@nestjs/passport";
+import * as errors from "../enums/errors";
 
 @Injectable()
 export class JwtHttpGuard extends AuthGuard("jwt-http") implements CanActivate {
@@ -9,8 +10,6 @@ export class JwtHttpGuard extends AuthGuard("jwt-http") implements CanActivate {
   }
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
-    // `super` has to be called to set `user` on `request`
-    // see https://github.com/nestjs/passport/blob/master/lib/auth.guard.ts
     return (super.canActivate(context) as Promise<boolean>).catch(e => {
       const isPublic = this.reflector.getAllAndOverride<boolean>("isPublic", [
         context.getHandler(),
@@ -22,7 +21,7 @@ export class JwtHttpGuard extends AuthGuard("jwt-http") implements CanActivate {
       }
 
       console.error(e);
-      throw new UnauthorizedException("Unauthorized");
+      throw new UnauthorizedException(errors.Auth.Unauthorized);
     });
   }
 }

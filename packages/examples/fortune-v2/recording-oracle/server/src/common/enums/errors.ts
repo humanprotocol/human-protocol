@@ -20,11 +20,16 @@ export enum User {
 
 export enum Payment {
   NotFound = "Payment not found",
-  NotSuccess = "Payment not success",
   CustomerNotFound = "Customer not found"
 }
 
 export enum Bucket {
   NotPublic = "Bucket is not public",
   UnableSaveFile = "Unable to save file.",
+}
+
+export enum Webhook {
+  NotFound = "Webhook not found",
+  NotCreated = "Webhook has not been created",
+  BadParams = "Bad params"
 }

@@ -14,19 +14,19 @@ export class JobController {
 
   @UseGuards(RolesGuard)
   @Post("/fortune")
-  public async createFortuneJob(@Request() req: any, @Body() data: JobFortuneCreateDto): Promise<any> {
+  public async createFortuneJob(@Request() req: any, @Body() data: JobFortuneCreateDto): Promise<number> {
     return this.jobService.createFortuneJob(req.user?.id, data);
   }
 
   @UseGuards(RolesGuard)
   @Post("/cvat")
-  public async createCvatJob(@Request() req: any, @Body() data: JobCvatCreateDto): Promise<any> {
+  public async createCvatJob(@Request() req: any, @Body() data: JobCvatCreateDto): Promise<number> {
     return this.jobService.createCvatJob(req.user?.id, data);
   }
 
   @UseGuards(RolesGuard)
   @Post("/confirm-payment")
-  public async confirmPayment(@Request() req: any, @Body() data: JobLaunchDto): Promise<any> {
+  public async confirmPayment(@Request() req: any, @Body() data: JobLaunchDto): Promise<boolean> {
     return this.jobService.confirmPayment(req.user?.stripeCustomerId, data);
   }
 }

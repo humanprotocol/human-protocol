@@ -30,10 +30,6 @@ export class addWebhookOutgoingTable1677750428969 implements MigrationInterface 
           type: "varchar",
         },
         {
-          name: "s3_url",
-          type: "varchar",
-        },
-        {
           name: "created_at",
           type: "timestamptz",
         },

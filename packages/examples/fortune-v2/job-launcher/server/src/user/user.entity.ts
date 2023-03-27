@@ -6,6 +6,7 @@ import { BaseEntity } from "../database/base.entity";
 import { IUser } from "../common/decorators";
 import { JobEntity } from "../job/job.entity";
 import { UserStatus, UserType } from "../common/enums/user";
+import { PaymentEntity } from "../payment/payment.entity";
 
 @Entity({ schema: NS, name: "user" })
 export class UserEntity extends BaseEntity implements IUser {
@@ -39,5 +40,8 @@ export class UserEntity extends BaseEntity implements IUser {
   public status: UserStatus;
 
   @OneToMany(() => JobEntity, job => job.user)
-  jobs: JobEntity[];
+  public jobs: JobEntity[];
+
+  @OneToMany(() => PaymentEntity, payment => payment.user)
+  public payments: PaymentEntity[];
 }

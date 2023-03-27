@@ -5,7 +5,6 @@ export interface IWebhook extends IBase {
   signature: string;
   chainId: number;
   escrowAddress: string;
-  s3Url: string;
   retriesCount?: number;
   status?: WebhookStatus;
   waitUntil: Date;
