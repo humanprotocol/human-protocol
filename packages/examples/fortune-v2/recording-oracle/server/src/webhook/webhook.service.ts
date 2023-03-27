@@ -70,21 +70,8 @@ export class WebhookService {
     }
   }
 
-  public async testIncommigWebhook(): Promise<number> {
-    console.log(12312)
-    const host = this.configService.get<string>("HOST", "localhost");
-    const port = this.configService.get<string>("PORT", "5000");
-    console.log(21)
-    const { data } = await firstValueFrom(
-      await this.httpService.post(`http://${host}:${port}/webhook`, {
-        headers: { 
-          'signature2': this.configService.get<string>("WEBHOOK_SIGNED_PAYLOAD")
-        }
-      }),
-    );
-
-    console.log(data)
-    
-    return 1
+  public async processIncommingWebhook(webhookIncomingEntity: WebhookIncomingEntity): Promise<boolean> {
+    // TODO: https://github.com/humanprotocol/human-protocol/issues/300
+    return true;
   }
 }
