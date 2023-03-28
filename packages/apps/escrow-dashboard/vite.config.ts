@@ -21,17 +21,18 @@ export default defineConfig({
       name: 'generate-merkle-tree',
       apply: 'build',
       async writeBundle() {
-      
-        const merkleTreeJson = await generateMerkleTree(process.env.VITE_APP_NFT_STORAGE_API as string);
+        const merkleTreeJson = await generateMerkleTree(
+          process.env.VITE_APP_NFT_STORAGE_API as string
+        );
 
         const indexPath = path.resolve(__dirname, './dist/index.html');
         const indexContent = fs.readFileSync(indexPath, 'utf-8');
         const newIndexContent = indexContent.replace(
-                '<script id="binary-transparency-manifest" type="application/json"></script>',
-                `<script id="binary-transparency-manifest" type="application/json">${merkleTreeJson}</script>`
-                );
+          '<script id="binary-transparency-manifest" type="application/json"></script>',
+          `<script id="binary-transparency-manifest" type="application/json">${merkleTreeJson}</script>`
+        );
         fs.writeFileSync(indexPath, newIndexContent);
-        },
+      },
     },
   ],
   worker: {
