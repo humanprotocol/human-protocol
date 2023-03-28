@@ -4,7 +4,8 @@ export enum Auth {
 
 export enum Job {
   NotFound = "Job not found",
-  NotCreated = "Job has not been created"
+  NotCreated = "Job has not been created",
+  NotEnoughFunds = "Not enough funds"
 }
 
 export enum Escrow {
@@ -21,7 +22,8 @@ export enum User {
 export enum Payment {
   NotFound = "Payment not found",
   NotSuccess = "Payment not success",
-  CustomerNotFound = "Customer not found"
+  CustomerNotFound = "Customer not found",
+  IncorrectAmount = "Incorrect amount"
 }
 
 export enum Bucket {

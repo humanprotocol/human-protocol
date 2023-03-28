@@ -13,4 +13,11 @@ export class CurrencyService {
     );
     return data[token_name][currency];
   }
+
+  public async getPair(token_name: string, currency: string) {
+    const { data } = await firstValueFrom(
+      await this.httpService.get(`${COINGECKO_API_URL}?ids=${token_name}&vs_currencies=${currency}`),
+    );
+    return data[token_name][currency];
+  }
 }

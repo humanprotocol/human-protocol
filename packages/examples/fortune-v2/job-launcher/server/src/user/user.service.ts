@@ -11,6 +11,7 @@ import * as errors from "../common/constants/errors";
 import { AuthEntity } from "../auth/auth.entity";
 import { PaymentService } from "../payment/payment.service";
 import { UserStatus, UserType } from "../common/enums/user";
+import { PaymentEntity } from "../payment/payment.entity";
 
 @Injectable()
 export class UserService {
@@ -23,6 +24,8 @@ export class UserService {
     private readonly authEntityRepository: Repository<AuthEntity>,
     private readonly configService: ConfigService,
     private readonly paymentService: PaymentService,
+    @InjectRepository(PaymentEntity)
+    private readonly paymentEntityRepository: Repository<PaymentEntity>,
   ) {}
 
   public async update(where: FindConditions<UserEntity>, dto: Partial<IUserUpdateDto>): Promise<UserEntity> {

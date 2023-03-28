@@ -25,6 +25,8 @@ import { StorageService } from "../storage/storage.service";
 import { IJobCvatCreateDto, IJobFortuneCreateDto, IJobLaunchDto } from "./interfaces";
 import { JobEntity } from "./job.entity";
 import { IManifestDto } from "./serializers/job.responses";
+import { UserService } from "../user/user.service";
+import { PaymentType } from "../common/enums/currencies";
 
 @Injectable()
 export class JobService {
@@ -38,10 +40,10 @@ export class JobService {
     private readonly ethersSigner: EthersSigner,
     @InjectContractProvider()
     private readonly ethersContract: EthersContract,
-    private readonly paymentService: PaymentService,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,
     private readonly storageService: StorageService,
+    private readonly paymentService: PaymentService,
     private readonly configService: ConfigService,
   ) {
     this.keyPair = {
@@ -53,6 +55,14 @@ export class JobService {
 
   public async createFortuneJob(userId: number, dto: IJobFortuneCreateDto): Promise<number> {
     const { chainId, fortunesRequired, requesterTitle, requesterDescription, price } = dto;
+
+    const userBalance = await this.paymentService.getUserBalance(userId)
+    const amount = price * fortunesRequired;
+
+    if (userBalance <= amount) {
+      this.logger.log(errors.Job.NotEnoughFunds, JobService.name);
+      throw new NotFoundException(errors.Job.NotEnoughFunds);
+    }
 
     const manifestData: IManifestDto = {
       chainId,
@@ -87,11 +97,24 @@ export class JobService {
       throw new NotFoundException(errors.Job.NotCreated);
     }
 
+    await this.paymentService.savePayment(userId, PaymentType.WITHDRAWAL, amount)
+
+    jobEntity.status = JobStatus.PAID;
+    await jobEntity.save();
+
     return jobEntity.id;
   }
 
   public async createCvatJob(userId: number, dto: IJobCvatCreateDto): Promise<number> {
     const { chainId, dataUrl, annotationsPerImage, labels, requesterDescription, requesterAccuracyTarget, price } = dto;
+
+    const userBalance = await this.paymentService.getUserBalance(userId)
+    const amount = price * annotationsPerImage;
+
+    if (userBalance <= amount) {
+      this.logger.log(errors.Job.NotEnoughFunds, JobService.name);
+      throw new NotFoundException(errors.Job.NotEnoughFunds);
+    }
 
     const manifestData: IManifestDto = {
       chainId,
@@ -127,23 +150,12 @@ export class JobService {
       throw new NotFoundException(errors.Job.NotCreated);
     }
 
-    return jobEntity.id;
-  }
-
-  public async confirmPayment(customerId: string, dto: IJobLaunchDto): Promise<boolean> {
-    const jobEntity = await this.jobEntityRepository.findOne({ id: dto.jobId });
-
-    if (!jobEntity) {
-      this.logger.log(errors.User.NotFound, JobService.name);
-      throw new NotFoundException(errors.Job.NotFound);
-    }
-
-    await this.paymentService.confirmPayment(customerId, dto);
+    await this.paymentService.savePayment(userId, PaymentType.WITHDRAWAL, amount)
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
-    return true;
+    return jobEntity.id;
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<boolean> {
