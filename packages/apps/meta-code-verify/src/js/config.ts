@@ -96,6 +96,7 @@ export const ORIGIN_HOST = {
   FACEBOOK: 'facebook.com',
   WHATSAPP: 'whatsapp.com',
   MESSENGER: 'messenger.com',
+  KVSTORE: 'dashboard.humanprotocol.org',
 };
 
 export const ORIGIN_TIMEOUT = {
@@ -108,6 +109,7 @@ export const ORIGIN_TYPE = Object.freeze({
   FACEBOOK: 'FACEBOOK',
   WHATSAPP: 'WHATSAPP',
   MESSENGER: 'MESSENGER',
+  KVSTORE: 'KVSTORE',
 });
 
 export type Origin = keyof typeof ORIGIN_TYPE;

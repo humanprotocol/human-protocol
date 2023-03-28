@@ -136,7 +136,7 @@ describe('background', () => {
     it('should return false when no matching hash', async () => {
       const mockSendResponse = jest.fn();
       const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      window.TextEncoder = function() {
         return {
           encode: encodeMock,
         };
@@ -163,7 +163,7 @@ describe('background', () => {
     });
     it('should return false if the hashes do not match', async () => {
       const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      window.TextEncoder = function() {
         return {
           encode: encodeMock,
         };
@@ -190,7 +190,7 @@ describe('background', () => {
     });
     it('should return true iff the hashes match', async () => {
       const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      window.TextEncoder = function() {
         return {
           encode: encodeMock,
         };

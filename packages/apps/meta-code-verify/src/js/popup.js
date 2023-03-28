@@ -41,6 +41,12 @@ const ORIGIN_TO_LEARN_MORE_PAGES = {
     risk: chrome.i18n.getMessage('possible_risk_detected_faq_url_wa'),
     timeout: chrome.i18n.getMessage('network_timeout_faq_url_wa'),
   },
+  [ORIGIN_TYPE.KVSTORE]: {
+    about: chrome.i18n.getMessage('about_code_verify_faq_url_wa'),
+    failure: chrome.i18n.getMessage('validation_failure_faq_url_wa'),
+    risk: chrome.i18n.getMessage('possible_risk_detected_faq_url_wa'),
+    timeout: chrome.i18n.getMessage('network_timeout_faq_url_wa'),
+  },
 };
 
 // doing this so we can add support for i18n using messages.json
@@ -84,10 +90,10 @@ function attachListeners(origin) {
     menuRowList[1].style.cursor = 'pointer';
 
     downloadTextList[0].addEventListener('click', () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { greeting: 'downloadSource' },
+          { greeting: 'downloadMove' },
           () => {}
         );
       });
@@ -95,7 +101,7 @@ function attachListeners(origin) {
     downloadTextList[0].style.cursor = 'pointer';
 
     downloadSrcButton.onclick = () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         chrome.tabs.sendMessage(
           tabs[0].id,
           { greeting: 'downloadSource' },
@@ -174,6 +180,7 @@ function setUpBackgroundMessageHandler(tabId) {
     console.error('[Popup] No tab_id query param', document.location);
     return;
   }
+
   chrome.runtime.onMessage.addListener(message => {
     if (!('type' in message)) {
       return;

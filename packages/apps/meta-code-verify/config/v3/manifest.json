@@ -1,11 +1,11 @@
 {
     "manifest_version": 3,
-    "name": "Code Verify",
+    "name": "KV Store Code Verify",
     "version": "2.0.1",
     "default_locale": "en",
     "description": "An extension to verify the code running in your browser matches what was published.",
     "action": {
-        "default_title": "Code Verify",
+        "default_title": "KV Store Code Verify",
         "default_icon": {
             "32": "default_32.png",
             "64": "default_64.png",
@@ -22,28 +22,12 @@
     },
     "content_scripts": [
         {
-            "matches": ["*://*.messenger.com/*"],
-            "all_frames": true,
-            "js": ["contentMSGR.js"],
-            "run_at": "document_start"
-        },
-        {
-            "matches": ["*://*.facebook.com/*"],
+            "matches": [     "*://localhost/*",
+                "https://dashboard.humanprotocol.org/*"],
             "all_frames": true,
             "match_about_blank": true,
-            "js": ["contentFB.js"],
-            "run_at": "document_start"
-        },
-        {
-            "matches": ["*://*.whatsapp.com/*"],
-            "all_frames": true,
-            "match_about_blank": true,
-            "exclude_matches": [
-                "*://www.whatsapp.com/",
-                "*://*.whatsapp.com/bt-manifest/*",
-                "*://faq.whatsapp.com/*"
-            ],
-            "js": ["contentWA.js"],
+            "exclude_matches": [ ],
+            "js": ["contentKvstore.js"],
             "run_at": "document_start"
         }
     ],
@@ -51,7 +35,6 @@
         "webRequest"
     ],
     "host_permissions": [
-        "https://*.privacy-auditability.cloudflare.com/",
-        "https://web.whatsapp.com/"
+        "https://nftstorage.link/ipfs/"
     ]
 }

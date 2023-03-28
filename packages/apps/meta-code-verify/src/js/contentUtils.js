@@ -8,7 +8,6 @@
 import {
   KNOWN_EXTENSION_HASHES,
   MESSAGE_TYPE,
-  ORIGIN_TYPE,
   DOWNLOAD_JS_ENABLED,
   STATES,
 } from './config';
@@ -288,29 +287,13 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
     let otherHashes = '';
     let otherType = '';
     let roothash = rawManifest.root;
-    let version = rawManifest.version;
+    let ipfs_cid = rawManifest.ipfs_cid;
 
-    if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(currentOrigin)) {
-      leaves = rawManifest.manifest;
-      otherHashes = rawManifest.manifest_hashes;
-      otherType = scriptNodeMaybe.getAttribute('data-manifest-type');
-      roothash = otherHashes.combined_hash;
-      version = scriptNodeMaybe.getAttribute('data-manifest-rev');
+    currentFilterType = 'BOTH';
 
-      if (currentFilterType != '') {
-        currentFilterType = 'BOTH';
-      }
-      if (currentFilterType === '') {
-        currentFilterType = otherType;
-      }
-    }
-    // for whatsapp
-    else {
-      currentFilterType = 'BOTH';
-    }
     // now that we know the actual version of the scripts, transfer the ones we know about.
     if (foundScripts.has('')) {
-      foundScripts.set(version, foundScripts.get(''));
+      foundScripts.set(ipfs_cid, foundScripts.get(''));
       foundScripts.delete('');
     }
 
@@ -323,7 +306,7 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
         otherType: otherType,
         rootHash: roothash,
         workaround: scriptNodeMaybe.innerHTML,
-        version: version,
+        ipfs_cid,
       },
       response => {
         chrome.runtime.sendMessage({
@@ -339,7 +322,7 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
             clearTimeout(manifestTimeoutID);
             manifestTimeoutID = '';
           }
-          window.setTimeout(() => processFoundJS(currentOrigin, version), 0);
+          window.setTimeout(() => processFoundJS(currentOrigin, ipfs_cid), 0);
         } else {
           if (
             ['ENDPOINT_FAILURE', 'UNKNOWN_ENDPOINT_ISSUE'].includes(
@@ -386,6 +369,11 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
         otherType: otherType, // TODO: read from DOM when available
       });
     }
+  } else if (scriptNodeMaybe.as === 'script') {
+    scriptList.get(scriptList.keys().next().value).push({
+      src: scriptNodeMaybe.href,
+      otherType: otherType, // TODO: read from DOM when available
+    });
   } else {
     // no src, access innerHTML for the code
     const hashLookupAttribute =
@@ -538,6 +526,8 @@ export function hasInvalidScripts(scriptNodeMaybe, scriptList) {
 
   if (scriptNodeMaybe.nodeName.toLowerCase() === 'script') {
     return storeFoundJS(scriptNodeMaybe, scriptList);
+  } else if (scriptNodeMaybe.as === 'script') {
+    return storeFoundJS(scriptNodeMaybe, scriptList);
   } else if (scriptNodeMaybe.childNodes.length > 0) {
     scriptNodeMaybe.childNodes.forEach(childNode => {
       // if not an HTMLElement ignore it!
@@ -646,10 +636,13 @@ async function genSourceText(response) {
   return sourceTextParts.join('\n').trim();
 }
 
-async function processJSWithSrc(script, origin, version) {
+async function processJSWithSrc(script, origin, ipfs_cid) {
   // fetch the script from page context, not the extension context.
   try {
-    const sourceResponse = await fetch(script.src, { method: 'GET' });
+    const sourceResponse = await fetch(script.src, {
+      method: 'GET',
+    });
+
     if (DOWNLOAD_JS_ENABLED) {
       const fileNameArr = script.src.split('/');
       const fileName = fileNameArr[fileNameArr.length - 1].split('?')[0];
@@ -660,7 +653,7 @@ async function processJSWithSrc(script, origin, version) {
           .body.pipeThrough(new window.CompressionStream('gzip'))
       );
     }
-    const sourceText = await genSourceText(sourceResponse);
+    const sourceText = await genSourceText(sourceResponse.clone());
     // split package up if necessary
     const packages = sourceText.split('/*FB_PKG_DELIM*/\n');
     const packagePromises = packages.map(jsPackage => {
@@ -670,7 +663,7 @@ async function processJSWithSrc(script, origin, version) {
             type: MESSAGE_TYPE.RAW_JS,
             rawjs: jsPackage.trimStart(),
             origin: origin,
-            version: version,
+            ipfs_cid,
           },
           response => {
             if (response.valid) {
@@ -692,9 +685,9 @@ async function processJSWithSrc(script, origin, version) {
   }
 }
 
-export const processFoundJS = async (origin, version) => {
+export const processFoundJS = async (origin, ipfs_cid) => {
   // foundScripts
-  const fullscripts = foundScripts.get(version).splice(0);
+  const fullscripts = foundScripts.get(ipfs_cid).splice(0);
   const scripts = fullscripts.filter(script => {
     if (
       script.otherType === currentFilterType ||
@@ -702,13 +695,15 @@ export const processFoundJS = async (origin, version) => {
     ) {
       return true;
     } else {
-      foundScripts.get(version).push(script);
+      foundScripts.get(ipfs_cid).push(script);
     }
   });
+
   let pendingScriptCount = scripts.length;
+
   for (const script of scripts) {
     if (script.src) {
-      await processJSWithSrc(script, origin, version).then(response => {
+      await processJSWithSrc(script, origin, ipfs_cid).then(response => {
         pendingScriptCount--;
         if (response.valid) {
           if (pendingScriptCount == 0) {
@@ -737,7 +732,7 @@ export const processFoundJS = async (origin, version) => {
           rawjs: script.rawjs.trimStart(),
           lookupKey: script.lookupKey,
           origin: origin,
-          version: version,
+          ipfs_cid,
         },
         response => {
           pendingScriptCount--;
@@ -770,53 +765,84 @@ export const processFoundJS = async (origin, version) => {
       );
     }
   }
-  window.setTimeout(() => processFoundJS(origin, version), 3000);
+  window.setTimeout(() => processFoundJS(origin, ipfs_cid), 3000);
 };
 
-async function downloadJSToZip() {
-  const fileHandle = await window.showSaveFilePicker({
-    suggestedName: 'meta_source_files.gz',
-  });
+async function downloadJSToZip(downloadType) {
+  try {
+    if (downloadType === 'downloadSource') {
+      const chunks = [];
+      const delimPrefix = '\n********** new file: ';
+      const delimSuffix = ' **********\n';
+      const enc = new TextEncoder();
 
-  const writableStream = await fileHandle.createWritable();
-  // delimiter between files
-  const delimPrefix = '\n********** new file: ';
-  const delimSuffix = ' **********\n';
-  const enc = new TextEncoder();
+      for (const [fileName, compressedStream] of sourceScripts.entries()) {
+        try {
+          let delim = delimPrefix + fileName + delimSuffix;
+          let encodedDelim = enc.encode(delim);
+          let delimStream = new window.CompressionStream('gzip');
+          let writer = delimStream.writable.getWriter();
+          writer.write(encodedDelim);
+          writer.close();
+          const delimBuffer = await new Response(
+            delimStream.readable
+          ).arrayBuffer();
+          chunks.push(delimBuffer);
 
-  for (const [fileName, compressedStream] of sourceScripts.entries()) {
-    let delim = delimPrefix + fileName + delimSuffix;
-    let encodedDelim = enc.encode(delim);
-    let delimStream = new window.CompressionStream('gzip');
-    let writer = delimStream.writable.getWriter();
-    writer.write(encodedDelim);
-    writer.close();
-    await delimStream.readable.pipeTo(writableStream, { preventClose: true });
-    await compressedStream.pipeTo(writableStream, { preventClose: true });
+          const fileBuffer = await new Response(compressedStream).arrayBuffer();
+          chunks.push(fileBuffer);
+        } catch (err) {
+          console.error(`Error processing file ${fileName}: `, err);
+        }
+      }
+
+      for (const inlineSrcMap of inlineScripts) {
+        try {
+          let inlineHash = inlineSrcMap.keys().next().value;
+          let inlineSrc = inlineSrcMap.values().next().value;
+          let delim = delimPrefix + 'Inline Script ' + inlineHash + delimSuffix;
+          let encodedDelim = enc.encode(delim);
+          let delimStream = new window.CompressionStream('gzip');
+          let delimWriter = delimStream.writable.getWriter();
+          delimWriter.write(encodedDelim);
+          delimWriter.close();
+          const delimBuffer = await new Response(
+            delimStream.readable
+          ).arrayBuffer();
+          chunks.push(delimBuffer);
+
+          let inlineStream = new window.CompressionStream('gzip');
+          let writer = inlineStream.writable.getWriter();
+          writer.write(enc.encode(inlineSrc));
+          writer.close();
+          const inlineBuffer = await new Response(
+            inlineStream.readable
+          ).arrayBuffer();
+          chunks.push(inlineBuffer);
+        } catch (err) {
+          console.error(`Error processing inline script: `, err);
+        }
+      }
+
+      const combinedBuffer = new Blob(chunks, { type: 'application/gzip' });
+
+      const url = URL.createObjectURL(combinedBuffer);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'meta_source_files.gz';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  } catch (err) {
+    console.error('Error in downloadJSToZip: ', err);
   }
-
-  for (const inlineSrcMap of inlineScripts) {
-    let inlineHash = inlineSrcMap.keys().next().value;
-    let inlineSrc = inlineSrcMap.values().next().value;
-    let delim = delimPrefix + 'Inline Script ' + inlineHash + delimSuffix;
-    let encodedDelim = enc.encode(delim);
-    let delimStream = new window.CompressionStream('gzip');
-    let delimWriter = delimStream.writable.getWriter();
-    delimWriter.write(encodedDelim);
-    delimWriter.close();
-    await delimStream.readable.pipeTo(writableStream, { preventClose: true });
-    let inlineStream = new window.CompressionStream('gzip');
-    let writer = inlineStream.writable.getWriter();
-    writer.write(enc.encode(inlineSrc));
-    writer.close();
-    await inlineStream.readable.pipeTo(writableStream, { preventClose: true });
-  }
-  writableStream.close();
 }
 
-chrome.runtime.onMessage.addListener(function (request) {
-  if (request.greeting === 'downloadSource' && DOWNLOAD_JS_ENABLED) {
-    downloadJSToZip();
+chrome.runtime.onMessage.addListener(function(request) {
+  if (request.greeting && DOWNLOAD_JS_ENABLED) {
+    downloadJSToZip(request.greeting);
   } else if (request.greeting === 'nocacheHeaderFound') {
     updateCurrentState(STATES.INVALID);
   }
@@ -850,6 +876,8 @@ function isPathnameExcluded(excludedPathnames) {
   });
 }
 
+// Initialize the connection
+
 export function startFor(origin, excludedPathnames = []) {
   chrome.runtime.sendMessage({
     type: MESSAGE_TYPE.CONTENT_SCRIPT_START,
@@ -859,30 +887,14 @@ export function startFor(origin, excludedPathnames = []) {
     updateCurrentState(STATES.IGNORE);
     return;
   }
-  let isUserLoggedIn = false;
-  if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(origin)) {
-    const cookies = document.cookie.split(';');
-    cookies.forEach(cookie => {
-      let pair = cookie.split('=');
-      // c_user contains the user id of the user logged in
-      if (pair[0].indexOf('c_user') >= 0) {
-        isUserLoggedIn = true;
-      }
-    });
-  } else {
-    // only doing this check for FB and MSGR
-    isUserLoggedIn = true;
-  }
-  if (isUserLoggedIn) {
-    updateCurrentState(STATES.PROCESSING);
-    currentOrigin = origin;
-    scanForScripts();
-    // set the timeout once, in case there's an iframe and contentUtils sets another manifest timer
-    if (manifestTimeoutID === '') {
-      manifestTimeoutID = setTimeout(() => {
-        // Manifest failed to load, flag a warning to the user.
-        updateCurrentState(STATES.TIMEOUT);
-      }, 45000);
-    }
+  updateCurrentState(STATES.PROCESSING);
+  currentOrigin = origin;
+  scanForScripts();
+  // set the timeout once, in case there's an iframe and contentUtils sets another manifest timer
+  if (manifestTimeoutID === '') {
+    manifestTimeoutID = setTimeout(() => {
+      // Manifest failed to load, flag a warning to the user.
+      updateCurrentState(STATES.TIMEOUT);
+    }, 45000);
   }
 }
