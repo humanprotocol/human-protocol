@@ -3,9 +3,9 @@ import { IsDate, IsEnum, IsString } from "class-validator";
 import { WebhookStatus } from "../../common/decorators";
 
 import { WebhookCommonDto } from "../../common/dto/webhook-common";
-import { IWebhookUpdateDto } from "../interfaces";
+import { IWebhookIncomingUpdateDto } from "../interfaces";
 
-export class UpdateWebhookDto extends WebhookCommonDto implements IWebhookUpdateDto {
+export class UpdateIncomingWebhookDto extends WebhookCommonDto implements IWebhookIncomingUpdateDto {
   @ApiPropertyOptional({
     enum: WebhookStatus,
   })
