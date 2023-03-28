@@ -7,14 +7,11 @@ import { UserEntity } from "../user/user.entity";
 
 @Entity({ schema: NS, name: "payment" })
 export class PaymentEntity extends BaseEntity implements IPayment {
-  @Column({ type: "varchar", nullable: true })
-  public paymentId: string;
-
-  @Column({ type: "int" })
+  @Column({ type: "decimal", precision: 5, scale: 2 })
   public amount: number;
 
-  @Column({ type: "varchar", nullable: true })
-  public clientSecret: string;
+  @Column({ type: "decimal", precision: 5, scale: 2 })
+  public rate: number;
 
   @Column({
     type: "enum",

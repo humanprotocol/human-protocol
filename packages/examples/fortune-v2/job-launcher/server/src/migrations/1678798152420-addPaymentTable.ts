@@ -30,13 +30,17 @@ export class addPaymentTable1678798152420 implements MigrationInterface {
               isNullable: true,
             },
             {
-              name: "amount",
-              type: "int",
-            },
-            {
               name: "client_secret",
               type: "varchar",
               isNullable: true,
+            },
+            {
+              name: "amount",
+              type: "decimal",
+            },
+            {
+              name: "rate",
+              type: "decimal",
             },
             {
               name: "currency",

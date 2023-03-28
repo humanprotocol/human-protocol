@@ -23,10 +23,4 @@ export class JobController {
   public async createCvatJob(@Request() req: any, @Body() data: JobCvatCreateDto): Promise<number> {
     return this.jobService.createCvatJob(req.user?.id, data);
   }
-
-  @UseGuards(RolesGuard)
-  @Post("/confirm-payment")
-  public async confirmPayment(@Request() req: any, @Body() data: JobLaunchDto): Promise<boolean> {
-    return this.jobService.confirmPayment(req.user?.stripeCustomerId, data);
-  }
 }

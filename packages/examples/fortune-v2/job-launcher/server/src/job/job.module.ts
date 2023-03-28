@@ -9,6 +9,7 @@ import { JobCron } from "./job.cron";
 import { StorageModule } from "../storage/storage.module";
 import { HttpModule } from "@nestjs/axios";
 import { PaymentModule } from "../payment/payment.module";
+import { UserModule } from "../user/user.module";
 
 @Module({
   imports: [

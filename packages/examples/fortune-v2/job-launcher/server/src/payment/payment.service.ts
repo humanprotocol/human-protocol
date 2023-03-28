@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import Stripe from "stripe";
@@ -88,12 +88,7 @@ export class PaymentService {
     };
   }
 
-  public async webhookHandler(body: string, signature: string) {
-    const event = this.stripe.webhooks.constructEvent(body, signature, this.endpointSecrete);
-    return event;
-  }
-
-  public async confirmPayment(customerId: string, dto: IPaymentConfirmDto): Promise<number> {
+  public async confirmPayment(userId: number, dto: IPaymentConfirmDto): Promise<boolean> {
     try {
       const paymentData = await this.getPayment(dto.paymentId);
 
@@ -102,28 +97,51 @@ export class PaymentService {
         throw new NotFoundException(errors.Payment.NotSuccess);
       }
 
-      const paymentEntity = await this.paymentEntityRepository
-        .create({
-          paymentId: paymentData.id,
-          amount: paymentData.amount,
-          currency: Currency.USD,
-          clientSecret: paymentData.client_secret || "",
-          type: PaymentType.DEPOSIT,
-        })
-        .save();
+      await this.savePayment(userId, PaymentType.DEPOSIT, paymentData.amount)
 
-      if (!paymentEntity) {
-        this.logger.log(errors.Payment.NotFound, PaymentService.name);
-        throw new NotFoundException(errors.Payment.NotFound);
-      }
-      return paymentEntity.id;
+      return true;
     } catch (e) {
+      this.logger.log(errors.Payment.NotFound, PaymentService.name);
+      return false;
+    }
+  }
+
+  public async savePayment(userId: number, type: PaymentType, amount: number): Promise<boolean> {
+    const paymentEntity = await this.paymentEntityRepository
+      .create({
+        userId,
+        amount: amount,
+        currency: Currency.USD,
+        rate: 1, // TODO: Implement the rate when depositing in other currencies
+        type,
+      })
+      .save();
+
+    if (!paymentEntity) {
       this.logger.log(errors.Payment.NotFound, PaymentService.name);
       throw new NotFoundException(errors.Payment.NotFound);
     }
+
+    return true;
   }
 
   private async getPayment(paymentId: string): Promise<Stripe.Response<Stripe.PaymentIntent>> {
     return this.stripe.paymentIntents.retrieve(paymentId);
+  }
+
+  public async getUserBalance(userId: number): Promise<number> {
+    const paymentEntities = await this.paymentEntityRepository.find({ userId });
+
+    let finalAmount = 0;
+    
+    paymentEntities.forEach(payment => {
+      if(payment.type === PaymentType.WITHDRAWAL) {
+        finalAmount -= payment.amount
+      } else {
+        finalAmount += payment.amount
+      }
+    })
+
+    return finalAmount;
   }
 }
