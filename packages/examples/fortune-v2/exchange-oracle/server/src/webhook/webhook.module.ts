@@ -3,7 +3,6 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 
 import { WebhookService } from "./webhook.service";
-import { WebhookIncomingEntity } from "./webhook-incoming.entity";
 import { WebhookController } from "./webhook.controller";
 import { WebhookCron } from "./webhook.cron";
 import { StorageModule } from "../storage/storage.module";
@@ -12,7 +11,7 @@ import { WebhookOutgoingEntity } from "./webhook-outgoing.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WebhookIncomingEntity, WebhookOutgoingEntity]),
+    TypeOrmModule.forFeature([WebhookOutgoingEntity]),
     ConfigModule,
     StorageModule,
     HttpModule,

@@ -37,10 +37,6 @@ export class addWebhookOutgoingTable1677750428969 implements MigrationInterface 
           name: "updated_at",
           type: "timestamptz",
         },
-        {
-          name: "wait_until",
-          type: "timestamptz",
-        },
       ],
     });
 

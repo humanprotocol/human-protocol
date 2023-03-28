@@ -31,5 +31,6 @@ export enum Bucket {
 export enum Webhook {
   NotFound = "Webhook not found",
   NotCreated = "Webhook has not been created",
+  NotSent = "Webhook has not been sent",
   BadParams = "Bad params"
 }

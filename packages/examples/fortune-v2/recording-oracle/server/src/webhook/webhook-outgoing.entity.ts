@@ -14,7 +14,4 @@ export class WebhookOutgoingEntity extends BaseEntity implements IWebhook {
 
   @Column({ type: "varchar" })
   public escrowAddress: string;
-  
-  @Column({ type: "timestamptz" })
-  public waitUntil: Date;
 }

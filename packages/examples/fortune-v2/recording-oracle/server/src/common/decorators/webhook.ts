@@ -7,7 +7,7 @@ export interface IWebhook extends IBase {
   escrowAddress: string;
   retriesCount?: number;
   status?: WebhookStatus;
-  waitUntil: Date;
+  waitUntil?: Date;
 }
 
 export enum ChainId {
