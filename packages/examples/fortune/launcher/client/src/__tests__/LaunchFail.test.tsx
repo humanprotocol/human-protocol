@@ -3,8 +3,8 @@ import { MockConnector } from '@wagmi/core/connectors/mock';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import { LaunchFail } from 'src/components/LaunchFail';
-import { Providers, setupClient, getSigners } from 'tests/utils';
+import { Providers, setupClient, getSigners } from '../../tests/utils';
+import { LaunchFail } from '../components/LaunchFail';
 
 describe('when rendered LaunchFail component', () => {
   it('should render texts', async () => {

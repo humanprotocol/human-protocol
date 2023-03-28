@@ -9,10 +9,9 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useConnect } from 'wagmi';
-
-import coinbaseSvg from 'src/assets/coinbase.svg';
-import metaMaskSvg from 'src/assets/metamask.svg';
-import walletConnectSvg from 'src/assets/walletconnect.svg';
+import coinbaseSvg from '../assets/coinbase.svg';
+import metaMaskSvg from '../assets/metamask.svg';
+import walletConnectSvg from '../assets/walletconnect.svg';
 
 const WALLET_ICONS: Record<string, any> = {
   metaMask: metaMaskSvg,

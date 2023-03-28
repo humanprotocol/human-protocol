@@ -3,8 +3,8 @@ import { MockConnector } from '@wagmi/core/connectors/mock';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import { FundingMethod } from 'src/components/FundingMethod';
-import { Providers, setupClient, getSigners } from 'tests/utils';
+import { Providers, setupClient, getSigners } from '../../tests/utils';
+import { FundingMethod } from '../components/FundingMethod';
 
 describe('when rendered FundingMethod component', () => {
   it('should render Crypto and Fiat buttons', async () => {

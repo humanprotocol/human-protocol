@@ -3,8 +3,8 @@ import { MockConnector } from '@wagmi/core/connectors/mock';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import { JobRequest } from 'src/components/JobRequest';
-import { Providers, setupClient, getSigners } from 'tests/utils';
+import { Providers, setupClient, getSigners } from '../../tests/utils';
+import { JobRequest } from '../components/JobRequest';
 
 describe('when rendered JobRequest component', () => {
   it('should render buttons', async () => {

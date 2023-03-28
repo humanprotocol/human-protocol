@@ -3,8 +3,8 @@ import { MockConnector } from '@wagmi/core/connectors/mock';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { create } from 'react-test-renderer';
-import { LaunchSuccess } from 'src/components/LaunchSuccess';
-import { Providers, setupClient, getSigners } from 'tests/utils';
+import { Providers, setupClient, getSigners } from '../../tests/utils';
+import { LaunchSuccess } from '../components/LaunchSuccess';
 
 const jobResponse = {
   escrowAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
