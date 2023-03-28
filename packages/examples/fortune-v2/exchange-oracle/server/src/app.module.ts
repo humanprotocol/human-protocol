@@ -6,7 +6,6 @@ import { EthersModule } from "nestjs-ethers";
 
 import { AppController } from "./app.controller";
 import { DatabaseModule } from "./database/database.module";
-import { RolesGuard } from "./common/guards";
 import { HttpValidationPipe } from "./common/pipes";
 import { HealthModule } from "./health/health.module";
 import { networkMap, networks } from "./common/interfaces/networks";
@@ -23,10 +22,6 @@ const ethersModules = networks.map(network => {
 
 @Module({
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
     {
       provide: APP_PIPE,
       useClass: HttpValidationPipe,
