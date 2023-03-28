@@ -32,7 +32,7 @@ export class WebhookService {
     const { signature } = dto;
 
     const verifyData: IVerifyMessage = {
-      publicKey: this.configService.get<string>("JOB_LAUNCHER_PGP_PUBLIC_KEY", ""),
+      publicKey: this.configService.get<string>("EXCHANGE_ORACLE_PGP_PUBLIC_KEY", ""),
       message: signature
     }
 

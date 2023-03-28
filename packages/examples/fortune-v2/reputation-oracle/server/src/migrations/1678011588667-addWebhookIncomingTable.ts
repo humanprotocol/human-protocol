@@ -4,12 +4,12 @@ import { NS } from "../common/constants";
 export class addWebhookIncomingTable1678011588667 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(`
-          CREATE TYPE ${NS}.webhook_incoming_status_enum AS ENUM (
-            'PENDING',
-            'COMPLETED',
-            'FAILED'
-          );
-        `);
+        CREATE TYPE ${NS}.webhook_incoming_status_enum AS ENUM (
+          'PENDING',
+          'COMPLETED',
+          'FAILED'
+        );
+      `);
 
     const table = new Table({
       name: `${NS}.webhook_incoming`,
@@ -30,12 +30,7 @@ export class addWebhookIncomingTable1678011588667 implements MigrationInterface 
         },
         {
           name: "escrow_address",
-          type: "varchar",
-          isUnique: true,
-        },
-        {
-          name: "s3_url",
-          type: "varchar",
+          type: "varchar"
         },
         {
           name: "retries_count",

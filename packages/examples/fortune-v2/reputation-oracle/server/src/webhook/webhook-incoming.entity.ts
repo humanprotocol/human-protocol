@@ -15,9 +15,6 @@ export class WebhookIncomingEntity extends BaseEntity implements IWebhook {
   @Column({ type: "varchar" })
   public escrowAddress: string;
 
-  @Column({ type: "varchar" })
-  public s3Url: string;
-
   @Column({ type: "int" })
   public retriesCount: number;
 
