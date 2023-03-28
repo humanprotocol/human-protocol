@@ -1,5 +1,7 @@
 import {
   BulkTransfer,
+  Cancelled,
+  Completed,
   IntermediateStorage,
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
@@ -194,7 +196,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   }
 }
 
-export function handleCancelled(): void {
+export function handleCancelled(event: Cancelled): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Cancelled';
@@ -202,7 +204,7 @@ export function handleCancelled(): void {
   }
 }
 
-export function handleCompleted(): void {
+export function handleCompleted(event: Completed): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Completed';

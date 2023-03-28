@@ -21,6 +21,7 @@ import {
   RAW_LEADER_QUERY,
 } from 'src/queries';
 import { AppState } from 'src/state';
+import { formatAmount } from 'src/utils';
 import { gqlFetch } from 'src/utils/gqlFetch';
 
 type LeadersType = { [chainId in ChainId]?: LeaderData[] };
@@ -72,18 +73,20 @@ const getLeaders = async (subgraphUrl: string) => {
   return await gqlFetch(subgraphUrl!, RAW_LEADERS_QUERY)
     .then((res) => res.json())
     .then((json) =>
-      json.data.leaders.map((leader: any) => ({
-        address: leader.address,
-        role: leader.role,
-        amountStaked: Number(leader.amountStaked),
-        amountAllocated: Number(leader.amountAllocated),
-        amountLocked: Number(leader.amountLocked),
-        amountSlashed: Number(leader.amountSlashed),
-        amountWithdrawn: Number(leader.amountWithdrawn),
-        lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
-        reputation: Number(leader.reputation),
-        amountJobsLaunched: Number(leader.amountJobsLaunched),
-      }))
+      json.data.leaders
+        .map((leader: any) => ({
+          address: leader.address,
+          role: leader.role,
+          amountStaked: formatAmount(leader.amountStaked),
+          amountAllocated: formatAmount(leader.amountAllocated),
+          amountLocked: formatAmount(leader.amountLocked),
+          amountSlashed: formatAmount(leader.amountSlashed),
+          amountWithdrawn: formatAmount(leader.amountWithdrawn),
+          lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+          reputation: Number(leader.reputation),
+          amountJobsLaunched: Number(leader.amountJobsLaunched),
+        }))
+        .filter((leader: LeaderData) => Number(leader.amountStaked) > 0)
     )
     .catch((err) => []);
 };
@@ -120,11 +123,11 @@ const getLeader = async (
     .then((json) => ({
       address: json.data.leader.address,
       role: json.data.leader.role,
-      amountStaked: Number(json.data.leader.amountStaked),
-      amountAllocated: Number(json.data.leader.amountAllocated),
-      amountLocked: Number(json.data.leader.amountLocked),
-      amountSlashed: Number(json.data.leader.amountSlashed),
-      amountWithdrawn: Number(json.data.leader.amountWithdrawn),
+      amountStaked: formatAmount(json.data.leader.amountStaked),
+      amountAllocated: formatAmount(json.data.leader.amountAllocated),
+      amountLocked: formatAmount(json.data.leader.amountLocked),
+      amountSlashed: formatAmount(json.data.leader.amountSlashed),
+      amountWithdrawn: formatAmount(json.data.leader.amountWithdrawn),
       lockedUntilTimestamp: Number(json.data.leader.lockedUntilTimestamp),
       reputation: Number(json.data.leader.reputation),
       amountJobsLaunched: Number(json.data.leader.amountJobsLaunched),
@@ -162,8 +165,8 @@ const getLeaderEscrows = async (subgraphUrl: string, address: string) => {
     .then((json) =>
       json.data.launchedEscrows.map((escrow: any) => ({
         address: escrow.id,
-        amountAllocated: Number(escrow.amountAllocated),
-        amountPayout: Number(escrow.amountPayout),
+        amountAllocated: formatAmount(escrow.amountAllocated ?? '0'),
+        amountPayout: formatAmount(escrow.amountPayout ?? '0'),
         status: escrow.status,
       }))
     )

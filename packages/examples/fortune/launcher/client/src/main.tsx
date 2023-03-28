@@ -14,6 +14,7 @@ import {
   polygonMumbai,
   bsc,
   bscTestnet,
+  skaleHumanProtocol,
 } from 'wagmi/chains';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
@@ -45,27 +46,6 @@ const fortune: Chain = {
   },
 };
 
-const wagmiSkaleHP: Chain = {
-  id: 1273227453,
-  name: 'Skale Human Protocol chain',
-  network: 'skale',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Skale FUEL',
-    symbol: 'sFUEL',
-  },
-  rpcUrls: {
-    public: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-    default: { http: ['https://mainnet.skalenodes.com/v1/wan-red-ain'] },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Skale Explorer',
-      url: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    },
-  },
-};
-
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
@@ -73,7 +53,7 @@ const { chains, provider, webSocketProvider } = configureChains(
     goerli,
     mainnet,
     polygon,
-    wagmiSkaleHP,
+    skaleHumanProtocol,
     polygonMumbai,
     bsc,
     bscTestnet,
@@ -81,6 +61,8 @@ const { chains, provider, webSocketProvider } = configureChains(
   ],
   [publicProvider()]
 );
+
+const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
 
 // Set up client
 const client = createClient({
@@ -96,7 +78,8 @@ const client = createClient({
     new WalletConnectConnector({
       chains,
       options: {
-        qrcode: true,
+        showQrModal: true,
+        projectId: projectId || '',
       },
     }),
   ],

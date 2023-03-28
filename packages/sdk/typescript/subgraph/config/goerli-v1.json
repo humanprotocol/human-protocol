@@ -2,7 +2,7 @@
   "network": "goerli",
   "description": "Human subgraph on goerli network",
   "graft": {
-    "base": "QmPbnu8R54f2L2uKbLcW5VNKCwXs6yW5B9LaEDY77Zsr7u",
+    "base": "QmWsWEV58a1bWSZyWc2ZHJLcr4UVWDhjmYTyqQ8bKbbrQN",
     "block": 8630704
   },
   "EscrowFactory": {

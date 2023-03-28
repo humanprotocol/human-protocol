@@ -82,7 +82,7 @@ export const FAUCET_NETWORKS: {
     chainId: ChainId.SKALE,
     title: 'SKALE Human Protocol chain',
     rpcUrl: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
-    hmtAddress: '0xa91B2C7d9704aeE8918460fc4375866e2c415A67',
+    hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
     faucetAddress: '0xb51a0E538c76C82e76757dc6D5a3938136C03c0C',
   },
 };

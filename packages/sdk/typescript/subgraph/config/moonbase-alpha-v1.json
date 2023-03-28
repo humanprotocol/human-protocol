@@ -2,7 +2,7 @@
   "network": "mbase",
   "description": "Human subgraph on Moonbase Alpha network",
   "graft": {
-    "base": "QmbJKZNX7mN6QDvVcf9aNeuH1PJjG2qpFjQqRJzmYhfZtM",
+    "base": "QmY7gnMbfzt6dUbeiqXBi22x5SnSs473kF3MAKC1ShimA7",
     "block": 3912594
   },
   "EscrowFactory": {
