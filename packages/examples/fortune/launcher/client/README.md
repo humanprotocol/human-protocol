@@ -14,6 +14,7 @@ Before running the client app, you need to make sure that you have correct envir
 ```
 VITE_APP_JOB_LAUNCHER_SERVER_URL=<Job launcher back-end API url>
 VITE_APP_JOB_LAUNCHER_ADDRESS=<Job launcher contract address>
+VITE_APP_WALLETCONNECT_PROJECT_ID=<WalletConnect Project Id>
 ```
 
 Now run this command to start fortune launcher client.
@@ -48,3 +49,4 @@ $ yarn test
 7. Set Environnment Variables:
     - VITE_APP_JOB_LAUNCHER_ADDRESS
     - VITE_APP_JOB_LAUNCHER_SERVER_URL
+    - VITE_APP_WALLETCONNECT_PROJECT_ID
