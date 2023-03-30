@@ -90,7 +90,7 @@ export const JobRequest = ({
     };
     try {
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
-      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
+      const jobLauncherAddress = import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
         alert('Job Launcher address is missing');
         setIsLoading(false);
@@ -105,7 +105,7 @@ export const JobRequest = ({
         throw new Error('Balance not enough for funding the escrow');
       }
 
-      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      const baseUrl = import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL;
       await axios.post(`${baseUrl}/check-escrow`, data);
 
       const allowance = await contract.allowance(address, jobLauncherAddress);
