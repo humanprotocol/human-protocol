@@ -1,7 +1,7 @@
 {
-  "name": "@human-protocol/job-launcher-server",
+  "name": "@human-protocol/fortune-job-launcher-server",
   "version": "1.0.0",
-  "description": "Job Launcher Server",
+  "description": "Fortune Job Launcher Server",
   "main": "index.ts",
   "license": "MIT",
   "private": false,
@@ -25,6 +25,7 @@
     "build": "tsc",
     "start:prod": "ts-node build/src/index.js",
     "start": "NODE_ENV=development ts-node ./src/index.ts",
-    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8546 vitest --run\""
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8546 vitest --run\"",
+    "lint": "eslint '**/*.ts'"
   }
 }

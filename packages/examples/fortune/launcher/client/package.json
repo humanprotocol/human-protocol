@@ -1,7 +1,7 @@
 {
-  "name": "@human-protocol/job-launcher-client",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@human-protocol/fortune-job-launcher-client",
+  "version": "1.0.0",
+  "description": "Fortune Job Launcher Client",
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",

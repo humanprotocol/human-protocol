@@ -1,10 +1,9 @@
 import { screen, render } from '@testing-library/react';
-
 import { act, create } from 'react-test-renderer';
-import { Providers, setupClient, getSigners } from 'tests/utils';
 import { MockConnector } from 'wagmi/connectors/mock';
 
 import { Escrow } from './Escrow';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 describe('When rendered Escrow component', () => {
   it('renders landing page', async () => {

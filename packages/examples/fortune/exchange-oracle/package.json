@@ -1,6 +1,7 @@
 {
-  "name": "@human-protocol/fortune-exchange",
-  "version": "0.1.0",
+  "name": "@human-protocol/fortune-exchange-oracle",
+  "description": "Fortune Exchange Oracle",
+  "version": "1.0.0",
   "license": "MIT",
   "private": false,
   "dependencies": {
@@ -22,7 +23,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start-prod": "serve -s dist",
-    "test": "vitest -u",
+    "test": "vitest run",
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
     "format": "npm run format:prettier && npm run format:lint"
@@ -47,7 +48,11 @@
     "@types/react-dom": "^18.0.9",
     "@types/react-test-renderer": "^18.0.0",
     "@vitejs/plugin-react": "^3.1.0",
-    "babel-jest": "^29.3.1",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-import-resolver-typescript": "^3.5.4",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "react-test-renderer": "^18.2.0",
     "vite": "^4.1.4",
     "vitest": "^0.29.2"

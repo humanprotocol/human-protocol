@@ -112,15 +112,13 @@ export const JobRequest = ({
 
       if (allowance.lt(fundAmount)) {
         const tx = await contract.approve(jobLauncherAddress, fundAmount);
-        const receipt = await tx.wait();
-        console.log(receipt);
+        await tx.wait();
       }
 
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err: any) {
-      console.log(err);
+    } catch (err) {
       if (err.name === 'AxiosError') onFail(err.response.data);
       else onFail(err.message);
     }

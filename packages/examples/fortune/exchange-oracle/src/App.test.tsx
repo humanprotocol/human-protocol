@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { act } from 'react-test-renderer';
-import { Providers, setupClient, getSigners } from 'tests/utils';
 import { MockConnector } from 'wagmi/connectors/mock';
 
 import App from './App';
+import { Providers, setupClient, getSigners } from 'tests/utils';
 
 test('renders correctly', async () => {
   const client = setupClient({
