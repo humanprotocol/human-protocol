@@ -1,4 +1,3 @@
-import { expect } from '@jest/globals';
 import { Preprocess } from '../src/preprocess';
 
 it('Preprocess Test', () => {
