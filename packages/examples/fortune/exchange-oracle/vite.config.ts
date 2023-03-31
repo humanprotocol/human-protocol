@@ -21,6 +21,9 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
+    env: {
+      VITE_APP_WALLETCONNECT_PROJECT_ID: 'PROJECT_ID',
+    },
   },
   server: {
     port: 3001,
