@@ -1,40 +1,31 @@
 {
-  "name": "exchange",
+  "name": "@human-protocol/fortune-exchange",
   "version": "0.1.0",
   "license": "MIT",
   "private": false,
   "dependencies": {
     "@human-protocol/core": "workspace:*",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.4.3",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.9",
-    "@web3modal/ethereum": "2.0.0",
-    "@web3modal/react": "2.0.0",
+    "@web3modal/ethereum": "^2.2.1",
+    "@web3modal/react": "^2.2.1",
+    "@web3modal/ui": "^2.2.1",
     "axios": "^1.1.3",
     "ethers": "^5.7.2",
-    "identity-obj-proxy": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "^5.0.1",
-    "remove": "^0.1.5",
     "wagmi": "^0.12.2",
     "web-vitals": "^3.1.0",
     "web3": "^1.8.1"
   },
   "scripts": {
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "start-prod": "serve -s build",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "jest",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "lint": "eslint '**/*.{ts,tsx}'",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start-prod": "serve -s dist",
+    "test": "vitest -u",
+    "format:prettier": "prettier --write '**/*.{ts,tsx}'",
+    "format:lint": "eslint --fix '**/*.{ts,tsx}'",
+    "format": "npm run format:prettier && npm run format:lint"
   },
   "browserslist": {
     "production": [
@@ -49,8 +40,16 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/react-test-renderer": "^18.0.0",
+    "@vitejs/plugin-react": "^3.1.0",
     "babel-jest": "^29.3.1",
-    "identity-obj-proxy": "^3.0.0",
-    "react-test-renderer": "^18.2.0"
+    "react-test-renderer": "^18.2.0",
+    "vite": "^4.1.4",
+    "vitest": "^0.29.2"
   }
 }
