@@ -10,7 +10,7 @@ import generateMerkleTree from './scripts/generateMerkleTree';
 
 dotenv.config();
 // https://vitejs.dev/config/
-export default defineConfig(({mode})=>{
+export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react({ fastRefresh: false }),
@@ -23,20 +23,22 @@ export default defineConfig(({mode})=>{
         apply: 'build',
         async writeBundle() {
           const merkleTreeJson = await generateMerkleTree(
-            mode==="development"?"localhost":"dashboard.humanprotocol.org",
+            mode === 'development'
+              ? 'localhost'
+              : 'dashboard.humanprotocol.org',
             process.env.VITE_APP_NFT_STORAGE_API as string
-            );
+          );
 
           const indexPath = path.resolve(__dirname, './dist/index.html');
           const indexContent = fs.readFileSync(indexPath, 'utf-8');
           const newIndexContent = indexContent.replace(
             '<script id="binary-transparency-manifest" type="application/json"></script>',
             `<script id="binary-transparency-manifest" type="application/json">${merkleTreeJson}</script>`
-            );
+          );
           fs.writeFileSync(indexPath, newIndexContent);
-          },
+        },
       },
-      ],
+    ],
     worker: {
       plugins: [react()],
     },
@@ -54,5 +56,5 @@ export default defineConfig(({mode})=>{
     server: {
       port: 3002,
     },
-  }
+  };
 });

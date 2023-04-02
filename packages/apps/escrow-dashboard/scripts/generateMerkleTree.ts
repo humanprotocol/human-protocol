@@ -6,7 +6,7 @@ import { MerkleTree } from 'merkletreejs';
 import { NFTStorage } from 'nft.storage';
 
 export default async function generateMerkleTree(
-origin:string,
+  origin: string,
   token: string
 ): Promise<string> {
   const buildPath = path.join(__dirname, '../dist/assets');
