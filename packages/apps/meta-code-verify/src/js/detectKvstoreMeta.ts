@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { ORIGIN_TYPE } from './config';
 import { startFor } from './contentUtils.js';
 
-startFor(ORIGIN_TYPE.KVSTORE);
+startFor(window.location.hostname);

@@ -51,7 +51,13 @@ function getCFHashWorkaroundFunction(ipfs_cid) {
   });
 }
 
-async function validateManifest(rootHash, leaves, ipfs_cid, workaround) {
+async function validateManifest(
+  rootHash,
+  leaves,
+  ipfs_cid,
+  workaround,
+  origin
+) {
   // does rootHash match what was published?
   const cfResponse = await getCFHashWorkaroundFunction(ipfs_cid).catch(
     cfError => {
@@ -71,8 +77,16 @@ async function validateManifest(rootHash, leaves, ipfs_cid, workaround) {
   }
   const cfPayload = await cfResponse.json();
   let cfRootHash = cfPayload.root_hash;
+  let cfOrigin = cfPayload.origin;
   if (cfPayload.root_hash.startsWith('0x')) {
     cfRootHash = cfPayload.root_hash.slice(2);
+  }
+
+  if (cfOrigin !== origin) {
+    return {
+      valid: false,
+      reason: 'ROOT_HASH_VERIFY_FAIL_3RD_PARTY',
+    };
   }
   // validate
   if (rootHash !== cfRootHash) {
@@ -95,7 +109,7 @@ async function validateManifest(rootHash, leaves, ipfs_cid, workaround) {
     if (backupHash !== cfRootHash) {
       return {
         valid: false,
-        reason: 'ROOT_HASH_VERFIY_FAIL_3RD_PARTY',
+        reason: 'ROOT_HASH_VERIFY_FAIL_3RD_PARTY',
       };
     }
   }
@@ -176,7 +190,8 @@ export function handleMessages(message, sender, sendResponse) {
       slicedHash,
       slicedLeaves,
       message.ipfs_cid,
-      message.workaround
+      message.workaround,
+      message.origin
     ).then(validationResult => {
       if (validationResult.valid) {
         // store manifest to subsequently validate JS

@@ -10,46 +10,49 @@ import generateMerkleTree from './scripts/generateMerkleTree';
 
 dotenv.config();
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    react({ fastRefresh: false }),
-    nodePolyfills({
-      // Whether to polyfill `node:` protocol imports.
-      protocolImports: true,
-    }),
-    {
-      name: 'generate-merkle-tree',
-      apply: 'build',
-      async writeBundle() {
-        const merkleTreeJson = await generateMerkleTree(
-          process.env.VITE_APP_NFT_STORAGE_API as string
-        );
+export default defineConfig(({mode})=>{
+  return {
+    plugins: [
+      react({ fastRefresh: false }),
+      nodePolyfills({
+        // Whether to polyfill `node:` protocol imports.
+        protocolImports: true,
+      }),
+      {
+        name: 'generate-merkle-tree',
+        apply: 'build',
+        async writeBundle() {
+          const merkleTreeJson = await generateMerkleTree(
+            mode==="development"?"localhost":"dashboard.humanprotocol.org",
+            process.env.VITE_APP_NFT_STORAGE_API as string
+            );
 
-        const indexPath = path.resolve(__dirname, './dist/index.html');
-        const indexContent = fs.readFileSync(indexPath, 'utf-8');
-        const newIndexContent = indexContent.replace(
-          '<script id="binary-transparency-manifest" type="application/json"></script>',
-          `<script id="binary-transparency-manifest" type="application/json">${merkleTreeJson}</script>`
-        );
-        fs.writeFileSync(indexPath, newIndexContent);
+          const indexPath = path.resolve(__dirname, './dist/index.html');
+          const indexContent = fs.readFileSync(indexPath, 'utf-8');
+          const newIndexContent = indexContent.replace(
+            '<script id="binary-transparency-manifest" type="application/json"></script>',
+            `<script id="binary-transparency-manifest" type="application/json">${merkleTreeJson}</script>`
+            );
+          fs.writeFileSync(indexPath, newIndexContent);
+          },
+      },
+      ],
+    worker: {
+      plugins: [react()],
+    },
+    resolve: {
+      alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
+    },
+    test: {
+      globals: true,
+      environment: 'happy-dom',
+      setupFiles: './tests/setup.ts',
+      coverage: {
+        reporter: ['text', 'json', 'html'],
       },
     },
-  ],
-  worker: {
-    plugins: [react()],
-  },
-  resolve: {
-    alias: [{ find: 'src', replacement: path.resolve(__dirname, 'src') }],
-  },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    setupFiles: './tests/setup.ts',
-    coverage: {
-      reporter: ['text', 'json', 'html'],
+    server: {
+      port: 3002,
     },
-  },
-  server: {
-    port: 3002,
-  },
+  }
 });

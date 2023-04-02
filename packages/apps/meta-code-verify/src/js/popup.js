@@ -57,13 +57,8 @@ function attachTextToHtml() {
   });
 }
 
-function attachListeners(origin) {
-  if (!(origin in ORIGIN_TO_LEARN_MORE_PAGES)) {
-    throw new Error(
-      `Learn more pages for origin type: ${origin} do not exist!`
-    );
-  }
-  const learnMoreUrls = ORIGIN_TO_LEARN_MORE_PAGES[origin];
+function attachListeners() {
+  const learnMoreUrls = ORIGIN_TO_LEARN_MORE_PAGES['KVSTORE'];
 
   const menuButtonList = document.getElementsByClassName('menu');
   Array.from(menuButtonList).forEach(menuButton => {
