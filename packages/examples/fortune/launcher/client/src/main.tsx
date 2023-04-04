@@ -1,7 +1,11 @@
+import { Buffer } from 'buffer';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import axios from 'axios';
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { WagmiConfig, createClient, configureChains, Chain } from 'wagmi';
 import {
   goerli,
@@ -12,19 +16,16 @@ import {
   bscTestnet,
   skaleHumanProtocol,
 } from 'wagmi/chains';
-import axios from 'axios';
-import { publicProvider } from 'wagmi/providers/public';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import theme from './theme';
 
-window.Buffer = window.Buffer || require('buffer').Buffer;
+window.Buffer = window.Buffer || Buffer;
 
 const fortune: Chain = {
   id: 1338,
@@ -61,7 +62,7 @@ const { chains, provider, webSocketProvider } = configureChains(
   [publicProvider()]
 );
 
-const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID;
+const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
 // Set up client
 const client = createClient({
@@ -78,14 +79,14 @@ const client = createClient({
       chains,
       options: {
         showQrModal: true,
-        projectId: projectId || ''
+        projectId: projectId || '',
       },
     }),
   ],
   provider,
   webSocketProvider,
 });
-const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+const baseUrl = import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL;
 axios.get(`${baseUrl}/config`).then((r) =>
   loadStripe(r.data.publishableKey).then((stripePromise) =>
     root.render(
@@ -103,9 +104,7 @@ axios.get(`${baseUrl}/config`).then((r) =>
   )
 );
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const root = createRoot(document.getElementById('root') as HTMLElement);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
