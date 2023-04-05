@@ -54,7 +54,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     uint256 public duration;
 
-    uint256[] public finalAmounts;
     bool public bulkPaid;
 
     mapping(address => bool) public areTrustedHandlers;
@@ -216,6 +215,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         uint256 balance = getBalance();
+        bulkPaid = false;
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
@@ -229,29 +229,21 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _storeResult(_url, _hash);
 
         (
+            uint256[] memory finalAmounts,
             uint256 reputationOracleFee,
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
 
-        uint256[] memory _amountsPaid = new uint256[](_recipients.length);
         for (uint256 i = 0; i < _recipients.length; ++i) {
-            uint256 amount = finalAmounts[i];
-            if (amount == 0) {
-                continue;
-            }
-            finalAmounts[i] = 0;
-            _safeTransfer(_recipients[i], amount);
-            _amountsPaid[i] = amount;
+            _safeTransfer(_recipients[i], finalAmounts[i]);
         }
-
-        delete finalAmounts;
 
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        balance = getBalance();
         bulkPaid = true;
 
+        balance = getBalance();
         if (balance == 0) {
             status = EscrowStatuses.Paid;
         } else {
@@ -261,7 +253,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit BulkTransfer(
             _txId,
             _recipients,
-            _amountsPaid,
+            finalAmounts,
             status == EscrowStatuses.Partial
         );
         return true;
@@ -269,7 +261,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     function finalizePayouts(
         uint256[] memory _amounts
-    ) internal returns (uint256, uint256) {
+    ) internal view returns (uint256[] memory, uint256, uint256) {
+        uint256[] memory finalAmounts;
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
@@ -288,9 +281,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
             recordingOracleFee = recordingOracleFee.add(
                 singleRecordingOracleFee
             );
-            finalAmounts.push(amount);
+            finalAmounts[j] = amount;
         }
-        return (reputationOracleFee, recordingOracleFee);
+        return (finalAmounts, reputationOracleFee, recordingOracleFee);
     }
 
     function _safeTransfer(address to, uint256 value) internal {
