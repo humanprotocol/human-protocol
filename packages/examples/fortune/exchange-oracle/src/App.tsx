@@ -14,9 +14,10 @@ function App() {
   const { isConnected } = useAccount();
 
   setTheme({
-    themeColor: 'purple',
     themeMode: 'light',
-    themeBackground: 'themeColor',
+    themeVariables: {
+      '--w3m-accent-color': 'purple',
+    },
   });
 
   return (
