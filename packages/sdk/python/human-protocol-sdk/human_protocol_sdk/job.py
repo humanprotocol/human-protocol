@@ -417,7 +417,6 @@ class Job:
         recording_oracle = str(self.serialized_manifest["recording_oracle_addr"])
         hmt_amount = int(self.amount * 10**18)
         hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
-        requested_solutions = int(self.serialized_manifest["job_total_tasks"])
 
         tx_balance = None
         hmt_transferred = False
@@ -482,7 +481,6 @@ class Job:
             recording_oracle_stake,
             self.manifest_url,
             self.manifest_hash,
-            requested_solutions,
         ]
 
         try:
@@ -1803,7 +1801,7 @@ class Job:
         False
 
         Bulk has been paid upon successful bulk payout.
-        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('20.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
+        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('50.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
         >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
         True
         >>> job._bulk_paid()

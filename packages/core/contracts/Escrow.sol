@@ -250,6 +250,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _safeTransfer(recordingOracle, recordingOracleFee);
 
         balance = getBalance();
+        bulkPaid = true;
 
         if (balance == 0) {
             status = EscrowStatuses.Paid;
