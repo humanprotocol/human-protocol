@@ -103,6 +103,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     event SetRewardPool(address indexed rewardPool);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

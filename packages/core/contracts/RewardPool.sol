@@ -40,6 +40,7 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         uint256 tokens
     );
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

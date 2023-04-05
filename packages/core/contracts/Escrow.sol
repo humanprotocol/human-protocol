@@ -48,7 +48,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     string public manifestUrl;
     string public manifestHash;
-    uint256 public remainingSolutions;
 
     string public finalResultsUrl;
     string public finalResultsHash;
@@ -110,8 +109,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _reputationOracleStake,
         uint256 _recordingOracleStake,
         string memory _url,
-        string memory _hash,
-        uint256 _solutionsRequested
+        string memory _hash
     ) external override trusted notExpired {
         require(
             _reputationOracle != address(0),
@@ -121,7 +119,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recordingOracle != address(0),
             'Invalid or missing token spender'
         );
-        require(_solutionsRequested > 0, 'Invalid or missing solutions');
         uint256 totalStake = _reputationOracleStake.add(_recordingOracleStake);
         require(totalStake <= 100, 'Stake out of bounds');
         require(
@@ -139,7 +136,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         manifestUrl = _url;
         manifestHash = _hash;
-        remainingSolutions = _solutionsRequested;
         status = EscrowStatuses.Pending;
         emit Pending(manifestUrl, manifestHash);
     }
@@ -220,7 +216,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         uint256 balance = getBalance();
-        bulkPaid = false;
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
@@ -228,7 +223,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
 
         if (balance < aggregatedBulkAmount) {
-            return bulkPaid;
+            return false;
         }
 
         _storeResult(_url, _hash);
@@ -254,23 +249,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        bulkPaid = true;
         balance = getBalance();
-        if (status == EscrowStatuses.Pending) {
+
+        if (balance == 0) {
+            status = EscrowStatuses.Paid;
+        } else {
             status = EscrowStatuses.Partial;
-            remainingSolutions = remainingSolutions.sub(_recipients.length);
         }
-        if (
-            balance > 0 &&
-            status == EscrowStatuses.Partial &&
-            remainingSolutions == 0
-        ) {
-            _safeTransfer(canceler, balance);
-            status = EscrowStatuses.Paid;
-        }
-        if (balance == 0 && status == EscrowStatuses.Partial) {
-            status = EscrowStatuses.Paid;
-        }
+
         emit BulkTransfer(
             _txId,
             _recipients,

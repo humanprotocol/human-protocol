@@ -20,6 +20,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     event Launched(address token, address escrow);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }

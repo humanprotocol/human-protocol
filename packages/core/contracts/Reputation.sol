@@ -23,6 +23,7 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
     int256 private constant MAX_REPUTATION = 100;
     mapping(address => int256) public reputations;
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
