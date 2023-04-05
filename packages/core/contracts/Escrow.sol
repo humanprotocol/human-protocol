@@ -262,7 +262,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function finalizePayouts(
         uint256[] memory _amounts
     ) internal view returns (uint256[] memory, uint256, uint256) {
-        uint256[] memory finalAmounts;
+        uint256[] memory finalAmounts = new uint256[](_amounts.length);
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
