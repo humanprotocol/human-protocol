@@ -40,6 +40,10 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         uint256 tokens
     );
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _token,
         address _staking,

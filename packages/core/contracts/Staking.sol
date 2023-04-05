@@ -103,6 +103,10 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     event SetRewardPool(address indexed rewardPool);
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _token,
         uint256 _minimumStake,

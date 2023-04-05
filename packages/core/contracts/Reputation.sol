@@ -23,6 +23,10 @@ contract Reputation is OwnableUpgradeable, UUPSUpgradeable {
     int256 private constant MAX_REPUTATION = 100;
     mapping(address => int256) public reputations;
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _staking,
         uint256 _minimumStake

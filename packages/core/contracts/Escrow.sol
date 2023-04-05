@@ -256,22 +256,20 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         bulkPaid = true;
         balance = getBalance();
-        if (bulkPaid) {
-            if (status == EscrowStatuses.Pending) {
-                status = EscrowStatuses.Partial;
-                remainingSolutions = remainingSolutions.sub(_recipients.length);
-            }
-            if (
-                balance > 0 &&
-                status == EscrowStatuses.Partial &&
-                remainingSolutions == 0
-            ) {
-                _safeTransfer(canceler, balance);
-                status = EscrowStatuses.Paid;
-            }
-            if (balance == 0 && status == EscrowStatuses.Partial) {
-                status = EscrowStatuses.Paid;
-            }
+        if (status == EscrowStatuses.Pending) {
+            status = EscrowStatuses.Partial;
+            remainingSolutions = remainingSolutions.sub(_recipients.length);
+        }
+        if (
+            balance > 0 &&
+            status == EscrowStatuses.Partial &&
+            remainingSolutions == 0
+        ) {
+            _safeTransfer(canceler, balance);
+            status = EscrowStatuses.Paid;
+        }
+        if (balance == 0 && status == EscrowStatuses.Partial) {
+            status = EscrowStatuses.Paid;
         }
         emit BulkTransfer(
             _txId,
