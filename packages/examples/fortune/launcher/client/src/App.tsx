@@ -73,6 +73,7 @@ function App() {
 
   useEffect(() => {
     fetchLastEscrow(ESCROW_NETWORKS[chainId as ChainId]?.factoryAddress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, signer]);
 
   return (
