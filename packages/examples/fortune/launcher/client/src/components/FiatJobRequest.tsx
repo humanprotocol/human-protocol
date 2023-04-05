@@ -166,8 +166,7 @@ export const JobRequest = ({
       data.paymentId = paymentIntent?.id;
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
       if (err.name === 'AxiosError') onFail(err.response.data);
       else onFail(err.message);
     }
