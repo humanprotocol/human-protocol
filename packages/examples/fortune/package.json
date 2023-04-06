@@ -20,7 +20,7 @@
     "test:launcher-server": "yarn workspace @human-protocol/fortune-job-launcher-server test",
     "test:launcher-client": "yarn workspace @human-protocol/fortune-job-launcher-client test",
     "test:e2e:backend": "(concurrently -k -s first -g --hide 0 \"yarn start:backend\" \"sleep 5 && yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
-    "test:unit": "(concurrently -g \"yarn test:exchange-oracle\" \"yarn test:recording-oracle\" \"yarn test:reputation-oracle\" \"yarn test:launcher-server\" \"yarn test:launcher-client\") && docker compose down",
+    "test:unit": "yarn test:exchange-oracle && yarn test:recording-oracle && yarn test:reputation-oracle && yarn test:launcher-server && yarn test:launcher-client && docker compose down",
     "test": "concurrently -g \"yarn start:minio\" \"yarn test:unit\"",
     "lint:exchange-oracle": "yarn workspace @human-protocol/fortune-exchange-oracle lint",
     "lint:recording-oracle": "yarn workspace @human-protocol/fortune-recording-oracle lint",

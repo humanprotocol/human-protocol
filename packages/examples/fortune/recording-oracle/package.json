@@ -10,7 +10,7 @@
     "build": "tsc",
     "start:prod": "ts-node build/src/index.js",
     "start": "NODE_ENV=development ts-node ./src/index.ts",
-    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8547\" \"sleep 10 && RPC_PORT=8547 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8547 vitest --run\""
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8547\" \"sleep 10 && RPC_PORT=8547 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8547 vitest run -u\""
   },
   "repository": {
     "type": "git",
