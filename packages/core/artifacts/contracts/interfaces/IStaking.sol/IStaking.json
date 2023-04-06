@@ -1,0 +1,377 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IStaking",
+  "sourceName": "contracts/interfaces/IStaking.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "escrowAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "allocate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_escrowAddress",
+          "type": "address"
+        }
+      ],
+      "name": "closeAllocation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_escrowAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getAllocation",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "escrowAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "staker",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokens",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "createdAt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "closedAt",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IStaking.Allocation",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_escrowAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getAllocationState",
+      "outputs": [
+        {
+          "internalType": "enum IStaking.AllocationState",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getListOfStakers",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokensStaked",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensAllocated",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensLocked",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensLockedUntil",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Stakes.Staker[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_staker",
+          "type": "address"
+        }
+      ],
+      "name": "getStakedTokens",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_staker",
+          "type": "address"
+        }
+      ],
+      "name": "getStaker",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "tokensStaked",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensAllocated",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensLocked",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokensLockedUntil",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Stakes.Staker",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_indexer",
+          "type": "address"
+        }
+      ],
+      "name": "hasAvailableStake",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_indexer",
+          "type": "address"
+        }
+      ],
+      "name": "hasStake",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_escrowAddress",
+          "type": "address"
+        }
+      ],
+      "name": "isAllocation",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rewardPool",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_lockPeriod",
+          "type": "uint32"
+        }
+      ],
+      "name": "setLockPeriod",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_minimumStake",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMinimumStake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_rewardPool",
+          "type": "address"
+        }
+      ],
+      "name": "setRewardPool",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_slasher",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_staker",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_escrowAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "slash",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "stake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_tokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "unstake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,158 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IEscrow",
+  "sourceName": "contracts/interfaces/IEscrow.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "abort",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "_handlers",
+          "type": "address[]"
+        }
+      ],
+      "name": "addTrustedHandlers",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "_recipients",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_amounts",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "string",
+          "name": "_url",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_hash",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_txId",
+          "type": "uint256"
+        }
+      ],
+      "name": "bulkPayOut",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "cancel",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "complete",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_reputationOracle",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_recordingOracle",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_reputationOracleStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_recordingOracleStake",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "_url",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_hash",
+          "type": "string"
+        }
+      ],
+      "name": "setup",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "status",
+      "outputs": [
+        {
+          "internalType": "enum IEscrow.EscrowStatuses",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_worker",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_url",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_hash",
+          "type": "string"
+        }
+      ],
+      "name": "storeResults",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

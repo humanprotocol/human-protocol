@@ -41,9 +41,6 @@ jobs:
       - uses: actions/checkout@v3
       - run: yarn --ignore-scripts
         name: Install dependencies
-      - run: yarn compile
-        name: Compile smart contracts
-        working-directory: ./packages/core
       - run: yarn global add @graphprotocol/graph-cli
         name: Install Graph CLI
       - run: graph auth --product hosted-service ${API_KEY}
