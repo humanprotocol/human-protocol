@@ -337,8 +337,9 @@ export class Job {
         escrowAddr,
         this.providerData?.gasPayer
       );
-    } catch {
-      this._logError(new Error('Error creating escrow...'));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      this._logError(new Error('Error creating escrow... ' + e.message));
       return false;
     }
 
@@ -529,17 +530,17 @@ export class Job {
     const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
     this._logger.info('Bulk paying out the workers...');
-    try {
-      await this._raffleExecute(
-        this.contractData.escrow,
-        'bulkPayOut',
-        payouts.map(({ address }) => address),
-        payouts.map(({ amount }) => toFullDigit(amount)),
-        url,
-        hash,
-        1
-      );
-    } catch {
+    const paid = await this._raffleExecute(
+      this.contractData.escrow,
+      'bulkPayOut',
+      payouts.map(({ address }) => address),
+      payouts.map(({ amount }) => toFullDigit(amount)),
+      url,
+      hash,
+      1
+    );
+
+    if (!paid) {
       this._logError(new Error('Failed to bulk payout users'));
       return false;
     }

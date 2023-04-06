@@ -1,5 +1,5 @@
 clean-package:
-	rm -rf build contracts dist *.egg-info
+	rm -rf build artifacts dist *.egg-info
 
 build-contracts:
 	./scripts/build-contracts.sh

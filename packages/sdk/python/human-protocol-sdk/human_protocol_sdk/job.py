@@ -1110,7 +1110,7 @@ class Job:
                 f"{txn_event} failed from operator: {gas_payer}, {gas_payer_priv} due to {e}."
             )
 
-        txn_event = "Staking"
+        txn_event = "Staking HMT"
         txn_func = self.staking_contract.functions.stake
         txn_info = {
             "gas_payer": gas_payer,
@@ -1161,7 +1161,7 @@ class Job:
 
         (gas_payer, gas_payer_priv) = operator
 
-        txn_event = "Staking"
+        txn_event = "Unstaking HMT"
         txn_func = self.staking_contract.functions.unstake
         txn_info = {
             "gas_payer": gas_payer,
@@ -1214,7 +1214,7 @@ class Job:
 
         (gas_payer, gas_payer_priv) = operator
 
-        txn_event = "Staking"
+        txn_event = "Withdrawing HMT from stake"
         txn_func = self.staking_contract.functions.withdraw
         txn_info = {
             "gas_payer": gas_payer,
@@ -1268,7 +1268,7 @@ class Job:
 
         (gas_payer, gas_payer_priv) = operator
 
-        txn_event = "Staking"
+        txn_event = "Allocating HMT to job"
         txn_func = self.staking_contract.functions.allocate
         txn_info = {
             "gas_payer": gas_payer,
@@ -1329,7 +1329,7 @@ class Job:
 
         (gas_payer, gas_payer_priv) = operator
 
-        txn_event = "Staking"
+        txn_event = "Closing HMT allocation from job"
         txn_func = self.staking_contract.functions.closeAllocation
         txn_info = {
             "gas_payer": gas_payer,
@@ -1813,7 +1813,7 @@ class Job:
             TimeoutError: if wait_on_transaction times out.
 
         """
-        txn_event = "Contract creation"
+        txn_event = "Job creation"
         txn_func = self.factory_contract.functions.createEscrow
         txn_info = {
             "gas_payer": self.gas_payer,
