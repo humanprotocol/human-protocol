@@ -1,7 +1,5 @@
 {
-  "buildCommand": "yarn workspace @human-protocol/job-launcher-server build",
-  "installCommand": "yarn install",
-  "outputDirectory": "build",
+  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
   "builds": [
     {
       "src": "src/index.ts",
