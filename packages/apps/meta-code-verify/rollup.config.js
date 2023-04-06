@@ -1,9 +1,9 @@
-import cleanOnce from "./build/rollup-plugin-clean-once.mjs";
+import cleanOnce from "./built/rollup-plugin-clean-once.mjs";
 import eslintPlugin from "@rollup/plugin-eslint";
 import typescript from "@rollup/plugin-typescript";
-import prettierBuildStart from "./build/rollup-plugin-prettier-build-start.mjs";
-import staticFiles from "./build/rollup-plugin-static-files.mjs";
-import watch from "./build/rollup-plugin-watch-additional.mjs";
+import prettierBuildStart from "./built/rollup-plugin-prettier-build-start.mjs";
+import staticFiles from "./built/rollup-plugin-static-files.mjs";
+import watch from "./built/rollup-plugin-watch-additional.mjs";
 
 function eslint() {
     return eslintPlugin({ throwOnError: true });

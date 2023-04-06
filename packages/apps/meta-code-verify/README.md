@@ -23,7 +23,7 @@ $ yarn
 $ yarn build-local-dev
 ```
 
-Then, go to your browser and open this URL: `brave://extensions/.` Turn on developer mode if you haven't:
+Then, go to your browser and open this URL: `brave://extensions/` Turn on developer mode if you haven't:
 
 ![Developer mode](https://user-images.githubusercontent.com/62529025/228216854-1e85b3c3-3f13-441f-82c3-ed188dffeed6.png)
 

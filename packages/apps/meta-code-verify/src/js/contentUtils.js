@@ -840,7 +840,7 @@ async function downloadJSToZip(downloadType) {
   }
 }
 
-chrome.runtime.onMessage.addListener(function(request) {
+chrome.runtime.onMessage.addListener(function (request) {
   if (request.greeting && DOWNLOAD_JS_ENABLED) {
     downloadJSToZip(request.greeting);
   } else if (request.greeting === 'nocacheHeaderFound') {

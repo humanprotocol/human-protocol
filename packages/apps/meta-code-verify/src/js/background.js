@@ -321,17 +321,18 @@ chrome.webRequest.onResponseStarted.addListener(
       src.url.indexOf('chrome-extension://') === 0 &&
       src.url.indexOf('moz-extension://') === 0
     ) {
-      chrome.tabs.query({ active: true, currentWindow: true }, async function(
-        tabs
-      ) {
-        try {
-          await chrome.tabs.sendMessage(tabs[0].id, {
-            greeting: 'nocacheHeaderFound',
-          });
-        } catch {
-          console.log('webRequest error');
+      chrome.tabs.query(
+        { active: true, currentWindow: true },
+        async function (tabs) {
+          try {
+            await chrome.tabs.sendMessage(tabs[0].id, {
+              greeting: 'nocacheHeaderFound',
+            });
+          } catch {
+            console.log('webRequest error');
+          }
         }
-      });
+      );
     }
   },
   srcFilters,

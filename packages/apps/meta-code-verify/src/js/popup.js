@@ -85,7 +85,7 @@ function attachListeners() {
     menuRowList[1].style.cursor = 'pointer';
 
     downloadTextList[0].addEventListener('click', () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(
           tabs[0].id,
           { greeting: 'downloadMove' },
@@ -96,7 +96,7 @@ function attachListeners() {
     downloadTextList[0].style.cursor = 'pointer';
 
     downloadSrcButton.onclick = () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(
           tabs[0].id,
           { greeting: 'downloadSource' },
