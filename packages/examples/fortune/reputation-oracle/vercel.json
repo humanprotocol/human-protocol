@@ -1,16 +1,3 @@
 {
-  "version": 2,
-  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
-  "builds": [
-      {
-          "src": "src/index.ts",
-          "use": "@vercel/node"
-      }
-  ],
-  "routes": [
-      {
-          "src": "/(.*)",
-          "dest": "src/index.ts"
-      }
-  ]
+  "installCommand": "yarn install && yarn workspace @human-protocol/core compile"
 }

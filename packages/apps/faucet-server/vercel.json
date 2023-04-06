@@ -1,17 +1,3 @@
 {
-  "buildCommand": "yarn workspace @human-protocol/faucet-server build",
-  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
-  "outputDirectory": "build",
-  "builds": [
-    {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
-  ]
+  "installCommand": "yarn install && yarn workspace @human-protocol/core compile"
 }
