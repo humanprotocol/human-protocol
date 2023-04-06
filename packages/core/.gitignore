@@ -1,5 +1,7 @@
 # Hardhat files
 cache
+artifacts/build-info
+artifacts/**/*.dbg.json
 .deps
 
 # solidity-coverage directory and output file

@@ -5,7 +5,8 @@
   "files": [
     "contracts/**/*.sol",
     "abis/**/*.json",
-    "artifacts/contracts/**/*.json",
+    "artifacts/@openzeppelin/**/[^.]*.json",
+    "artifacts/contracts/**/[^.]*.json",
     "typechain-types/**/*.ts"
   ],
   "scripts": {
