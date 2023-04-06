@@ -1,10 +1,5 @@
 import Web3 from 'web3';
-import {
-  getBalance,
-  bulkPayOut,
-  bulkPaid,
-  getEscrowManifestUrl,
-} from './escrow';
+import { getBalance, bulkPayOut, getEscrowManifestUrl } from './escrow';
 import { describe, expect, it, beforeAll, beforeEach } from '@jest/globals';
 import Escrow from '@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
@@ -143,9 +138,7 @@ describe('Fortune', () => {
       'localhost',
       'localhost'
     );
-    const result = await bulkPaid(web3, escrowAddress);
 
-    expect(result).toBe(false);
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('0', 'ether')
     );
@@ -170,9 +163,7 @@ describe('Fortune', () => {
       'localhost',
       'localhost'
     );
-    const result = await bulkPaid(web3, escrowAddress);
 
-    expect(result).toBe(true);
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('8', 'ether')
     );

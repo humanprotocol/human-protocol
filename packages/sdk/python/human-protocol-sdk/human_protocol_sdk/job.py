@@ -1779,45 +1779,6 @@ class Job:
 
         return factory
 
-    def _bulk_paid(self) -> int:
-        """Checks if the last bulk payment has succeeded.
-
-        >>> from test.human_protocol_sdk.utils import manifest
-        >>> credentials = {
-        ... 	"gas_payer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-        ... 	"gas_payer_priv": "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-        ... }
-        >>> rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
-        >>> job = Job(credentials, manifest)
-        >>> job.stake(1)
-        True
-        >>> job.launch(rep_oracle_pub_key)
-        True
-        >>> job.setup()
-        True
-
-        No payout has been performed yet.
-        >>> job._bulk_paid()
-        False
-
-        Bulk has been paid upon successful bulk payout.
-        >>> payouts = [("0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC", Decimal('50.0')), ("0x852023fbb19050B8291a335E5A83Ac9701E7B4E6", Decimal('50.0'))]
-        >>> job.bulk_payout(payouts, {}, rep_oracle_pub_key)
-        True
-        >>> job._bulk_paid()
-        True
-
-        Args:
-            gas (int): maximum amount of gas the caller is ready to pay.
-
-        Returns:
-            returns True if the last bulk payout has succeeded.
-
-        """
-        return self.job_contract.functions.bulkPaid().call(
-            {"from": self.gas_payer, "gas": Wei(self.gas)}
-        )
-
     def _create_escrow(self, trusted_handlers=[]) -> RaffleTxn:
         """Launches a new escrow contract to the ethereum network.
 

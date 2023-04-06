@@ -32,9 +32,3 @@ export async function bulkPayOut(
     .bulkPayOut(workerAddresses, rewards, resultsUrl, resultHash, 1)
     .send({ from: web3.eth.defaultAccount, gas: gasNeeded, gasPrice });
 }
-
-export async function bulkPaid(web3: Web3, escrowAddress: string) {
-  const Escrow = new web3.eth.Contract(EscrowAbi as [], escrowAddress);
-  const result = await Escrow.methods.bulkPaid().call();
-  return result;
-}

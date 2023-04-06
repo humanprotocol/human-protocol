@@ -50,8 +50,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public finalResultsUrl;
     string public finalResultsHash;
 
-    bool public bulkPaid;
-
     uint256 public duration;
 
     mapping(address => bool) public areTrustedHandlers;
@@ -204,8 +202,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         notExpired
         nonReentrant
     {
-        // TODO: Remove bulkPaid in the future, and just check if the txn is succedeed.
-        bulkPaid = false;
         require(
             _recipients.length == _amounts.length,
             "Amount of recipients and values don't match"
@@ -251,7 +247,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             isPartial = true;
         }
 
-        bulkPaid = true;
         emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
     }
 

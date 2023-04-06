@@ -529,25 +529,24 @@ export class Job {
     const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
     this._logger.info('Bulk paying out the workers...');
-    await this._raffleExecute(
-      this.contractData.escrow,
-      'bulkPayOut',
-      payouts.map(({ address }) => address),
-      payouts.map(({ amount }) => toFullDigit(amount)),
-      url,
-      hash,
-      1
-    );
-
-    const bulkPaid = await this.contractData.escrow.bulkPaid();
-    if (!bulkPaid) {
+    try {
+      await this._raffleExecute(
+        this.contractData.escrow,
+        'bulkPayOut',
+        payouts.map(({ address }) => address),
+        payouts.map(({ amount }) => toFullDigit(amount)),
+        url,
+        hash,
+        1
+      );
+    } catch {
       this._logError(new Error('Failed to bulk payout users'));
       return false;
     }
 
     this._logger.info('Workers are paid out.');
 
-    return bulkPaid;
+    return true;
   }
 
   /**

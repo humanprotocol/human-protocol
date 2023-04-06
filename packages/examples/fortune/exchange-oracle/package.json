@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "@human-protocol/core": "workspace:*",
+    "@human-protocol/core": "*",
     "@web3modal/ethereum": "^2.2.1",
     "@web3modal/react": "^2.2.1",
     "@web3modal/ui": "^2.2.1",
