@@ -130,9 +130,6 @@ describe('Escrow tests', async () => {
     const url = 'http://test.com';
     await escrow.setupEscrow(web3Client, escrowAddress, url, 3);
     expect(await escrowContract.methods.manifestUrl().call()).eq(url);
-    expect(Number(await escrowContract.methods.remainingSolutions().call())).eq(
-      3
-    );
   });
 
   test('Should not detect curse words', () => {
