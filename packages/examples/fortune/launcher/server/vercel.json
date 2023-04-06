@@ -1,15 +1,10 @@
 {
   "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
-  "builds": [
+  "outputDirectory": "build",
+  "rewrites": [
     {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
+      "source": "/(.*)",
+      "destination": "/api/product"
     }
   ]
 }
