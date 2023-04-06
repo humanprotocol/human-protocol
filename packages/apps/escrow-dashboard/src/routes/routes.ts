@@ -9,6 +9,7 @@ import {
   Main,
   Owner,
   Profile,
+  Staking,
 } from 'src/pages';
 
 interface Route {
@@ -66,5 +67,11 @@ export const routes: Array<Route> = [
     title: 'Faucet',
     path: '/faucet',
     component: Faucet,
+  },
+  {
+    key: 'staking-route',
+    title: 'Staking',
+    path: '/staking',
+    component: Staking,
   },
 ];
