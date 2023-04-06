@@ -43,5 +43,5 @@ interface IEscrow {
         string memory _url,
         string memory _hash,
         uint256 _txId
-    ) external returns (bool);
+    ) external;
 }

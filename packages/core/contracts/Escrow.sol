@@ -15,8 +15,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
         bytes4(keccak256('balanceOf(address)'));
-    bytes4 private constant FUNC_SELECTOR_TRANSFER =
-        bytes4(keccak256('transfer(address,uint256)'));
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
@@ -53,8 +51,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public finalResultsHash;
 
     uint256 public duration;
-
-    bool public bulkPaid;
 
     mapping(address => bool) public areTrustedHandlers;
 
@@ -186,6 +182,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit IntermediateStorage(_sender, _url, _hash);
     }
 
+    /**
+     * @dev Bulk payout workers
+     * Should fail if any of the transaction is failing.
+     */
     function bulkPayOut(
         address[] memory _recipients,
         uint256[] memory _amounts,
@@ -201,7 +201,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         notPaid
         notExpired
         nonReentrant
-        returns (bool)
     {
         require(
             _recipients.length == _amounts.length,
@@ -215,16 +214,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         uint256 balance = getBalance();
-        bulkPaid = false;
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
-
-        if (balance < aggregatedBulkAmount) {
-            return false;
-        }
+        require(aggregatedBulkAmount <= balance, 'Not enough balance');
 
         _storeResult(_url, _hash);
 
@@ -241,22 +236,18 @@ contract Escrow is IEscrow, ReentrancyGuard {
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        bulkPaid = true;
-
         balance = getBalance();
+
+        bool isPartial;
         if (balance == 0) {
             status = EscrowStatuses.Paid;
+            isPartial = false;
         } else {
             status = EscrowStatuses.Partial;
+            isPartial = true;
         }
 
-        emit BulkTransfer(
-            _txId,
-            _recipients,
-            finalAmounts,
-            status == EscrowStatuses.Partial
-        );
-        return true;
+        emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
     }
 
     function finalizePayouts(
