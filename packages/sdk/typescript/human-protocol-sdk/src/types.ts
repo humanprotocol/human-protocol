@@ -495,31 +495,31 @@ export type ProviderData = {
  * AWS/GCP cloud storage access data
  * @readonly
  */
-export type StorageAccessData = {
+export type StorageCredentials = {
   /**
-   * Access Key ID
+   * Access Key
    */
-  accessKeyId: string;
+  accessKey: string;
   /**
-   * Secret Access Key
+   * Secret Key
    */
-  secretAccessKey: string;
+  secretKey: string;
+  /**
+   * Request endPoint
+   */
+  endPoint: string;
   /**
    * Region
    */
   region?: string;
   /**
-   * Request endpoint
+   * TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
    */
-  endpoint?: string;
+  port?: number;
   /**
-   * Storage bucket (private)
+   * Enable secure (HTTPS) access. Default value set to false
    */
-  bucket: string;
-  /**
-   * Storage bucket (public)
-   */
-  publicBucket: string;
+  useSSL?: boolean;
 };
 
 /**
