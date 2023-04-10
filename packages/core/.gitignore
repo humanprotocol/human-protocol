@@ -1,7 +1,8 @@
 # Hardhat files
+abis
 cache
-artifacts/build-info
-artifacts/**/*.dbg.json
+artifacts
+typechain-types
 .deps
 
 # solidity-coverage directory and output file
