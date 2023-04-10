@@ -1,8 +1,16 @@
 {
-  "rewrites": [
-      {
-          "source": "/(.*)",
-          "destination": "/serverless.js"
-      }
+  "version": 2,
+  "installCommand": "yarn install --production=false && yarn workspace @human-protocol/core compile",
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts"
+    }
   ]
 }
