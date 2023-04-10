@@ -4,31 +4,29 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from human_protocol_sdk import crypto
-from human_protocol_sdk.storage import upload, download, download_from_storage
+from human_protocol_sdk.storage import get_s3_instance
 from test.human_protocol_sdk.utils import test_manifest
 
 ESCROW_TEST_BUCKETNAME = "test-escrow-results"
 ESCROW_TEST_PUBLIC_BUCKETNAME = "test-escrow-public-results"
 
-logging.getLogger("boto").setLevel(logging.INFO)
-logging.getLogger("botocore").setLevel(logging.INFO)
-logging.getLogger("boto3").setLevel(logging.INFO)
-
 
 class StorageTest(unittest.TestCase):
     bid_amount = 1.0  # value to be inserted in manifest
+
+    def setUp(self):
+        self.credentials = {
+            "gas_payer": DEFAULT_GAS_PAYER,
+            "gas_payer_priv": DEFAULT_GAS_PAYER_PRIV,
+        }
+        self.rep_oracle_pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
+        self.storage = get_s3_instance()
 
     def get_manifest(self) -> dict:
         """Retrieves manifest differing bid amount to bid amount to force unique state of the manifest"""
         manifest = test_manifest(bid_amount=self.bid_amount)
         self.bid_amount += 0.1
         return dict(manifest.serialize())
-
-    def setUp(self) -> None:
-        self.pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
-        self.priv_key = (
-            b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-        )
 
     @patch(
         "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",

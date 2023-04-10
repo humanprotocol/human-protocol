@@ -1,10 +1,6 @@
 import hashlib
 import json
-import logging
-import os
-import urllib.request
-import re
-from typing import Dict, Tuple, Optional, Union
+from typing import Optional
 
 import boto3
 from botocore import UNSIGNED
@@ -99,6 +95,39 @@ class StorageClient:
             self._boto3_client.upload_fileobj(data, bucket, key)
             result_files.push(key)
         return result_files
+
+    def bucket_exists(self, bucket: str) -> bool:
+        """Checks if a bucket exists.
+
+        Args:
+            bucket(str): Bucket name to check.
+
+        Returns:
+            isExists(bool): Returns true if bucket exists, false otherwise
+        """
+        try:
+            self._boto3_client.head_bucket(Bucket=bucket)
+            return True
+        except ClientError as e:
+            return False
+        except Exception as e:
+            raise e
+
+    def list_objects(self, bucket: str) -> list[str]:
+        """Lists all objects in a bucket.
+
+        Args:
+            bucket(str): Bucket name to list.
+
+        Returns:
+            filenames(list[str]): Returns a list of filenames with their extensions in the bucket.
+        """
+        try:
+            objs = self._boto3_client.list_objects_v2(Bucket=bucket)
+            ["Contents"]
+            return map(lambda obj: obj["Key"], objs)
+        except Exception as e:
+            raise e
 
 
 def get_s3_instance(credentials: Optional[Credentials] = None) -> StorageClient:
