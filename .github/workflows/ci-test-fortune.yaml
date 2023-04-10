@@ -18,5 +18,8 @@ jobs:
           node-version: 18
       - run: npm install --global yarn && yarn
         name: Install dependencies
+      - run: yarn compile
+        name: Compile smart contracts
+        working-directory: ./packages/core
       - run: yarn fortune:test
         name: Run fortune test
