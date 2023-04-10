@@ -4,6 +4,7 @@ import {
   bscTestnet,
   polygon,
   polygonMumbai,
+  mainnet,
   moonbeam,
   Chain,
   moonbaseAlpha,
@@ -81,7 +82,7 @@ export const ESCROW_NETWORKS: {
       'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v1',
-    wagmiChain: {} as Chain,
+    wagmiChain: mainnet,
     factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
     hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
     stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
