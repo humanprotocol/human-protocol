@@ -2,8 +2,10 @@
 abis
 cache
 artifacts
-typechain-types
 .deps
+
+# TypeScript bindings output directory
+typechain-types
 
 # solidity-coverage directory and output file
 coverage
