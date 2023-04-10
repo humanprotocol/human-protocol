@@ -26,6 +26,7 @@
     "start:prod": "ts-node build/src/index.js",
     "start": "NODE_ENV=development ts-node ./src/index.ts",
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8546\" \"sleep 5 && RPC_PORT=8546 yarn workspace @human-protocol/core deploy:local && RPC_PORT=8546 vitest run -u\"",
-    "lint": "eslint '**/*.ts'"
+    "lint": "eslint '**/*.ts'",
+    "vercel-build": "yarn workspace @human-protocol/core compile"
   }
 }

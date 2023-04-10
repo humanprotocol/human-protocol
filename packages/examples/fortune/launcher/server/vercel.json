@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "installCommand": "yarn install --production=false && yarn workspace @human-protocol/core compile"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
