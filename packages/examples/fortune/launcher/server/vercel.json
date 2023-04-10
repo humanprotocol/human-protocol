@@ -1,5 +1,3 @@
 {
-  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
-  "buildCommand": "yarn workspace @human-protocol/fortune-job-launcher-server build",
   "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
