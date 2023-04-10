@@ -4,6 +4,7 @@ import {
   bscTestnet,
   polygon,
   polygonMumbai,
+  mainnet,
   moonbeam,
   Chain,
   moonbaseAlpha,
@@ -38,6 +39,7 @@ export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
 };
 
 export const SUPPORTED_CHAIN_IDS = [
+  ChainId.MAINNET,
   ChainId.RINKEBY,
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
@@ -72,6 +74,23 @@ export const FAUCET_CHAIN_IDS = [
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: EscrowNetwork;
 } = {
+  [ChainId.MAINNET]: {
+    chainId: ChainId.MAINNET,
+    title: 'Ethereum',
+    scanUrl: 'https://etherscan.io',
+    rpcUrl:
+      'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v1',
+    wagmiChain: mainnet,
+    factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+    hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
+    stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   // TODO: Remove Rinkeby from supported chainlist
   [ChainId.RINKEBY]: {
     chainId: ChainId.RINKEBY,
