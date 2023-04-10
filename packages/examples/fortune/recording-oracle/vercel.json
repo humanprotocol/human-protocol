@@ -1,5 +1,15 @@
 {
-  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
-  "buildCommand": "yarn workspace @human-protocol/fortune-recording-oracle build",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts"
+    }
+  ]
 }
