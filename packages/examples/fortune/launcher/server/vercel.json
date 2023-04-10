@@ -1,10 +1,12 @@
 {
   "version": 2,
-  "installCommand": "yarn install --production=false && yarn workspace @human-protocol/core compile",
   "builds": [
     {
       "src": "src/index.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "installCommand": "yarn install --production=false && yarn workspace @human-protocol/core compile"
+      }
     }
   ],
   "routes": [
