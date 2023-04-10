@@ -19,6 +19,15 @@
 |2023/01/26                  | EthKVStore     | 0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807 | N/A                                        |
 |2023/01/26                  | Reputation     | 0x7B9f9Dc6c157899C1Eb1c6B86f94855cC2F537dF | 0xC522463d36f76b881bE66484e3068F11e7038Ace |
 
+|🟢 Ethereum (Mainnet)        | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2021/04/06                  | HMToken        | 0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867 | N/A                                        |
+|2023/03/28                  | EscrowFactory  | 0xe44D7eb960f24797D36FAdD8a8FfF29C76375Ef0 | 0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a |
+|2023/03/28                  | Staking        | 0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c | 0x05398211bA2046E296fBc9a9D3EB49e3F15C3123 |
+|2023/04/03                  | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0x4A5963Dd6792692e9147EdC7659936b96251917a |
+|2023/03/28                  | EthKVStore     | 0x70671167176C4934204B1C7e97F5e86695857ef2 | N/A                                        |
+|                            | Reputation     | N/A                                        | N/A                                        |
+
 |🟠 Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                  | HMToken        | 0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317 | N/A                                        |

@@ -29,6 +29,8 @@ jobs:
             graph: mumbai-v1
           - name: mbase
             graph: moonbase-alpha-v1
+          - name: mainnet
+            graph: mainnet-v1
           # - name: avalanche
           #   graph: avalanche
           # - name: fuji

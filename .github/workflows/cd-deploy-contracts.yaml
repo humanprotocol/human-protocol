@@ -71,6 +71,13 @@ jobs:
               reputation: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
               private_key: TESTNET_PRIVATE_KEY,
             },
+            {
+              name: mainnet,
+              escrow_factory: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+              staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
+              reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
+              private_key: MAINNET_PRIVATE_KEY,
+            }
             # {
             #   name: avalanche,
             #   escrow_factory,
@@ -107,6 +114,7 @@ jobs:
       ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
       ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
+      ETH_MAINNET_TESTNET_URL: ${{ secrets.ETH_MAINNET_TESTNET_URL }}
       # ETH_SKALE_URL: ${{ secrets.ETH_SKALE_URL }}
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
       POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}

@@ -66,6 +66,12 @@ const config: HardhatUserConfig = {
     tenderly: {
       url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
     },
+    mainnet: {
+      chainId: 1,
+      url: process.env.ETH_MAINNET_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     goerli: {
       chainId: 5,
       url: process.env.ETH_GOERLI_TESTNET_URL || '',
