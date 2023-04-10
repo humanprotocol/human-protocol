@@ -1,14 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
-  ]
+  "installCommand": "yarn install && yarn workspace @human-protocol/core compile",
+  "buildCommand": "yarn workspace @human-protocol/faucet-server build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
