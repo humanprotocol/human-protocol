@@ -1,56 +1,130 @@
 import crypto from 'crypto';
 import * as Minio from 'minio';
 
-import { UploadResult, Result, StorageCredentials } from './types';
+import {
+  UploadResult,
+  Result,
+  StorageCredentials,
+  StorageParams,
+} from './types';
 
-/**
- * **Get S3 instance**
- *
- * @param {StorageCredentials} storageCredentials - Cloud storage access data
- * @returns {Minio.Client} - Minio Client instance
- */
-const getS3Instance = (
-  storageCredentials: StorageCredentials
-): Minio.Client => {
-  const storageClient = new Minio.Client({
-    ...storageCredentials,
-    accessKey: storageCredentials.accessKey,
-    secretKey: storageCredentials.secretKey,
-    endPoint: storageCredentials.endPoint,
-  });
+class storageClient {
+  private client: Minio.Client;
 
-  return storageClient;
-};
+  /**
+   * **Storage client constructor**
+   *
+   * @param {StorageCredentials} credentials - Cloud storage access data
+   * @param {StorageParams} params - Cloud storage params
+   */
+  constructor(credentials: StorageCredentials, params: StorageParams) {
+    this.client = new Minio.Client({
+      ...params,
+      accessKey: credentials.accessKey,
+      secretKey: credentials.secretKey,
+    });
+  }
 
-/**
- * **Upload result to cloud storage**
- *
- * @param {StorageCredentials} storageCredentials - Cloud storage access data
- * @param {Result[]} results - Results to upload
- * @returns {Promise<UploadResult>} - Uploaded result with key/hash
- */
-export const uploadFiles = async (
-  storageCredentials: StorageCredentials,
-  files: Result[],
-  bucket: string
-): Promise<UploadResult[]> => {
-  return Promise.all(
-    files.map(async (file) => {
-      const storageClient = getS3Instance(storageCredentials);
+  /**
+   * **Download files from cloud storage**
+   *
+   * @param {string} keys - Keys of files
+   * @returns {Promise<Result>} - Downloaded result
+   */
+  public async downloadFiles(
+    keys: string[],
+    bucket: string
+  ): Promise<Result[]> {
+    const isbBucketExists = await this.client.bucketExists(bucket);
+    if (!isbBucketExists) {
+      throw new Error(`Bucket named ${bucket} does not exist.`);
+    }
 
-      const content = JSON.stringify(file);
+    return Promise.all(
+      keys.map(async (key) => {
+        try {
+          const response = await this.client.getObject(bucket, key);
+          const content = response?.read();
 
-      const hash = crypto.createHash('sha1').update(content).digest('hex');
-      const key = `s3${hash}`;
+          return { key, content: JSON.parse(content?.toString('utf-8') || '') };
+        } catch (e) {
+          throw new Error(String(e));
+        }
+      })
+    );
+  }
 
-      await storageClient.putObject(bucket, key, content, {
-        'Content-Type': 'application/json',
+  /**
+   * **Upload result to cloud storage**
+   *
+   * @param {Result[]} files - Files to upload
+   * @param {string} bucket - Bucket name
+   * @returns {Promise<UploadResult>} - Uploaded result with key/hash
+   */
+  public async uploadFiles(
+    files: Result[],
+    bucket: string
+  ): Promise<UploadResult[]> {
+    const isbBucketExists = await this.client.bucketExists(bucket);
+    if (!isbBucketExists) {
+      throw new Error(`Bucket named ${bucket} does not exist.`);
+    }
+
+    return Promise.all(
+      files.map(async (file) => {
+        const content = JSON.stringify(file);
+
+        const hash = crypto.createHash('sha1').update(content).digest('hex');
+        const key = `s3${hash}`;
+
+        try {
+          await this.client.putObject(bucket, key, content, {
+            'Content-Type': 'application/json',
+          });
+
+          return { key, hash };
+        } catch (e) {
+          throw new Error(String(e));
+        }
+      })
+    );
+  }
+
+  /**
+   * **Checks if a bucket exists**
+   *
+   * @param {string} bucket - Name of the bucket
+   * @returns {Promise<boolean>} - True if bucket exists, false otherwise
+   */
+  public async bucketExists(bucket: string): Promise<boolean> {
+    return this.client.bucketExists(bucket);
+  }
+
+  /**
+   * **Checks if a bucket exists**
+   *
+   * @param {string} bucket - Name of the bucket
+   * @returns {Promise<string[]>} - A list of filenames with their extensions in the bucket
+   */
+  public async listObjects(bucket: string): Promise<string[]> {
+    const isbBucketExists = await this.client.bucketExists(bucket);
+    if (!isbBucketExists) {
+      throw new Error(`Bucket named ${bucket} does not exist.`);
+    }
+
+    try {
+      return new Promise((resolve, reject) => {
+        const keys: string[] = [];
+        const stream = this.client.listObjectsV2(bucket, '', true, '');
+
+        stream.on('data', (obj) => keys.push(obj.name));
+        stream.on('error', reject);
+        stream.on('end', () => {
+          resolve(keys);
+        });
       });
-
-      return { key, hash };
-    })
-  );
-};
-
-//	bucketExists: boolean,
-//	listObjects: string[],
+    } catch (e) {
+      throw new Error(String(e));
+    }
+  }
+}

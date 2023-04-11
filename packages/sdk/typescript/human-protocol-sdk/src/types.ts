@@ -504,6 +504,9 @@ export type StorageCredentials = {
    * Secret Key
    */
   secretKey: string;
+};
+
+export type StorageParams = {
   /**
    * Request endPoint
    */
