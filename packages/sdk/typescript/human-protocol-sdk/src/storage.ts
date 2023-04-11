@@ -8,7 +8,7 @@ import {
   StorageParams,
 } from './types';
 
-class storageClient {
+export class StorageClient {
   private client: Minio.Client;
 
   /**
