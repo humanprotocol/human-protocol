@@ -11,6 +11,7 @@ import {
   Staking__factory,
   RewardPool,
   RewardPool__factory,
+  ERC1967Proxy__factory,
 } from '@human-protocol/core/typechain-types';
 
 /**
@@ -42,11 +43,20 @@ export const deployEscrowFactory = async (
   stakingAddr: string,
   signer?: ethers.Signer
 ): Promise<EscrowFactory> => {
-  const factory = new EscrowFactory__factory(signer);
+  const escrowFactoryFactory = new EscrowFactory__factory(signer);
+  const escrowFactoryImpl = await escrowFactoryFactory.deploy();
 
-  const contract = await factory.deploy();
-  await contract.initialize(stakingAddr);
+  const proxyFactory = new ERC1967Proxy__factory(signer);
+  const initEncoded = await escrowFactoryImpl.interface.encodeFunctionData(
+    'initialize',
+    [stakingAddr]
+  );
+  const proxy = await proxyFactory.deploy(
+    escrowFactoryImpl.address,
+    initEncoded
+  );
 
+  const contract = await escrowFactoryFactory.attach(proxy.address);
   return contract;
 };
 
@@ -101,10 +111,17 @@ export const deployStaking = async (
   lockPeriod: number,
   signer?: ethers.Signer
 ): Promise<Staking> => {
-  const staking = new Staking__factory(signer);
-  const contract = await staking.deploy();
-  await contract.initialize(hmTokenAddr, minimumStake, lockPeriod);
+  const stakingFactory = new Staking__factory(signer);
+  const stakingImpl = await stakingFactory.deploy();
 
+  const proxyFactory = new ERC1967Proxy__factory(signer);
+  const initEncoded = await stakingImpl.interface.encodeFunctionData(
+    'initialize',
+    [hmTokenAddr, minimumStake, lockPeriod]
+  );
+  const proxy = await proxyFactory.deploy(stakingImpl.address, initEncoded);
+
+  const contract = await stakingFactory.attach(proxy.address);
   return contract;
 };
 
@@ -141,10 +158,17 @@ export const deployRewardPool = async (
   fee: number,
   signer?: ethers.Signer
 ): Promise<RewardPool> => {
-  const rewardPool = new RewardPool__factory(signer);
-  const contract = await rewardPool.deploy();
-  await contract.initialize(hmTokenAddr, stakingAddr, fee);
+  const rewardPoolFactory = new RewardPool__factory(signer);
+  const rewardPoolImpl = await rewardPoolFactory.deploy();
 
+  const proxyFactory = new ERC1967Proxy__factory(signer);
+  const initEncoded = await rewardPoolImpl.interface.encodeFunctionData(
+    'initialize',
+    [hmTokenAddr, stakingAddr, fee]
+  );
+  const proxy = await proxyFactory.deploy(rewardPoolImpl.address, initEncoded);
+
+  const contract = await rewardPoolFactory.attach(proxy.address);
   return contract;
 };
 

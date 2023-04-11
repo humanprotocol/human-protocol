@@ -56,8 +56,7 @@ class Escrow {
         this.repOracleFee,
         this.recOracleFee,
         url,
-        url,
-        fortunesRequested
+        url
       )
       .estimateGas({ from: web3.eth.defaultAccount });
     const gasPrice = await web3.eth.getGasPrice();
@@ -68,8 +67,7 @@ class Escrow {
         this.repOracleFee,
         this.recOracleFee,
         url,
-        url,
-        fortunesRequested
+        url
       )
       .send({ from: web3.eth.defaultAccount, gas, gasPrice });
   }

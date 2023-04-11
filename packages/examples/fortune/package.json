@@ -20,7 +20,7 @@
     "test:launcher-server": "yarn workspace @human-protocol/fortune-job-launcher-server test",
     "test:launcher-client": "yarn workspace @human-protocol/fortune-job-launcher-client test",
     "test:e2e:backend": "(concurrently -k -s first -g --hide 0 \"yarn start:backend\" \"sleep 5 && yarn deploy:contracts && jest tests/e2e-backend --runInBand\") && docker compose down",
-    "test:unit": "(concurrently -g \"yarn test:exchange-oracle\" \"yarn test:recording-oracle\" \"yarn test:reputation-oracle\" \"yarn test:launcher-server\" \"yarn test:launcher-client\") && docker compose down",
+    "test:unit": "yarn test:exchange-oracle && yarn test:recording-oracle && yarn test:reputation-oracle && yarn test:launcher-server && yarn test:launcher-client && docker compose down",
     "test": "concurrently -g \"yarn start:minio\" \"yarn test:unit\"",
     "lint:exchange-oracle": "yarn workspace @human-protocol/fortune-exchange-oracle lint",
     "lint:recording-oracle": "yarn workspace @human-protocol/fortune-recording-oracle lint",
@@ -30,7 +30,7 @@
     "lint": "concurrently -g \"yarn lint:exchange-oracle\" \"yarn lint:recording-oracle\" \"yarn lint:reputation-oracle\" \"yarn lint:launcher-server\" \"yarn lint:launcher-client\""
   },
   "devDependencies": {
-    "@human-protocol/core": "workspace:*",
+    "@human-protocol/core": "*",
     "axios": "^1.1.3",
     "hardhat": "^2.12.2",
     "web3": "^1.8.0"

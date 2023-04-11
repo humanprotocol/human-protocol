@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eux
 
-rm -rf contracts
+rm -rf artifacts
 yarn workspace @human-protocol/core compile
-cp -r ../../../core/artifacts/contracts .
+cp -r ../../../core/artifacts .
