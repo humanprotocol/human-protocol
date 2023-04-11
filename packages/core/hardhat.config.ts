@@ -13,6 +13,7 @@ import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-dependency-compiler';
 
 dotenv.config();
 
@@ -183,6 +184,9 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 200000,
+  },
+  dependencyCompiler: {
+    paths: ['@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'],
   },
 };
 

@@ -13,6 +13,7 @@ dist
 *.egg-info
 
 # ABIs
+artifacts
 contracts
 
 # Minio Data

@@ -99,8 +99,7 @@ const setupEscrow = async (
         reoOracleStake || stakes.repOracle,
         recOracleStake || stakes.recOracle,
         urls.manifestUrl,
-        urls.manifestUrl,
-        fortunesRequested
+        urls.manifestUrl
       )
       .send({ from: launcher, gasLimit });
   } catch (err) {
