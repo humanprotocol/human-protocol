@@ -1,6 +1,8 @@
 import hashlib
 import io
 import json
+import os
+import logging
 from typing import Optional, List
 
 import boto3
@@ -8,7 +10,13 @@ from botocore import UNSIGNED
 from botocore.client import Config
 from botocore.exceptions import ClientError
 
-from human_protocol_sdk import crypto
+logging.getLogger("boto").setLevel(logging.INFO)
+logging.getLogger("botocore").setLevel(logging.INFO)
+logging.getLogger("boto3").setLevel(logging.INFO)
+
+DEBUG = "true" in os.getenv("DEBUG", "false").lower()
+LOG = logging.getLogger("human_protocol_sdk.storage")
+LOG.setLevel(logging.DEBUG if DEBUG else logging.INFO)
 
 
 class StorageClientError(Exception):
@@ -109,6 +117,7 @@ class StorageClient:
                 )  # authenticated access
             )
         except Exception as e:
+            LOG.error(f"Connection with S3 failed because of: {e}")
             raise e
 
     def download_files(self, files: List[str], bucket: str) -> List:
@@ -136,6 +145,9 @@ class StorageClient:
                     raise StorageFileNotFoundError("No object found - returning empty")
                 raise StorageClientError(str(e))
             except Exception as e:
+                LOG.warning(
+                    f"Reading the key {file} with S3 failed" f" because of: {str(e)}"
+                )
                 raise StorageClientError(str(e))
         return result_files
 
@@ -158,6 +170,7 @@ class StorageClient:
             try:
                 artifact = json.dumps(file, sort_keys=True)
             except Exception as e:
+                LOG.error("Can't extract the json from the object")
                 raise e
 
             data = artifact.encode("utf-8")
@@ -177,6 +190,9 @@ class StorageClient:
                 else:
                     raise StorageClientError(str(e))
             except Exception as e:
+                LOG.warning(
+                    f"Reading the key {key} in S3 failed" f" because of: {str(e)}"
+                )
                 raise StorageClientError(str(e))
 
             if etag is None:
@@ -184,6 +200,7 @@ class StorageClient:
                 try:
                     self.client.upload_fileobj(io.BytesIO(data), bucket, key)
                     result_files.append(key)
+                    LOG.debug(f"Uploaded to S3, key: {key}")
                 except ClientError as e:
                     raise StorageClientError(str(e))
 
@@ -208,6 +225,9 @@ class StorageClient:
         except ClientError as e:
             return False
         except Exception as e:
+            LOG.warning(
+                f"Checking the bucket {bucket} in S3 failed" f" because of: {str(e)}"
+            )
             raise StorageClientError(str(e))
 
     def list_objects(self, bucket: str) -> List[str]:
@@ -230,4 +250,5 @@ class StorageClient:
             else:
                 return []
         except Exception as e:
+            LOG.warning(f"Listing objects in S3 failed because of: {str(e)}")
             raise StorageClientError(str(e))
