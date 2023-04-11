@@ -1,3 +1,5 @@
+import hashlib
+import json
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -13,7 +15,9 @@ from human_protocol_sdk.storage import (
 
 class TestCredentials(unittest.TestCase):
     def test_credentials(self):
-        credentials = Credentials(access_key="my-access-key", secret_key="my-secret-key")
+        credentials = Credentials(
+            access_key="my-access-key", secret_key="my-secret-key"
+        )
         self.assertEqual(credentials.access_key, "my-access-key")
         self.assertEqual(credentials.secret_key, "my-secret-key")
 
@@ -25,7 +29,9 @@ class TestStorageClient(unittest.TestCase):
         cls.bucket = "my-bucket"
         cls.files = ["file1.txt", "file2.txt"]
         cls.region = "us-west-2"
-        cls.credentials = Credentials(access_key="my-access-key", secret_key="my-secret-key")
+        cls.credentials = Credentials(
+            access_key="my-access-key", secret_key="my-secret-key"
+        )
 
     def setUp(self):
         self.client = StorageClient(
@@ -37,7 +43,9 @@ class TestStorageClient(unittest.TestCase):
     def test_init_authenticated_access(self):
         with patch("boto3.client") as mock_client:
             client = StorageClient(
-                endpoint_url=self.endpoint_url, region=self.region, credentials=self.credentials
+                endpoint_url=self.endpoint_url,
+                region=self.region,
+                credentials=self.credentials,
             )
             mock_client.assert_called_once_with(
                 "s3",
@@ -86,6 +94,110 @@ class TestStorageClient(unittest.TestCase):
             self.client.download_files(files=self.files, bucket=self.bucket)
 
     def test_download_files_exception(self):
-        self.client.client.get_object = MagicMock(side_effect=Exception("Connection error"))
+        self.client.client.get_object = MagicMock(
+            side_effect=Exception("Connection error")
+        )
         with self.assertRaises(StorageClientError):
             self.client.download_files(files=self.files, bucket=self.bucket)
+
+    def test_upload_files(self):
+        file3 = "file3 content"
+        hash_ = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{hash_}"
+
+        self.client.client.head_object = MagicMock(
+            side_effect=ClientError(
+                {"Error": {"Code": "404", "Message": "Key not found"}},
+                "HeadObject",
+            )
+        )
+        self.client.client.upload_fileobj = MagicMock()
+        result = self.client.upload_files(files=[file3], bucket=self.bucket)
+        self.assertEqual(result, [key3])
+
+    def test_upload_files_exist(self):
+        file3 = "file3 content"
+        hash_ = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{hash_}"
+
+        self.client.client.head_object = MagicMock(side_effect=[{"ETag": "1234567890"}])
+        self.client.client.upload_fileobj = MagicMock()
+        result = self.client.upload_files(files=[file3], bucket=self.bucket)
+        self.assertEqual(result, [key3])
+
+    def test_upload_files_error(self):
+        file3 = "file3 content"
+
+        # HeadObject error
+        self.client.client.head_object = MagicMock(
+            side_effect=ClientError(
+                {"Error": {"Code": "InvalidAccessKeyId", "Message": "Access denied"}},
+                "HeadObject",
+            )
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.upload_files(files=[file3], bucket=self.bucket)
+
+        # PutObject error
+        self.client.client.head_object = MagicMock(
+            side_effect=ClientError(
+                {"Error": {"Code": "404", "Message": "Key not found"}},
+                "HeadObject",
+            )
+        )
+        self.client.client.upload_fileobj = MagicMock(
+            side_effect=ClientError(
+                {"Error": {"Code": "InvalidAccessKeyId", "Message": "Access denied"}},
+                "HeadObject",
+            )
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.upload_files(files=[file3], bucket=self.bucket)
+
+    def test_bucket_exists(self):
+        self.client.client.head_bucket = MagicMock(side_effect="OK")
+        result = self.client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, True)
+
+    def test_bucket_not_exists(self):
+        self.client.client.head_bucket = MagicMock(
+            side_effect=ClientError(
+                {"Error": {"Code": "NoSuchKey", "Message": "Key not found"}},
+                "GetObject",
+            )
+        )
+        result = self.client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, False)
+
+    def test_bucket_error(self):
+        self.client.client.head_bucket = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.bucket_exists(bucket=self.bucket)
+
+    def test_list_objects(self):
+        self.client.client.list_objects_v2 = MagicMock(
+            side_effect=[
+                {
+                    "Contents": [
+                        {"Key": "file1"},
+                        {"Key": "file2"},
+                    ]
+                }
+            ]
+        )
+        result = self.client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, ["file1", "file2"])
+
+    def test_list_objects_empty(self):
+        self.client.client.list_objects_v2 = MagicMock(side_effect=["OK"])
+        result = self.client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, [])
+
+    def test_list_objects_error(self):
+        self.client.client.head_bucket = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.list_objects(bucket=self.bucket)
