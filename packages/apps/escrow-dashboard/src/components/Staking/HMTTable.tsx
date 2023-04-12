@@ -110,25 +110,21 @@ interface HeadCell {
   disablePadding: boolean;
   id: keyof Data;
   label: string;
-  numeric: boolean;
 }
 
 const headCells: readonly HeadCell[] = [
   {
     id: 'amount',
-    numeric: false,
     disablePadding: false,
     label: 'Amount Allocated',
   },
   {
     id: 'role',
-    numeric: false,
     disablePadding: false,
     label: 'Role',
   },
   {
     id: 'escrowAddress',
-    numeric: false,
     disablePadding: false,
     label: 'Escrow',
   },
@@ -160,7 +156,6 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -269,7 +264,9 @@ export const HMTTable = () => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
+      <Paper
+        sx={{ width: '100%', mb: 2, borderRadius: '8px', boxShadow: 'none' }}
+      >
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -295,8 +292,8 @@ export const HMTTable = () => {
                         <TableCell component="th" scope="row">
                           {row.amount} HMT
                         </TableCell>
-                        <TableCell align="right">{row.role}</TableCell>
-                        <TableCell align="right">{row.escrowAddress}</TableCell>
+                        <TableCell>{row.role}</TableCell>
+                        <TableCell>{row.escrowAddress}</TableCell>
                       </TableRow>
                     );
                   })
