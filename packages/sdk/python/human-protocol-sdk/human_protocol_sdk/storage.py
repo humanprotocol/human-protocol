@@ -5,10 +5,7 @@ import os
 import logging
 from typing import Optional, List
 
-import boto3
-from botocore import UNSIGNED
-from botocore.client import Config
-from botocore.exceptions import ClientError
+from minio import Minio
 
 logging.getLogger("boto").setLevel(logging.INFO)
 logging.getLogger("botocore").setLevel(logging.INFO)
@@ -101,19 +98,17 @@ class StorageClient:
         """
         try:
             self.client = (
-                boto3.client(
-                    "s3",
-                    region_name=region,
-                    endpoint_url=endpoint_url,
-                    config=Config(signature_version=UNSIGNED),
+                Minio(
+                    region=region,
+                    endpoint=endpoint_url,
                 )  # anonymous access
                 if credentials is None
-                else boto3.client(
-                    "s3",
-                    aws_access_key_id=credentials.access_key,
-                    aws_secret_access_key=credentials.secret_key,
-                    region_name=region,
-                    endpoint_url=endpoint_url,
+                else Minio(
+                    access_key=credentials.access_key,
+                    secret_key=credentials.secret_key,
+                    region=region,
+                    endpoint=endpoint_url,
+                    secure=False,
                 )  # authenticated access
             )
         except Exception as e:
@@ -220,10 +215,7 @@ class StorageClient:
             StorageClientError: If an error occurs while checking the bucket.
         """
         try:
-            self.client.head_bucket(Bucket=bucket)
-            return True
-        except ClientError as e:
-            return False
+            return self.client.bucket_exists(bucket_name=bucket)
         except Exception as e:
             LOG.warning(
                 f"Checking the bucket {bucket} in S3 failed" f" because of: {str(e)}"
@@ -244,9 +236,9 @@ class StorageClient:
             StorageClientError: If an error occurs while listing the objects.
         """
         try:
-            response = self.client.list_objects_v2(Bucket=bucket)
-            if "Contents" in response:
-                return [obj["Key"] for obj in response["Contents"]]
+            objects = list(self.client.list_objects(bucket_name=bucket))
+            if objects:
+                return [obj["_object_name"] for obj in objects]
             else:
                 return []
         except Exception as e:
