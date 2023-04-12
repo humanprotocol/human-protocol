@@ -3,6 +3,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 
+from botocore import UNSIGNED
 from botocore.exceptions import ClientError
 
 from human_protocol_sdk.storage import (
@@ -56,7 +57,38 @@ class TestStorageClient(unittest.TestCase):
             )
             self.assertIsNotNone(client.client)
 
+    def test_init_anonymous_access(self):
+        with patch("boto3.client") as mock_client:
+            client = StorageClient(
+                endpoint_url=self.endpoint_url,
+            )
+            mock_client.assert_called_once()
+            self.assertEqual(mock_client.call_args_list[0].args[0], "s3")
+            self.assertEqual(mock_client.call_args_list[0].kwargs["region_name"], None)
+            self.assertEqual(
+                mock_client.call_args_list[0].kwargs["endpoint_url"], self.endpoint_url
+            )
+            self.assertEqual(
+                mock_client.call_args_list[0].kwargs["config"].signature_version,
+                UNSIGNED,
+            )
+            self.assertIsNotNone(client.client)
+
     def test_init_error(self):
+        # Endpoint URL error
+        with self.assertRaises(ValueError):
+            StorageClient(
+                endpoint_url="test",
+            )
+
+        # Region error
+        with self.assertRaises(TypeError):
+            StorageClient(
+                endpoint_url=self.endpoint_url,
+                region={"test"},
+            )
+
+        # Connection error
         with patch("boto3.client") as mock_client:
             mock_client.side_effect = Exception("Connection error")
             with self.assertRaises(Exception):
@@ -83,7 +115,7 @@ class TestStorageClient(unittest.TestCase):
         with self.assertRaises(StorageFileNotFoundError):
             self.client.download_files(files=self.files, bucket=self.bucket)
 
-    def test_download_files_client_error(self):
+    def test_download_files_anonymous_error(self):
         self.client.client.get_object = MagicMock(
             side_effect=ClientError(
                 {"Error": {"Code": "InvalidAccessKeyId", "Message": "Access denied"}},
@@ -139,12 +171,6 @@ class TestStorageClient(unittest.TestCase):
             self.client.upload_files(files=[file3], bucket=self.bucket)
 
         # PutObject error
-        self.client.client.head_object = MagicMock(
-            side_effect=ClientError(
-                {"Error": {"Code": "404", "Message": "Key not found"}},
-                "HeadObject",
-            )
-        )
         self.client.client.upload_fileobj = MagicMock(
             side_effect=ClientError(
                 {"Error": {"Code": "InvalidAccessKeyId", "Message": "Access denied"}},
@@ -157,6 +183,14 @@ class TestStorageClient(unittest.TestCase):
     def test_bucket_exists(self):
         self.client.client.head_bucket = MagicMock(side_effect="OK")
         result = self.client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, True)
+
+    def test_bucket_exists_anonymous(self):
+        client = StorageClient(
+            endpoint_url=self.endpoint_url,
+        )
+        client.client.head_bucket = MagicMock(side_effect="OK")
+        result = client.bucket_exists(bucket=self.bucket)
         self.assertEqual(result, True)
 
     def test_bucket_not_exists(self):
@@ -188,6 +222,23 @@ class TestStorageClient(unittest.TestCase):
             ]
         )
         result = self.client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, ["file1", "file2"])
+
+    def test_list_objects_anonymous(self):
+        client = StorageClient(
+            endpoint_url=self.endpoint_url,
+        )
+        client.client.list_objects_v2 = MagicMock(
+            side_effect=[
+                {
+                    "Contents": [
+                        {"Key": "file1"},
+                        {"Key": "file2"},
+                    ]
+                }
+            ]
+        )
+        result = client.list_objects(bucket=self.bucket)
         self.assertEqual(result, ["file1", "file2"])
 
     def test_list_objects_empty(self):
