@@ -512,6 +512,10 @@ export type StorageParams = {
    */
   endPoint: string;
   /**
+   * Enable secure (HTTPS) access. Default value set to false
+   */
+  useSSL: boolean;
+  /**
    * Region
    */
   region?: string;
@@ -519,10 +523,6 @@ export type StorageParams = {
    * TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
    */
   port?: number;
-  /**
-   * Enable secure (HTTPS) access. Default value set to false
-   */
-  useSSL?: boolean;
 };
 
 /**
@@ -653,17 +653,25 @@ export type JobArguments = {
    */
   manifest?: Manifest;
   /**
-   * AWS/GCP Access Key ID
+   * AWS/GCP Access Key
    */
-  storageAccessKeyId?: string;
+  storageAccessKey?: string;
   /**
-   * AWS/GCP Secret Access Key
+   * AWS/GCP Secret Key
    */
-  storageSecretAccessKey?: string;
+  storageSecretKey?: string;
   /**
    * AWS/GCP bucket endpoint
    */
   storageEndpoint?: string;
+  /**
+   * AWS/GCP port
+   */
+  storagePort?: number;
+  /**
+   * AWS/GCP use ssl
+   */
+  storageUseSSL?: boolean;
   /**
    * AWS/GCP public bucket name
    */

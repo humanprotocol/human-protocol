@@ -1,6 +1,14 @@
-import { getPublicURL } from './../src/storage';
-import { EscrowStatus, Job } from '../src';
-import { upload } from '../src/storage';
+import {
+  DEFAULT_ENDPOINT,
+  DEFAULT_PORT,
+  DEFAULT_PUBLIC_BUCKET,
+  DEFAULT_USE_SSL,
+  EscrowStatus,
+  Job,
+  StorageCredentials,
+  StorageParams,
+} from '../src';
+import StorageClient from '../src/storage';
 import { toFullDigit } from '../src/utils';
 import {
   DEFAULT_GAS_PAYER_ADDR,
@@ -18,17 +26,19 @@ import {
 } from './utils/constants';
 import { manifest } from './utils/manifest';
 
-jest.mock('../src/storage', () => ({
-  ...jest.requireActual('../src/storage'),
-  upload: jest.fn().mockResolvedValue({
-    key: 'uploaded-key',
-    hash: 'uploaded-hash',
-  }),
-  download: jest.fn().mockResolvedValue({
-    results: 0,
-  }),
-  getPublicURL: jest.fn().mockResolvedValue('public-url'),
-}));
+jest.mock('../src/storage', function () {
+  const { default: mockStorageClient } = jest.requireActual('../src/storage');
+
+  mockStorageClient.prototype.uploadFiles = function () {
+    return [{ key: 'uploaded-key', hash: 'uploaded-hash' }];
+  };
+
+  mockStorageClient.prototype.downloadFiles = function () {
+    return [{ key: 'value', content: 'content' }];
+  };
+
+  return mockStorageClient;
+});
 
 const setupJob = async (job: Job) => {
   await job.initialize();
@@ -40,6 +50,19 @@ describe('Test Job', () => {
   describe('New job', () => {
     let job: Job;
 
+    const storageCredentials: StorageCredentials = {
+      accessKey: '',
+      secretKey: '',
+    };
+
+    const storageParams: StorageParams = {
+      endPoint: DEFAULT_ENDPOINT,
+      port: DEFAULT_PORT,
+      useSSL: DEFAULT_USE_SSL,
+    };
+
+    const storageClient = new StorageClient(storageCredentials, storageParams);
+
     beforeEach(() => {
       job = new Job({
         gasPayer: DEFAULT_GAS_PAYER_PRIVKEY,
@@ -48,6 +71,7 @@ describe('Test Job', () => {
         hmTokenAddr: DEFAULT_HMTOKEN_ADDR,
         stakingAddr: DEFAULT_STAKING_ADDR,
         logLevel: 'debug',
+        storageBucket: DEFAULT_PUBLIC_BUCKET,
       });
     });
 
@@ -169,14 +193,9 @@ describe('Test Job', () => {
         true
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        true,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should not encrypt result, when bulk paying out workers', async () => {
@@ -195,14 +214,9 @@ describe('Test Job', () => {
         false
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should store result in private storage, when bulk paying out workers', async () => {
@@ -222,14 +236,9 @@ describe('Test Job', () => {
         false
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should store result in public storage, when bulk paying out workers', async () => {
@@ -249,21 +258,15 @@ describe('Test Job', () => {
         true
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        true
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
-      expect(getPublicURL).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should return final result', async () => {
       await setupJob(job);
 
-      const finalResults = { results: 0 };
+      const finalResults = { key: 'value', content: 'content' };
       await job.bulkPayout(
         [
           {
@@ -445,6 +448,19 @@ describe('Test Job', () => {
   describe('Access existing job from trusted handler', () => {
     let job: Job;
 
+    const storageCredentials: StorageCredentials = {
+      accessKey: '',
+      secretKey: '',
+    };
+
+    const storageParams: StorageParams = {
+      endPoint: DEFAULT_ENDPOINT,
+      port: DEFAULT_PORT,
+      useSSL: false,
+    };
+
+    const storageClient = new StorageClient(storageCredentials, storageParams);
+
     beforeEach(async () => {
       const originalJob = new Job({
         gasPayer: DEFAULT_GAS_PAYER_PRIVKEY,
@@ -588,14 +604,9 @@ describe('Test Job', () => {
         true
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        true,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should not encrypt result, when bulk paying out workers', async () => {
@@ -614,14 +625,9 @@ describe('Test Job', () => {
         false
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should store result in private storage, when bulk paying out workers', async () => {
@@ -641,14 +647,9 @@ describe('Test Job', () => {
         false
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        false
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should store result in public storage, when bulk paying out workers', async () => {
@@ -668,21 +669,15 @@ describe('Test Job', () => {
         true
       );
 
-      expect(upload).toHaveBeenCalledWith(
-        job.storageAccessData,
-        finalResults,
-        job.providerData?.reputationOracle?.publicKey,
-        false,
-        true
-      );
-      expect(upload).toHaveBeenCalledTimes(1);
-      expect(getPublicURL).toHaveBeenCalledTimes(1);
+      expect(
+        storageClient.uploadFiles([finalResults], DEFAULT_PUBLIC_BUCKET)
+      ).toEqual([{ key: 'uploaded-key', hash: 'uploaded-hash' }]);
     });
 
     it('Should return final result', async () => {
       await job.initialize();
 
-      const finalResults = { results: 0 };
+      const finalResults = { key: 'value', content: 'content' };
       await job.bulkPayout(
         [
           {

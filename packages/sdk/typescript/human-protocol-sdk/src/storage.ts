@@ -1,6 +1,11 @@
 import crypto from 'crypto';
 import * as Minio from 'minio';
-
+import { DEFAULT_FILENAME_PREFIX } from './constants';
+import {
+  ErrorStorageBucketNotFound,
+  ErrorStorageFileNotFound,
+  ErrorStorageFileNotUploaded,
+} from './error';
 import {
   UploadResult,
   Result,
@@ -8,7 +13,7 @@ import {
   StorageParams,
 } from './types';
 
-export class StorageClient {
+export default class StorageClient {
   private client: Minio.Client;
 
   /**
@@ -37,7 +42,7 @@ export class StorageClient {
   ): Promise<Result[]> {
     const isbBucketExists = await this.client.bucketExists(bucket);
     if (!isbBucketExists) {
-      throw new Error(`Bucket named ${bucket} does not exist.`);
+      throw ErrorStorageBucketNotFound;
     }
 
     return Promise.all(
@@ -48,7 +53,7 @@ export class StorageClient {
 
           return { key, content: JSON.parse(content?.toString('utf-8') || '') };
         } catch (e) {
-          throw new Error(String(e));
+          throw ErrorStorageFileNotFound;
         }
       })
     );
@@ -67,7 +72,7 @@ export class StorageClient {
   ): Promise<UploadResult[]> {
     const isbBucketExists = await this.client.bucketExists(bucket);
     if (!isbBucketExists) {
-      throw new Error(`Bucket named ${bucket} does not exist.`);
+      throw ErrorStorageBucketNotFound;
     }
 
     return Promise.all(
@@ -75,7 +80,7 @@ export class StorageClient {
         const content = JSON.stringify(file);
 
         const hash = crypto.createHash('sha1').update(content).digest('hex');
-        const key = `s3${hash}`;
+        const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
 
         try {
           await this.client.putObject(bucket, key, content, {
@@ -84,7 +89,7 @@ export class StorageClient {
 
           return { key, hash };
         } catch (e) {
-          throw new Error(String(e));
+          throw ErrorStorageFileNotUploaded;
         }
       })
     );
@@ -109,7 +114,7 @@ export class StorageClient {
   public async listObjects(bucket: string): Promise<string[]> {
     const isbBucketExists = await this.client.bucketExists(bucket);
     if (!isbBucketExists) {
-      throw new Error(`Bucket named ${bucket} does not exist.`);
+      throw ErrorStorageBucketNotFound;
     }
 
     try {
