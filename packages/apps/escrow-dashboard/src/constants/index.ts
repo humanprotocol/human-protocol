@@ -39,7 +39,7 @@ export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
 };
 
 export const SUPPORTED_CHAIN_IDS = [
-  // ChainId.MAINNET,
+  ChainId.MAINNET,
   ChainId.RINKEBY,
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
