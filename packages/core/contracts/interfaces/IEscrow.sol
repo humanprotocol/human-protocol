@@ -22,8 +22,7 @@ interface IEscrow {
         uint256 _reputationOracleStake,
         uint256 _recordingOracleStake,
         string memory _url,
-        string memory _hash,
-        uint256 _solutionsRequested
+        string memory _hash
     ) external;
 
     function abort() external;
@@ -44,5 +43,5 @@ interface IEscrow {
         string memory _url,
         string memory _hash,
         uint256 _txId
-    ) external returns (bool);
+    ) external;
 }

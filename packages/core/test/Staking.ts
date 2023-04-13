@@ -687,6 +687,27 @@ describe('Staking', function () {
         ).to.be.revertedWith('Must be a valid address');
       });
 
+      it('Should revert if slash amount exceeds allocation', async function () {
+        await staking
+          .connect(owner)
+          .slash(
+            await validator.getAddress(),
+            await operator.getAddress(),
+            escrowAddress,
+            slashedTokens
+          );
+
+        await expect(
+          staking
+            .connect(owner)
+            .slash(
+              await validator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              allocatedTokens
+            )
+        ).to.be.revertedWith('Slash tokens exceed allocated ones');
+      });
       // TODO: Add additional tests
     });
 
