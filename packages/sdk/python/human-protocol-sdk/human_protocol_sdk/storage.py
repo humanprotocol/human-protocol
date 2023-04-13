@@ -7,9 +7,7 @@ from typing import Optional, List
 
 from minio import Minio
 
-logging.getLogger("boto").setLevel(logging.INFO)
-logging.getLogger("botocore").setLevel(logging.INFO)
-logging.getLogger("boto3").setLevel(logging.INFO)
+logging.getLogger("minio").setLevel(logging.INFO)
 
 DEBUG = "true" in os.getenv("DEBUG", "false").lower()
 LOG = logging.getLogger("human_protocol_sdk.storage")
@@ -65,9 +63,10 @@ class StorageClient:
         region (Optional[str]): The region of the S3-compatible service. Defaults to None.
         credentials (Optional[Credentials]): The credentials required to authenticate with the S3-compatible service.
                                              Defaults to None for anonymous access.
+        secure (Optional[bool]): Flag to indicate to use secure (TLS) connection to S3 service or not. Defaults to True.
 
     Attributes:
-        client (boto3.client): The S3-compatible client used for interacting with the service.
+        client (Minio): The S3-compatible client used for interacting with the service.
 
     Example:
         # Download a list of files from an S3-compatible service
@@ -84,6 +83,7 @@ class StorageClient:
         endpoint_url: str,
         region: Optional[str] = None,
         credentials: Optional[Credentials] = None,
+        secure: Optional[bool] = True,
     ):
         """
         Initializes the StorageClient with the given endpoint_url, region, and credentials.
@@ -95,12 +95,14 @@ class StorageClient:
             region (Optional[str]): The region of the S3-compatible service. Defaults to None.
             credentials (Optional[Credentials]): The credentials required to authenticate with the S3-compatible service.
                                                  Defaults to None for anonymous access.
+            secure (Optional[bool]): Flag to indicate to use secure (TLS) connection to S3 service or not. Defaults to True.
         """
         try:
             self.client = (
                 Minio(
                     region=region,
                     endpoint=endpoint_url,
+                    secure=secure,
                 )  # anonymous access
                 if credentials is None
                 else Minio(
@@ -108,7 +110,7 @@ class StorageClient:
                     secret_key=credentials.secret_key,
                     region=region,
                     endpoint=endpoint_url,
-                    secure=False,
+                    secure=secure,
                 )  # authenticated access
             )
         except Exception as e:
@@ -133,13 +135,11 @@ class StorageClient:
         result_files = []
         for file in files:
             try:
-                response = self.client.get_object(Bucket=bucket, Key=file)
-                result_files.append(response["Body"].read())
-            except ClientError as e:
-                if e.response["Error"]["Code"] == "NoSuchKey":
-                    raise StorageFileNotFoundError("No object found - returning empty")
-                raise StorageClientError(str(e))
+                response = self.client.get_object(bucket_name=bucket, object_name=file)
+                result_files.append(response.read())
             except Exception as e:
+                if hasattr(e, "code") and str(e.code) == "NoSuchKey":
+                    raise StorageFileNotFoundError("No object found - returning empty")
                 LOG.warning(
                     f"Reading the key {file} with S3 failed" f" because of: {str(e)}"
                 )
@@ -170,33 +170,37 @@ class StorageClient:
 
             data = artifact.encode("utf-8")
             hash_ = hashlib.sha1(data).hexdigest()
-            key = f"s3{hash_}"
-            etag = None
+            key = f"s3{hash_}.json"
+            file_exist = None
 
             try:
                 # check if file with same hash already exists in bucket
-                response = self.client.head_object(Bucket=bucket, Key=key)
-                etag = response["ETag"].strip('"')
+                file_exist = self.client.stat_object(
+                    bucket_name=bucket, object_name=key
+                )
                 result_files.append(key)
-            except ClientError as e:
-                if e.response["Error"]["Code"] == "404":
+            except Exception as e:
+                if e.code == "NoSuchKey":
                     # file does not exist in bucket, so upload it
                     pass
                 else:
+                    LOG.warning(
+                        f"Reading the key {key} in S3 failed" f" because of: {str(e)}"
+                    )
                     raise StorageClientError(str(e))
-            except Exception as e:
-                LOG.warning(
-                    f"Reading the key {key} in S3 failed" f" because of: {str(e)}"
-                )
-                raise StorageClientError(str(e))
 
-            if etag is None:
+            if not file_exist:
                 # file does not exist in bucket, so upload it
                 try:
-                    self.client.upload_fileobj(io.BytesIO(data), bucket, key)
+                    self.client.put_object(
+                        bucket_name=bucket,
+                        object_name=key,
+                        data=io.BytesIO(data),
+                        length=len(data),
+                    )
                     result_files.append(key)
                     LOG.debug(f"Uploaded to S3, key: {key}")
-                except ClientError as e:
+                except Exception as e:
                     raise StorageClientError(str(e))
 
         return result_files
@@ -238,7 +242,7 @@ class StorageClient:
         try:
             objects = list(self.client.list_objects(bucket_name=bucket))
             if objects:
-                return [obj["_object_name"] for obj in objects]
+                return [obj._object_name for obj in objects]
             else:
                 return []
         except Exception as e:
