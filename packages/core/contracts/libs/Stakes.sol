@@ -29,15 +29,6 @@ library Stakes {
     }
 
     /**
-     * @dev Withdraw tokens from the staker stake.
-     * @param stake Staker struct
-     * @param _tokens Amount of tokens to withdraw
-     */
-    function withdraw(Stakes.Staker storage stake, uint256 _tokens) internal {
-        stake.tokensStaked = stake.tokensStaked.sub(_tokens);
-    }
-
-    /**
      * @dev Release tokens from the staker stake.
      * @param stake Staker struct
      * @param _tokens Amount of tokens to release
@@ -117,7 +108,7 @@ library Stakes {
 
         if (tokensToWithdraw > 0) {
             stake.unlockTokens(tokensToWithdraw);
-            stake.withdraw(tokensToWithdraw);
+            stake.release(tokensToWithdraw);
         }
 
         return tokensToWithdraw;
