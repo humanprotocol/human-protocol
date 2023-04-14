@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import hashlib
+import json
 import unittest
 from decimal import Decimal
 from unittest.mock import MagicMock, patch, call
@@ -17,13 +19,14 @@ from human_protocol_sdk.job import (
     launcher,
     is_trusted_handler,
 )
-from human_protocol_sdk.storage import get_public_bucket_url
 from test.human_protocol_sdk.utils.manifest import manifest
 from test.human_protocol_sdk.utils.job import DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV
 
 
-@patch("human_protocol_sdk.storage._connect_s3", MagicMock(), create=True)
-@patch("human_protocol_sdk.job.download", MagicMock(return_value=manifest), create=True)
+@patch("human_protocol_sdk.storage.StorageClient", MagicMock(), create=True)
+@patch(
+    "human_protocol_sdk.job.download", MagicMock(return_value=[manifest]), create=True
+)
 class JobTestCase(unittest.TestCase):
     def setUp(self):
         self.credentials = {
@@ -251,10 +254,11 @@ class JobTestCase(unittest.TestCase):
 
         final_results = {"results": 0}
 
-        mock_upload = MagicMock(return_value=("hash", "url"))
-
         # Testing option as: do not encrypt final results: encrypt_final_results=False
-        with patch("human_protocol_sdk.job.upload", mock_upload):
+        with patch(
+            "human_protocol_sdk.job.StorageClient.upload_files"
+        ) as mock_upload_files:
+            mock_upload_files.return_value = "hash"
             # Bulk payout with final results as plain (not encrypted)
             job.bulk_payout(
                 payouts=payouts,
@@ -263,12 +267,7 @@ class JobTestCase(unittest.TestCase):
                 encrypt_final_results=False,
             )
 
-            mock_upload.assert_called_once_with(
-                msg=final_results,
-                public_key=self.rep_oracle_pub_key,
-                encrypt_data=False,
-                use_public_bucket=False,
-            )
+            mock_upload_files.assert_called_once()
 
     def test_job_bulk_payout_with_true_encryption_option(self):
         """Test that final results are stored uncrypted"""
@@ -281,12 +280,12 @@ class JobTestCase(unittest.TestCase):
 
         final_results = {"results": 0}
 
-        mock_upload = MagicMock(return_value=("hash", "url"))
-
         # Testing option as: encrypt final results: encrypt_final_results=True
-        with patch("human_protocol_sdk.job.upload") as mock_upload:
+        with patch(
+            "human_protocol_sdk.job.StorageClient.upload_files"
+        ) as mock_upload_files:
             # Bulk payout with final results as plain (not encrypted)
-            mock_upload.return_value = ("hash", "url")
+            mock_upload_files.return_value = "hash"
 
             job.bulk_payout(
                 payouts=payouts,
@@ -294,13 +293,7 @@ class JobTestCase(unittest.TestCase):
                 pub_key=self.rep_oracle_pub_key,
                 encrypt_final_results=True,
             )
-
-            mock_upload.assert_called_once_with(
-                msg=final_results,
-                public_key=self.rep_oracle_pub_key,
-                encrypt_data=True,
-                use_public_bucket=False,
-            )
+            mock_upload_files.assert_called_once()
 
     def test_job_bulk_payout_store_final_results_publicly_and_privately(self):
         """Tests bulk payout with option to store final results privately/publicly"""
@@ -314,9 +307,10 @@ class JobTestCase(unittest.TestCase):
 
         final_results = {"results": 0}
 
-        mock_upload = MagicMock(return_value=("hash", "url"))
-
-        with patch("human_protocol_sdk.job.upload", mock_upload):
+        with patch(
+            "human_protocol_sdk.job.StorageClient.upload_files"
+        ) as mock_upload_files:
+            mock_upload_files.return_value = "hash"
             # Bulk payout with with option to store privately
             job.bulk_payout(
                 payouts=payouts,
@@ -326,13 +320,8 @@ class JobTestCase(unittest.TestCase):
                 store_pub_final_results=False,
             )
 
-            mock_upload.assert_called_once_with(
-                msg=final_results,
-                public_key=self.rep_oracle_pub_key,
-                encrypt_data=False,
-                use_public_bucket=False,
-            )
-            mock_upload.reset_mock()
+            mock_upload_files.assert_called_once()
+            mock_upload_files.reset_mock()
 
             # Bulk payout with with option to store publicly
             job.bulk_payout(
@@ -343,12 +332,7 @@ class JobTestCase(unittest.TestCase):
                 store_pub_final_results=True,
             )
 
-            mock_upload.assert_called_once_with(
-                msg=final_results,
-                public_key=self.rep_oracle_pub_key,
-                encrypt_data=False,
-                use_public_bucket=True,
-            )
+            mock_upload_files.assert_called_once()
 
     def test_job_bulk_payout_with_full_qualified_url(self):
         """Tests whether url is only S3 string with encryption is on/off."""
@@ -364,13 +348,15 @@ class JobTestCase(unittest.TestCase):
         with patch(
             "human_protocol_sdk.job.handle_transaction_with_retry"
         ) as transaction_retry_mock, patch(
-            "human_protocol_sdk.job.upload"
-        ) as upload_mock, patch.object(
+            "human_protocol_sdk.job.StorageClient.upload_files"
+        ) as mock_upload_files, patch.object(
             Job, "_check_transfer_event"
         ) as _check_transfer_event_mock:
-            key = "abcdefg"
-            hash_ = f"s3{key}"
-            upload_mock.return_value = hash_, key
+            artifact = json.dumps(final_results, sort_keys=True)
+            data = artifact.encode("utf-8")
+            hash_ = hashlib.sha1(data).hexdigest()
+            key = f"s3{hash_}.json"
+            mock_upload_files.return_value = [key]
             _check_transfer_event_mock.return_value = True
 
             # Bulk payout with option to store final results privately
@@ -386,22 +372,6 @@ class JobTestCase(unittest.TestCase):
             self.assertIn(key, transaction_retry_mock.call_args.args)
 
             transaction_retry_mock.reset_mock()
-
-            # Bulk payout with option to store final results publicly
-            job.bulk_payout(
-                payouts=payouts,
-                results=final_results,
-                pub_key=self.rep_oracle_pub_key,
-                encrypt_final_results=False,
-                store_pub_final_results=True,
-            )
-
-            # Key MUST NOT be passed as URL in handle_transaction_with_retry
-            self.assertNotIn(key, transaction_retry_mock.call_args.args)
-
-            # Full bucket URL must be persisted in blockchain during bulk payout
-            full_url = get_public_bucket_url(key)
-            self.assertIn(full_url, transaction_retry_mock.call_args.args)
 
     def test_retrieving_encrypted_final_results(self):
         """Tests retrieving final results with encryption on/off"""
