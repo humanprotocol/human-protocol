@@ -8,9 +8,9 @@ This is a simple API built with Express in TypeScript that provides endpoints to
 
 Returns a list of similar jobs in JSON format.
 
-### `POST /jobs/check`
+### `POST /jobs/solutions`
 
-Receives job parameters in the request body and checks if the job exists based on address, chainId, and solution. Returns a JSON response with a boolean value indicating whether the job exists or not.
+Receives job parameters in the request body and add a new to solution to the job based on address, chainId, and solution fields. Returns a JSON response with a boolean value indicating whether the job exists or not.
 
 ## Usage
 
