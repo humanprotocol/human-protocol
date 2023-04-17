@@ -25,6 +25,7 @@ export default class StorageClient {
    */
   constructor(credentials: StorageCredentials, params: StorageParams) {
     try {
+      console.log(credentials, params);
       this.client = new Minio.Client({
         ...params,
         accessKey: credentials.accessKey,
@@ -54,7 +55,6 @@ export default class StorageClient {
       keys.map(async (key) => {
         try {
           const response = await this.client.getObject(bucket, key);
-          console.log(3333, response);
           const content = response?.read();
 
           return { key, content: JSON.parse(content?.toString('utf-8') || '') };

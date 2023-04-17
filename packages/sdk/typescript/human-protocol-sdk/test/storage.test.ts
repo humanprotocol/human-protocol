@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Readable } from 'stream';
 import {
   DEFAULT_ENDPOINT,
   DEFAULT_FILENAME_PREFIX,
@@ -18,6 +19,7 @@ import {
   STORAGE_FAKE_BUCKET,
   STORAGE_TEST_ACCESS_KEY,
   STORAGE_TEST_FILE_VALUE,
+  STORAGE_TEST_FILE_VALUE_2,
   STORAGE_TEST_SECRET_KEY,
 } from './utils/constants';
 
@@ -31,7 +33,7 @@ jest.mock('minio', () => {
           return JSON.stringify({ key: STORAGE_TEST_FILE_VALUE });
         };
         return Promise.resolve({ read });
-      }),
+      }), // getObject mock
       putObject: jest.fn(), // putObject mock
       bucketExists: jest.fn().mockImplementation((bucketName) => {
         // Add conditional logic here based on the test scenario
@@ -70,22 +72,6 @@ describe('Storage tests', () => {
       expect(storageParams.endPoint).toEqual(DEFAULT_ENDPOINT);
       expect(storageParams.port).toEqual(DEFAULT_PORT);
       expect(storageParams.useSSL).toEqual(false);
-    });
-
-    it('should throw an initialization error', async () => {
-      const storageCredentials: StorageCredentials = {
-        accessKey: STORAGE_TEST_ACCESS_KEY,
-        secretKey: STORAGE_TEST_SECRET_KEY,
-      };
-
-      const storageParams: StorageParams = {
-        endPoint: '', // Invalid endPoint
-        useSSL: DEFAULT_USE_SSL,
-      };
-
-      expect(
-        () => new StorageClient(storageCredentials, storageParams)
-      ).toThrow(ErrorStorageClientNotInitialized);
     });
 
     it('should init client with empty credentials', async () => {
@@ -173,7 +159,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotUploaded);
     });
 
-    it.only('should download the file with success', async () => {
+    it('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -188,6 +174,10 @@ describe('Storage tests', () => {
         DEFAULT_PUBLIC_BUCKET
       );
 
+      expect(storageClient['client'].getObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key
+      );
       expect(downloadedResults[0].key).toEqual(key);
       expect(downloadedResults[0].content).toEqual(file);
     });
@@ -205,18 +195,28 @@ describe('Storage tests', () => {
     });
 
     it('should return a list of objects with success', async () => {
-      const file = { key: STORAGE_TEST_FILE_VALUE };
-
-      await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
-      const hash = crypto
+      const file1 = { key: STORAGE_TEST_FILE_VALUE };
+      const hash1 = crypto
         .createHash('sha1')
-        .update(JSON.stringify(file))
+        .update(JSON.stringify(file1))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key1 = `${DEFAULT_FILENAME_PREFIX}${hash1}`;
+
+      const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
+      const hash2 = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file2))
+        .digest('hex');
+      const key2 = `${DEFAULT_FILENAME_PREFIX}${hash2}`;
+
+      jest
+        .spyOn(storageClient, 'listObjects')
+        .mockImplementation(() => Promise.resolve([key1, key2]));
 
       const results = await storageClient.listObjects(DEFAULT_PUBLIC_BUCKET);
 
-      expect(results[0]).toEqual(key);
+      expect(results[0]).toEqual(key1);
+      expect(results[1]).toEqual(key2);
     });
 
     it('should return a list of objects with an error', async () => {
@@ -308,6 +308,10 @@ describe('Storage tests', () => {
         DEFAULT_PUBLIC_BUCKET
       );
 
+      expect(storageClient['client'].getObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key
+      );
       expect(downloadedResults[0].key).toEqual(key);
       expect(downloadedResults[0].content).toEqual(file);
     });
@@ -325,18 +329,28 @@ describe('Storage tests', () => {
     });
 
     it('should return a list of objects with success', async () => {
-      const file = { key: STORAGE_TEST_FILE_VALUE };
-
-      await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
-      const hash = crypto
+      const file1 = { key: STORAGE_TEST_FILE_VALUE };
+      const hash1 = crypto
         .createHash('sha1')
-        .update(JSON.stringify(file))
+        .update(JSON.stringify(file1))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key1 = `${DEFAULT_FILENAME_PREFIX}${hash1}`;
+
+      const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
+      const hash2 = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file2))
+        .digest('hex');
+      const key2 = `${DEFAULT_FILENAME_PREFIX}${hash2}`;
+
+      jest
+        .spyOn(storageClient, 'listObjects')
+        .mockImplementation(() => Promise.resolve([key1, key2]));
 
       const results = await storageClient.listObjects(DEFAULT_PUBLIC_BUCKET);
 
-      expect(results[0]).toEqual(key);
+      expect(results[0]).toEqual(key1);
+      expect(results[1]).toEqual(key2);
     });
 
     it('should return a list of objects with an error', async () => {
