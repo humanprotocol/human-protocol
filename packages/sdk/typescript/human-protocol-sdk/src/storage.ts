@@ -25,14 +25,12 @@ export default class StorageClient {
    */
   constructor(credentials: StorageCredentials, params: StorageParams) {
     try {
-      console.log(credentials, params);
       this.client = new Minio.Client({
         ...params,
         accessKey: credentials.accessKey,
         secretKey: credentials.secretKey,
       });
     } catch (e) {
-      console.log(e);
       throw ErrorStorageClientNotInitialized;
     }
   }
@@ -60,7 +58,6 @@ export default class StorageClient {
 
           return { key, content: JSON.parse(content?.toString('utf-8') || '') };
         } catch (e) {
-          console.log(e);
           throw ErrorStorageFileNotFound;
         }
       })

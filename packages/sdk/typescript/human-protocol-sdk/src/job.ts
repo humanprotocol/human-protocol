@@ -108,7 +108,6 @@ export class Job {
     storageEndpoint,
     storagePort,
     storageUseSSL,
-    storagePublicBucket,
     storageBucket,
     stakingAddr,
     logLevel = 'info',
@@ -530,12 +529,7 @@ export class Job {
    * @param {bool} isPublic - Whether to store data in public storage, or private.
    * @returns {Promise<boolean>} - True if the workers are paid out successfully.
    */
-  async bulkPayout(
-    payouts: Payout[],
-    result: Result,
-    encrypt = true,
-    isPublic = false
-  ): Promise<boolean> {
+  async bulkPayout(payouts: Payout[], result: Result): Promise<boolean> {
     if (!this.providerData?.reputationOracle) {
       this._logError(ErrorReputationOracleMissing);
       return false;

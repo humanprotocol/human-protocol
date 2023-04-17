@@ -189,8 +189,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(
@@ -210,8 +209,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        false
+        finalResults
       );
 
       expect(
@@ -231,9 +229,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        false,
-        false
+        finalResults
       );
 
       expect(
@@ -253,9 +249,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        false,
-        true
+        finalResults
       );
 
       expect(
@@ -274,8 +268,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(JSON.stringify(await job.finalResults())).toBe(
@@ -300,8 +293,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.abort()).toBe(true);
@@ -318,8 +310,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.abort()).toBe(false);
@@ -343,8 +334,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.cancel()).toBe(true);
@@ -362,8 +352,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.cancel()).toBe(false);
@@ -600,8 +589,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(
@@ -621,8 +609,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        false
+        finalResults
       );
 
       expect(
@@ -642,9 +629,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        false,
-        false
+        finalResults
       );
 
       expect(
@@ -664,9 +649,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        false,
-        true
+        finalResults
       );
 
       expect(
@@ -685,8 +668,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(JSON.stringify(await job.finalResults())).toBe(
@@ -711,8 +693,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.abort()).toBe(true);
@@ -729,8 +710,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.abort()).toBe(false);
@@ -754,8 +734,7 @@ describe('Test Job', () => {
             amount: 50,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.cancel()).toBe(true);
@@ -773,8 +752,7 @@ describe('Test Job', () => {
             amount: 100,
           },
         ],
-        finalResults,
-        true
+        finalResults
       );
 
       expect(await job.cancel()).toBe(false);
