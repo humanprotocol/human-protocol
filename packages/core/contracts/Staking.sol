@@ -282,7 +282,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         if (
             allocation.closedAt == 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Complete
+            (escrowStatus == IEscrow.EscrowStatuses.Complete ||
+                escrowStatus == IEscrow.EscrowStatuses.Cancelled)
         ) {
             return AllocationState.Completed;
         }
@@ -371,7 +372,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function unstake(uint256 _tokens) external override onlyStaker(msg.sender) {
         Stakes.Staker storage staker = stakes[msg.sender];
 
-        require(staker.tokensStaked > 0, 'Must be a positive number');
         require(_tokens > 0, 'Must be a positive number');
         require(
             staker.tokensAvailable() >= _tokens,
@@ -439,7 +439,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         Allocation storage allocation = allocations[_escrowAddress];
 
-        require(allocation.tokens > 0, 'Must be a positive number');
+        require(_tokens > 0, 'Must be a positive number');
 
         require(
             _tokens <= allocation.tokens,
