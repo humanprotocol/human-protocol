@@ -1,3 +1,4 @@
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import crypto from 'crypto';
 import {
   DEFAULT_ENDPOINT,
@@ -21,9 +22,21 @@ import {
   STORAGE_TEST_SECRET_KEY,
 } from './utils/constants';
 
+// Create a Minio.Client mock for the tests
+vi.mock('minio', () => {
+  // Define a constructor for the Minio.Client mock
+  class Client {
+    putObject = vi.fn(); // putObject mock
+    bucketExists = vi.fn().mockResolvedValue(true); // bucketExists mock that always returns true
+  }
+
+  // Return Minio.Client mock
+  return { Client };
+});
+
 describe('Storage tests', () => {
   describe('Client initialization', () => {
-    it('should set correct credentials', async () => {
+    test('should set correct credentials', async () => {
       const storageCredentials: StorageCredentials = {
         accessKey: STORAGE_TEST_ACCESS_KEY,
         secretKey: STORAGE_TEST_SECRET_KEY,
@@ -33,7 +46,7 @@ describe('Storage tests', () => {
       expect(storageCredentials.secretKey).toEqual(STORAGE_TEST_SECRET_KEY);
     });
 
-    it('should set correct params', async () => {
+    test('should set correct params', async () => {
       const storageParams: StorageParams = {
         endPoint: DEFAULT_ENDPOINT,
         port: DEFAULT_PORT,
@@ -45,7 +58,7 @@ describe('Storage tests', () => {
       expect(storageParams.useSSL).toEqual(false);
     });
 
-    it('should throw an initialization error', async () => {
+    test('should throw an initialization error', async () => {
       const storageCredentials: StorageCredentials = {
         accessKey: STORAGE_TEST_ACCESS_KEY,
         secretKey: STORAGE_TEST_SECRET_KEY,
@@ -61,7 +74,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageClientNotInitialized);
     });
 
-    it('should init client with empty credentials', async () => {
+    test('should init client with empty credentials', async () => {
       const storageCredentials: StorageCredentials = {
         accessKey: '',
         secretKey: '',
@@ -100,23 +113,23 @@ describe('Storage tests', () => {
       storageClient = new StorageClient(storageCredentials, storageParams);
     });
 
-    it('should return the bucket exists', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(true));
+    test('should return the bucket exists', async () => {
+      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
+        Promise.resolve(true)
+      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(true);
     });
 
-    it('should return the bucket does not exist', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(false));
+    test('should return the bucket does not exist', async () => {
+      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
+        Promise.resolve(false)
+      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
 
-    it('should upload the file with success', async () => {
+    test('should upload the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       const uploadedResults = await storageClient.uploadFiles(
@@ -130,13 +143,21 @@ describe('Storage tests', () => {
         .digest('hex');
       const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
 
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        JSON.stringify(file),
+        {
+          'Content-Type': 'application/json',
+        }
+      );
       expect(uploadedResults[0].key).toEqual(key);
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
-    it('should upload the file with an error', async () => {
+    test('should upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
-      jest.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
+      vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotUploaded;
       });
       expect(() =>
@@ -144,7 +165,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotUploaded);
     });
 
-    it('should download the file with success', async () => {
+    test('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -163,8 +184,8 @@ describe('Storage tests', () => {
       expect(downloadedResults[0].content).toEqual(file);
     });
 
-    it('should download the file with an error', async () => {
-      jest.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
+    test('should download the file with an error', async () => {
+      vi.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
       expect(() =>
@@ -175,7 +196,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotFound);
     });
 
-    it('should return a list of objects with success', async () => {
+    test('should return a list of objects with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -190,8 +211,8 @@ describe('Storage tests', () => {
       expect(results[0]).toEqual(key);
     });
 
-    it('should return a list of objects with an error', async () => {
-      jest.spyOn(storageClient, 'listObjects').mockImplementation(() => {
+    test('should return a list of objects with an error', async () => {
+      vi.spyOn(storageClient, 'listObjects').mockImplementation(() => {
         throw new Error();
       });
       expect(() => storageClient.listObjects(DEFAULT_PUBLIC_BUCKET)).toThrow(
@@ -218,23 +239,23 @@ describe('Storage tests', () => {
       storageClient = new StorageClient(storageCredentials, storageParams);
     });
 
-    it('should return the bucket exists', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(true));
+    test('should return the bucket exists', async () => {
+      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
+        Promise.resolve(true)
+      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(true);
     });
 
-    it('should return the bucket does not exist', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(false));
+    test('should return the bucket does not exist', async () => {
+      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
+        Promise.resolve(false)
+      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
 
-    it('should upload the file with success', async () => {
+    test('should upload the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       const uploadedResults = await storageClient.uploadFiles(
@@ -252,9 +273,9 @@ describe('Storage tests', () => {
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
-    it('should upload the file with an error', async () => {
+    test('should upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
-      jest.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
+      vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotUploaded;
       });
       expect(() =>
@@ -262,7 +283,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotUploaded);
     });
 
-    it('should download the file with success', async () => {
+    test('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -281,8 +302,8 @@ describe('Storage tests', () => {
       expect(downloadedResults[0].content).toEqual(file);
     });
 
-    it('should download the file with an error', async () => {
-      jest.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
+    test('should download the file with an error', async () => {
+      vi.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
       expect(() =>
@@ -293,7 +314,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotFound);
     });
 
-    it('should return a list of objects with success', async () => {
+    test('should return a list of objects with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -308,8 +329,8 @@ describe('Storage tests', () => {
       expect(results[0]).toEqual(key);
     });
 
-    it('should return a list of objects with an error', async () => {
-      jest.spyOn(storageClient, 'listObjects').mockImplementation(() => {
+    test('should return a list of objects with an error', async () => {
+      vi.spyOn(storageClient, 'listObjects').mockImplementation(() => {
         throw new Error();
       });
       expect(() => storageClient.listObjects(DEFAULT_PUBLIC_BUCKET)).toThrow(
