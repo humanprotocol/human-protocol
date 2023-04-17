@@ -27,7 +27,14 @@ vi.mock('minio', () => {
   // Define a constructor for the Minio.Client mock
   class Client {
     putObject = vi.fn(); // putObject mock
-    bucketExists = vi.fn().mockResolvedValue(true); // bucketExists mock that always returns true
+    bucketExists = vi.fn().mockImplementation((bucketName) => {
+      // Add conditional logic here based on the test scenario
+      if (bucketName === STORAGE_FAKE_BUCKET) {
+        return Promise.resolve(false); // Return false for fake scenario
+      } else {
+        return Promise.resolve(true); // Return true for other scenarios
+      }
+    });
   }
 
   // Return Minio.Client mock
@@ -114,17 +121,11 @@ describe('Storage tests', () => {
     });
 
     test('should return the bucket exists', async () => {
-      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
-        Promise.resolve(true)
-      );
-      const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
+      const isExists = await storageClient.bucketExists(DEFAULT_PUBLIC_BUCKET);
       expect(isExists).toEqual(true);
     });
 
     test('should return the bucket does not exist', async () => {
-      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
-        Promise.resolve(false)
-      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
@@ -240,17 +241,11 @@ describe('Storage tests', () => {
     });
 
     test('should return the bucket exists', async () => {
-      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
-        Promise.resolve(true)
-      );
-      const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
+      const isExists = await storageClient.bucketExists(DEFAULT_PUBLIC_BUCKET);
       expect(isExists).toEqual(true);
     });
 
     test('should return the bucket does not exist', async () => {
-      vi.spyOn(storageClient, 'bucketExists').mockImplementation(() =>
-        Promise.resolve(false)
-      );
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
@@ -269,6 +264,14 @@ describe('Storage tests', () => {
         .digest('hex');
       const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
 
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        JSON.stringify(file),
+        {
+          'Content-Type': 'application/json',
+        }
+      );
       expect(uploadedResults[0].key).toEqual(key);
       expect(uploadedResults[0].hash).toEqual(hash);
     });
