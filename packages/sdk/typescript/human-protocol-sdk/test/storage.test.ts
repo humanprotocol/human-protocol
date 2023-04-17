@@ -1,6 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import crypto from 'crypto';
-import { Readable } from 'stream';
 import {
   DEFAULT_ENDPOINT,
   DEFAULT_FILENAME_PREFIX,
@@ -11,7 +10,6 @@ import {
   StorageParams,
 } from '../src';
 import {
-  ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from '../src/error';
