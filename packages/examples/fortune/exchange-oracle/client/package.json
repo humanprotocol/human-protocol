@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/fortune-exchange-oracle",
+  "name": "@human-protocol/fortune-exchange-client",
   "description": "Fortune Exchange Oracle",
   "version": "1.0.0",
   "license": "MIT",
