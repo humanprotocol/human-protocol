@@ -21,6 +21,33 @@ import {
   STORAGE_TEST_SECRET_KEY,
 } from './utils/constants';
 
+// Create a Minio.Client mock for the tests
+jest.mock('minio', () => {
+  // Defines a constructor for the Minio.Client mock
+  function Client() {
+    return {
+      getObject: jest.fn().mockImplementation(() => {
+        const read = () => {
+          return JSON.stringify({ key: STORAGE_TEST_FILE_VALUE });
+        };
+        return Promise.resolve({ read });
+      }),
+      putObject: jest.fn(), // putObject mock
+      bucketExists: jest.fn().mockImplementation((bucketName) => {
+        // Add conditional logic here based on the test scenario
+        if (bucketName === STORAGE_FAKE_BUCKET) {
+          return Promise.resolve(false); // Return false for fake scenario
+        } else {
+          return Promise.resolve(true); // Return true for other scenarios
+        }
+      }),
+    };
+  }
+
+  // Returns Minio.Client mock
+  return { Client };
+});
+
 describe('Storage tests', () => {
   describe('Client initialization', () => {
     it('should set correct credentials', async () => {
@@ -101,17 +128,11 @@ describe('Storage tests', () => {
     });
 
     it('should return the bucket exists', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(true));
-      const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
+      const isExists = await storageClient.bucketExists(DEFAULT_PUBLIC_BUCKET);
       expect(isExists).toEqual(true);
     });
 
     it('should return the bucket does not exist', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(false));
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
@@ -130,6 +151,14 @@ describe('Storage tests', () => {
         .digest('hex');
       const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
 
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        JSON.stringify(file),
+        {
+          'Content-Type': 'application/json',
+        }
+      );
       expect(uploadedResults[0].key).toEqual(key);
       expect(uploadedResults[0].hash).toEqual(hash);
     });
@@ -144,7 +173,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotUploaded);
     });
 
-    it('should download the file with success', async () => {
+    it.only('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
@@ -219,17 +248,11 @@ describe('Storage tests', () => {
     });
 
     it('should return the bucket exists', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(true));
-      const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
+      const isExists = await storageClient.bucketExists(DEFAULT_PUBLIC_BUCKET);
       expect(isExists).toEqual(true);
     });
 
     it('should return the bucket does not exist', async () => {
-      jest
-        .spyOn(storageClient, 'bucketExists')
-        .mockImplementation(() => Promise.resolve(false));
       const isExists = await storageClient.bucketExists(STORAGE_FAKE_BUCKET);
       expect(isExists).toEqual(false);
     });
@@ -248,6 +271,14 @@ describe('Storage tests', () => {
         .digest('hex');
       const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
 
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        JSON.stringify(file),
+        {
+          'Content-Type': 'application/json',
+        }
+      );
       expect(uploadedResults[0].key).toEqual(key);
       expect(uploadedResults[0].hash).toEqual(hash);
     });

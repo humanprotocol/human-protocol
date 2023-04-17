@@ -54,10 +54,12 @@ export default class StorageClient {
       keys.map(async (key) => {
         try {
           const response = await this.client.getObject(bucket, key);
+          console.log(3333, response);
           const content = response?.read();
 
           return { key, content: JSON.parse(content?.toString('utf-8') || '') };
         } catch (e) {
+          console.log(e);
           throw ErrorStorageFileNotFound;
         }
       })
