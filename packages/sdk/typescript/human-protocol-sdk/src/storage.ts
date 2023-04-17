@@ -3,6 +3,7 @@ import * as Minio from 'minio';
 import { DEFAULT_FILENAME_PREFIX } from './constants';
 import {
   ErrorStorageBucketNotFound,
+  ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from './error';
@@ -23,11 +24,15 @@ export default class StorageClient {
    * @param {StorageParams} params - Cloud storage params
    */
   constructor(credentials: StorageCredentials, params: StorageParams) {
-    this.client = new Minio.Client({
-      ...params,
-      accessKey: credentials.accessKey,
-      secretKey: credentials.secretKey,
-    });
+    try {
+      this.client = new Minio.Client({
+        ...params,
+        accessKey: credentials.accessKey,
+        secretKey: credentials.secretKey,
+      });
+    } catch (e) {
+      throw ErrorStorageClientNotInitialized;
+    }
   }
 
   /**
@@ -40,8 +45,8 @@ export default class StorageClient {
     keys: string[],
     bucket: string
   ): Promise<Result[]> {
-    const isbBucketExists = await this.client.bucketExists(bucket);
-    if (!isbBucketExists) {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
     }
 
@@ -70,8 +75,8 @@ export default class StorageClient {
     files: Result[],
     bucket: string
   ): Promise<UploadResult[]> {
-    const isbBucketExists = await this.client.bucketExists(bucket);
-    if (!isbBucketExists) {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
     }
 
@@ -112,8 +117,8 @@ export default class StorageClient {
    * @returns {Promise<string[]>} - A list of filenames with their extensions in the bucket
    */
   public async listObjects(bucket: string): Promise<string[]> {
-    const isbBucketExists = await this.client.bucketExists(bucket);
-    if (!isbBucketExists) {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
     }
 

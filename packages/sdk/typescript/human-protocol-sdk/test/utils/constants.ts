@@ -28,3 +28,8 @@ export const WORKER3_ADDR = '0x976EA74026E726554dB657fA54763abd0C3a0aa9';
 
 export const NOT_TRUSTED_OPERATOR_PRIVKEY =
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365b';
+
+export const STORAGE_TEST_ACCESS_KEY = 'my-access-key';
+export const STORAGE_TEST_SECRET_KEY = 'my-secret-key';
+export const STORAGE_FAKE_BUCKET = 'fake-bucket';
+export const STORAGE_TEST_FILE_VALUE = 'value';

@@ -36,7 +36,14 @@ export const ErrorHMTokenMissing = new Error('HMToken is missing');
 export const ErrorStakingMissing = new Error('Staking contract is missing');
 
 /**
- * @constant {Error} - The Storage credentials is missing.
+ * @constant {Error} - The Storage client not initialised.
+ */
+export const ErrorStorageClientNotInitialized = new Error(
+  'Storage client not initialized'
+);
+
+/**
+ * @constant {Error} - The Storage does not exists.
  */
 export const ErrorStorageClientNotExists = new Error(
   'Storage client does not exists'
