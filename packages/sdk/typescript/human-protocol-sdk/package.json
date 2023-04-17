@@ -14,8 +14,7 @@
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc",
     "prepublish": "npm run build",
-    "test": "concurrently -k -s first -g --hide 0 \"yarn workspace @human-protocol/core local\" \"sleep 10 && vitest -u test/storage.test.ts\"",
-    "lint": "eslint .",
+    "test": "vitest -u test/storage.test.ts",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'"
   },

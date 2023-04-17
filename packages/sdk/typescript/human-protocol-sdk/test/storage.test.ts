@@ -159,7 +159,6 @@ describe('Storage tests', () => {
     test('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
-      await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
       const hash = crypto
         .createHash('sha1')
         .update(JSON.stringify(file))
@@ -293,7 +292,6 @@ describe('Storage tests', () => {
     test('should download the file with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
-      await storageClient.uploadFiles([file], DEFAULT_PUBLIC_BUCKET);
       const hash = crypto
         .createHash('sha1')
         .update(JSON.stringify(file))
