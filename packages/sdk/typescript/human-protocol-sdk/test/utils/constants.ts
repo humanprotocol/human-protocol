@@ -33,3 +33,4 @@ export const STORAGE_TEST_ACCESS_KEY = 'my-access-key';
 export const STORAGE_TEST_SECRET_KEY = 'my-secret-key';
 export const STORAGE_FAKE_BUCKET = 'fake-bucket';
 export const STORAGE_TEST_FILE_VALUE = 'value';
+export const STORAGE_TEST_FILE_VALUE_2 = 'another value';
