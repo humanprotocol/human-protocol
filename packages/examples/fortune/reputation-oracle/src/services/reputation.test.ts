@@ -1,3 +1,4 @@
+import Proxy from '@human-protocol/core/artifacts/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
 import Reputation from '@human-protocol/core/artifacts/contracts/Reputation.sol/Reputation.json';
 import Staking from '@human-protocol/core/artifacts/contracts/Staking.sol/Staking.json';
@@ -49,8 +50,10 @@ describe('Reputation', () => {
         from: owner.address,
       });
 
+    const proxyContract = new web3.eth.Contract(Proxy.abi as []);
+
     const stakingContract = new web3.eth.Contract(Staking.abi as []);
-    staking = await stakingContract
+    const stakingIml = await stakingContract
       .deploy({
         data: Staking.bytecode,
         arguments: [],
@@ -58,15 +61,34 @@ describe('Reputation', () => {
       .send({
         from: owner.address,
       });
-
-    await staking.methods
-      .initialize(token.options.address, web3.utils.toWei('1', 'ether'), 1)
-      .send({ from: owner.address });
+    const stakingProxy = await proxyContract
+      .deploy({
+        data: Proxy.bytecode,
+        arguments: [
+          stakingIml.options.address,
+          stakingContract.methods
+            .initialize(
+              token.options.address,
+              web3.utils.toWei('1', 'ether'),
+              1
+            )
+            .encodeABI(),
+        ],
+      })
+      .send({
+        from: owner.address,
+      });
+    staking = new web3.eth.Contract(
+      Staking.abi as [],
+      stakingProxy.options.address
+    );
   });
 
   beforeEach(async () => {
+    const proxyContract = new web3.eth.Contract(Proxy.abi as []);
+
     const reputationContract = new web3.eth.Contract(Reputation.abi as []);
-    reputation = await reputationContract
+    const reputationImpl = await reputationContract
       .deploy({
         data: Reputation.bytecode,
         arguments: [],
@@ -75,9 +97,23 @@ describe('Reputation', () => {
         from: owner.address,
       });
 
-    await reputation.methods
-      .initialize(staking.options.address, 1)
-      .send({ from: owner.address });
+    const reputationProxy = await proxyContract
+      .deploy({
+        data: Proxy.bytecode,
+        arguments: [
+          reputationImpl.options.address,
+          reputationContract.methods
+            .initialize(staking.options.address, 1)
+            .encodeABI(),
+        ],
+      })
+      .send({
+        from: owner.address,
+      });
+    reputation = new web3.eth.Contract(
+      Reputation.abi as [],
+      reputationProxy.options.address
+    );
 
     await token.methods
       .transfer(reputationAccount.address, web3.utils.toWei('1000', 'ether'))

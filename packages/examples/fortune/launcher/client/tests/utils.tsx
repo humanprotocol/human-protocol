@@ -1,12 +1,3 @@
-import {
-  CreateClientConfig,
-  WagmiConfig,
-  WagmiConfigProps,
-  Chain,
-  createClient,
-} from 'wagmi';
-import { MockConnector } from '@wagmi/core/connectors/mock';
-import { Wallet, providers } from 'ethers';
 import type { Provider, WebSocketProvider } from '@wagmi/core';
 import {
   foundry,
@@ -15,6 +6,15 @@ import {
   optimism,
   polygon,
 } from '@wagmi/core/chains';
+import { MockConnector } from '@wagmi/core/connectors/mock';
+import { Wallet, providers } from 'ethers';
+import {
+  CreateClientConfig,
+  WagmiConfig,
+  WagmiConfigProps,
+  Chain,
+  createClient,
+} from 'wagmi';
 type Config = Partial<CreateClientConfig>;
 function getNetwork(chain: Chain) {
   return {

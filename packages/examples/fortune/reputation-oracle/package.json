@@ -1,11 +1,10 @@
 {
-  "name": "reputation-oracle",
+  "name": "@human-protocol/fortune-reputation-oracle",
   "version": "1.0.0",
-  "description": "fortune reputation oracle",
+  "description": "Fortune Reputation Oracle",
   "main": "index.ts",
   "author": "human-protocol",
   "license": "MIT",
-  "private": false,
   "devDependencies": {
     "@types/body-parser": "^1.19.2",
     "@types/cors": "^2.8.12",
@@ -13,7 +12,7 @@
     "@types/minio": "^7.0.14"
   },
   "dependencies": {
-    "@human-protocol/core": "workspace:*",
+    "@human-protocol/core": "*",
     "axios": "^1.1.3",
     "minio": "^7.0.32",
     "web3": "^1.8.1"
@@ -22,6 +21,8 @@
     "build": "tsc",
     "start:prod": "ts-node build/src/index.js",
     "start": "ts-node src/index.ts",
-    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8548\" \"jest\""
+    "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8548\" \"jest\"",
+    "lint": "eslint '**/*.ts'",
+    "vercel-build": "yarn workspace @human-protocol/core compile"
   }
 }

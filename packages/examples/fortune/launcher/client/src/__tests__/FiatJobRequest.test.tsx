@@ -1,7 +1,7 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import renderer from 'react-test-renderer';
+import { create } from 'react-test-renderer';
 import { vi } from 'vitest';
 import { JobRequest } from '../components/FiatJobRequest';
 
@@ -41,7 +41,6 @@ const mockStripe = () => ({
 describe('when rendered FiatJobRequest component', () => {
   const mockstripe = mockStripe() as any;
   it('should render buttons', async () => {
-    // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {
       render(
         <JobRequest
@@ -65,18 +64,16 @@ describe('when rendered FiatJobRequest component', () => {
 
 it('FiatJobRequest component renders correctly, corresponds to the snapshot', () => {
   const mockstripe = mockStripe() as any;
-  const tree = renderer
-    .create(
-      <Elements stripe={mockstripe}>
-        <JobRequest
-          fundingMethod="fiat"
-          onBack={() => 1}
-          onLaunch={() => 1}
-          onSuccess={() => 1}
-          onFail={() => 1}
-        />
-      </Elements>
-    )
-    .toJSON();
+  const tree = create(
+    <Elements stripe={mockstripe}>
+      <JobRequest
+        fundingMethod="fiat"
+        onBack={() => 1}
+        onLaunch={() => 1}
+        onSuccess={() => 1}
+        onFail={() => 1}
+      />
+    </Elements>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });

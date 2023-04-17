@@ -4,7 +4,6 @@ import bodyParser from 'body-parser';
 import Web3 from 'web3';
 import {
   bulkPayOut,
-  bulkPaid,
   getBalance,
   getEscrowManifestUrl,
 } from './services/escrow';
@@ -98,15 +97,16 @@ app.post('/send-fortunes', async (req, res) => {
       // TODO calculate the URL hash(?)
       const resultsUrl = await uploadResults(escrow, escrow.escrowAddress);
       const resultHash = resultsUrl;
-      await bulkPayOut(
-        web3,
-        escrow.escrowAddress,
-        workerAddresses,
-        rewards,
-        resultsUrl,
-        resultHash
-      );
-      if (!(await bulkPaid(web3, escrow.escrowAddress))) {
+      try {
+        await bulkPayOut(
+          web3,
+          escrow.escrowAddress,
+          workerAddresses,
+          rewards,
+          resultsUrl,
+          resultHash
+        );
+      } catch {
         errorMessage.push(
           `Escrow ${escrow.escrowAddress} payout couldn't be done`
         );

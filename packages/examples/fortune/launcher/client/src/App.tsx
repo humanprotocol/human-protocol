@@ -1,8 +1,9 @@
 import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
-import Box from '@mui/material/Box';
 import { Grid, Link, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
 import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
+import { useSigner, useChainId } from 'wagmi';
 import {
   FortuneStages,
   FortuneFundingMethod,
@@ -11,13 +12,12 @@ import {
   FortuneLaunch,
   FortuneLaunchSuccess,
   FortuneLaunchFail,
-} from 'src/components';
+} from './components';
 import {
   FortuneStageStatus,
   FundingMethodType,
   JobLaunchResponse,
-} from 'src/components/types';
-import { useSigner, useChainId } from 'wagmi';
+} from './components/types';
 import { ChainId, ESCROW_NETWORKS } from './constants';
 
 function App() {
@@ -73,6 +73,7 @@ function App() {
 
   useEffect(() => {
     fetchLastEscrow(ESCROW_NETWORKS[chainId as ChainId]?.factoryAddress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId, signer]);
 
   return (

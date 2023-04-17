@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { render, screen } from '@testing-library/react';
-import renderer from 'react-test-renderer';
-import { act } from 'react-dom/test-utils';
-import { Launch } from 'src/components/Launch';
-import { Providers, setupClient, getSigners } from 'tests/utils';
 import { MockConnector } from '@wagmi/core/connectors/mock';
+import * as React from 'react';
+import { act } from 'react-dom/test-utils';
+import { create } from 'react-test-renderer';
+import { Providers, setupClient, getSigners } from '../../tests/utils';
+import { Launch } from '../components/Launch';
 
 describe('when rendered Launch component', () => {
   it('should render texts', async () => {
@@ -14,7 +14,6 @@ describe('when rendered Launch component', () => {
       ],
     });
 
-    // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {
       render(<Launch />, {
         wrapper: ({ children }: { children: React.ReactNode }) => (
@@ -33,12 +32,10 @@ it('Launch component renders correctly, corresponds to the snapshot', () => {
   const client = setupClient({
     connectors: [new MockConnector({ options: { signer: getSigners()[0]! } })],
   });
-  const tree = renderer
-    .create(
-      <Providers client={client}>
-        <Launch />
-      </Providers>
-    )
-    .toJSON();
+  const tree = create(
+    <Providers client={client}>
+      <Launch />
+    </Providers>
+  ).toJSON();
   expect(tree).toMatchSnapshot();
 });
