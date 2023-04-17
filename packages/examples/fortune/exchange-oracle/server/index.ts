@@ -76,8 +76,8 @@ app.get('/jobs', (req, res) => {
   res.json({ jobs: jobs });
 });
 
-// Endpoint to check if a job exists based on address, chainId, and solution
-app.post('/jobs/check', (req, res) => {
+// Endpoint for sending solutions. Receive address, chainId, and solution
+app.post('/jobs/solutions', (req, res) => {
   const { address, chainId, solution } = req.body;
 
   // Find the job in the jobs array based on the provided address and chainId
