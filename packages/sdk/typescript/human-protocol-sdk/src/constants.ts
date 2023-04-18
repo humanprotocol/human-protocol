@@ -1,4 +1,5 @@
 import { ChainId } from './enums';
+import { NetworkData } from './types';
 
 /**
  * @constant Default bucket name
@@ -10,21 +11,11 @@ export const DEFAULT_BUCKET = 'escrow-results';
  */
 export const DEFAULT_PUBLIC_BUCKET = 'escrow-public-results';
 
-export type NetworkInfo = {
-  chainId: number;
-  title: string;
-  scanUrl: string;
-  hmtAddress: string;
-  factoryAddress: string;
-  stakingAddress: string;
-  kvstoreAddress: string;
-};
-
 /**
  * @constant Default network parameters
  */
 export const NETWORKS: {
-  [chainId in ChainId]?: NetworkInfo;
+  [chainId in ChainId]?: NetworkData;
 } = {
   [ChainId.MAINNET]: {
     chainId: ChainId.MAINNET,
