@@ -5,7 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { MESSAGE_TYPE, ORIGIN_TIMEOUT } from './config';
+import {
+  MESSAGE_TYPE,
+  ORIGIN_HOST,
+  ORIGIN_TIMEOUT,
+  ORIGIN_TYPE,
+} from './config';
 
 import {
   recordContentScriptStart,
@@ -14,6 +19,8 @@ import {
 
 const manifestCache = new Map();
 const debugCache = new Map();
+const cspHeaders = new Map();
+const cspReportHeaders = new Map();
 
 // Emulate PageActions
 chrome.runtime.onInstalled.addListener(() => {
@@ -37,9 +44,9 @@ const fromHexString = hexString =>
 const toHexString = bytes =>
   bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
-function getCFHashWorkaroundFunction(ipfs_cid) {
+function getCFHashWorkaroundFunction(host, version) {
   return new Promise((resolve, reject) => {
-    fetch('https://nftstorage.link/ipfs/' + encodeURIComponent(ipfs_cid), {
+    fetch('https://nftstorage.link/ipfs/' + encodeURIComponent(version), {
       method: 'GET',
     })
       .then(response => {
@@ -51,15 +58,9 @@ function getCFHashWorkaroundFunction(ipfs_cid) {
   });
 }
 
-async function validateManifest(
-  rootHash,
-  leaves,
-  ipfs_cid,
-  workaround,
-  origin
-) {
+async function validateManifest(rootHash, leaves, host, version, workaround) {
   // does rootHash match what was published?
-  const cfResponse = await getCFHashWorkaroundFunction(ipfs_cid).catch(
+  const cfResponse = await getCFHashWorkaroundFunction(host, version).catch(
     cfError => {
       console.log('error fetching hash from CF', cfError);
       return {
@@ -77,16 +78,8 @@ async function validateManifest(
   }
   const cfPayload = await cfResponse.json();
   let cfRootHash = cfPayload.root_hash;
-  let cfOrigin = cfPayload.origin;
   if (cfPayload.root_hash.startsWith('0x')) {
     cfRootHash = cfPayload.root_hash.slice(2);
-  }
-
-  if (cfOrigin !== origin) {
-    return {
-      valid: false,
-      reason: 'ROOT_HASH_VERIFY_FAIL_3RD_PARTY',
-    };
   }
   // validate
   if (rootHash !== cfRootHash) {
@@ -109,7 +102,7 @@ async function validateManifest(
     if (backupHash !== cfRootHash) {
       return {
         valid: false,
-        reason: 'ROOT_HASH_VERIFY_FAIL_3RD_PARTY',
+        reason: 'ROOT_HASH_VERFIY_FAIL_3RD_PARTY',
       };
     }
   }
@@ -171,6 +164,40 @@ async function validateManifest(
   };
 }
 
+async function validateMetaCompanyManifest(rootHash, otherHashes, leaves) {
+  // merge all the hashes into one
+  const megaHash = JSON.stringify(leaves);
+  // hash it
+  const encoder = new TextEncoder();
+  const encodedMegaHash = encoder.encode(megaHash);
+  const jsHashArray = Array.from(
+    new Uint8Array(await crypto.subtle.digest('SHA-256', encodedMegaHash))
+  );
+  const jsHash = jsHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // compare to main and long tail, it should match one
+  // then hash it with the other
+  let combinedHash = '';
+  if (jsHash === otherHashes.main || jsHash === otherHashes.longtail) {
+    const combinedHashArray = Array.from(
+      new Uint8Array(
+        await crypto.subtle.digest(
+          'SHA-256',
+          encoder.encode(otherHashes.longtail + otherHashes.main)
+        )
+      )
+    );
+    combinedHash = combinedHashArray
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  } else {
+    return false;
+  }
+
+  // ensure result matches root, return.
+  console.log('combined hash is ', combinedHash, rootHash);
+  return combinedHash === rootHash;
+}
+
 function getDebugLog(tabId) {
   let tabDebugList = debugCache.get(tabId);
   return tabDebugList == null ? [] : tabDebugList;
@@ -181,45 +208,88 @@ export function handleMessages(message, sender, sendResponse) {
 
   if (message.type == MESSAGE_TYPE.LOAD_MANIFEST) {
     // validate manifest
-
-    const slicedHash = message.rootHash.slice(2);
-    const slicedLeaves = message.leaves.map(leaf => {
-      return leaf.slice(2);
-    });
-    validateManifest(
-      slicedHash,
-      slicedLeaves,
-      message.ipfs_cid,
-      message.workaround,
-      message.origin
-    ).then(validationResult => {
-      if (validationResult.valid) {
-        // store manifest to subsequently validate JS
-        let origin = manifestCache.get(message.origin);
-        if (origin == null) {
-          origin = new Map();
-          manifestCache.set(message.origin, origin);
-        }
-        // roll through the existing manifests and remove expired ones
-        if (ORIGIN_TIMEOUT[message.origin] > 0) {
-          for (let [key, manif] of origin.entries()) {
-            if (manif.start + ORIGIN_TIMEOUT[message.origin] < Date.now()) {
-              origin.delete(key);
+    if (
+      [ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(message.origin)
+    ) {
+      validateMetaCompanyManifest(
+        message.rootHash,
+        message.otherHashes,
+        message.leaves
+      ).then(valid => {
+        console.log('result is ', valid);
+        if (valid) {
+          let origin = manifestCache.get(message.origin);
+          if (origin == null) {
+            origin = new Map();
+            manifestCache.set(message.origin, origin);
+          }
+          // roll through the existing manifests and remove expired ones
+          if (ORIGIN_TIMEOUT[message.origin] > 0) {
+            for (let [key, manif] of origin.entries()) {
+              if (manif.start + ORIGIN_TIMEOUT[message.origin] < Date.now()) {
+                origin.delete(key);
+              }
             }
           }
-        }
-        console.log('result is ', validationResult.valid);
-        origin.set(message.version, {
-          leaves: slicedLeaves,
-          root: slicedHash,
-          start: Date.now(),
-        });
-        sendResponse({ valid: true });
-      } else {
-        sendResponse(validationResult);
-      }
-    });
 
+          let manifest = origin.get(message.version);
+          if (!manifest) {
+            manifest = {
+              leaves: [],
+              root: message.rootHash,
+              start: Date.now(),
+            };
+            origin.set(message.version, manifest);
+          }
+          message.leaves.forEach(leaf => {
+            if (!manifest.leaves.includes(leaf)) {
+              manifest.leaves.push(leaf);
+            }
+          });
+          sendResponse({ valid: true });
+        } else {
+          sendResponse({ valid: false });
+        }
+      });
+    } else {
+      const slicedHash = message.rootHash.slice(2);
+      const slicedLeaves = message.leaves.map(leaf => {
+        return leaf.slice(2);
+      });
+      validateManifest(
+        slicedHash,
+        slicedLeaves,
+        ORIGIN_HOST[message.origin],
+        message.version,
+        message.workaround
+      ).then(validationResult => {
+        if (validationResult.valid) {
+          // store manifest to subsequently validate JS
+          let origin = manifestCache.get(message.origin);
+          if (origin == null) {
+            origin = new Map();
+            manifestCache.set(message.origin, origin);
+          }
+          // roll through the existing manifests and remove expired ones
+          if (ORIGIN_TIMEOUT[message.origin] > 0) {
+            for (let [key, manif] of origin.entries()) {
+              if (manif.start + ORIGIN_TIMEOUT[message.origin] < Date.now()) {
+                origin.delete(key);
+              }
+            }
+          }
+          console.log('result is ', validationResult.valid);
+          origin.set(message.version, {
+            leaves: slicedLeaves,
+            root: slicedHash,
+            start: Date.now(),
+          });
+          sendResponse({ valid: true });
+        } else {
+          sendResponse(validationResult);
+        }
+      });
+    }
     return true;
   }
 
@@ -306,13 +376,16 @@ export function handleMessages(message, sender, sendResponse) {
 
   if (message.type === MESSAGE_TYPE.CONTENT_SCRIPT_START) {
     recordContentScriptStart(sender, message.origin);
-    sendResponse({ success: true });
+    sendResponse({
+      success: true,
+      cspHeader: cspHeaders.get(sender.tab.id),
+      cspReportHeader: cspReportHeaders.get(sender.tab.id),
+    });
     return;
   }
 }
-
 chrome.runtime.onMessage.addListener(handleMessages);
-const srcFilters = { urls: ['<all_urls>'] };
+
 chrome.webRequest.onResponseStarted.addListener(
   src => {
     if (
@@ -321,23 +394,35 @@ chrome.webRequest.onResponseStarted.addListener(
       src.url.indexOf('chrome-extension://') === 0 &&
       src.url.indexOf('moz-extension://') === 0
     ) {
-      chrome.tabs.query(
-        { active: true, currentWindow: true },
-        async function (tabs) {
-          try {
-            await chrome.tabs.sendMessage(tabs[0].id, {
-              greeting: 'nocacheHeaderFound',
-            });
-          } catch {
-            console.log('webRequest error');
-          }
-        }
-      );
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { greeting: 'nocacheHeaderFound' });
+      });
     }
   },
-  srcFilters,
+  { urls: ['<all_urls>'] },
   []
 );
+
+chrome.webRequest.onHeadersReceived.addListener(
+  details => {
+    if (details.frameId === 0 && details.responseHeaders) {
+      const cspHeader = details.responseHeaders.find(
+        header => header.name === 'content-security-policy'
+      );
+      const cspReportHeader = details.responseHeaders.find(
+        header => header.name === 'content-security-policy-report-only'
+      );
+      cspHeaders.set(details.tabId, cspHeader?.value);
+      cspReportHeaders.set(details.tabId, cspReportHeader?.value);
+    }
+  },
+  {
+    types: ['main_frame'],
+    urls: ['*://*.facebook.com/*', '*://*.messenger.com/*'],
+  },
+  ['responseHeaders']
+);
+
 chrome.tabs.onRemoved.addListener(tabId => {
   if (debugCache.has(tabId)) {
     debugCache.delete(tabId);
