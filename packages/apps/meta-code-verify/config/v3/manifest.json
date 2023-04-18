@@ -32,9 +32,11 @@
         }
     ],
     "permissions": [
-        "webRequest"
+        "webRequest",
+        "storage",
+        "management"
     ],
     "host_permissions": [
-        "https://nftstorage.link/ipfs/"
+        "https://*.nftstorage.link/*"
     ]
 }
