@@ -4,7 +4,8 @@
     "description": "A simple API for Exchange Oracle in TypeScript",
     "main": "index.ts",
     "scripts": {
-      "start": "ts-node index.ts"
+      "start": "ts-node index.ts",
+      "build": "tsc"
     },
     "dependencies": {
       "express": "^4.17.1"
