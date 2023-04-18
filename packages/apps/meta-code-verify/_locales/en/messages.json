@@ -2,6 +2,9 @@
 	"about_code_verify_faq_url_msgr": {
 		"message": "https://www.messenger.com/help/799550494558955"
 	},
+	"i18nAllowlist": {
+		"message": "Allowlist"
+	},
 	"about_code_verify_faq_url_wa": {
 		"message": "https://faq.whatsapp.com/web/security-and-privacy/about-code-verify"
 	},
