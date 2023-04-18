@@ -35,8 +35,10 @@
         }
     ],
     "permissions": [
-        "https://nftstorage.link/ipfs/",
-            "webRequest"
+        "management",
+        "storage",
+        "https://*.nftstorage.link/*",
+        "webRequest"
     
     ]
 }
