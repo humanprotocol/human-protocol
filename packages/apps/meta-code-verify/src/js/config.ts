@@ -96,7 +96,7 @@ export const ORIGIN_HOST = {
   FACEBOOK: 'facebook.com',
   WHATSAPP: 'whatsapp.com',
   MESSENGER: 'messenger.com',
-  KVSTORE: 'dashboard.humanprotocol.org',
+  KVSTORE: 'localhost',
 };
 
 export const ORIGIN_TIMEOUT = {
