@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 requests = "*"
-pydantic = "*"
+pydantic = "==1.10.4"
 pytest = "*"
 black = "*"
 pylint = "*"

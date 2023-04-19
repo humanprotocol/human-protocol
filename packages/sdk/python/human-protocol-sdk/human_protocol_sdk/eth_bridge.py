@@ -25,7 +25,7 @@ STAKING_ADDR = Web3.toChecksumAddress(
     os.getenv("STAKING_ADDR", "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0")
 )
 
-ABIS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "contracts")
+ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
 
 # See more details about the eth-kvstore here: https://github.com/hCaptcha/eth-kvstore
 KVSTORE_CONTRACT = Web3.toChecksumAddress(
@@ -201,7 +201,9 @@ def get_hmtoken_interface():
     """
 
     return get_contract_interface(
-        "{}/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(ABIS_FOLDER)
+        "{}/contracts/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(
+            ARTIFACTS_FOLDER
+        )
     )
 
 
@@ -259,7 +261,7 @@ def get_escrow(escrow_addr: str, hmt_server_addr: str = None) -> Contract:
 
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/Escrow.sol/Escrow.json".format(ABIS_FOLDER)
+        "{}/contracts/Escrow.sol/Escrow.json".format(ARTIFACTS_FOLDER)
     )
     escrow = w3.eth.contract(
         address=ChecksumAddress(HexAddress(HexStr(escrow_addr))),
@@ -292,7 +294,7 @@ def get_factory(factory_addr: str, hmt_server_addr: str = None) -> Contract:
     """
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/EscrowFactory.sol/EscrowFactory.json".format(ABIS_FOLDER)
+        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(ARTIFACTS_FOLDER)
     )
     escrow_factory = w3.eth.contract(
         address=ChecksumAddress(HexAddress(HexStr(factory_addr))),
@@ -327,11 +329,11 @@ def deploy_factory(
     staking_address = STAKING_ADDR if staking_addr is None else staking_addr
 
     w3 = get_w3(hmt_server_addr)
-    contract_interface = get_contract_interface(
-        "{}/EscrowFactory.sol/EscrowFactory.json".format(ABIS_FOLDER)
+    factory_interface = get_contract_interface(
+        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(ARTIFACTS_FOLDER)
     )
     factory = w3.eth.contract(
-        abi=contract_interface["abi"], bytecode=contract_interface["bytecode"]
+        abi=factory_interface["abi"], bytecode=factory_interface["bytecode"]
     )
 
     txn_func = factory.constructor
@@ -343,14 +345,30 @@ def deploy_factory(
         "hmt_server_addr": hmt_server_addr,
     }
     txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
-    contract_addr = txn_receipt["contractAddress"]
+    factory_addr = txn_receipt["contractAddress"]
 
-    factory_contract = get_factory(contract_addr)
-    txn_func = factory_contract.functions.initialize
-    func_args = [staking_address]
+    proxy_interface = get_contract_interface(
+        "{}/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json".format(
+            ARTIFACTS_FOLDER
+        )
+    )
+    proxy = w3.eth.contract(
+        abi=proxy_interface["abi"], bytecode=proxy_interface["bytecode"]
+    )
+    txn_func = proxy.constructor
+    init_encoded = factory.encodeABI(fn_name="initialize", args=[staking_address])
+
+    func_args = [factory_addr, init_encoded]
+    txn_info = {
+        "gas_payer": gas_payer,
+        "gas_payer_priv": gas_payer_priv,
+        "gas": gas,
+        "hmt_server_addr": hmt_server_addr,
+    }
     txn_receipt = handle_transaction(txn_func, *func_args, **txn_info)
+    proxy_addr = txn_receipt["contractAddress"]
 
-    return str(contract_addr)
+    return str(proxy_addr)
 
 
 def get_staking_interface():
@@ -361,7 +379,9 @@ def get_staking_interface():
 
     """
 
-    return get_contract_interface("{}/Staking.sol/Staking.json".format(ABIS_FOLDER))
+    return get_contract_interface(
+        "{}/contracts/Staking.sol/Staking.json".format(ARTIFACTS_FOLDER)
+    )
 
 
 def get_staking(staking_addr=HMTOKEN_ADDR, hmt_server_addr: str = None) -> Contract:
@@ -432,7 +452,7 @@ def get_pub_key_from_addr(
 
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/KVStore.sol/KVStore.json".format(ABIS_FOLDER)
+        "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
     )
 
     kvstore = w3.eth.contract(address=kvstore_contract, abi=contract_interface["abi"])
@@ -482,7 +502,7 @@ def set_pub_key_at_addr(
 
     w3 = get_w3(hmt_server_addr)
     contract_interface = get_contract_interface(
-        "{}/KVStore.sol/KVStore.json".format(ABIS_FOLDER)
+        "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
     )
 
     kvstore = w3.eth.contract(address=KVSTORE_CONTRACT, abi=contract_interface["abi"])
