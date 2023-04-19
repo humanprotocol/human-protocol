@@ -832,6 +832,8 @@ async function allowDisallow(scriptOrHash, script) {
     }
   }
 }
+
+
 export const processFoundJS = async (origin, version) => {
   // foundScripts
   const fullscripts = foundScripts.get(version).splice(0);
@@ -847,6 +849,8 @@ export const processFoundJS = async (origin, version) => {
   });
   const allowList = await chrome.storage.local.get(['allowlist']);
   const allowMap = new Map(Object.entries(allowList.allowlist || {}));
+  const disallowList = await chrome.storage.local.get(['disallow']);
+  const disallowMap = new Map(Object.entries(disallowList.disallow || {}));
   let pendingScriptCount = scripts.length;
   for (const script of scripts) {
     if (script.src) {
@@ -858,10 +862,15 @@ export const processFoundJS = async (origin, version) => {
           }
         } else {
           allowDisallow(script, script);
-          if (allowMap.has(script.src)) {
-            updateCurrentState(STATES.VALID);
-          } else if (response.type === 'EXTENSION') {
-            updateCurrentState(STATES.RISK);
+
+          if (response.type === 'EXTENSION') {
+                                    updateCurrentState(STATES.RISK);
+          } else if (allowMap.has(script.src)) {
+            if (disallowMap.size === 0) {
+              updateCurrentState(STATES.VALID);
+            } else {
+              updateCurrentState(STATES.RISK);
+            }
           } else {
             updateCurrentState(STATES.INVALID);
           }
@@ -899,10 +908,19 @@ export const processFoundJS = async (origin, version) => {
             // using an array of maps, as we're using the same key for inline scripts - this will eventually be removed, once inline scripts are removed from the page load
             inlineScriptMap.set('hash not in manifest', script.rawjs);
             inlineScripts.push(inlineScriptMap);
-            if (allowMap.has(response.hash)) {
-              updateCurrentState(STATES.VALID);
-            } else if (KNOWN_EXTENSION_HASHES.includes(response.hash)) {
-              updateCurrentState(STATES.RISK);
+
+            if (
+              KNOWN_EXTENSION_HASHES.includes(response.hash) &&
+              !allowMap.has(response.hash)
+            ) {
+               updateCurrentState(STATES.RISK);
+
+            } else if (allowMap.has(response.hash)) {
+                if (disallowMap.size === 0) {
+                   updateCurrentState(STATES.VALID);
+                } else {
+                   updateCurrentState(STATES.RISK);
+                }
             } else {
               updateCurrentState(STATES.INVALID);
             }

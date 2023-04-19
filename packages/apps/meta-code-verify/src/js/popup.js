@@ -167,12 +167,9 @@ async function attachTable(data, what) {
     sourceCodeCell.style.border = '1px solid black';
     sourceCodeCell.style.padding = '5px';
     const aCell = document.createElement('a');
-    const textBlob = new Blob(
-      [type.toLowerCase() === 'raw_js' && rawjs ? rawjs : ''],
-      {
-        type: 'text/plain',
-      }
-    );
+    const textBlob = new Blob([rawjs ? rawjs : ''], {
+      type: 'text/plain',
+    });
     const textUrl = URL.createObjectURL(textBlob);
     aCell.href = textUrl;
     aCell.textContent =
