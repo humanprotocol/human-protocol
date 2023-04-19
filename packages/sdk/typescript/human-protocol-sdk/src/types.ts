@@ -707,4 +707,16 @@ export type NetworkData = {
    * KVStore contract address
    */
   kvstoreAddress: string;
+  /**
+   * Subgraph URL
+   */
+  subgraphUrl: string;
+  /**
+   * Old subgraph URL
+   */
+  oldSubgraphUrl: string;
+  /**
+   * Old Escrow Factory contract address
+   */
+  oldFactoryAddress: string;
 };
