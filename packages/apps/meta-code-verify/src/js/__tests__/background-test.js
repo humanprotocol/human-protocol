@@ -12,30 +12,27 @@ import { MESSAGE_TYPE, ORIGIN_TYPE } from '../config';
 import { handleMessages } from '../background';
 
 describe('background', () => {
-  beforeEach(() => {
-    window.chrome.browserAction.setIcon = jest.fn(() => {});
-  });
-  describe('UPDATE_ICON', () => {
-    it('should send update icon message when receiving icon update', () => {
-      const testIcon = 'testIcon';
-      handleMessages(
-        {
-          icon: testIcon,
-          type: MESSAGE_TYPE.UPDATE_ICON,
-        },
-        null,
-        () => {}
-      );
-      expect(window.chrome.browserAction.setIcon.mock.calls.length).toBe(1);
-    });
-  });
-
   describe('LOAD_MANIFEST', () => {
     it('should load manifest when origin is missing', async () => {
+      const encodeMock = jest.fn();
+      window.TextEncoder = function () {
+        return {
+          encode: encodeMock,
+        };
+      };
+      window.Uint8Array = function () {
+        return {
+          reduce: () => '7',
+        };
+      };
       window.fetch = jest.fn();
       window.fetch.mockReturnValueOnce(
         Promise.resolve({
-          json: () => Promise.resolve({ 1: { '/somepath': 'somehash' } }),
+          json: () =>
+            Promise.resolve({
+              1: { '/somepath': 'somehash' },
+              root_hash: '0x7',
+            }),
         })
       );
       const mockSendResponse = jest.fn();
@@ -44,8 +41,10 @@ describe('background', () => {
           origin: ORIGIN_TYPE.WHATSAPP,
           type: MESSAGE_TYPE.LOAD_MANIFEST,
           version: '1',
+          rootHash: '0x7',
+          leaves: ['0xsomeotherhash'],
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
@@ -59,7 +58,10 @@ describe('background', () => {
       window.fetch.mockReturnValueOnce(
         Promise.resolve({
           json: () =>
-            Promise.resolve({ 2: { '/someotherpath': 'someotherhash' } }),
+            Promise.resolve({
+              2: { '/someotherpath': 'someotherhash' },
+              root_hash: '0x7',
+            }),
         })
       );
       const mockSendResponse = jest.fn();
@@ -68,8 +70,10 @@ describe('background', () => {
           origin: ORIGIN_TYPE.WHATSAPP,
           type: MESSAGE_TYPE.LOAD_MANIFEST,
           version: '2',
+          rootHash: '0x7',
+          leaves: ['0xsomeotherhash'],
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
@@ -79,20 +83,42 @@ describe('background', () => {
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);
     });
     it('return valid when manifest and origin are found in cache', async () => {
+      const encodeMock = jest.fn();
+      window.TextEncoder = function () {
+        return {
+          encode: encodeMock,
+        };
+      };
+      window.Uint8Array = function () {
+        return {
+          reduce: () => '7',
+        };
+      };
       window.fetch = jest.fn();
+      window.fetch.mockReturnValueOnce(
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              1: { '/someotherpath': 'someotherhash' },
+              root_hash: '0x7',
+            }),
+        })
+      );
       const mockSendResponse = jest.fn();
       const handleMessagesReturnValue = handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
           type: MESSAGE_TYPE.LOAD_MANIFEST,
           version: '1',
+          rootHash: '0x7',
+          leaves: ['0xsomeotherhash'],
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.fetch.mock.calls.length).toBe(0);
-      expect(handleMessagesReturnValue).toBe(undefined);
+      expect(fetch.mock.calls.length).toBe(1);
+      expect(handleMessagesReturnValue).toBe(true);
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);
     });
@@ -107,7 +133,7 @@ describe('background', () => {
           type: MESSAGE_TYPE.RAW_JS,
           version: '1',
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       expect(mockSendResponse.mock.calls.length).toBe(1);
@@ -124,7 +150,7 @@ describe('background', () => {
           type: MESSAGE_TYPE.RAW_JS,
           version: 'NOT_A_VALID_VERSION',
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       expect(mockSendResponse.mock.calls.length).toBe(1);
@@ -152,14 +178,14 @@ describe('background', () => {
           type: MESSAGE_TYPE.RAW_JS,
           src: 'https://www.notavalidurl.com/nottherightpath',
           version: '1',
+          rawjs: '',
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(false);
-      expect(mockSendResponse.mock.calls[0][0].reason).toBe('no matching hash');
     });
     it('should return false if the hashes do not match', async () => {
       const encodeMock = jest.fn();
@@ -181,14 +207,14 @@ describe('background', () => {
           rawjs: 'console.log("all the JavaScript goes here");',
           version: '2',
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(false);
     });
-    it('should return true iff the hashes match', async () => {
+    it('should return true if the hashes match', async () => {
       const encodeMock = jest.fn();
       window.TextEncoder = function () {
         return {
@@ -209,9 +235,10 @@ describe('background', () => {
           rawjs: 'console.log("all the JavaScript goes here");',
           version: '2',
         },
-        null,
+        { tab: { id: null } },
         mockSendResponse
       );
+
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);

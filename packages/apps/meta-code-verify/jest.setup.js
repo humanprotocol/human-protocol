@@ -1,16 +1,42 @@
-import { jest } from '@jest/globals';
+import {jest} from '@jest/globals';
 
 window.chrome = {
-  browserAction: {
-    setIcon: jest.fn(),
-    setPopup: jest.fn(),
-  },
-  runtime: {
-    onMessage: {
-      addListener: jest.fn(),
+    browserAction: {
+        setIcon: jest.fn(),
+        setPopup: jest.fn(),
     },
-    sendMessage: jest.fn(),
-  }
+    storage: {
+        local: {
+            get: jest.fn(() => {
+                return {allowlist: {}}
+            }),
+            set: jest.fn()
+        }
+    },
+    tabs: {
+        onRemoved: {
+            addListener: jest.fn(),
+        }, onReplaced: {
+            addListener: jest.fn(),
+        }
+    },
+  webRequest: {
+      onResponseStarted: {
+        addListener: jest.fn(),
+      },
+    onHeadersReceived:{
+        addListener: jest.fn(),
+      }
+  },
+    runtime: {
+        onMessage: {
+            addListener: jest.fn(),
+        },
+        onInstalled: {
+            addListener: jest.fn(),
+        },
+        sendMessage: jest.fn(),
+    }
 };
 
 window.crypto = {
@@ -19,7 +45,6 @@ window.crypto = {
     }
 };
 
-window.TextEncoder = function () {};
-window.TextEncoder.encode = jest.fn();
 
-window.Uint8Array = function () {};
+window.Uint8Array = function () {
+};

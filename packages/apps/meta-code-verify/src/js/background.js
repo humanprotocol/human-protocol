@@ -384,6 +384,7 @@ export function handleMessages(message, sender, sendResponse) {
     return;
   }
 }
+
 chrome.runtime.onMessage.addListener(handleMessages);
 
 chrome.webRequest.onResponseStarted.addListener(
@@ -395,7 +396,9 @@ chrome.webRequest.onResponseStarted.addListener(
       src.url.indexOf('moz-extension://') === 0
     ) {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, { greeting: 'nocacheHeaderFound' });
+        chrome.tabs.sendMessage(tabs[0].id, {
+          greeting: 'nocacheHeaderFound',
+        });
       });
     }
   },

@@ -7,7 +7,7 @@
 
 'use strict';
 
-describe('detectKvstoreMeta', () => {
+describe('detectKVstoreMeta', () => {
   it.todo('test extractMetaAndLoad');
   it.todo('ensure extraMetaAndLoad is called statically');
   it.todo('ensure extractMetaAndLoad is called after DOMContentReady');

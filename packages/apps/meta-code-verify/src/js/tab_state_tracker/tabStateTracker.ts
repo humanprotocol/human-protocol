@@ -9,13 +9,14 @@ import { Origin, State } from '../config';
 import TabStateMachine from './TabStateMachine';
 
 const tabStateTracker = new Map<number, TabStateMachine>();
-
-chrome.tabs.onRemoved.addListener((tabId: number, _removeInfo) => {
-  tabStateTracker.delete(tabId);
-});
-chrome.tabs.onReplaced.addListener((_addedTabId, removedTabId: number) => {
-  tabStateTracker.delete(removedTabId);
-});
+if (typeof chrome !== 'undefined') {
+  chrome.tabs.onRemoved.addListener((tabId: number, _removeInfo) => {
+    tabStateTracker.delete(tabId);
+  });
+  chrome.tabs.onReplaced.addListener((_addedTabId, removedTabId: number) => {
+    tabStateTracker.delete(removedTabId);
+  });
+}
 
 function getOrCreateTabStateMachine(tabId: number, origin: Origin) {
   if (!tabStateTracker.has(tabId)) {

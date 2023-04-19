@@ -81,6 +81,35 @@ export const KNOWN_EXTENSION_HASHES = [
   '', // Edge - Dynamic: Tau adblock v1.4.1
 ];
 
+export const KNOWN_EXTENSION_HASHES_MAP = new Map(
+  Object.entries({
+    '727bfede71f473991faeb7f4b65632c93e7f7d17189f1b3d952cd990cd150808':
+      'Avast Online Security & Privacy v21.0.101',
+    c09a2e7b2fa97705c9afe890498e1f620ede4bd2968cfef7421080a8f9f0d8f9:
+      'Privacy Badger v2021.11.23.1',
+    '04c354b90b330f4cac2678ccd311e5d2a6e8b57815510b176ddbed8d52595726':
+      'LastPass v4.88.0',
+    e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855:
+      'AdLock - adblocker & privacy protection v0.1.30',
+    '4ae6b4dcefb37952cef704c39fe3e8d675bd32c54302984e747ba6768541862a':
+      'Vue.js devtools v6.0.12',
+    '91fecf0ca4c2260f8a18d1c371d717e656e98a0015f0206379afe662746d6009':
+      'Vue.js devtools v6.0.12',
+    e64b3a9472f559611158a628da06e770ce8cc3d0f8395849072a0199bae705f9:
+      'Total Adblock-Ad Blocker v2.10.0 *and* FF/Edge BitGuard v1.0',
+    c924b9ed122066e5420b125a1accb787c3856c4a422fe9bde47d1f40660271a6:
+      'Smart Blocker v1.0.2',
+    '7a69d1fb29471a9962307f7882adade784141d02617e233eb366ae5f63fd9dd8':
+      'Minimal Consent v1.0.9',
+    d768396bbfda57a3defb0aeba5d9b9aefef562d8204520668f9e275c68455a0c:
+      'Writer from Writer.com v1.63.2',
+    '855e2fd1368fc12a14159e26ed3132e6567e8443f8b75081265b93845b865103':
+      'AdGuard AdBlocker v3.6.17',
+    deda33bced5f2014562e03f8c82a2a16df074a2bc6be6eceba78274056e41372:
+      'Netcraft Extension v1.16.8',
+  })
+);
+
 export const MESSAGE_TYPE = {
   DEBUG: 'DEBUG',
   GET_DEBUG: 'GET_DEBUG',
@@ -96,7 +125,7 @@ export const ORIGIN_HOST = {
   FACEBOOK: 'facebook.com',
   WHATSAPP: 'whatsapp.com',
   MESSENGER: 'messenger.com',
-  KVSTORE: 'localhost',
+  KVSTORE: 'dashboard.humanprotocol.org',
 };
 
 export const ORIGIN_TIMEOUT = {
@@ -115,4 +144,5 @@ export const ORIGIN_TYPE = Object.freeze({
 export type Origin = keyof typeof ORIGIN_TYPE;
 
 // Firefox and Safari currently do not support CompressionStream
-export const DOWNLOAD_JS_ENABLED = 'CompressionStream' in window;
+export const DOWNLOAD_JS_ENABLED =
+  typeof window !== 'undefined' && 'CompressionStream' in window;

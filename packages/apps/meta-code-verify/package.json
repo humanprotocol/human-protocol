@@ -16,10 +16,11 @@
     "watch": "yarn run rollup --config --watch",
     "lint": "yarn makePrettier && yarn run eslint src/js/**",
     "makeBundle": "yarn run rollup -c",
-    "makePrettier": "yarn run prettier --write \"src/**/*.js\" \"build/**/*.mjs\"",
+    "makePrettier": "yarn run prettier --write \"src/**/*.js\" \"rollup_scripts/**/*.mjs\"",
     "test": "yarn lint && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-eslint": "^8.0.2",
     "@rollup/plugin-node-resolve": "^15.0.1",
@@ -29,10 +30,13 @@
     "@types/jest": "^29.4.0",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
+    "assert": "^2.0.0",
     "eslint": "^7.32.0",
     "jest": "^27.1.0",
+    "jest-environment-jsdom": "^27.5.1",
     "prettier": "^2.3.2",
     "rollup": "^2.56.3",
+    "sinon-chrome": "^3.0.1",
     "ts-jest": "^27.1.0",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"

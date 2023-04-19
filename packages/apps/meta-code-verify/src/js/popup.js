@@ -10,6 +10,7 @@ import {
   MESSAGE_TYPE,
   ORIGIN_TYPE,
   STATES,
+  KNOWN_EXTENSION_HASHES_MAP,
 } from './config.js';
 
 const STATE_TO_POPUP_STATE = {
@@ -56,9 +57,163 @@ function attachTextToHtml() {
     element.innerHTML = chrome.i18n.getMessage(element.id);
   });
 }
+function shortenString(str, startLength, endLength) {
+  return str.substr(0, startLength) + '...' + str.substr(-endLength);
+}
+async function handleBoth(what, key) {
+  const { disallow } = await chrome.storage.local.get('disallow');
+  const { allowlist } = await chrome.storage.local.get('allowlist');
+  const disallowMap = new Map(Object.entries(disallow || {}));
+  const allowMap = new Map(Object.entries(allowlist || {}));
+  if (what === 'disallow') {
+    allowMap.set(key, disallowMap.get(key));
+    disallowMap.delete(key);
+    await chrome.storage.local.set({
+      disallow: Object.fromEntries(disallowMap),
+    });
+    await chrome.storage.local.set({
+      allowlist: Object.fromEntries(allowMap),
+    });
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      const activeTab = tabs[0];
+      chrome.tabs.reload(activeTab.id);
+    });
+  } else {
+    console.log(disallowMap.entries());
+    disallowMap.set(key, allowMap.get(key));
+    allowMap.delete(key);
+    await chrome.storage.local.set({
+      disallow: Object.fromEntries(disallowMap),
+    });
+    await chrome.storage.local.set({
+      allowlist: Object.fromEntries(allowMap),
+    });
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      const activeTab = tabs[0];
+      chrome.tabs.reload(activeTab.id);
+    });
+  }
 
-function attachListeners() {
-  const learnMoreUrls = ORIGIN_TO_LEARN_MORE_PAGES['KVSTORE'];
+  await whatTable();
+}
+function getExtensionName(extensionId) {
+  return new Promise((resolve, reject) => {
+    chrome.management.get(extensionId, extensionInfo => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError.message);
+      } else {
+        resolve(extensionInfo.name);
+      }
+    });
+  });
+}
+async function attachTable(data, what) {
+  // Create the table element
+  const table = document.createElement('table');
+  table.style.border = '1px solid black';
+  table.style.borderCollapse = 'collapse';
+
+  // Create the header row
+  const headerRow = document.createElement('tr');
+
+  const headers = ['link/hash', 'src', 'extension name', 'source code', what];
+  headers.forEach(headerText => {
+    const th = document.createElement('th');
+    th.style.border = '1px solid black';
+    th.style.padding = '5px';
+    th.textContent = headerText;
+    headerRow.appendChild(th);
+  });
+
+  table.appendChild(headerRow);
+
+  // Create table rows
+  for (const key in data) {
+    const row = document.createElement('tr');
+    const { type, src, rawjs } = data[key];
+
+    // Key cell
+    const keyCell = document.createElement('td');
+    keyCell.style.border = '1px solid black';
+    keyCell.style.padding = '5px';
+    keyCell.textContent = shortenString(key, 3, 3);
+    row.appendChild(keyCell);
+
+    // Src cell
+    const srcCell = document.createElement('td');
+    srcCell.style.border = '1px solid black';
+    srcCell.style.padding = '5px';
+    const regex = /# sourceURL=(.*\.js)\b/;
+    const result = rawjs ? rawjs.match(regex) : '';
+    srcCell.textContent =
+      type !== 'raw_js' && src ? src : result && result[1] ? result[1] : '';
+    row.appendChild(srcCell);
+
+    const extensionCell = document.createElement('td');
+    extensionCell.style.border = '1px solid black';
+    extensionCell.style.padding = '5px';
+    const regex1 = /chrome-extension:\/\/([^/]+)\//;
+    const result1 = result ? result[1].match(regex1) : '';
+    extensionCell.textContent =
+      result1.length > 1
+        ? await getExtensionName(result1[1])
+        : KNOWN_EXTENSION_HASHES_MAP.has(key)
+        ? KNOWN_EXTENSION_HASHES_MAP.get(key)
+        : '';
+    row.appendChild(extensionCell);
+
+    // Source code cell
+    const sourceCodeCell = document.createElement('td');
+    sourceCodeCell.style.border = '1px solid black';
+    sourceCodeCell.style.padding = '5px';
+    const aCell = document.createElement('a');
+    const textBlob = new Blob(
+      [type.toLowerCase() === 'raw_js' && rawjs ? rawjs : ''],
+      {
+        type: 'text/plain',
+      }
+    );
+    const textUrl = URL.createObjectURL(textBlob);
+    aCell.href = textUrl;
+    aCell.textContent =
+      type.toLowerCase() === 'raw_js' && rawjs ? 'source code' : '';
+    aCell.target = '_blank';
+    sourceCodeCell.appendChild(aCell);
+    row.appendChild(sourceCodeCell);
+    const allowDisallowCell = document.createElement('td');
+    allowDisallowCell.style.border = '1px solid black';
+    allowDisallowCell.style.padding = '5px';
+    const allowACell = document.createElement('a');
+    allowACell.href = '#';
+    allowACell.textContent = what;
+    allowACell.addEventListener('click', () =>
+      handleBoth(what === 'allow' ? 'disallow' : 'allow', key)
+    );
+    allowDisallowCell.appendChild(allowACell);
+    row.appendChild(allowDisallowCell);
+    table.appendChild(row);
+  }
+
+  // Add table to the document
+  const disallowDiv = document.getElementById(
+    what === 'allow' ? 'disallow' : 'allow'
+  );
+  disallowDiv.innerHTML = '';
+  disallowDiv.appendChild(table);
+}
+async function whatTable() {
+  const { disallow } = await chrome.storage.local.get('disallow');
+  const { allowlist } = await chrome.storage.local.get('allowlist');
+  attachTable(disallow, 'allow');
+  attachTable(allowlist, 'disallow');
+}
+function attachListeners(origin) {
+  if (!(origin in ORIGIN_TO_LEARN_MORE_PAGES)) {
+    throw new Error(
+      `Learn more pages for origin type: ${origin} do not exist!`
+    );
+  }
+  const learnMoreUrls = ORIGIN_TO_LEARN_MORE_PAGES[origin];
 
   const menuButtonList = document.getElementsByClassName('menu');
   Array.from(menuButtonList).forEach(menuButton => {
@@ -69,11 +224,15 @@ function attachListeners() {
   closeMenuButton.addEventListener('click', () => window.close());
 
   const menuRowList = document.getElementsByClassName('menu_row');
-
-  menuRowList[0].addEventListener('click', _evt => {
-    chrome.tabs.create({ url: learnMoreUrls.about });
+  menuRowList[0].addEventListener('click', async _evt => {
+    whatTable();
+    updateDisplay('allowlist');
   });
   menuRowList[0].style.cursor = 'pointer';
+  menuRowList[1].addEventListener('click', _evt => {
+    chrome.tabs.create({ url: learnMoreUrls.about });
+  });
+  menuRowList[1].style.cursor = 'pointer';
 
   const downloadTextList = document.getElementsByClassName(
     'status_message_highlight'
@@ -81,8 +240,8 @@ function attachListeners() {
   const downloadSrcButton = document.getElementById('i18nDownloadSourceButton');
 
   if (DOWNLOAD_JS_ENABLED) {
-    menuRowList[1].addEventListener('click', () => updateDisplay('download'));
-    menuRowList[1].style.cursor = 'pointer';
+    menuRowList[2].addEventListener('click', () => updateDisplay('download'));
+    menuRowList[2].style.cursor = 'pointer';
 
     downloadTextList[0].addEventListener('click', () => {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -175,7 +334,6 @@ function setUpBackgroundMessageHandler(tabId) {
     console.error('[Popup] No tab_id query param', document.location);
     return;
   }
-
   chrome.runtime.onMessage.addListener(message => {
     if (!('type' in message)) {
       return;

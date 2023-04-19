@@ -12,7 +12,7 @@ Here's what it looks like in our apps:
 
 ![App Screenshot](https://user-images.githubusercontent.com/62529025/228215108-8891f6dc-23f3-4fa8-9188-c780707c50c0.png)
 
-The main difference is the removal of `version` and `hash_function`, replaced by `ipfs_cid`, which can later be used to verify the Merkle tree. While WhatsApp pushes their Merkle root to Cloudflare, our implementation is more resilient as it's decentralized in IPFS, in contrast to the centralized server solution used by Cloudflare. The following is a brief description of the project and how to use it.
+The main difference is the removal of `hash_function`. While WhatsApp pushes their Merkle root to Cloudflare, our implementation is more resilient as it's decentralized in IPFS, in contrast to the centralized server solution used by Cloudflare. The following is a brief description of the project and how to use it.
 
 # How to Use
 

@@ -8,6 +8,7 @@
 import {
   KNOWN_EXTENSION_HASHES,
   MESSAGE_TYPE,
+  ORIGIN_TYPE,
   DOWNLOAD_JS_ENABLED,
   STATES,
 } from './config';
@@ -287,13 +288,29 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
     let otherHashes = '';
     let otherType = '';
     let roothash = rawManifest.root;
-    let ipfs_cid = rawManifest.ipfs_cid;
+    let version = rawManifest.version;
 
-    currentFilterType = 'BOTH';
+    if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(currentOrigin)) {
+      leaves = rawManifest.manifest;
+      otherHashes = rawManifest.manifest_hashes;
+      otherType = scriptNodeMaybe.getAttribute('data-manifest-type');
+      roothash = otherHashes.combined_hash;
+      version = scriptNodeMaybe.getAttribute('data-manifest-rev');
 
+      if (currentFilterType != '') {
+        currentFilterType = 'BOTH';
+      }
+      if (currentFilterType === '') {
+        currentFilterType = otherType;
+      }
+    }
+    // for whatsapp
+    else {
+      currentFilterType = 'BOTH';
+    }
     // now that we know the actual version of the scripts, transfer the ones we know about.
     if (foundScripts.has('')) {
-      foundScripts.set(ipfs_cid, foundScripts.get(''));
+      foundScripts.set(version, foundScripts.get(''));
       foundScripts.delete('');
     }
 
@@ -306,7 +323,7 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
         otherType: otherType,
         rootHash: roothash,
         workaround: scriptNodeMaybe.innerHTML,
-        ipfs_cid,
+        version: version,
       },
       response => {
         chrome.runtime.sendMessage({
@@ -322,7 +339,7 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
             clearTimeout(manifestTimeoutID);
             manifestTimeoutID = '';
           }
-          window.setTimeout(() => processFoundJS(currentOrigin, ipfs_cid), 0);
+          window.setTimeout(() => processFoundJS(currentOrigin, version), 0);
         } else {
           if (
             ['ENDPOINT_FAILURE', 'UNKNOWN_ENDPOINT_ISSUE'].includes(
@@ -369,11 +386,6 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
         otherType: otherType, // TODO: read from DOM when available
       });
     }
-  } else if (scriptNodeMaybe.as === 'script') {
-    scriptList.get(scriptList.keys().next().value).push({
-      src: scriptNodeMaybe.href,
-      otherType: otherType, // TODO: read from DOM when available
-    });
   } else {
     // no src, access innerHTML for the code
     const hashLookupAttribute =
@@ -526,8 +538,6 @@ export function hasInvalidScripts(scriptNodeMaybe, scriptList) {
 
   if (scriptNodeMaybe.nodeName.toLowerCase() === 'script') {
     return storeFoundJS(scriptNodeMaybe, scriptList);
-  } else if (scriptNodeMaybe.as === 'script') {
-    return storeFoundJS(scriptNodeMaybe, scriptList);
   } else if (scriptNodeMaybe.childNodes.length > 0) {
     scriptNodeMaybe.childNodes.forEach(childNode => {
       // if not an HTMLElement ignore it!
@@ -550,6 +560,108 @@ export function hasInvalidScripts(scriptNodeMaybe, scriptList) {
 
   return;
 }
+
+const parseCSPString = csp => {
+  const directiveStrings = csp.split(';');
+  return directiveStrings.reduce((map, directiveString) => {
+    const [directive, ...values] = directiveString.split(' ');
+    return map.set(directive, new Set(values));
+  }, new Map());
+};
+
+const checkCSPHeaders = (cspHeader, cspReportHeader) => {
+  // If CSP is enforcing on evals we don't need to do extra checks
+  if (cspHeader != null) {
+    const cspMap = parseCSPString(cspHeader);
+    if (cspMap.has('script-src')) {
+      if (!cspMap.get('script-src').has("'unsafe-eval'")) {
+        return;
+      }
+    }
+    if (!cspMap.has('script-src') && cspMap.has('default-src')) {
+      if (!cspMap.get('default-src').has("'unsafe-eval'")) {
+        return;
+      }
+    }
+  }
+
+  // If CSP is not reporting on evals we cannot catch them
+  if (cspReportHeader != null) {
+    const cspReportMap = parseCSPString(cspReportHeader);
+    if (cspReportMap.has('script-src')) {
+      if (cspReportMap.get('script-src').has("'unsafe-eval'")) {
+        updateCurrentState(STATES.INVALID);
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.DEBUG,
+          log: 'Missing unsafe-eval from CSP report-only header',
+        });
+        return;
+      }
+    }
+    if (!cspReportMap.has('script-src') && cspReportMap.has('default-src')) {
+      if (cspReportMap.get('default-src').has("'unsafe-eval'")) {
+        updateCurrentState(STATES.INVALID);
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.DEBUG,
+          log: 'Missing unsafe-eval from CSP report-only header',
+        });
+        return;
+      }
+    }
+  } else {
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPE.DEBUG,
+      log: 'Missing CSP report-only header',
+    });
+    updateCurrentState(STATES.INVALID);
+    return;
+  }
+
+  // Check for evals
+  scanForCSPEvalReportViolations();
+};
+
+const scanForCSPEvalReportViolations = () => {
+  document.addEventListener('securitypolicyviolation', e => {
+    // Older Browser can't distinguish between 'eval' and 'wasm-eval' violations
+    // We need to check if there is an eval violation
+    if (e.blockedURI !== 'eval') {
+      return;
+    }
+
+    if (e.disposition === 'enforce') {
+      return;
+    }
+
+    fetch(e.sourceFile, { cache: 'only-if-cached', mode: 'same-origin' })
+      .then(response => {
+        if (response.status === 504) {
+          updateCurrentState(STATES.INVALID);
+        }
+
+        return response.text();
+      })
+      .then(code => {
+        const violatingLine = code.split(/\r?\n/)[e.lineNumber - 1];
+        if (
+          violatingLine.includes('WebAssembly') &&
+          !violatingLine.includes('eval(') &&
+          !violatingLine.includes('Function(') &&
+          !violatingLine.includes("setTimeout('") &&
+          !violatingLine.includes("setInterval('") &&
+          !violatingLine.includes('setTimeout("') &&
+          !violatingLine.includes('setInterval("')
+        ) {
+          return;
+        }
+        updateCurrentState(STATES.INVALID);
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.DEBUG,
+          log: `Caught eval in ${e.sourceFile}`,
+        });
+      });
+  });
+};
 
 export const scanForScripts = () => {
   const allElements = document.getElementsByTagName('*');
@@ -636,13 +748,10 @@ async function genSourceText(response) {
   return sourceTextParts.join('\n').trim();
 }
 
-async function processJSWithSrc(script, origin, ipfs_cid) {
+async function processJSWithSrc(script, origin, version) {
   // fetch the script from page context, not the extension context.
   try {
-    const sourceResponse = await fetch(script.src, {
-      method: 'GET',
-    });
-
+    const sourceResponse = await fetch(script.src, { method: 'GET' });
     if (DOWNLOAD_JS_ENABLED) {
       const fileNameArr = script.src.split('/');
       const fileName = fileNameArr[fileNameArr.length - 1].split('?')[0];
@@ -663,7 +772,7 @@ async function processJSWithSrc(script, origin, ipfs_cid) {
             type: MESSAGE_TYPE.RAW_JS,
             rawjs: jsPackage.trimStart(),
             origin: origin,
-            ipfs_cid,
+            version: version,
           },
           response => {
             if (response.valid) {
@@ -684,10 +793,48 @@ async function processJSWithSrc(script, origin, ipfs_cid) {
     };
   }
 }
+async function allowDisallow(scriptOrHash, script) {
+  const disallowList = await chrome.storage.local.get(['disallow']);
+  const allowList = await chrome.storage.local.get(['allowlist']);
 
-export const processFoundJS = async (origin, ipfs_cid) => {
+  const disallowMap = new Map(Object.entries(disallowList.disallow || {}));
+  const allowMap = new Map(Object.entries(allowList.allowlist || {}));
+  if (
+    !disallowMap.size &&
+    !allowMap.has(scriptOrHash?.src) &&
+    !allowMap.has(scriptOrHash)
+  ) {
+    if (scriptOrHash?.src) {
+      disallowMap.set(scriptOrHash.src, script);
+      await chrome.storage.local.set({
+        disallow: Object.fromEntries(disallowMap),
+      });
+    } else {
+      disallowMap.set(scriptOrHash, script);
+      await chrome.storage.local.set({
+        disallow: Object.fromEntries(disallowMap),
+      });
+    }
+  } else {
+    if (scriptOrHash.src) {
+      if (
+        !disallowMap.has(scriptOrHash.src) &&
+        !allowMap.has(scriptOrHash.src)
+      ) {
+        const map2 = disallowMap.set(scriptOrHash.src, script);
+        await chrome.storage.local.set({ disallow: Object.fromEntries(map2) });
+      }
+    } else {
+      if (!disallowMap.has(scriptOrHash) && !allowMap.has(scriptOrHash)) {
+        const map2 = disallowMap.set(scriptOrHash, script);
+        await chrome.storage.local.set({ disallow: Object.fromEntries(map2) });
+      }
+    }
+  }
+}
+export const processFoundJS = async (origin, version) => {
   // foundScripts
-  const fullscripts = foundScripts.get(ipfs_cid).splice(0);
+  const fullscripts = foundScripts.get(version).splice(0);
   const scripts = fullscripts.filter(script => {
     if (
       script.otherType === currentFilterType ||
@@ -695,27 +842,31 @@ export const processFoundJS = async (origin, ipfs_cid) => {
     ) {
       return true;
     } else {
-      foundScripts.get(ipfs_cid).push(script);
+      foundScripts.get(version).push(script);
     }
   });
-
+  const allowList = await chrome.storage.local.get(['allowlist']);
+  const allowMap = new Map(Object.entries(allowList.allowlist || {}));
   let pendingScriptCount = scripts.length;
-
   for (const script of scripts) {
     if (script.src) {
-      await processJSWithSrc(script, origin, ipfs_cid).then(response => {
+      await processJSWithSrc(script, origin, version).then(response => {
         pendingScriptCount--;
         if (response.valid) {
           if (pendingScriptCount == 0) {
             updateCurrentState(STATES.VALID);
           }
         } else {
-          if (response.type === 'EXTENSION') {
+          allowDisallow(script, script);
+          if (allowMap.has(script.src)) {
+            updateCurrentState(STATES.VALID);
+          } else if (response.type === 'EXTENSION') {
             updateCurrentState(STATES.RISK);
           } else {
             updateCurrentState(STATES.INVALID);
           }
         }
+
         chrome.runtime.sendMessage({
           type: MESSAGE_TYPE.DEBUG,
           log:
@@ -732,9 +883,9 @@ export const processFoundJS = async (origin, ipfs_cid) => {
           rawjs: script.rawjs.trimStart(),
           lookupKey: script.lookupKey,
           origin: origin,
-          ipfs_cid,
+          version: version,
         },
-        response => {
+        async response => {
           pendingScriptCount--;
           let inlineScriptMap = new Map();
           if (response.valid) {
@@ -744,10 +895,13 @@ export const processFoundJS = async (origin, ipfs_cid) => {
               updateCurrentState(STATES.VALID);
             }
           } else {
+            allowDisallow(response.hash, script);
             // using an array of maps, as we're using the same key for inline scripts - this will eventually be removed, once inline scripts are removed from the page load
             inlineScriptMap.set('hash not in manifest', script.rawjs);
             inlineScripts.push(inlineScriptMap);
-            if (KNOWN_EXTENSION_HASHES.includes(response.hash)) {
+            if (allowMap.has(response.hash)) {
+              updateCurrentState(STATES.VALID);
+            } else if (KNOWN_EXTENSION_HASHES.includes(response.hash)) {
               updateCurrentState(STATES.RISK);
             } else {
               updateCurrentState(STATES.INVALID);
@@ -765,7 +919,7 @@ export const processFoundJS = async (origin, ipfs_cid) => {
       );
     }
   }
-  window.setTimeout(() => processFoundJS(origin, ipfs_cid), 3000);
+  window.setTimeout(() => processFoundJS(origin, version), 3000);
 };
 
 async function downloadJSToZip(downloadType) {
@@ -841,7 +995,7 @@ async function downloadJSToZip(downloadType) {
 }
 
 chrome.runtime.onMessage.addListener(function (request) {
-  if (request.greeting && DOWNLOAD_JS_ENABLED) {
+  if (request.greeting === 'downloadSource' && DOWNLOAD_JS_ENABLED) {
     downloadJSToZip(request.greeting);
   } else if (request.greeting === 'nocacheHeaderFound') {
     updateCurrentState(STATES.INVALID);
@@ -876,25 +1030,47 @@ function isPathnameExcluded(excludedPathnames) {
   });
 }
 
-// Initialize the connection
-
 export function startFor(origin, excludedPathnames = []) {
-  chrome.runtime.sendMessage({
-    type: MESSAGE_TYPE.CONTENT_SCRIPT_START,
-    origin,
-  });
+  chrome.runtime
+    .sendMessage({
+      type: MESSAGE_TYPE.CONTENT_SCRIPT_START,
+      origin,
+    })
+    .then(resp => {
+      if (
+        [ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(currentOrigin)
+      ) {
+        checkCSPHeaders(resp.cspHeader, resp.cspReportHeader);
+      }
+    });
   if (isPathnameExcluded(excludedPathnames)) {
     updateCurrentState(STATES.IGNORE);
     return;
   }
-  updateCurrentState(STATES.PROCESSING);
-  currentOrigin = origin;
-  scanForScripts();
-  // set the timeout once, in case there's an iframe and contentUtils sets another manifest timer
-  if (manifestTimeoutID === '') {
-    manifestTimeoutID = setTimeout(() => {
-      // Manifest failed to load, flag a warning to the user.
-      updateCurrentState(STATES.TIMEOUT);
-    }, 45000);
+  let isUserLoggedIn = false;
+  if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(origin)) {
+    const cookies = document.cookie.split(';');
+    cookies.forEach(cookie => {
+      let pair = cookie.split('=');
+      // c_user contains the user id of the user logged in
+      if (pair[0].indexOf('c_user') >= 0) {
+        isUserLoggedIn = true;
+      }
+    });
+  } else {
+    // only doing this check for FB and MSGR
+    isUserLoggedIn = true;
+  }
+  if (isUserLoggedIn) {
+    updateCurrentState(STATES.PROCESSING);
+    currentOrigin = origin;
+    scanForScripts();
+    // set the timeout once, in case there's an iframe and contentUtils sets another manifest timer
+    if (manifestTimeoutID === '') {
+      manifestTimeoutID = setTimeout(() => {
+        // Manifest failed to load, flag a warning to the user.
+        updateCurrentState(STATES.TIMEOUT);
+      }, 45000);
+    }
   }
 }
