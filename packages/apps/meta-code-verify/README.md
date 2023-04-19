@@ -71,3 +71,23 @@ Run `yarn build --mode development` again, followed by `yarn start-prod`. When y
 ![Red exclamation](https://user-images.githubusercontent.com/62529025/228222259-d144fd17-0f7d-4a2b-93ff-caf57ae31ced.png)
 
 This indicates that one or more scripts are not in the Merkle tree. If you download it, you'll get a list of all JavaScript files and their source code in gzip files, so you can check it yourself. 
+
+# Allowlist
+
+Allowlist allowing you to allow some of the extension that you deemed safe to use for example you want to use [metamask](https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en) you will surely get an error like this:
+
+![Red exclamation](https://user-images.githubusercontent.com/62529025/228222259-d144fd17-0f7d-4a2b-93ff-caf57ae31ced.png)
+
+You can now open allowlist on the right sidebar and click allow
+
+![image](https://user-images.githubusercontent.com/62529025/233020510-64abc10a-af07-4f6e-b232-818b83b09af5.png)
+
+![image](https://user-images.githubusercontent.com/62529025/233020636-032fd746-82f5-4974-b2e7-bab0c4f5c76b.png)
+
+And now your code is validated again 
+
+![image](https://user-images.githubusercontent.com/62529025/233020950-76945a40-82fa-4f06-8dfa-4f4eeb8093d8.png)
+
+
+
+
