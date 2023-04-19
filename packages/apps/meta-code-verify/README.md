@@ -10,7 +10,8 @@ This project is a modified version of [meta-code-verify](https://github.com/face
 
 Here's what it looks like in our apps:
 
-![App Screenshot](https://user-images.githubusercontent.com/62529025/228215108-8891f6dc-23f3-4fa8-9188-c780707c50c0.png)
+![image](https://user-images.githubusercontent.com/62529025/233022112-f4de94fd-ec48-4d4b-aa4e-e86a907bcec8.png)
+
 
 The main difference is the removal of `hash_function`. While WhatsApp pushes their Merkle root to Cloudflare, our implementation is more resilient as it's decentralized in IPFS, in contrast to the centralized server solution used by Cloudflare. The following is a brief description of the project and how to use it.
 
