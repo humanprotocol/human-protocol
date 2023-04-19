@@ -38,7 +38,7 @@ export default async function generateMerkleTree(
   const cid = await NFT_STORAGE_CLIENT.storeBlob(someData);
 
   const merkleTreeJson = JSON.stringify({
-    ipfs_cid: cid,
+    version: cid,
     root: merkleRoot,
     leaves: leaves,
   });
