@@ -39,7 +39,13 @@ If successful, it will show something like this:
 
 ![Success](https://user-images.githubusercontent.com/62529025/228217415-034622c6-0cf6-46c2-9d58-237ca72d8bf5.png)
 
-Now, go to `packages/apps/escrow-dashboard` and run these commands:
+Now, go to `packages/apps/escrow-dashboard` and then add the necessary environment variable:
+
+```
+VITE_APP_NFT_STORAGE_API=
+```
+
+And then run this command:
 
 ```
 $ yarn
