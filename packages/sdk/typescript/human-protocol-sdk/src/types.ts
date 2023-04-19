@@ -674,3 +674,49 @@ export type JobArguments = {
    */
   logLevel?: 'debug' | 'info' | 'warn' | 'error';
 };
+
+/**
+ * Network data
+ */
+export type NetworkData = {
+  /**
+   * Network chain id
+   */
+  chainId: number;
+  /**
+   * Network title
+   */
+  title: string;
+  /**
+   * Network scanner URL
+   */
+  scanUrl: string;
+  /**
+   * HMT Token contract address
+   */
+  hmtAddress: string;
+  /**
+   * Escrow Factory contract address
+   */
+  factoryAddress: string;
+  /**
+   * Staking contract address
+   */
+  stakingAddress: string;
+  /**
+   * KVStore contract address
+   */
+  kvstoreAddress: string;
+  /**
+   * Subgraph URL
+   */
+  subgraphUrl: string;
+  /**
+   * Old subgraph URL
+   */
+  oldSubgraphUrl: string;
+  /**
+   * Old Escrow Factory contract address
+   */
+  oldFactoryAddress: string;
+};
