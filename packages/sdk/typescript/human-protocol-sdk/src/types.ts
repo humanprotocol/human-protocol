@@ -604,6 +604,28 @@ export type UploadResult = {
 };
 
 /**
+ * Generic file data
+ * @readonly
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type File = Record<string, any>;
+
+/**
+ * Upload file data
+ * @readonly
+ */
+export type UploadFile = {
+  /**
+   * Uploaded object key
+   */
+  key: string;
+  /**
+   * Hash of uploaded object key
+   */
+  hash: string;
+};
+
+/**
  * Job arguments
  * @readonly
  */

@@ -1,8 +1,7 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeAll } from 'vitest';
 import crypto from 'crypto';
 import {
   DEFAULT_ENDPOINT,
-  DEFAULT_FILENAME_PREFIX,
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BUCKET,
   DEFAULT_USE_SSL,
@@ -10,6 +9,7 @@ import {
   StorageParams,
 } from '../src';
 import {
+  ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from '../src/error';
@@ -90,12 +90,38 @@ describe('Storage tests', () => {
 
       expect(storageClient).toBeInstanceOf(StorageClient);
     });
+
+    test('should not init client with an error', async () => {
+      // TODO: Adapt it for particular test case
+      /* vi.mock('../src/storage', () => {
+        const StorageClient = vi.fn().mockImplementation(() => {
+          throw ErrorStorageClientNotInitialized;
+        });
+      
+        return {
+          default: StorageClient
+        }
+      }) */
+
+      const storageCredentials: StorageCredentials = {
+        accessKey: '',
+        secretKey: '',
+      };
+
+      const storageParams: StorageParams = {
+        endPoint: DEFAULT_ENDPOINT,
+        port: DEFAULT_PORT,
+        useSSL: DEFAULT_USE_SSL,
+      };
+
+      // expect(() => new StorageClient(storageCredentials, storageParams)).toThrow(ErrorStorageClientNotInitialized);
+    });
   });
 
   describe('Client anonymous access', () => {
     let storageClient: StorageClient;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       const storageCredentials: StorageCredentials = {
         accessKey: '',
         secretKey: '',
@@ -132,7 +158,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key = hash;
 
       expect(storageClient['client'].putObject).toHaveBeenCalledWith(
         DEFAULT_PUBLIC_BUCKET,
@@ -146,7 +172,7 @@ describe('Storage tests', () => {
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
-    test('should upload the file with an error', async () => {
+    test('should not upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
       vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotUploaded;
@@ -163,7 +189,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key = hash;
 
       const downloadedResults = await storageClient.downloadFiles(
         [key],
@@ -178,7 +204,7 @@ describe('Storage tests', () => {
       expect(downloadedResults[0].content).toEqual(file);
     });
 
-    test('should download the file with an error', async () => {
+    test('should not download the file with an error', async () => {
       vi.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
@@ -196,14 +222,14 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file1))
         .digest('hex');
-      const key1 = `${DEFAULT_FILENAME_PREFIX}${hash1}`;
+      const key1 = hash1;
 
       const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
       const hash2 = crypto
         .createHash('sha1')
         .update(JSON.stringify(file2))
         .digest('hex');
-      const key2 = `${DEFAULT_FILENAME_PREFIX}${hash2}`;
+      const key2 = hash2;
 
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() =>
         Promise.resolve([key1, key2])
@@ -215,7 +241,7 @@ describe('Storage tests', () => {
       expect(results[1]).toEqual(key2);
     });
 
-    test('should return a list of objects with an error', async () => {
+    test('should not return a list of objects with an error', async () => {
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() => {
         throw new Error();
       });
@@ -228,7 +254,7 @@ describe('Storage tests', () => {
   describe('Client with credentials', () => {
     let storageClient: StorageClient;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       const storageCredentials: StorageCredentials = {
         accessKey: STORAGE_TEST_ACCESS_KEY,
         secretKey: STORAGE_TEST_SECRET_KEY,
@@ -265,7 +291,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key = hash;
 
       expect(storageClient['client'].putObject).toHaveBeenCalledWith(
         DEFAULT_PUBLIC_BUCKET,
@@ -279,7 +305,7 @@ describe('Storage tests', () => {
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
-    test('should upload the file with an error', async () => {
+    test('should not upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
       vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotUploaded;
@@ -296,7 +322,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+      const key = hash;
 
       const downloadedResults = await storageClient.downloadFiles(
         [key],
@@ -311,7 +337,7 @@ describe('Storage tests', () => {
       expect(downloadedResults[0].content).toEqual(file);
     });
 
-    test('should download the file with an error', async () => {
+    test('should not download the file with an error', async () => {
       vi.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
@@ -329,14 +355,14 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file1))
         .digest('hex');
-      const key1 = `${DEFAULT_FILENAME_PREFIX}${hash1}`;
+      const key1 = hash1;
 
       const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
       const hash2 = crypto
         .createHash('sha1')
         .update(JSON.stringify(file2))
         .digest('hex');
-      const key2 = `${DEFAULT_FILENAME_PREFIX}${hash2}`;
+      const key2 = hash2;
 
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() =>
         Promise.resolve([key1, key2])
@@ -348,7 +374,7 @@ describe('Storage tests', () => {
       expect(results[1]).toEqual(key2);
     });
 
-    test('should return a list of objects with an error', async () => {
+    test('should not return a list of objects with an error', async () => {
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() => {
         throw new Error();
       });

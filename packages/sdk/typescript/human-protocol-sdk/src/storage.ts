@@ -1,18 +1,12 @@
 import crypto from 'crypto';
 import * as Minio from 'minio';
-import { DEFAULT_FILENAME_PREFIX } from './constants';
 import {
   ErrorStorageBucketNotFound,
   ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from './error';
-import {
-  UploadResult,
-  Result,
-  StorageCredentials,
-  StorageParams,
-} from './types';
+import { UploadFile, File, StorageCredentials, StorageParams } from './types';
 
 export default class StorageClient {
   private client: Minio.Client;
@@ -39,12 +33,9 @@ export default class StorageClient {
    * **Download files from cloud storage**
    *
    * @param {string} keys - Keys of files
-   * @returns {Promise<Result>} - Downloaded result
+   * @returns {Promise<File>} - Downloaded file
    */
-  public async downloadFiles(
-    keys: string[],
-    bucket: string
-  ): Promise<Result[]> {
+  public async downloadFiles(keys: string[], bucket: string): Promise<File[]> {
     const isBucketExists = await this.client.bucketExists(bucket);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
@@ -65,16 +56,16 @@ export default class StorageClient {
   }
 
   /**
-   * **Upload result to cloud storage**
+   * **Upload file to cloud storage**
    *
-   * @param {Result[]} files - Files to upload
+   * @param {File[]} files - Files to upload
    * @param {string} bucket - Bucket name
-   * @returns {Promise<UploadResult>} - Uploaded result with key/hash
+   * @returns {Promise<UploadFile>} - Uploaded file with key/hash
    */
   public async uploadFiles(
-    files: Result[],
+    files: File[],
     bucket: string
-  ): Promise<UploadResult[]> {
+  ): Promise<UploadFile[]> {
     const isBucketExists = await this.client.bucketExists(bucket);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
@@ -85,7 +76,7 @@ export default class StorageClient {
         const content = JSON.stringify(file);
 
         const hash = crypto.createHash('sha1').update(content).digest('hex');
-        const key = `${DEFAULT_FILENAME_PREFIX}${hash}`;
+        const key = hash;
 
         try {
           await this.client.putObject(bucket, key, content, {
