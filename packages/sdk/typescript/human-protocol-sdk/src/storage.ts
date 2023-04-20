@@ -1,135 +1,131 @@
-import AWS from 'aws-sdk';
 import crypto from 'crypto';
+import * as Minio from 'minio';
+import {
+  ErrorStorageBucketNotFound,
+  ErrorStorageClientNotInitialized,
+  ErrorStorageFileNotFound,
+  ErrorStorageFileNotUploaded,
+} from './error';
+import { UploadFile, File, StorageCredentials, StorageParams } from './types';
 
-import { UploadResult, StorageAccessData, Result } from './types';
+export default class StorageClient {
+  private client: Minio.Client;
 
-/**
- * **Get S3 instance**
- *
- * @param {StorageAccessData} storageAccessData - Cloud storage access data
- * @returns {AWS.S3} - AWS S3 instance
- */
-const getS3Instance = (storageAccessData: StorageAccessData): AWS.S3 => {
-  AWS.config.update({
-    accessKeyId: storageAccessData.accessKeyId,
-    secretAccessKey: storageAccessData.secretAccessKey,
-  });
-
-  const s3 = new AWS.S3({
-    endpoint: storageAccessData.endpoint,
-    region: storageAccessData.region,
-  });
-
-  return s3;
-};
-
-/**
- * **Get bucket name**
- *
- * @param {StorageAccessData} storageAccessData - Cloud storage access data
- * @param {boolean} isPublic - Whether to return public bucket, or private bucket.
- * @returns {string} - Bucket name
- */
-const getBucket = (
-  storageAccessData: StorageAccessData,
-  isPublic: boolean
-): string => {
-  return isPublic ? storageAccessData.publicBucket : storageAccessData.bucket;
-};
-
-/**
- * **Get public URL of the object**
- *
- * @param {StorageAccessData} storageAccessData - Cloud storage access data
- * @param {string} key - Key of the object
- * @returns {string} - The public URL of the object
- */
-export const getPublicURL = (
-  storageAccessData: StorageAccessData,
-  key: string
-): string => {
-  return `https://${storageAccessData.publicBucket}.s3.amazonaws.com/${key}`;
-};
-
-/**
- * **Parse object key from URL**
- *
- * @param {string} url - URL to parse
- * @returns {string} - The key of the object
- */
-export const getKeyFromURL = (url: string): string => {
-  if (url.startsWith('https')) {
-    // URL is fully qualified URL. Let's split it and try to retrieve key from last part of it.
-    const keyParts = url.split('/');
-    const key = keyParts[keyParts.length - 1];
-
-    return key;
+  /**
+   * **Storage client constructor**
+   *
+   * @param {StorageCredentials} credentials - Cloud storage access data
+   * @param {StorageParams} params - Cloud storage params
+   */
+  constructor(credentials: StorageCredentials, params: StorageParams) {
+    try {
+      this.client = new Minio.Client({
+        ...params,
+        accessKey: credentials.accessKey,
+        secretKey: credentials.secretKey,
+      });
+    } catch (e) {
+      throw ErrorStorageClientNotInitialized;
+    }
   }
 
-  // If not fully qualified http URL, the key is the URL
-  return url;
-};
+  /**
+   * **Download files from cloud storage**
+   *
+   * @param {string} keys - Keys of files
+   * @returns {Promise<File>} - Downloaded file
+   */
+  public async downloadFiles(keys: string[], bucket: string): Promise<File[]> {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
+      throw ErrorStorageBucketNotFound;
+    }
 
-/**
- * **Download result from cloud storage**
- *
- * @param {StorageAccessData} storageAccessData - Cloud storage access data
- * @param {string} key - Key of result object
- * @param {string} privateKey - Private key to decode encrypted content
- * @param {boolean} isPublic - Whether the objest is using public bucket, or private bucket
- * @returns {Promise<Result>} - Downloaded result
- */
-export const download = async (
-  storageAccessData: StorageAccessData,
-  key: string,
-  privateKey: string,
-  isPublic = false
-): Promise<Result> => {
-  const s3 = getS3Instance(storageAccessData);
-  const params = {
-    Bucket: getBucket(storageAccessData, isPublic),
-    Key: key,
-  };
+    return Promise.all(
+      keys.map(async (key) => {
+        try {
+          const response = await this.client.getObject(bucket, key);
+          const content = response?.read();
 
-  const { Body } = await s3.getObject(params).promise();
+          return { key, content: JSON.parse(content?.toString('utf-8') || '') };
+        } catch (e) {
+          throw ErrorStorageFileNotFound;
+        }
+      })
+    );
+  }
 
-  const data = JSON.parse(Body?.toString('utf-8') || '');
+  /**
+   * **Upload file to cloud storage**
+   *
+   * @param {File[]} files - Files to upload
+   * @param {string} bucket - Bucket name
+   * @returns {Promise<UploadFile>} - Uploaded file with key/hash
+   */
+  public async uploadFiles(
+    files: File[],
+    bucket: string
+  ): Promise<UploadFile[]> {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
+      throw ErrorStorageBucketNotFound;
+    }
 
-  return data;
-};
+    return Promise.all(
+      files.map(async (file) => {
+        const content = JSON.stringify(file);
 
-/**
- * **Upload result to cloud storage**
- *
- * @param {StorageAccessData} storageAccessData - Cloud storage access data
- * @param {Result} result - Result to upload
- * @param {string} publicKey - Public key to encrypt data if necessary
- * @param {boolean} _encrypt - Whether to encrypt the result, or not
- * @param {boolean} isPublic - Whether to use public bucket, or private bucket
- * @returns {Promise<UploadResult>} - Uploaded result with key/hash
- */
-export const upload = async (
-  storageAccessData: StorageAccessData,
-  result: Result,
-  publicKey: string,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  encrypt = true,
-  isPublic = false
-): Promise<UploadResult> => {
-  const s3 = getS3Instance(storageAccessData);
+        const hash = crypto.createHash('sha1').update(content).digest('hex');
+        const key = hash;
 
-  const content = JSON.stringify(result);
+        try {
+          await this.client.putObject(bucket, key, content, {
+            'Content-Type': 'application/json',
+          });
 
-  const hash = crypto.createHash('sha1').update(content).digest('hex');
-  const key = `s3${hash}`;
+          return { key, hash };
+        } catch (e) {
+          throw ErrorStorageFileNotUploaded;
+        }
+      })
+    );
+  }
 
-  const params = {
-    Bucket: getBucket(storageAccessData, isPublic),
-    Key: key,
-    Body: content,
-  };
+  /**
+   * **Checks if a bucket exists**
+   *
+   * @param {string} bucket - Name of the bucket
+   * @returns {Promise<boolean>} - True if bucket exists, false otherwise
+   */
+  public async bucketExists(bucket: string): Promise<boolean> {
+    return this.client.bucketExists(bucket);
+  }
 
-  await s3.putObject(params).promise();
+  /**
+   * **Checks if a bucket exists**
+   *
+   * @param {string} bucket - Name of the bucket
+   * @returns {Promise<string[]>} - A list of filenames with their extensions in the bucket
+   */
+  public async listObjects(bucket: string): Promise<string[]> {
+    const isBucketExists = await this.client.bucketExists(bucket);
+    if (!isBucketExists) {
+      throw ErrorStorageBucketNotFound;
+    }
 
-  return { key, hash };
-};
+    try {
+      return new Promise((resolve, reject) => {
+        const keys: string[] = [];
+        const stream = this.client.listObjectsV2(bucket, '', true, '');
+
+        stream.on('data', (obj) => keys.push(obj.name));
+        stream.on('error', reject);
+        stream.on('end', () => {
+          resolve(keys);
+        });
+      });
+    } catch (e) {
+      throw new Error(String(e));
+    }
+  }
+}
