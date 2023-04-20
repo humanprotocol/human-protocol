@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 
 // Define the data type for jobs
 type Job = {
@@ -9,11 +10,11 @@ type Job = {
   token: string;
   estimatedPrice: number;
   solutionsRequired: number;
-  solutionsSent: number;
 };
 
 // Create an instance of Express application
 const app = express();
+app.use(bodyParser.json());
 // Specify the port on which the API will run
 const PORT = 3000;
 
@@ -26,8 +27,7 @@ const jobs: Job[] = [
     description: 'Job description 1',
     token: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
     estimatedPrice: 1,
-    solutionsRequired: 2,
-    solutionsSent: 1,
+    solutionsRequired: 2
   },
   {
     address: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb7',
@@ -37,7 +37,6 @@ const jobs: Job[] = [
     token: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
     estimatedPrice: 1,
     solutionsRequired: 3,
-    solutionsSent: 2,
   },
   {
     address: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb8',
@@ -46,8 +45,7 @@ const jobs: Job[] = [
     description: 'Job description 3',
     token: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
     estimatedPrice: 2,
-    solutionsRequired: 2,
-    solutionsSent: 0,
+    solutionsRequired: 2
   },
   {
     address: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb9',
@@ -56,8 +54,7 @@ const jobs: Job[] = [
     description: 'Job description 4',
     token: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
     estimatedPrice: 3,
-    solutionsRequired: 1,
-    solutionsSent: 1,
+    solutionsRequired: 1
   },
   {
     address: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb10',
@@ -66,14 +63,20 @@ const jobs: Job[] = [
     description: 'Job description 5',
     token: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
     estimatedPrice: 2,
-    solutionsRequired: 3,
-    solutionsSent: 2,
+    solutionsRequired: 3
   },
 ];
 
 // Endpoint to get the list of similar jobs
 app.get('/jobs', (req, res) => {
-  res.json({ jobs: jobs });
+  // Get the value of the workeraddress query parameter
+  const workerAddress = req.query.workeraddress;
+
+  if (!workerAddress || workerAddress === '') {
+    return res.status(400).json({ error: 'workerAddress is required' });
+  }
+  // Return the filtered jobs
+  res.json(jobs);
 });
 
 // Endpoint for sending solutions. Receive address, chainId, and solution
@@ -86,7 +89,7 @@ app.post('/jobs/solutions', (req, res) => {
   );
 
   // Check if the job exists and if the provided solution matches the required solutions
-  if (foundJob && foundJob.solutionsSent < foundJob.solutionsRequired) {
+  if (foundJob) {
     res.json({ result: true });
   } else {
     res.json({ result: false });
