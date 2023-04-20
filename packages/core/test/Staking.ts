@@ -187,6 +187,14 @@ describe('Staking', function () {
         ).to.be.revertedWith('Must be a positive number');
       });
 
+      it('Should revert with the right error if total stake is below the unstake amount', async function () {
+        const amount = 15;
+
+        await expect(
+          staking.connect(operator).unstake(amount)
+        ).to.be.revertedWith('Insufficient amount to unstake');
+      });
+
       it('Should revert with the right error if total stake is below the minimum threshold', async function () {
         const amount = 9;
 
@@ -708,7 +716,19 @@ describe('Staking', function () {
             )
         ).to.be.revertedWith('Slash tokens exceed allocated ones');
       });
-      // TODO: Add additional tests
+
+      it('Should revert if slash amount is 0', async function () {
+        await expect(
+          staking
+            .connect(owner)
+            .slash(
+              await validator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              0
+            )
+        ).to.be.revertedWith('Must be a positive number');
+      });
     });
 
     describe('Events', function () {
