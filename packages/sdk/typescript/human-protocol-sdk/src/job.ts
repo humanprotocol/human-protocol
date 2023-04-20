@@ -1,8 +1,13 @@
 import { BigNumber, Contract, ethers } from 'ethers';
 import winston from 'winston';
 
-import { DEFAULT_BUCKET, DEFAULT_PUBLIC_BUCKET } from './constants';
-import { download, getKeyFromURL, getPublicURL, upload } from './storage';
+import {
+  DEFAULT_PUBLIC_BUCKET,
+  DEFAULT_ENDPOINT,
+  DEFAULT_PORT,
+  DEFAULT_USE_SSL,
+} from './constants';
+import StorageClient from './storage';
 import {
   EscrowStatus,
   Manifest,
@@ -13,7 +18,8 @@ import {
   ManifestData,
   ContractData,
   JobArguments,
-  StorageAccessData,
+  StorageCredentials,
+  StorageParams,
 } from './types';
 import {
   deployEscrowFactory,
@@ -31,7 +37,8 @@ import {
   ErrorManifestMissing,
   ErrorReputationOracleMissing,
   ErrorStakingMissing,
-  ErrorStorageAccessDataMissing,
+  ErrorStorageBucketNotFound,
+  ErrorStorageClientNotExists,
 } from './error';
 import { createLogger } from './logger';
 
@@ -55,9 +62,14 @@ export class Job {
   contractData?: ContractData;
 
   /**
-   * Cloud storage access data
+   * Cloud storage client
    */
-  storageAccessData?: StorageAccessData;
+  storageClient?: StorageClient;
+
+  /**
+   * Cloud storage bucket name
+   */
+  storageBucket?: string;
 
   private _logger: winston.Logger;
 
@@ -91,10 +103,11 @@ export class Job {
     factoryAddr,
     escrowAddr,
     manifest,
-    storageAccessKeyId,
-    storageSecretAccessKey,
+    storageAccessKey,
+    storageSecretKey,
     storageEndpoint,
-    storagePublicBucket,
+    storagePort,
+    storageUseSSL,
     storageBucket,
     stakingAddr,
     logLevel = 'info',
@@ -142,13 +155,20 @@ export class Job {
 
     this.manifestData = { manifest };
 
-    this.storageAccessData = {
-      accessKeyId: storageAccessKeyId || '',
-      secretAccessKey: storageSecretAccessKey || '',
-      endpoint: storageEndpoint,
-      publicBucket: storagePublicBucket || DEFAULT_PUBLIC_BUCKET,
-      bucket: storageBucket || DEFAULT_BUCKET,
+    const storageCredentials: StorageCredentials = {
+      accessKey: storageAccessKey || '',
+      secretKey: storageSecretKey || '',
     };
+
+    const storageParams: StorageParams = {
+      endPoint: storageEndpoint || DEFAULT_ENDPOINT,
+      port: storagePort || DEFAULT_PORT,
+      useSSL: storageUseSSL || DEFAULT_USE_SSL,
+    };
+
+    this.storageClient = new StorageClient(storageCredentials, storageParams);
+
+    this.storageBucket = storageBucket || DEFAULT_PUBLIC_BUCKET;
 
     this._logger = createLogger(logLevel);
   }
@@ -280,8 +300,14 @@ export class Job {
           },
         };
 
+        if (!this.storageBucket) {
+          this._logError(ErrorStorageBucketNotFound);
+          return false;
+        }
+
         this.manifestData.manifest = (await this._download(
-          manifestUrl
+          manifestUrl,
+          this.storageBucket
         )) as Manifest;
       }
     }
@@ -415,8 +441,16 @@ export class Job {
     }
     this._logger.info('HMT transferred.');
 
+    if (!this.storageBucket) {
+      this._logError(ErrorStorageBucketNotFound);
+      return false;
+    }
+
     this._logger.info('Uploading manifest...');
-    const uploadResult = await this._upload(this.manifestData.manifest);
+    const uploadResult = await this._upload(
+      this.manifestData.manifest,
+      this.storageBucket
+    );
     if (!uploadResult) {
       this._logError(new Error('Error uploading manifest'));
       return false;
@@ -495,12 +529,7 @@ export class Job {
    * @param {bool} isPublic - Whether to store data in public storage, or private.
    * @returns {Promise<boolean>} - True if the workers are paid out successfully.
    */
-  async bulkPayout(
-    payouts: Payout[],
-    result: Result,
-    encrypt = true,
-    isPublic = false
-  ): Promise<boolean> {
+  async bulkPayout(payouts: Payout[], result: Result): Promise<boolean> {
     if (!this.providerData?.reputationOracle) {
       this._logError(ErrorReputationOracleMissing);
       return false;
@@ -511,8 +540,13 @@ export class Job {
       return false;
     }
 
+    if (!this.storageBucket) {
+      this._logError(ErrorStorageBucketNotFound);
+      return false;
+    }
+
     this._logger.info('Uploading result...');
-    const uploadResult = await this._upload(result, encrypt, isPublic);
+    const uploadResult = await this._upload(result, this.storageBucket);
 
     if (!uploadResult) {
       this._logError(new Error('Error uploading result'));
@@ -522,12 +556,10 @@ export class Job {
     const { key, hash } = uploadResult;
     this._logger.info(`Uploaded result.\n\tKey: ${key}\n\tHash: ${hash}`);
 
-    if (!this.storageAccessData) {
-      this._logError(ErrorStorageAccessDataMissing);
+    if (!this.storageClient) {
+      this._logError(ErrorStorageClientNotExists);
       return false;
     }
-
-    const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
     this._logger.info('Bulk paying out the workers...');
     const paid = await this._raffleExecute(
@@ -535,7 +567,7 @@ export class Job {
       'bulkPayOut',
       payouts.map(({ address }) => address),
       payouts.map(({ amount }) => toFullDigit(amount)),
-      url,
+      key,
       hash,
       1
     );
@@ -625,8 +657,13 @@ export class Job {
       return false;
     }
 
+    if (!this.storageBucket) {
+      this._logError(ErrorStorageBucketNotFound);
+      return false;
+    }
+
     this._logger.info('Uploading intermediate result...');
-    const uploadResult = await this._upload(result);
+    const uploadResult = await this._upload(result, this.storageBucket);
 
     if (!uploadResult) {
       this._logError(new Error('Error uploading intermediate result'));
@@ -901,7 +938,15 @@ export class Job {
       return undefined;
     }
 
-    return this._download(this.manifestData.intermediateResultLink.url);
+    if (!this.storageBucket) {
+      this._logError(ErrorStorageBucketNotFound);
+      return undefined;
+    }
+
+    return this._download(
+      this.manifestData.intermediateResultLink.url,
+      this.storageBucket
+    );
   }
 
   /**
@@ -921,9 +966,12 @@ export class Job {
       return undefined;
     }
 
-    const key = getKeyFromURL(finalResultsURL);
+    if (!this.storageBucket) {
+      this._logError(ErrorStorageBucketNotFound);
+      return undefined;
+    }
 
-    return await this._download(key);
+    return await this._download(finalResultsURL, this.storageBucket);
   }
 
   /**
@@ -944,56 +992,60 @@ export class Job {
   /**
    * **Download result from cloud storage**
    *
-   * @param {string | undefined} url - Result URL to download
+   * @param {string} key - Key to download
+   * @param {string} bucket - Bucket name
    * @returns {Result | undefined} - Downloaded result
    */
-  private async _download(url?: string): Promise<Result | undefined> {
+  private async _download(
+    url: string,
+    bucket: string
+  ): Promise<Result | undefined> {
     if (!url || !this.providerData?.reputationOracle) {
       return undefined;
     }
 
-    if (!this.storageAccessData) {
-      this._logError(ErrorStorageAccessDataMissing);
+    if (!this.storageClient) {
+      this._logError(ErrorStorageClientNotExists);
       return undefined;
     }
 
-    return await download(
-      this.storageAccessData,
-      url,
-      this.providerData?.reputationOracle.privateKey
+    const key = this._getKeyFromURL(url);
+
+    const downloadedFiles = await this.storageClient.downloadFiles(
+      [key],
+      bucket
     );
+
+    return downloadedFiles[0];
   }
 
   /**
    * **Uploads result to cloud storage**
    *
    * @param {Result} result - Result to upload
-   * @param {boolean} encrypt - Whether to encrypt result, or not.
-   * @param {bool} isPublic - Whether to store data in public storage, or private.
+   * @param {string} bucket - Bucket name
    * @returns {Promise<UploadResult | undefined>} - Uploaded result
    */
   private async _upload(
     result: Result,
-    encrypt = true,
-    isPublic = false
+    bucket: string
   ): Promise<UploadResult | undefined> {
     if (!this.providerData?.reputationOracle) {
       this._logError(ErrorReputationOracleMissing);
       return undefined;
     }
 
-    if (!this.storageAccessData) {
-      this._logError(ErrorStorageAccessDataMissing);
+    if (!this.storageClient) {
+      this._logError(ErrorStorageClientNotExists);
       return undefined;
     }
 
-    return await upload(
-      this.storageAccessData,
-      result,
-      this.providerData?.reputationOracle?.publicKey,
-      encrypt,
-      isPublic
+    const uploadedFiles = await this.storageClient.uploadFiles(
+      [result],
+      bucket
     );
+
+    return uploadedFiles[0];
   }
 
   /**
@@ -1064,5 +1116,24 @@ export class Job {
           ...(this.providerData?.trustedHandlers || []),
         ].find((account?: ethers.Wallet) => account?.address === addr)
       : this.providerData?.gasPayer;
+  }
+
+  /**
+   * **Parse object key from URL**
+   *
+   * @param {string} url - URL to parse
+   * @returns {string} - The key of the object
+   */
+  private _getKeyFromURL(url: string): string {
+    if (url.startsWith('https')) {
+      // URL is fully qualified URL. Let's split it and try to retrieve key from last part of it.
+      const keyParts = url.split('/');
+      const key = keyParts[keyParts.length - 1];
+
+      return key;
+    }
+
+    // If not fully qualified http URL, the key is the URL
+    return url;
   }
 }
