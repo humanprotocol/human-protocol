@@ -495,31 +495,34 @@ export type ProviderData = {
  * AWS/GCP cloud storage access data
  * @readonly
  */
-export type StorageAccessData = {
+export type StorageCredentials = {
   /**
-   * Access Key ID
+   * Access Key
    */
-  accessKeyId: string;
+  accessKey: string;
   /**
-   * Secret Access Key
+   * Secret Key
    */
-  secretAccessKey: string;
+  secretKey: string;
+};
+
+export type StorageParams = {
+  /**
+   * Request endPoint
+   */
+  endPoint: string;
+  /**
+   * Enable secure (HTTPS) access. Default value set to false
+   */
+  useSSL: boolean;
   /**
    * Region
    */
   region?: string;
   /**
-   * Request endpoint
+   * TCP/IP port number. Default value set to 80 for HTTP and 443 for HTTPs
    */
-  endpoint?: string;
-  /**
-   * Storage bucket (private)
-   */
-  bucket: string;
-  /**
-   * Storage bucket (public)
-   */
-  publicBucket: string;
+  port?: number;
 };
 
 /**
@@ -601,6 +604,28 @@ export type UploadResult = {
 };
 
 /**
+ * Generic file data
+ * @readonly
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type File = Record<string, any>;
+
+/**
+ * Upload file data
+ * @readonly
+ */
+export type UploadFile = {
+  /**
+   * Uploaded object key
+   */
+  key: string;
+  /**
+   * Hash of uploaded object key
+   */
+  hash: string;
+};
+
+/**
  * Job arguments
  * @readonly
  */
@@ -650,17 +675,25 @@ export type JobArguments = {
    */
   manifest?: Manifest;
   /**
-   * AWS/GCP Access Key ID
+   * AWS/GCP Access Key
    */
-  storageAccessKeyId?: string;
+  storageAccessKey?: string;
   /**
-   * AWS/GCP Secret Access Key
+   * AWS/GCP Secret Key
    */
-  storageSecretAccessKey?: string;
+  storageSecretKey?: string;
   /**
    * AWS/GCP bucket endpoint
    */
   storageEndpoint?: string;
+  /**
+   * AWS/GCP port
+   */
+  storagePort?: number;
+  /**
+   * AWS/GCP use ssl
+   */
+  storageUseSSL?: boolean;
   /**
    * AWS/GCP public bucket name
    */
