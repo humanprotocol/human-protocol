@@ -81,7 +81,8 @@ Allowlist allowing you to allow some of the extension that you deemed safe to us
 
 You can now open allowlist on the right sidebar and click allow
 
-![image](https://user-images.githubusercontent.com/62529025/233020510-64abc10a-af07-4f6e-b232-818b83b09af5.png)
+![image](https://user-images.githubusercontent.com/62529025/233215157-4df40b3b-c9b1-49fb-a689-9e41784607e9.png)
+
 
 ![image](https://user-images.githubusercontent.com/62529025/233020636-032fd746-82f5-4974-b2e7-bab0c4f5c76b.png)
 
