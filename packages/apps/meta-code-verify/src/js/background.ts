@@ -44,22 +44,21 @@ const fromHexString = hexString =>
 const toHexString = bytes =>
   bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
-function getCFHashWorkaroundFunction(host, version) {
+function getCFHashWorkaroundFunction(host, version): Promise<Response> {
   return new Promise((resolve, reject) => {
     fetch('https://nftstorage.link/ipfs/' + encodeURIComponent(version), {
       method: 'GET',
     })
-      .then(response => {
-        resolve(response);
-      })
-      .catch(response => {
-        reject(response);
-      });
+      .then(response => response.clone())
+      .then(response => response.json())
+      .then(responseData => resolve(responseData))
+      .catch(error => reject(error));
   });
 }
 
 async function validateManifest(rootHash, leaves, host, version, workaround) {
   // does rootHash match what was published?
+
   const cfResponse = await getCFHashWorkaroundFunction(host, version).catch(
     cfError => {
       console.log('error fetching hash from CF', cfError);
@@ -70,13 +69,15 @@ async function validateManifest(rootHash, leaves, host, version, workaround) {
       };
     }
   );
-  if (cfResponse == null || cfResponse.json == null) {
+
+  if (cfResponse == null) {
     return {
       valid: false,
       reason: 'UNKNOWN_ENDPOINT_ISSUE',
     };
   }
-  const cfPayload = await cfResponse.json();
+
+  const cfPayload = cfResponse as { root_hash?: string };
   let cfRootHash = cfPayload.root_hash;
   if (cfPayload.root_hash.startsWith('0x')) {
     cfRootHash = cfPayload.root_hash.slice(2);
@@ -199,7 +200,7 @@ async function validateMetaCompanyManifest(rootHash, otherHashes, leaves) {
 }
 
 function getDebugLog(tabId) {
-  let tabDebugList = debugCache.get(tabId);
+  const tabDebugList = debugCache.get(tabId);
   return tabDebugList == null ? [] : tabDebugList;
 }
 
@@ -225,7 +226,7 @@ export function handleMessages(message, sender, sendResponse) {
           }
           // roll through the existing manifests and remove expired ones
           if (ORIGIN_TIMEOUT[message.origin] > 0) {
-            for (let [key, manif] of origin.entries()) {
+            for (const [key, manif] of origin.entries()) {
               if (manif.start + ORIGIN_TIMEOUT[message.origin] < Date.now()) {
                 origin.delete(key);
               }
@@ -272,7 +273,7 @@ export function handleMessages(message, sender, sendResponse) {
           }
           // roll through the existing manifests and remove expired ones
           if (ORIGIN_TIMEOUT[message.origin] > 0) {
-            for (let [key, manif] of origin.entries()) {
+            for (const [key, manif] of origin.entries()) {
               if (manif.start + ORIGIN_TIMEOUT[message.origin] < Date.now()) {
                 origin.delete(key);
               }

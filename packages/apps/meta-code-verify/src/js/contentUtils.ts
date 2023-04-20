@@ -273,7 +273,13 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
     (scriptNodeMaybe.id === 'binary-transparency-manifest' ||
       scriptNodeMaybe.getAttribute('name') === 'binary-transparency-manifest')
   ) {
-    let rawManifest = '';
+    let rawManifest: {
+      leaves?: Array<string>;
+      root?: string;
+      version?: string;
+      manifest?: Array<string>;
+      manifest_hashes?: string & { combined_hash?: string };
+    } = {};
     try {
       rawManifest = JSON.parse(scriptNodeMaybe.textContent);
     } catch (manifestParseError) {
@@ -290,10 +296,16 @@ export function storeFoundJS(scriptNodeMaybe, scriptList) {
     let roothash = rawManifest.root;
     let version = rawManifest.version;
 
-    if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(currentOrigin)) {
+    if (
+      [ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(
+        currentOrigin as 'FACEBOOK' | 'MESSENGER'
+      )
+    ) {
       leaves = rawManifest.manifest;
       otherHashes = rawManifest.manifest_hashes;
       otherType = scriptNodeMaybe.getAttribute('data-manifest-type');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       roothash = otherHashes.combined_hash;
       version = scriptNodeMaybe.getAttribute('data-manifest-rev');
 
@@ -475,12 +487,12 @@ export function hasInvalidAttributes(htmlElement) {
   ) {
     Array.from(htmlElement.attributes).forEach(elementAttribute => {
       // check first for violating attributes
-      if (DOM_EVENTS.indexOf(elementAttribute.localName) >= 0) {
+      if (DOM_EVENTS.indexOf((elementAttribute as Attr).localName) >= 0) {
         chrome.runtime.sendMessage({
           type: MESSAGE_TYPE.DEBUG,
           log:
             'violating attribute ' +
-            elementAttribute.localName +
+            (elementAttribute as Attr).localName +
             ' from element ' +
             htmlElement.outerHTML,
         });
@@ -501,10 +513,10 @@ export function hasInvalidAttributes(htmlElement) {
       ) {
         Array.from(childNode.attributes).forEach(elementAttribute => {
           if (
-            (elementAttribute.localName === 'href' ||
-              elementAttribute.localName === 'xlink:href') &&
+            ((elementAttribute as Attr).localName === 'href' ||
+              (elementAttribute as Attr).localName === 'xlink:href') &&
             childNode
-              .getAttribute(elementAttribute.localName)
+              .getAttribute((elementAttribute as Attr).localName)
               .toLowerCase()
               .startsWith('javascript')
           ) {
@@ -512,7 +524,7 @@ export function hasInvalidAttributes(htmlElement) {
               type: MESSAGE_TYPE.DEBUG,
               log:
                 'violating attribute ' +
-                elementAttribute.localName +
+                (elementAttribute as Attr).localName +
                 ' from element ' +
                 htmlElement.outerHTML,
             });
@@ -623,8 +635,6 @@ const checkCSPHeaders = (cspHeader, cspReportHeader) => {
 
 const scanForCSPEvalReportViolations = () => {
   document.addEventListener('securitypolicyviolation', e => {
-    // Older Browser can't distinguish between 'eval' and 'wasm-eval' violations
-    // We need to check if there is an eval violation
     if (e.blockedURI !== 'eval') {
       return;
     }
@@ -755,10 +765,13 @@ async function processJSWithSrc(script, origin, version) {
     if (DOWNLOAD_JS_ENABLED) {
       const fileNameArr = script.src.split('/');
       const fileName = fileNameArr[fileNameArr.length - 1].split('?')[0];
+
       sourceScripts.set(
         fileName,
         sourceResponse
           .clone()
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           .body.pipeThrough(new window.CompressionStream('gzip'))
       );
     }
@@ -776,7 +789,7 @@ async function processJSWithSrc(script, origin, version) {
           },
           response => {
             if (response.valid) {
-              resolve();
+              resolve(response.valid);
             } else {
               reject(response.type);
             }
@@ -797,8 +810,8 @@ async function allowDisallow(scriptOrHash, script) {
   const disallowList = await chrome.storage.local.get(['disallow']);
   const allowList = await chrome.storage.local.get(['allowlist']);
 
-  const disallowMap = new Map(Object.entries(disallowList.disallow || {}));
-  const allowMap = new Map(Object.entries(allowList.allowlist || {}));
+  const disallowMap = new Map(Object.entries(disallowList?.disallow || {}));
+  const allowMap = new Map(Object.entries(allowList?.allowlist || {}));
   if (
     !disallowMap.size &&
     !allowMap.has(scriptOrHash?.src) &&
@@ -833,7 +846,6 @@ async function allowDisallow(scriptOrHash, script) {
   }
 }
 
-
 export const processFoundJS = async (origin, version) => {
   // foundScripts
   const fullscripts = foundScripts.get(version).splice(0);
@@ -848,9 +860,9 @@ export const processFoundJS = async (origin, version) => {
     }
   });
   const allowList = await chrome.storage.local.get(['allowlist']);
-  const allowMap = new Map(Object.entries(allowList.allowlist || {}));
+  const allowMap = new Map(Object.entries(allowList?.allowlist || {}));
   const disallowList = await chrome.storage.local.get(['disallow']);
-  const disallowMap = new Map(Object.entries(disallowList.disallow || {}));
+  const disallowMap = new Map(Object.entries(disallowList?.disallow || {}));
   let pendingScriptCount = scripts.length;
   for (const script of scripts) {
     if (script.src) {
@@ -864,7 +876,7 @@ export const processFoundJS = async (origin, version) => {
           allowDisallow(script, script);
 
           if (response.type === 'EXTENSION') {
-                                    updateCurrentState(STATES.RISK);
+            updateCurrentState(STATES.RISK);
           } else if (allowMap.has(script.src)) {
             if (disallowMap.size === 0) {
               updateCurrentState(STATES.VALID);
@@ -896,7 +908,7 @@ export const processFoundJS = async (origin, version) => {
         },
         async response => {
           pendingScriptCount--;
-          let inlineScriptMap = new Map();
+          const inlineScriptMap = new Map();
           if (response.valid) {
             inlineScriptMap.set(response.hash, script.rawjs);
             inlineScripts.push(inlineScriptMap);
@@ -913,14 +925,13 @@ export const processFoundJS = async (origin, version) => {
               KNOWN_EXTENSION_HASHES.includes(response.hash) &&
               !allowMap.has(response.hash)
             ) {
-               updateCurrentState(STATES.RISK);
-
+              updateCurrentState(STATES.RISK);
             } else if (allowMap.has(response.hash)) {
-                if (disallowMap.size === 0) {
-                   updateCurrentState(STATES.VALID);
-                } else {
-                   updateCurrentState(STATES.RISK);
-                }
+              if (disallowMap.size === 0) {
+                updateCurrentState(STATES.VALID);
+              } else {
+                updateCurrentState(STATES.RISK);
+              }
             } else {
               updateCurrentState(STATES.INVALID);
             }
@@ -950,10 +961,12 @@ async function downloadJSToZip(downloadType) {
 
       for (const [fileName, compressedStream] of sourceScripts.entries()) {
         try {
-          let delim = delimPrefix + fileName + delimSuffix;
-          let encodedDelim = enc.encode(delim);
-          let delimStream = new window.CompressionStream('gzip');
-          let writer = delimStream.writable.getWriter();
+          const delim = delimPrefix + fileName + delimSuffix;
+          const encodedDelim = enc.encode(delim);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const delimStream = new window.CompressionStream('gzip');
+          const writer = delimStream.writable.getWriter();
           writer.write(encodedDelim);
           writer.close();
           const delimBuffer = await new Response(
@@ -970,21 +983,25 @@ async function downloadJSToZip(downloadType) {
 
       for (const inlineSrcMap of inlineScripts) {
         try {
-          let inlineHash = inlineSrcMap.keys().next().value;
-          let inlineSrc = inlineSrcMap.values().next().value;
-          let delim = delimPrefix + 'Inline Script ' + inlineHash + delimSuffix;
-          let encodedDelim = enc.encode(delim);
-          let delimStream = new window.CompressionStream('gzip');
-          let delimWriter = delimStream.writable.getWriter();
+          const inlineHash = inlineSrcMap.keys().next().value;
+          const inlineSrc = inlineSrcMap.values().next().value;
+          const delim =
+            delimPrefix + 'Inline Script ' + inlineHash + delimSuffix;
+          const encodedDelim = enc.encode(delim);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const delimStream = new window.CompressionStream('gzip');
+          const delimWriter = delimStream.writable.getWriter();
           delimWriter.write(encodedDelim);
           delimWriter.close();
           const delimBuffer = await new Response(
             delimStream.readable
           ).arrayBuffer();
           chunks.push(delimBuffer);
-
-          let inlineStream = new window.CompressionStream('gzip');
-          let writer = inlineStream.writable.getWriter();
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const inlineStream = new window.CompressionStream('gzip');
+          const writer = inlineStream.writable.getWriter();
           writer.write(enc.encode(inlineSrc));
           writer.close();
           const inlineBuffer = await new Response(
@@ -1056,7 +1073,9 @@ export function startFor(origin, excludedPathnames = []) {
     })
     .then(resp => {
       if (
-        [ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(currentOrigin)
+        [ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(
+          currentOrigin as 'FACEBOOK' | 'MESSENGER'
+        )
       ) {
         checkCSPHeaders(resp.cspHeader, resp.cspReportHeader);
       }
@@ -1069,7 +1088,7 @@ export function startFor(origin, excludedPathnames = []) {
   if ([ORIGIN_TYPE.FACEBOOK, ORIGIN_TYPE.MESSENGER].includes(origin)) {
     const cookies = document.cookie.split(';');
     cookies.forEach(cookie => {
-      let pair = cookie.split('=');
+      const pair = cookie.split('=');
       // c_user contains the user id of the user logged in
       if (pair[0].indexOf('c_user') >= 0) {
         isUserLoggedIn = true;
@@ -1085,6 +1104,8 @@ export function startFor(origin, excludedPathnames = []) {
     scanForScripts();
     // set the timeout once, in case there's an iframe and contentUtils sets another manifest timer
     if (manifestTimeoutID === '') {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       manifestTimeoutID = setTimeout(() => {
         // Manifest failed to load, flag a warning to the user.
         updateCurrentState(STATES.TIMEOUT);

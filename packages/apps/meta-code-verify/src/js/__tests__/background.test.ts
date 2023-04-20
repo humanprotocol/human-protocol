@@ -1,32 +1,12 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-'use strict';
-
-import { jest } from '@jest/globals';
 import { MESSAGE_TYPE, ORIGIN_TYPE } from '../config';
 import { handleMessages } from '../background';
+import { vi, Mock } from 'vitest';
 
 describe('background', () => {
   describe('LOAD_MANIFEST', () => {
     it('should load manifest when origin is missing', async () => {
-      const encodeMock = jest.fn();
-      window.TextEncoder = function () {
-        return {
-          encode: encodeMock,
-        };
-      };
-      window.Uint8Array = function () {
-        return {
-          reduce: () => '7',
-        };
-      };
-      window.fetch = jest.fn();
-      window.fetch.mockReturnValueOnce(
+      window.fetch = vi.fn();
+      (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
           json: () =>
             Promise.resolve({
@@ -35,27 +15,32 @@ describe('background', () => {
             }),
         })
       );
-      const mockSendResponse = jest.fn();
+      (window.Uint8Array as unknown) = function () {
+        return {
+          reduce: () => '7',
+        };
+      };
+      const mockSendResponse = vi.fn();
       const handleMessagesReturnValue = handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
           type: MESSAGE_TYPE.LOAD_MANIFEST,
           version: '1',
           rootHash: '0x7',
-          leaves: ['0xsomeotherhash'],
+          leaves: ['0x7'],
         },
-        { tab: { id: null } },
+        { tab: { id: '' } },
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.fetch.mock.calls.length).toBe(1);
+      expect((window.fetch as Mock).mock.calls.length).toBe(1);
       expect(handleMessagesReturnValue).toBe(true);
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);
     });
     it('should load manifest when manifest is missing', async () => {
-      window.fetch = jest.fn();
-      window.fetch.mockReturnValueOnce(
+      (window.fetch as Mock) = vi.fn();
+      (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
           json: () =>
             Promise.resolve({
@@ -64,7 +49,7 @@ describe('background', () => {
             }),
         })
       );
-      const mockSendResponse = jest.fn();
+      const mockSendResponse = vi.fn();
       const handleMessagesReturnValue = handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
@@ -77,25 +62,25 @@ describe('background', () => {
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.fetch.mock.calls.length).toBe(1);
+      expect((window.fetch as Mock).mock.calls.length).toBe(1);
       expect(handleMessagesReturnValue).toBe(true);
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);
     });
     it('return valid when manifest and origin are found in cache', async () => {
-      const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      const encodeMock: Mock = vi.fn();
+      (window.TextEncoder as unknown) = function () {
         return {
           encode: encodeMock,
         };
       };
-      window.Uint8Array = function () {
+      (window.Uint8Array as unknown) = function () {
         return {
           reduce: () => '7',
         };
       };
-      window.fetch = jest.fn();
-      window.fetch.mockReturnValueOnce(
+      (window.fetch as Mock) = vi.fn();
+      (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
           json: () =>
             Promise.resolve({
@@ -104,7 +89,7 @@ describe('background', () => {
             }),
         })
       );
-      const mockSendResponse = jest.fn();
+      const mockSendResponse = vi.fn();
       const handleMessagesReturnValue = handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
@@ -117,7 +102,7 @@ describe('background', () => {
         mockSendResponse
       );
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(fetch.mock.calls.length).toBe(1);
+      expect((fetch as Mock).mock.calls.length).toBe(1);
       expect(handleMessagesReturnValue).toBe(true);
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);
@@ -126,14 +111,15 @@ describe('background', () => {
 
   describe('RAW_JS', () => {
     it('should return false when no matching origin', () => {
-      const mockSendResponse = jest.fn();
+      const mockSendResponse = vi.fn();
       handleMessages(
         {
           origin: 'NOT_AN_ORIGIN',
           type: MESSAGE_TYPE.RAW_JS,
           version: '1',
+          leaves: ['someotherhash'],
         },
-        { tab: { id: null } },
+        { tab: { id: '' } },
         mockSendResponse
       );
       expect(mockSendResponse.mock.calls.length).toBe(1);
@@ -143,14 +129,15 @@ describe('background', () => {
       );
     });
     it('should return false when no matching manifest', () => {
-      const mockSendResponse = jest.fn();
+      const mockSendResponse = vi.fn();
       handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
           type: MESSAGE_TYPE.RAW_JS,
           version: 'NOT_A_VALID_VERSION',
+          leaves: ['someotherhash'],
         },
-        { tab: { id: null } },
+        { tab: { id: '' } },
         mockSendResponse
       );
       expect(mockSendResponse.mock.calls.length).toBe(1);
@@ -160,18 +147,20 @@ describe('background', () => {
       );
     });
     it('should return false when no matching hash', async () => {
-      const mockSendResponse = jest.fn();
-      const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      const mockSendResponse = vi.fn();
+      const encodeMock: Mock = vi.fn();
+      (window.TextEncoder as unknown) = function () {
         return {
           encode: encodeMock,
         };
       };
       encodeMock.mockReturnValueOnce('abc');
-      window.crypto.subtle.digest = jest
+      window.crypto.subtle.digest = vi
         .fn()
         .mockReturnValueOnce(Promise.resolve('def'));
-      window.Uint8Array = jest.fn().mockReturnValueOnce(['somefakehash']);
+      (window.Uint8Array as unknown as Mock) = vi
+        .fn()
+        .mockReturnValueOnce(['somefakehash']);
       handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
@@ -188,18 +177,20 @@ describe('background', () => {
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(false);
     });
     it('should return false if the hashes do not match', async () => {
-      const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+      const encodeMock: Mock = vi.fn();
+      (window.TextEncoder as unknown) = function () {
         return {
           encode: encodeMock,
         };
       };
       encodeMock.mockReturnValueOnce('abc');
-      window.crypto.subtle.digest = jest
+      window.crypto.subtle.digest = vi
         .fn()
         .mockReturnValueOnce(Promise.resolve('def'));
-      window.Uint8Array = jest.fn().mockReturnValueOnce(['somefakehash']);
-      const mockSendResponse = jest.fn();
+      (window.Uint8Array as unknown as Mock) = vi
+        .fn()
+        .mockReturnValueOnce(['somefakehash']);
+      const mockSendResponse = vi.fn();
       handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
@@ -214,19 +205,51 @@ describe('background', () => {
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(false);
     });
-    it('should return true if the hashes match', async () => {
-      const encodeMock = jest.fn();
-      window.TextEncoder = function () {
+    it('should return false if the hashes do not match', async () => {
+      const encodeMock: Mock = vi.fn();
+      (window.TextEncoder as unknown) = function () {
         return {
           encode: encodeMock,
         };
       };
       encodeMock.mockReturnValueOnce('abc');
-      window.crypto.subtle.digest = jest
+      window.crypto.subtle.digest = vi
         .fn()
         .mockReturnValueOnce(Promise.resolve('def'));
-      window.Uint8Array = jest.fn().mockReturnValueOnce(['someotherhash']);
-      const mockSendResponse = jest.fn();
+      (window.Uint8Array as unknown as Mock) = vi
+        .fn()
+        .mockReturnValueOnce(['somefakehash']);
+      const mockSendResponse = vi.fn();
+      handleMessages(
+        {
+          origin: ORIGIN_TYPE.WHATSAPP,
+          type: MESSAGE_TYPE.RAW_JS,
+          rawjs: 'console.log("all the JavaScript goes here");',
+          version: '2',
+          leaves: ['someotherhash'],
+        },
+        { tab: { id: '' } },
+        mockSendResponse
+      );
+      await (() => new Promise(res => setTimeout(res, 10)))();
+      expect(mockSendResponse.mock.calls.length).toBe(1);
+      expect(mockSendResponse.mock.calls[0][0].valid).toBe(false);
+    });
+    it('should return true if the hashes match', async () => {
+      const encodeMock: Mock = vi.fn();
+      (window.TextEncoder as unknown) = function () {
+        return {
+          encode: encodeMock,
+        };
+      };
+      encodeMock.mockReturnValueOnce('abc');
+      window.crypto.subtle.digest = vi
+        .fn()
+        .mockReturnValueOnce(Promise.resolve('def'));
+      (window.Uint8Array as unknown as Mock) = vi
+        .fn()
+        .mockReturnValueOnce(['someotherhash']);
+      const mockSendResponse = vi.fn();
       handleMessages(
         {
           origin: ORIGIN_TYPE.WHATSAPP,
@@ -235,10 +258,9 @@ describe('background', () => {
           rawjs: 'console.log("all the JavaScript goes here");',
           version: '2',
         },
-        { tab: { id: null } },
+        { tab: { id: '' } },
         mockSendResponse
       );
-
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(mockSendResponse.mock.calls.length).toBe(1);
       expect(mockSendResponse.mock.calls[0][0].valid).toBe(true);

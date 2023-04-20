@@ -1,9 +1,9 @@
-import cleanOnce from "./rollup_scripts/rollup-plugin-clean-once.mjs";
+import cleanOnce from "./rollup_scripts/rollup-plugin-clean-once";
 import eslintPlugin from "@rollup/plugin-eslint";
 import typescript from "@rollup/plugin-typescript";
-import prettierBuildStart from "./rollup_scripts/rollup-plugin-prettier-build-start.mjs";
-import staticFiles from "./rollup_scripts/rollup-plugin-static-files.mjs";
-import watch from "./rollup_scripts/rollup-plugin-watch-additional.mjs";
+import prettierBuildStart from "./rollup_scripts/rollup-plugin-prettier-build-start";
+import staticFiles from "./rollup_scripts/rollup-plugin-static-files";
+import watch from "./rollup_scripts/rollup-plugin-watch-additional";
 
 function eslint() {
     return eslintPlugin({ throwOnError: true });
@@ -30,7 +30,7 @@ export default [
     },
 
     {
-        input: "src/js/background.js",
+        input: "src/js/background.ts",
         output: [{
             file: "dist/chrome/background.js",
             format: "iife"
@@ -44,7 +44,7 @@ export default [
         plugins: [typescript(), prettierSrc(), eslint()]
     },
     {
-        input: "src/js/popup.js",
+        input: "src/js/popup.ts",
         output: [{
             file: "dist/chrome/popup.js",
             format: "iife",

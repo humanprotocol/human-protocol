@@ -156,7 +156,7 @@ async function attachTable(data, what) {
     const result1 = result ? result[1].match(regex1) : '';
     extensionCell.textContent =
       result1.length > 1
-        ? await getExtensionName(result1[1])
+        ? ((await getExtensionName(result1[1])) as string)
         : KNOWN_EXTENSION_HASHES_MAP.has(key)
         ? KNOWN_EXTENSION_HASHES_MAP.get(key)
         : '';
@@ -225,11 +225,11 @@ function attachListeners(origin) {
     whatTable();
     updateDisplay('allowlist');
   });
-  menuRowList[0].style.cursor = 'pointer';
+  (menuRowList[0] as HTMLElement).style.cursor = 'pointer';
   menuRowList[1].addEventListener('click', _evt => {
     chrome.tabs.create({ url: learnMoreUrls.about });
   });
-  menuRowList[1].style.cursor = 'pointer';
+  (menuRowList[1] as HTMLElement).style.cursor = 'pointer';
 
   const downloadTextList = document.getElementsByClassName(
     'status_message_highlight'
@@ -238,7 +238,7 @@ function attachListeners(origin) {
 
   if (DOWNLOAD_JS_ENABLED) {
     menuRowList[2].addEventListener('click', () => updateDisplay('download'));
-    menuRowList[2].style.cursor = 'pointer';
+    (menuRowList[2] as HTMLElement).style.cursor = 'pointer';
 
     downloadTextList[0].addEventListener('click', () => {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -249,7 +249,7 @@ function attachListeners(origin) {
         );
       });
     });
-    downloadTextList[0].style.cursor = 'pointer';
+    (downloadTextList[0] as HTMLElement).style.cursor = 'pointer';
 
     downloadSrcButton.onclick = () => {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -266,7 +266,7 @@ function attachListeners(origin) {
     downloadTextList[0].addEventListener('click', () =>
       updateDisplay('download')
     );
-    downloadTextList[0].style.cursor = 'pointer';
+    (downloadTextList[0] as HTMLElement).style.cursor = 'pointer';
   } else {
     menuRowList[1].remove();
     downloadTextList[0].remove();
@@ -285,7 +285,7 @@ function attachListeners(origin) {
   learnMoreList[0].addEventListener('click', () => {
     chrome.tabs.create({ url: learnMoreUrls.failure });
   });
-  learnMoreList[0].style.cursor = 'pointer';
+  (learnMoreList[0] as HTMLElement).style.cursor = 'pointer';
 
   const riskLearnMoreList = document.getElementsByClassName(
     'risk_learn_more_button'
@@ -293,14 +293,14 @@ function attachListeners(origin) {
   riskLearnMoreList[0].addEventListener('click', () => {
     chrome.tabs.create({ url: learnMoreUrls.risk });
   });
-  riskLearnMoreList[0].style.cursor = 'pointer';
+  (riskLearnMoreList[0] as HTMLElement).style.cursor = 'pointer';
 
   const retryButtonList = document.getElementsByClassName('retry_button');
   Array.from(retryButtonList).forEach(retryButton => {
     retryButton.addEventListener('click', () => {
       chrome.tabs.reload();
     });
-    retryButton.style.cursor = 'pointer';
+    (retryButton as HTMLElement).style.cursor = 'pointer';
   });
 
   const timeoutLearnMoreList = document.getElementsByClassName(
@@ -309,7 +309,7 @@ function attachListeners(origin) {
   timeoutLearnMoreList[0].addEventListener('click', () => {
     chrome.tabs.create({ url: learnMoreUrls.timeout });
   });
-  timeoutLearnMoreList[0].style.cursor = 'pointer';
+  (timeoutLearnMoreList[0] as HTMLElement).style.cursor = 'pointer';
 }
 
 function updateDisplay(state) {
@@ -317,10 +317,10 @@ function updateDisplay(state) {
   Array.from(document.getElementsByClassName('state_boundary')).forEach(
     element => {
       if (element.id == popupState) {
-        element.style.display = 'flex';
+        (element as HTMLElement).style.display = 'flex';
         document.body.className = popupState + '_body';
       } else {
-        element.style.display = 'none';
+        (element as HTMLElement).style.display = 'none';
       }
     }
   );
@@ -345,7 +345,7 @@ function setUpBackgroundMessageHandler(tabId) {
 }
 
 function loadUp() {
-  const params = new URL(document.location).searchParams;
+  const params = new URL(document.location.href).searchParams;
   setUpBackgroundMessageHandler(params.get('tab_id'));
   updateDisplay(params.get('state'));
   attachTextToHtml();

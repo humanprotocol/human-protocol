@@ -1,12 +1,22 @@
 import { exec } from 'child_process';
+class ExecError extends Error {
+  public stdout: string;
+  public stderr: string;
 
+  constructor(message: string, stdout: string, stderr: string) {
+    super(message);
+    this.stdout = stdout;
+    this.stderr = stderr;
+  }
+}
 function genExec(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
+      const customError = new ExecError(error?.message, stdout, stderr);
       if (error) {
-        error.stdout = stdout;
-        error.stderr = stderr;
-        reject(error);
+        customError.stdout = stdout;
+        customError.stderr = stderr;
+         reject(error);
       } else {
         resolve({ stdout, stderr });
       }

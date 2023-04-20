@@ -6,7 +6,7 @@
  */
 
 'use strict';
-
+import { describe, it } from 'vitest';
 describe('detectKVstoreMeta', () => {
   it.todo('test extractMetaAndLoad');
   it.todo('ensure extraMetaAndLoad is called statically');

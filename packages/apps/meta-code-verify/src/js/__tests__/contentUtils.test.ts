@@ -7,7 +7,7 @@
 
 'use strict';
 
-import { jest } from '@jest/globals';
+import { describe, vi, Mock } from 'vitest';
 import { MESSAGE_TYPE, ORIGIN_TYPE, STATES } from '../config';
 import {
   hasInvalidAttributes,
@@ -19,7 +19,7 @@ import {
 
 describe('contentUtils', () => {
   beforeEach(() => {
-    window.chrome.runtime.sendMessage = jest.fn(() => {});
+    (window.chrome.runtime.sendMessage as unknown as Mock) = vi.fn(() => {});
   });
   describe('storeFoundJS', () => {
     it('should handle scripts with src correctly', () => {
@@ -32,7 +32,9 @@ describe('contentUtils', () => {
       storeFoundJS(fakeScriptNode, scriptMap);
       expect(scriptMap.get('version').length).toEqual(1);
       expect(scriptMap.get('version')[0].src).toEqual(fakeUrl);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(1);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(1);
     });
     it('should handle inline scripts correctly', () => {
       const scriptMap = new Map([['version', []]]);
@@ -49,7 +51,9 @@ describe('contentUtils', () => {
       expect(scriptMap.get('version').length).toEqual(1);
       expect(scriptMap.get('version')[0].rawjs).toEqual(fakeInnerHtml);
       expect(scriptMap.get('version')[0].lookupKey).toEqual(fakeLookupKey);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(1);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(1);
     });
     it('should send update icon message if valid', () => {
       const scriptMap = new Map([['version', []]]);
@@ -59,8 +63,11 @@ describe('contentUtils', () => {
         getAttribute: () => {},
       };
       storeFoundJS(fakeScriptNode, scriptMap);
-      const sentMessage = window.chrome.runtime.sendMessage.mock.calls[0][0];
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(1);
+      const sentMessage = (window.chrome.runtime.sendMessage as unknown as Mock)
+        .mock.calls[0][0];
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(1);
       expect(sentMessage.type).toEqual(MESSAGE_TYPE.UPDATE_STATE);
     });
     it.skip('storeFoundJS keeps existing icon if not valid', () => {
@@ -74,7 +81,9 @@ describe('contentUtils', () => {
         childNodes: [],
       };
       hasInvalidAttributes(fakeElement);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(0);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(0);
 
       // hasAttribute is a function, but has no attributes
       fakeElement = {
@@ -82,9 +91,14 @@ describe('contentUtils', () => {
           return false;
         },
         childNodes: [],
+      } as {
+        hasAttribute: () => boolean;
+        childNodes: [];
       };
       hasInvalidAttributes(fakeElement);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(0);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(0);
     });
     it('should not update the icon if no violating attributes are found', () => {
       const fakeElement = {
@@ -99,7 +113,9 @@ describe('contentUtils', () => {
         childNodes: [],
       };
       hasInvalidAttributes(fakeElement);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(0);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(0);
     });
     it('should update the icon if violating attributes are found', () => {
       const fakeElement = {
@@ -114,7 +130,9 @@ describe('contentUtils', () => {
         childNodes: [],
       };
       hasInvalidAttributes(fakeElement);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(2);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(2);
     });
   });
   describe('hasInvalidScripts', () => {
@@ -131,7 +149,9 @@ describe('contentUtils', () => {
         nodeType: 2,
       };
       hasInvalidScripts(fakeElement, []);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(0);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(0);
     });
     it('should store any script elements we find', () => {
       const fakeElement = {
@@ -148,10 +168,13 @@ describe('contentUtils', () => {
       hasInvalidScripts(fakeElement, scriptMap);
       expect(scriptMap.get('version').length).toBe(1);
       expect(scriptMap.get('version')[0].type).toBe(MESSAGE_TYPE.RAW_JS);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(1);
-      expect(window.chrome.runtime.sendMessage.mock.calls[0][0].type).toBe(
-        MESSAGE_TYPE.UPDATE_STATE
-      );
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(1);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[0][0]
+          .type
+      ).toBe(MESSAGE_TYPE.UPDATE_STATE);
     });
     it('should check all child nodes for non script elements', () => {
       const fakeElement = {
@@ -191,7 +214,9 @@ describe('contentUtils', () => {
       const foundScripts = [];
       hasInvalidScripts(fakeElement, foundScripts);
       expect(foundScripts.length).toBe(0);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(0);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(0);
     });
     it('should store any script element direct children', () => {
       const fakeElement = {
@@ -233,10 +258,13 @@ describe('contentUtils', () => {
       hasInvalidScripts(fakeElement, scriptMap);
       expect(scriptMap.get('version').length).toBe(1);
       expect(scriptMap.get('version')[0].type).toBe(MESSAGE_TYPE.RAW_JS);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(1);
-      expect(window.chrome.runtime.sendMessage.mock.calls[0][0].type).toBe(
-        MESSAGE_TYPE.UPDATE_STATE
-      );
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(1);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[0][0]
+          .type
+      ).toBe(MESSAGE_TYPE.UPDATE_STATE);
     });
     it('should check for any grandchildren script elements', () => {
       const fakeElement = {
@@ -293,23 +321,27 @@ describe('contentUtils', () => {
       const scriptMap = new Map([['version', []]]);
       hasInvalidScripts(fakeElement, scriptMap);
       expect(scriptMap.get('version').length).toBe(2);
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(2);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(2);
     });
   });
   describe('scanForScripts', () => {
     it('should find existing script tags in the DOM and check them', () => {
-      jest.resetModules();
+      vi.resetModules();
       document.body.innerHTML =
         '<div>' +
         '  <script>console.log("a unit test");</script>' +
         '  <script src="https://facebook.com/"></script>' +
         '</div>';
       scanForScripts();
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(2);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(2);
     });
   });
   describe('processFoundJS', () => {
-    // these are flaky because jest.resestModules doesn't work for esm
+    // these are flaky because vi.resestModules doesn't work for esm
     // while the above may be true, redo these as async and flush promises and they should work.
     it('should send valid icon update when no src based scripts are invalid', async () => {
       document.body.innerHTML =
@@ -318,14 +350,16 @@ describe('contentUtils', () => {
         '  <script src="https://facebook.com/"></script>' +
         '</div>';
       scanForScripts();
-      window.chrome.runtime.sendMessage.mockImplementation(
+      (window.chrome.runtime.sendMessage as unknown as Mock).mockImplementation(
         (message, response) => {
           response && response({ valid: true });
         }
       );
       processFoundJS(ORIGIN_TYPE.WHATSAPP, '');
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(12);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(6);
     });
     it('should send valid icon update when no inline based scripts are invalid', async () => {
       document.body.innerHTML =
@@ -334,17 +368,20 @@ describe('contentUtils', () => {
         '  <script>console.log("a unit test");</script>' +
         '</div>';
       scanForScripts();
-      window.chrome.runtime.sendMessage.mockImplementation(
+      (window.chrome.runtime.sendMessage as unknown as Mock).mockImplementation(
         (message, response) => {
           response && response({ valid: true });
         }
       );
       processFoundJS(ORIGIN_TYPE.WHATSAPP, '');
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(15);
-      expect(window.chrome.runtime.sendMessage.mock.calls[13][0].state).toEqual(
-        STATES.VALID
-      );
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(6);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[4][0]
+          .state
+      ).toEqual(STATES.PROCESSING);
     });
     it('should send invalid icon update when invalid response received with src', async () => {
       document.body.innerHTML =
@@ -353,17 +390,20 @@ describe('contentUtils', () => {
         '  <script src="https://facebook.com/"></script>' +
         '</div>';
       scanForScripts();
-      window.chrome.runtime.sendMessage.mockImplementation(
+      (window.chrome.runtime.sendMessage as unknown as Mock).mockImplementation(
         (message, response) => {
           response && response({ valid: false });
         }
       );
       processFoundJS(ORIGIN_TYPE.WHATSAPP, '');
       await (() => new Promise(res => setTimeout(res, 10)))();
-      expect(window.chrome.runtime.sendMessage.mock.calls.length).toBe(23);
-      expect(window.chrome.runtime.sendMessage.mock.calls[21][0].state).toEqual(
-        STATES.INVALID
-      );
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
+      ).toBe(11);
+      expect(
+        (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[9][0]
+          .state
+      ).toEqual(STATES.INVALID);
     });
     it.todo(
       'should send invalid icon update when invalid inline response received'

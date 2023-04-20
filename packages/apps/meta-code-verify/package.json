@@ -15,14 +15,14 @@
     "build-local-dev": "yarn makeBundle",
     "watch": "yarn run rollup --config --watch",
     "lint": "yarn makePrettier && yarn run eslint src/js/**",
-    "makeBundle": "yarn run rollup -c",
-    "makePrettier": "yarn run prettier --write \"src/**/*.js\" \"rollup_scripts/**/*.mjs\"",
-    "test": "yarn lint && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js"
+    "makeBundle": "yarn run rollup --config rollup.config.ts --configPlugin typescript",
+    "makePrettier": "yarn run prettier --write \"src/**/*.ts\" \"rollup_scripts/**/*.mjs\"",
+    "test": "yarn lint && vitest -u"
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.21.2",
     "@rollup/plugin-commonjs": "^24.0.1",
-    "@rollup/plugin-eslint": "^8.0.2",
+    "@rollup/plugin-eslint": "^9.0.3",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.2",
     "@rollup/plugin-typescript": "^11.0.0",
@@ -39,6 +39,9 @@
     "sinon-chrome": "^3.0.1",
     "ts-jest": "^27.1.0",
     "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "vite": "^4.3.0",
+    "vite-plugin-chrome-extension": "^0.0.7",
+    "vitest": "^0.30.1"
   }
 }
