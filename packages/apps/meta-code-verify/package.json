@@ -1,10 +1,9 @@
 {
-  "name": "meta-code-verify",
+  "name": "@human-protocol/meta-code-verify",
   "version": "0.1.0",
   "description": "Browser extensions to verify code running in the browser against a published manifest",
   "main": "none",
-  "repository": "git@github.com:facebookincubator/meta-code-verify.git",
-  "author": "Richard Hansen <rrh@fb.com>",
+  "repository": "https://github.com/humanprotocol/human-protocol",
   "license": "MIT",
   "type": "module",
   "private": true,
