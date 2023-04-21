@@ -28,6 +28,9 @@ export default class KVStoreClient {
     this.signerOrProvider = signerOrProvider;
   }
 
+  /**
+   * Initializes the contract instance and sets it to the `this.contract` property
+   */
   private async init() {
     let chainId: ChainId;
     if (!this.contract) {
@@ -44,6 +47,13 @@ export default class KVStoreClient {
     }
   }
 
+  /**
+   * Sets a key-value pair in the contract
+   *
+   * @param {string} key - The key of the key-value pair to set
+   * @param {string} value - The value of the key-value pair to set
+   * @returns {Error | null} - An error object if an error occurred, null otherwise
+   */
   public async set(key: string, value: string) {
     if (key === '') return ErrorKVStoreEmptyKey;
     if (value === '') return ErrorKVStoreEmptyValue;
@@ -57,6 +67,13 @@ export default class KVStoreClient {
     }
   }
 
+  /**
+   * Sets multiple key-value pairs in the contract
+   *
+   * @param {string[]} keys - An array of keys to set
+   * @param {string[]} values - An array of values to set
+   * @returns {Error | null} - An error object if an error occurred, null otherwise
+   */
   public async setBulk(keys: string[], values: string[]) {
     if (keys.length !== values.length) return ErrorKVStoreArrayLength;
     if (keys.includes('')) return ErrorKVStoreEmptyKey;
@@ -72,6 +89,13 @@ export default class KVStoreClient {
     }
   }
 
+  /**
+   * Gets the value of a key-value pair in the contract
+   *
+   * @param {string} address - The Ethereum address associated with the key-value pair
+   * @param {string} key - The key of the key-value pair to get
+   * @returns {string | Error} - The value of the key-value pair if it exists, an error object otherwise
+   */
   public async get(address: string, key: string) {
     if (key === '') return ErrorKVStoreEmptyKey;
     if (!ethers.utils.isAddress(address)) return ErrorInvalidAddress;
