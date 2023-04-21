@@ -16,7 +16,7 @@
     "watch": "yarn run rollup --config --watch",
     "lint": "yarn makePrettier && yarn run eslint src/js/**",
     "makeBundle": "yarn run rollup --config rollup.config.ts --configPlugin typescript",
-    "makePrettier": "yarn run prettier --write \"src/**/*.ts\" \"rollup_scripts/**/*.mjs\"",
+    "makePrettier": "yarn run prettier --write \"src/**/*.ts\" \"rollup_scripts/**/*.ts\"",
     "test": "yarn lint && vitest -u"
   },
   "devDependencies": {

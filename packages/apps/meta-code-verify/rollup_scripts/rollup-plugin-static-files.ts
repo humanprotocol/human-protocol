@@ -19,8 +19,11 @@ const DEFAULT_OPTIONS = {
  *    `dist/<contents of locales>`)
  * @returns Rollup.PluginImpl
  */
-export default function rollupPluginStaticFiles(dirs:Array<string>|string = [], options?:{keepDir?:boolean}) {
-  const { keepDir }:{keepDir?:boolean} = { ...DEFAULT_OPTIONS, ...options };
+export default function rollupPluginStaticFiles(
+  dirs: Array<string> | string = [],
+  options?: { keepDir?: boolean }
+) {
+  const { keepDir }: { keepDir?: boolean } = { ...DEFAULT_OPTIONS, ...options };
   if (!Array.isArray(dirs)) {
     dirs = [dirs];
   }

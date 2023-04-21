@@ -8,6 +8,16 @@ describe('background', () => {
       window.fetch = vi.fn();
       (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
+          clone: () => {
+            return {
+              json: () => {
+                return {
+                  1: { '/somepath': 'somehash' },
+                  root_hash: '0x7',
+                };
+              },
+            };
+          },
           json: () =>
             Promise.resolve({
               1: { '/somepath': 'somehash' },
@@ -42,9 +52,19 @@ describe('background', () => {
       (window.fetch as Mock) = vi.fn();
       (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
+          clone: () => {
+            return {
+              json: () => {
+                return {
+                  1: { '/somepath': 'somehash' },
+                  root_hash: '0x7',
+                };
+              },
+            };
+          },
           json: () =>
             Promise.resolve({
-              2: { '/someotherpath': 'someotherhash' },
+              1: { '/somepath': 'somehash' },
               root_hash: '0x7',
             }),
         })
@@ -82,9 +102,19 @@ describe('background', () => {
       (window.fetch as Mock) = vi.fn();
       (window.fetch as Mock).mockReturnValueOnce(
         Promise.resolve({
+          clone: () => {
+            return {
+              json: () => {
+                return {
+                  1: { '/somepath': 'somehash' },
+                  root_hash: '0x7',
+                };
+              },
+            };
+          },
           json: () =>
             Promise.resolve({
-              1: { '/someotherpath': 'someotherhash' },
+              1: { '/somepath': 'somehash' },
               root_hash: '0x7',
             }),
         })

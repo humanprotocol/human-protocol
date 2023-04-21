@@ -16,7 +16,7 @@ function genExec(command) {
       if (error) {
         customError.stdout = stdout;
         customError.stderr = stderr;
-         reject(error);
+        reject(error);
       } else {
         resolve({ stdout, stderr });
       }
