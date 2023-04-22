@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import * as path from 'path';
 import { SHA256 } from 'crypto-js';
 import * as glob from 'glob';
@@ -7,9 +7,14 @@ import { NFTStorage } from 'nft.storage';
 
 export default async function generateMerkleTree(
   origin: string,
-  token: string
+  token: string,
+  buildPath?: string
 ): Promise<string> {
-  const buildPath = path.join(__dirname, '../dist/assets');
+
+  if (!buildPath) {
+    buildPath = path.join(__dirname, '../dist/assets');
+  }
+
   const allFiles = glob.sync('**/*.js', { cwd: buildPath });
   const NFT_STORAGE_CLIENT = new NFTStorage({
     token,
