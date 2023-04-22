@@ -18,6 +18,14 @@ You may also see any lint errors in the console.
 
 ### `yarn run build`
 
+Before building you need to set environment variable in `.env`:
+
+```
+VITE_APP_NFT_STORAGE_API=
+VITE_APP_FAUCET_SERVER_URL=
+VITE_APP_WALLETCONNECT_PROJECT_ID=
+```
+
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
