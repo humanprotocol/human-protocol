@@ -9,14 +9,14 @@ import {
 } from './error';
 import { ChainId } from './enums';
 
-export class InitParams {
+export class InitClient {
   /**
    * **Get init client parameters**
    *
    * @param {string} providerOrSigner - Ethereum signer or provider
    * @returns {Promise<IClientParams>} - Init client parameters
    */
-  static async getClientParams(
+  static async getParams(
     signerOrProvider: Signer | Provider
   ): Promise<IClientParams> {
     let network: Network;

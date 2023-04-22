@@ -35,3 +35,12 @@ export class StakingClient {
     );
   }
 }
+
+import { ethers } from 'ethers';
+import { InitClient } from './init';
+
+const provider = new ethers.providers.JsonRpcProvider();
+const signer = provider.getSigner();
+
+const clientParams = await InitClient.getParams(signer); // or provider
+const stakingClient = new StakingClient(clientParams);
