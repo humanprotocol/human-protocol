@@ -70,3 +70,34 @@ export const ErrorStorageFileNotFound = new Error('File not found');
  * @constant {Error} - The Storage file not uploaded.
  */
 export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
+
+/**
+ * @constant {Error} - The Staking value must be positive.
+ */
+export const ErrorStakingValueMustBePositive = new Error(
+  'Value must be positive'
+);
+
+/**
+ * @constant {Error} - The Staking value is not big number.
+ */
+export const ErrorStakingValueNotBigNumber = new Error(
+  'Value is not big number'
+);
+
+/**
+ * @constant {Error} - The HMToken amount not approved.
+ */
+export const ErrorHMTokenAmountNotApproved = new Error('Amount not approved');
+
+/**
+ * @constant {Error} - Init provider does not exists.
+ */
+export const ErrorInitProviderDoesNotExist = new Error(
+  'Provider does not exist'
+);
+
+/**
+ * @constant {Error} - Init with unsupported chain ID.
+ */
+export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
