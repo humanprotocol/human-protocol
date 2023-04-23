@@ -519,6 +519,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function closeAllocation(
         address _escrowAddress
     ) external override onlyStaker(msg.sender) {
+        require(_escrowAddress != address(0), 'Must be a valid address');
+
         _closeAllocation(_escrowAddress);
     }
 
@@ -533,7 +535,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             'Allocation has no completed state'
         );
 
-        Allocation memory allocation = allocations[_escrowAddress];
+        Allocation storage allocation = allocations[_escrowAddress];
 
         allocation.closedAt = block.number;
         uint256 diffInBlocks = Math.diffOrZero(
@@ -542,11 +544,14 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         );
         require(diffInBlocks > 0, 'Allocation cannot be closed so early');
 
-        stakes[allocation.staker].unallocate(allocation.tokens);
+        uint256 _tokens = allocation.tokens;
+
+        stakes[allocation.staker].unallocate(_tokens);
+        allocation.tokens = 0;
 
         emit AllocationClosed(
             allocation.staker,
-            allocation.tokens,
+            _tokens,
             _escrowAddress,
             allocation.closedAt
         );
