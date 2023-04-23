@@ -10,7 +10,6 @@ export default async function generateMerkleTree(
   token: string,
   buildPath?: string
 ): Promise<string> {
-
   if (!buildPath) {
     buildPath = path.join(__dirname, '../dist/assets');
   }
