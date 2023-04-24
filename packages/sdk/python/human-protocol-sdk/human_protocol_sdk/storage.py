@@ -169,8 +169,8 @@ class StorageClient:
                 raise e
 
             data = artifact.encode("utf-8")
-            hash_ = hashlib.sha1(data).hexdigest()
-            key = f"s3{hash_}.json"
+            data_sha = hashlib.sha1(data).hexdigest()
+            key = f"s3{data_sha}.json"
             file_exist = None
 
             try:
