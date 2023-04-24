@@ -282,7 +282,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         if (
             allocation.closedAt == 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Complete
+            (escrowStatus == IEscrow.EscrowStatuses.Complete ||
+                escrowStatus == IEscrow.EscrowStatuses.Cancelled)
         ) {
             return AllocationState.Completed;
         }
@@ -371,7 +372,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function unstake(uint256 _tokens) external override onlyStaker(msg.sender) {
         Stakes.Staker storage staker = stakes[msg.sender];
 
-        require(staker.tokensStaked > 0, 'Must be a positive number');
         require(_tokens > 0, 'Must be a positive number');
         require(
             staker.tokensAvailable() >= _tokens,
@@ -439,7 +439,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         Allocation storage allocation = allocations[_escrowAddress];
 
-        require(allocation.tokens > 0, 'Must be a positive number');
+        require(_tokens > 0, 'Must be a positive number');
 
         require(
             _tokens <= allocation.tokens,
@@ -519,6 +519,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function closeAllocation(
         address _escrowAddress
     ) external override onlyStaker(msg.sender) {
+        require(_escrowAddress != address(0), 'Must be a valid address');
+
         _closeAllocation(_escrowAddress);
     }
 
@@ -533,7 +535,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             'Allocation has no completed state'
         );
 
-        Allocation memory allocation = allocations[_escrowAddress];
+        Allocation storage allocation = allocations[_escrowAddress];
 
         allocation.closedAt = block.number;
         uint256 diffInBlocks = Math.diffOrZero(
@@ -542,11 +544,14 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         );
         require(diffInBlocks > 0, 'Allocation cannot be closed so early');
 
-        stakes[allocation.staker].unallocate(allocation.tokens);
+        uint256 _tokens = allocation.tokens;
+
+        stakes[allocation.staker].unallocate(_tokens);
+        allocation.tokens = 0;
 
         emit AllocationClosed(
             allocation.staker,
-            allocation.tokens,
+            _tokens,
             _escrowAddress,
             allocation.closedAt
         );
