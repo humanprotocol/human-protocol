@@ -99,6 +99,13 @@ export const ErrorKVStoreValueNotFound = new Error('Value not found');
 export const ErrorInvalidAddress = new Error('Invalid address');
 
 /**
- * @constant {Error} - ChainId not supported.
+ * @constant {Error} - Init provider does not exists.
  */
-export const ErrorChainId = new Error('ChainId not supported');
+export const ErrorInitProviderDoesNotExist = new Error(
+  'Provider does not exist'
+);
+
+/**
+ * @constant {Error} - Init with unsupported chain ID.
+ */
+export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
