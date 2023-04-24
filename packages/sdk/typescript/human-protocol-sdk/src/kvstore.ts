@@ -1,50 +1,30 @@
-import { Provider } from '@ethersproject/abstract-provider';
 import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
-import { Signer, ethers } from 'ethers';
-import { NETWORKS } from './constants';
-import { ChainId } from './enums';
+import { ethers } from 'ethers';
 import {
-  ErrorChainId,
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
   ErrorKVStoreEmptyValue,
   ErrorKVStoreValueNotFound,
 } from './error';
+import { IClientParams } from './interfaces';
 
 export default class KVStoreClient {
-  private signerOrProvider: Signer | Provider;
   private contract?: KVStore;
 
   /**
    * **KVStore constructor**
    *
-   * @param {Signer | Provider} signerOrProvider - Ethereum Signer or Provider
+   *   * @param {IClientParams} clientParams - Init client parameters
    */
-  constructor(signerOrProvider: Signer | Provider) {
-    this.signerOrProvider = signerOrProvider;
-  }
-
-  /**
-   * Initializes the contract instance and sets it to the `this.contract` property
-   */
-  private async init() {
-    let chainId: ChainId;
-    if (!this.contract) {
-      if (this.signerOrProvider instanceof Signer)
-        chainId = await this.signerOrProvider.getChainId();
-      else chainId = (await this.signerOrProvider.getNetwork()).chainId;
-      const kvstoreAddress = NETWORKS[chainId]?.kvstoreAddress;
-
-      if (!kvstoreAddress) return ErrorChainId;
-      this.contract = KVStore__factory.connect(
-        kvstoreAddress,
-        this.signerOrProvider
-      );
-    }
+  constructor(readonly clientParams: IClientParams) {
+    this.contract = KVStore__factory.connect(
+      clientParams.network.kvstoreAddress,
+      clientParams.signerOrProvider
+    );
   }
 
   /**
@@ -52,18 +32,16 @@ export default class KVStoreClient {
    *
    * @param {string} key - The key of the key-value pair to set
    * @param {string} value - The value of the key-value pair to set
-   * @returns {Error | null} - An error object if an error occurred, null otherwise
+   * @throws {Error} - An error object if an error occurred, null otherwise
    */
   public async set(key: string, value: string) {
-    if (key === '') return ErrorKVStoreEmptyKey;
-    if (value === '') return ErrorKVStoreEmptyValue;
-    await this.init();
+    if (key === '') throw ErrorKVStoreEmptyKey;
+    if (value === '') throw ErrorKVStoreEmptyValue;
 
     try {
       await this.contract?.set(key, value);
-      return null;
     } catch (e) {
-      if (e instanceof Error) return Error(`Failed to set value: ${e.message}`);
+      if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
   }
 
@@ -72,20 +50,18 @@ export default class KVStoreClient {
    *
    * @param {string[]} keys - An array of keys to set
    * @param {string[]} values - An array of values to set
-   * @returns {Error | null} - An error object if an error occurred, null otherwise
+   * @throws {Error} - An error object if an error occurred, null otherwise
    */
   public async setBulk(keys: string[], values: string[]) {
-    if (keys.length !== values.length) return ErrorKVStoreArrayLength;
-    if (keys.includes('')) return ErrorKVStoreEmptyKey;
-    if (values.includes('')) return ErrorKVStoreEmptyValue;
-    await this.init();
+    if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
+    if (keys.includes('')) throw ErrorKVStoreEmptyKey;
+    if (values.includes('')) throw ErrorKVStoreEmptyValue;
 
     try {
       await this.contract?.setBulk(keys, values);
-      return null;
     } catch (e) {
       if (e instanceof Error)
-        return Error(`Failed to set bulk values: ${e.message}`);
+        throw Error(`Failed to set bulk values: ${e.message}`);
     }
   }
 
@@ -94,19 +70,19 @@ export default class KVStoreClient {
    *
    * @param {string} address - The Ethereum address associated with the key-value pair
    * @param {string} key - The key of the key-value pair to get
-   * @returns {string | Error} - The value of the key-value pair if it exists, an error object otherwise
+   * @returns {string} - The value of the key-value pair if it exists
+   * @throws {Error} - An error object if an error occurred, null otherwise
    */
   public async get(address: string, key: string) {
-    if (key === '') return ErrorKVStoreEmptyKey;
-    if (!ethers.utils.isAddress(address)) return ErrorInvalidAddress;
-    await this.init();
+    if (key === '') throw ErrorKVStoreEmptyKey;
+    if (!ethers.utils.isAddress(address)) throw ErrorInvalidAddress;
 
     try {
       const result = await this.contract?.get(address, key);
-      if (result === '') return ErrorKVStoreValueNotFound;
+      if (result === '') throw ErrorKVStoreValueNotFound;
       return result;
     } catch (e) {
-      if (e instanceof Error) return Error(`Failed to get value: ${e.message}`);
+      if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
     }
   }
 }
