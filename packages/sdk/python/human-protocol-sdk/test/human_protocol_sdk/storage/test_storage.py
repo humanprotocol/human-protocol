@@ -1,5 +1,6 @@
 import hashlib
 import json
+import random
 import unittest
 from unittest.mock import MagicMock, patch
 import types
@@ -123,8 +124,8 @@ class TestStorageClient(unittest.TestCase):
 
     def test_upload_files(self):
         file3 = "file3 content"
-        hash_ = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
-        key3 = f"s3{hash_}.json"
+        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{data_sha}.json"
 
         self.client.client.stat_object = MagicMock(
             side_effect=S3Error(
@@ -142,8 +143,8 @@ class TestStorageClient(unittest.TestCase):
 
     def test_upload_files_exist(self):
         file3 = "file3 content"
-        hash_ = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
-        key3 = f"s3{hash_}.json"
+        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{data_sha}.json"
 
         self.client.client.stat_object = MagicMock(
             side_effect=[{"_object_name": "1234567890"}]
