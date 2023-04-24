@@ -6,18 +6,21 @@ import os
 from decimal import Decimal
 from typing import Optional
 
-from human_protocol_sdk.eth_bridge import (
-    get_hmtoken,
-    get_staking,
-    handle_transaction_with_retry,
-    Retry,
-    HMTOKEN_ADDR,
-    STAKING_ADDR,
+from web3 import Web3
+from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
+from web3.providers.rpc import HTTPProvider
+
+from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.utils import (
+    get_hmtoken_interface,
+    get_factory_interface,
+    get_staking_interface,
+    get_reward_pool_interface,
 )
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
-LOG = logging.getLogger("human_protocol_sdk.job")
+LOG = logging.getLogger("human_protocol_sdk.staking")
 
 
 class StakingClientError(Exception):
@@ -41,38 +44,51 @@ class StakingClient:
 
     """
 
-    def __init__(
-        self,
-        staker: str,
-        priv_key: str,
-        hmtoken_addr: str = None,
-        staking_addr: str = None,
-        retry: Retry = None,
-        hmt_server_addr: str = None,
-        gas_limit: int = GAS_LIMIT,
-    ):
-        """Initializes a Staking instance with optional staking contract address.
+    def __init__(self, chain_id: ChainId, provider: HTTPProvider, priv_key: str):
+        """Initializes a Staking instance
 
         Args:
-            staking_addr (Optional[str]): an ethereum address of the staking.
 
         """
 
-        # holds global retry parameters for transactions
-        if retry is None:
-            self.retry = Retry()
-        else:
-            self.retry = retry
+        # Load network configuration based on chain id
+        self.network = NETWORKS[chain_id]
 
-        self.gas_payer = staker
-        self.gas_payer_priv = priv_key
-        self.hmt_server_addr = hmt_server_addr
-        self.hmtoken_addr = HMTOKEN_ADDR if hmtoken_addr is None else hmtoken_addr
-        self.staking_addr = STAKING_ADDR if staking_addr is None else staking_addr
-        self.gas = gas_limit or GAS_LIMIT
+        if not self.network:
+            raise StakingClientError("Invalid chain id")
 
-        self.hmtoken_contract = get_hmtoken(self.hmtoken_addr, self.hmt_server_addr)
-        self.staking_contract = get_staking(self.staking_addr, self.hmt_server_addr)
+        # Initialize web3 instance
+        self.w3 = Web3(provider)
+        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+        # Set default gas payer
+        self.gas_payer = self.w3.eth.account.from_key(priv_key)
+        self.w3.middleware_onion.add(
+            construct_sign_and_send_raw_middleware(self.gas_payer)
+        )
+        self.w3.eth.default_account = self.gas_payer.address
+
+        # Initialize contract instances
+        hmtoken_interface = get_hmtoken_interface()
+        self.hmtoken_contract = self.w3.eth.contract(
+            address=self.network["hmt_address"], abi=hmtoken_interface["abi"]
+        )
+
+        factory_interface = get_factory_interface()
+        self.factory_contract = self.w3.eth.contract(
+            address=self.network["factory_address"], abi=factory_interface["abi"]
+        )
+
+        staking_interface = get_staking_interface()
+        self.staking_contract = self.w3.eth.contract(
+            address=self.network["staking_address"], abi=staking_interface["abi"]
+        )
+
+        reward_pool_interface = get_reward_pool_interface()
+        self.reward_pool_contract = self.w3.eth.contract(
+            address=self.network["reward_pool_address"],
+            abi=reward_pool_interface["abi"],
+        )
 
     def approve_stake(self, amount: Decimal):
         """Approves HMT token for Staking.
@@ -87,9 +103,10 @@ class StakingClient:
             raise StakingClientError("Amount to approve must be greater than 0")
 
         self._handle_transaction(
-            "Approve HMT",
-            self.hmtoken_contract.functions.approve,
-            [self.staking_addr, amount],
+            "Approve stake",
+            self.hmtoken_contract.functions.approve(
+                self.network["staking_address"], amount
+            ),
         )
 
     def stake(self, amount: Decimal):
@@ -105,14 +122,14 @@ class StakingClient:
             raise StakingClientError("Amount to stake must be greater than 0")
 
         self._handle_transaction(
-            "Stake HMT", self.staking_contract.functions.stake, [amount]
+            "Stake HMT", self.staking_contract.functions.stake(amount)
         )
 
-    def allocate(self, escrow_addr: str, amount: Decimal):
+    def allocate(self, escrow_address: str, amount: Decimal):
         """Allocates HMT token to the escrow.
 
         Args:
-            escrow_addr (str): Address of the escrow
+            escrow_address (str): Address of the escrow
             amount (Decimal): Amount to allocate
 
         Returns:
@@ -122,102 +139,93 @@ class StakingClient:
             raise StakingClientError("Amount to allocate must be greater than 0")
 
         self._handle_transaction(
-            "Allocate HMT to escrow",
-            self.staking_contract.functions.allocate,
-            [escrow_addr, amount],
+            "Allocate HMT",
+            self.staking_contract.functions.allocate(escrow_address, amount),
         )
 
-    def unstake(self, amount: Decimal, staker: str, priv_key: str) -> bool:
+    def close_allocation(self, escrow_address: str):
+        """Closes allocated HMT token from the escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+        """
+
+        self._handle_transaction(
+            "Close allocation",
+            self.staking_contract.functions.closeAllocation(escrow_address),
+        )
+
+    def unstake(self, amount: Decimal):
         """Unstakes HMT token.
 
         Args:
             amount (Decimal): Amount to unstake
-            staker (Optional[str]): Operator to unstake
 
         Returns:
-            bool: returns True if unstaking succeeds.
         """
-        txn_event = "Unstaking HMT"
-        txn_func = self.staking_contract.functions.unstake
-        txn_info = {
-            "gas_payer": staker,
-            "gas_payer_priv": priv_key,
-            "gas": self.gas,
-            "hmt_server_addr": self.hmt_server_addr,
-        }
 
-        func_args = [amount]
+        if amount <= 0:
+            raise StakingClientError("Amount to unstake must be greater than 0")
 
-        try:
-            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            return True
-        except Exception as e:
-            LOG.exception(f"{txn_event} failed from: {staker}, {priv_key} due to {e}.")
+        self._handle_transaction(
+            "Unstake HMT", self.staking_contract.functions.unstake(amount)
+        )
 
-    def withdraw(self, amount: Decimal, staker: str, priv_key: str) -> bool:
+    def withdraw(self, amount: Decimal):
         """Withdraws HMT token.
 
         Args:
             amount (Decimal): Amount to withdraw
-            staker (Optional[str]): Operator to withdraw
 
         Returns:
-            bool: returns True if withdrawing succeeds.
         """
-        txn_event = "Withdrawing HMT from stake"
-        txn_func = self.staking_contract.functions.withdraw
-        txn_info = {
-            "gas_payer": staker,
-            "gas_payer_priv": priv_key,
-            "gas": self.gas,
-            "hmt_server_addr": self.hmt_server_addr,
-        }
 
-        func_args = [amount]
+        if amount <= 0:
+            raise StakingClientError("Amount to withdraw must be greater than 0")
 
-        try:
-            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            return True
-        except Exception as e:
-            LOG.exception(f"{txn_event} failed from: {staker}, {priv_key} due to {e}.")
+        self._handle_transaction(
+            "Withdraw HMT", self.staking_contract.functions.withdraw(amount)
+        )
 
-    def closeAllocation(self, escrow_addr: str, staker: str, priv_key: str) -> bool:
-        """Close allocation of HMT token from the escrow.
+    def slash(self, slasher: str, staker: str, escrow_address: str, amount: Decimal):
+        """Slashes HMT token.
 
         Args:
-            amount (Decimal): Amount to close allocation
-            staker (Optional[str]): Operator to close allocation
+            amount (Decimal): Amount to slash
 
         Returns:
-            bool: returns True if closing allocation succeeds.
         """
-        txn_event = "Closing HMT allocation from job"
-        txn_func = self.staking_contract.functions.closeAllocation
-        txn_info = {
-            "gas_payer": staker,
-            "gas_payer_priv": priv_key,
-            "gas": self.gas,
-            "hmt_server_addr": self.hmt_server_addr,
-        }
 
-        func_args = [escrow_addr]
+        if amount <= 0:
+            raise StakingClientError("Amount to slash must be greater than 0")
 
+        self._handle_transaction(
+            "Slash HMT",
+            self.staking_contract.functions.slash(
+                slasher, staker, escrow_address, amount
+            ),
+        )
+
+    def distribute_rewards(self, escrow_address: str):
+        """Pays out rewards to the slashers for the specified escrow address.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+        """
+
+        self._handle_transaction(
+            "Distribute reward",
+            self.reward_pool_contract.functions.distributeReward(escrow_address),
+        )
+
+    def _handle_transaction(self, tx_name, tx):
         try:
-            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-            return True
+            tx_hash = tx.transact()
+            self.w3.eth.waitForTransactionReceipt(tx_hash)
         except Exception as e:
-            LOG.exception(f"{txn_event} failed from: {staker}, {priv_key} due to {e}.")
-
-    def _handle_transaction(self, txn_event, txn_func, func_args):
-        txn_info = {
-            "gas_payer": self.gas_payer,
-            "gas_payer_priv": self.gas_payer_priv,
-            "gas": self.gas,
-            "hmt_server_addr": self.hmt_server_addr,
-        }
-
-        try:
-            handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
-        except Exception as e:
-            LOG.exception(f"{txn_event} failed due to {e}.")
-            raise StakingClientError(e)
+            LOG.exception(f"{tx_name} failed due to {e}.")
+            raise StakingClientError("Transaction failed.")

@@ -1,10 +1,14 @@
-import time
+import json
 import logging
+import time
 from typing import Tuple, Optional
+
 from web3.contract import Contract
 from web3.types import TxReceipt
 
-logger = logging.getLogger("human_protocol_sdk.job")
+from human_protocol_sdk.constants import ARTIFACTS_FOLDER
+
+logger = logging.getLogger("human_protocol_sdk.utils")
 
 
 def with_retry(fn, retries=3, delay=5, backoff=2):
@@ -91,3 +95,72 @@ def parse_transfer_transaction(
         tx_balance = transfer_event[0].get("args", {}).get("_value")
 
     return hmt_transferred and tx_balance is not None, tx_balance
+
+
+def get_contract_interface(contract_entrypoint):
+    """Retrieve the contract interface of a given contract.
+
+    Args:
+        contract_entrypoint: the entrypoint of the JSON.
+
+    Returns:
+        returns the contract interface containing the contract abi.
+
+    """
+    with open(contract_entrypoint) as f:
+        contract_interface = json.load(f)
+    return contract_interface
+
+
+def get_hmtoken_interface():
+    """Retrieve the HMToken interface.
+
+    Returns:
+        Contract interface: returns the HMToken interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(
+            ARTIFACTS_FOLDER
+        )
+    )
+
+
+def get_factory_interface():
+    """Retrieve the EscrowFactory interface.
+
+    Returns:
+        Contract interface: returns the EscrowFactory interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_staking_interface():
+    """Retrieve the Staking interface.
+
+    Returns:
+        Contract interface: returns the Staking interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/Staking.sol/Staking.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_reward_pool_interface():
+    """Retrieve the RewardPool interface.
+
+    Returns:
+        Contract interface: returns the RewardPool interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/RewardPool.sol/RewardPool.json".format(ARTIFACTS_FOLDER)
+    )
