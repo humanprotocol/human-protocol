@@ -1,3 +1,6 @@
+import { NetworkData } from '../../src';
+import { ChainId } from '../../src/enums';
+
 export const DEFAULT_HMTOKEN_ADDR =
   '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
@@ -34,3 +37,24 @@ export const STORAGE_TEST_SECRET_KEY = 'my-secret-key';
 export const STORAGE_FAKE_BUCKET = 'fake-bucket';
 export const STORAGE_TEST_FILE_VALUE = 'value';
 export const STORAGE_TEST_FILE_VALUE_2 = 'another value';
+export const FAKE_NETWORK_NAME = 'fake_network';
+
+/**
+ * @constant Default network parameters
+ */
+export const FAKE_NETWORK = {
+  chainId: ChainId.LOCALHOST,
+  title: FAKE_NETWORK_NAME,
+  scanUrl: '',
+  factoryAddress: '0x0000000000000000000000000000000000000000',
+  hmtAddress: '0x0000000000000000000000000000000000000000',
+  stakingAddress: '0x0000000000000000000000000000000000000000',
+  kvstoreAddress: '0x0000000000000000000000000000000000000000',
+  subgraphUrl: '',
+  oldSubgraphUrl: '',
+  oldFactoryAddress: '',
+};
+
+export const FAKE_TRANSACTION_HASH =
+  '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+export const FAKE_BLOCK_NUMBER = '1234';

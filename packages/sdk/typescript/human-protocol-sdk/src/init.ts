@@ -9,7 +9,7 @@ import {
 } from './error';
 import { ChainId } from './enums';
 
-export class InitClient {
+export default class InitClient {
   /**
    * **Get init client parameters**
    *

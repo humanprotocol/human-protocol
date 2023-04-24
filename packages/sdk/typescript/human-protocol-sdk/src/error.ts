@@ -79,10 +79,31 @@ export const ErrorStakingValueMustBePositive = new Error(
 );
 
 /**
- * @constant {Error} - The Staking value is not big number.
+ * @constant {Error} - Invalid staking value: amount must be a BigNumber.
  */
-export const ErrorStakingValueNotBigNumber = new Error(
-  'Value is not big number'
+export const ErrorInvalidStakingValueType = new Error(
+  'Invalid staking value: amount must be a BigNumber'
+);
+
+/**
+ * @constant {Error} - Invalid staking value: amount must be positive.
+ */
+export const ErrorInvalidStakingValueSign = new Error(
+  'Invalid staking value: amount must be positive'
+);
+
+/**
+ * @constant {Error} - Failed to approve staking amount: allowance not updated.
+ */
+export const ErrorFailedToApproveStakingAmountAllowanceNotUpdated = new Error(
+  'Failed to approve staking amount: allowance not updated'
+);
+
+/**
+ * @constant {Error} - Failed to approve staking amount: signerOrProvider is not a Signer instance.
+ */
+export const ErrorFailedToApproveStakingAmountSignerDoesNotExist = new Error(
+  'Failed to approve staking amount: signerOrProvider is not a Signer instance'
 );
 
 /**

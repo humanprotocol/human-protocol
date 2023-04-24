@@ -5,15 +5,24 @@ import {
   HMToken,
   Staking,
 } from '@human-protocol/core/typechain-types';
-import { Signer } from 'ethers';
+import { BigNumber, Signer } from 'ethers';
 import { NetworkData } from './types';
 import { IClientParams } from './interfaces';
+import {
+  ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
+  ErrorFailedToApproveStakingAmountSignerDoesNotExist,
+  ErrorHMTokenAmountNotApproved,
+  ErrorInvalidStakingValueSign,
+  ErrorInvalidStakingValueType,
+  ErrorStakingValueMustBePositive,
+  ErrorStakingValueNotBigNumber,
+} from './error';
 
-export class StakingClient {
-  private readonly signerOrProvider: Signer | Provider;
-  private readonly network: NetworkData;
-  private readonly tokenContract: HMToken;
-  private readonly stakingContract: Staking;
+export default class StakingClient {
+  public signerOrProvider: Signer | Provider;
+  public network: NetworkData;
+  public tokenContract: HMToken;
+  public stakingContract: Staking;
 
   /**
    * **Staking constructor**
@@ -34,13 +43,45 @@ export class StakingClient {
       this.signerOrProvider
     );
   }
+
+  public async approveStake(amount: BigNumber): Promise<boolean> {
+    try {
+      console.log(12321, amount);
+      if (!BigNumber.isBigNumber(amount)) {
+        throw ErrorInvalidStakingValueType;
+      }
+
+      if (amount.isNegative()) {
+        throw ErrorInvalidStakingValueSign;
+      }
+
+      if (await this.isAllowance(amount)) {
+        return true;
+      }
+
+      const tx = await this.tokenContract.approve(
+        this.stakingContract.address,
+        amount
+      );
+
+      await tx.wait();
+
+      return this.isAllowance(amount);
+    } catch (error) {
+      throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
+    }
+  }
+
+  private async isAllowance(amount: BigNumber): Promise<boolean> {
+    if (this.signerOrProvider instanceof Signer) {
+      const newAllowance = await this.tokenContract.allowance(
+        await this.signerOrProvider.getAddress(),
+        this.stakingContract.address
+      );
+
+      return newAllowance.gte(amount);
+    } else {
+      throw ErrorFailedToApproveStakingAmountSignerDoesNotExist;
+    }
+  }
 }
-
-import { ethers } from 'ethers';
-import { InitClient } from './init';
-
-const provider = new ethers.providers.JsonRpcProvider();
-const signer = provider.getSigner();
-
-const clientParams = await InitClient.getParams(signer); // or provider
-const stakingClient = new StakingClient(clientParams);
