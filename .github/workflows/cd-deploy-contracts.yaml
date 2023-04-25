@@ -12,6 +12,7 @@ jobs:
   deploy-contracts:
     name: Deploy contracts
     runs-on: ubuntu-latest
+    environment: deploy-contracts
     strategy:
       matrix:
         network: [
@@ -22,6 +23,7 @@ jobs:
               reward_pool: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
               reputation: '0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405',
               private_key: TESTNET_PRIVATE_KEY,
+              subgraph: 'goerli-v1'
             },
             {
               name: polygon,
@@ -30,6 +32,7 @@ jobs:
               reward_pool: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
               # reputation:
               private_key: MAINNET_PRIVATE_KEY,
+              subgraph: 'polygon-v1'
             },
             {
               name: polygonMumbai,
@@ -38,6 +41,7 @@ jobs:
               reward_pool: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
               reputation: '0xC522463d36f76b881bE66484e3068F11e7038Ace',
               private_key: TESTNET_PRIVATE_KEY,
+              subgraph: 'mumbai-v1'
             },
             {
               name: bsc,
@@ -46,6 +50,7 @@ jobs:
               reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
               # reputation:
               private_key: MAINNET_PRIVATE_KEY,
+              subgraph: 'bsc-v1'
             },
             {
               name: bscTestnet,
@@ -54,6 +59,7 @@ jobs:
               reward_pool: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
               reputation: '0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98',
               private_key: TESTNET_PRIVATE_KEY,
+              subgraph: 'bsctest-v1'
             },
             {
               name: moonbeam,
@@ -62,6 +68,7 @@ jobs:
               reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
               # reputation:
               private_key: MAINNET_PRIVATE_KEY,
+              subgraph: 'moonbeam-v1'
             },
             {
               name: moonbaseAlpha,
@@ -70,6 +77,7 @@ jobs:
               reward_pool: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
               reputation: '0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c',
               private_key: TESTNET_PRIVATE_KEY,
+              subgraph: 'moonbase-alpha-v1'
             },
             {
               name: mainnet,
@@ -77,6 +85,7 @@ jobs:
               staking: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
               reward_pool: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
               private_key: MAINNET_PRIVATE_KEY,
+              subgraph: 'mainnet-v1'
             }
             # {
             #   name: avalanche,
@@ -123,6 +132,7 @@ jobs:
       # SKALE_API_KEY: ${{ secrets.SKALE_API_KEY }}
       # SKALE_BROWSER_API_URL: ${{ secrets.SKALE_BROWSER_API_URL }}
       # SKALE_BROWSER_URL: ${{ secrets.SKALE_BROWSER_URL }}
+      SUBGRAPH: ${{ matrix.network.subgraph }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -136,13 +146,20 @@ jobs:
         uses: dorny/paths-filter@v2
         id: filter
         with:
+          base: ${{ github.ref }}
           filters: |
             escrow_factory:
               - 'packages/core/contracts/Escrow*.sol'
+              - 'packages/core/contracts/interfaces/IStaking.sol'
             staking:
               - 'packages/core/contracts/Staking.sol'
+              - 'packages/core/contracts/libs/Stakes.sol'
+              - 'packages/core/contracts/interfaces/IStaking.sol'
+              - 'packages/core/contracts/interfaces/IRewardPool.sol'
+              - 'packages/core/contracts/interfaces/IEscrow.sol'
             reward_pool:
               - 'packages/core/contracts/RewardPool.sol'
+              - 'packages/core/contracts/interfaces/IRewardPool.sol'
             reputation:
               - 'packages/core/contracts/Reputation.sol'
 
@@ -207,6 +224,11 @@ jobs:
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v9
         with:
-          add: './packages/core/.openzeppelin'
-          message: 'chore(generated): update generated network data automatically'
+          add: "['./packages/core/.openzeppelin', './packages/sdk/typescript/subgraph/config']"
+          message: 'Update grafting and upgrade file from CD'
           default_author: github_actions
+      - name: Trigger Another Workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Subgraph deployment
+          inputs: '{ "subgraph-name": "${{ matrix.network.subgraph }}" }'
