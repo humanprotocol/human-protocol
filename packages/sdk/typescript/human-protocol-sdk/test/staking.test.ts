@@ -1,5 +1,5 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { ethers } from 'ethers';
+import { describe, test, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { Signer, ethers } from 'ethers';
 import StakingClient from '../src/staking';
 import { FAKE_NETWORK } from './utils/constants';
 import {
@@ -9,21 +9,36 @@ import {
   ErrorStakingFailedToStake,
   ErrorStakingInsufficientAllowance,
 } from '../src/error';
+import { NETWORKS, NetworkData } from '../src';
+import InitClient from '../src/init';
+import { ChainId } from '../src/enums';
+
+vi.mock('../src/init');
 
 describe('StakingClient', () => {
-  describe('approveStake', () => {
-    const provider = new ethers.providers.JsonRpcProvider();
-    const signer = provider.getSigner();
-    const clientParams = {
+  let provider: ethers.providers.JsonRpcProvider;
+  let signer: Signer;
+  let network: NetworkData | undefined;
+  let stakingClient: StakingClient;
+
+  beforeAll(async () => {
+    provider = new ethers.providers.JsonRpcProvider();
+    signer = provider.getSigner();
+    signer.getAddress = vi
+      .fn()
+      .mockResolvedValue('0xc5a5C42992dECbae36851359345FE25997F5C42d');
+    network = NETWORKS[ChainId.LOCALHOST];
+    const getClientParamsMock = InitClient.getParams as jest.Mock;
+    getClientParamsMock.mockResolvedValue({
       signerOrProvider: signer,
-      network: FAKE_NETWORK,
-    };
-    let stakingClient: StakingClient;
-
-    beforeEach(() => {
-      stakingClient = new StakingClient(clientParams);
+      network,
     });
+  });
 
+  beforeEach(async () => {
+    stakingClient = new StakingClient(await InitClient.getParams(signer));
+  });
+  describe('approveStake', () => {
     test('approves the staking amount if allowance is not sufficient', async () => {
       const amount = ethers.utils.parseEther('1');
 
@@ -84,17 +99,6 @@ describe('StakingClient', () => {
   });
 
   describe('stake', () => {
-    const provider = new ethers.providers.JsonRpcProvider();
-    const signer = provider.getSigner();
-    const clientParams = {
-      signerOrProvider: signer,
-      network: FAKE_NETWORK,
-    };
-    let stakingClient: StakingClient;
-
-    beforeEach(() => {
-      stakingClient = new StakingClient(clientParams);
-    });
     test('throws an error if amount is not a BigNumber', async () => {
       const amount = ethers.utils.parseEther('1');
 
@@ -116,7 +120,7 @@ describe('StakingClient', () => {
 
     test('throws an error if staking allowance is insufficient', async () => {
       const amount = ethers.utils.parseEther('1');
-      stakingClient.isAllowance = vi.fn(() => Promise.resolve(true));
+      stakingClient.isAllowance = vi.fn(() => Promise.resolve(false));
 
       await expect(stakingClient.stake(amount)).rejects.toThrow(
         ErrorStakingInsufficientAllowance
@@ -125,11 +129,15 @@ describe('StakingClient', () => {
 
     test('stake the amount successfully', async () => {
       const amount = ethers.utils.parseEther('1');
-      stakingClient.isAllowance = vi.fn(() => Promise.resolve(false));
+      const mockStaking = vi.fn();
+      (stakingClient as any)['stakingContract'] = {
+        stake: mockStaking.mockResolvedValue(null),
+      };
+      const mockToken = vi.fn();
+      (stakingClient as any)['tokenContract'] = {
+        allowance: mockToken.mockResolvedValue(amount),
+      };
 
-      vi.spyOn(stakingClient, 'stake').mockImplementation(() =>
-        Promise.resolve(undefined)
-      );
       expect(await stakingClient.stake(amount)).toBeUndefined();
     });
 

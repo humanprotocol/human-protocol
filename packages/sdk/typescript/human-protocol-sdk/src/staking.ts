@@ -96,7 +96,7 @@ export default class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (await this.isAllowance(amount)) {
+    if (!(await this.isAllowance(amount))) {
       throw ErrorStakingInsufficientAllowance;
     }
 
