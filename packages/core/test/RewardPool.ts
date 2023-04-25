@@ -229,6 +229,12 @@ describe('RewardPool', function () {
       await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
     });
 
+    it('Should revert if there is no reward', async () => {
+      await expect(
+        rewardPool.distributeReward(escrowAddress)
+      ).to.be.revertedWith('No rewards for escrow');
+    });
+
     it('Should distribute the reward.', async () => {
       const vSlashAmount = 2;
       const v2SlashAmount = 3;

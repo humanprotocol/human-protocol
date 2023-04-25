@@ -106,6 +106,8 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
     function distributeReward(address _escrowAddress) external override {
         Reward[] memory rewardsForEscrow = rewards[_escrowAddress];
 
+        require(rewardsForEscrow.length > 0, 'No rewards for escrow');
+
         // Delete rewards for allocation
         delete rewards[_escrowAddress];
 
