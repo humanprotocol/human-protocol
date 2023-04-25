@@ -241,3 +241,30 @@ class TestStorageClient(unittest.TestCase):
         )
         with self.assertRaises(StorageClientError):
             self.client.list_objects(bucket=self.bucket)
+
+    def test_list_objects_length(self):
+        expected_length = random.randint(1, 10)
+        mock_client = MagicMock()
+        mock_client.list_objects.return_value = [
+            types.SimpleNamespace(_object_name=f"file{i}")
+            for i in range(expected_length)
+        ]
+        with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
+            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            object_list = client.list_objects(bucket="my-bucket")
+            self.assertEqual(len(object_list), expected_length)
+
+    def test_list_objects_length_error(self):
+        expected_length = random.randint(1, 10)
+        mock_client = MagicMock()
+        mock_client.list_objects.return_value = [
+            types.SimpleNamespace(_object_name=f"file{i}")
+            for i in range(expected_length)
+        ]
+        with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
+            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            object_list = client.list_objects(bucket="my-bucket")
+            if len(object_list) != expected_length:
+                raise AssertionError(
+                    f"Expected {expected_length} objects, but found {len(object_list)}"
+                )
