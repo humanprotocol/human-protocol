@@ -44,7 +44,11 @@ export const FundingMethod = ({ onChange }: FundingMethodProps) => {
             py: 8,
           }}
         >
-          <img src="/images/fortune-crypto.png" alt="crypto" />
+          <img
+            src="/images/fortune-crypto.png"
+            alt="crypto"
+            style={{ width: 135, height: 'auto' }}
+          />
           <Typography variant="body2" color="primary" mt={8}>
             Click to connect your wallet
           </Typography>
@@ -68,7 +72,11 @@ export const FundingMethod = ({ onChange }: FundingMethodProps) => {
             py: 8,
           }}
         >
-          <img src="/images/fortune-fiat.png" alt="fiat" />
+          <img
+            src="/images/fortune-fiat.png"
+            alt="fiat"
+            style={{ width: 143, height: 'auto' }}
+          />
           <Typography variant="body2" color="primary" mt={8}>
             Click to fund with credit card
           </Typography>
