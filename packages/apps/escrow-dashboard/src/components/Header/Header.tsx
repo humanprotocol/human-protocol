@@ -106,7 +106,15 @@ export const Header: FC = () => {
                     <CloseIcon fontSize="inherit" />
                   </IconButton>
                 }
-                sx={{ px: 5 }}
+                sx={{
+                  px: 5,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  '& .MuiAlert-action': {
+                    marginLeft: 0,
+                    paddingTop: 0,
+                  },
+                }}
               >
                 Beta Dashboard: minor inaccuracies may be present
               </Alert>

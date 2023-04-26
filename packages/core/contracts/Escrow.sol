@@ -6,7 +6,6 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
-import './interfaces/IRewardPool.sol';
 import './interfaces/IEscrow.sol';
 import './utils/SafeMath.sol';
 
@@ -15,8 +14,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     bytes4 private constant FUNC_SELECTOR_BALANCE_OF =
         bytes4(keccak256('balanceOf(address)'));
-    bytes4 private constant FUNC_SELECTOR_TRANSFER =
-        bytes4(keccak256('transfer(address,uint256)'));
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
@@ -48,15 +45,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     string public manifestUrl;
     string public manifestHash;
-    uint256 public remainingSolutions;
 
     string public finalResultsUrl;
     string public finalResultsHash;
 
     uint256 public duration;
-
-    uint256[] public finalAmounts;
-    bool public bulkPaid;
 
     mapping(address => bool) public areTrustedHandlers;
 
@@ -110,8 +103,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 _reputationOracleStake,
         uint256 _recordingOracleStake,
         string memory _url,
-        string memory _hash,
-        uint256 _solutionsRequested
+        string memory _hash
     ) external override trusted notExpired {
         require(
             _reputationOracle != address(0),
@@ -121,7 +113,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recordingOracle != address(0),
             'Invalid or missing token spender'
         );
-        require(_solutionsRequested > 0, 'Invalid or missing solutions');
         uint256 totalStake = _reputationOracleStake.add(_recordingOracleStake);
         require(totalStake <= 100, 'Stake out of bounds');
         require(
@@ -139,7 +130,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         manifestUrl = _url;
         manifestHash = _hash;
-        remainingSolutions = _solutionsRequested;
         status = EscrowStatuses.Pending;
         emit Pending(manifestUrl, manifestHash);
     }
@@ -191,6 +181,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
         emit IntermediateStorage(_sender, _url, _hash);
     }
 
+    /**
+     * @dev Bulk payout workers
+     * Should fail if any of the transaction is failing.
+     */
     function bulkPayOut(
         address[] memory _recipients,
         uint256[] memory _amounts,
@@ -206,7 +200,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         notPaid
         notExpired
         nonReentrant
-        returns (bool)
     {
         require(
             _recipients.length == _amounts.length,
@@ -220,71 +213,46 @@ contract Escrow is IEscrow, ReentrancyGuard {
         );
 
         uint256 balance = getBalance();
-        bulkPaid = false;
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
-
-        if (balance < aggregatedBulkAmount) {
-            return bulkPaid;
-        }
+        require(aggregatedBulkAmount <= balance, 'Not enough balance');
 
         _storeResult(_url, _hash);
 
         (
+            uint256[] memory finalAmounts,
             uint256 reputationOracleFee,
             uint256 recordingOracleFee
         ) = finalizePayouts(_amounts);
 
-        uint256[] memory _amountsPaid = new uint256[](_recipients.length);
         for (uint256 i = 0; i < _recipients.length; ++i) {
-            uint256 amount = finalAmounts[i];
-            if (amount == 0) {
-                continue;
-            }
-            finalAmounts[i] = 0;
-            _safeTransfer(_recipients[i], amount);
-            _amountsPaid[i] = amount;
+            _safeTransfer(_recipients[i], finalAmounts[i]);
         }
-
-        delete finalAmounts;
 
         _safeTransfer(reputationOracle, reputationOracleFee);
         _safeTransfer(recordingOracle, recordingOracleFee);
 
-        bulkPaid = true;
         balance = getBalance();
-        if (bulkPaid) {
-            if (status == EscrowStatuses.Pending) {
-                status = EscrowStatuses.Partial;
-                remainingSolutions = remainingSolutions.sub(_recipients.length);
-            }
-            if (
-                balance > 0 &&
-                status == EscrowStatuses.Partial &&
-                remainingSolutions == 0
-            ) {
-                _safeTransfer(canceler, balance);
-                status = EscrowStatuses.Paid;
-            }
-            if (balance == 0 && status == EscrowStatuses.Partial) {
-                status = EscrowStatuses.Paid;
-            }
+
+        bool isPartial;
+        if (balance == 0) {
+            status = EscrowStatuses.Paid;
+            isPartial = false;
+        } else {
+            status = EscrowStatuses.Partial;
+            isPartial = true;
         }
-        emit BulkTransfer(
-            _txId,
-            _recipients,
-            _amountsPaid,
-            status == EscrowStatuses.Partial
-        );
-        return true;
+
+        emit BulkTransfer(_txId, _recipients, finalAmounts, isPartial);
     }
 
     function finalizePayouts(
         uint256[] memory _amounts
-    ) internal returns (uint256, uint256) {
+    ) internal view returns (uint256[] memory, uint256, uint256) {
+        uint256[] memory finalAmounts = new uint256[](_amounts.length);
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
@@ -303,9 +271,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
             recordingOracleFee = recordingOracleFee.add(
                 singleRecordingOracleFee
             );
-            finalAmounts.push(amount);
+            finalAmounts[j] = amount;
         }
-        return (reputationOracleFee, recordingOracleFee);
+        return (finalAmounts, reputationOracleFee, recordingOracleFee);
     }
 
     function _safeTransfer(address to, uint256 value) internal {

@@ -22,7 +22,7 @@ export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
 ];
 
 export const SUPPORTED_CHAIN_IDS =
-  process.env.NODE_ENV === 'development'
+  import.meta.env.MODE === 'development'
     ? [ChainId.LOCALHOST]
     : SUPPORTED_CHAIN_IDS_PRODUCTION;
 

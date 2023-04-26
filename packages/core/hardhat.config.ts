@@ -13,6 +13,7 @@ import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-dependency-compiler';
 
 dotenv.config();
 
@@ -65,6 +66,12 @@ const config: HardhatUserConfig = {
     },
     tenderly: {
       url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
+    },
+    mainnet: {
+      chainId: 1,
+      url: process.env.ETH_MAINNET_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     goerli: {
       chainId: 5,
@@ -177,6 +184,9 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 200000,
+  },
+  dependencyCompiler: {
+    paths: ['@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'],
   },
 };
 

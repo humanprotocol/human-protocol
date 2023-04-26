@@ -103,19 +103,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "bulkPaid",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",

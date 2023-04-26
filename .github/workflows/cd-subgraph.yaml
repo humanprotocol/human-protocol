@@ -7,11 +7,32 @@ on:
     paths:
       - packages/sdk/typescript/subgraph/**
       - .github/workflows/cd-subgraph.yaml
+  workflow_dispatch:
+    inputs:
+      subgraph-name:
+        description: 'subgraph name'
+        required: true
 
 jobs:
+  contracts-check:
+    runs-on: ubuntu-latest
+    outputs:
+      contracts_updated: ${{ steps.filter.outputs.contracts }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check changes in files
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            contracts:
+              - 'packages/core/contracts/**'
   subgraph:
     name: Deploy Subgraph
+    needs: contracts-check
     runs-on: ubuntu-latest
+    
     strategy:
       matrix:
         network:
@@ -29,6 +50,8 @@ jobs:
             graph: mumbai-v1
           - name: mbase
             graph: moonbase-alpha-v1
+          - name: mainnet
+            graph: mainnet-v1
           # - name: avalanche
           #   graph: avalanche
           # - name: fuji
@@ -37,22 +60,41 @@ jobs:
           #   graph: skale
       fail-fast: true
       max-parallel: 3
+    if: ${{ needs.contracts-check.outputs.contracts_updated != 'true' || github.event.inputs.subgraph-name }}
     steps:
       - uses: actions/checkout@v3
+      - name: Continue check
+        id: continue_check
+        run:  |
+          if [[ ${{ needs.contracts-check.outputs.contracts_updated}} == 'true' && "${{ github.event.inputs.subgraph-name }}" != "${{ matrix.network.graph }}" ]]; then
+            echo "stop=true" >> $GITHUB_OUTPUT
+          fi
+      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
+        with:
+          node-version: 18.15
       - run: yarn --ignore-scripts
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Install dependencies
+      - run: yarn compile
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
+        name: Compile smart contracts
+        working-directory: ./packages/core
       - run: yarn global add @graphprotocol/graph-cli
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Install Graph CLI
       - run: graph auth --product hosted-service ${API_KEY}
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Authenticate Graph CLI
         env:
           API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
       - run: yarn generate
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Generate Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:
           NETWORK: ${{ matrix.network.graph }}
       - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
+        if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Deploy Subgraph
         working-directory: ./packages/sdk/typescript/subgraph
         env:

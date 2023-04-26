@@ -337,8 +337,9 @@ export class Job {
         escrowAddr,
         this.providerData?.gasPayer
       );
-    } catch {
-      this._logError(new Error('Error creating escrow...'));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      this._logError(new Error('Error creating escrow... ' + e.message));
       return false;
     }
 
@@ -385,8 +386,6 @@ export class Job {
       this.manifestData?.manifest?.reputation_oracle_addr || '';
     const recordingOracleAddr =
       this.manifestData?.manifest?.recording_oracle_addr || '';
-    const requestedSolutions =
-      this.manifestData?.manifest?.job_total_tasks || 0;
 
     this._logger.info(
       `Transferring ${this.amount} HMT to ${this.contractData.escrow.address}...`
@@ -440,8 +439,7 @@ export class Job {
       reputationOracleStake,
       recordingOracleStake,
       this.manifestData?.manifestlink?.url,
-      this.manifestData?.manifestlink?.hash,
-      requestedSolutions
+      this.manifestData?.manifestlink?.hash
     );
 
     if (!contractSetup) {
@@ -532,7 +530,7 @@ export class Job {
     const url = isPublic ? getPublicURL(this.storageAccessData, key) : key;
 
     this._logger.info('Bulk paying out the workers...');
-    await this._raffleExecute(
+    const paid = await this._raffleExecute(
       this.contractData.escrow,
       'bulkPayOut',
       payouts.map(({ address }) => address),
@@ -542,15 +540,14 @@ export class Job {
       1
     );
 
-    const bulkPaid = await this.contractData.escrow.bulkPaid();
-    if (!bulkPaid) {
+    if (!paid) {
       this._logError(new Error('Failed to bulk payout users'));
       return false;
     }
 
     this._logger.info('Workers are paid out.');
 
-    return bulkPaid;
+    return true;
   }
 
   /**

@@ -1,7 +1,5 @@
 {
-  "buildCommand": "yarn workspace @human-protocol/fortune-recording-oracle build",
-  "installCommand": "yarn install",
-  "outputDirectory": "build",
+  "version": 2,
   "builds": [
     {
       "src": "src/index.ts",

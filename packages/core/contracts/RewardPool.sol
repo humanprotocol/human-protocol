@@ -40,6 +40,11 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         uint256 tokens
     );
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _token,
         address _staking,
@@ -100,6 +105,8 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
      */
     function distributeReward(address _escrowAddress) external override {
         Reward[] memory rewardsForEscrow = rewards[_escrowAddress];
+
+        require(rewardsForEscrow.length > 0, 'No rewards for escrow');
 
         // Delete rewards for allocation
         delete rewards[_escrowAddress];

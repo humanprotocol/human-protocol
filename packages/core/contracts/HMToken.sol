@@ -23,7 +23,7 @@ contract HMToken is HMTokenInterface, Ownable {
     uint256 public totalSupply;
 
     uint256 private constant MAX_UINT256 = ~uint256(0);
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
+    uint256 private constant BULK_MAX_VALUE = (10 ** 9) * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
