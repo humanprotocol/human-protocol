@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import logging
 import os
 from decimal import Decimal
@@ -27,15 +28,17 @@ from human_protocol_sdk.eth_bridge import (
     HMTOKEN_ADDR,
     STAKING_ADDR,
 )
-from human_protocol_sdk.storage import (
-    download,
-    upload,
-    get_public_bucket_url,
-    get_key_from_url,
-)
+from human_protocol_sdk.storage import StorageClient, Credentials
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 TRANSFER_EVENT = get_entity_topic(get_hmtoken_interface(), "Transfer")
+
+ESCROW_BUCKETNAME = os.getenv("ESCROW_PUBLIC_BUCKETNAME", "escrow-public-results")
+ESCROW_ACCESS_KEY = os.getenv("ESCROW_ACCESS_KEY", "minio")
+ESCROW_SECRET_KEY = os.getenv("ESCROW_SECRET_KEY", "minio123")
+ESCROW_REGION = os.getenv("ESCROW_AWS_REGION", "us-west-2")
+ESCROW_ENDPOINT_URL = os.getenv("ESCROW_ENDPOINT_URL", "localhost:9000")
+ESCROW_SECURE = os.getenv("ESCROW_SECURE", False)
 
 # Explicit env variable that will use s3 for storing results.
 
@@ -280,6 +283,13 @@ class Job:
         self.staking_addr = STAKING_ADDR if staking_addr is None else staking_addr
         self.gas = gas_limit or GAS_LIMIT
 
+        self.storage = StorageClient(
+            ESCROW_ENDPOINT_URL,
+            ESCROW_REGION,
+            Credentials(ESCROW_ACCESS_KEY, ESCROW_SECRET_KEY),
+            ESCROW_SECURE,
+        )
+
         # Initialize a new Job.
         if not escrow_addr and escrow_manifest:
             self.factory_contract = self._init_factory(factory_addr, credentials)
@@ -364,8 +374,18 @@ class Job:
         LOG.info("Job's escrow contract deployed to:{}".format(job_addr))
         self.job_contract = get_escrow(job_addr, self.hmt_server_addr)
 
-        (hash_, manifest_url) = upload(self.serialized_manifest, pub_key)
-        self.manifest_url = manifest_url
+        hash_ = self.storage.upload_files(
+            [self.serialized_manifest], ESCROW_BUCKETNAME
+        )[0]
+
+        self.manifest_url = (
+            ("https://" if ESCROW_SECURE else "http://")
+            + ESCROW_ENDPOINT_URL
+            + "/"
+            + ESCROW_BUCKETNAME
+            + "/"
+            + hash_
+        )
         self.manifest_hash = hash_
         return self.status() == Status.Launched and self.balance() == 0
 
@@ -651,15 +671,15 @@ class Job:
             "hmt_server_addr": self.hmt_server_addr,
         }
 
-        hash_, url = upload(
-            msg=results,
-            public_key=pub_key,
-            encrypt_data=encrypt_final_results,
-            use_public_bucket=store_pub_final_results,
+        hash_ = self.storage.upload_files([results], ESCROW_BUCKETNAME)[0]
+        url = (
+            ("https://" if ESCROW_SECURE else "http://")
+            + ESCROW_ENDPOINT_URL
+            + "/"
+            + ESCROW_BUCKETNAME
+            + "/"
+            + hash_
         )
-
-        # Plain data will be publicly accessible
-        url = get_public_bucket_url(url) if store_pub_final_results else url
 
         eth_addrs = list()
         hmt_amounts = list()
@@ -964,7 +984,16 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
-        (hash_, url) = upload(results, pub_key)
+
+        hash_ = self.storage.upload_files([results], ESCROW_BUCKETNAME)[0]
+        url = (
+            ("https://" if ESCROW_SECURE else "http://")
+            + ESCROW_ENDPOINT_URL
+            + "/"
+            + ESCROW_BUCKETNAME
+            + "/"
+            + hash_
+        )
 
         self.intermediate_manifest_hash = hash_
         self.intermediate_manifest_url = url
@@ -1435,7 +1464,11 @@ class Job:
             bool: returns True if IPFS download with the private key succeeds.
 
         """
-        return download(self.manifest_url, priv_key)
+        return json.loads(
+            (
+                self.storage.download_files([self.manifest_hash], ESCROW_BUCKETNAME)[0]
+            ).decode("utf-8")
+        )
 
     def intermediate_results(self, priv_key: bytes) -> Dict:
         """Reputation Oracle retrieves the intermediate results stored by the Recording Oracle.
@@ -1456,15 +1489,6 @@ class Job:
 
         Trying to download the results with the wrong key fails.
 
-        >>> results = {"results": True}
-        >>> sender = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-        >>> job.store_intermediate_results(results, rep_oracle_pub_key, sender)
-        True
-        >>> rep_oracle_false_priv_key = b"59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
-        >>> job.intermediate_results(rep_oracle_false_priv_key)
-        Traceback (most recent call last):
-        human_protocol_sdk.crypto.exceptions.DecryptionError: Failed to verify tag
-
         Args:
             priv_key (bytes): the private key of the Reputation Oracle.
 
@@ -1472,7 +1496,13 @@ class Job:
             bool: returns True if IPFS download with the private key succeeds.
 
         """
-        return download(self.intermediate_manifest_url, priv_key)
+        return json.loads(
+            (
+                self.storage.download_files(
+                    [self.intermediate_manifest_hash], ESCROW_BUCKETNAME
+                )[0]
+            ).decode("utf-8")
+        )
 
     def final_results(self, priv_key: bytes) -> Optional[Dict]:
         """Retrieves the final results stored by the Reputation Oracle.
@@ -1507,16 +1537,18 @@ class Job:
             bool: returns True if IPFS download with the private key succeeds.
 
         """
-        final_results_url = self.job_contract.functions.finalResultsUrl().call(
+        final_results_hash = self.job_contract.functions.finalResultsHash().call(
             {"from": self.gas_payer, "gas": Wei(self.gas)}
         )
 
-        if not final_results_url:
+        if not final_results_hash:
             return None
 
-        url = get_key_from_url(final_results_url)
-
-        return download(url, priv_key)
+        return json.loads(
+            (
+                self.storage.download_files([final_results_hash], ESCROW_BUCKETNAME)[0]
+            ).decode("utf-8")
+        )
 
     def _access_job(self, factory_addr: str, escrow_addr: str, **credentials):
         """Given a factory and escrow address and credentials, access an already
