@@ -1,12 +1,13 @@
+import { Box } from '@mui/material';
 import {
   useWeb3ModalTheme,
-  Web3Button,
   Web3Modal,
   Web3NetworkSwitch,
 } from '@web3modal/react';
 import { useAccount } from 'wagmi';
-import './App.css';
+
 import { Escrow } from './components/Escrow';
+import { Header } from './components/Header';
 import { ethereumClient, projectId } from './connectors/connectors';
 
 function App() {
@@ -22,11 +23,26 @@ function App() {
 
   return (
     <>
-      <div className="App">
-        <header className="App-header">
-          {isConnected && <Web3Button icon="show" balance="show" />}
-        </header>
-        <div className="App-body">
+      <Header />
+      <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 12 }}>
+        <Box
+          sx={{
+            background: '#f6f7fe',
+            borderRadius: {
+              xs: '16px',
+              sm: '16px',
+              md: '24px',
+              lg: '32px',
+              xl: '40px',
+            },
+            padding: {
+              xs: '24px 16px',
+              md: '42px 54px',
+              lg: '56px 72px',
+              xl: '70px 90px',
+            },
+          }}
+        >
           {!isConnected && (
             <>
               <h1>Select Network</h1>
@@ -34,8 +50,8 @@ function App() {
             </>
           )}
           {isConnected && <Escrow />}
-        </div>
-      </div>
+        </Box>
+      </Box>
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
     </>
   );
