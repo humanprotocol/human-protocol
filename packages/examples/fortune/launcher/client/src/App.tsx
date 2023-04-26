@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import { ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import { useSigner, useChainId } from 'wagmi';
+import fortuneSvg from './assets/fortune.svg';
 import {
   FortuneStages,
   FortuneFundingMethod,
@@ -13,6 +14,7 @@ import {
   FortuneLaunchSuccess,
   FortuneLaunchFail,
 } from './components';
+import { Header } from './components/Header';
 import {
   FortuneStageStatus,
   FundingMethodType,
@@ -77,108 +79,127 @@ function App() {
   }, [chainId, signer]);
 
   return (
-    <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 10 }}>
-      <Box
-        sx={{
-          background: '#f6f7fe',
-          borderRadius: {
-            xs: '16px',
-            sm: '16px',
-            md: '24px',
-            lg: '32px',
-            xl: '40px',
-          },
-          padding: {
-            xs: '24px 16px',
-            md: '42px 54px',
-            lg: '56px 72px',
-            xl: '70px 90px',
-          },
-        }}
-      >
-        <Grid container spacing={4}>
-          {status === FortuneStageStatus.FUNDING_METHOD && (
-            <Grid item xs={12} sm={12} md={5} lg={4}>
-              <Typography color="primary" fontWeight={600} variant="h4">
-                Fortune
-              </Typography>
-              <Typography color="primary" fontWeight={500} variant="h6">
-                HUMAN Protocol basic functionality demo
-              </Typography>
-              <Typography mt={4} color="primary" variant="body2">
-                Based on an old Unix program in which a pseudorandom message is
-                displayed from a database of quotations, created by the
-                community. We&apos;re adopting this basic idea, and
-                decentralizing it, placing the basic ask-and-receive
-                functionality on-chain.
-              </Typography>
-              <Link
-                href="#"
-                sx={{ textDecoration: 'none', mt: 1, display: 'block' }}
-              >
-                <Typography color="primary" fontWeight={600} variant="body2">
-                  Blog Article
-                </Typography>
-              </Link>
+    <>
+      <Header />
+      <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 }, pt: 11 }}>
+        <Box
+          sx={{
+            background: '#f6f7fe',
+            borderRadius: {
+              xs: '16px',
+              sm: '16px',
+              md: '24px',
+              lg: '32px',
+              xl: '40px',
+            },
+            padding: {
+              xs: '24px 16px',
+              md: '42px 54px',
+              lg: '56px 72px',
+              xl: '70px 90px',
+            },
+          }}
+        >
+          <Grid container spacing={4}>
+            {status === FortuneStageStatus.FUNDING_METHOD && (
+              <Grid item xs={12} sm={12} md={5} lg={4}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Box>
+                    <img src={fortuneSvg} alt="fortune" />
+                  </Box>
+                  <Typography color="primary" fontWeight={600} variant="h4">
+                    Fortune
+                  </Typography>
+                  <Typography color="primary" fontWeight={500} variant="h6">
+                    HUMAN Protocol basic functionality demo
+                  </Typography>
+                  <Typography mt={4} color="primary" variant="body2">
+                    Based on an old Unix program in which a pseudorandom message
+                    is displayed from a database of quotations, created by the
+                    community. We&apos;re adopting this basic idea, and
+                    decentralizing it, placing the basic ask-and-receive
+                    functionality on-chain.
+                  </Typography>
+                  <Link
+                    href="https://humanprotocol.org/blog/demonstration-of-human-protocol-inspired-by-fortune"
+                    sx={{ textDecoration: 'none', mt: 1, display: 'block' }}
+                    target="_blank"
+                  >
+                    <Typography
+                      color="primary"
+                      fontWeight={600}
+                      variant="body2"
+                    >
+                      Blog Article
+                    </Typography>
+                  </Link>
+                </Box>
+              </Grid>
+            )}
+            <Grid
+              item
+              xs={12}
+              sm={12}
+              md={status === FortuneStageStatus.FUNDING_METHOD ? 7 : 12}
+              lg={status === FortuneStageStatus.FUNDING_METHOD ? 7 : 12}
+            >
+              <FortuneStages status={status} />
+              <Box mt={3}>
+                {status === FortuneStageStatus.FUNDING_METHOD && (
+                  <FortuneFundingMethod onChange={handleChangeFundingMethod} />
+                )}
+                {status === FortuneStageStatus.JOB_REQUEST &&
+                  fundingMethod === 'crypto' && (
+                    <FortuneJobRequest
+                      fundingMethod={fundingMethod}
+                      onBack={handleBack}
+                      onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                      onSuccess={handleOnSuccess}
+                      onFail={handleOnError}
+                    />
+                  )}
+                {status === FortuneStageStatus.JOB_REQUEST &&
+                  fundingMethod === 'fiat' && (
+                    <FortuneFiatJobRequest
+                      fundingMethod={fundingMethod}
+                      onBack={handleBack}
+                      onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
+                      onSuccess={handleOnSuccess}
+                      onFail={handleOnError}
+                    />
+                  )}
+                {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
+                {status === FortuneStageStatus.LAUNCH_SUCCESS && (
+                  <FortuneLaunchSuccess
+                    jobResponse={jobResponse}
+                    onCreateNewEscrow={handleCreateNewEscrow}
+                  />
+                )}
+                {status === FortuneStageStatus.LAUNCH_FAIL && (
+                  <FortuneLaunchFail
+                    message={errorMessage}
+                    onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
+                  />
+                )}
+              </Box>
+              <Box my={2}>
+                {lastEscrowAddress && (
+                  <Typography variant="body2">
+                    Last Escrow: {lastEscrowAddress}
+                  </Typography>
+                )}
+              </Box>
             </Grid>
-          )}
-          <Grid
-            item
-            xs={12}
-            sm={12}
-            md={status === FortuneStageStatus.FUNDING_METHOD ? 7 : 12}
-            lg={status === FortuneStageStatus.FUNDING_METHOD ? 7 : 12}
-          >
-            <FortuneStages status={status} />
-            <Box mt={3}>
-              {status === FortuneStageStatus.FUNDING_METHOD && (
-                <FortuneFundingMethod onChange={handleChangeFundingMethod} />
-              )}
-              {status === FortuneStageStatus.JOB_REQUEST &&
-                fundingMethod === 'crypto' && (
-                  <FortuneJobRequest
-                    fundingMethod={fundingMethod}
-                    onBack={handleBack}
-                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
-                    onSuccess={handleOnSuccess}
-                    onFail={handleOnError}
-                  />
-                )}
-              {status === FortuneStageStatus.JOB_REQUEST &&
-                fundingMethod === 'fiat' && (
-                  <FortuneFiatJobRequest
-                    fundingMethod={fundingMethod}
-                    onBack={handleBack}
-                    onLaunch={() => setStatus(FortuneStageStatus.LAUNCH)}
-                    onSuccess={handleOnSuccess}
-                    onFail={handleOnError}
-                  />
-                )}
-              {status === FortuneStageStatus.LAUNCH && <FortuneLaunch />}
-              {status === FortuneStageStatus.LAUNCH_SUCCESS && (
-                <FortuneLaunchSuccess
-                  jobResponse={jobResponse}
-                  onCreateNewEscrow={handleCreateNewEscrow}
-                />
-              )}
-              {status === FortuneStageStatus.LAUNCH_FAIL && (
-                <FortuneLaunchFail
-                  message={errorMessage}
-                  onBack={() => setStatus(FortuneStageStatus.JOB_REQUEST)}
-                />
-              )}
-            </Box>
-            <Box my={2}>
-              {lastEscrowAddress && (
-                <Typography variant="body2">
-                  Last Escrow: {lastEscrowAddress}
-                </Typography>
-              )}
-            </Box>
           </Grid>
-        </Grid>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
 

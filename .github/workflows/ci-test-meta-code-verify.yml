@@ -1,0 +1,25 @@
+name: meta-code-verify CI
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  meta-code-verify-test:
+    name: meta-code-verify Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
+        with:
+          node-version: 18.15
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn compile
+        name: Compile smart contracts
+        working-directory: ./packages/core
+      - run: yarn meta-code-verify:test
+        name: Run meta-code-verify test
