@@ -9,8 +9,8 @@ import {
 } from 'wagmi/chains';
 import {
   EthereumClient,
-  modalConnectors,
-  walletConnectProvider,
+  w3mConnectors,
+  w3mProvider,
 } from '@web3modal/ethereum';
 import { configureChains, createClient } from 'wagmi';
 import { fortune } from './chains';
@@ -36,16 +36,15 @@ const chains = [
   fortune,
 ];
 const { provider } = configureChains(chains, [
-  walletConnectProvider({ projectId }),
+  w3mProvider({ projectId }),
 ]);
 
 export const wagmiClient = createClient({
   autoConnect: true,
-  connectors: modalConnectors({
-    version: '2',
-    appName: 'web3Modal',
-    chains,
+  connectors: w3mConnectors({
     projectId,
+    version: 2,
+    chains,
   }),
   provider,
 });

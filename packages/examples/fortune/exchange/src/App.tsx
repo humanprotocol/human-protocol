@@ -14,9 +14,7 @@ function App() {
   const { isConnected } = useAccount();
 
   setTheme({
-    themeColor: 'purple',
     themeMode: 'light',
-    themeBackground: 'themeColor',
   });
 
   return (
