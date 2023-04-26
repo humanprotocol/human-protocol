@@ -135,13 +135,11 @@ jobs:
       SUBGRAPH: ${{ matrix.network.subgraph }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
         with:
-          node-version: 18
-
+          node-version: 18.15
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
-
       - name: Check changes in files
         uses: dorny/paths-filter@v2
         id: filter
@@ -162,7 +160,6 @@ jobs:
               - 'packages/core/contracts/interfaces/IRewardPool.sol'
             reputation:
               - 'packages/core/contracts/Reputation.sol'
-
       - name: Compile smart contracts
         if: |
           steps.filter.outputs.escrow_factory == 'true' ||
@@ -171,55 +168,46 @@ jobs:
           steps.filter.outputs.reputation == 'true'
         run: yarn compile
         working-directory: ./packages/core
-
       - name: Upgrade Escrow Factory Proxy
         if: steps.filter.outputs.escrow_factory == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ matrix.network.escrow_factory }}
-
       - name: Verify Escrow Factory Proxy
         if: steps.filter.outputs.escrow_factory == 'true'
         run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.escrow_factory }}
         working-directory: ./packages/core
-
       - name: Upgrade Staking Proxy
         if: steps.filter.outputs.staking == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ matrix.network.staking }}
-
       - name: Verify Staking Proxy
         if: steps.filter.outputs.staking == 'true'
         run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.staking }}
         working-directory: ./packages/core
-
       - name: Upgrade Reward Pool Proxy
         if: steps.filter.outputs.reward_pool == 'true'
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ matrix.network.reward_pool }}
-
       - name: Verify Reward Pool Proxy
         if: steps.filter.outputs.reward_pool == 'true'
         run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reward_pool }}
         working-directory: ./packages/core
-
       - name: Upgrade Reputation Proxy
         if: steps.filter.outputs.reputation == 'true' && matrix.network.reputation != ''
         run: yarn upgrade:proxy --network ${{ matrix.network.name }}
         working-directory: ./packages/core
         env:
           REPUTATION_ADDRESS: ${{ matrix.network.reputation }}
-
       - name: Verify Reputation Proxy
         if: steps.filter.outputs.reputation == 'true' && matrix.network.reputation != ''
         run: npx hardhat verify --network ${{ matrix.network.name }} ${{ matrix.network.reputation }}
         working-directory: ./packages/core
-
       - name: Commit changes
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v9
