@@ -57,4 +57,8 @@ export const FAKE_NETWORK = {
 
 export const FAKE_TRANSACTION_HASH =
   '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef';
+export const FAKE_TRANSACTION_CONFIRMATIONS = 1;
 export const FAKE_BLOCK_NUMBER = '1234';
+export const FAKE_ADDRESS = '0x1234567890abcdef';
+export const FAKE_AMOUNT = 100;
+export const FAKE_NEGATIVE_AMOUNT = -100;

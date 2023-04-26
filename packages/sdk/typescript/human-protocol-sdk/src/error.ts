@@ -93,10 +93,24 @@ export const ErrorInvalidStakingValueSign = new Error(
 );
 
 /**
- * @constant {Error} - Invalid ethereum address provided.
+ * @constant {Error} - Invalid slasher address provided.
  */
-export const ErrorInvalidEthereumAddressProvided = new Error(
-  'Invalid ethereum address provided'
+export const ErrorInvalidSlasherAddressProvided = new Error(
+  'Invalid slasher address provided'
+);
+
+/**
+ * @constant {Error} - Invalid staker address provided.
+ */
+export const ErrorInvalidStakerAddressProvided = new Error(
+  'Invalid staker address provided'
+);
+
+/**
+ * @constant {Error} - Invalid escrow address provided.
+ */
+export const ErrorInvalidEscrowAddressProvided = new Error(
+  'Invalid escrow address provided'
 );
 
 /**
@@ -122,6 +136,13 @@ export const ErrorStakingFailedToStake = new Error('Failed to stake');
  * @constant {Error} - Failed to unstake.
  */
 export const ErrorStakingFailedToUnstake = new Error('Failed to unstake');
+
+/**
+ * @constant {Error} - Failed to distribute rewards.
+ */
+export const ErrorStakingFailedToDistributeRewards = new Error(
+  'Failed to distribute rewards'
+);
 
 /**
  * @constant {Error} - Failed to allocate.
@@ -167,6 +188,10 @@ export const ErrorStakingGetStakers = new Error('Error getting stakers data');
  */
 export const ErrorFailedToApproveStakingAmountSignerDoesNotExist = new Error(
   'Failed to approve staking amount: signerOrProvider is not a Signer instance'
+);
+
+export const ErrorFailedToCheckAllowance = new Error(
+  'Failed to check allowance'
 );
 
 /**

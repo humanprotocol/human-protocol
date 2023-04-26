@@ -1,160 +1,583 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { ethers } from 'ethers';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ethers, BigNumber } from 'ethers';
 import StakingClient from '../src/staking';
-import { FAKE_NETWORK } from './utils/constants';
+import {
+  FAKE_AMOUNT,
+  FAKE_BLOCK_NUMBER,
+  FAKE_NEGATIVE_AMOUNT,
+  FAKE_NETWORK,
+  FAKE_TRANSACTION_CONFIRMATIONS,
+  FAKE_TRANSACTION_HASH,
+} from './utils/constants';
 import {
   ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
+  ErrorInvalidEscrowAddressProvided,
+  ErrorInvalidSlasherAddressProvided,
+  ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
+  ErrorStakingFailedToAllocate,
+  ErrorStakingFailedToCloseAllocation,
+  ErrorStakingFailedToSlash,
   ErrorStakingFailedToStake,
+  ErrorStakingFailedToUnstake,
+  ErrorStakingGetAllocation,
+  ErrorStakingGetStaker,
   ErrorStakingInsufficientAllowance,
+  ErrorStakingStakersNotFound,
 } from '../src/error';
+import InitClient from '../src/init';
+import { IAllocation, IStaker } from '../src/interfaces';
+
+vi.mock('../src/init');
 
 describe('StakingClient', () => {
-  describe('approveStake', () => {
-    const provider = new ethers.providers.JsonRpcProvider();
-    const signer = provider.getSigner();
-    const clientParams = {
-      signerOrProvider: signer,
-      network: FAKE_NETWORK,
+  const provider = new ethers.providers.JsonRpcProvider();
+  let stakingClient: any;
+  let mockSigner: any;
+  let mockProvider: any;
+  let mockStakingContract: any;
+  let mockRewardPoolContract: any;
+  let mockTokenContract: any;
+
+  beforeEach(async () => {
+    mockSigner = {
+      ...provider.getSigner(),
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
     };
-    let stakingClient: StakingClient;
 
-    beforeEach(() => {
-      stakingClient = new StakingClient(clientParams);
+    mockProvider = {
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
+
+    mockStakingContract = {
+      stake: vi.fn(),
+      unstake: vi.fn(),
+      withdraw: vi.fn(),
+      slash: vi.fn(),
+      allocate: vi.fn(),
+      closeAllocation: vi.fn(),
+      distributeRewards: vi.fn(),
+      getStaker: vi.fn(),
+      getListOfStakers: vi.fn(),
+      getAllocation: vi.fn(),
+      rewardPool: vi.fn().mockResolvedValueOnce(ethers.constants.AddressZero),
+      address: FAKE_NETWORK.stakingAddress,
+    };
+
+    mockRewardPoolContract = {
+      distributeRewards: vi.fn(),
+      address: ethers.constants.AddressZero,
+    };
+
+    mockTokenContract = {
+      allowance: vi.fn(),
+      approve: vi.fn(),
+    };
+
+    const getClientParamsMock = InitClient.getParams as jest.Mock;
+    getClientParamsMock.mockResolvedValue({
+      signerOrProvider: mockSigner,
+      network: FAKE_NETWORK,
     });
 
-    test('approves the staking amount if allowance is not sufficient', async () => {
-      const amount = ethers.utils.parseEther('1');
+    stakingClient = new StakingClient(await InitClient.getParams(mockSigner));
 
-      vi.spyOn(stakingClient, 'approveStake').mockImplementation(() =>
-        Promise.resolve(false)
-      );
+    stakingClient.stakingContract = mockStakingContract;
+    stakingClient.tokenContract = mockTokenContract;
+  });
 
-      const result = await stakingClient.approveStake(amount);
-      expect(result).toEqual(false);
-    });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-    test('returns true if allowance is sufficient', async () => {
-      const amount = ethers.utils.parseEther('1');
+  describe('approveStake', () => {
+    const amount = BigNumber.from(FAKE_AMOUNT);
+    const negativeAmount = BigNumber.from(FAKE_NEGATIVE_AMOUNT);
 
-      vi.spyOn(stakingClient, 'approveStake').mockImplementation(() =>
-        Promise.resolve(true)
-      );
-
-      const result = await stakingClient.approveStake(amount);
-      expect(result).toEqual(true);
-    });
-
-    test('throws an error if the staking value is not a BigNumber', async () => {
-      const amount = ethers.utils.parseEther('1');
-
-      vi.spyOn(stakingClient, 'approveStake').mockImplementation(() => {
-        throw ErrorInvalidStakingValueType;
-      });
-
-      expect(() => stakingClient.approveStake(amount)).toThrow(
+    test('should throw an error if the amount is not a BigNumber', async () => {
+      await expect(stakingClient.approveStake('foo')).rejects.toThrow(
         ErrorInvalidStakingValueType
       );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
     });
 
-    test('throws an error if the staking value is negative', async () => {
-      const amount = ethers.utils.parseEther('-1');
-
-      vi.spyOn(stakingClient, 'approveStake').mockImplementation(() => {
-        throw ErrorInvalidStakingValueSign;
-      });
-
-      expect(() => stakingClient.approveStake(amount)).toThrow(
+    test('should throw an error if the amount is negative', async () => {
+      await expect(stakingClient.approveStake(negativeAmount)).rejects.toThrow(
         ErrorInvalidStakingValueSign
       );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
     });
 
-    test('throws an error if the allowance is not updated after approving', async () => {
-      const amount = ethers.utils.parseEther('1');
+    test('should throw an error if the allowance is insufficient', async () => {
+      stakingClient.isAllowance = vi.fn().mockResolvedValue(false);
 
-      vi.spyOn(stakingClient, 'approveStake').mockImplementation(() => {
-        throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
+      await expect(stakingClient.approveStake(amount)).rejects.toThrow(
+        ErrorStakingInsufficientAllowance
+      );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
+    });
+
+    test('should return true if the allowance is sufficient and the approval is successful', async () => {
+      stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
+
+      mockTokenContract.approve = vi.fn().mockResolvedValue({
+        hash: FAKE_TRANSACTION_HASH,
+        blockNumber: FAKE_BLOCK_NUMBER,
+        confirmations: FAKE_TRANSACTION_CONFIRMATIONS,
       });
 
-      expect(() => stakingClient.approveStake(amount)).toThrow(
+      await expect(stakingClient.approveStake(amount)).resolves.toBe(true);
+      expect(mockTokenContract.approve).toBeCalledWith(
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the approval fails', async () => {
+      stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
+
+      mockTokenContract.approve = vi.fn().mockRejectedValue(new Error());
+
+      await expect(stakingClient.approveStake(amount)).rejects.toThrow(
         ErrorFailedToApproveStakingAmountAllowanceNotUpdated
       );
+      expect(mockTokenContract.approve).toBeCalledWith(
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('stake', () => {
-    const provider = new ethers.providers.JsonRpcProvider();
-    const signer = provider.getSigner();
-    const clientParams = {
-      signerOrProvider: signer,
-      network: FAKE_NETWORK,
-    };
-    let stakingClient: StakingClient;
+    const amount = BigNumber.from(FAKE_AMOUNT);
+    const negativeAmount = BigNumber.from(FAKE_NEGATIVE_AMOUNT);
 
-    beforeEach(() => {
-      stakingClient = new StakingClient(clientParams);
-    });
-    test('throws an error if amount is not a BigNumber', async () => {
-      const amount = ethers.utils.parseEther('1');
-
-      vi.spyOn(stakingClient, 'stake').mockImplementation(() => {
-        throw ErrorInvalidStakingValueType;
-      });
-
-      expect(() => stakingClient.stake(amount)).toThrow(
+    test('should throw an error if amount is not a BigNumber', async () => {
+      await expect(stakingClient.stake('foo')).rejects.toThrow(
         ErrorInvalidStakingValueType
       );
+      expect(mockStakingContract.stake).toHaveBeenCalledTimes(0);
     });
 
-    test('throws an error if amount is negative', async () => {
-      const negativeAmount = ethers.utils.parseEther('-1');
-      expect(stakingClient.stake(negativeAmount)).rejects.toThrow(
+    test('should throw an error if amount is negative', async () => {
+      await expect(stakingClient.stake(negativeAmount)).rejects.toThrow(
         ErrorInvalidStakingValueSign
       );
+      expect(mockStakingContract.stake).toHaveBeenCalledTimes(0);
     });
 
-    test('throws an error if staking allowance is insufficient', async () => {
-      const amount = ethers.utils.parseEther('1');
-      stakingClient.isAllowance = vi.fn(() => Promise.resolve(true));
+    test('should throw an error if allowance is not sufficient', async () => {
+      const zeroAmount = BigNumber.from(0);
+      mockTokenContract.allowance.mockResolvedValueOnce(zeroAmount);
 
       await expect(stakingClient.stake(amount)).rejects.toThrow(
         ErrorStakingInsufficientAllowance
       );
+      expect(mockStakingContract.stake).toHaveBeenCalledTimes(0);
     });
 
-    test('stake the amount successfully', async () => {
-      const amount = ethers.utils.parseEther('1');
-      stakingClient.isAllowance = vi.fn(() => Promise.resolve(false));
+    test('should call the stake function on the staking contract with the given amount', async () => {
+      mockTokenContract.allowance.mockResolvedValueOnce(amount);
 
-      vi.spyOn(stakingClient, 'stake').mockImplementation(() =>
-        Promise.resolve(undefined)
-      );
-      expect(await stakingClient.stake(amount)).toBeUndefined();
+      await stakingClient.stake(amount);
+
+      expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
     });
 
-    test('throws an error if staking fails', async () => {
-      const amount = ethers.utils.parseEther('1');
+    test('should throw an error if the stake function on the staking contract fails', async () => {
+      mockTokenContract.allowance.mockResolvedValueOnce(amount);
 
-      vi.spyOn(stakingClient, 'stake').mockImplementation(() => {
-        throw ErrorStakingFailedToStake;
-      });
+      mockStakingContract.stake.mockRejectedValueOnce(new Error());
 
-      expect(() => stakingClient.stake(amount)).toThrow(
+      await expect(stakingClient.stake(amount)).rejects.toThrow(
         ErrorStakingFailedToStake
       );
+      expect(mockTokenContract.allowance).toHaveBeenCalledTimes(1);
+      expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('unstake', () => {
+    const amount = BigNumber.from(FAKE_AMOUNT);
+    const negativeAmount = BigNumber.from(FAKE_NEGATIVE_AMOUNT);
+
+    test('should throw an error if amount is not a BigNumber', async () => {
+      await expect(stakingClient.unstake('foo')).rejects.toThrow(
+        ErrorInvalidStakingValueType
+      );
+      expect(mockStakingContract.unstake).toHaveBeenCalledTimes(0);
     });
 
-    test('should throw an error if staking fails', async () => {
-      const amount = ethers.utils.parseEther('1');
-
-      vi.spyOn(stakingClient, 'stake').mockImplementation(() => {
-        throw ErrorStakingFailedToStake;
-      });
-
-      expect(() => stakingClient.stake(amount)).toThrow(
-        ErrorStakingFailedToStake
+    test('should throw an error if amount is negative', async () => {
+      await expect(stakingClient.unstake(negativeAmount)).rejects.toThrow(
+        ErrorInvalidStakingValueSign
       );
+      expect(mockStakingContract.unstake).toHaveBeenCalledTimes(0);
+    });
+
+    test('should call the unstake function on the staking contract with the given amount', async () => {
+      await stakingClient.unstake(amount);
+
+      expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.unstake).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the unstake function on the staking contract fails', async () => {
+      mockStakingContract.unstake.mockRejectedValueOnce(new Error());
+
+      await expect(stakingClient.unstake(amount)).rejects.toThrow(
+        ErrorStakingFailedToUnstake
+      );
+      expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.unstake).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('withdraw', () => {
+    test('should call the withdraw method with the correct parameters', async () => {
+      mockStakingContract.withdraw.mockResolvedValueOnce();
+
+      await stakingClient.withdraw();
+
+      expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the withdraw method of the staking contract fails', async () => {
+      mockStakingContract.withdraw.mockRejectedValueOnce(new Error());
+
+      await expect(stakingClient.withdraw()).rejects.toThrow(
+        ErrorStakingFailedToUnstake
+      );
+      expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('slash', () => {
+    const amount = BigNumber.from(FAKE_AMOUNT);
+    const negativeAmount = BigNumber.from(FAKE_NEGATIVE_AMOUNT);
+    const invalidAddress = 'InvalidAddress';
+
+    test('throws an error if amount is not a BigNumber', async () => {
+      await expect(
+        stakingClient.slash(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          'foo'
+        )
+      ).rejects.toThrow(ErrorInvalidStakingValueType);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if amount is negative', async () => {
+      await expect(
+        stakingClient.slash(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          negativeAmount
+        )
+      ).rejects.toThrow(ErrorInvalidStakingValueSign);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if slasher address is invalid', async () => {
+      await expect(
+        stakingClient.slash(
+          invalidAddress,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          amount
+        )
+      ).rejects.toThrow(ErrorInvalidSlasherAddressProvided);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if staker address is invalid', async () => {
+      await expect(
+        stakingClient.slash(
+          ethers.constants.AddressZero,
+          invalidAddress,
+          ethers.constants.AddressZero,
+          amount
+        )
+      ).rejects.toThrow(ErrorInvalidStakerAddressProvided);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if escrow address is invalid', async () => {
+      await expect(
+        stakingClient.slash(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          invalidAddress,
+          amount
+        )
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if slashing fails', async () => {
+      mockStakingContract.slash.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.slash(
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          amount
+        )
+      ).rejects.toThrow(ErrorStakingFailedToSlash);
+
+      expect(mockStakingContract.slash).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(1);
+    });
+
+    test('calls the staking contract to slash the given amount', async () => {
+      mockStakingContract.slash.mockResolvedValueOnce();
+
+      stakingClient.slash(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        amount
+      );
+
+      expect(mockStakingContract.slash).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('allocate', () => {
+    const amount = BigNumber.from(FAKE_AMOUNT);
+    const negativeAmount = BigNumber.from(FAKE_NEGATIVE_AMOUNT);
+    const invalidAddress = 'InvalidAddress';
+
+    test('throws an error if escrow address is invalid', async () => {
+      await expect(
+        stakingClient.allocate(invalidAddress, amount)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if amount is not a BigNumber', async () => {
+      await expect(
+        stakingClient.allocate(ethers.constants.AddressZero, 'foo')
+      ).rejects.toThrow(ErrorInvalidStakingValueType);
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(0);
+    });
+
+    test('throws an error if amount is negative', async () => {
+      await expect(
+        stakingClient.allocate(ethers.constants.AddressZero, negativeAmount)
+      ).rejects.toThrow(ErrorInvalidStakingValueSign);
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(0);
+    });
+
+    test('should call the allocate method with the correct parameters', async () => {
+      await stakingClient.allocate(ethers.constants.AddressZero, amount);
+
+      expect(mockStakingContract.allocate).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the allocate method fails', async () => {
+      mockStakingContract.allocate.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.allocate(ethers.constants.AddressZero, amount)
+      ).rejects.toThrow(ErrorStakingFailedToAllocate);
+      expect(mockStakingContract.allocate).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        amount
+      );
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('closeAllocation', () => {
+    const invalidAddress = 'InvalidAddress';
+
+    test('should throws an error if escrow address is invalid', async () => {
+      await expect(
+        stakingClient.closeAllocation(invalidAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(0);
+    });
+
+    test('should throw an error when stakingContract.closeAllocation throws an error', async () => {
+      mockStakingContract.closeAllocation.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.closeAllocation(ethers.constants.AddressZero)
+      ).rejects.toThrow(ErrorStakingFailedToCloseAllocation);
+
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledWith(
+        ethers.constants.AddressZero
+      );
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call the closeAllocation method with the correct parameters', async () => {
+      mockStakingContract.closeAllocation.mockResolvedValueOnce();
+
+      await stakingClient.closeAllocation(ethers.constants.AddressZero);
+
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledWith(
+        ethers.constants.AddressZero
+      );
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('distributeRewards', () => {
+    const invalidAddress = 'InvalidAddress';
+
+    test('throws an error if escrow address is invalid', async () => {
+      await expect(
+        stakingClient.distributeRewards(invalidAddress)
+      ).rejects.toEqual(ErrorInvalidEscrowAddressProvided);
+    });
+
+    /* test('should call distributeReward method on RewardPool contract', async () => {
+      mockStakingContract.rewardPool.mockResolvedValueOnce(ethers.constants.AddressZero);
+      mockStakingContract.distributeRewards.mockResolvedValueOnce();
+
+      await stakingClient.distributeRewards(ethers.constants.AddressZero);
+
+      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledWith(ethers.constants.AddressZero);
+      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledTimes(1);
+    }); */
+  });
+
+  describe('getStaker', () => {
+    const stakerAddress = ethers.constants.AddressZero;
+    const invalidAddress = 'InvalidAddress';
+
+    test('should return staker information', async () => {
+      const mockStaker: IStaker = {
+        tokensStaked: ethers.utils.parseEther('100'),
+        tokensAllocated: ethers.utils.parseEther('50'),
+        tokensLocked: ethers.utils.parseEther('25'),
+        tokensLockedUntil: ethers.BigNumber.from(0),
+      };
+      mockStakingContract.getStaker.mockResolvedValueOnce(mockStaker);
+
+      const result = await stakingClient.getStaker(stakerAddress);
+      expect(result).toEqual(mockStaker);
+      expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
+      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error for an invalid staker address', async () => {
+      await expect(stakingClient.getStaker(invalidAddress)).rejects.toThrow(
+        ErrorInvalidStakerAddressProvided
+      );
+      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(0);
+    });
+
+    test('should throw an error if the staking contract call fails', async () => {
+      mockStakingContract.getStaker.mockRejectedValue(new Error());
+
+      await expect(stakingClient.getStaker(stakerAddress)).rejects.toThrow(
+        ErrorStakingGetStaker
+      );
+      expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
+      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getAllStakers()', () => {
+    const mockStaker: IStaker = {
+      tokensStaked: ethers.utils.parseEther('100'),
+      tokensAllocated: ethers.utils.parseEther('50'),
+      tokensLocked: ethers.utils.parseEther('25'),
+      tokensLockedUntil: ethers.BigNumber.from(0),
+    };
+    const stakerAddress = ethers.constants.AddressZero;
+
+    test('should return an array of stakers', async () => {
+      mockStakingContract.getListOfStakers.mockResolvedValueOnce([
+        [stakerAddress, stakerAddress],
+        [mockStaker, mockStaker],
+      ]);
+
+      const stakers = await stakingClient.getAllStakers();
+
+      expect(stakers).toEqual([mockStaker, mockStaker]);
+      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if no stakers are found', async () => {
+      mockStakingContract.getListOfStakers.mockResolvedValue([[], []]);
+      await expect(stakingClient.getAllStakers()).rejects.toThrow(
+        ErrorStakingStakersNotFound
+      );
+      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if there is an error in getting stakers', async () => {
+      mockStakingContract.getListOfStakers.mockRejectedValueOnce(new Error());
+      await expect(stakingClient.getAllStakers()).rejects.toThrow(
+        ErrorStakingStakersNotFound
+      );
+      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getAllocation', () => {
+    const invalidAddress = 'InvalidAddress';
+
+    test('should throw an error for invalid escrow address', async () => {
+      await expect(stakingClient.getAllocation(invalidAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+      expect(mockStakingContract.getAllocation).toHaveBeenCalledTimes(0);
+    });
+
+    test('should return allocation information', async () => {
+      const mockAllocation: IAllocation = {
+        escrowAddress: ethers.constants.AddressZero,
+        staker: ethers.constants.AddressZero,
+        tokens: ethers.utils.parseEther('100'),
+        createdAt: ethers.utils.parseEther('100'),
+        closedAt: ethers.utils.parseEther('100'),
+      };
+      mockStakingContract.getAllocation.mockResolvedValueOnce(mockAllocation);
+
+      const result = await stakingClient.getAllocation(
+        ethers.constants.AddressZero
+      );
+      expect(result).toEqual(mockAllocation);
+      expect(mockStakingContract.getAllocation).toHaveBeenCalledWith(
+        ethers.constants.AddressZero
+      );
+      expect(mockStakingContract.getAllocation).toHaveBeenCalledTimes(1);
+    });
+
+    test('should throw an error if the allocation data cannot be retrieved', async () => {
+      mockStakingContract.getAllocation.mockRejectedValue(new Error());
+      await expect(
+        stakingClient.getAllocation(ethers.constants.AddressZero)
+      ).rejects.toThrow(ErrorStakingGetAllocation);
     });
   });
 });

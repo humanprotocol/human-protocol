@@ -13,11 +13,14 @@ import { IAllocation, IClientParams, IStaker } from './interfaces';
 import {
   ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
   ErrorFailedToApproveStakingAmountSignerDoesNotExist,
-  ErrorInvalidEthereumAddressProvided,
+  ErrorInvalidEscrowAddressProvided,
+  ErrorInvalidSlasherAddressProvided,
+  ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
   ErrorStakingFailedToAllocate,
   ErrorStakingFailedToCloseAllocation,
+  ErrorStakingFailedToDistributeRewards,
   ErrorStakingFailedToSlash,
   ErrorStakingFailedToStake,
   ErrorStakingFailedToUnstake,
@@ -60,23 +63,22 @@ export default class StakingClient {
    * @returns {Promise<boolean>}
    */
   public async approveStake(amount: BigNumber): Promise<boolean> {
+    if (!BigNumber.isBigNumber(amount)) {
+      throw ErrorInvalidStakingValueType;
+    }
+
+    if (amount.isNegative()) {
+      throw ErrorInvalidStakingValueSign;
+    }
+
+    if (!(await this.isAllowance(amount))) {
+      throw ErrorStakingInsufficientAllowance;
+    }
+
     try {
-      if (!BigNumber.isBigNumber(amount)) {
-        throw ErrorInvalidStakingValueType;
-      }
-
-      if (amount.isNegative()) {
-        throw ErrorInvalidStakingValueSign;
-      }
-
-      if (await this.isAllowance(amount)) {
-        return true;
-      }
-
       await this.tokenContract.approve(this.stakingContract.address, amount);
-
       return true;
-    } catch {
+    } catch (e) {
       throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
     }
   }
@@ -87,7 +89,7 @@ export default class StakingClient {
    * @param {BigNumber} amount - Amount to stake
    * @returns {Promise<void>}
    */
-  public async stake(amount: BigNumber) {
+  public async stake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -96,7 +98,7 @@ export default class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (await this.isAllowance(amount)) {
+    if (!(await this.isAllowance(amount))) {
       throw ErrorStakingInsufficientAllowance;
     }
 
@@ -114,7 +116,7 @@ export default class StakingClient {
    * @param {BigNumber} amount - Amount to unstake
    * @returns {Promise<void>}
    */
-  public async unstake(amount: BigNumber) {
+  public async unstake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -124,7 +126,7 @@ export default class StakingClient {
     }
 
     try {
-      await this.stakingContract.stake(amount);
+      await this.stakingContract.unstake(amount);
       return;
     } catch {
       throw ErrorStakingFailedToUnstake;
@@ -136,7 +138,7 @@ export default class StakingClient {
    *
    * @returns {Promise<void>}
    */
-  public async withdraw() {
+  public async withdraw(): Promise<void> {
     try {
       await this.stakingContract.withdraw();
       return;
@@ -168,12 +170,16 @@ export default class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (
-      !ethers.utils.isAddress(slasher) ||
-      !ethers.utils.isAddress(staker) ||
-      !ethers.utils.isAddress(escrowAddress)
-    ) {
-      throw ErrorInvalidEthereumAddressProvided;
+    if (!ethers.utils.isAddress(slasher)) {
+      throw ErrorInvalidSlasherAddressProvided;
+    }
+
+    if (!ethers.utils.isAddress(staker)) {
+      throw ErrorInvalidStakerAddressProvided;
+    }
+
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
     }
 
     try {
@@ -204,7 +210,7 @@ export default class StakingClient {
     }
 
     if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEthereumAddressProvided;
+      throw ErrorInvalidEscrowAddressProvided;
     }
 
     try {
@@ -223,7 +229,7 @@ export default class StakingClient {
    */
   public async closeAllocation(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEthereumAddressProvided;
+      throw ErrorInvalidEscrowAddressProvided;
     }
 
     try {
@@ -242,7 +248,7 @@ export default class StakingClient {
    */
   public async distributeRewards(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEthereumAddressProvided;
+      throw ErrorInvalidEscrowAddressProvided;
     }
 
     try {
@@ -253,8 +259,8 @@ export default class StakingClient {
 
       await rewardPoolContract.distributeReward(escrowAddress);
       return;
-    } catch {
-      throw ErrorStakingFailedToUnstake;
+    } catch (e) {
+      throw ErrorStakingFailedToDistributeRewards;
     }
   }
 
@@ -266,11 +272,12 @@ export default class StakingClient {
    */
   public async getStaker(staker: string): Promise<IStaker> {
     if (!ethers.utils.isAddress(staker)) {
-      throw ErrorInvalidEthereumAddressProvided;
+      throw ErrorInvalidStakerAddressProvided;
     }
 
     try {
-      return this.stakingContract.getStaker(staker);
+      const result = await this.stakingContract.getStaker(staker);
+      return result;
     } catch {
       throw ErrorStakingGetStaker;
     }
@@ -281,7 +288,7 @@ export default class StakingClient {
    *
    * @returns {Promise<IStakerInfo>}
    */
-  public async getListOfStakers(): Promise<IStaker[]> {
+  public async getAllStakers(): Promise<IStaker[]> {
     try {
       const result = await this.stakingContract.getListOfStakers();
 
@@ -291,7 +298,7 @@ export default class StakingClient {
 
       return result[1];
     } catch {
-      throw ErrorStakingGetStaker;
+      throw ErrorStakingStakersNotFound;
     }
   }
 
@@ -303,11 +310,12 @@ export default class StakingClient {
    */
   public async getAllocation(escrowAddress: string): Promise<IAllocation> {
     if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEthereumAddressProvided;
+      throw ErrorInvalidEscrowAddressProvided;
     }
 
     try {
-      return this.stakingContract.getAllocation(escrowAddress);
+      const result = await this.stakingContract.getAllocation(escrowAddress);
+      return result;
     } catch {
       throw ErrorStakingGetAllocation;
     }
@@ -319,16 +327,16 @@ export default class StakingClient {
    * @param {BigNumber} amount - Amount
    * @returns {Promise<boolean>}
    */
-  public async isAllowance(amount: BigNumber): Promise<boolean> {
-    if (this.signerOrProvider instanceof Signer) {
-      const newAllowance = await this.tokenContract.allowance(
-        await this.signerOrProvider.getAddress(),
-        this.stakingContract.address
-      );
-
-      return newAllowance.gte(amount);
-    } else {
+  private async isAllowance(amount: BigNumber): Promise<boolean> {
+    if (this.signerOrProvider instanceof Provider) {
       throw ErrorFailedToApproveStakingAmountSignerDoesNotExist;
     }
+
+    const newAllowance = await this.tokenContract.allowance(
+      await this.signerOrProvider.getAddress(),
+      this.stakingContract.address
+    );
+
+    return newAllowance.gte(amount);
   }
 }
