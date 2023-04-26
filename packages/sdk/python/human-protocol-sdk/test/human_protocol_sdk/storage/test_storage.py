@@ -1,219 +1,270 @@
+import hashlib
 import json
-import logging
+import random
 import unittest
 from unittest.mock import MagicMock, patch
+import types
+from minio import S3Error
 
-from human_protocol_sdk import crypto
-from human_protocol_sdk.storage import upload, download, download_from_storage
-from test.human_protocol_sdk.utils import test_manifest
-
-ESCROW_TEST_BUCKETNAME = "test-escrow-results"
-ESCROW_TEST_PUBLIC_BUCKETNAME = "test-escrow-public-results"
-
-logging.getLogger("boto").setLevel(logging.INFO)
-logging.getLogger("botocore").setLevel(logging.INFO)
-logging.getLogger("boto3").setLevel(logging.INFO)
+from human_protocol_sdk.storage import (
+    Credentials,
+    StorageClient,
+    StorageClientError,
+    StorageFileNotFoundError,
+)
 
 
-class StorageTest(unittest.TestCase):
-    bid_amount = 1.0  # value to be inserted in manifest
+class TestCredentials(unittest.TestCase):
+    def test_credentials(self):
+        credentials = Credentials(
+            access_key="my-access-key", secret_key="my-secret-key"
+        )
+        self.assertEqual(credentials.access_key, "my-access-key")
+        self.assertEqual(credentials.secret_key, "my-secret-key")
 
-    def get_manifest(self) -> dict:
-        """Retrieves manifest differing bid amount to bid amount to force unique state of the manifest"""
-        manifest = test_manifest(bid_amount=self.bid_amount)
-        self.bid_amount += 0.1
-        return dict(manifest.serialize())
 
-    def setUp(self) -> None:
-        self.pub_key = b"8318535b54105d4a7aae60c08fc45f9687181b4fdfc625bd1a753fa7397fed753547f11ca8696646f2f3acb08e31016afac23e630c5d11f59f61fef57b0d2aa5"
-        self.priv_key = (
-            b"ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+class TestStorageClient(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.endpoint_url = "s3.us-west-2.amazonaws.com"
+        cls.bucket = "my-bucket"
+        cls.files = ["file1.txt", "file2.txt"]
+        cls.region = "us-west-2"
+        cls.credentials = Credentials(
+            access_key="my-access-key", secret_key="my-secret-key"
         )
 
-    @patch(
-        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
-        ESCROW_TEST_PUBLIC_BUCKETNAME,
-    )
-    @patch("human_protocol_sdk.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
-    def test_upload_to_private_bucket(self):
-        """
-        Tests uploading file to storage to private bucket when encryption is on.
-        """
+    def setUp(self):
+        self.client = StorageClient(
+            endpoint_url=self.endpoint_url,
+            region=self.region,
+            credentials=self.credentials,
+        )
 
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-
-            upload(
-                self.get_manifest(),
-                self.pub_key,
-                encrypt_data=True,
-                use_public_bucket=False,
+    def test_init_authenticated_access(self):
+        with patch("human_protocol_sdk.storage.Minio") as mock_client:
+            client = StorageClient(
+                endpoint_url=self.endpoint_url,
+                region=self.region,
+                credentials=self.credentials,
             )
+            mock_client.assert_called_once_with(
+                access_key=self.credentials.access_key,
+                secret_key=self.credentials.secret_key,
+                region=self.region,
+                endpoint=self.endpoint_url,
+                secure=True,
+            )
+            self.assertIsNotNone(client.client)
 
-            mock_s3.assert_called()
-            self.assertIn("Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
-
-            # With use_public_bucket False, bucket MUST be the private one
+    def test_init_anonymous_access(self):
+        with patch("human_protocol_sdk.storage.Minio") as mock_client:
+            client = StorageClient(
+                endpoint_url=self.endpoint_url,
+            )
+            mock_client.assert_called_once()
+            self.assertEqual(mock_client.call_args_list[0].kwargs["region"], None)
             self.assertEqual(
-                s3_client_mock.put_object.call_args.kwargs["Bucket"],
-                ESCROW_TEST_BUCKETNAME,
+                mock_client.call_args_list[0].kwargs["endpoint"], self.endpoint_url
             )
+            self.assertIsNotNone(client.client)
 
-    @patch(
-        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
-        ESCROW_TEST_PUBLIC_BUCKETNAME,
-    )
-    def test_upload_to_public_bucket(self):
-        """Tests uploading file to storage to public bucket only when encryption is off."""
+    def test_init_error(self):
+        # Connection error
+        with patch("human_protocol_sdk.storage.Minio") as mock_client:
+            mock_client.side_effect = Exception("Connection error")
+            with self.assertRaises(Exception):
+                StorageClient(endpoint_url=self.endpoint_url)
 
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-
-            upload(
-                self.get_manifest(),
-                self.pub_key,
-                encrypt_data=True,
-                use_public_bucket=True,
-            )
-
-            mock_s3.assert_called()
-
-            self.assertIn("Bucket", s3_client_mock.put_object.call_args.kwargs.keys())
-
-            # With use_public_bucket True, bucket MUST be the public one
-            self.assertIn(
-                s3_client_mock.put_object.call_args.kwargs["Bucket"],
-                ESCROW_TEST_PUBLIC_BUCKETNAME,
-            )
-
-    def test_upload_with_enabled_encryption_option(self):
-        """
-        Tests data persisted in storage is encrypted.
-        """
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-
-            # Encryption on (default).
-            data = self.get_manifest()
-            upload(data, self.pub_key, encrypt_data=True)
-
-            mock_s3.assert_called()
-            self.assertIn("Body", s3_client_mock.put_object.call_args.kwargs.keys())
-
-            # Data to be uploaded must be encrypted
-            uploaded_content = crypto.decrypt(
-                self.priv_key, s3_client_mock.put_object.call_args.kwargs["Body"]
-            )
-            self.assertEqual(json.dumps(data, sort_keys=True), uploaded_content)
-
-    def test_upload_with_disabled_encryption_option(self):
-        """
-        Tests data persisted in storage is plain.
-        """
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-            # Encryption off.
-            data = self.get_manifest()
-            upload(data, self.pub_key, encrypt_data=False)
-
-            mock_s3.assert_called()
-            self.assertIn("Body", s3_client_mock.put_object.call_args.kwargs.keys())
-
-            # Data to be uploaded must be plain
-            uploaded_content = s3_client_mock.put_object.call_args.kwargs["Body"]
-            self.assertEqual(
-                json.dumps(data, sort_keys=True), uploaded_content.decode()
-            )
-
-    @patch("human_protocol_sdk.storage.ESCROW_BUCKETNAME", ESCROW_TEST_BUCKETNAME)
-    def test_download_from_storage_from_private_bucket(self):
-        """Tests download of file artifact from storage from private bucket."""
-        # Encrypting data is on (default)
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-
-            download_from_storage(key="s3aaaa", public=False)
-
-        mock_s3.assert_called()
-
-        # With encryption on, bucket is meant to be the public one
-        self.assertEqual(
-            s3_client_mock.get_object.call_args.kwargs["Bucket"], ESCROW_TEST_BUCKETNAME
-        )
-
-    @patch(
-        "human_protocol_sdk.storage.ESCROW_PUBLIC_BUCKETNAME",
-        ESCROW_TEST_PUBLIC_BUCKETNAME,
-    )
-    def test_download_from_storage_public_bucket(self):
-        """Tests download of file artifact from storage from private bucket."""
-        s3_client_mock = MagicMock()
-        with patch("human_protocol_sdk.storage._connect_s3") as mock_s3:
-            mock_s3.return_value = s3_client_mock
-
-            download_from_storage(key="s3aaaa", public=True)
-
-        mock_s3.assert_called()
-
-        # With encryption on, bucket is meant to be the public one
-        self.assertEqual(
-            s3_client_mock.get_object.call_args.kwargs["Bucket"],
-            ESCROW_TEST_PUBLIC_BUCKETNAME,
-        )
-
-    def test_public_private_download_from_storage(self):
-        """Tests whether download is correctly called using public or private parameter."""
-        file_key = "s3aaa"
-        sample_data = '{"a": 1, "b": 2}'
-
-        with patch("human_protocol_sdk.storage.download_from_storage") as download_mock:
-            # 2 returns. 1. encrypted and other plain
-            download_mock.side_effect = [
-                crypto.encrypt(self.pub_key, sample_data),
-                sample_data.encode("utf-8"),
+    def test_download_files(self):
+        expected_result = [b"file1 contents", b"file2 contents"]
+        self.client.client.get_object = MagicMock(
+            side_effect=[
+                MagicMock(read=MagicMock(return_value=expected_result[0])),
+                MagicMock(read=MagicMock(return_value=expected_result[1])),
             ]
+        )
+        result = self.client.download_files(files=self.files, bucket=self.bucket)
+        self.assertEqual(result, expected_result)
 
-            # Encryption is on (default)
-            downloaded = download(key=file_key, private_key=self.priv_key, public=False)
-            self.assertEqual(json.dumps(downloaded), sample_data)
+    def test_download_files_error(self):
+        self.client.client.get_object = MagicMock(
+            side_effect=S3Error(
+                code="NoSuchKey",
+                message="Key not found",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        with self.assertRaises(StorageFileNotFoundError):
+            self.client.download_files(files=self.files, bucket=self.bucket)
 
-            # Download from storage must be called as PRIVATE (public is FALSE)
-            download_mock.assert_called_once_with(key=file_key, public=False)
+    def test_download_files_anonymous_error(self):
+        self.client.client.get_object = MagicMock(
+            side_effect=S3Error(
+                code="InvalidAccessKeyId",
+                message="Access denied",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.download_files(files=self.files, bucket=self.bucket)
 
-            download_mock.reset_mock()
+    def test_download_files_exception(self):
+        self.client.client.get_object = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.download_files(files=self.files, bucket=self.bucket)
 
-            # Encryption is on (default)
-            downloaded = download(key=file_key, private_key=self.priv_key, public=True)
-            self.assertEqual(json.dumps(downloaded), sample_data)
+    def test_upload_files(self):
+        file3 = "file3 content"
+        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{data_sha}.json"
 
-            # Download from storage must be called as PRIVATE (public is TRUE)
-            download_mock.assert_called_once_with(key=file_key, public=True)
+        self.client.client.stat_object = MagicMock(
+            side_effect=S3Error(
+                code="NoSuchKey",
+                message="Object does not exist",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        self.client.client.put_object = MagicMock()
+        result = self.client.upload_files(files=[file3], bucket=self.bucket)
+        self.assertEqual(result, [key3])
 
-    def test_download_from_public_resource(self):
-        """Download content from public URI"""
-        file_key = "https://s3aaa.com"
-        sample_data = '{"a": 1, "b": 2}'
+    def test_upload_files_exist(self):
+        file3 = "file3 content"
+        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{data_sha}.json"
 
-        with patch("urllib.request.urlopen") as mock_urlopen:
-            cm = MagicMock()
-            cm.read.side_effect = [
-                crypto.encrypt(self.pub_key, sample_data),
-                sample_data.encode("utf-8"),
-            ]
-            mock_urlopen.return_value = cm
+        self.client.client.stat_object = MagicMock(
+            side_effect=[{"_object_name": "1234567890"}]
+        )
+        self.client.client.put_object = MagicMock()
+        result = self.client.upload_files(files=[file3], bucket=self.bucket)
+        self.assertEqual(result, [key3])
 
-            with patch(
-                "human_protocol_sdk.storage.download_from_storage"
-            ) as download_mock:
-                downloaded = download(key=file_key, private_key=self.priv_key)
-                self.assertEqual(json.dumps(downloaded), sample_data)
-                mock_urlopen.assert_called_once()
+    def test_upload_files_error(self):
+        file3 = "file3 content"
 
+        # HeadObject error
+        self.client.client.head_object = MagicMock(
+            side_effect=S3Error(
+                code="InvalidAccessKeyId",
+                message="Access denied",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.upload_files(files=[file3], bucket=self.bucket)
 
-if __name__ == "__main__":
-    unittest.main(exit=True)
+        # PutObject error
+        self.client.client.upload_fileobj = MagicMock(
+            side_effect=S3Error(
+                code="InvalidAccessKeyId",
+                message="Access denied",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.upload_files(files=[file3], bucket=self.bucket)
+
+    def test_bucket_exists(self):
+        self.client.client.bucket_exists = MagicMock(side_effect=[True])
+        result = self.client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, True)
+
+    def test_bucket_exists_anonymous(self):
+        client = StorageClient(
+            endpoint_url=self.endpoint_url,
+        )
+        client.client.bucket_exists = MagicMock(side_effect=[True])
+        result = client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, True)
+
+    def test_bucket_not_exists(self):
+        self.client.client.bucket_exists = MagicMock(side_effect=[False])
+        result = self.client.bucket_exists(bucket=self.bucket)
+        self.assertEqual(result, False)
+
+    def test_bucket_error(self):
+        self.client.client.bucket_exists = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.bucket_exists(bucket=self.bucket)
+
+    def test_list_objects(self):
+        file1 = types.SimpleNamespace()
+        file2 = types.SimpleNamespace()
+        file1._object_name = "file1"
+        file2._object_name = "file2"
+        self.client.client.list_objects = MagicMock(side_effect=[[file1, file2]])
+        result = self.client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, ["file1", "file2"])
+
+    def test_list_objects_anonymous(self):
+        client = StorageClient(
+            endpoint_url=self.endpoint_url,
+        )
+        file1 = types.SimpleNamespace()
+        file2 = types.SimpleNamespace()
+        file1._object_name = "file1"
+        file2._object_name = "file2"
+        client.client.list_objects = MagicMock(side_effect=[[file1, file2]])
+        result = client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, ["file1", "file2"])
+
+    def test_list_objects_empty(self):
+        self.client.client.list_objects = MagicMock(side_effect=[[]])
+        result = self.client.list_objects(bucket=self.bucket)
+        self.assertEqual(result, [])
+
+    def test_list_objects_error(self):
+        self.client.client.head_bucket = MagicMock(
+            side_effect=Exception("Connection error")
+        )
+        with self.assertRaises(StorageClientError):
+            self.client.list_objects(bucket=self.bucket)
+
+    def test_list_objects_length(self):
+        expected_length = random.randint(1, 10)
+        mock_client = MagicMock()
+        mock_client.list_objects.return_value = [
+            types.SimpleNamespace(_object_name=f"file{i}")
+            for i in range(expected_length)
+        ]
+        with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
+            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            object_list = client.list_objects(bucket="my-bucket")
+            self.assertEqual(len(object_list), expected_length)
+
+    def test_list_objects_length_error(self):
+        expected_length = random.randint(1, 10)
+        mock_client = MagicMock()
+        mock_client.list_objects.return_value = [
+            types.SimpleNamespace(_object_name=f"file{i}")
+            for i in range(expected_length)
+        ]
+        with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
+            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            object_list = client.list_objects(bucket="my-bucket")
+            if len(object_list) != expected_length:
+                raise AssertionError(
+                    f"Expected {expected_length} objects, but found {len(object_list)}"
+                )
