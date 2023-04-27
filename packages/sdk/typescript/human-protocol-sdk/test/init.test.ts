@@ -1,4 +1,4 @@
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   ErrorInitProviderDoesNotExist,
   ErrorInitUnsupportedChainID,
@@ -10,34 +10,49 @@ import InitClient from '../src/init';
 import { IClientParams } from '../src/interfaces';
 import { ChainId } from '../src/enums';
 
-// Mock Signer and Provider
-const mockProvider = new ethers.providers.JsonRpcProvider();
-const mockSigner = mockProvider.getSigner();
-
 describe('InitClient', () => {
+  const provider = new ethers.providers.JsonRpcProvider();
+  let mockProvider: any;
+  let mockSigner: any;
+
+  beforeEach(async () => {
+    mockSigner = {
+      ...provider.getSigner(),
+      getNetwork: vi.fn().mockReturnValue({
+        name: FAKE_NETWORK_NAME,
+        chainId: ChainId.POLYGON_MUMBAI,
+      }),
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
+
+    mockProvider = {
+      getNetwork: vi.fn().mockReturnValue({
+        name: FAKE_NETWORK_NAME,
+        chainId: ChainId.POLYGON_MUMBAI,
+      }),
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('getParams', () => {
     test('should throw an error if Signer provider does not exist', async () => {
       const invalidSigner = ethers.Wallet.createRandom();
-      const result = await InitClient.getParams(invalidSigner);
-      expect(() => result).toThrow(ErrorInitProviderDoesNotExist);
+      await expect(InitClient.getParams(invalidSigner)).rejects.toThrow(
+        ErrorInitProviderDoesNotExist
+      );
     });
 
     test('should throw an error if chainId is not supported', async () => {
-      const invalidProvider = new ethers.providers.JsonRpcProvider();
       const invalidNetwork = { name: FAKE_NETWORK_NAME, chainId: ChainId.ALL };
-      const invalidSigner = invalidProvider.getSigner();
+      mockProvider.getNetwork.mockResolvedValueOnce(invalidNetwork);
 
-      vi.spyOn(invalidProvider, 'getNetwork').mockImplementation(
-        async () => invalidNetwork
+      await expect(InitClient.getParams(mockProvider)).rejects.toThrow(
+        ErrorInitUnsupportedChainID
       );
-
-      vi.spyOn(InitClient, 'getParams').mockImplementation(() => {
-        throw ErrorInitUnsupportedChainID;
-      });
-
-      const result = await InitClient.getParams(invalidSigner);
-
-      expect(() => result).toThrow(ErrorInitUnsupportedChainID);
     });
 
     test('should return the client parameters for a Signer', async () => {
@@ -46,9 +61,9 @@ describe('InitClient', () => {
         network: FAKE_NETWORK,
       };
 
-      vi.spyOn(InitClient, 'getParams').mockImplementation(() =>
-        Promise.resolve(expectedClientParams)
-      );
+      InitClient.getParams = vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(expectedClientParams));
 
       const clientParams = await InitClient.getParams(mockSigner);
 
@@ -61,9 +76,9 @@ describe('InitClient', () => {
         network: FAKE_NETWORK,
       };
 
-      vi.spyOn(InitClient, 'getParams').mockImplementation(() =>
-        Promise.resolve(expectedClientParams)
-      );
+      InitClient.getParams = vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(expectedClientParams));
 
       const clientParams = await InitClient.getParams(mockProvider);
 

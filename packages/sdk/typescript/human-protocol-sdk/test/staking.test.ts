@@ -451,21 +451,24 @@ describe('StakingClient', () => {
   describe('distributeRewards', () => {
     const invalidAddress = 'InvalidAddress';
 
-    test('throws an error if escrow address is invalid', async () => {
+    test('should throw an error if an invalid escrow address is provided', async () => {
       await expect(
         stakingClient.distributeRewards(invalidAddress)
-      ).rejects.toEqual(ErrorInvalidEscrowAddressProvided);
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+      expect(mockStakingContract.distributeRewards).toHaveBeenCalledTimes(0);
     });
 
-    /* test('should call distributeReward method on RewardPool contract', async () => {
-      mockStakingContract.rewardPool.mockResolvedValueOnce(ethers.constants.AddressZero);
-      mockStakingContract.distributeRewards.mockResolvedValueOnce();
+    test('should call distributeReward on the reward pool contract', async () => {
+      mockStakingContract.rewardPool.mockResolvedValue(
+        mockRewardPoolContract.address
+      );
 
-      await stakingClient.distributeRewards(ethers.constants.AddressZero);
+      stakingClient.distributeRewards = vi
+        .fn()
+        .mockImplementation(() => Promise.resolve(undefined));
 
-      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledWith(ethers.constants.AddressZero);
-      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledTimes(1);
-    }); */
+      await stakingClient.distributeRewards(mockRewardPoolContract.address);
+    });
   });
 
   describe('getStaker', () => {

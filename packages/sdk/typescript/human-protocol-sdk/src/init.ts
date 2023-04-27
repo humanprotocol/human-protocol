@@ -21,7 +21,9 @@ export default class InitClient {
   ): Promise<IClientParams> {
     let network: Network;
     if (signerOrProvider instanceof Signer) {
-      if (!signerOrProvider.provider) throw ErrorInitProviderDoesNotExist;
+      if (!signerOrProvider.provider) {
+        throw ErrorInitProviderDoesNotExist;
+      }
 
       network = await signerOrProvider.provider.getNetwork();
     } else {
@@ -31,10 +33,14 @@ export default class InitClient {
     const chainId: ChainId = network.chainId;
     const networkData = NETWORKS[chainId];
 
+    console.log(network);
+    console.log(networkData);
+
     if (!networkData) {
       throw ErrorInitUnsupportedChainID;
     }
 
+    console.log(12321);
     return {
       signerOrProvider: signerOrProvider,
       network: networkData,

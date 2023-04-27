@@ -1,0 +1,22 @@
+name: meta-code-verify CI
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  meta-code-verify-test:
+    name: meta-code-verify Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn compile
+        name: Compile smart contracts
+        working-directory: ./packages/core
+      - run: yarn meta-code-verify:test
+        name: Run meta-code-verify test
