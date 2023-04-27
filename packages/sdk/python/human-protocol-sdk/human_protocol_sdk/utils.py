@@ -164,3 +164,16 @@ def get_reward_pool_interface():
     return get_contract_interface(
         "{}/contracts/RewardPool.sol/RewardPool.json".format(ARTIFACTS_FOLDER)
     )
+
+
+def get_escrow_interface():
+    """Retrieve the RewardPool interface.
+
+    Returns:
+        Contract interface: returns the RewardPool interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/Escrow.sol/Escrow.json".format(ARTIFACTS_FOLDER)
+    )

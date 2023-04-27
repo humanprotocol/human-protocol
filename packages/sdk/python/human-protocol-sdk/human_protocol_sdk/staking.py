@@ -44,18 +44,12 @@ class StakingClient:
 
     """
 
-    def __init__(self, chain_id: ChainId, provider: HTTPProvider, priv_key: str):
+    def __init__(self, provider: HTTPProvider, priv_key: str):
         """Initializes a Staking instance
 
         Args:
 
         """
-
-        # Load network configuration based on chain id
-        self.network = NETWORKS[chain_id]
-
-        if not self.network:
-            raise StakingClientError("Invalid chain id")
 
         # Initialize web3 instance
         self.w3 = Web3(provider)
@@ -67,6 +61,12 @@ class StakingClient:
             construct_sign_and_send_raw_middleware(self.gas_payer)
         )
         self.w3.eth.default_account = self.gas_payer.address
+
+        # Load network configuration based on chain id
+        self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+
+        if not self.network:
+            raise StakingClientError("Invalid chain id")
 
         # Initialize contract instances
         hmtoken_interface = get_hmtoken_interface()
@@ -96,7 +96,8 @@ class StakingClient:
         Args:
             amount (Decimal): Amount to approve
 
-        Returns:
+        Validations:
+            - Amount must be greater than 0
         """
 
         if amount <= 0:
@@ -115,7 +116,10 @@ class StakingClient:
         Args:
             amount (Decimal): Amount to stake
 
-        Returns:
+        Validations:
+            - Amount must be greater than 0
+            - Amount must be less than or equal to the approved amount (on-chain)
+            - Amount must be less than or equal to the balance of the staker (on-chain)
         """
 
         if amount <= 0:
@@ -132,11 +136,17 @@ class StakingClient:
             escrow_address (str): Address of the escrow
             amount (Decimal): Amount to allocate
 
-        Returns:
+        Validations:
+            - Amount must be greater than 0
+            - Escrow address must be valid
+            - Amount must be less than or equal to the staked amount (on-chain)
         """
 
         if amount <= 0:
             raise StakingClientError("Amount to allocate must be greater than 0")
+
+        if not self._is_valid_escrow(escrow_address):
+            raise StakingClientError("Invalid escrow")
 
         self._handle_transaction(
             "Allocate HMT",
@@ -149,7 +159,9 @@ class StakingClient:
         Args:
             escrow_address (str): Address of the escrow
 
-        Returns:
+        Validations:
+            - Escrow address must be valid
+            - Escrow should be cancelled / completed (on-chain)
         """
 
         self._handle_transaction(
@@ -163,7 +175,9 @@ class StakingClient:
         Args:
             amount (Decimal): Amount to unstake
 
-        Returns:
+        Validations:
+            - Amount must be greater than 0
+            - Amount must be less than or equal to the staked amount which is not locked / allocated (on-chain)
         """
 
         if amount <= 0:
@@ -173,20 +187,15 @@ class StakingClient:
             "Unstake HMT", self.staking_contract.functions.unstake(amount)
         )
 
-    def withdraw(self, amount: Decimal):
+    def withdraw(self):
         """Withdraws HMT token.
 
-        Args:
-            amount (Decimal): Amount to withdraw
-
-        Returns:
+        Validations:
+            - There must be unstaked tokens which is unlocked (on-chain)
         """
 
-        if amount <= 0:
-            raise StakingClientError("Amount to withdraw must be greater than 0")
-
         self._handle_transaction(
-            "Withdraw HMT", self.staking_contract.functions.withdraw(amount)
+            "Withdraw HMT", self.staking_contract.functions.withdraw()
         )
 
     def slash(self, slasher: str, staker: str, escrow_address: str, amount: Decimal):
@@ -222,7 +231,80 @@ class StakingClient:
             self.reward_pool_contract.functions.distributeReward(escrow_address),
         )
 
+    def get_staker_info(self, staker_address: Optional[str] = None) -> dict:
+        """Gets the staker info.
+
+        Args:
+            staker_address (Optional[str]): Address of the staker, defaults to the default account
+
+        Returns:
+            dict: Staker info
+        """
+
+        if not staker_address:
+            staker_address = self.w3.eth.default_account
+
+        [
+            tokens_staked,
+            tokens_allocated,
+            tokens_locked,
+            tokens_locked_until,
+        ] = self.staking_contract.functions.getStaker(staker_address).call()
+
+        return {
+            "tokens_staked": tokens_staked,
+            "tokens_allocated": tokens_allocated,
+            "tokens_locked": tokens_locked,
+            "tokens_locked_until": tokens_locked_until,
+        }
+
+    def get_allocation(self, escrow_address: str) -> Optional[dict]:
+        """Gets the allocation info for the specified escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            Optional[dict]: Allocation info
+        """
+
+        [
+            escrow_address,
+            staker,
+            tokens,
+            created_at,
+            closed_at,
+        ] = self.staking_contract.functions.getAllocation(escrow_address).call()
+
+        return {
+            "escrow_address": escrow_address,
+            "staker": staker,
+            "tokens": tokens,
+            "created_at": created_at,
+            "closed_at": closed_at,
+        }
+
+    def _is_valid_escrow(self, escrow_address: str) -> bool:
+        """Checks if the escrow address is valid.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            bool: True if the escrow address is valid, False otherwise
+        """
+
+        # TODO: Use Escrow/Job Module once implemented
+        return self.factory_contract.functions.hasEscrow(escrow_address).call()
+
     def _handle_transaction(self, tx_name, tx):
+        """Executes the transaction and waits for the receipt.
+
+        Args:
+            tx_name (str): Name of the transaction
+            tx (obj): Transaction object
+
+        """
         try:
             tx_hash = tx.transact()
             self.w3.eth.waitForTransactionReceipt(tx_hash)
