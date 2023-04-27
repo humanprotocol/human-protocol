@@ -4,11 +4,11 @@ import logging
 import os
 
 from decimal import Decimal
-from typing import Optional
+from typing import List, Optional
 
+import web3
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
-from web3.providers.rpc import HTTPProvider
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.utils import (
@@ -44,7 +44,7 @@ class StakingClient:
 
     """
 
-    def __init__(self, provider: HTTPProvider, priv_key: str):
+    def __init__(self, w3: Web3, priv_key: str):
         """Initializes a Staking instance
 
         Args:
@@ -52,7 +52,7 @@ class StakingClient:
         """
 
         # Initialize web3 instance
-        self.w3 = Web3(provider)
+        self.w3 = w3
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         # Set default gas payer
@@ -202,13 +202,22 @@ class StakingClient:
         """Slashes HMT token.
 
         Args:
+            slasher (str): Address of the slasher
+            staker (str): Address of the staker
+            escrow_address (str): Address of the escrow
             amount (Decimal): Amount to slash
 
-        Returns:
+        Validations:
+            - Amount must be greater than 0
+            - Amount must be less than or equal to the amount allocated to the escrow (on-chain)
+            - Escrow address must be valid
         """
 
         if amount <= 0:
             raise StakingClientError("Amount to slash must be greater than 0")
+
+        if not self._is_valid_escrow(escrow_address):
+            raise StakingClientError("Invalid escrow")
 
         self._handle_transaction(
             "Slash HMT",
@@ -223,22 +232,49 @@ class StakingClient:
         Args:
             escrow_address (str): Address of the escrow
 
-        Returns:
+        Validations:
+            - Escrow address must be valid
         """
+
+        if not self._is_valid_escrow(escrow_address):
+            raise StakingClientError("Invalid escrow")
 
         self._handle_transaction(
             "Distribute reward",
             self.reward_pool_contract.functions.distributeReward(escrow_address),
         )
 
-    def get_staker_info(self, staker_address: Optional[str] = None) -> dict:
+    def get_all_stakers_info(self) -> List[dict]:
+        """Gets all stakers of the protocol
+
+        Returns:
+            List[dict]: List of stakers info
+        """
+
+        [
+            stakers,
+            staker_info,
+        ] = self.staking_contract.functions.getListOfStakers().call()
+
+        return [
+            {
+                "staker": stakers[i],
+                "tokens_staked": staker_info[i][0],
+                "tokens_allocated": staker_info[i][1],
+                "tokens_locked": staker_info[i][2],
+                "tokens_locked_until": staker_info[i][3],
+            }
+            for i in range(len(stakers))
+        ]
+
+    def get_staker_info(self, staker_address: Optional[str] = None) -> Optional[dict]:
         """Gets the staker info.
 
         Args:
             staker_address (Optional[str]): Address of the staker, defaults to the default account
 
         Returns:
-            dict: Staker info
+            Optional[dict]: Staker info if staker exists, otherwise None
         """
 
         if not staker_address:
@@ -250,6 +286,14 @@ class StakingClient:
             tokens_locked,
             tokens_locked_until,
         ] = self.staking_contract.functions.getStaker(staker_address).call()
+
+        if (
+            tokens_staked == 0
+            and tokens_allocated == 0
+            and tokens_locked == 0
+            and tokens_locked_until == 0
+        ):
+            return None
 
         return {
             "tokens_staked": tokens_staked,
@@ -265,7 +309,7 @@ class StakingClient:
             escrow_address (str): Address of the escrow
 
         Returns:
-            Optional[dict]: Allocation info
+            Optional[dict]: Allocation info if escrow exists, otherwise None
         """
 
         [
@@ -276,6 +320,9 @@ class StakingClient:
             closed_at,
         ] = self.staking_contract.functions.getAllocation(escrow_address).call()
 
+        if escrow_address == web3.constants.ADDRESS_ZERO:
+            return None
+
         return {
             "escrow_address": escrow_address,
             "staker": staker,
@@ -283,6 +330,19 @@ class StakingClient:
             "created_at": created_at,
             "closed_at": closed_at,
         }
+
+    def get_rewards_info(self, slasher: str) -> List[dict]:
+        """Get rewards of the given slasher
+
+        Args:
+            slasher (str): Address of the slasher
+
+        Returns:
+            List[dict]: List of rewards info
+        """
+
+        # TODO:
+        pass
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.

@@ -8,7 +8,7 @@ yarn workspace @human-protocol/core local &
 sleep 10
 
 # Run test
-pipenv run pytest ./test/human_protocol_sdk/test_staking.py
+pipenv run pytest .
 
 # Kill running hardhat node
 trap 'kill $(jobs -p)' EXIT
