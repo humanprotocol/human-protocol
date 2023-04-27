@@ -1,4 +1,6 @@
 import unittest
+
+from human_protocol_sdk.constants import NETWORKS
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
 from unittest.mock import MagicMock, PropertyMock
 
@@ -18,6 +20,32 @@ class KVStoreTestCase(unittest.TestCase):
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.kvstore = KVStoreClient(self.w3, self.mock_priv_key)
+
+    def test_init_with_valid_inputs(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_priv_key = DEFAULT_GAS_PAYER_PRIV
+
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        kvstore = KVStoreClient(w3, mock_priv_key)
+
+        self.assertEqual(kvstore.w3, w3)
+        self.assertEqual(kvstore.gas_payer, w3.eth.account.from_key(mock_priv_key))
+        self.assertEqual(kvstore.network, NETWORKS[ChainId(mock_chain_id)])
+        self.assertIsNotNone(kvstore.kvstore_contract)
+
+    def test_init_with_invalid_chain_id(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_priv_key = DEFAULT_GAS_PAYER_PRIV
+
+        mock_chain_id = 9999
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        with self.assertRaises(KVStoreClientError):
+            KVStoreClient(w3, mock_priv_key)
 
     def test_set(self):
         mock_function = MagicMock()
@@ -93,6 +121,16 @@ class KVStoreTestCase(unittest.TestCase):
     def test_get_invalid_address(self):
         address = "invalid_address"
         key = "key"
+        with self.assertRaises(KVStoreClientError):
+            self.kvstore.get(address, key)
+
+    def test_get_empty_value(self):
+        mock_function = MagicMock()
+        mock_function.return_value.call.return_value = ""
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.toChecksumAddress("0x1234567890123456789012345678901234567890")
+        key = "key"
+
         with self.assertRaises(KVStoreClientError):
             self.kvstore.get(address, key)
 

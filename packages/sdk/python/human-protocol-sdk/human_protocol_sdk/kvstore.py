@@ -49,11 +49,11 @@ class KVStoreClient:
         )
         self.w3.eth.default_account = self.gas_payer.address
 
-        # Load network configuration based on chain id
-        self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
-
-        if not self.network:
-            raise KVStoreClientError("Invalid chain id")
+        # Load network configuration based on chainId
+        try:
+            self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+        except:
+            raise KVStoreClientError("Invalid ChainId")
 
         # Initialize contract instances
         kvstore_interface = get_kvstore_interface()
