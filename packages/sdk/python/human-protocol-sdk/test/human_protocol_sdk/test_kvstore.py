@@ -1,18 +1,23 @@
 import unittest
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, PropertyMock
 
 from human_protocol_sdk.kvstore import KVStoreClient, KVStoreClientError
+from human_protocol_sdk.constants import ChainId
 from web3 import Web3
 from web3.providers.rpc import HTTPProvider
 
 
 class KVStoreTestCase(unittest.TestCase):
     def setUp(self):
-        self.mock_provider = (Mock(spec=HTTPProvider),)
+        self.mock_provider = MagicMock(spec=HTTPProvider)
+        self.w3 = Web3(self.mock_provider)
         self.mock_priv_key = DEFAULT_GAS_PAYER_PRIV
 
-        self.kvstore = KVStoreClient(self.mock_provider, self.mock_priv_key)
+        self.mock_chain_id = ChainId.LOCALHOST.value
+        type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
+
+        self.kvstore = KVStoreClient(self.w3, self.mock_priv_key)
 
     def test_set(self):
         mock_function = MagicMock()

@@ -29,17 +29,17 @@ class KVStoreClient:
     A class used to manage kvstore on the HUMAN network.
     """
 
-    def __init__(self, provider: HTTPProvider, priv_key: str):
+    def __init__(self, web3: Web3, priv_key: str):
         """
         Initializes a KVStore instance.
 
         Args:
-            provider (HTTPProvider): The Web3 HTTPProvider object for the network
+            web3 (Web3): The Web3 object
             priv_key (str): The private key of the account used to pay for gas
         """
 
         # Initialize web3 instance
-        self.w3 = Web3(provider)
+        self.w3 = web3
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         # Set default gas payer
@@ -50,8 +50,7 @@ class KVStoreClient:
         self.w3.eth.default_account = self.gas_payer.address
 
         # Load network configuration based on chain id
-        # self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
-        self.network = NETWORKS[ChainId.LOCALHOST]
+        self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
 
         if not self.network:
             raise KVStoreClientError("Invalid chain id")
