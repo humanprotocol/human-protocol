@@ -25,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy-contracts
     env:
-      PRIVATE_KEY: ${{ secrets[matrix.network.private_key] }}
       ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
       ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
@@ -38,7 +37,6 @@ jobs:
       POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-      SUBGRAPH: ${{ matrix.network.subgraph }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
@@ -117,40 +115,28 @@ jobs:
           esac
       - name: Upgrade Escrow Factory Proxy
         if: github.event.inputs.escrowFactory == 'true'
-        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
+        run: |
+          echo "ESCROW_FACTORY_ADDRESS=$(if [ ${{github.event.inputs.escrowFactory == 'true' }} ]; then echo '${{ steps.networks.outputs.escrow_factory }}'; else echo ''; fi)" >> $GITHUB_ENV
+          echo "STAKING_ADDRESS=$(if [ ${{github.event.inputs.staking == 'true' }} ]; then echo '${{ steps.networks.outputs.staking }}'; else echo ''; fi)" >> $GITHUB_ENV
+          echo "REWARD_POOL_ADDRESS=$(if [ ${{github.event.inputs.rewardPool == 'true' }} ]; then echo '${{ steps.networks.outputs.reward_pool }}'; else echo ''; fi)" >> $GITHUB_ENV
+          echo "REPUTATION_ADDRESS=$(if [ ${{github.event.inputs.reputation == 'true' }} ]; then echo '${{ steps.networks.outputs.reputation }}'; else echo ''; fi)" >> $GITHUB_ENV
+          yarn upgrade:proxy --network ${{ github.event.inputs.network }}
         working-directory: ./packages/core
         env:
-          ESCROW_FACTORY_ADDRESS: ${{ steps.networks.outputs.escrow_factory }}
+          PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
+          SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
       - name: Verify Escrow Factory Proxy
         if: github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
         working-directory: ./packages/core
-      - name: Upgrade Staking Proxy
-        if: github.event.inputs.staking == 'true'
-        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
-        working-directory: ./packages/core
-        env:
-          STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
       - name: Verify Staking Proxy
         if: github.event.inputs.staking == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.staking }}
         working-directory: ./packages/core
-      - name: Upgrade Reward Pool Proxy
-        if: github.event.inputs.rewardPool == 'true'
-        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
-        working-directory: ./packages/core
-        env:
-          REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
       - name: Verify Reward Pool Proxy
         if: github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
-      - name: Upgrade Reputation Proxy
-        if: github.event.inputs.reputation == 'true' && steps.networks.outputs.reputation != ''
-        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
-        working-directory: ./packages/core
-        env:
-          REPUTATION_ADDRESS: ${{ steps.networks.outputs.reputation }}
       - name: Verify Reputation Proxy
         if: github.event.inputs.reputation == 'true' && steps.networks.outputs.reputation != ''
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reputation }}
