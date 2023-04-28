@@ -16,7 +16,6 @@ on:
 jobs:
   contracts-check:
     runs-on: ubuntu-latest
-    environment: deploy-subgraph
     outputs:
       contracts_updated: ${{ steps.filter.outputs.contracts }}
     steps:
@@ -31,6 +30,7 @@ jobs:
               - 'packages/core/contracts/**'
   subgraph:
     name: Deploy Subgraph
+    environment: deploy-subgraph
     needs: contracts-check
     runs-on: ubuntu-latest   
     strategy:
