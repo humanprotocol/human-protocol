@@ -16,11 +16,10 @@ export class InitClient {
    * @param {string} providerOrSigner - Ethereum signer or provider
    * @returns {Promise<IClientParams>} - Init client parameters
    */
-  static async getClientParams(
+  static async getParams(
     signerOrProvider: Signer | Provider
   ): Promise<IClientParams> {
     let network: Network;
-    console.log(signerOrProvider instanceof Signer);
     if (signerOrProvider instanceof Signer) {
       if (!signerOrProvider.provider) throw ErrorInitProviderDoesNotExist;
 
