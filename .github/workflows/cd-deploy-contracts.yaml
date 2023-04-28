@@ -25,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy-contracts
     env:
-      PRIVATE_KEY: ${{ secrets[matrix.network.private_key] }}
       ETH_GOERLI_TESTNET_URL: ${{ secrets.ETH_GOERLI_TESTNET_URL }}
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
       ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
@@ -38,7 +37,6 @@ jobs:
       POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
-      SUBGRAPH: ${{ matrix.network.subgraph }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
@@ -121,6 +119,8 @@ jobs:
         working-directory: ./packages/core
         env:
           ESCROW_FACTORY_ADDRESS: ${{ steps.networks.outputs.escrow_factory }}
+          PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
+          SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
       - name: Verify Escrow Factory Proxy
         if: github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
@@ -131,6 +131,8 @@ jobs:
         working-directory: ./packages/core
         env:
           STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
+          PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
+          SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
       - name: Verify Staking Proxy
         if: github.event.inputs.staking == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.staking }}
@@ -141,6 +143,8 @@ jobs:
         working-directory: ./packages/core
         env:
           REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
+          PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
+          SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
       - name: Verify Reward Pool Proxy
         if: github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
@@ -151,6 +155,8 @@ jobs:
         working-directory: ./packages/core
         env:
           REPUTATION_ADDRESS: ${{ steps.networks.outputs.reputation }}
+          PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
+          SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
       - name: Verify Reputation Proxy
         if: github.event.inputs.reputation == 'true' && steps.networks.outputs.reputation != ''
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reputation }}
