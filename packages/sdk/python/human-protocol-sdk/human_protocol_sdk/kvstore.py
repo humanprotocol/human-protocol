@@ -8,8 +8,7 @@ from typing import List, Optional
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.utils import get_kvstore_interface
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
-from web3.providers.rpc import HTTPProvider
+from web3.middleware import geth_poa_middleware
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
@@ -29,7 +28,7 @@ class KVStoreClient:
     A class used to manage kvstore on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3, priv_key: str):
+    def __init__(self, web3: Web3):
         """
         Initializes a KVStore instance.
 
@@ -41,13 +40,6 @@ class KVStoreClient:
         # Initialize web3 instance
         self.w3 = web3
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
-        # Set default gas payer
-        self.gas_payer = self.w3.eth.account.from_key(priv_key)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer)
-        )
-        self.w3.eth.default_account = self.gas_payer.address
 
         # Load network configuration based on chainId
         try:
@@ -77,6 +69,8 @@ class KVStoreClient:
             raise KVStoreClientError("Key can not be empty")
         if not value:
             raise KVStoreClientError("Value can not be empty")
+        if not self.w3.eth.default_account:
+            raise KVStoreClientError("You must add an account to Web3 instance")
 
         self._handle_transaction(
             "Set",
@@ -99,6 +93,8 @@ class KVStoreClient:
             raise KVStoreClientError("Key can not be empty")
         if "" in values:
             raise KVStoreClientError("Value can not be empty")
+        if not self.w3.eth.default_account:
+            raise KVStoreClientError("You must add an account to Web3 instance")
 
         self._handle_transaction(
             "Set Bulk",
