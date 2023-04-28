@@ -1,4 +1,3 @@
-import { NetworkData } from '../../src';
 import { ChainId } from '../../src/enums';
 
 export const DEFAULT_HMTOKEN_ADDR =

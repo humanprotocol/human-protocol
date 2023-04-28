@@ -13,7 +13,7 @@ export default class InitClient {
   /**
    * **Get init client parameters**
    *
-   * @param {string} providerOrSigner - Ethereum signer or provider
+   * @param {Signer | Provider} providerOrSigner - Ethereum signer or provider
    * @returns {Promise<IClientParams>} - Init client parameters
    */
   static async getParams(

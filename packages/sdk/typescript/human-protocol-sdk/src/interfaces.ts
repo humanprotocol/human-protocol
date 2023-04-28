@@ -15,6 +15,12 @@ export interface IAllocation {
   closedAt: BigNumber;
 }
 
+export interface IReward {
+  escrowAddress: string;
+  slasher: string;
+  amount: BigNumber;
+}
+
 export interface IStaker {
   tokensStaked: BigNumber;
   tokensAllocated: BigNumber;

@@ -27,7 +27,7 @@ import {
   ErrorStakingStakersNotFound,
 } from '../src/error';
 import InitClient from '../src/init';
-import { IAllocation, IStaker } from '../src/interfaces';
+import { IAllocation, IReward, IStaker } from '../src/interfaces';
 
 vi.mock('../src/init');
 
@@ -58,6 +58,7 @@ describe('StakingClient', () => {
       allocate: vi.fn(),
       closeAllocation: vi.fn(),
       distributeRewards: vi.fn(),
+      getRewards: vi.fn(),
       getStaker: vi.fn(),
       getListOfStakers: vi.fn(),
       getAllocation: vi.fn(),
@@ -67,6 +68,7 @@ describe('StakingClient', () => {
 
     mockRewardPoolContract = {
       distributeRewards: vi.fn(),
+      getRewards: vi.fn(),
       address: ethers.constants.AddressZero,
     };
 
@@ -127,7 +129,7 @@ describe('StakingClient', () => {
         confirmations: FAKE_TRANSACTION_CONFIRMATIONS,
       });
 
-      await expect(stakingClient.approveStake(amount)).resolves.toBe(true);
+      await expect(stakingClient.approveStake(amount)).resolves.toBeUndefined();
       expect(mockTokenContract.approve).toBeCalledWith(
         ethers.constants.AddressZero,
         amount
@@ -459,15 +461,15 @@ describe('StakingClient', () => {
     });
 
     test('should call distributeReward on the reward pool contract', async () => {
-      mockStakingContract.rewardPool.mockResolvedValue(
-        mockRewardPoolContract.address
+      vi.spyOn(stakingClient, 'distributeRewards').mockImplementation(() =>
+        Promise.resolve(undefined)
       );
 
-      stakingClient.distributeRewards = vi
-        .fn()
-        .mockImplementation(() => Promise.resolve(undefined));
+      const results = await stakingClient.distributeRewards(
+        ethers.constants.AddressZero
+      );
 
-      await stakingClient.distributeRewards(mockRewardPoolContract.address);
+      expect(results).toBeUndefined();
     });
   });
 
@@ -581,6 +583,34 @@ describe('StakingClient', () => {
       await expect(
         stakingClient.getAllocation(ethers.constants.AddressZero)
       ).rejects.toThrow(ErrorStakingGetAllocation);
+    });
+  });
+
+  describe('getRewards', () => {
+    const invalidAddress = 'InvalidAddress';
+    const mockReward: IReward = {
+      escrowAddress: ethers.constants.AddressZero,
+      slasher: ethers.constants.AddressZero,
+      amount: ethers.utils.parseEther('100'),
+    };
+
+    test('should throw an error if an invalid escrow address is provided', async () => {
+      await expect(stakingClient.getRewards(invalidAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+      expect(mockStakingContract.getRewards).toHaveBeenCalledTimes(0);
+    });
+
+    test('should return an array of rewards', async () => {
+      vi.spyOn(stakingClient, 'getRewards').mockImplementation(() =>
+        Promise.resolve([mockReward, mockReward])
+      );
+
+      const results = await stakingClient.getRewards(
+        ethers.constants.AddressZero
+      );
+
+      expect(results).toEqual([mockReward, mockReward]);
     });
   });
 });

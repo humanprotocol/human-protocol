@@ -9,7 +9,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ethers, Signer } from 'ethers';
 import { NetworkData } from './types';
-import { IAllocation, IClientParams, IStaker } from './interfaces';
+import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
 import {
   ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
   ErrorFailedToApproveStakingAmountSignerDoesNotExist,
@@ -57,12 +57,14 @@ export default class StakingClient {
   }
 
   /**
-   * **Approve stake for staking*
+   * **Approves the staking contract to transfer a specified amount of tokens when the user stakes.
+   * **It increases the allowance for the staking contract.*
    *
-   * @param {BigNumber} amount - Amount to approve
+   * @param {BigNumber} amount - Amount of tokens to approve for stake
    * @returns {Promise<boolean>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
-  public async approveStake(amount: BigNumber): Promise<boolean> {
+  public async approveStake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -77,17 +79,18 @@ export default class StakingClient {
 
     try {
       await this.tokenContract.approve(this.stakingContract.address, amount);
-      return true;
+      return;
     } catch (e) {
       throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
     }
   }
 
   /**
-   * **Stake amount*
+   * **Stakes a specified amount of tokens on a specific network.*
    *
-   * @param {BigNumber} amount - Amount to stake
+   * @param {BigNumber} amount - Amount of tokens to stake
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async stake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
@@ -111,10 +114,12 @@ export default class StakingClient {
   }
 
   /**
-   * **Unstake amount*
+   * **Unstakes tokens from staking contract.
+   * **The unstaked tokens stay locked for a period of time.*
    *
-   * @param {BigNumber} amount - Amount to unstake
+   * @param {BigNumber} amount - Amount of tokens to unstake
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async unstake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
@@ -134,9 +139,10 @@ export default class StakingClient {
   }
 
   /**
-   * **Withdraw amount*
+   * **Withdraws unstaked and non locked tokens form staking contract to the user wallet.*
    *
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async withdraw(): Promise<void> {
     try {
@@ -148,13 +154,15 @@ export default class StakingClient {
   }
 
   /**
-   * **Slash amount*
+   * **Slash the allocated amount by an staker in an escrow and transfers those tokens to the reward pool.
+   * **This allows the slasher to claim them later.*
    *
-   * @param {string} slasher - Slasher
-   * @param {string} staker - Staker
-   * @param {string} escrowAddress - Escrow address
-   * @param {BigNumber} amount - Amount to slash
+   * @param {string} slasher - Wallet address from who requested the slash
+   * @param {string} staker - Wallet address from who is going to be slashed
+   * @param {string} escrowAddress - Address of the escrow which allocation will be slashed
+   * @param {BigNumber} amount - Amount of tokens to slash
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async slash(
     slasher: string,
@@ -191,11 +199,12 @@ export default class StakingClient {
   }
 
   /**
-   * **Allocate amount*
+   * **Allocates a portion of the staked tokens to a specific escrow.*
    *
    * @param {string} escrowAddress - Address of the escrow contract
    * @param {BigNumber} amount - Amount of tokens to allocate
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async allocate(
     escrowAddress: string,
@@ -222,10 +231,11 @@ export default class StakingClient {
   }
 
   /**
-   * **Close allocation*
+   * **Drops the allocation from a specific escrow.*
    *
-   * @param {string} escrowAddress - Address of the staker for information.
+   * @param {string} escrowAddress - Address of the escrow contract.
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async closeAllocation(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
@@ -241,10 +251,11 @@ export default class StakingClient {
   }
 
   /**
-   * **Distribute rewards*
+   * **Pays out rewards to the slashers for the specified escrow address.*
    *
-   * @param {string} escrowAddress - Escrow address from which rewards are distributed
+   * @param {string} escrowAddress - Escrow address from which rewards are distributed.
    * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async distributeRewards(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
@@ -265,10 +276,11 @@ export default class StakingClient {
   }
 
   /**
-   * **Get staker info*
+   * **Returns the staking information about an staker address.*
    *
    * @param {string} staker - Address of the staker
-   * @returns {Promise<IStakerInfo>}
+   * @returns {Promise<IStakerInfo>} - Return staking information of the specified address
+   * @throws {Error} - An error object if an error occurred, result otherwise
    */
   public async getStaker(staker: string): Promise<IStaker> {
     if (!ethers.utils.isAddress(staker)) {
@@ -284,9 +296,10 @@ export default class StakingClient {
   }
 
   /**
-   * **Get staker info*
+   * **Returns the staking information about all stakers of the protocol.*
    *
-   * @returns {Promise<IStakerInfo>}
+   * @returns {Promise<IStakerInfo>} - Return an array with all stakers information
+   * @throws {Error} - An error object if an error occurred, results otherwise
    */
   public async getAllStakers(): Promise<IStaker[]> {
     try {
@@ -303,10 +316,11 @@ export default class StakingClient {
   }
 
   /**
-   * **Get allocation data*
+   * **Returns information about the allocation of the specified escrow.*
    *
    * @param {string} escrowAddress - The escrow address for the received allocation data
-   * @returns {Promise<IAllocation>}
+   * @returns {Promise<IAllocation>} - Returns allocation info if exists
+   * @throws {Error} - An error object if an error occurred, result otherwise
    */
   public async getAllocation(escrowAddress: string): Promise<IAllocation> {
     if (!ethers.utils.isAddress(escrowAddress)) {
@@ -322,10 +336,35 @@ export default class StakingClient {
   }
 
   /**
+   * **Returns information about the rewards for a given escrow address.*
+   *
+   * @param {string} escrowAddress - Address of the escrow
+   * @returns {Promise<IReward[]>} - Returns rewards info if exists
+   * @throws {Error} - An error object if an error occurred, results otherwise
+   */
+  public async getRewards(escrowAddress: string): Promise<IReward[]> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    try {
+      const rewardPoolContract: RewardPool = RewardPool__factory.connect(
+        await this.stakingContract.rewardPool(),
+        this.signerOrProvider
+      );
+
+      return rewardPoolContract.getRewards(escrowAddress);
+    } catch {
+      throw ErrorStakingGetAllocation;
+    }
+  }
+
+  /**
    * **Check allowance*
    *
-   * @param {BigNumber} amount - Amount
+   * @param {BigNumber} amount - Amount of the tokens
    * @returns {Promise<boolean>}
+   * @throws {Error} - An error object if an error occurred, void otherwise
    */
   private async isAllowance(amount: BigNumber): Promise<boolean> {
     if (this.signerOrProvider instanceof Provider) {
