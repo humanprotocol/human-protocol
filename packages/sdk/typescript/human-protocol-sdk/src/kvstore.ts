@@ -32,7 +32,8 @@ export default class KVStoreClient {
    *
    * @param {string} key - The key of the key-value pair to set
    * @param {string} value - The value of the key-value pair to set
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred
    */
   public async set(key: string, value: string) {
     if (key === '') throw ErrorKVStoreEmptyKey;
@@ -50,7 +51,8 @@ export default class KVStoreClient {
    *
    * @param {string[]} keys - An array of keys to set
    * @param {string[]} values - An array of values to set
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred
    */
   public async setBulk(keys: string[], values: string[]) {
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
@@ -71,7 +73,7 @@ export default class KVStoreClient {
    * @param {string} address - The Ethereum address associated with the key-value pair
    * @param {string} key - The key of the key-value pair to get
    * @returns {string} - The value of the key-value pair if it exists
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * @throws {Error} - An error object if an error occurred
    */
   public async get(address: string, key: string) {
     if (key === '') throw ErrorKVStoreEmptyKey;
