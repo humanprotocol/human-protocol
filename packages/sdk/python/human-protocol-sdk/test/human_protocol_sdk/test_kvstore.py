@@ -116,6 +116,12 @@ class KVStoreTestCase(unittest.TestCase):
         with self.assertRaises(KVStoreClientError):
             self.kvstore.set_bulk(keys, values)
 
+    def test_set_bulk_different_length_array(self):
+        keys = ["key1", "key2", "key3"]
+        values = ["value1", "value3"]
+        with self.assertRaises(KVStoreClientError):
+            self.kvstore.set_bulk(keys, values)
+
     def test_set_bulk_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
         w3 = Web3(mock_provider)
