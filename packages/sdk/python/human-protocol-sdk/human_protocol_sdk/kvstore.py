@@ -34,7 +34,6 @@ class KVStoreClient:
 
         Args:
             web3 (Web3): The Web3 object
-            priv_key (str): The private key of the account used to pay for gas
         """
 
         # Initialize web3 instance
@@ -122,6 +121,13 @@ class KVStoreClient:
         return result
 
     def _handle_transaction(self, tx_name, tx):
+        """Executes the transaction and waits for the receipt.
+
+        Args:
+            tx_name (str): Name of the transaction
+            tx (obj): Transaction object
+
+        """
         try:
             tx_hash = tx.transact()
             self.w3.eth.waitForTransactionReceipt(tx_hash)
