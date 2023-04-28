@@ -16,6 +16,7 @@ on:
 jobs:
   contracts-check:
     runs-on: ubuntu-latest
+    environment: deploy-subgraph
     outputs:
       contracts_updated: ${{ steps.filter.outputs.contracts }}
     steps:
@@ -31,8 +32,7 @@ jobs:
   subgraph:
     name: Deploy Subgraph
     needs: contracts-check
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-latest   
     strategy:
       matrix:
         network:
@@ -52,12 +52,6 @@ jobs:
             graph: moonbase-alpha-v1
           - name: mainnet
             graph: mainnet-v1
-          # - name: avalanche
-          #   graph: avalanche
-          # - name: fuji
-          #   graph: fuji
-          # - name: skale
-          #   graph: skale
       fail-fast: true
       max-parallel: 3
     if: ${{ needs.contracts-check.outputs.contracts_updated != 'true' || github.event.inputs.subgraph-name }}
