@@ -8,7 +8,7 @@ from typing import List, Optional
 
 import web3
 from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware, geth_poa_middleware
+from web3.middleware import geth_poa_middleware
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.utils import (
@@ -44,7 +44,7 @@ class StakingClient:
 
     """
 
-    def __init__(self, w3: Web3, priv_key: str):
+    def __init__(self, w3: Web3):
         """Initializes a Staking instance
 
         Args:
@@ -55,18 +55,14 @@ class StakingClient:
         self.w3 = w3
         self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
-        # Set default gas payer
-        self.gas_payer = self.w3.eth.account.from_key(priv_key)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer)
-        )
-        self.w3.eth.default_account = self.gas_payer.address
-
-        # Load network configuration based on chain id
-        self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+        # Load network configuration based on chain_id
+        try:
+            self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+        except:
+            raise StakingClientError("Invalid ChainId")
 
         if not self.network:
-            raise StakingClientError("Invalid chain id")
+            raise StakingClientError("Empty network configuration")
 
         # Initialize contract instances
         hmtoken_interface = get_hmtoken_interface()
@@ -164,6 +160,9 @@ class StakingClient:
             - Escrow should be cancelled / completed (on-chain)
         """
 
+        if not self._is_valid_escrow(escrow_address):
+            raise StakingClientError("Invalid escrow")
+
         self._handle_transaction(
             "Close allocation",
             self.staking_contract.functions.closeAllocation(escrow_address),
@@ -226,7 +225,7 @@ class StakingClient:
             ),
         )
 
-    def distribute_rewards(self, escrow_address: str):
+    def distribute_reward(self, escrow_address: str):
         """Pays out rewards to the slashers for the specified escrow address.
 
         Args:
@@ -357,14 +356,22 @@ class StakingClient:
         # TODO: Use Escrow/Job Module once implemented
         return self.factory_contract.functions.hasEscrow(escrow_address).call()
 
-    def _handle_transaction(self, tx_name, tx):
+    def _handle_transaction(self, tx_name, tx, read_only=False):
         """Executes the transaction and waits for the receipt.
 
         Args:
             tx_name (str): Name of the transaction
             tx (obj): Transaction object
+            read_only (bool): True if the transaction is read-only, False otherwise
+
+        Validations:
+            - If the transaction is not read-only, there must be a default account
 
         """
+
+        if not read_only and not self.w3.eth.default_account:
+            raise StakingClientError("You must add an account to Web3 instance")
+
         try:
             tx_hash = tx.transact()
             self.w3.eth.waitForTransactionReceipt(tx_hash)
