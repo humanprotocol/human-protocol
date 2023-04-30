@@ -564,7 +564,3 @@ class StakingTestCase(unittest.TestCase):
         )
 
         self.assertIsNone(allocation)
-
-
-if __name__ == "__main__":
-    unittest.main(exit=True)
