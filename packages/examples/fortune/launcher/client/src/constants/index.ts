@@ -23,7 +23,7 @@ export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
 
 export const SUPPORTED_CHAIN_IDS =
   import.meta.env.MODE === 'development'
-    ? [ChainId.LOCALHOST]
+    ? [ChainId.GOERLI, ChainId.LOCALHOST]
     : SUPPORTED_CHAIN_IDS_PRODUCTION;
 
 export interface IEscrowNetwork {

@@ -68,6 +68,22 @@ const theme = createTheme({
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        icon: {
+          color: '#320a8d',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected': {
+            backgroundColor: '#f9faff',
+          },
+        },
+      },
+    },
   },
 });
 
