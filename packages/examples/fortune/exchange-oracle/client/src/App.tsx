@@ -9,6 +9,7 @@ import { useAccount } from 'wagmi';
 import { Escrow } from './components/Escrow';
 import { Header } from './components/Header';
 import { ethereumClient, projectId } from './connectors/connectors';
+import { Footer } from './components/Footer';
 
 function App() {
   const { setTheme } = useWeb3ModalTheme();
@@ -52,6 +53,7 @@ function App() {
           {isConnected && <Escrow />}
         </Box>
       </Box>
+      <Footer />
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
     </>
   );
