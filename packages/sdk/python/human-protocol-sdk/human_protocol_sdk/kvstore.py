@@ -66,8 +66,6 @@ class KVStoreClient:
 
         if not key:
             raise KVStoreClientError("Key can not be empty")
-        if not value:
-            raise KVStoreClientError("Value can not be empty")
         if not self.w3.eth.default_account:
             raise KVStoreClientError("You must add an account to Web3 instance")
 
@@ -90,8 +88,6 @@ class KVStoreClient:
 
         if "" in keys:
             raise KVStoreClientError("Key can not be empty")
-        if "" in values:
-            raise KVStoreClientError("Value can not be empty")
         if not self.w3.eth.default_account:
             raise KVStoreClientError("You must add an account to Web3 instance")
 
@@ -116,8 +112,6 @@ class KVStoreClient:
         if not Web3.isAddress(address):
             raise KVStoreClientError("Invalid address")
         result = self.kvstore_contract.functions.get(address, key).call()
-        if not result:
-            raise KVStoreClientError("Value not found")
         return result
 
     def _handle_transaction(self, tx_name, tx):
