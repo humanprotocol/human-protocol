@@ -33,14 +33,10 @@ export default class InitClient {
     const chainId: ChainId = network.chainId;
     const networkData = NETWORKS[chainId];
 
-    console.log(network);
-    console.log(networkData);
-
     if (!networkData) {
       throw ErrorInitUnsupportedChainID;
     }
 
-    console.log(12321);
     return {
       signerOrProvider: signerOrProvider,
       network: networkData,

@@ -121,13 +121,6 @@ export const ErrorFailedToApproveStakingAmountAllowanceNotUpdated = new Error(
 );
 
 /**
- * @constant {Error} - Staking insufficient allowance.
- */
-export const ErrorStakingInsufficientAllowance = new Error(
-  'Staking insufficient allowance'
-);
-
-/**
  * @constant {Error} - Failed to stake.
  */
 export const ErrorStakingFailedToStake = new Error('Failed to stake');

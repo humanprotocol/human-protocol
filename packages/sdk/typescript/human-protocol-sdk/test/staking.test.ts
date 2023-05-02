@@ -23,7 +23,6 @@ import {
   ErrorStakingFailedToUnstake,
   ErrorStakingGetAllocation,
   ErrorStakingGetStaker,
-  ErrorStakingInsufficientAllowance,
   ErrorStakingStakersNotFound,
 } from '../src/error';
 import InitClient from '../src/init';
@@ -111,15 +110,6 @@ describe('StakingClient', () => {
       expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
     });
 
-    test('should throw an error if the allowance is insufficient', async () => {
-      stakingClient.isAllowance = vi.fn().mockResolvedValue(false);
-
-      await expect(stakingClient.approveStake(amount)).rejects.toThrow(
-        ErrorStakingInsufficientAllowance
-      );
-      expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
-    });
-
     test('should return true if the allowance is sufficient and the approval is successful', async () => {
       stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
 
@@ -171,16 +161,6 @@ describe('StakingClient', () => {
       expect(mockStakingContract.stake).toHaveBeenCalledTimes(0);
     });
 
-    test('should throw an error if allowance is not sufficient', async () => {
-      const zeroAmount = BigNumber.from(0);
-      mockTokenContract.allowance.mockResolvedValueOnce(zeroAmount);
-
-      await expect(stakingClient.stake(amount)).rejects.toThrow(
-        ErrorStakingInsufficientAllowance
-      );
-      expect(mockStakingContract.stake).toHaveBeenCalledTimes(0);
-    });
-
     test('should call the stake function on the staking contract with the given amount', async () => {
       mockTokenContract.allowance.mockResolvedValueOnce(amount);
 
@@ -198,7 +178,6 @@ describe('StakingClient', () => {
       await expect(stakingClient.stake(amount)).rejects.toThrow(
         ErrorStakingFailedToStake
       );
-      expect(mockTokenContract.allowance).toHaveBeenCalledTimes(1);
       expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
       expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
     });

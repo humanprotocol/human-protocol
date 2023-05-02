@@ -18,7 +18,7 @@ export interface IAllocation {
 export interface IReward {
   escrowAddress: string;
   slasher: string;
-  amount: BigNumber;
+  tokens: BigNumber;
 }
 
 export interface IStaker {

@@ -12,7 +12,6 @@ import { NetworkData } from './types';
 import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
 import {
   ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
-  ErrorFailedToApproveStakingAmountSignerDoesNotExist,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
@@ -26,7 +25,6 @@ import {
   ErrorStakingFailedToUnstake,
   ErrorStakingGetAllocation,
   ErrorStakingGetStaker,
-  ErrorStakingInsufficientAllowance,
   ErrorStakingStakersNotFound,
 } from './error';
 
@@ -73,14 +71,11 @@ export default class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!(await this.isAllowance(amount))) {
-      throw ErrorStakingInsufficientAllowance;
-    }
-
     try {
       await this.tokenContract.approve(this.stakingContract.address, amount);
       return;
     } catch (e) {
+      console.error(e);
       throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
     }
   }
@@ -101,14 +96,11 @@ export default class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!(await this.isAllowance(amount))) {
-      throw ErrorStakingInsufficientAllowance;
-    }
-
     try {
       await this.stakingContract.stake(amount);
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToStake;
     }
   }
@@ -133,7 +125,8 @@ export default class StakingClient {
     try {
       await this.stakingContract.unstake(amount);
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToUnstake;
     }
   }
@@ -148,7 +141,8 @@ export default class StakingClient {
     try {
       await this.stakingContract.withdraw();
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToUnstake;
     }
   }
@@ -193,7 +187,8 @@ export default class StakingClient {
     try {
       await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToSlash;
     }
   }
@@ -225,7 +220,8 @@ export default class StakingClient {
     try {
       await this.stakingContract.allocate(escrowAddress, amount);
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToAllocate;
     }
   }
@@ -245,7 +241,8 @@ export default class StakingClient {
     try {
       await this.stakingContract.closeAllocation(escrowAddress);
       return;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingFailedToCloseAllocation;
     }
   }
@@ -290,7 +287,8 @@ export default class StakingClient {
     try {
       const result = await this.stakingContract.getStaker(staker);
       return result;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingGetStaker;
     }
   }
@@ -310,7 +308,8 @@ export default class StakingClient {
       }
 
       return result[1];
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingStakersNotFound;
     }
   }
@@ -330,7 +329,8 @@ export default class StakingClient {
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
       return result;
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingGetAllocation;
     }
   }
@@ -354,28 +354,9 @@ export default class StakingClient {
       );
 
       return rewardPoolContract.getRewards(escrowAddress);
-    } catch {
+    } catch (e) {
+      console.error(e);
       throw ErrorStakingGetAllocation;
     }
-  }
-
-  /**
-   * **Check allowance*
-   *
-   * @param {BigNumber} amount - Amount of the tokens
-   * @returns {Promise<boolean>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
-   */
-  private async isAllowance(amount: BigNumber): Promise<boolean> {
-    if (this.signerOrProvider instanceof Provider) {
-      throw ErrorFailedToApproveStakingAmountSignerDoesNotExist;
-    }
-
-    const newAllowance = await this.tokenContract.allowance(
-      await this.signerOrProvider.getAddress(),
-      this.stakingContract.address
-    );
-
-    return newAllowance.gte(amount);
   }
 }
