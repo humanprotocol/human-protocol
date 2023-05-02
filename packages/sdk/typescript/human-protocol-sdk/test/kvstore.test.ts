@@ -1,20 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  describe,
-  test,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
-  afterEach,
-} from 'vitest';
+import { describe, test, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { Signer, ethers } from 'ethers';
 import KVStoreClient from '../src/kvstore';
 import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
-  ErrorKVStoreEmptyValue,
+  ErrorSigner,
 } from '../src/error';
 import { InitClient } from '../src/init';
 import { ChainId } from '../src/enums';
@@ -24,32 +16,33 @@ import { NetworkData } from '../src/types';
 vi.mock('../src/init');
 
 describe('KVStoreClient', () => {
-  const provider = new ethers.providers.JsonRpcProvider();
+  let provider: ethers.providers.JsonRpcProvider;
   let signer: Signer;
   let network: NetworkData | undefined;
   let kvStoreClient: any;
   let mockKVStoreContract: any;
+  let mockGetClientParams: any;
 
   beforeAll(async () => {
+    provider = new ethers.providers.JsonRpcProvider();
     signer = provider.getSigner();
     network = NETWORKS[ChainId.LOCALHOST];
+    mockGetClientParams = InitClient.getParams as jest.Mock;
+  });
 
+  beforeEach(async () => {
+    mockGetClientParams.mockResolvedValue({
+      signerOrProvider: signer,
+      network,
+    });
+    kvStoreClient = new KVStoreClient(await InitClient.getParams(signer));
     mockKVStoreContract = {
+      ...kvStoreClient.contract,
       set: vi.fn(),
       setBulk: vi.fn(),
       get: vi.fn(),
       address: network?.kvstoreAddress,
     };
-  });
-
-  beforeEach(async () => {
-    const getClientParamsMock = InitClient.getParams as jest.Mock;
-    getClientParamsMock.mockResolvedValue({
-      signerOrProvider: signer,
-      network,
-    });
-    kvStoreClient = new KVStoreClient(await InitClient.getParams(signer));
-
     kvStoreClient.contract = mockKVStoreContract;
   });
 
@@ -62,18 +55,22 @@ describe('KVStoreClient', () => {
       expect(setSpy).toHaveBeenCalledWith('', 'test');
     });
 
-    test('should throw an error if value is empty', async () => {
-      const setSpy = vi.spyOn(kvStoreClient, 'set');
-      await expect(kvStoreClient.set('test', '')).rejects.toThrow(
-        ErrorKVStoreEmptyValue
-      );
-      expect(setSpy).toHaveBeenCalledWith('test', '');
-    });
-
     test('should set the key-value pair if both key and value are provided', async () => {
       mockKVStoreContract.set.mockResolvedValue(null);
       expect(kvStoreClient.set('key1', 'value1')).resolves.toBeUndefined();
       expect(mockKVStoreContract.set).toHaveBeenCalledWith('key1', 'value1');
+    });
+
+    test('should throw an error when attempting to set a value without signer', async () => {
+      mockGetClientParams.mockResolvedValue({
+        signerOrProvider: provider,
+        network,
+      });
+      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
+
+      await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
+        ErrorSigner
+      );
     });
 
     test('should throw an error when a network error occurs', async () => {
@@ -83,23 +80,6 @@ describe('KVStoreClient', () => {
 
       await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
         Error('Failed to set value: could not detect network')
-      );
-
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith('key1', 'value1');
-    });
-
-    test('should throw an error when attempting to set a value without a signer', async () => {
-      const getClientParamsMock = InitClient.getParams as jest.Mock;
-      getClientParamsMock.mockResolvedValue({
-        provider,
-        network,
-      });
-      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
-
-      await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
-        Error(
-          'Failed to set value: sending a transaction requires a signer (operation="sendTransaction", code=UNSUPPORTED_OPERATION, version=contracts/5.7.0)'
-        )
       );
 
       expect(mockKVStoreContract.set).toHaveBeenCalledWith('key1', 'value1');
@@ -126,14 +106,6 @@ describe('KVStoreClient', () => {
       );
     });
 
-    test('should throw an error if any of the values is empty', async () => {
-      const setBulkSpy = vi.spyOn(kvStoreClient, 'setBulk');
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1', ''])
-      ).rejects.toThrow(ErrorKVStoreEmptyValue);
-      expect(setBulkSpy).toHaveBeenCalledWith(['key1', 'key2'], ['value1', '']);
-    });
-
     test('should set the key-value pairs if both keys and values arrays are provided correctly', async () => {
       mockKVStoreContract.setBulk.mockResolvedValue(null);
       expect(
@@ -145,6 +117,18 @@ describe('KVStoreClient', () => {
       );
     });
 
+    test('should throw an error when attempting to set values without signer', async () => {
+      mockGetClientParams.mockResolvedValue({
+        provider,
+        network,
+      });
+      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
+
+      await expect(
+        kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
+      ).rejects.toThrow(ErrorSigner);
+    });
+
     test('should throw an error if a network error occurs', async () => {
       mockKVStoreContract.setBulk.mockRejectedValue(
         new Error('could not detect network')
@@ -154,28 +138,6 @@ describe('KVStoreClient', () => {
       ).rejects.toThrow(
         new Error('Failed to set bulk values: could not detect network')
       );
-      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
-        ['key1', 'key2'],
-        ['value1', 'value2']
-      );
-    });
-
-    test('should throw an error when attempting to set a value without a signer', async () => {
-      const getClientParamsMock = InitClient.getParams as jest.Mock;
-      getClientParamsMock.mockResolvedValue({
-        provider,
-        network,
-      });
-      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
-
-      await expect(
-        kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])
-      ).rejects.toThrow(
-        Error(
-          'Failed to set bulk values: sending a transaction requires a signer (operation="sendTransaction", code=UNSUPPORTED_OPERATION, version=contracts/5.7.0)'
-        )
-      );
-
       expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
         ['key1', 'key2'],
         ['value1', 'value2']
@@ -209,7 +171,7 @@ describe('KVStoreClient', () => {
       );
     });
 
-    test('should return empty string if both address and key are valid and address set a value', async () => {
+    test('should return value if both address and key are valid and address set a value', async () => {
       mockKVStoreContract.get.mockResolvedValue('value1');
 
       const getSpy = vi.spyOn(kvStoreClient, 'get');

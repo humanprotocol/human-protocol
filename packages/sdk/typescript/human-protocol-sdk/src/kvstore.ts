@@ -7,8 +7,7 @@ import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
-  ErrorKVStoreEmptyValue,
-  ErrorKVStoreValueNotFound,
+  ErrorSigner,
 } from './error';
 import { IClientParams } from './interfaces';
 
@@ -36,9 +35,8 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   public async set(key: string, value: string) {
+    if (!this.contract.signer) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
-    if (value === '') throw ErrorKVStoreEmptyValue;
-
     try {
       await this.contract?.set(key, value);
     } catch (e) {
@@ -55,9 +53,9 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   public async setBulk(keys: string[], values: string[]) {
+    if (!this.contract.signer) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
-    if (values.includes('')) throw ErrorKVStoreEmptyValue;
 
     try {
       await this.contract?.setBulk(keys, values);
@@ -81,7 +79,6 @@ export default class KVStoreClient {
 
     try {
       const result = await this.contract?.get(address, key);
-      if (result === '') throw ErrorKVStoreValueNotFound;
       return result;
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
