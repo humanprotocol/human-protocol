@@ -70,3 +70,37 @@ export const ErrorStorageFileNotFound = new Error('File not found');
  * @constant {Error} - The Storage file not uploaded.
  */
 export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
+
+/**
+ * @constant {Error} - The KVStore key can not be empty.
+ */
+export const ErrorKVStoreEmptyKey = new Error('Key can not be empty');
+
+/**
+ * @constant {Error} - The KVStore arrays must have the same length.
+ */
+export const ErrorKVStoreArrayLength = new Error(
+  'Arrays must have the same length'
+);
+
+/**
+ * @constant {Error} - The Address sent is invalid.
+ */
+export const ErrorInvalidAddress = new Error('Invalid address');
+
+/**
+ * @constant {Error} - Init provider does not exists.
+ */
+export const ErrorInitProviderDoesNotExist = new Error(
+  'Provider does not exist'
+);
+
+/**
+ * @constant {Error} - Init with unsupported chain ID.
+ */
+export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
+
+/**
+ * @constant {Error} - Sending a transaction requires a signer.
+ */
+export const ErrorSigner = new Error('Signer required');
