@@ -2,7 +2,8 @@ import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
-import { ethers } from 'ethers';
+import { Signer, ethers } from 'ethers';
+import { Provider } from '@ethersproject/abstract-provider';
 import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
@@ -13,6 +14,7 @@ import { IClientParams } from './interfaces';
 
 export default class KVStoreClient {
   private contract: KVStore;
+  private signerOrProvider: Signer | Provider;
 
   /**
    * **KVStore constructor**
@@ -24,6 +26,7 @@ export default class KVStoreClient {
       clientParams.network.kvstoreAddress,
       clientParams.signerOrProvider
     );
+    this.signerOrProvider = clientParams.signerOrProvider;
   }
 
   /**
@@ -35,7 +38,7 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   public async set(key: string, value: string) {
-    if (!this.contract.signer) throw ErrorSigner;
+    if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
       await this.contract?.set(key, value);
@@ -53,7 +56,7 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   public async setBulk(keys: string[], values: string[]) {
-    if (!this.contract.signer) throw ErrorSigner;
+    if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
