@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import {
   useWeb3ModalTheme,
   Web3Modal,
@@ -7,9 +7,9 @@ import {
 import { useAccount } from 'wagmi';
 
 import { Escrow } from './components/Escrow';
+import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { ethereumClient, projectId } from './connectors/connectors';
-import { Footer } from './components/Footer';
 
 function App() {
   const { setTheme } = useWeb3ModalTheme();
@@ -45,10 +45,19 @@ function App() {
           }}
         >
           {!isConnected && (
-            <>
-              <h1>Select Network</h1>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Typography variant="h4" fontWeight={600} gutterBottom>
+                Select Network
+              </Typography>
               <Web3NetworkSwitch />
-            </>
+            </Box>
           )}
           {isConnected && <Escrow />}
         </Box>

@@ -13,7 +13,6 @@ import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
 import { useAccount, useNetwork } from 'wagmi';
 import sendFortune from '../../services/RecordingOracle/RecordingClient';
-import FortuneStages, { FortuneStageStatus } from '../FortuneStages';
 
 const statusesMap = [
   'Launched',
@@ -111,9 +110,8 @@ export const Escrow = () => {
   return (
     <Container maxWidth="lg" sx={{ mx: 'auto' }}>
       <Typography color="primary" variant="h4" mb={3}>
-        Fortune Job Request
+        Fortune Job Submission
       </Typography>
-      <FortuneStages status={FortuneStageStatus.LAUNCH} />
       <Box
         sx={{
           background: '#fff',
