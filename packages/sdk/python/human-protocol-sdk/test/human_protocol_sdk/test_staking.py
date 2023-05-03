@@ -27,7 +27,8 @@ class StakingTestCase(unittest.TestCase):
         self.w3.eth.default_account = self.gas_payer.address
 
         self.mock_chain_id = ChainId.LOCALHOST.value
-        type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
+        type(self.w3.eth).chain_id = PropertyMock(
+            return_value=self.mock_chain_id)
 
         self.staking_client = StakingClient(self.w3)
         self.staking_client._handle_transaction = MagicMock()
@@ -42,7 +43,8 @@ class StakingTestCase(unittest.TestCase):
         staking_client = StakingClient(w3)
 
         self.assertEqual(staking_client.w3, w3)
-        self.assertEqual(staking_client.network, NETWORKS[ChainId(mock_chain_id)])
+        self.assertEqual(staking_client.network,
+                         NETWORKS[ChainId(mock_chain_id)])
         self.assertIsNotNone(staking_client.hmtoken_contract)
         self.assertIsNotNone(staking_client.factory_contract)
         self.assertIsNotNone(staking_client.staking_contract)
@@ -184,7 +186,8 @@ class StakingTestCase(unittest.TestCase):
         self.staking_client._handle_transaction.assert_called_once_with(
             "Slash HMT", mock_function.return_value
         )
-        mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
+        mock_function.assert_called_once_with(
+            slasher, staker, escrow_address, 50)
 
     def test_slash_invalid_amount(self):
         slasher = "SLASHER"
@@ -382,9 +385,11 @@ rewardAddedEvents(where:{slasher:"slasher1"}) {
             print(rewards_info)
 
             self.assertEqual(len(rewards_info), 2)
-            self.assertEqual(rewards_info[0]["escrow_address"].lower(), "escrow1")
+            self.assertEqual(
+                rewards_info[0]["escrow_address"].lower(), "escrow1")
             self.assertEqual(rewards_info[0]["amount"], 10)
-            self.assertEqual(rewards_info[1]["escrow_address"].lower(), "escrow2")
+            self.assertEqual(
+                rewards_info[1]["escrow_address"].lower(), "escrow2")
             self.assertEqual(rewards_info[1]["amount"], 20)
 
 
