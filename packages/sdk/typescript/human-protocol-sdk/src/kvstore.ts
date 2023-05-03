@@ -12,6 +12,21 @@ import {
 } from './error';
 import { IClientParams } from './interfaces';
 
+function requiresSigner(
+  target: unknown,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+) {
+  const originalMethod = descriptor.value;
+  descriptor.value = async function (key: string, value: string) {
+    if (!Signer.isSigner(this.signerOrProvider)) {
+      throw ErrorSigner;
+    }
+    return originalMethod.call(this, key, value);
+  };
+  return descriptor;
+}
+
 export default class KVStoreClient {
   private contract: KVStore;
   private signerOrProvider: Signer | Provider;
@@ -37,6 +52,7 @@ export default class KVStoreClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred
    */
+  @requiresSigner
   public async set(key: string, value: string) {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
@@ -55,6 +71,7 @@ export default class KVStoreClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred
    */
+  @requiresSigner
   public async setBulk(keys: string[], values: string[]) {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
