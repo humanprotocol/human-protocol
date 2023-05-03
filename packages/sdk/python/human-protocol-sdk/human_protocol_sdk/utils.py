@@ -110,8 +110,8 @@ def get_contract_interface(contract_entrypoint):
     with open(contract_entrypoint) as f:
         contract_interface = json.load(f)
     return contract_interface
-
-
+    
+        
 def get_hmtoken_interface():
     """Retrieve the HMToken interface.
 
@@ -176,4 +176,17 @@ def get_escrow_interface():
 
     return get_contract_interface(
         "{}/contracts/Escrow.sol/Escrow.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_kvstore_interface():
+    """Retrieve the KVStore interface.
+
+    Returns:
+        Contract interface: returns the KVStore interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
     )
