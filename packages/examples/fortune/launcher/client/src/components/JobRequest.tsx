@@ -153,6 +153,7 @@ export const JobRequest = ({
                   Number(e.target.value)
                 )
               }
+              sx={{ height: '56px' }}
             >
               {SUPPORTED_CHAIN_IDS.map((chainId) => (
                 <MenuItem key={chainId} value={chainId}>
