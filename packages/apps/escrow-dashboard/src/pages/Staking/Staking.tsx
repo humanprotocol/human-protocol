@@ -9,7 +9,7 @@ import {
   HMTTable,
   HMTStatusTable,
   HMTStatusChart,
-  StakingRewardsChart,
+  RewardsHistory,
 } from 'src/components/Staking';
 import { ViewTitle } from 'src/components/ViewTitle';
 
@@ -29,12 +29,12 @@ export const Staking: FC = () => (
       </Button>
     </Box>
     <Grid container spacing={4}>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} lg={6}>
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <HMTStatusTable />
         </Box>
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} lg={6}>
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <HMTStatusChart />
         </Box>
@@ -62,10 +62,10 @@ export const Staking: FC = () => (
       <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
         Rewards History
       </Typography>
-      <StakingRewardsChart />
+      <RewardsHistory />
     </Box>
     <Grid container spacing={4} sx={{ mt: 4 }}>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} lg={6}>
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
             Allocated HMT
@@ -73,7 +73,7 @@ export const Staking: FC = () => (
           <HMTTable />
         </Box>
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} lg={6}>
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
             Slashed HMT
