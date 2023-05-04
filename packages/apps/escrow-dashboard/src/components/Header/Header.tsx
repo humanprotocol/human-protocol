@@ -7,6 +7,8 @@ import {
   Alert,
   AppBar,
   Box,
+  Button,
+  ButtonProps,
   Collapse,
   Drawer,
   IconButton,
@@ -17,13 +19,14 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 import { ConnectButton } from '../ConnectButton';
 import { SearchBox } from '../SearchBox';
 import { SocialIcons } from '../SocialIcons';
 
 import logoSvg from 'src/assets/logo.svg';
+import myHMTSvg from 'src/assets/my-hmt.svg';
 
 type NavLink = {
   title: string;
@@ -41,6 +44,22 @@ const NAV_LINKS: NavLink[] = [
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },
 ];
 
+const MyHMTButton = (props: ButtonProps) => {
+  return (
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{ borderRadius: '40px', boxShadow: 'none', p: 1, pr: 2 }}
+      {...props}
+    >
+      <img src={myHMTSvg} alt="my-hmt" />
+      <Typography variant="body2" fontWeight={600} sx={{ ml: 1 }}>
+        My HMT
+      </Typography>
+    </Button>
+  );
+};
+
 export const Header: FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -48,7 +67,7 @@ export const Header: FC = () => {
   const isDownLg = useMediaQuery(theme.breakpoints.down('lg'));
   const isDownMd = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [showWarning, setShowWarning] = useState(true);
+  const [showWarning, setShowWarning] = useState(false);
 
   /**
    * @TODO: Remove the flag once it's implemented
@@ -79,6 +98,22 @@ export const Header: FC = () => {
     </Stack>
   );
 
+  const handleCloseWarning = () => {
+    localStorage.setItem('HUMAN_ESCROW_DASHBOARD_SHOW_WARNING', 'false');
+    setShowWarning(false);
+  };
+
+  useEffect(() => {
+    const cacheValue = localStorage.getItem(
+      'HUMAN_ESCROW_DASHBOARD_SHOW_WARNING'
+    );
+    if (cacheValue === 'false') {
+      setShowWarning(false);
+    } else {
+      setShowWarning(true);
+    }
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -99,9 +134,7 @@ export const Header: FC = () => {
                     aria-label="close"
                     color="inherit"
                     size="small"
-                    onClick={() => {
-                      setShowWarning(false);
-                    }}
+                    onClick={handleCloseWarning}
                   >
                     <CloseIcon fontSize="inherit" />
                   </IconButton>
@@ -166,7 +199,7 @@ export const Header: FC = () => {
                     </Box>
                   )}
                   {!isDownMd && (
-                    <Box display="flex" alignItems="center" gap={3}>
+                    <Box display="flex" alignItems="center" gap={2}>
                       {isDownLg && (
                         <IconButton color="primary" onClick={toggleSearchBox}>
                           <SearchIcon />
@@ -174,6 +207,7 @@ export const Header: FC = () => {
                       )}
                       {renderNavLinks()}
                       <ConnectButton />
+                      <MyHMTButton href="/staking" />
                     </Box>
                   )}
                   {isDownMd && (
@@ -216,7 +250,7 @@ export const Header: FC = () => {
         <Box display="flex">
           <Box flex="1" sx={{ p: 6 }}>
             {renderNavLinks('vertical')}
-            <Box mt={8}>
+            <Box mt={4}>
               <ConnectButton />
             </Box>
           </Box>

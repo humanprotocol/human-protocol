@@ -1,98 +1,86 @@
-import { Grid, Typography } from '@mui/material';
+import { Button, Grid, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { FC } from 'react';
+import humanTokenSvg from 'src/assets/human-token.svg';
+import { PageWrapper } from 'src/components';
 import {
-  StakeCard,
   Stake,
   Rewards,
   HMTTable,
+  HMTStatusTable,
+  HMTStatusChart,
   StakingRewardsChart,
 } from 'src/components/Staking';
+import { ViewTitle } from 'src/components/ViewTitle';
 
 export const Staking: FC = () => (
-  <Box sx={{ px: { xs: 1, sm: 2, md: 3, lg: 4, xl: 5 } }}>
+  <PageWrapper>
     <Box
       sx={{
-        background: '#f6f7fe',
-        borderRadius: {
-          xs: '16px',
-          sm: '16px',
-          md: '24px',
-          lg: '32px',
-          xl: '40px',
-        },
-        padding: {
-          xs: '24px 16px',
-          md: '42px 54px',
-          lg: '56px 72px',
-          xl: '70px 90px',
-        },
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        mb: 4,
       }}
     >
-      <Grid container spacing={4}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StakeCard title="Stake HMT" hmt={0} usd={0} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StakeCard title="HMT reward balance" hmt={0} usd={0} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StakeCard title="Alllocated HMT" hmt={0} usd={0} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StakeCard title="Slashed HMT" hmt={0} usd={0} />
-        </Grid>
-      </Grid>
-      <Grid container spacing={4} sx={{ mt: 8 }}>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
-            <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
-              Stake your HMT
-            </Typography>
-            <Stake />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
-            <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
-              Rewards
-            </Typography>
-            <Rewards />
-          </Box>
-        </Grid>
-      </Grid>
-      <Box sx={{ mt: 8 }}>
-        <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
-          Staking rewards
-        </Typography>
-        <StakingRewardsChart />
-      </Box>
-      <Grid container spacing={4} sx={{ mt: 4 }}>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
-            <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
-              Allocated HMT
-            </Typography>
-            <HMTTable />
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-          >
-            <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
-              Slashed HMT
-            </Typography>
-            <HMTTable />
-          </Box>
-        </Grid>
-      </Grid>
+      <ViewTitle title="My HMT" iconUrl={humanTokenSvg} />
+      <Button color="primary" variant="contained">
+        Configure your Oracle
+      </Button>
     </Box>
-  </Box>
+    <Grid container spacing={4}>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <HMTStatusTable />
+        </Box>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <HMTStatusChart />
+        </Box>
+      </Grid>
+    </Grid>
+    <Grid container spacing={4} sx={{ mt: 8 }}>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
+            Stake
+          </Typography>
+          <Stake />
+        </Box>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
+            Rewards
+          </Typography>
+          <Rewards />
+        </Box>
+      </Grid>
+    </Grid>
+    <Box sx={{ mt: 8 }}>
+      <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
+        Rewards History
+      </Typography>
+      <StakingRewardsChart />
+    </Box>
+    <Grid container spacing={4} sx={{ mt: 4 }}>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
+            Allocated HMT
+          </Typography>
+          <HMTTable />
+        </Box>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <Typography color="primary" variant="h4" fontWeight={600} mb={4}>
+            Slashed HMT
+          </Typography>
+          <HMTTable />
+        </Box>
+      </Grid>
+    </Grid>
+  </PageWrapper>
 );
