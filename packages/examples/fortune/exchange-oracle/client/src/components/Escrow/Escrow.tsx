@@ -1,11 +1,18 @@
 import EscrowABI from '@human-protocol/core/abis/Escrow.json';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { getContract, getProvider } from '@wagmi/core';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { useCallback, useEffect, useState } from 'react';
 import { useAccount, useNetwork } from 'wagmi';
 import sendFortune from '../../services/RecordingOracle/RecordingClient';
-import './Escrow.css';
 
 const statusesMap = [
   'Launched',
@@ -101,46 +108,107 @@ export const Escrow = () => {
   };
 
   return (
-    <div className="escrow-container">
-      <div className="escrow-view">
-        <div>
-          <input
+    <Container maxWidth="lg" sx={{ mx: 'auto' }}>
+      <Typography color="primary" variant="h4" mb={3}>
+        Fortune Job Submission
+      </Typography>
+      <Box
+        sx={{
+          background: '#fff',
+          boxShadow:
+            '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2)',
+          borderRadius: '16px',
+          py: 7,
+          px: { sm: 6, md: 13 },
+          mt: 3,
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'flex-start',
+            gap: 3,
+          }}
+        >
+          <TextField
+            variant="outlined"
             onChange={(e) => setEscrow(e.target.value)}
             value={escrow}
             data-testid="escrowAddress"
+            sx={{ flex: 1 }}
+            helperText="Fill the exchange address to pass the fortune to the recording oracle"
           />
-          <button
-            type="button"
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => setMainEscrow(ethers.utils.getAddress(escrow))}
+            sx={{ width: '136px', height: '56px' }}
           >
-            {' '}
-            Confirm{' '}
-          </button>
-        </div>
-        <span>
-          {' '}
-          Fill the exchange address to pass the fortune to the recording oracle
-        </span>
-        <span>
-          {' '}
-          <b>Address: </b> {escrow}{' '}
-        </span>
-        <span>
-          {' '}
-          <b>Status: </b> {escrowStatus}
-        </span>
-        <span>
-          {' '}
-          <b>Balance: </b> {balance}
-        </span>
-        <div>
-          <input onChange={(e) => setFortune(e.target.value)} />
-          <button type="button" onClick={send}>
-            {' '}
-            Send Fortune{' '}
-          </button>
-        </div>
-      </div>
-    </div>
+            Confirm
+          </Button>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            my: 4,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            <Typography component="span" fontWeight={500}>
+              Address:
+            </Typography>
+            {escrow && <Typography variant="caption">{escrow}</Typography>}
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            <Typography component="span" fontWeight={500}>
+              Status:
+            </Typography>
+            {escrowStatus && (
+              <Chip
+                sx={{
+                  height: '24px',
+                  '.MuiChip-label': { padding: '0px 8px' },
+                }}
+                label={escrowStatus}
+                color="primary"
+              />
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+            <Typography component="span" fontWeight={500}>
+              Balance:
+            </Typography>
+            {balance && (
+              <Typography variant="caption">{balance} HMT</Typography>
+            )}
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'flex-start',
+            gap: 3,
+          }}
+        >
+          <TextField
+            variant="outlined"
+            onChange={(e) => setFortune(e.target.value)}
+            sx={{ flex: 1 }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={send}
+            sx={{ width: '136px', height: '56px' }}
+          >
+            Send Fortune
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 };
