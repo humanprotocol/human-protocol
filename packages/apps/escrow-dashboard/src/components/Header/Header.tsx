@@ -1,7 +1,7 @@
 import {
   Close as CloseIcon,
   Menu as MenuIcon,
-  Search as SearchIcon,
+  // Search as SearchIcon,
 } from '@mui/icons-material';
 import {
   Alert,
@@ -21,10 +21,10 @@ import {
 } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
 
+import { useAccount } from 'wagmi';
 import { ConnectButton } from '../ConnectButton';
 import { SearchBox } from '../SearchBox';
 import { SocialIcons } from '../SocialIcons';
-
 import logoSvg from 'src/assets/logo.svg';
 import myHMTSvg from 'src/assets/my-hmt.svg';
 
@@ -65,7 +65,8 @@ export const Header: FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const theme = useTheme();
   const isDownLg = useMediaQuery(theme.breakpoints.down('lg'));
-  const isDownMd = useMediaQuery(theme.breakpoints.down('md'));
+  // const isDownMd = useMediaQuery(theme.breakpoints.down('md'));
+  const { address } = useAccount();
 
   const [showWarning, setShowWarning] = useState(false);
 
@@ -193,32 +194,32 @@ export const Header: FC = () => {
                       Dashboard
                     </Typography>
                   </Link>
-                  {!isDownLg && (
+                  {!isDownLg && showSearchBox && (
                     <Box sx={{ minWidth: '400px' }}>
-                      {showSearchBox && <SearchBox />}
+                      <SearchBox />
                     </Box>
                   )}
-                  {!isDownMd && (
+                  {!isDownLg && (
                     <Box display="flex" alignItems="center" gap={2}>
-                      {isDownLg && (
+                      {/* {isDownLg && (
                         <IconButton color="primary" onClick={toggleSearchBox}>
                           <SearchIcon />
                         </IconButton>
-                      )}
+                      )} */}
                       {renderNavLinks()}
                       <ConnectButton />
-                      <MyHMTButton href="/staking" />
+                      {address && <MyHMTButton href="/staking" />}
                     </Box>
                   )}
-                  {isDownMd && (
+                  {isDownLg && (
                     <Box>
-                      <IconButton
+                      {/* <IconButton
                         color="primary"
                         sx={{ ml: 1 }}
                         onClick={toggleSearchBox}
                       >
                         <SearchIcon />
-                      </IconButton>
+                      </IconButton> */}
                       <IconButton
                         color="primary"
                         sx={{ ml: 1 }}
@@ -250,8 +251,9 @@ export const Header: FC = () => {
         <Box display="flex">
           <Box flex="1" sx={{ p: 6 }}>
             {renderNavLinks('vertical')}
-            <Box mt={4}>
+            <Box mt={4} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               <ConnectButton />
+              {address && <MyHMTButton href="/staking" />}
             </Box>
           </Box>
           <Box
