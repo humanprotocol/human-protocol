@@ -82,11 +82,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return 0;
     }
 
-    function addTrustedHandlers(address[] memory _handlers) public override {
-        require(
-            areTrustedHandlers[msg.sender],
-            'Address calling cannot add trusted handlers'
-        );
+    function addTrustedHandlers(
+        address[] memory _handlers
+    ) public override trusted {
         for (uint256 i = 0; i < _handlers.length; i++) {
             require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
             areTrustedHandlers[_handlers[i]] = true;
