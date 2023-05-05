@@ -714,6 +714,13 @@
           "title": "Launch Group Id",
           "minimum": 0,
           "type": "integer"
+        },
+        "interests": {
+          "title": "Interests",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
         }
       }
     }
