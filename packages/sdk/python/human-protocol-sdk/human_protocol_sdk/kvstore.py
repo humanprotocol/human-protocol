@@ -38,7 +38,8 @@ class KVStoreClient:
 
         # Initialize web3 instance
         self.w3 = web3
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        if not self.w3.middleware_onion.get("geth_poa"):
+            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
         # Load network configuration based on chainId
         try:
