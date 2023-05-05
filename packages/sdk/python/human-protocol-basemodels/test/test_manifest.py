@@ -395,6 +395,13 @@ class ManifestTest(unittest.TestCase):
         ]:
             assert_raises(data)
 
+        for data in [
+            {"interests": 1},
+            {"interests": {"mapped": 1}},
+            {"interests": ["as", "string"]},
+        ]:
+            assert_raises(data)
+
         data = {
             "lang": [
                 {"us": {"score": 0}},
@@ -427,6 +434,7 @@ class ManifestTest(unittest.TestCase):
             "min_user_score": 0,
             "max_user_score": 0.3,
             "launch_group_id": 101,
+            "interests": [1, 2, 3, 4],
         }
 
         RestrictedAudience(**data)

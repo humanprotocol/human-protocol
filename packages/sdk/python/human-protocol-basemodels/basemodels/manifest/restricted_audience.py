@@ -45,6 +45,8 @@ class RestrictedAudience(BaseModel):
 
     launch_group_id: Optional[conint(ge=0, strict=True)]
 
+    interests: Optional[List[conint(strict=True)]]
+
     def dict(self, **kwargs):
         kwargs["exclude_unset"] = True
         return super().dict(**kwargs)
