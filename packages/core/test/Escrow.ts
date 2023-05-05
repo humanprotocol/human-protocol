@@ -161,7 +161,7 @@ describe('Escrow', function () {
           escrow
             .connect(externalAddress)
             .addTrustedHandlers([await reputationOracle.getAddress()])
-        ).to.be.revertedWith('Address calling cannot add trusted handlers');
+        ).to.be.revertedWith('Address calling not trusted');
       });
     });
 
