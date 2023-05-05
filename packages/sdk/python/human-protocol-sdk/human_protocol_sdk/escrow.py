@@ -657,5 +657,4 @@ class EscrowClient:
         """
         # Initialize contract instance
         escrow_interface = get_escrow_interface()
-
         return self.w3.eth.contract(address=address, abi=escrow_interface["abi"])
