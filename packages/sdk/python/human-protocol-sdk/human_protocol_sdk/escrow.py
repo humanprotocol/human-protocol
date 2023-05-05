@@ -90,7 +90,8 @@ class EscrowClient:
         # Initialize web3 instance
         self.w3 = web3
         if not self.w3.middleware_onion.get("geth_poa"):
-            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
+            self.w3.middleware_onion.inject(
+                geth_poa_middleware, "geth_poa", layer=0)
 
         # Load network configuration based on chainId
         try:
@@ -267,7 +268,8 @@ class EscrowClient:
             raise EscrowClientError("Invalid address")
 
         self._handle_transaction(
-            "Complete", self._get_escrow_contract(escrow_address).functions.complete()
+            "Complete", self._get_escrow_contract(
+                escrow_address).functions.complete()
         )
 
     def bulk_payout(
@@ -336,7 +338,8 @@ class EscrowClient:
             raise EscrowClientError("Invalid address")
 
         self._handle_transaction(
-            "Cancel", self._get_escrow_contract(escrow_address).functions.cancel()
+            "Cancel", self._get_escrow_contract(
+                escrow_address).functions.cancel()
         )
 
     def abort(self, escrow_address: str):
@@ -356,7 +359,8 @@ class EscrowClient:
             raise EscrowClientError("Invalid address")
 
         self._handle_transaction(
-            "Abort", self._get_escrow_contract(escrow_address).functions.abort()
+            "Abort", self._get_escrow_contract(
+                escrow_address).functions.abort()
         )
 
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]):
@@ -436,7 +440,8 @@ class EscrowClient:
             raise EscrowClientError("Invalid address")
 
         return (
-            self._get_escrow_contract(escrow_address).functions.finalResultsUrl().call()
+            self._get_escrow_contract(
+                escrow_address).functions.finalResultsUrl().call()
         )
 
     def get_token_address(self, escrow_address: str):
@@ -512,5 +517,4 @@ class EscrowClient:
         """
         # Initialize contract instance
         escrow_interface = get_escrow_interface()
-
         return self.w3.eth.contract(address=address, abi=escrow_interface["abi"])
