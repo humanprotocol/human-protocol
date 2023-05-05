@@ -182,7 +182,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     /**
-     * @notice Bulk payout workers
+     * @dev Performs bulk payout to multiple workers
      * Escrow needs to be complted / cancelled, so that it can be paid out.
      * Every recipient is paid with the amount after reputation and recording oracle fees taken out.
      * If the amount is less than the fee, the recipient is not paid.
@@ -190,10 +190,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
      * Payout will fail if any of the transaction fails.
      * If the escrow is fully paid out, meaning that the balance of the escrow is 0, it'll set as Paid.
      * If the escrow is partially paid out, meaning that the escrow still has remaining balance, it'll set as Partial.
+     * This contract is only callable if the contract is not broke, not launched, not paid, not expired, by trusted parties.
      *
      * @param _recipients Array of recipients
-     * @param _amounts Array of amounts
-     * @param _url URL of the results
+     * @param _amounts Array of amounts to be paid to each recipient.
+     * @param _url URL storing results as transaction details
      * @param _hash Hash of the results
      * @param _txId Transaction ID
      */
@@ -227,6 +228,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 balance = getBalance();
         uint256 aggregatedBulkAmount = 0;
         for (uint256 i; i < _amounts.length; i++) {
+            require(_amounts[i] > 0, 'Amount should be greater than zero');
             aggregatedBulkAmount = aggregatedBulkAmount.add(_amounts[i]);
         }
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
