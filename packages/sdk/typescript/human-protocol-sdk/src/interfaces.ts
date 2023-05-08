@@ -25,4 +25,5 @@ export interface IStaker {
   tokensAllocated: BigNumber;
   tokensLocked: BigNumber;
   tokensLockedUntil: BigNumber;
+  tokensAvailable: BigNumber;
 }

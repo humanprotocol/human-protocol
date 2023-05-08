@@ -22,7 +22,7 @@ import {
   InvalidArgumentError,
   OutOfGasError,
 } from './error';
-import { getRevertReason, gqlFetch } from './utils';
+import { getRevertReason, gqlFetch, toBigNumber } from './utils';
 import { RAW_REWARDS_QUERY } from './queries';
 
 export default class StakingClient {
@@ -275,7 +275,7 @@ export default class StakingClient {
    * **Returns the staking information about an staker address.*
    *
    * @param {string} staker - Address of the staker
-   * @returns {Promise<IStakerInfo>} - Return staking information of the specified address
+   * @returns {Promise<IStaker>} - Return staking information of the specified address
    * @throws {Error} - An error object if an error occurred, result otherwise
    */
   public async getStaker(staker: string): Promise<IStaker> {
@@ -285,7 +285,23 @@ export default class StakingClient {
 
     try {
       const result = await this.stakingContract.getStaker(staker);
-      return result;
+
+      const tokensStaked = toBigNumber(result.tokensStaked),
+        tokensAllocated = toBigNumber(result.tokensAllocated),
+        tokensLocked = toBigNumber(result.tokensLocked),
+        tokensLockedUntil = toBigNumber(result.tokensLockedUntil);
+
+      const tokensAvailable = tokensStaked
+        .sub(tokensAllocated)
+        .sub(tokensLocked);
+
+      return {
+        tokensStaked,
+        tokensAllocated,
+        tokensLocked,
+        tokensLockedUntil,
+        tokensAvailable,
+      };
     } catch (e) {
       throw new Error(e.message);
     }

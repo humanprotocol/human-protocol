@@ -231,3 +231,13 @@ export const gqlFetch = (
     return Promise.reject(ErrorNoURLprovided);
   }
 };
+
+/**
+ * **Convert entity to BigNumber*
+ *
+ * @param {any} value
+ * @returns
+ */
+export const toBigNumber = (value: string | number) => {
+  return BigNumber.from(value);
+};

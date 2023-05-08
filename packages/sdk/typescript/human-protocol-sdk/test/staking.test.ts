@@ -446,6 +446,7 @@ describe('StakingClient', () => {
         tokensAllocated: ethers.utils.parseEther('50'),
         tokensLocked: ethers.utils.parseEther('25'),
         tokensLockedUntil: ethers.BigNumber.from(0),
+        tokensAvailable: ethers.utils.parseEther('25'),
       };
       mockStakingContract.getStaker.mockResolvedValueOnce(mockStaker);
 
