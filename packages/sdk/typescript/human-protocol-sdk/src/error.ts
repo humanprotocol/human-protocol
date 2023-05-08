@@ -114,6 +114,13 @@ export const ErrorInvalidEscrowAddressProvided = new Error(
 );
 
 /**
+ * @constant {Error} - Escrow address is not provided by the factory.
+ */
+export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
+  'Escrow address is not provided by the factory'
+);
+
+/**
  * @constant {Error} - Error getting stakers data.
  */
 export const ErrorStakingGetStakers = new Error('Error getting stakers data');

@@ -6,11 +6,14 @@ import {
   Staking,
   RewardPool__factory,
   RewardPool,
+  EscrowFactory,
+  EscrowFactory__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ethers, Signer } from 'ethers';
 import { NetworkData } from './types';
 import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
 import {
+  ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
@@ -26,6 +29,7 @@ export default class StakingClient {
   public network: NetworkData;
   public tokenContract: HMToken;
   public stakingContract: Staking;
+  public escrowFactoryContract: EscrowFactory;
 
   /**
    * **Staking constructor**
@@ -41,6 +45,11 @@ export default class StakingClient {
       this.signerOrProvider
     );
 
+    this.escrowFactoryContract = EscrowFactory__factory.connect(
+      this.network.factoryAddress,
+      this.signerOrProvider
+    );
+
     this.tokenContract = HMToken__factory.connect(
       this.network.hmtAddress,
       this.signerOrProvider
@@ -52,7 +61,7 @@ export default class StakingClient {
    * **It increases the allowance for the staking contract.*
    *
    * @param {BigNumber} amount - Amount of tokens to approve for stake
-   * @returns {Promise<boolean>}
+   * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
   public async approveStake(amount: BigNumber): Promise<void> {
@@ -173,8 +182,13 @@ export default class StakingClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
     try {
       await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
+
       return;
     } catch (e) {
       return throwError(e);
@@ -205,6 +219,10 @@ export default class StakingClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
     try {
       await this.stakingContract.allocate(escrowAddress, amount);
       return;
@@ -225,6 +243,10 @@ export default class StakingClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
     try {
       await this.stakingContract.closeAllocation(escrowAddress);
       return;
@@ -243,6 +265,10 @@ export default class StakingClient {
   public async distributeRewards(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
@@ -343,6 +369,10 @@ export default class StakingClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
       return result;
@@ -362,15 +392,13 @@ export default class StakingClient {
     if (!ethers.utils.isAddress(slasherAddress)) {
       throw ErrorInvalidSlasherAddressProvided;
     }
-    console.log(9999);
 
     try {
-      console.log(9999);
       const { data } = await gqlFetch(
         this.network.subgraphUrl,
         RAW_REWARDS_QUERY(slasherAddress)
       );
-      console.log(2131, data);
+
       return data.rewardAddedEvents.map((reward: any) => {
         return {
           escrowAddress: reward.escrow,

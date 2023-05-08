@@ -23,20 +23,16 @@ vi.mock('../src/init');
 
 describe('StakingClient', () => {
   const provider = new ethers.providers.JsonRpcProvider();
-  let stakingClient: any;
-  let mockSigner: any;
-  let mockProvider: any;
-  let mockStakingContract: any;
-  let mockRewardPoolContract: any;
-  let mockTokenContract: any;
+  let stakingClient: any,
+    mockSigner: any,
+    mockStakingContract: any,
+    mockRewardPoolContract: any,
+    mockEscrowFactoryContract: any,
+    mockTokenContract: any;
 
   beforeEach(async () => {
     mockSigner = {
       ...provider.getSigner(),
-      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
-    };
-
-    mockProvider = {
       getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
     };
 
@@ -62,6 +58,10 @@ describe('StakingClient', () => {
       address: ethers.constants.AddressZero,
     };
 
+    mockEscrowFactoryContract = {
+      hasEscrow: vi.fn(),
+    };
+
     mockTokenContract = {
       allowance: vi.fn(),
       approve: vi.fn(),
@@ -77,6 +77,7 @@ describe('StakingClient', () => {
 
     stakingClient.stakingContract = mockStakingContract;
     stakingClient.tokenContract = mockTokenContract;
+    stakingClient.escrowFactoryContract = mockEscrowFactoryContract;
   });
 
   afterEach(() => {
@@ -101,7 +102,7 @@ describe('StakingClient', () => {
       expect(mockTokenContract.approve).toHaveBeenCalledTimes(0);
     });
 
-    test('should return true if the allowance is sufficient and the approval is successful', async () => {
+    test('should not fail and return void if the allowance is sufficient and the approval is successful', async () => {
       stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
 
       mockTokenContract.approve = vi.fn().mockResolvedValue({
@@ -286,7 +287,22 @@ describe('StakingClient', () => {
       expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
     });
 
+    test('throws an error if escrow address is not provided by the factory', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.slash(
+          invalidAddress,
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          amount
+        )
+      ).rejects.toThrow(ErrorInvalidSlasherAddressProvided);
+      expect(mockStakingContract.slash).toHaveBeenCalledTimes(0);
+    });
+
     test('throws an error if slashing fails', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.slash.mockRejectedValueOnce(new Error());
 
       await expect(
@@ -308,9 +324,10 @@ describe('StakingClient', () => {
     });
 
     test('calls the staking contract to slash the given amount', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.slash.mockResolvedValueOnce();
 
-      stakingClient.slash(
+      await stakingClient.slash(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
@@ -353,7 +370,17 @@ describe('StakingClient', () => {
       expect(mockStakingContract.allocate).toHaveBeenCalledTimes(0);
     });
 
+    test('throws an error if escrow address is not provided by the factory', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.allocate(ethers.constants.AddressZero, amount)
+      ).rejects.toThrow();
+      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(0);
+    });
+
     test('should call the allocate method with the correct parameters', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       await stakingClient.allocate(ethers.constants.AddressZero, amount);
 
       expect(mockStakingContract.allocate).toHaveBeenCalledWith(
@@ -364,6 +391,7 @@ describe('StakingClient', () => {
     });
 
     test('should throw an error if the allocate method fails', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.allocate.mockRejectedValueOnce(new Error());
 
       await expect(
@@ -387,7 +415,17 @@ describe('StakingClient', () => {
       expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(0);
     });
 
+    test('throws an error if escrow address is not provided by the factory', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.closeAllocation(ethers.constants.AddressZero)
+      ).rejects.toThrow();
+      expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(0);
+    });
+
     test('should throw an error when stakingContract.closeAllocation throws an error', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.closeAllocation.mockRejectedValueOnce(new Error());
 
       await expect(
@@ -401,6 +439,7 @@ describe('StakingClient', () => {
     });
 
     test('should call the closeAllocation method with the correct parameters', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.closeAllocation.mockResolvedValueOnce();
 
       await stakingClient.closeAllocation(ethers.constants.AddressZero);
@@ -422,7 +461,17 @@ describe('StakingClient', () => {
       expect(mockStakingContract.distributeRewards).toHaveBeenCalledTimes(0);
     });
 
+    test('throws an error if escrow address is not provided by the factory', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.distributeRewards(ethers.constants.AddressZero)
+      ).rejects.toThrow();
+      expect(mockStakingContract.distributeRewards).toHaveBeenCalledTimes(0);
+    });
+
     test('should call distributeReward on the reward pool contract', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       vi.spyOn(stakingClient, 'distributeRewards').mockImplementation(() =>
         Promise.resolve(undefined)
       );
@@ -516,6 +565,15 @@ describe('StakingClient', () => {
       expect(mockStakingContract.getAllocation).toHaveBeenCalledTimes(0);
     });
 
+    test('throws an error if escrow address is not provided by the factory', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
+
+      await expect(
+        stakingClient.getAllocation(ethers.constants.AddressZero)
+      ).rejects.toThrow();
+      expect(mockStakingContract.getAllocation).toHaveBeenCalledTimes(0);
+    });
+
     test('should return allocation information', async () => {
       const mockAllocation: IAllocation = {
         escrowAddress: ethers.constants.AddressZero,
@@ -524,6 +582,7 @@ describe('StakingClient', () => {
         createdAt: ethers.utils.parseEther('100'),
         closedAt: ethers.utils.parseEther('100'),
       };
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.getAllocation.mockResolvedValueOnce(mockAllocation);
 
       const result = await stakingClient.getAllocation(
@@ -537,6 +596,7 @@ describe('StakingClient', () => {
     });
 
     test('should throw an error if the allocation data cannot be retrieved', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
       mockStakingContract.getAllocation.mockRejectedValue(new Error());
       await expect(
         stakingClient.getAllocation(ethers.constants.AddressZero)
