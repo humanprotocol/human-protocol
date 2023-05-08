@@ -1,6 +1,6 @@
 import unittest
+from unittest.mock import MagicMock, PropertyMock, patch
 
-from unittest.mock import MagicMock, PropertyMock
 import web3
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
@@ -346,6 +346,46 @@ class StakingTestCase(unittest.TestCase):
         mock_function.assert_called_once_with(escrow_address)
 
         self.assertIsNone(allocation)
+
+    def test_get_rewards_info(self):
+        slasher = "slasher1"
+
+        mock_function = MagicMock()
+        with patch(
+            "human_protocol_sdk.staking.get_data_from_subgraph"
+        ) as mock_function:
+            mock_function.return_value = {
+                "data": {
+                    "rewardAddedEvents": [
+                        {
+                            "escrow": "escrow1",
+                            "amount": 10,
+                        },
+                        {
+                            "escrow": "escrow2",
+                            "amount": 20,
+                        },
+                    ]
+                }
+            }
+            rewards_info = self.staking_client.get_rewards_info(slasher)
+
+            mock_function.assert_called_once_with(
+                "subgraph_url",
+                """
+rewardAddedEvents(where:{staker:"slasher1"}) {
+    escrow
+    amount
+}""",
+            )
+
+            print(rewards_info)
+
+            self.assertEqual(len(rewards_info), 2)
+            self.assertEqual(rewards_info[0]["escrow_address"].lower(), "escrow1")
+            self.assertEqual(rewards_info[0]["amount"], 10)
+            self.assertEqual(rewards_info[1]["escrow_address"].lower(), "escrow2")
+            self.assertEqual(rewards_info[1]["amount"], 20)
 
 
 if __name__ == "__main__":
