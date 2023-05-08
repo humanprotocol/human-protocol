@@ -49,9 +49,9 @@ export const FAKE_NETWORK = {
   hmtAddress: '0x0000000000000000000000000000000000000000',
   stakingAddress: '0x0000000000000000000000000000000000000000',
   kvstoreAddress: '0x0000000000000000000000000000000000000000',
-  subgraphUrl: '',
-  oldSubgraphUrl: '',
-  oldFactoryAddress: '',
+  subgraphUrl: 'http://fake.url',
+  oldSubgraphUrl: 'http://fake.url',
+  oldFactoryAddress: 'http://fake.url',
 };
 
 export const FAKE_TRANSACTION_HASH =

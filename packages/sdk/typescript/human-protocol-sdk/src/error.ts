@@ -203,3 +203,37 @@ export const ErrorInitProviderDoesNotExist = new Error(
  * @constant {Error} - Init with unsupported chain ID.
  */
 export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
+
+/**
+ * @constant {Error} - No URL provided.
+ */
+export const ErrorNoURLprovided = new Error('No URL provided');
+
+/**
+ * @constant {Error} - Sending a transaction requires a signer.
+ */
+export const ErrorSigner = new Error('Signer required');
+
+export class EthereumError extends Error {
+  constructor(message: string) {
+    super(`An error occurred while interacting with Ethereum: ${message}`);
+  }
+}
+
+export class InvalidArgumentError extends EthereumError {
+  constructor(message: string) {
+    super(`Invalid argument: ${message}`);
+  }
+}
+
+export class OutOfGasError extends EthereumError {
+  constructor(message: string) {
+    super(`Out of gas: ${message}`);
+  }
+}
+
+export class ContractExecutionError extends EthereumError {
+  constructor(reason: string) {
+    super(`Contract execution error: ${reason}`);
+  }
+}

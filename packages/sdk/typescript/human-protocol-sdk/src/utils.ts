@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
+import axios from 'axios';
 
 import {
   Escrow,
@@ -13,6 +14,7 @@ import {
   RewardPool__factory,
   ERC1967Proxy__factory,
 } from '@human-protocol/core/typechain-types';
+import { ErrorNoURLprovided } from './error';
 
 /**
  * **Get HMToken contract instance at given address**
@@ -186,4 +188,46 @@ export const toFullDigit = (
   decimals = 18
 ): BigNumber => {
   return BigNumber.from(amount).mul(BigNumber.from(10).pow(decimals));
+};
+
+/**
+ * **Get specific error text.*
+ *
+ * @param {any} error - An error message.
+ * @returns
+ */
+export const getRevertReason = (error: any): string => {
+  const prefix = "reverted with reason string '";
+  const suffix = "'";
+  const message = error.data.substring(
+    error.data.indexOf(prefix) + prefix.length
+  );
+  return message.substring(0, message.indexOf(suffix));
+};
+
+/**
+ * **Fetching data with queries.*
+ *
+ * @param {string} url
+ * @param {string} query
+ * @param {any} variables
+ * @param {any} headers
+ * @returns
+ */
+export const gqlFetch = (
+  url: string,
+  query: string,
+  variables?: any,
+  headers?: any
+) => {
+  if (url && url.length) {
+    return axios.post(url, JSON.stringify({ query, variables }), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+    });
+  } else {
+    return Promise.reject(ErrorNoURLprovided);
+  }
 };

@@ -10,19 +10,11 @@ import {
   FAKE_TRANSACTION_HASH,
 } from './utils/constants';
 import {
-  ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
-  ErrorStakingFailedToAllocate,
-  ErrorStakingFailedToCloseAllocation,
-  ErrorStakingFailedToSlash,
-  ErrorStakingFailedToStake,
-  ErrorStakingFailedToUnstake,
-  ErrorStakingGetAllocation,
-  ErrorStakingGetStaker,
   ErrorStakingStakersNotFound,
 } from '../src/error';
 import InitClient from '../src/init';
@@ -132,9 +124,7 @@ describe('StakingClient', () => {
 
       mockTokenContract.approve = vi.fn().mockRejectedValue(new Error());
 
-      await expect(stakingClient.approveStake(amount)).rejects.toThrow(
-        ErrorFailedToApproveStakingAmountAllowanceNotUpdated
-      );
+      await expect(stakingClient.approveStake(amount)).rejects.toThrow();
       expect(mockTokenContract.approve).toBeCalledWith(
         ethers.constants.AddressZero,
         amount
@@ -175,9 +165,7 @@ describe('StakingClient', () => {
 
       mockStakingContract.stake.mockRejectedValueOnce(new Error());
 
-      await expect(stakingClient.stake(amount)).rejects.toThrow(
-        ErrorStakingFailedToStake
-      );
+      await expect(stakingClient.stake(amount)).rejects.toThrow();
       expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
       expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
     });
@@ -211,9 +199,7 @@ describe('StakingClient', () => {
     test('should throw an error if the unstake function on the staking contract fails', async () => {
       mockStakingContract.unstake.mockRejectedValueOnce(new Error());
 
-      await expect(stakingClient.unstake(amount)).rejects.toThrow(
-        ErrorStakingFailedToUnstake
-      );
+      await expect(stakingClient.unstake(amount)).rejects.toThrow();
       expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount);
       expect(mockStakingContract.unstake).toHaveBeenCalledTimes(1);
     });
@@ -231,9 +217,7 @@ describe('StakingClient', () => {
     test('should throw an error if the withdraw method of the staking contract fails', async () => {
       mockStakingContract.withdraw.mockRejectedValueOnce(new Error());
 
-      await expect(stakingClient.withdraw()).rejects.toThrow(
-        ErrorStakingFailedToUnstake
-      );
+      await expect(stakingClient.withdraw()).rejects.toThrow();
       expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
     });
   });
@@ -313,7 +297,7 @@ describe('StakingClient', () => {
           ethers.constants.AddressZero,
           amount
         )
-      ).rejects.toThrow(ErrorStakingFailedToSlash);
+      ).rejects.toThrow();
 
       expect(mockStakingContract.slash).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
@@ -385,7 +369,7 @@ describe('StakingClient', () => {
 
       await expect(
         stakingClient.allocate(ethers.constants.AddressZero, amount)
-      ).rejects.toThrow(ErrorStakingFailedToAllocate);
+      ).rejects.toThrow();
       expect(mockStakingContract.allocate).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         amount
@@ -409,7 +393,7 @@ describe('StakingClient', () => {
 
       await expect(
         stakingClient.closeAllocation(ethers.constants.AddressZero)
-      ).rejects.toThrow(ErrorStakingFailedToCloseAllocation);
+      ).rejects.toThrow();
 
       expect(mockStakingContract.closeAllocation).toHaveBeenCalledWith(
         ethers.constants.AddressZero
@@ -481,9 +465,7 @@ describe('StakingClient', () => {
     test('should throw an error if the staking contract call fails', async () => {
       mockStakingContract.getStaker.mockRejectedValue(new Error());
 
-      await expect(stakingClient.getStaker(stakerAddress)).rejects.toThrow(
-        ErrorStakingGetStaker
-      );
+      await expect(stakingClient.getStaker(stakerAddress)).rejects.toThrow();
       expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
       expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
     });
@@ -520,9 +502,7 @@ describe('StakingClient', () => {
 
     test('should throw an error if there is an error in getting stakers', async () => {
       mockStakingContract.getListOfStakers.mockRejectedValueOnce(new Error());
-      await expect(stakingClient.getAllStakers()).rejects.toThrow(
-        ErrorStakingStakersNotFound
-      );
+      await expect(stakingClient.getAllStakers()).rejects.toThrow();
       expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
     });
   });
@@ -561,21 +541,27 @@ describe('StakingClient', () => {
       mockStakingContract.getAllocation.mockRejectedValue(new Error());
       await expect(
         stakingClient.getAllocation(ethers.constants.AddressZero)
-      ).rejects.toThrow(ErrorStakingGetAllocation);
+      ).rejects.toThrow();
     });
   });
 
   describe('getRewards', () => {
     const invalidAddress = 'InvalidAddress';
+    const gqlRawResult = {
+      rewardAddedEvents: {
+        escrow: ethers.constants.AddressZero,
+        amount: ethers.utils.parseEther('100'),
+      },
+    };
+
     const mockReward: IReward = {
       escrowAddress: ethers.constants.AddressZero,
-      slasher: ethers.constants.AddressZero,
       amount: ethers.utils.parseEther('100'),
     };
 
     test('should throw an error if an invalid escrow address is provided', async () => {
       await expect(stakingClient.getRewards(invalidAddress)).rejects.toThrow(
-        ErrorInvalidEscrowAddressProvided
+        ErrorInvalidSlasherAddressProvided
       );
       expect(mockStakingContract.getRewards).toHaveBeenCalledTimes(0);
     });

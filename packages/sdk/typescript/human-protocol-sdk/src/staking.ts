@@ -11,6 +11,7 @@ import { BigNumber, ethers, Signer } from 'ethers';
 import { NetworkData } from './types';
 import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
 import {
+  ContractExecutionError,
   ErrorFailedToApproveStakingAmountAllowanceNotUpdated,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
@@ -26,7 +27,12 @@ import {
   ErrorStakingGetAllocation,
   ErrorStakingGetStaker,
   ErrorStakingStakersNotFound,
+  EthereumError,
+  InvalidArgumentError,
+  OutOfGasError,
 } from './error';
+import { getRevertReason, gqlFetch } from './utils';
+import { RAW_REWARDS_QUERY } from './queries';
 
 export default class StakingClient {
   public signerOrProvider: Signer | Provider;
@@ -75,8 +81,16 @@ export default class StakingClient {
       await this.tokenContract.approve(this.stakingContract.address, amount);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorFailedToApproveStakingAmountAllowanceNotUpdated;
+      if (e.code === 'INVALID_ARGUMENT') {
+        throw new InvalidArgumentError(e.message);
+      } else if (e.code === 'OUT_OF_GAS') {
+        throw new OutOfGasError(e.message);
+      } else if (e.code === 'CALL_EXCEPTION') {
+        const reason = getRevertReason(e.data);
+        throw new ContractExecutionError(reason);
+      } else {
+        throw new EthereumError(e.message);
+      }
     }
   }
 
@@ -100,8 +114,7 @@ export default class StakingClient {
       await this.stakingContract.stake(amount);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToStake;
+      throw new Error(e.message);
     }
   }
 
@@ -126,8 +139,7 @@ export default class StakingClient {
       await this.stakingContract.unstake(amount);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToUnstake;
+      throw new Error(e.message);
     }
   }
 
@@ -142,8 +154,7 @@ export default class StakingClient {
       await this.stakingContract.withdraw();
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToUnstake;
+      throw new Error(e.message);
     }
   }
 
@@ -188,8 +199,7 @@ export default class StakingClient {
       await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToSlash;
+      throw new Error(e.message);
     }
   }
 
@@ -221,8 +231,7 @@ export default class StakingClient {
       await this.stakingContract.allocate(escrowAddress, amount);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToAllocate;
+      throw new Error(e.message);
     }
   }
 
@@ -242,8 +251,7 @@ export default class StakingClient {
       await this.stakingContract.closeAllocation(escrowAddress);
       return;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingFailedToCloseAllocation;
+      throw new Error(e.message);
     }
   }
 
@@ -268,7 +276,7 @@ export default class StakingClient {
       await rewardPoolContract.distributeReward(escrowAddress);
       return;
     } catch (e) {
-      throw ErrorStakingFailedToDistributeRewards;
+      throw new Error(e.message);
     }
   }
 
@@ -288,8 +296,7 @@ export default class StakingClient {
       const result = await this.stakingContract.getStaker(staker);
       return result;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingGetStaker;
+      throw new Error(e.message);
     }
   }
 
@@ -309,8 +316,7 @@ export default class StakingClient {
 
       return result[1];
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingStakersNotFound;
+      throw new Error(e.message);
     }
   }
 
@@ -330,33 +336,38 @@ export default class StakingClient {
       const result = await this.stakingContract.getAllocation(escrowAddress);
       return result;
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingGetAllocation;
+      throw new Error(e.message);
     }
   }
 
   /**
    * **Returns information about the rewards for a given escrow address.*
    *
-   * @param {string} escrowAddress - Address of the escrow
+   * @param {string} slasherAddress - Address of the slasher
    * @returns {Promise<IReward[]>} - Returns rewards info if exists
    * @throws {Error} - An error object if an error occurred, results otherwise
    */
-  public async getRewards(escrowAddress: string): Promise<IReward[]> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
+  public async getRewards(slasherAddress: string): Promise<IReward[]> {
+    if (!ethers.utils.isAddress(slasherAddress)) {
+      throw ErrorInvalidSlasherAddressProvided;
     }
+    console.log(9999);
 
     try {
-      const rewardPoolContract: RewardPool = RewardPool__factory.connect(
-        await this.stakingContract.rewardPool(),
-        this.signerOrProvider
+      console.log(9999);
+      const { data } = await gqlFetch(
+        this.network.subgraphUrl,
+        RAW_REWARDS_QUERY(slasherAddress)
       );
-
-      return rewardPoolContract.getRewards(escrowAddress);
+      console.log(2131, data);
+      return data.rewardAddedEvents.map((reward: any) => {
+        return {
+          escrowAddress: reward.escrow,
+          amount: reward.amount,
+        };
+      });
     } catch (e) {
-      console.error(e);
-      throw ErrorStakingGetAllocation;
+      throw new Error(e.message);
     }
   }
 }
