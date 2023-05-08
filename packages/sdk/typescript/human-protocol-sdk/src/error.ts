@@ -114,59 +114,6 @@ export const ErrorInvalidEscrowAddressProvided = new Error(
 );
 
 /**
- * @constant {Error} - Failed to approve staking amount: allowance not updated.
- */
-export const ErrorFailedToApproveStakingAmountAllowanceNotUpdated = new Error(
-  'Failed to approve staking amount: allowance not updated'
-);
-
-/**
- * @constant {Error} - Failed to stake.
- */
-export const ErrorStakingFailedToStake = new Error('Failed to stake');
-
-/**
- * @constant {Error} - Failed to unstake.
- */
-export const ErrorStakingFailedToUnstake = new Error('Failed to unstake');
-
-/**
- * @constant {Error} - Failed to distribute rewards.
- */
-export const ErrorStakingFailedToDistributeRewards = new Error(
-  'Failed to distribute rewards'
-);
-
-/**
- * @constant {Error} - Failed to allocate.
- */
-export const ErrorStakingFailedToAllocate = new Error('Failed to allocate');
-
-/**
- * @constant {Error} - Failed to close allocation.
- */
-export const ErrorStakingFailedToCloseAllocation = new Error(
-  'Failed to close allocation'
-);
-
-/**
- * @constant {Error} - Failed to unstake.
- */
-export const ErrorStakingFailedToSlash = new Error('Failed to slash');
-
-/**
- * @constant {Error} - Error getting allocation data.
- */
-export const ErrorStakingGetAllocation = new Error(
-  'Error getting allocation data'
-);
-
-/**
- * @constant {Error} - Error getting staker data.
- */
-export const ErrorStakingGetStaker = new Error('Error getting staker data');
-
-/**
  * @constant {Error} - Error stakers not found.
  */
 export const ErrorStakingStakersNotFound = new Error('Error stakers not found');
