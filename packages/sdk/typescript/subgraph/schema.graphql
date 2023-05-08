@@ -210,6 +210,7 @@ type RewardAddedEvent @entity {
   id: ID!
   escrow: Bytes! # address
   staker: Bytes! # address
+  slasher: Bytes! # address
   amount: BigInt!
   block: BigInt!
   timestamp: BigInt!
