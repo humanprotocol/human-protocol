@@ -17,6 +17,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
+    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
+    uint32 private constant BULK_MAX_COUNT = 100;
+
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(address _sender, string _url, string _hash);
     event Pending(string manifest, string hash);
@@ -38,8 +41,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     uint8 public reputationOracleFeePercentage;
     uint8 public recordingOracleFeePercentage;
-    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
-    uint32 private constant BULK_MAX_COUNT = 100;
 
     address public token;
 
@@ -218,6 +219,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recipients.length == _amounts.length,
             "Amount of recipients and values don't match"
         );
+        require(_amounts.length > 0, 'Amounts should not be empty');
         require(_recipients.length < BULK_MAX_COUNT, 'Too many recipients');
         require(
             status != EscrowStatuses.Complete &&
