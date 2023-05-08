@@ -72,6 +72,23 @@ export const ErrorStorageFileNotFound = new Error('File not found');
 export const ErrorStorageFileNotUploaded = new Error('File not uploaded');
 
 /**
+ * @constant {Error} - The KVStore key can not be empty.
+ */
+export const ErrorKVStoreEmptyKey = new Error('Key can not be empty');
+
+/**
+ * @constant {Error} - The KVStore arrays must have the same length.
+ */
+export const ErrorKVStoreArrayLength = new Error(
+  'Arrays must have the same length'
+);
+
+/**
+ * @constant {Error} - The Address sent is invalid.
+ */
+export const ErrorInvalidAddress = new Error('Invalid address');
+
+/**
  * @constant {Error} - The Staking value must be positive.
  */
 export const ErrorStakingValueMustBePositive = new Error(

@@ -274,7 +274,7 @@ export const JobRequest = ({
             <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
               Card
             </Typography>
-            <RoundedBox sx={{ p: 2 }}>
+            <RoundedBox sx={{ p: 2, borderRadius: '4px' }}>
               <CardElement id="card" />
             </RoundedBox>
           </FormControl>
@@ -282,7 +282,7 @@ export const JobRequest = ({
             <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
               Name on Card
             </Typography>
-            <RoundedBox sx={{ p: 2 }}>
+            <RoundedBox sx={{ p: 2, borderRadius: '4px' }}>
               <TextField
                 fullWidth
                 variant="standard"
@@ -300,7 +300,7 @@ export const JobRequest = ({
                 <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
                   Amount
                 </Typography>
-                <RoundedBox sx={{ p: 2 }}>
+                <RoundedBox sx={{ p: 2, borderRadius: '4px' }}>
                   <TextField
                     fullWidth
                     placeholder="10"
@@ -318,7 +318,7 @@ export const JobRequest = ({
                 <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
                   Currency
                 </Typography>
-                <RoundedBox sx={{ p: 1 }}>
+                <RoundedBox sx={{ p: 1, borderRadius: '4px' }}>
                   <Select
                     size="small"
                     variant="filled"
