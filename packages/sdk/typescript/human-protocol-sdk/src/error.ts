@@ -114,11 +114,6 @@ export const ErrorInvalidEscrowAddressProvided = new Error(
 );
 
 /**
- * @constant {Error} - Error stakers not found.
- */
-export const ErrorStakingStakersNotFound = new Error('Error stakers not found');
-
-/**
  * @constant {Error} - Error getting stakers data.
  */
 export const ErrorStakingGetStakers = new Error('Error getting stakers data');
@@ -176,6 +171,36 @@ export class InvalidArgumentError extends EthereumError {
 export class OutOfGasError extends EthereumError {
   constructor(message: string) {
     super(`Out of gas: ${message}`);
+  }
+}
+
+export class UnpredictableGasLimit extends EthereumError {
+  constructor(message: string) {
+    super(`Unpredictable gas limit: ${message}`);
+  }
+}
+
+export class ReplacementUnderpriced extends EthereumError {
+  constructor(message: string) {
+    super(`Replacement underpriced: ${message}`);
+  }
+}
+
+export class NumericFault extends EthereumError {
+  constructor(message: string) {
+    super(`Numeric fault: ${message}`);
+  }
+}
+
+export class NonceExpired extends EthereumError {
+  constructor(message: string) {
+    super(`Nonce expired: ${message}`);
+  }
+}
+
+export class TransactionReplaced extends EthereumError {
+  constructor(message: string) {
+    super(`Transaction replaced: ${message}`);
   }
 }
 

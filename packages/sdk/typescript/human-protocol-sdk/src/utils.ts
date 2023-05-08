@@ -14,7 +14,18 @@ import {
   RewardPool__factory,
   ERC1967Proxy__factory,
 } from '@human-protocol/core/typechain-types';
-import { ErrorNoURLprovided } from './error';
+import {
+  ContractExecutionError,
+  ErrorNoURLprovided,
+  EthereumError,
+  InvalidArgumentError,
+  NonceExpired,
+  NumericFault,
+  OutOfGasError,
+  ReplacementUnderpriced,
+  TransactionReplaced,
+  UnpredictableGasLimit,
+} from './error';
 
 /**
  * **Get HMToken contract instance at given address**
@@ -240,4 +251,33 @@ export const gqlFetch = (
  */
 export const toBigNumber = (value: string | number) => {
   return BigNumber.from(value);
+};
+
+/**
+ * **Convert entity to BigNumber*
+ *
+ * @param {any} value
+ * @returns
+ */
+export const throwError = (e: any) => {
+  if (e.code === ethers.utils.Logger.errors.INVALID_ARGUMENT) {
+    throw new InvalidArgumentError(e.message);
+  } else if (e.code === 'OUT_OF_GAS') {
+    throw new OutOfGasError(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.CALL_EXCEPTION) {
+    const reason = getRevertReason(e.data);
+    throw new ContractExecutionError(reason);
+  } else if (e.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+    throw new UnpredictableGasLimit(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.TRANSACTION_REPLACED) {
+    throw new TransactionReplaced(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
+    throw new ReplacementUnderpriced(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.NUMERIC_FAULT) {
+    throw new NumericFault(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.NONCE_EXPIRED) {
+    throw new NonceExpired(e.message);
+  } else {
+    throw new EthereumError(e.message);
+  }
 };

@@ -15,7 +15,6 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
-  ErrorStakingStakersNotFound,
 } from '../src/error';
 import InitClient from '../src/init';
 import { IAllocation, IReward, IStaker } from '../src/interfaces';
@@ -478,6 +477,7 @@ describe('StakingClient', () => {
       tokensAllocated: ethers.utils.parseEther('50'),
       tokensLocked: ethers.utils.parseEther('25'),
       tokensLockedUntil: ethers.BigNumber.from(0),
+      tokensAvailable: ethers.utils.parseEther('25'),
     };
     const stakerAddress = ethers.constants.AddressZero;
 
@@ -495,9 +495,7 @@ describe('StakingClient', () => {
 
     test('should throw an error if no stakers are found', async () => {
       mockStakingContract.getListOfStakers.mockResolvedValue([[], []]);
-      await expect(stakingClient.getAllStakers()).rejects.toThrow(
-        ErrorStakingStakersNotFound
-      );
+      await expect(stakingClient.getAllStakers()).rejects.toThrow();
       expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
     });
 

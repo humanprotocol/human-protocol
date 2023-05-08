@@ -11,18 +11,14 @@ import { BigNumber, ethers, Signer } from 'ethers';
 import { NetworkData } from './types';
 import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
 import {
-  ContractExecutionError,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
-  ErrorStakingStakersNotFound,
-  EthereumError,
-  InvalidArgumentError,
-  OutOfGasError,
+  ErrorStakingGetStakers,
 } from './error';
-import { getRevertReason, gqlFetch, toBigNumber } from './utils';
+import { gqlFetch, throwError, toBigNumber } from './utils';
 import { RAW_REWARDS_QUERY } from './queries';
 
 export default class StakingClient {
@@ -72,16 +68,7 @@ export default class StakingClient {
       await this.tokenContract.approve(this.stakingContract.address, amount);
       return;
     } catch (e) {
-      if (e.code === 'INVALID_ARGUMENT') {
-        throw new InvalidArgumentError(e.message);
-      } else if (e.code === 'OUT_OF_GAS') {
-        throw new OutOfGasError(e.message);
-      } else if (e.code === 'CALL_EXCEPTION') {
-        const reason = getRevertReason(e.data);
-        throw new ContractExecutionError(reason);
-      } else {
-        throw new EthereumError(e.message);
-      }
+      return throwError(e);
     }
   }
 
@@ -105,7 +92,7 @@ export default class StakingClient {
       await this.stakingContract.stake(amount);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -130,7 +117,7 @@ export default class StakingClient {
       await this.stakingContract.unstake(amount);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -145,7 +132,7 @@ export default class StakingClient {
       await this.stakingContract.withdraw();
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -190,7 +177,7 @@ export default class StakingClient {
       await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -222,7 +209,7 @@ export default class StakingClient {
       await this.stakingContract.allocate(escrowAddress, amount);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -242,7 +229,7 @@ export default class StakingClient {
       await this.stakingContract.closeAllocation(escrowAddress);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -267,7 +254,7 @@ export default class StakingClient {
       await rewardPoolContract.distributeReward(escrowAddress);
       return;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -303,7 +290,7 @@ export default class StakingClient {
         tokensAvailable,
       };
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -318,12 +305,29 @@ export default class StakingClient {
       const result = await this.stakingContract.getListOfStakers();
 
       if (result[1].length === 0) {
-        throw ErrorStakingStakersNotFound;
+        throw ErrorStakingGetStakers;
       }
 
-      return result[1];
+      return result[1].map((staker: any) => {
+        const tokensStaked = toBigNumber(staker.tokensStaked),
+          tokensAllocated = toBigNumber(staker.tokensAllocated),
+          tokensLocked = toBigNumber(staker.tokensLocked),
+          tokensLockedUntil = toBigNumber(staker.tokensLockedUntil);
+
+        const tokensAvailable = tokensStaked
+          .sub(tokensAllocated)
+          .sub(tokensLocked);
+
+        return {
+          tokensStaked,
+          tokensAllocated,
+          tokensLocked,
+          tokensLockedUntil,
+          tokensAvailable,
+        };
+      });
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -343,7 +347,7 @@ export default class StakingClient {
       const result = await this.stakingContract.getAllocation(escrowAddress);
       return result;
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 
@@ -374,7 +378,7 @@ export default class StakingClient {
         };
       });
     } catch (e) {
-      throw new Error(e.message);
+      return throwError(e);
     }
   }
 }
