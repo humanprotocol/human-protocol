@@ -10,6 +10,7 @@ import {
   Owner,
   Profile,
   Staking,
+  ConfigureOracle,
 } from 'src/pages';
 
 interface Route {
@@ -73,5 +74,11 @@ export const routes: Array<Route> = [
     title: 'Staking',
     path: '/staking',
     component: Staking,
+  },
+  {
+    key: 'configure-oracle-route',
+    title: 'Configure Oracle',
+    path: '/configure-oracle',
+    component: ConfigureOracle,
   },
 ];

@@ -17,7 +17,7 @@ export const HMTStatusTable = () => {
       <Paper
         sx={{
           width: '100%',
-          borderRadius: '16px',
+          borderRadius: { xs: '8px', xl: '16px' },
           boxShadow:
             '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2)',
           pt: 2,

@@ -24,7 +24,7 @@ export const Staking: FC = () => (
       }}
     >
       <ViewTitle title="My HMT" iconUrl={humanTokenSvg} />
-      <Button color="primary" variant="contained">
+      <Button color="primary" variant="contained" href="/configure-oracle">
         Configure your Oracle
       </Button>
     </Box>

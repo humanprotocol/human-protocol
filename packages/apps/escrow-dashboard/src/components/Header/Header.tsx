@@ -160,6 +160,7 @@ export const Header: FC = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 width: '100%',
+                height: '104px',
                 boxSizing: 'border-box',
                 padding: {
                   xs: '30px 8px 26px',
