@@ -67,22 +67,33 @@ const RewardCard = ({
 }) => {
   return (
     <Box
-      sx={{ border: '1px solid #CBCFE6', borderRadius: '16px', py: 2, px: 3 }}
+      sx={{
+        border: '1px solid #CBCFE6',
+        borderRadius: '16px',
+        py: 2,
+        px: 3,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}
     >
       <Typography fontWeight={500} color="primary" gutterBottom>
         {title}
       </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
-        <Typography variant="h4" fontWeight={600} color="primary">
-          0.00
-        </Typography>
-        <Typography fontSize={14} fontWeight={600} color="primary">
-          HMT
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 1 }}>
+          <Typography variant="h4" fontWeight={600} color="primary">
+            0.00
+          </Typography>
+          <Typography fontSize={14} fontWeight={600} color="primary">
+            HMT
+          </Typography>
+        </Box>
+        <Typography variant="body2" fontWeight={600} color="text.secondary">
+          $0.00
         </Typography>
       </Box>
-      <Typography variant="body2" fontWeight={600} color="text.secondary">
-        $0.00
-      </Typography>
     </Box>
   );
 };
@@ -92,7 +103,7 @@ type RewardsHistoryProps = {};
 export const RewardsHistory: FC<RewardsHistoryProps> = () => {
   return (
     <Container>
-      <Grid container spacing={{ md: 4, xl: 8 }}>
+      <Grid container spacing={{ xs: 4, xl: 8 }}>
         <Grid item xs={12} lg={7} xl={6}>
           <Box
             sx={{
@@ -169,13 +180,13 @@ export const RewardsHistory: FC<RewardsHistoryProps> = () => {
             </Box>
           </Box>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ display: 'flex' }}>
               <RewardCard title="Worker Payouts" hmtValue={0} usdValue={0} />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ display: 'flex' }}>
               <RewardCard title="Oracle Fees" hmtValue={0} usdValue={0} />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={4} sx={{ display: 'flex' }}>
               <RewardCard title="Slashing Rewards" hmtValue={0} usdValue={0} />
             </Grid>
           </Grid>
