@@ -323,19 +323,19 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Invalid or missing token spender');
       });
 
-      it('Should revert with the right error if stake out of bounds and too high', async function () {
+      it('Should revert with the right error if fee percentage out of bounds and too high', async function () {
         await expect(
           escrow
             .connect(owner)
             .setup(
               await reputationOracle.getAddress(),
               await recordingOracle.getAddress(),
-              500,
-              500,
+              80,
+              80,
               MOCK_URL,
               MOCK_HASH
             )
-        ).to.be.revertedWith('Stake out of bounds');
+        ).to.be.revertedWith('Percentage out of bounds');
       });
     });
 

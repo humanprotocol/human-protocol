@@ -312,7 +312,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "recordingOracleStake",
+		"name": "recordingOracleFeePercentage",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -338,7 +338,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "reputationOracleStake",
+		"name": "reputationOracleFeePercentage",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -363,12 +363,12 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "_reputationOracleStake",
+				"name": "_reputationOracleFeePercentage",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "_recordingOracleStake",
+				"name": "_recordingOracleFeePercentage",
 				"type": "uint256"
 			},
 			{
