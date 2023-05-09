@@ -454,7 +454,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         _safeTransfer(rewardPool, _tokens);
 
         // Keep record on Reward Pool
-        IRewardPool(rewardPool).addReward(_escrowAddress, _slasher, _tokens);
+        IRewardPool(rewardPool).addReward(
+            _escrowAddress,
+            _staker,
+            _slasher,
+            _tokens
+        );
 
         emit StakeSlashed(_staker, _tokens, _escrowAddress, _slasher);
     }

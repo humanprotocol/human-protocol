@@ -131,7 +131,7 @@ dataSources:
         - name: RewardPool
           file: '{{{ RewardPool.abi }}}'
       eventHandlers:
-        - event: RewardAdded(indexed address,indexed address,uint256)
+        - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping/RewardPool.ts
 templates:
