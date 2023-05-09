@@ -1,11 +1,7 @@
 import {
   Box,
   Button,
-  FormControl,
-  Grid,
-  InputLabel,
   Link,
-  NativeSelect,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -19,7 +15,7 @@ type StakeProps = {};
 type Mode = 'stake' | 'unstake';
 
 export const Stake: FC<StakeProps> = () => {
-  const [mode, setMode] = useState<Mode>();
+  const [mode, setMode] = useState<Mode>('stake');
   const [isSuccess, setIsSuccess] = useState(false);
   return (
     <Container>
@@ -46,47 +42,9 @@ export const Stake: FC<StakeProps> = () => {
                 Unstake HMT
               </ToggleButton>
             </ToggleButtonGroup>
-            <Box mt={4} mb={5}>
-              <Grid container spacing={4} sx={{ mb: 5 }}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel variant="standard" htmlFor="network-selector">
-                      Network
-                    </InputLabel>
-                    <NativeSelect
-                      defaultValue={30}
-                      inputProps={{
-                        name: 'network',
-                        id: 'network-selector',
-                      }}
-                    >
-                      <option value={10}>Polygon</option>
-                      <option value={20}>BSC</option>
-                      <option value={30}>Avalanche</option>
-                    </NativeSelect>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel variant="standard" htmlFor="role-selector">
-                      Staking as:
-                    </InputLabel>
-                    <NativeSelect
-                      defaultValue={30}
-                      inputProps={{
-                        name: 'role',
-                        id: 'role-selector',
-                      }}
-                    >
-                      <option value={10}>Job Launcher</option>
-                      <option value={20}>Exchange Oracle</option>
-                      <option value={30}>Reputation Oracle</option>
-                    </NativeSelect>
-                  </FormControl>
-                </Grid>
-              </Grid>
+            <Box my={4}>
+              <CurrencyInput placeholder="Enter amount to stake" />
             </Box>
-            <CurrencyInput placeholder="Enter amount to stake" />
             <Box my={3}>
               <Typography
                 color="primary"

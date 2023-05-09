@@ -10,10 +10,10 @@ import {
   HMTStatusTable,
   HMTStatusChart,
   RewardsHistory,
-} from 'src/components/Staking';
+} from 'src/components/MyHMT';
 import { ViewTitle } from 'src/components/ViewTitle';
 
-export const Staking: FC = () => (
+export const MyHMT: FC = () => (
   <PageWrapper>
     <Box
       sx={{

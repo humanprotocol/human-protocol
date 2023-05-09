@@ -9,7 +9,7 @@ import {
   Main,
   Owner,
   Profile,
-  Staking,
+  MyHMT,
   ConfigureOracle,
 } from 'src/pages';
 
@@ -70,10 +70,10 @@ export const routes: Array<Route> = [
     component: Faucet,
   },
   {
-    key: 'staking-route',
-    title: 'Staking',
-    path: '/staking',
-    component: Staking,
+    key: 'my-hmt-route',
+    title: 'My HMT',
+    path: '/my-hmt',
+    component: MyHMT,
   },
   {
     key: 'configure-oracle-route',

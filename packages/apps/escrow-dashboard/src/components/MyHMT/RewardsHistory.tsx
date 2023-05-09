@@ -93,7 +93,7 @@ export const RewardsHistory: FC<RewardsHistoryProps> = () => {
   return (
     <Container>
       <Grid container spacing={{ md: 4, xl: 8 }}>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={7} xl={6}>
           <Box
             sx={{
               background: '#F6F7FE',
@@ -180,7 +180,7 @@ export const RewardsHistory: FC<RewardsHistoryProps> = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} lg={6}>
+        <Grid item xs={12} lg={5} xl={6}>
           <Box sx={{ width: '100%', height: '400px' }}>
             <ResponsiveContainer>
               <AreaChart

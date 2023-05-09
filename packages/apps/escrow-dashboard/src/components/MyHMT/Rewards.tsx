@@ -1,11 +1,7 @@
 import {
   Box,
   Button,
-  FormControl,
-  Grid,
-  InputLabel,
   Link,
-  NativeSelect,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -19,7 +15,7 @@ type RewardsProps = {};
 type Mode = 'claim' | 'reinvest';
 
 export const Rewards: FC<RewardsProps> = () => {
-  const [mode, setMode] = useState<Mode>();
+  const [mode, setMode] = useState<Mode>('claim');
   const [isSuccess, setIsSuccess] = useState(false);
 
   return (
@@ -40,36 +36,16 @@ export const Rewards: FC<RewardsProps> = () => {
               onChange={(e, newMode) => setMode(newMode)}
               fullWidth
             >
-              <ToggleButton color="primary" value="stake">
+              <ToggleButton color="primary" value="claim">
                 Claim Rewards
               </ToggleButton>
-              <ToggleButton color="primary" value="unstake">
+              <ToggleButton color="primary" value="reinvest">
                 Reinvest Rewards
               </ToggleButton>
             </ToggleButtonGroup>
-            <Box mt={4} mb={5}>
-              <Grid container spacing={4}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel variant="standard" htmlFor="network-selector">
-                      Network
-                    </InputLabel>
-                    <NativeSelect
-                      defaultValue={30}
-                      inputProps={{
-                        name: 'network',
-                        id: 'network-selector',
-                      }}
-                    >
-                      <option value={10}>Polygon</option>
-                      <option value={20}>BSC</option>
-                      <option value={30}>Avalanche</option>
-                    </NativeSelect>
-                  </FormControl>
-                </Grid>
-              </Grid>
+            <Box my={4}>
+              <CurrencyInput placeholder="Enter amount to claim" />
             </Box>
-            <CurrencyInput placeholder="Enter amount to claim" />
           </Box>
           <Button
             color="primary"
