@@ -373,7 +373,7 @@ class StakingTestCase(unittest.TestCase):
             mock_function.assert_called_once_with(
                 "subgraph_url",
                 """
-rewardAddedEvents(where:{staker:"slasher1"}) {
+rewardAddedEvents(where:{slasher:"slasher1"}) {
     escrow
     amount
 }""",

@@ -344,7 +344,7 @@ class StakingClient:
         reward_added_events_data = get_data_from_subgraph(
             self.network["subgraph_url"],
             """
-rewardAddedEvents(where:{{staker:"{0}"}}) {{
+rewardAddedEvents(where:{{slasher:"{0}"}}) {{
     escrow
     amount
 }}""".format(
