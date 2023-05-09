@@ -16,6 +16,7 @@ from human_protocol_sdk.utils import (
     get_factory_interface,
     get_staking_interface,
     get_reward_pool_interface,
+    get_data_from_subgraph,
 )
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
@@ -340,8 +341,25 @@ class StakingClient:
             List[dict]: List of rewards info
         """
 
-        # TODO:
-        pass
+        reward_added_events_data = get_data_from_subgraph(
+            self.network["subgraph_url"],
+            """
+rewardAddedEvents(where:{{slasher:"{0}"}}) {{
+    escrow
+    amount
+}}""".format(
+                slasher
+            ),
+        )
+        reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
+
+        return [
+            {
+                "escrow_address": reward_added_events[i]["escrow"],
+                "amount": reward_added_events[i]["amount"],
+            }
+            for i in range(len(reward_added_events))
+        ]
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.

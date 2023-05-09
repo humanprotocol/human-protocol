@@ -3,6 +3,7 @@ import logging
 import time
 from typing import Tuple, Optional
 
+import requests
 from web3.contract import Contract
 from web3.types import TxReceipt
 
@@ -110,8 +111,8 @@ def get_contract_interface(contract_entrypoint):
     with open(contract_entrypoint) as f:
         contract_interface = json.load(f)
     return contract_interface
-    
-        
+
+
 def get_hmtoken_interface():
     """Retrieve the HMToken interface.
 
@@ -190,3 +191,15 @@ def get_kvstore_interface():
     return get_contract_interface(
         "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
     )
+
+
+def get_data_from_subgraph(url: str, query: str):
+    request = requests.post(url, json={"query": query})
+    if request.status_code == 200:
+        return request.json()
+    else:
+        raise Exception(
+            "Subgraph query failed. return code is {}.      {}".format(
+                request.status_code, query
+            )
+        )
