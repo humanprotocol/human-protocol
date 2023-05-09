@@ -121,7 +121,7 @@ export const Header: FC = () => {
         position="fixed"
         sx={{
           background: 'rgba(255, 255, 255, 0.8)',
-          boxShadow: '0px 4px 120px rgba(218, 222, 240, 0.8)',
+          boxShadow: 'none',
           backdropFilter: 'blur(9px)',
         }}
       >
