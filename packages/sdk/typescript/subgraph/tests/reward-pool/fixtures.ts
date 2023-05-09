@@ -4,6 +4,7 @@ import { ethereum, Address, BigInt } from '@graphprotocol/graph-ts';
 
 export function createRewardAddedEvent(
   escrowAddress: string,
+  staker: string,
   slasher: string,
   tokens: i32,
   timestamp: BigInt
@@ -17,6 +18,12 @@ export function createRewardAddedEvent(
     new ethereum.EventParam(
       'escrowAddress',
       ethereum.Value.fromAddress(Address.fromString(escrowAddress))
+    )
+  );
+  newRewardAddedEvent.parameters.push(
+    new ethereum.EventParam(
+      'staker',
+      ethereum.Value.fromAddress(Address.fromString(staker))
     )
   );
   newRewardAddedEvent.parameters.push(

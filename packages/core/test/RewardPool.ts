@@ -148,6 +148,7 @@ describe('RewardPool', function () {
           .addReward(
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
             1
           )
       ).to.be.revertedWith('Caller is not staking contract');
@@ -186,6 +187,7 @@ describe('RewardPool', function () {
         .to.emit(rewardPool, 'RewardAdded')
         .withArgs(
           escrowAddress,
+          await operator.getAddress(),
           await validator.getAddress(),
           slashedTokens - rewardFee
         );
