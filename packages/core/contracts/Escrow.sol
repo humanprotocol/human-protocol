@@ -17,6 +17,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     string constant ERROR_ZERO_ADDRESS = 'Escrow: zero address';
 
+    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
+    uint32 private constant BULK_MAX_COUNT = 100;
+
     event TrustedHandlerAdded(address _handler);
     event IntermediateStorage(address _sender, string _url, string _hash);
     event Pending(string manifest, string hash);
@@ -36,10 +39,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     address public launcher;
     address payable public canceler;
 
-    uint256 public reputationOracleStake;
-    uint256 public recordingOracleStake;
-    uint256 private constant BULK_MAX_VALUE = 1e9 * (10 ** 18);
-    uint32 private constant BULK_MAX_COUNT = 100;
+    uint8 public reputationOracleFeePercentage;
+    uint8 public recordingOracleFeePercentage;
 
     address public token;
 
@@ -98,8 +99,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function setup(
         address _reputationOracle,
         address _recordingOracle,
-        uint256 _reputationOracleStake,
-        uint256 _recordingOracleStake,
+        uint8 _reputationOracleFeePercentage,
+        uint8 _recordingOracleFeePercentage,
         string memory _url,
         string memory _hash
     ) external override trusted notExpired {
@@ -111,8 +112,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recordingOracle != address(0),
             'Invalid or missing token spender'
         );
-        uint256 totalStake = _reputationOracleStake.add(_recordingOracleStake);
-        require(totalStake <= 100, 'Stake out of bounds');
+        uint256 _totalFeePercentage = uint256(_reputationOracleFeePercentage) +
+            uint256(_recordingOracleFeePercentage);
+        require(_totalFeePercentage <= 100, 'Percentage out of bounds');
+
         require(
             status == EscrowStatuses.Launched,
             'Escrow not in Launched status state'
@@ -123,8 +126,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         areTrustedHandlers[reputationOracle] = true;
         areTrustedHandlers[recordingOracle] = true;
 
-        reputationOracleStake = _reputationOracleStake;
-        recordingOracleStake = _recordingOracleStake;
+        reputationOracleFeePercentage = _reputationOracleFeePercentage;
+        recordingOracleFeePercentage = _recordingOracleFeePercentage;
 
         manifestUrl = _url;
         manifestHash = _hash;
@@ -216,6 +219,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             _recipients.length == _amounts.length,
             "Amount of recipients and values don't match"
         );
+        require(_amounts.length > 0, 'Amounts should not be empty');
         require(_recipients.length < BULK_MAX_COUNT, 'Too many recipients');
         require(
             status != EscrowStatuses.Complete &&
@@ -274,12 +278,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
-            uint256 singleReputationOracleFee = reputationOracleStake
-                .mul(_amounts[j])
-                .div(100);
-            uint256 singleRecordingOracleFee = recordingOracleStake
-                .mul(_amounts[j])
-                .div(100);
+            uint256 singleReputationOracleFee = uint256(
+                reputationOracleFeePercentage
+            ).mul(_amounts[j]).div(100);
+            uint256 singleRecordingOracleFee = uint256(
+                recordingOracleFeePercentage
+            ).mul(_amounts[j]).div(100);
             uint256 amount = _amounts[j].sub(singleReputationOracleFee).sub(
                 singleRecordingOracleFee
             );
