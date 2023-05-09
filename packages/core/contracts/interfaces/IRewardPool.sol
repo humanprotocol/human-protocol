@@ -8,14 +8,16 @@ interface IRewardPool {
      */
     struct Reward {
         address escrowAddress;
+        address staker;
         address slasher;
         uint256 tokens; // Tokens allocated to a escrowAddress
     }
 
     function addReward(
         address _escrowAddress,
-        address slasher,
-        uint256 tokens
+        address _staker,
+        address _slasher,
+        uint256 _tokens
     ) external;
 
     function getRewards(
