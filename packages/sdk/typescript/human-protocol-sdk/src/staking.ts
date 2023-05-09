@@ -19,6 +19,7 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
+  ErrorSigner,
   ErrorStakingGetStakers,
 } from './error';
 import { gqlFetch, throwError, toBigNumber } from './utils';

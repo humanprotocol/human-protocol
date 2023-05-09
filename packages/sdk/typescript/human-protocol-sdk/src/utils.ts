@@ -28,7 +28,7 @@ import {
 } from './error';
 
 /**
- * **Get HMToken contract instance at given address**
+ * **Get HMToken contract instance at given address.**
  *
  * @param {string} hmTokenAddr HMToken contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -46,7 +46,7 @@ export const getHmToken = async (
 };
 
 /**
- * **Deploy EscrowFactory contract**
+ * **Deploy EscrowFactory contract.**
  *
  * @param {string} stakingAddr Staking address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -74,7 +74,7 @@ export const deployEscrowFactory = async (
 };
 
 /**
- * **Get EscrowFactory contract instance at given address**
+ * **Get EscrowFactory contract instance at given address.**
  *
  * @param {string} factoryAddr EscrowFactory contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -92,7 +92,7 @@ export const getEscrowFactory = async (
 };
 
 /**
- * **Get Escrow contract instance at given address**
+ * **Get Escrow contract instance at given address.**
  *
  * @param {string} escrowAddr Escrow contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -110,7 +110,7 @@ export const getEscrow = async (
 };
 
 /**
- * **Deploy Staking contract**
+ * **Deploy Staking contract.**
  *
  * @param {string} hmTokenAddr HMToken address
  * @param {number} minimumStake Minimum amount to stake
@@ -139,7 +139,7 @@ export const deployStaking = async (
 };
 
 /**
- * **Get Staking contract instance at given address**
+ * **Get Staking contract instance at given address.**
  *
  * @param {string} stakingAddr Staking contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -157,7 +157,7 @@ export const getStaking = async (
 };
 
 /**
- * **Deploy RewardPool contract**
+ * **Deploy RewardPool contract.**
  *
  * @param {string} hmTokenAddr HMToken address
  * @param {string} stakingAddr Staking address
@@ -186,7 +186,7 @@ export const deployRewardPool = async (
 };
 
 /**
- * **Get specific amount representation in given decimals**
+ * **Get specific amount representation in given decimals.**
  *
  * Apply given decimals to the specified amount.
  *
@@ -244,7 +244,7 @@ export const gqlFetch = (
 };
 
 /**
- * **Convert entity to BigNumber*
+ * **Convert entity to BigNumber.*
  *
  * @param {any} value
  * @returns
@@ -254,7 +254,7 @@ export const toBigNumber = (value: string | number) => {
 };
 
 /**
- * **Convert entity to BigNumber*
+ * **Handle and throw the error.*
  *
  * @param {any} value
  * @returns
