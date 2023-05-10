@@ -152,7 +152,7 @@ templates:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
       eventHandlers:
-        - event: IntermediateStorage(address,string,string)
+        - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage
         - event: Pending(string,string)
           handler: handlePending

@@ -21,7 +21,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event TrustedHandlerAdded(address _handler);
-    event IntermediateStorage(address _sender, string _url, string _hash);
+    event IntermediateStorage(string _url, string _hash);
     event Pending(string manifest, string hash);
     event BulkTransfer(
         uint256 indexed _txId,
@@ -169,7 +169,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     }
 
     function storeResults(
-        address _sender,
         string memory _url,
         string memory _hash
     ) external override trusted notExpired {
@@ -179,7 +178,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
             'Escrow not in Pending or Partial status state'
         );
         _storeResult(_url, _hash);
-        emit IntermediateStorage(_sender, _url, _hash);
+        emit IntermediateStorage(_url, _hash);
     }
 
     /**
