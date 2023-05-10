@@ -642,7 +642,6 @@ export class Job {
     const resultStored = await this._raffleExecute(
       this.contractData.escrow,
       'storeResults',
-      sender,
       key,
       hash
     );

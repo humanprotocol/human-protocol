@@ -16,10 +16,7 @@ export function createISEvent(
     newMockEvent()
   );
   newIntermediateStorageEvent.parameters = [];
-  const senderParam = new ethereum.EventParam(
-    '_sender',
-    ethereum.Value.fromAddress(sender)
-  );
+  newIntermediateStorageEvent.transaction.from = sender;
   const urlParam = new ethereum.EventParam(
     '_url',
     ethereum.Value.fromString(url)
@@ -29,7 +26,6 @@ export function createISEvent(
     ethereum.Value.fromString(hash)
   );
 
-  newIntermediateStorageEvent.parameters.push(senderParam);
   newIntermediateStorageEvent.parameters.push(urlParam);
   newIntermediateStorageEvent.parameters.push(hashParam);
 
