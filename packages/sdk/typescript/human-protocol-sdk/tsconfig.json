@@ -10,7 +10,9 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "types": ["node", "jest"],
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
   },
   "include": ["./src"]
 }

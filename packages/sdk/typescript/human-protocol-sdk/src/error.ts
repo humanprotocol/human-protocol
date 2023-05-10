@@ -89,6 +89,76 @@ export const ErrorKVStoreArrayLength = new Error(
 export const ErrorInvalidAddress = new Error('Invalid address');
 
 /**
+ * @constant {Error} - The Staking value must be positive.
+ */
+export const ErrorStakingValueMustBePositive = new Error(
+  'Value must be positive'
+);
+
+/**
+ * @constant {Error} - Invalid staking value: amount must be a BigNumber.
+ */
+export const ErrorInvalidStakingValueType = new Error(
+  'Invalid staking value: amount must be a BigNumber'
+);
+
+/**
+ * @constant {Error} - Invalid staking value: amount must be positive.
+ */
+export const ErrorInvalidStakingValueSign = new Error(
+  'Invalid staking value: amount must be positive'
+);
+
+/**
+ * @constant {Error} - Invalid slasher address provided.
+ */
+export const ErrorInvalidSlasherAddressProvided = new Error(
+  'Invalid slasher address provided'
+);
+
+/**
+ * @constant {Error} - Invalid staker address provided.
+ */
+export const ErrorInvalidStakerAddressProvided = new Error(
+  'Invalid staker address provided'
+);
+
+/**
+ * @constant {Error} - Invalid escrow address provided.
+ */
+export const ErrorInvalidEscrowAddressProvided = new Error(
+  'Invalid escrow address provided'
+);
+
+/**
+ * @constant {Error} - Escrow address is not provided by the factory.
+ */
+export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
+  'Escrow address is not provided by the factory'
+);
+
+/**
+ * @constant {Error} - Error getting stakers data.
+ */
+export const ErrorStakingGetStakers = new Error('Error getting stakers data');
+
+/**
+ * @constant {Error} - Failed to approve staking amount: signerOrProvider is not a Signer instance.
+ */
+export const ErrorFailedToApproveStakingAmountSignerDoesNotExist = new Error(
+  'Failed to approve staking amount: signerOrProvider is not a Signer instance'
+);
+
+export const ErrorFailedToCheckAllowance = new Error(
+  'Failed to check allowance'
+);
+
+/**
+ * @constant {Error} - The HMToken amount not approved.
+ */
+export const ErrorHMTokenAmountNotApproved = new Error('Amount not approved');
+
+/**
  * @constant {Error} - Init provider does not exists.
  */
 export const ErrorInitProviderDoesNotExist = new Error(
@@ -101,6 +171,65 @@ export const ErrorInitProviderDoesNotExist = new Error(
 export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
 
 /**
+ * @constant {Error} - No URL provided.
+ */
+export const ErrorNoURLprovided = new Error('No URL provided');
+
+/**
  * @constant {Error} - Sending a transaction requires a signer.
  */
 export const ErrorSigner = new Error('Signer required');
+
+export class EthereumError extends Error {
+  constructor(message: string) {
+    super(`An error occurred while interacting with Ethereum: ${message}`);
+  }
+}
+
+export class InvalidArgumentError extends EthereumError {
+  constructor(message: string) {
+    super(`Invalid argument: ${message}`);
+  }
+}
+
+export class OutOfGasError extends EthereumError {
+  constructor(message: string) {
+    super(`Out of gas: ${message}`);
+  }
+}
+
+export class UnpredictableGasLimit extends EthereumError {
+  constructor(message: string) {
+    super(`Unpredictable gas limit: ${message}`);
+  }
+}
+
+export class ReplacementUnderpriced extends EthereumError {
+  constructor(message: string) {
+    super(`Replacement underpriced: ${message}`);
+  }
+}
+
+export class NumericFault extends EthereumError {
+  constructor(message: string) {
+    super(`Numeric fault: ${message}`);
+  }
+}
+
+export class NonceExpired extends EthereumError {
+  constructor(message: string) {
+    super(`Nonce expired: ${message}`);
+  }
+}
+
+export class TransactionReplaced extends EthereumError {
+  constructor(message: string) {
+    super(`Transaction replaced: ${message}`);
+  }
+}
+
+export class ContractExecutionError extends EthereumError {
+  constructor(reason: string) {
+    super(`Contract execution error: ${reason}`);
+  }
+}

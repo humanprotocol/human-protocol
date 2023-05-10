@@ -8,7 +8,7 @@ import {
   ErrorKVStoreEmptyKey,
   ErrorSigner,
 } from '../src/error';
-import { InitClient } from '../src/init';
+import InitClient from '../src/init';
 import { ChainId } from '../src/enums';
 import { NETWORKS } from '../src/constants';
 import { NetworkData } from '../src/types';

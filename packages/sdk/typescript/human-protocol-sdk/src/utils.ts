@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
+import axios from 'axios';
 
 import {
   Escrow,
@@ -13,9 +14,21 @@ import {
   RewardPool__factory,
   ERC1967Proxy__factory,
 } from '@human-protocol/core/typechain-types';
+import {
+  ContractExecutionError,
+  ErrorNoURLprovided,
+  EthereumError,
+  InvalidArgumentError,
+  NonceExpired,
+  NumericFault,
+  OutOfGasError,
+  ReplacementUnderpriced,
+  TransactionReplaced,
+  UnpredictableGasLimit,
+} from './error';
 
 /**
- * **Get HMToken contract instance at given address**
+ * **Get HMToken contract instance at given address.**
  *
  * @param {string} hmTokenAddr HMToken contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -33,7 +46,7 @@ export const getHmToken = async (
 };
 
 /**
- * **Deploy EscrowFactory contract**
+ * **Deploy EscrowFactory contract.**
  *
  * @param {string} stakingAddr Staking address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -61,7 +74,7 @@ export const deployEscrowFactory = async (
 };
 
 /**
- * **Get EscrowFactory contract instance at given address**
+ * **Get EscrowFactory contract instance at given address.**
  *
  * @param {string} factoryAddr EscrowFactory contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -79,7 +92,7 @@ export const getEscrowFactory = async (
 };
 
 /**
- * **Get Escrow contract instance at given address**
+ * **Get Escrow contract instance at given address.**
  *
  * @param {string} escrowAddr Escrow contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -97,7 +110,7 @@ export const getEscrow = async (
 };
 
 /**
- * **Deploy Staking contract**
+ * **Deploy Staking contract.**
  *
  * @param {string} hmTokenAddr HMToken address
  * @param {number} minimumStake Minimum amount to stake
@@ -126,7 +139,7 @@ export const deployStaking = async (
 };
 
 /**
- * **Get Staking contract instance at given address**
+ * **Get Staking contract instance at given address.**
  *
  * @param {string} stakingAddr Staking contract address
  * @param {ethers.Signer | undefined} signer Deployer signer
@@ -144,7 +157,7 @@ export const getStaking = async (
 };
 
 /**
- * **Deploy RewardPool contract**
+ * **Deploy RewardPool contract.**
  *
  * @param {string} hmTokenAddr HMToken address
  * @param {string} stakingAddr Staking address
@@ -173,7 +186,7 @@ export const deployRewardPool = async (
 };
 
 /**
- * **Get specific amount representation in given decimals**
+ * **Get specific amount representation in given decimals.**
  *
  * Apply given decimals to the specified amount.
  *
@@ -186,4 +199,75 @@ export const toFullDigit = (
   decimals = 18
 ): BigNumber => {
   return BigNumber.from(amount).mul(BigNumber.from(10).pow(decimals));
+};
+
+/**
+ * **Get specific error text.*
+ *
+ * @param {any} error - An error message.
+ * @returns
+ */
+export const getRevertReason = (error: any): string => {
+  const prefix = "reverted with reason string '";
+  const suffix = "'";
+  const message = error.data.substring(
+    error.data.indexOf(prefix) + prefix.length
+  );
+  return message.substring(0, message.indexOf(suffix));
+};
+
+/**
+ * **Fetching data with queries.*
+ *
+ * @param {string} url
+ * @param {string} query
+ * @param {any} variables
+ * @param {any} headers
+ * @returns
+ */
+export const gqlFetch = (
+  url: string,
+  query: string,
+  variables?: any,
+  headers?: any
+) => {
+  if (url && url.length) {
+    return axios.post(url, JSON.stringify({ query, variables }), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+    });
+  } else {
+    return Promise.reject(ErrorNoURLprovided);
+  }
+};
+
+/**
+ * **Handle and throw the error.*
+ *
+ * @param {any} e - Error object
+ * @returns
+ */
+export const throwError = (e: any) => {
+  if (e.code === ethers.utils.Logger.errors.INVALID_ARGUMENT) {
+    throw new InvalidArgumentError(e.message);
+  } else if (e.code === 'OUT_OF_GAS') {
+    throw new OutOfGasError(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.CALL_EXCEPTION) {
+    const reason = getRevertReason(e.data);
+    throw new ContractExecutionError(reason);
+  } else if (e.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+    throw new UnpredictableGasLimit(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.TRANSACTION_REPLACED) {
+    throw new TransactionReplaced(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
+    throw new ReplacementUnderpriced(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.NUMERIC_FAULT) {
+    throw new NumericFault(e.message);
+  } else if (e.code === ethers.utils.Logger.errors.NONCE_EXPIRED) {
+    throw new NonceExpired(e.message);
+  } else {
+    throw new EthereumError(e.message);
+  }
 };
