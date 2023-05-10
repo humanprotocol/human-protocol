@@ -67,8 +67,6 @@ class KVStoreClient:
 
         if not key:
             raise KVStoreClientError("Key can not be empty")
-        if not self.w3.eth.default_account:
-            raise KVStoreClientError("You must add an account to Web3 instance")
 
         self._handle_transaction(
             "Set",
@@ -89,8 +87,6 @@ class KVStoreClient:
 
         if "" in keys:
             raise KVStoreClientError("Key can not be empty")
-        if not self.w3.eth.default_account:
-            raise KVStoreClientError("You must add an account to Web3 instance")
 
         self._handle_transaction(
             "Set Bulk",
@@ -124,6 +120,8 @@ class KVStoreClient:
 
         """
         try:
+            if not self.w3.eth.default_account:
+                raise KVStoreClientError("You must add an account to Web3 instance")
             tx_hash = tx.transact()
             self.w3.eth.waitForTransactionReceipt(tx_hash)
         except Exception as e:

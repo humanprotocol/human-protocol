@@ -1,8 +1,6 @@
 from enum import Enum
 import os
 
-from web3 import Web3
-
 
 class ChainId(Enum):
     """Enum for chain IDs."""
@@ -167,5 +165,17 @@ NETWORKS = {
         "old_factory_address": "",
     },
 }
+
+
+class Status(Enum):
+    """Enum for escrow statuses."""
+
+    Launched = 0
+    Pending = 1
+    Partial = 2
+    Paid = 3
+    Complete = 4
+    Cancelled = 5
+
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
