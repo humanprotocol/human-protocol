@@ -4,7 +4,7 @@ import datetime
 import logging
 import os
 from decimal import Decimal
-from typing import List, Optional
+from typing import List
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Role, Status
 from human_protocol_sdk.utils import (
@@ -288,6 +288,64 @@ class EscrowClient:
             EscrowClientError,
         )
 
+    def create_and_setup_escrow(
+        self,
+        token_address: str,
+        trusted_handlers: List[str],
+        escrow_config: EscrowConfig,
+    ):
+        """
+        Creates and sets up an escrow.
+
+        Args:
+            token_address (str): Token to use for pay outs
+            trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
+            escrow_config (EscrowConfig): Object containing all the necessary information to setup an escrow
+
+        Returns:
+            str: The address of the escrow created
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        escrow_address = self.create_escrow(token_address, trusted_handlers)
+        self.setup(escrow_address, escrow_config)
+
+        return escrow_address
+
+    def fund(self, escrow_address: str, amount: Decimal):
+        """
+        Adds funds to the escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow to setup
+            amount (Decimal): Amount to be added as funds
+
+        Returns:
+            None
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.isAddress(escrow_address):
+            raise EscrowClientError("Invalid address")
+        if 0 > amount:
+            raise EscrowClientError("Amount must be possitive")
+
+        token_address = self.get_token_address(escrow_address)
+
+        hmtoken_interface = get_hmtoken_interface()
+        hmtoken_contract = self.w3.eth.contract(
+            token_address, abi=hmtoken_interface["abi"]
+        )
+
+        self._handle_transaction(
+            "Fund",
+            hmtoken_contract.functions.transfer(escrow_address, amount),
+        )
+
     def store_results(self, escrow_address: str, url: str, hash: str):
         """Stores the results url.
 
@@ -383,6 +441,8 @@ class EscrowClient:
             raise EscrowClientError("Arrays must have any value")
         if len(recipients) != len(amounts):
             raise EscrowClientError("Arrays must have same length")
+        if len(recipients) == 0:
+            raise EscrowClientError("Arrays must have any value")
         if 0 in amounts:
             raise EscrowClientError("Amounts cannot be empty")
         balance = self.get_balance(escrow_address)
@@ -657,4 +717,5 @@ class EscrowClient:
         """
         # Initialize contract instance
         escrow_interface = get_escrow_interface()
+
         return self.w3.eth.contract(address=address, abi=escrow_interface["abi"])
