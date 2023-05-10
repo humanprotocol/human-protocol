@@ -628,7 +628,7 @@ describe('Escrow', function () {
       it('Should revert with the right error if address calling is not trusted', async function () {
         await expect(
           escrow.connect(externalAddress).complete()
-        ).to.be.revertedWith('Address calling is not trusted');
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if escrow not in Paid status state', async function () {
