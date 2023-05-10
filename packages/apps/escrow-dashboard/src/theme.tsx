@@ -5,7 +5,6 @@ const theme = createTheme({
     primary: {
       main: '#320a8d',
       light: '#320a8d',
-      dark: '#100735',
     },
     info: {
       main: '#eeeeee',
@@ -53,6 +52,9 @@ const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          paddingTop: '8px',
+          paddingBottom: '8px',
+          fontWeight: 600,
           textTransform: 'none',
         },
       },
@@ -70,6 +72,35 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           textTransform: 'none',
+        },
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          borderRadius: '8px',
+          border: '1px solid #320a8d',
+          color: '#320a8d',
+          fontWeight: 600,
+          fontSize: '14px',
+          '&.Mui-selected': {
+            background: '#320a8d',
+            color: '#fff',
+          },
+          '&.Mui-selected:hover': {
+            background: '#320a8d',
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: '10px',
+        },
+        notchedOutline: {
+          border: '1px solid #320a8d',
         },
       },
     },
