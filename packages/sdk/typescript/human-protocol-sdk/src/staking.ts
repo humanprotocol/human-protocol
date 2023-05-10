@@ -19,10 +19,9 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
-  ErrorSigner,
   ErrorStakingGetStakers,
 } from './error';
-import { gqlFetch, throwError, toBigNumber } from './utils';
+import { gqlFetch, throwError } from './utils';
 import { RAW_REWARDS_QUERY } from './queries';
 
 export default class StakingClient {
@@ -300,10 +299,10 @@ export default class StakingClient {
     try {
       const result = await this.stakingContract.getStaker(staker);
 
-      const tokensStaked = toBigNumber(result.tokensStaked),
-        tokensAllocated = toBigNumber(result.tokensAllocated),
-        tokensLocked = toBigNumber(result.tokensLocked),
-        tokensLockedUntil = toBigNumber(result.tokensLockedUntil);
+      const tokensStaked = BigNumber.from(result.tokensStaked),
+        tokensAllocated = BigNumber.from(result.tokensAllocated),
+        tokensLocked = BigNumber.from(result.tokensLocked),
+        tokensLockedUntil = BigNumber.from(result.tokensLockedUntil);
 
       const tokensAvailable = tokensStaked
         .sub(tokensAllocated)
@@ -336,10 +335,10 @@ export default class StakingClient {
       }
 
       return result[1].map((staker: any) => {
-        const tokensStaked = toBigNumber(staker.tokensStaked),
-          tokensAllocated = toBigNumber(staker.tokensAllocated),
-          tokensLocked = toBigNumber(staker.tokensLocked),
-          tokensLockedUntil = toBigNumber(staker.tokensLockedUntil);
+        const tokensStaked = BigNumber.from(staker.tokensStaked),
+          tokensAllocated = BigNumber.from(staker.tokensAllocated),
+          tokensLocked = BigNumber.from(staker.tokensLocked),
+          tokensLockedUntil = BigNumber.from(staker.tokensLockedUntil);
 
         const tokensAvailable = tokensStaked
           .sub(tokensAllocated)

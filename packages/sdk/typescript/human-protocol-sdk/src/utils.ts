@@ -244,19 +244,9 @@ export const gqlFetch = (
 };
 
 /**
- * **Convert entity to BigNumber.*
- *
- * @param {any} value
- * @returns
- */
-export const toBigNumber = (value: string | number) => {
-  return BigNumber.from(value);
-};
-
-/**
  * **Handle and throw the error.*
  *
- * @param {any} value
+ * @param {any} e - Error object
  * @returns
  */
 export const throwError = (e: any) => {
