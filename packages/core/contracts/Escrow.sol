@@ -158,11 +158,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
-    function complete() external override notExpired {
-        require(
-            areTrustedHandlers[msg.sender],
-            'Address calling is not trusted'
-        );
+    function complete() external override notExpired trusted {
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
         emit Completed();
