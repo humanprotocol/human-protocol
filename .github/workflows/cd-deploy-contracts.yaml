@@ -113,18 +113,17 @@ jobs:
               exit 1
               ;;
           esac
-      - name: Upgrade Escrow Factory Proxy
+      - name: Upgrade Proxies
         if: github.event.inputs.escrowFactory == 'true'
-        run: |
-          echo "ESCROW_FACTORY_ADDRESS=$(if [ ${{github.event.inputs.escrowFactory == 'true' }} ]; then echo '${{ steps.networks.outputs.escrow_factory }}'; else echo ''; fi)" >> $GITHUB_ENV
-          echo "STAKING_ADDRESS=$(if [ ${{github.event.inputs.staking == 'true' }} ]; then echo '${{ steps.networks.outputs.staking }}'; else echo ''; fi)" >> $GITHUB_ENV
-          echo "REWARD_POOL_ADDRESS=$(if [ ${{github.event.inputs.rewardPool == 'true' }} ]; then echo '${{ steps.networks.outputs.reward_pool }}'; else echo ''; fi)" >> $GITHUB_ENV
-          echo "REPUTATION_ADDRESS=$(if [ ${{github.event.inputs.reputation == 'true' }} ]; then echo '${{ steps.networks.outputs.reputation }}'; else echo ''; fi)" >> $GITHUB_ENV
-          yarn upgrade:proxy --network ${{ github.event.inputs.network }}
+        run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
         working-directory: ./packages/core
         env:
           PRIVATE_KEY: ${{ secrets[steps.networks.outputs.private_key] }}
           SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
+          DEPLOY_ESCROW_FACTORY: ${{ github.event.inputs.escrowFactory }}
+          DEPLOY_STAKING: ${{ github.event.inputs.staking }}
+          DEPLOY_REPUTATION: ${{ github.event.inputs.reputation }}
+          DEPLOY_REWARD_POOL: ${{ github.event.inputs.rewardPool }}
       - name: Verify Escrow Factory Proxy
         if: github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
