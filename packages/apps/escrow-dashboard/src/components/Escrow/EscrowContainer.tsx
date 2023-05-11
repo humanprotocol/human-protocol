@@ -31,6 +31,7 @@ import { setChainId as setEscrowChainId } from 'src/state/escrow/reducer';
 import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
 
 const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
+  [ChainId.MAINNET]: <EthereumIcon />,
   [ChainId.RINKEBY]: <EthereumIcon />,
   [ChainId.GOERLI]: <EthereumIcon />,
   [ChainId.POLYGON]: <PolygonIcon />,

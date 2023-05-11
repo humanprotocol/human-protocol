@@ -5,7 +5,10 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
     "@human-protocol/core": "*",
+    "@mui/material": "^5.12.2",
     "@web3modal/ethereum": "^2.2.1",
     "@web3modal/react": "^2.2.1",
     "@web3modal/ui": "^2.2.1",

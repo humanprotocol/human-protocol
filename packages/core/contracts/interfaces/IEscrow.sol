@@ -19,8 +19,8 @@ interface IEscrow {
     function setup(
         address _reputationOracle,
         address _recordingOracle,
-        uint256 _reputationOracleStake,
-        uint256 _recordingOracleStake,
+        uint8 _reputationOracleFeePercentage,
+        uint8 _recordingOracleFeePercentage,
         string memory _url,
         string memory _hash
     ) external;
@@ -31,11 +31,7 @@ interface IEscrow {
 
     function complete() external;
 
-    function storeResults(
-        address _worker,
-        string memory _url,
-        string memory _hash
-    ) external;
+    function storeResults(string memory _url, string memory _hash) external;
 
     function bulkPayOut(
         address[] memory _recipients,

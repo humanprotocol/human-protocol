@@ -14,7 +14,8 @@ export function handleRewardAdded(event: RewardAdded): void {
 
   // Entity fields can be set based on event parameters
   entity.escrow = event.params.escrowAddress;
-  entity.staker = event.params.slasher;
+  entity.staker = event.params.staker;
+  entity.slasher = event.params.slasher;
   entity.amount = event.params.tokens;
 
   entity.block = event.block.number;

@@ -969,7 +969,7 @@ class Job:
         self.intermediate_manifest_hash = hash_
         self.intermediate_manifest_url = url
 
-        func_args = [sender, url, hash_]
+        func_args = [url, hash_]
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *func_args, **txn_info)
