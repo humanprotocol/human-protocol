@@ -4,7 +4,7 @@ import datetime
 import logging
 import os
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Role, Status
 from human_protocol_sdk.utils import (
@@ -330,9 +330,10 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError("Invalid address")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
         if 0 > amount:
-            raise EscrowClientError("Amount must be possitive")
+            raise EscrowClientError("Amount must be positive")
 
         token_address = self.get_token_address(escrow_address)
 
