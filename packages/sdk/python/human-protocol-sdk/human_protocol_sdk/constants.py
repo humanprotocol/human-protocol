@@ -178,5 +178,15 @@ class Status(Enum):
     Cancelled = 5
 
 
+class Role(Enum):
+    """Enum for roles."""
+
+    validator = "Validator"
+    job_launcher = "Job Launcher"
+    exchange_oracle = "Exchange Oracle"
+    reputation_oracle = "Reputation Oracle"
+    recording_oracle = "Recording Oracle"
+
+
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(
     os.path.dirname(__file__)), "artifacts")
