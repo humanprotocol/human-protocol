@@ -150,9 +150,10 @@ class EscrowClient:
 
         # Load network configuration based on chainId
         try:
-            self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+            chain_id = self.w3.eth.chain_id
+            self.network = NETWORKS[ChainId(chain_id)]
         except:
-            raise EscrowClientError(f"Invalid ChainId: {self.w3.eth.chain_id}")
+            raise EscrowClientError(f"Invalid ChainId: {chain_id}")
 
         # Initialize contract instances
         factory_interface = get_factory_interface()
@@ -367,9 +368,11 @@ class EscrowClient:
             raise EscrowClientError("Arrays must have any value")
         if 0 in amounts:
             raise EscrowClientError("Amounts cannot be empty")
-        if sum(amounts) > self.get_balance(escrow_address):
+        balance = self.get_balance(escrow_address)
+        total_amount = sum(amounts)
+        if total_amount > balance:
             raise EscrowClientError(
-                f"Escrow does not have enough balance. Current balance: {self.get_balance(escrow_address)}. Amounts: {sum(amounts)}"
+                f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
             )
         if not URL(final_results_url):
             raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
