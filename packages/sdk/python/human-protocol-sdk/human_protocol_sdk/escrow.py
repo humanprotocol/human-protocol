@@ -342,9 +342,11 @@ class EscrowClient:
             token_address, abi=hmtoken_interface["abi"]
         )
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Fund",
             hmtoken_contract.functions.transfer(escrow_address, amount),
+            EscrowClientError,
         )
 
     def store_results(self, escrow_address: str, url: str, hash: str):
@@ -442,8 +444,6 @@ class EscrowClient:
             raise EscrowClientError("Arrays must have any value")
         if len(recipients) != len(amounts):
             raise EscrowClientError("Arrays must have same length")
-        if len(recipients) == 0:
-            raise EscrowClientError("Arrays must have any value")
         if 0 in amounts:
             raise EscrowClientError("Amounts cannot be empty")
         balance = self.get_balance(escrow_address)
