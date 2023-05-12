@@ -2,12 +2,12 @@
   "network": "goerli",
   "description": "Human subgraph on goerli network",
   "graft": {
-    "base": "QmWsWEV58a1bWSZyWc2ZHJLcr4UVWDhjmYTyqQ8bKbbrQN",
-    "block": 8630704
+    "base": "QmVCh4wH3RAYCvCkUp85gTDp8V6adELN5oVDf56kRdVFML",
+    "block": 8985993
   },
   "EscrowFactory": {
     "address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
-    "startBlock": 8403038,
+    "startBlock": 8985991,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -20,7 +20,7 @@
   },
   "Staking": {
     "address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
-    "startBlock": 8403036,
+    "startBlock": 8985993,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
