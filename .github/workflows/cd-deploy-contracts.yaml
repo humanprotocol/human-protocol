@@ -124,6 +124,11 @@ jobs:
           DEPLOY_STAKING: ${{ github.event.inputs.staking }}
           DEPLOY_REPUTATION: ${{ github.event.inputs.reputation }}
           DEPLOY_REWARD_POOL: ${{ github.event.inputs.rewardPool }}
+          ESCROW_FACTORY_ADDRESS: ${{ steps.networks.outputs.escrow_factory }}
+          STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
+          REPUTATION_ADDRESS: ${{ steps.networks.outputs.reputation }}
+          REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
+
       - name: Verify Escrow Factory Proxy
         if: github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
