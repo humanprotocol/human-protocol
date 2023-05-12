@@ -204,3 +204,31 @@ def get_data_from_subgraph(url: str, query: str):
                 request.status_code, query
             )
         )
+
+
+def handle_transaction(w3, tx_name, tx, exception):
+    """Executes the transaction and waits for the receipt.
+
+    Args:
+        w3 (Web3): Web3 instance
+        tx_name (str): Name of the transaction
+        tx (obj): Transaction object
+        exception (Exception): Exception class to raise in case of error
+
+    Validations:
+        - There must be a default account
+
+    """
+    if not w3.eth.default_account:
+        raise exception("You must add an account to Web3 instance")
+    try:
+        tx_hash = tx.transact()
+        w3.eth.waitForTransactionReceipt(tx_hash)
+    except Exception as e:
+        if "reverted with reason string" in e.args[0]:
+            start_index = e.args[0].find("'") + 1
+            end_index = e.args[0].rfind("'")
+            message = e.args[0][start_index:end_index]
+            raise exception(f"{tx_name} transaction failed: {message}")
+        else:
+            raise exception(f"{tx_name} transaction failed.")

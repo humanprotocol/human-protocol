@@ -12,6 +12,7 @@ from human_protocol_sdk.utils import (
     get_escrow_interface,
     get_factory_interface,
     get_hmtoken_interface,
+    handle_transaction,
 )
 from validators import url as URL
 from web3 import Web3
@@ -182,11 +183,13 @@ class EscrowClient:
             if not Web3.isAddress(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Create Escrow",
             self.factory_contract.functions.createEscrow(
                 token_address, trusted_handlers
             ),
+            EscrowClientError,
         )
 
         return self.factory_contract.functions.lastEscrow().call()
@@ -207,9 +210,11 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Setup",
             self._get_escrow_contract(escrow_address).functions.setup(
                 escrow_config.recording_oracle_address,
@@ -219,6 +224,7 @@ class EscrowClient:
                 escrow_config.manifest_url,
                 escrow_config.hash,
             ),
+            EscrowClientError,
         )
 
     def create_and_setup_escrow(
@@ -263,7 +269,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
         if 0 > amount:
             raise EscrowClientError("Amount must be positive")
 
@@ -274,9 +281,11 @@ class EscrowClient:
             token_address, abi=hmtoken_interface["abi"]
         )
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Fund",
             hmtoken_contract.functions.transfer(escrow_address, amount),
+            EscrowClientError,
         )
 
     def store_results(self, escrow_address: str, url: str, hash: str):
@@ -295,7 +304,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
         if not hash:
             raise EscrowClientError("Invalid empty hash")
         if not URL(url):
@@ -303,11 +313,13 @@ class EscrowClient:
         if not self.w3.eth.default_account:
             raise EscrowClientError("You must add an account to Web3 instance")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Store Results",
             self._get_escrow_contract(escrow_address).functions.storeResults(
                 self.w3.eth.default_account, url, hash
             ),
+            EscrowClientError,
         )
 
     def complete(self, escrow_address: str):
@@ -324,11 +336,14 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
-            "Complete", self._get_escrow_contract(
-                escrow_address).functions.complete()
+        handle_transaction(
+            self.w3,
+            "Complete",
+            self._get_escrow_contract(escrow_address).functions.complete(),
+            EscrowClientError,
         )
 
     def bulk_payout(
@@ -358,14 +373,16 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
         for recipient in recipients:
             if not Web3.isAddress(recipient):
-                raise EscrowClientError(f"Invalid recipient address: {recipient}")
-        if len(recipients) != len(amounts):
-            raise EscrowClientError("Arrays must have same length")
+                raise EscrowClientError(
+                    f"Invalid recipient address: {recipient}")
         if len(recipients) == 0:
             raise EscrowClientError("Arrays must have any value")
+        if len(recipients) != len(amounts):
+            raise EscrowClientError("Arrays must have same length")
         if 0 in amounts:
             raise EscrowClientError("Amounts cannot be empty")
         balance = self.get_balance(escrow_address)
@@ -375,15 +392,18 @@ class EscrowClient:
                 f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
             )
         if not URL(final_results_url):
-            raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
+            raise EscrowClientError(
+                f"Invalid final results URL: {final_results_url}")
         if not final_results_hash:
             raise EscrowClientError("Invalid empty final results hash")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Bulk Payout",
             self._get_escrow_contract(escrow_address).functions.bulkPayOut(
                 recipients, amounts, final_results_url, final_results_hash, txId
             ),
+            EscrowClientError,
         )
 
     def cancel(self, escrow_address: str):
@@ -400,11 +420,14 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
-            "Cancel", self._get_escrow_contract(
-                escrow_address).functions.cancel()
+        handle_transaction(
+            self.w3,
+            "Cancel",
+            self._get_escrow_contract(escrow_address).functions.cancel(),
+            EscrowClientError,
         )
 
     def abort(self, escrow_address: str):
@@ -421,11 +444,14 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
-            "Abort", self._get_escrow_contract(
-                escrow_address).functions.abort()
+        handle_transaction(
+            self.w3,
+            "Abort",
+            self._get_escrow_contract(escrow_address).functions.abort(),
+            EscrowClientError,
         )
 
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]):
@@ -439,16 +465,19 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
         for handler in handlers:
             if not Web3.isAddress(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Add Trusted Handlers",
             self._get_escrow_contract(escrow_address).functions.addTrustedHandlers(
                 handlers
             ),
+            EscrowClientError,
         )
 
     def get_balance(self, escrow_address: str):
@@ -465,7 +494,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
@@ -483,7 +513,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
 
@@ -501,7 +532,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
         return (
             self._get_escrow_contract(
@@ -522,7 +554,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.token().call()
 
@@ -540,7 +573,8 @@ class EscrowClient:
         """
 
         if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+            raise EscrowClientError(
+                f"Invalid escrow address: {escrow_address}")
 
         return Status(
             self._get_escrow_contract(escrow_address).functions.status().call()
@@ -593,12 +627,16 @@ class EscrowClient:
                 }}
             }}
             """.format(
-                """from:"{0}",""".format(filter.address) if filter.address else "",
-                """status:"{0}",""".format(filter.status.name) if filter.status else "",
-                """timestamp_gte:"{0}",""".format(int(filter.date_from.timestamp()))
+                """from:"{0}",""".format(
+                    filter.address) if filter.address else "",
+                """status:"{0}",""".format(
+                    filter.status.name) if filter.status else "",
+                """timestamp_gte:"{0}",""".format(
+                    int(filter.date_from.timestamp()))
                 if filter.date_from
                 else "",
-                """timestamp_lte:"{0}",""".format(int(filter.date_to.timestamp()))
+                """timestamp_lte:"{0}",""".format(
+                    int(filter.date_to.timestamp()))
                 if filter.date_to
                 else "",
             ),
@@ -606,32 +644,6 @@ class EscrowClient:
         launched_escrows = launched_escrows_data["data"]["launchedEscrows"]
 
         return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
-
-    def _handle_transaction(self, tx_name, tx):
-        """Executes the transaction and waits for the receipt.
-
-        Args:
-            tx_name (str): Name of the transaction
-            tx (obj): Transaction object
-
-        Validations:
-            - There must be a default account
-
-        """
-        if not self.w3.eth.default_account:
-            raise EscrowClientError("You must add an account to Web3 instance")
-        try:
-            tx_hash = tx.transact()
-            self.w3.eth.waitForTransactionReceipt(tx_hash)
-        except Exception as e:
-            LOG.exception(f"{tx_name} failed due to {e}.")
-            if "reverted with reason string" in e.args[0]:
-                start_index = e.args[0].find("'") + 1
-                end_index = e.args[0].rfind("'")
-                message = e.args[0][start_index:end_index]
-                raise EscrowClientError("Transaction failed: " + message)
-            else:
-                raise EscrowClientError("Transaction failed.")
 
     def _get_escrow_contract(self, address: str):
         """Returns the escrow contract instance.
