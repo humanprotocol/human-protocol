@@ -1596,7 +1596,7 @@ class EscrowTestCase(unittest.TestCase):
                 date_to=datetime.fromtimestamp(1683811973),
             )
         self.assertEqual(
-            "Invalid dates: 2023-05-11 15:33:27 must be earlier than 2023-05-11 15:32:53",
+            f"Invalid dates: {datetime.fromtimestamp(1683812007)} must be earlier than {datetime.fromtimestamp(1683811973)}",
             str(cm.exception),
         )
 
