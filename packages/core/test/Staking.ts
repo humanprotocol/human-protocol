@@ -895,6 +895,12 @@ describe('Staking', function () {
         ).to.be.revertedWith('Must be a valid address');
       });
 
+      it('Should revert with the right error if the caller is not the allocator', async function () {
+        await expect(
+          staking.connect(validator).closeAllocation(escrowAddress.toString())
+        ).to.be.revertedWith('Only the allocator can close the allocation');
+      });
+
       it('Should revert with the right error if escrow is not completed nor cancelled', async function () {
         await expect(
           staking.connect(operator).closeAllocation(escrowAddress.toString())
