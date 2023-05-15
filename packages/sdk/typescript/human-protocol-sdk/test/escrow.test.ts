@@ -6,6 +6,7 @@ import {
   FAKE_HASH,
   FAKE_NETWORK,
   FAKE_URL,
+  VALID_URL,
 } from './utils/constants';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -19,6 +20,7 @@ import {
   ErrorInvalidRecordingOracleAddressProvided,
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
+  ErrorInvalidUrl,
   ErrorListOfHandlersCannotBeEmpty,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
@@ -34,8 +36,13 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { DEFAULT_TX_ID } from '../src/constants';
 import { EscrowStatus } from '../src/types';
+import { isValidUrl } from '../src/utils';
 
 vi.mock('../src/init');
+/*
+vi.mock('../src/utils', () => ({
+  isValidUrl: vi.fn(),
+}));*/
 
 describe('EscrowClient', () => {
   const provider = new ethers.providers.JsonRpcProvider();
@@ -195,7 +202,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -210,7 +217,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -225,7 +232,7 @@ describe('EscrowClient', () => {
         reputationOracle: FAKE_ADDRESS,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -240,7 +247,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -255,7 +262,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -272,7 +279,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(0),
         reputationOracleFee: BigNumber.from(0),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -289,7 +296,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(100),
         reputationOracleFee: BigNumber.from(100),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -317,13 +324,30 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if manifestUrl is invalid url', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: FAKE_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is empty string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(50),
+        reputationOracleFee: BigNumber.from(50),
+        manifestUrl: VALID_URL,
         hash: '',
       };
 
@@ -340,7 +364,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -354,7 +378,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
         BigNumber.from(50),
         BigNumber.from(50),
-        FAKE_URL,
+        VALID_URL,
         FAKE_HASH
       );
     });
@@ -365,7 +389,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -381,7 +405,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
         BigNumber.from(50),
         BigNumber.from(50),
-        FAKE_URL,
+        VALID_URL,
         FAKE_HASH
       );
     });
@@ -397,7 +421,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -420,7 +444,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
         BigNumber.from(50),
         BigNumber.from(50),
-        FAKE_URL,
+        VALID_URL,
         FAKE_HASH
       );
     });
@@ -431,7 +455,7 @@ describe('EscrowClient', () => {
         reputationOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
-        manifestUrl: FAKE_URL,
+        manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
 
@@ -447,7 +471,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
         BigNumber.from(50),
         BigNumber.from(50),
-        FAKE_URL,
+        VALID_URL,
         FAKE_HASH
       );
     });
@@ -615,7 +639,7 @@ describe('EscrowClient', () => {
     test('should throw an error if signerOrProvider is not a signer', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const senderAddress = ethers.constants.AddressZero;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       const invalidClientParams = {
@@ -632,7 +656,7 @@ describe('EscrowClient', () => {
     test('should throw an error if senderAddress is an invalid address', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const invalidAddress = FAKE_ADDRESS;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       await expect(
@@ -643,7 +667,7 @@ describe('EscrowClient', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
       const senderAddress = ethers.constants.AddressZero;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       await expect(
@@ -654,7 +678,7 @@ describe('EscrowClient', () => {
     test('should throw an error if an hasEscrow return false', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const senderAddress = ethers.constants.AddressZero;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
@@ -677,10 +701,23 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if results url is invalid url', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const senderAddress = ethers.constants.AddressZero;
       const url = FAKE_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const senderAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
       const hash = '';
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -693,7 +730,7 @@ describe('EscrowClient', () => {
     test('should successfully store results escrow', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const senderAddress = ethers.constants.AddressZero;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -710,7 +747,7 @@ describe('EscrowClient', () => {
     test('should throw an error if the store results fails', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const senderAddress = ethers.constants.AddressZero;
-      const url = FAKE_URL;
+      const url = VALID_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -790,7 +827,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       const invalidClientParams = {
@@ -814,7 +851,7 @@ describe('EscrowClient', () => {
       const invalidAddress = FAKE_ADDRESS;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       await expect(
@@ -832,7 +869,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
@@ -852,7 +889,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [];
       const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -872,7 +909,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -896,7 +933,7 @@ describe('EscrowClient', () => {
         BigNumber.from(100),
         BigNumber.from(100),
       ];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -916,7 +953,7 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [FAKE_ADDRESS];
       const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -952,11 +989,31 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if final results url is invalid url', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
       const finalResultsUrl = FAKE_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = '';
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -979,7 +1036,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
       ];
       const amounts = [BigNumber.from(90), BigNumber.from(20)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -1003,7 +1060,7 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero,
       ];
       const amounts = [BigNumber.from(10), BigNumber.from(10)];
-      const finalResultsUrl = FAKE_URL;
+      const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);

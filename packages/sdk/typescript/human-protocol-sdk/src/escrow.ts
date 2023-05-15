@@ -35,7 +35,7 @@ import {
   IEscrowsFilter,
   ILauncherEscrowsResult,
 } from './interfaces';
-import { gqlFetch, throwError } from './utils';
+import { gqlFetch, isValidUrl, throwError } from './utils';
 import { DEFAULT_TX_ID } from './constants';
 import {
   RAW_LAUNCHED_ESCROWS_FILTERED_QUERY,
@@ -144,11 +144,9 @@ export default class EscrowClient {
     }
 
     if (
-      recordingOracleFee.lt(0) ||
-      recordingOracleFee.eq(0) ||
+      recordingOracleFee.lte(0) ||
       recordingOracleFee.gt(100) ||
-      reputationOracleFee.lt(0) ||
-      reputationOracleFee.eq(0) ||
+      reputationOracleFee.lte(0) ||
       reputationOracleFee.gt(100)
     ) {
       throw ErrorFeeMustBeBetweenZeroAndHundred;
@@ -160,6 +158,10 @@ export default class EscrowClient {
 
     if (!manifestUrl) {
       throw ErrorUrlIsEmptyString;
+    }
+
+    if (!isValidUrl(manifestUrl)) {
+      throw ErrorInvalidUrl;
     }
 
     if (!hash) {
@@ -297,6 +299,10 @@ export default class EscrowClient {
       throw ErrorUrlIsEmptyString;
     }
 
+    if (!isValidUrl(url)) {
+      throw ErrorInvalidUrl;
+    }
+
     if (!hash) {
       throw ErrorHashIsEmptyString;
     }
@@ -396,6 +402,10 @@ export default class EscrowClient {
 
     if (!finalResultsUrl) {
       throw ErrorUrlIsEmptyString;
+    }
+
+    if (!isValidUrl(finalResultsUrl)) {
+      throw ErrorInvalidUrl;
     }
 
     if (!finalResultsHash) {

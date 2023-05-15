@@ -38,6 +38,7 @@ export const STORAGE_TEST_FILE_VALUE = 'value';
 export const STORAGE_TEST_FILE_VALUE_2 = 'another value';
 export const FAKE_URL = 'fakeUrl';
 export const FAKE_NETWORK_NAME = 'fake_network';
+export const VALID_URL = 'https://www.humanprotocol.org';
 
 /**
  * @constant Default network parameters
