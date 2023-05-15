@@ -168,5 +168,4 @@ NETWORKS = {
     },
 }
 
-ARTIFACTS_FOLDER = os.path.join(os.path.dirname(
-    os.path.dirname(__file__)), "artifacts")
+ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")

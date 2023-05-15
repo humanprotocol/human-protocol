@@ -137,8 +137,7 @@ def get_factory_interface():
     """
 
     return get_contract_interface(
-        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(
-            ARTIFACTS_FOLDER)
+        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(ARTIFACTS_FOLDER)
     )
 
 

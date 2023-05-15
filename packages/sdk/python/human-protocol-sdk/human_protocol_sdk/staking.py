@@ -98,8 +98,7 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to approve must be greater than 0")
+            raise StakingClientError("Amount to approve must be greater than 0")
 
         self._handle_transaction(
             "Approve stake",
@@ -141,8 +140,7 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to allocate must be greater than 0")
+            raise StakingClientError("Amount to allocate must be greater than 0")
 
         if not self._is_valid_escrow(escrow_address):
             raise StakingClientError("Invalid escrow")
@@ -183,8 +181,7 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to unstake must be greater than 0")
+            raise StakingClientError("Amount to unstake must be greater than 0")
 
         self._handle_transaction(
             "Unstake HMT", self.staking_contract.functions.unstake(amount)
@@ -244,8 +241,7 @@ class StakingClient:
 
         self._handle_transaction(
             "Distribute reward",
-            self.reward_pool_contract.functions.distributeReward(
-                escrow_address),
+            self.reward_pool_contract.functions.distributeReward(escrow_address),
         )
 
     def get_all_stakers_info(self) -> List[dict]:
@@ -392,8 +388,7 @@ rewardAddedEvents(where:{{slasher:"{0}"}}) {{
         """
 
         if not read_only and not self.w3.eth.default_account:
-            raise StakingClientError(
-                "You must add an account to Web3 instance")
+            raise StakingClientError("You must add an account to Web3 instance")
 
         try:
             tx_hash = tx.transact()
