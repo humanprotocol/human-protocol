@@ -28,8 +28,7 @@ class EscrowTestCase(unittest.TestCase):
         self.w3.eth.default_account = self.gas_payer.address
 
         self.mock_chain_id = ChainId.LOCALHOST.value
-        type(self.w3.eth).chain_id = PropertyMock(
-            return_value=self.mock_chain_id)
+        type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.escrow = EscrowClient(self.w3)
 
@@ -55,8 +54,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             EscrowClient(w3)
-        self.assertEqual(
-            f"Invalid ChainId: {mock_chain_id}", str(cm.exception))
+        self.assertEqual(f"Invalid ChainId: {mock_chain_id}", str(cm.exception))
 
     def test_escrow_config_valid_params(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
@@ -81,10 +79,8 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(
             escrow_config.reputation_oracle_address, reputation_oracle_address
         )
-        self.assertEqual(escrow_config.recording_oracle_fee,
-                         recording_oracle_fee)
-        self.assertEqual(escrow_config.reputation_oracle_fee,
-                         reputation_oracle_fee)
+        self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
+        self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
         self.assertEqual(escrow_config.manifest_url, manifest_url)
         self.assertEqual(escrow_config.hash, hash)
 
@@ -106,8 +102,7 @@ class EscrowTestCase(unittest.TestCase):
                 hash,
             )
         self.assertEqual(
-            f"Invalid recording oracle address: {invalid_address}", str(
-                cm.exception)
+            f"Invalid recording oracle address: {invalid_address}", str(cm.exception)
         )
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -120,8 +115,7 @@ class EscrowTestCase(unittest.TestCase):
                 hash,
             )
         self.assertEqual(
-            f"Invalid reputation oracle address: {invalid_address}", str(
-                cm.exception)
+            f"Invalid reputation oracle address: {invalid_address}", str(cm.exception)
         )
 
     def test_escrow_config_invalid_fee(self):
@@ -203,8 +197,7 @@ class EscrowTestCase(unittest.TestCase):
                 manifest_url,
                 hash,
             )
-        self.assertEqual(
-            f"Invalid manifest URL: {manifest_url}", str(cm.exception))
+        self.assertEqual(f"Invalid manifest URL: {manifest_url}", str(cm.exception))
 
     def test_escrow_config_invalid_hash(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
@@ -236,8 +229,7 @@ class EscrowTestCase(unittest.TestCase):
         trusted_handlers = [self.w3.eth.default_account]
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
-            response = self.escrow.create_escrow(
-                token_address, trusted_handlers)
+            response = self.escrow.create_escrow(token_address, trusted_handlers)
 
             self.assertEqual(response, escrow_address)
             mock_function_create.assert_called_once_with(
@@ -258,8 +250,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_escrow(token_address, trusted_handlers)
-        self.assertEqual(
-            f"Invalid token address: {token_address}", str(cm.exception))
+        self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
 
     def test_create_escrow_invalid_handler(self):
         token_address = "0x1234567890123456789012345678901234567890"
@@ -268,8 +259,7 @@ class EscrowTestCase(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_escrow(token_address, trusted_handlers)
         self.assertEqual(
-            f"Invalid handler address: {trusted_handlers[0]}", str(
-                cm.exception)
+            f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
         )
 
     def test_create_escrow_without_account(self):
@@ -284,14 +274,12 @@ class EscrowTestCase(unittest.TestCase):
         trusted_handlers = ["0x1234567890123456789012345678901234567890"]
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.create_escrow(token_address, trusted_handlers)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_setup(self):
         mock_contract = MagicMock()
         mock_contract.functions.setup = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
@@ -305,8 +293,7 @@ class EscrowTestCase(unittest.TestCase):
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.setup(escrow_address, escrow_config)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.setup.assert_called_once_with(
                 escrow_config.recording_oracle_address,
                 escrow_config.reputation_oracle_address,
@@ -335,8 +322,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.setup(escrow_address, escrow_config)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_setup_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -357,8 +343,7 @@ class EscrowTestCase(unittest.TestCase):
         )
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.setup(escrow_address, escrow_config)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_setup_invalid_status(self):
         mock_contract = MagicMock()
@@ -366,8 +351,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.setup.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Escrow not in Launched status state'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
@@ -391,8 +375,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.setup.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
@@ -406,8 +389,7 @@ class EscrowTestCase(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.setup(escrow_address, escrow_config)
         self.assertEqual(
-            "Setup transaction failed: Address calling not trusted", str(
-                cm.exception)
+            "Setup transaction failed: Address calling not trusted", str(cm.exception)
         )
 
     def test_create_and_setup_escrow(self):
@@ -415,8 +397,7 @@ class EscrowTestCase(unittest.TestCase):
         self.escrow.factory_contract.functions.createEscrow = mock_function_create
         mock_contract = MagicMock()
         mock_contract.functions.setup = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         mock_function_last_escrow = MagicMock()
         escrow_address = "0x1234567890123456789012345678901234567890"
         mock_function_last_escrow.return_value.call.return_value = escrow_address
@@ -472,8 +453,7 @@ class EscrowTestCase(unittest.TestCase):
             self.escrow.create_and_setup_escrow(
                 token_address, trusted_handlers, escrow_config
             )
-        self.assertEqual(
-            f"Invalid token address: {token_address}", str(cm.exception))
+        self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
         self.escrow.setup.assert_not_called()
 
     def test_create_and_setup_escrow_invalid_handler(self):
@@ -494,8 +474,7 @@ class EscrowTestCase(unittest.TestCase):
                 token_address, trusted_handlers, escrow_config
             )
         self.assertEqual(
-            f"Invalid handler address: {trusted_handlers[0]}", str(
-                cm.exception)
+            f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
         )
         self.escrow.setup.assert_not_called()
 
@@ -523,8 +502,7 @@ class EscrowTestCase(unittest.TestCase):
             escrowClient.create_and_setup_escrow(
                 token_address, trusted_handlers, escrow_config
             )
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
         escrowClient.setup.assert_not_called()
 
     def test_fund(self):
@@ -535,8 +513,7 @@ class EscrowTestCase(unittest.TestCase):
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.fund(escrow_address, amount)
 
-            self.escrow.get_token_address.assert_called_once_with(
-                escrow_address)
+            self.escrow.get_token_address.assert_called_once_with(escrow_address)
             mock_function.assert_called_once()
 
     def test_fund_invalid_address(self):
@@ -545,8 +522,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.fund(escrow_address, amount)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_fund_invalid_amount(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -570,14 +546,12 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.fund(escrow_address, amount)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_store_results(self):
         mock_contract = MagicMock()
         mock_contract.functions.storeResults = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "http://localhost"
         hash = "test"
@@ -585,8 +559,7 @@ class EscrowTestCase(unittest.TestCase):
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.store_results(escrow_address, url, hash)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.storeResults.assert_called_once_with(
                 self.w3.eth.default_account, url, hash
             )
@@ -604,8 +577,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.store_results(escrow_address, url, hash)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_store_results_invalid_url(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
@@ -639,8 +611,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.store_results(escrow_address, url, hash)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_store_results_invalid_status(self):
         mock_contract = MagicMock()
@@ -648,8 +619,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.storeResults.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Escrow not in Pending or Partial status state'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "http://localhost"
         hash = "test"
@@ -667,8 +637,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.storeResults.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         url = "http://localhost"
         hash = "test"
@@ -683,8 +652,7 @@ class EscrowTestCase(unittest.TestCase):
     def test_bulk_payout(self):
         mock_contract = MagicMock()
         mock_contract.functions.bulkPayOut = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -703,8 +671,7 @@ class EscrowTestCase(unittest.TestCase):
                 txId,
             )
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.bulkPayOut.assert_called_once_with(
                 recipients, amounts, final_results_url, final_results_hash, txId
             )
@@ -732,8 +699,7 @@ class EscrowTestCase(unittest.TestCase):
                 final_results_hash,
                 txId,
             )
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.bulk_payout(
@@ -847,8 +813,7 @@ class EscrowTestCase(unittest.TestCase):
                 txId,
             )
         self.assertEqual(
-            f"Invalid final results URL: {final_results_url}", str(
-                cm.exception)
+            f"Invalid final results URL: {final_results_url}", str(cm.exception)
         )
 
     def test_bulk_payout_invalid_hash(self):
@@ -896,8 +861,7 @@ class EscrowTestCase(unittest.TestCase):
                 final_results_hash,
                 txId,
             )
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_bulk_payout_exceed_max_count(self):
         mock_contract = MagicMock()
@@ -905,8 +869,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Too many recipients'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -925,8 +888,7 @@ class EscrowTestCase(unittest.TestCase):
                 txId,
             )
         self.assertEqual(
-            "Bulk Payout transaction failed: Too many recipients", str(
-                cm.exception)
+            "Bulk Payout transaction failed: Too many recipients", str(cm.exception)
         )
 
     def test_bulk_payout_exceed_max_value(self):
@@ -935,8 +897,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Bulk value too high'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -955,8 +916,7 @@ class EscrowTestCase(unittest.TestCase):
                 txId,
             )
         self.assertEqual(
-            "Bulk Payout transaction failed: Bulk value too high", str(
-                cm.exception)
+            "Bulk Payout transaction failed: Bulk value too high", str(cm.exception)
         )
 
     def test_bulk_payout_invalid_status(self):
@@ -965,8 +925,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Invalid status'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -994,8 +953,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.bulkPayOut.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         self.escrow.get_balance = MagicMock(return_value=100)
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
@@ -1021,15 +979,13 @@ class EscrowTestCase(unittest.TestCase):
     def test_complete(self):
         mock_contract = MagicMock()
         mock_contract.functions.complete = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.complete(escrow_address)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.complete.assert_called_once_with()
             mock_function.assert_called_once_with(
                 self.w3,
@@ -1043,8 +999,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.complete(escrow_address)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_complete_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1058,8 +1013,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.complete(escrow_address)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_complete_invalid_status(self):
         mock_contract = MagicMock()
@@ -1067,15 +1021,13 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.complete.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Escrow not in Paid state'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.complete(escrow_address)
         self.assertEqual(
-            "Complete transaction failed: Escrow not in Paid state", str(
-                cm.exception)
+            "Complete transaction failed: Escrow not in Paid state", str(cm.exception)
         )
 
     def test_complete_invalid_caller(self):
@@ -1084,8 +1036,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.complete.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -1098,15 +1049,13 @@ class EscrowTestCase(unittest.TestCase):
     def test_cancel(self):
         mock_contract = MagicMock()
         mock_contract.functions.cancel = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.cancel(escrow_address)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.cancel.assert_called_once_with()
             mock_function.assert_called_once_with(
                 self.w3,
@@ -1120,8 +1069,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.cancel(escrow_address)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_cancel_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1135,8 +1083,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.cancel(escrow_address)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_cancel_invalid_status(self):
         mock_contract = MagicMock()
@@ -1144,15 +1091,13 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.cancel.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Escrow in Paid status state'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.cancel(escrow_address)
         self.assertEqual(
-            "Cancel transaction failed: Escrow in Paid status state", str(
-                cm.exception)
+            "Cancel transaction failed: Escrow in Paid status state", str(cm.exception)
         )
 
     def test_cancel_invalid_caller(self):
@@ -1161,29 +1106,25 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.cancel.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.cancel(escrow_address)
         self.assertEqual(
-            "Cancel transaction failed: Address calling not trusted", str(
-                cm.exception)
+            "Cancel transaction failed: Address calling not trusted", str(cm.exception)
         )
 
     def test_abort(self):
         mock_contract = MagicMock()
         mock_contract.functions.abort = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.abort(escrow_address)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
             mock_contract.functions.abort.assert_called_once_with()
             mock_function.assert_called_once_with(
                 self.w3,
@@ -1197,8 +1138,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.abort(escrow_address)
-        self.assertEqual(
-            f"Invalid escrow address: {escrow_address}", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: {escrow_address}", str(cm.exception))
 
     def test_abort_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1212,8 +1152,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.abort(escrow_address)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_abort_invalid_status(self):
         mock_contract = MagicMock()
@@ -1221,15 +1160,13 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.abort.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Escrow in Paid status state'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.abort(escrow_address)
         self.assertEqual(
-            "Abort transaction failed: Escrow in Paid status state", str(
-                cm.exception)
+            "Abort transaction failed: Escrow in Paid status state", str(cm.exception)
         )
 
     def test_abort_invalid_caller(self):
@@ -1238,22 +1175,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.abort.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.abort(escrow_address)
         self.assertEqual(
-            "Abort transaction failed: Address calling not trusted", str(
-                cm.exception)
+            "Abort transaction failed: Address calling not trusted", str(cm.exception)
         )
 
     def test_add_trusted_handlers(self):
         mock_contract = MagicMock()
         mock_contract.functions.addTrustedHandlers = MagicMock()
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         handlers = [
             "0x1234567890123456789012345678901234567891",
@@ -1263,10 +1197,8 @@ class EscrowTestCase(unittest.TestCase):
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
             self.escrow.add_trusted_handlers(escrow_address, handlers)
 
-            self.escrow._get_escrow_contract.assert_called_once_with(
-                escrow_address)
-            mock_contract.functions.addTrustedHandlers.assert_called_once_with(
-                handlers)
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.addTrustedHandlers.assert_called_once_with(handlers)
             mock_function.assert_called_once_with(
                 self.w3,
                 "Add Trusted Handlers",
@@ -1283,16 +1215,14 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.add_trusted_handlers("invalid_address", handlers)
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.add_trusted_handlers(
                 escrow_address,
                 ["invalid_address", "0x1234567890123456789012345678901234567892"],
             )
-        self.assertEqual(
-            f"Invalid handler address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid handler address: invalid_address", str(cm.exception))
 
     def test_add_trusted_handlers_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1310,8 +1240,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.add_trusted_handlers(escrow_address, handlers)
-        self.assertEqual(
-            "You must add an account to Web3 instance", str(cm.exception))
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_add_trusted_handlers_invalid_caller(self):
         mock_contract = MagicMock()
@@ -1319,8 +1248,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.addTrustedHandlers.return_value.transact.side_effect = Exception(
             "Error: VM Exception while processing transaction: reverted with reason string 'Address calling not trusted'."
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
         handlers = [
             "0x1234567890123456789012345678901234567891",
@@ -1338,22 +1266,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract = MagicMock()
         mock_contract.functions.getBalance = MagicMock()
         mock_contract.functions.getBalance.return_value.call.return_value = 100
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_balance(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.getBalance.assert_called_once_with()
         self.assertEqual(result, 100)
 
     def test_get_balance_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_balance("invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_balance_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1365,14 +1290,12 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract = MagicMock()
         mock_contract.functions.getBalance = MagicMock()
         mock_contract.functions.getBalance.return_value.call.return_value = 100
-        escrowClient._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_balance(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.getBalance.assert_called_once_with()
         self.assertEqual(result, 100)
 
@@ -1382,22 +1305,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.manifestUrl.return_value.call.return_value = (
             "mock_value"
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_manifest_url(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.manifestUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
     def test_get_manifest_url_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_manifest_url("invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_manifest_url_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1411,14 +1331,12 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.manifestUrl.return_value.call.return_value = (
             "mock_value"
         )
-        escrowClient._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_manifest_url(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.manifestUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
@@ -1428,22 +1346,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.finalResultsUrl.return_value.call.return_value = (
             "mock_value"
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_results_url(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.finalResultsUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
     def test_get_results_url_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_results_url("invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_results_url_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1457,14 +1372,12 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.finalResultsUrl.return_value.call.return_value = (
             "mock_value"
         )
-        escrowClient._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_results_url(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.finalResultsUrl.assert_called_once_with()
         self.assertEqual(result, "mock_value")
 
@@ -1474,22 +1387,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.token.return_value.call.return_value = (
             "0x1234567890123456789012345678901234567890"
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_token_address(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.token.assert_called_once_with()
         self.assertEqual(result, "0x1234567890123456789012345678901234567890")
 
     def test_get_token_address_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_token_address("invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_token_address_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1503,14 +1413,12 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.token.return_value.call.return_value = (
             "0x1234567890123456789012345678901234567890"
         )
-        escrowClient._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_token_address(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.token.assert_called_once_with()
         self.assertEqual(result, "0x1234567890123456789012345678901234567890")
 
@@ -1520,22 +1428,19 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.status.return_value.call.return_value = (
             Status.Launched.value
         )
-        self.escrow._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = self.escrow.get_status(escrow_address)
 
-        self.escrow._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.status.assert_called_once_with()
         self.assertEqual(result, Status.Launched)
 
     def test_get_status_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_status("invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(cm.exception))
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_status_without_account(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -1549,14 +1454,12 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.status.return_value.call.return_value = (
             Status.Launched.value
         )
-        escrowClient._get_escrow_contract = MagicMock(
-            return_value=mock_contract)
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
 
         result = escrowClient.get_status(escrow_address)
 
-        escrowClient._get_escrow_contract.assert_called_once_with(
-            escrow_address)
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
         mock_contract.functions.status.assert_called_once_with()
         self.assertEqual(result, Status.Launched)
 
@@ -1576,8 +1479,7 @@ class EscrowTestCase(unittest.TestCase):
                     ]
                 }
             }
-            launched_escrows = self.escrow.get_launched_escrows(
-                requester_address)
+            launched_escrows = self.escrow.get_launched_escrows(requester_address)
 
             mock_function.assert_called_once_with(
                 "subgraph_url",
@@ -1625,8 +1527,7 @@ class EscrowTestCase(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as cm:
             EscrowFilter()
         self.assertEqual(
-            "EscrowFilter class must have at least one parameter", str(
-                cm.exception)
+            "EscrowFilter class must have at least one parameter", str(cm.exception)
         )
 
     def test_escrow_filter_invalid_dates(self):
@@ -1676,10 +1577,8 @@ class EscrowTestCase(unittest.TestCase):
             )
 
             self.assertEqual(len(filtered), 2)
-            self.assertEqual(
-                filtered[0], "0x1234567890123456789012345678901234567891")
-            self.assertEqual(
-                filtered[1], "0x1234567890123456789012345678901234567892")
+            self.assertEqual(filtered[0], "0x1234567890123456789012345678901234567891")
+            self.assertEqual(filtered[1], "0x1234567890123456789012345678901234567892")
 
 
 if __name__ == "__main__":

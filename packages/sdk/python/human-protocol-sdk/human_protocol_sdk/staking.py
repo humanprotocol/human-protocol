@@ -56,8 +56,7 @@ class StakingClient:
         # Initialize web3 instance
         self.w3 = w3
         if not self.w3.middleware_onion.get("geth_poa"):
-            self.w3.middleware_onion.inject(
-                geth_poa_middleware, "geth_poa", layer=0)
+            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
         # Load network configuration based on chain_id
         try:
@@ -102,8 +101,7 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to approve must be greater than 0")
+            raise StakingClientError("Amount to approve must be greater than 0")
 
         handle_transaction(
             self.w3,
@@ -150,12 +148,10 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to allocate must be greater than 0")
+            raise StakingClientError("Amount to allocate must be greater than 0")
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(
-                f"Invalid escrow address: {escrow_address}")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
             self.w3,
@@ -176,8 +172,7 @@ class StakingClient:
         """
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(
-                f"Invalid escrow address: {escrow_address}")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
             self.w3,
@@ -198,8 +193,7 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to unstake must be greater than 0")
+            raise StakingClientError("Amount to unstake must be greater than 0")
 
         handle_transaction(
             self.w3,
@@ -241,8 +235,7 @@ class StakingClient:
             raise StakingClientError("Amount to slash must be greater than 0")
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(
-                f"Invalid escrow address: {escrow_address}")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
             self.w3,
@@ -264,14 +257,12 @@ class StakingClient:
         """
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError(
-                f"Invalid escrow address: {escrow_address}")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
             self.w3,
             "Distribute reward",
-            self.reward_pool_contract.functions.distributeReward(
-                escrow_address),
+            self.reward_pool_contract.functions.distributeReward(escrow_address),
             StakingClientError,
         )
 

@@ -27,8 +27,7 @@ class StakingTestCase(unittest.TestCase):
         self.w3.eth.default_account = self.gas_payer.address
 
         self.mock_chain_id = ChainId.LOCALHOST.value
-        type(self.w3.eth).chain_id = PropertyMock(
-            return_value=self.mock_chain_id)
+        type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
         self.staking_client = StakingClient(self.w3)
 
@@ -42,8 +41,7 @@ class StakingTestCase(unittest.TestCase):
         staking_client = StakingClient(w3)
 
         self.assertEqual(staking_client.w3, w3)
-        self.assertEqual(staking_client.network,
-                         NETWORKS[ChainId(mock_chain_id)])
+        self.assertEqual(staking_client.network, NETWORKS[ChainId(mock_chain_id)])
         self.assertIsNotNone(staking_client.hmtoken_contract)
         self.assertIsNotNone(staking_client.factory_contract)
         self.assertIsNotNone(staking_client.staking_contract)
@@ -79,8 +77,7 @@ class StakingTestCase(unittest.TestCase):
     def test_approve_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.approve_stake(-1)
-        self.assertEqual(
-            "Amount to approve must be greater than 0", str(cm.exception))
+        self.assertEqual("Amount to approve must be greater than 0", str(cm.exception))
 
     def test_stake(self):
         mock_function = MagicMock()
@@ -99,8 +96,7 @@ class StakingTestCase(unittest.TestCase):
     def test_stake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.stake(-1)
-        self.assertEqual(
-            "Amount to stake must be greater than 0", str(cm.exception))
+        self.assertEqual("Amount to stake must be greater than 0", str(cm.exception))
 
     def test_allocate(self):
         escrow_address = "escrow1"
@@ -125,8 +121,7 @@ class StakingTestCase(unittest.TestCase):
 
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.allocate(escrow_address, -1)
-        self.assertEqual(
-            "Amount to allocate must be greater than 0", str(cm.exception))
+        self.assertEqual("Amount to allocate must be greater than 0", str(cm.exception))
 
     def test_allocate_invalid_escrow(self):
         escrow_address = "invalid_escrow"
@@ -134,8 +129,7 @@ class StakingTestCase(unittest.TestCase):
 
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.allocate(escrow_address, 10)
-        self.assertEqual(
-            "Invalid escrow address: invalid_escrow", str(cm.exception))
+        self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
     def test_close_allocation(self):
         escrow_address = "escrow1"
@@ -163,8 +157,7 @@ class StakingTestCase(unittest.TestCase):
 
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.close_allocation(escrow_address)
-        self.assertEqual(
-            "Invalid escrow address: invalid_escrow", str(cm.exception))
+        self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
     def test_unstake(self):
         mock_function = MagicMock()
@@ -183,8 +176,7 @@ class StakingTestCase(unittest.TestCase):
     def test_unstake_invalid_amount(self):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.unstake(-1)
-        self.assertEqual(
-            "Amount to unstake must be greater than 0", str(cm.exception))
+        self.assertEqual("Amount to unstake must be greater than 0", str(cm.exception))
 
     def test_withdraw(self):
         mock_function = MagicMock()
@@ -222,8 +214,7 @@ class StakingTestCase(unittest.TestCase):
             mock_handle_transaction.assert_called_once_with(
                 self.w3, "Slash HMT", mock_function.return_value, StakingClientError
             )
-            mock_function.assert_called_once_with(
-                slasher, staker, escrow_address, 50)
+            mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
 
     def test_slash_invalid_amount(self):
         slasher = "SLASHER"
@@ -235,8 +226,7 @@ class StakingTestCase(unittest.TestCase):
             self.staking_client.slash(
                 slasher=slasher, staker=staker, escrow_address=escrow_address, amount=-1
             )
-        self.assertEqual(
-            "Amount to slash must be greater than 0", str(cm.exception))
+        self.assertEqual("Amount to slash must be greater than 0", str(cm.exception))
 
     def test_slash_invalid_escrow(self):
         slasher = "SLASHER"
@@ -248,8 +238,7 @@ class StakingTestCase(unittest.TestCase):
             self.staking_client.slash(
                 slasher=slasher, staker=staker, escrow_address=escrow_address, amount=10
             )
-        self.assertEqual(
-            "Invalid escrow address: invalid_escrow", str(cm.exception))
+        self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
     def test_distribute_reward(self):
         escrow_address = "escrow1"
@@ -279,8 +268,7 @@ class StakingTestCase(unittest.TestCase):
 
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.distribute_reward(escrow_address)
-        self.assertEqual(
-            "Invalid escrow address: invalid_escrow", str(cm.exception))
+        self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
     def test_get_all_stakers_info(self):
         mock_function = MagicMock()
@@ -431,11 +419,9 @@ rewardAddedEvents(where:{slasher:"slasher1"}) {
             )
 
             self.assertEqual(len(rewards_info), 2)
-            self.assertEqual(
-                rewards_info[0]["escrow_address"].lower(), "escrow1")
+            self.assertEqual(rewards_info[0]["escrow_address"].lower(), "escrow1")
             self.assertEqual(rewards_info[0]["amount"], 10)
-            self.assertEqual(
-                rewards_info[1]["escrow_address"].lower(), "escrow2")
+            self.assertEqual(rewards_info[1]["escrow_address"].lower(), "escrow2")
             self.assertEqual(rewards_info[1]["amount"], 20)
 
 
