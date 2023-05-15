@@ -107,18 +107,6 @@ describe('Storage tests', () => {
           default: StorageClient
         }
       }) */
-
-      const storageCredentials: StorageCredentials = {
-        accessKey: '',
-        secretKey: '',
-      };
-
-      const storageParams: StorageParams = {
-        endPoint: DEFAULT_ENDPOINT,
-        port: DEFAULT_PORT,
-        useSSL: DEFAULT_USE_SSL,
-      };
-
       // expect(() => new StorageClient(storageCredentials, storageParams)).toThrow(ErrorStorageClientNotInitialized);
     });
   });

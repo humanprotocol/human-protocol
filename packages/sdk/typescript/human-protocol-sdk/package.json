@@ -14,7 +14,7 @@
     "clean": "rm -rf ./dist",
     "build": "npm run clean && tsc",
     "prepublish": "npm run build",
-    "test": "vitest -u test/storage.test.ts test/kvstore.test.ts test/escrow.test.ts",
+    "test": "vitest -u test/init.test.ts test/staking.test.ts test/storage.test.ts test/kvstore.test.ts test/escrow.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{ts,json}'"

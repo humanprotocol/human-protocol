@@ -13,7 +13,7 @@ export default class InitClient {
   /**
    * **Get init client parameters**
    *
-   * @param {string} providerOrSigner - Ethereum signer or provider
+   * @param {Signer | Provider} providerOrSigner - Ethereum signer or provider
    * @returns {Promise<IClientParams>} - Init client parameters
    */
   static async getParams(
@@ -21,7 +21,9 @@ export default class InitClient {
   ): Promise<IClientParams> {
     let network: Network;
     if (signerOrProvider instanceof Signer) {
-      if (!signerOrProvider.provider) throw ErrorInitProviderDoesNotExist;
+      if (!signerOrProvider.provider) {
+        throw ErrorInitProviderDoesNotExist;
+      }
 
       network = await signerOrProvider.provider.getNetwork();
     } else {

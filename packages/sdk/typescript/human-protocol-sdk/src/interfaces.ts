@@ -7,6 +7,27 @@ export interface IClientParams {
   network: NetworkData;
 }
 
+export interface IAllocation {
+  escrowAddress: string;
+  staker: string;
+  tokens: BigNumber;
+  createdAt: BigNumber;
+  closedAt: BigNumber;
+}
+
+export interface IReward {
+  escrowAddress: string;
+  amount: BigNumber;
+}
+
+export interface IStaker {
+  tokensStaked: BigNumber;
+  tokensAllocated: BigNumber;
+  tokensLocked: BigNumber;
+  tokensLockedUntil: BigNumber;
+  tokensAvailable: BigNumber;
+}
+
 export interface IEscrowsFilter {
   address: string;
   role?: number;
