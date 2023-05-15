@@ -182,7 +182,7 @@ class EscrowClient:
             if not Web3.isAddress(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
-        handle_transaction(
+        transaction_receipt = handle_transaction(
             self.w3,
             "Create Escrow",
             self.factory_contract.functions.createEscrow(
@@ -190,8 +190,14 @@ class EscrowClient:
             ),
             EscrowClientError,
         )
-
-        return self.factory_contract.functions.lastEscrow().call()
+        return next(
+            (
+                self.factory_contract.events.Launched().processLog(log)
+                for log in transaction_receipt["logs"]
+                if log["address"] == self.network["factory_address"]
+            ),
+            None,
+        ).args.escrow
 
     def setup(self, escrow_address: str, escrow_config: EscrowConfig):
         """
@@ -268,7 +274,7 @@ class EscrowClient:
 
         if not Web3.isAddress(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        if 0 > amount:
+        if 0 >= amount:
             raise EscrowClientError("Amount must be positive")
 
         token_address = self.get_token_address(escrow_address)
@@ -284,32 +290,6 @@ class EscrowClient:
             hmtoken_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
         )
-
-    def create_and_setup_escrow(
-        self,
-        token_address: str,
-        trusted_handlers: List[str],
-        escrow_config: EscrowConfig,
-    ):
-        """
-        Creates and sets up an escrow.
-
-        Args:
-            token_address (str): Token to use for pay outs
-            trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
-            escrow_config (EscrowConfig): Object containing all the necessary information to setup an escrow
-
-        Returns:
-            str: The address of the escrow created
-
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
-        """
-
-        escrow_address = self.create_escrow(token_address, trusted_handlers)
-        self.setup(escrow_address, escrow_config)
-
-        return escrow_address
 
     def fund(self, escrow_address: str, amount: Decimal):
         """
@@ -372,9 +352,7 @@ class EscrowClient:
         handle_transaction(
             self.w3,
             "Store Results",
-            self._get_escrow_contract(escrow_address).functions.storeResults(
-                self.w3.eth.default_account, url, hash
-            ),
+            self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
             EscrowClientError,
         )
 
@@ -438,6 +416,8 @@ class EscrowClient:
             raise EscrowClientError("Arrays must have same length")
         if 0 in amounts:
             raise EscrowClientError("Amounts cannot be empty")
+        if any(amount < 0 for amount in amounts):
+            raise EscrowClientError("Amounts cannot be negative")
         balance = self.get_balance(escrow_address)
         total_amount = sum(amounts)
         if total_amount > balance:
@@ -694,6 +674,9 @@ class EscrowClient:
             Contract: The instance of the escrow contract
 
         """
+
+        if not self.factory_contract.functions.hasEscrow(address):
+            raise EscrowClientError("Escrow address is not provided by the factory")
         # Initialize contract instance
         escrow_interface = get_escrow_interface()
         return self.w3.eth.contract(address=address, abi=escrow_interface["abi"])

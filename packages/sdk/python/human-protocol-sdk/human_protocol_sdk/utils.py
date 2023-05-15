@@ -214,6 +214,9 @@ def handle_transaction(w3, tx_name, tx, exception):
         tx (obj): Transaction object
         exception (Exception): Exception class to raise in case of error
 
+    Returns:
+        obj: The transaction receipt
+
     Validations:
         - There must be a default account
 
@@ -222,7 +225,7 @@ def handle_transaction(w3, tx_name, tx, exception):
         raise exception("You must add an account to Web3 instance")
     try:
         tx_hash = tx.transact()
-        w3.eth.waitForTransactionReceipt(tx_hash)
+        return w3.eth.wait_for_transaction_receipt(tx_hash)
     except Exception as e:
         if "reverted with reason string" in e.args[0]:
             start_index = e.args[0].find("'") + 1

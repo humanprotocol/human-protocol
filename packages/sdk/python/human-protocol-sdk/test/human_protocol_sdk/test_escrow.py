@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 import unittest
 from datetime import datetime
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
@@ -221,28 +222,29 @@ class EscrowTestCase(unittest.TestCase):
     def test_create_escrow(self):
         mock_function_create = MagicMock()
         self.escrow.factory_contract.functions.createEscrow = mock_function_create
-        mock_function_last_escrow = MagicMock()
         escrow_address = "0x1234567890123456789012345678901234567890"
-        mock_function_last_escrow.return_value.call.return_value = escrow_address
-        self.escrow.factory_contract.functions.lastEscrow = mock_function_last_escrow
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = [self.w3.eth.default_account]
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
-            response = self.escrow.create_escrow(token_address, trusted_handlers)
+            with patch("human_protocol_sdk.escrow.next") as mock_function_next:
+                mock_function_next.return_value = SimpleNamespace(
+                    args=SimpleNamespace(escrow=escrow_address)
+                )
+                response = self.escrow.create_escrow(token_address, trusted_handlers)
 
-            self.assertEqual(response, escrow_address)
-            mock_function_create.assert_called_once_with(
-                token_address, trusted_handlers
-            )
-            mock_function_last_escrow.assert_called_once_with()
+                self.assertEqual(response, escrow_address)
+                mock_function_create.assert_called_once_with(
+                    token_address, trusted_handlers
+                )
+                mock_function_next.assert_called_once()
 
-            mock_function.assert_called_once_with(
-                self.w3,
-                "Create Escrow",
-                mock_function_create.return_value,
-                EscrowClientError,
-            )
+                mock_function.assert_called_once_with(
+                    self.w3,
+                    "Create Escrow",
+                    mock_function_create.return_value,
+                    EscrowClientError,
+                )
 
     def test_create_escrow_invalid_token(self):
         token_address = "invalid_address"
@@ -398,10 +400,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract = MagicMock()
         mock_contract.functions.setup = MagicMock()
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
-        mock_function_last_escrow = MagicMock()
         escrow_address = "0x1234567890123456789012345678901234567890"
-        mock_function_last_escrow.return_value.call.return_value = escrow_address
-        self.escrow.factory_contract.functions.lastEscrow = mock_function_last_escrow
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = [self.w3.eth.default_account]
         escrow_config = EscrowConfig(
@@ -413,28 +412,32 @@ class EscrowTestCase(unittest.TestCase):
             "test",
         )
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
-            response = self.escrow.create_and_setup_escrow(
-                token_address, trusted_handlers, escrow_config
-            )
+            with patch("human_protocol_sdk.escrow.next") as mock_function_next:
+                mock_function_next.return_value = SimpleNamespace(
+                    args=SimpleNamespace(escrow=escrow_address)
+                )
+                response = self.escrow.create_and_setup_escrow(
+                    token_address, trusted_handlers, escrow_config
+                )
 
-            self.assertEqual(response, escrow_address)
-            mock_function_create.assert_called_once_with(
-                token_address, trusted_handlers
-            )
-            mock_function_last_escrow.assert_called_once_with()
+                self.assertEqual(response, escrow_address)
+                mock_function_create.assert_called_once_with(
+                    token_address, trusted_handlers
+                )
+                mock_function_next.assert_called_once()
 
-            mock_function.assert_any_call(
-                self.w3,
-                "Create Escrow",
-                mock_function_create.return_value,
-                EscrowClientError,
-            )
-            mock_function.assert_called_with(
-                self.w3,
-                "Setup",
-                mock_contract.functions.setup.return_value,
-                EscrowClientError,
-            )
+                mock_function.assert_any_call(
+                    self.w3,
+                    "Create Escrow",
+                    mock_function_create.return_value,
+                    EscrowClientError,
+                )
+                mock_function.assert_called_with(
+                    self.w3,
+                    "Setup",
+                    mock_contract.functions.setup.return_value,
+                    EscrowClientError,
+                )
 
     def test_create_and_setup_escrow_invalid_token(self):
         self.escrow.setup = MagicMock()
@@ -560,9 +563,7 @@ class EscrowTestCase(unittest.TestCase):
             self.escrow.store_results(escrow_address, url, hash)
 
             self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
-            mock_contract.functions.storeResults.assert_called_once_with(
-                self.w3.eth.default_account, url, hash
-            )
+            mock_contract.functions.storeResults.assert_called_once_with(url, hash)
             mock_function.assert_called_once_with(
                 self.w3,
                 "Store Results",
