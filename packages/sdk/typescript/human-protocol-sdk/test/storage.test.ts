@@ -1,4 +1,5 @@
 import { describe, test, expect, vi, beforeAll } from 'vitest';
+import axios from 'axios';
 import crypto from 'crypto';
 import {
   DEFAULT_ENDPOINT,
@@ -9,12 +10,14 @@ import {
   StorageParams,
 } from '../src';
 import {
+  ErrorInvalidUrl,
   ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from '../src/error';
 import StorageClient from '../src/storage';
 import {
+  FAKE_URL,
   STORAGE_FAKE_BUCKET,
   STORAGE_TEST_ACCESS_KEY,
   STORAGE_TEST_FILE_VALUE,
@@ -46,6 +49,8 @@ vi.mock('minio', () => {
   // Return Minio.Client mock
   return { Client };
 });
+
+vi.mock('axios');
 
 describe('Storage tests', () => {
   describe('Client initialization', () => {
@@ -182,7 +187,7 @@ describe('Storage tests', () => {
       ).toThrow(ErrorStorageFileNotUploaded);
     });
 
-    test('should download the file with success', async () => {
+    test('should download the files with success', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       const hash = crypto
@@ -204,7 +209,7 @@ describe('Storage tests', () => {
       expect(downloadedResults[0].content).toEqual(file);
     });
 
-    test('should not download the file with an error', async () => {
+    test('should not download the files with an error', async () => {
       vi.spyOn(storageClient, 'downloadFiles').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
@@ -214,6 +219,46 @@ describe('Storage tests', () => {
           DEFAULT_PUBLIC_BUCKET
         )
       ).toThrow(ErrorStorageFileNotFound);
+    });
+
+    test('should fail URL validation', async () => {
+      expect(storageClient.downloadFileFromUrl(FAKE_URL)).rejects.toThrow(
+        ErrorInvalidUrl
+      );
+    });
+
+    test('should download the file from URL with success', async () => {
+      const file = { key: STORAGE_TEST_FILE_VALUE };
+
+      vi.spyOn(axios, 'get').mockImplementation(() =>
+        Promise.resolve({ data: file })
+      );
+
+      const hash = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file))
+        .digest('hex');
+      const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
+
+      const result = await storageClient.downloadFileFromUrl(url);
+      expect(result).toEqual(file);
+    });
+
+    test('should not download the file from URL with an error', async () => {
+      const file = { key: STORAGE_TEST_FILE_VALUE };
+
+      const hash = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file))
+        .digest('hex');
+      const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
+
+      vi.spyOn(storageClient, 'downloadFileFromUrl').mockImplementation(() => {
+        throw ErrorStorageFileNotFound;
+      });
+      expect(() => storageClient.downloadFileFromUrl(url)).toThrow(
+        ErrorStorageFileNotFound
+      );
     });
 
     test('should return a list of objects with success', async () => {

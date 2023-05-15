@@ -22,6 +22,23 @@ export const DEFAULT_PORT = 9000;
 export const DEFAULT_USE_SSL = false;
 
 /**
+ * @constant Default tx Id
+ */
+export const DEFAULT_TX_ID = 1;
+
+/**
+ * @constant Default Enum for escrow statuses.
+ */
+export enum EscrowStatus {
+  Launched = 0,
+  Pending = 1,
+  Partial = 2,
+  Paid = 3,
+  Complete = 4,
+  Cancelled = 5,
+}
+
+/**
  * @constant Default network parameters
  */
 export const NETWORKS: {

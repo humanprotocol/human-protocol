@@ -1,12 +1,15 @@
+import axios from 'axios';
 import crypto from 'crypto';
 import * as Minio from 'minio';
 import {
+  ErrorInvalidUrl,
   ErrorStorageBucketNotFound,
   ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from './error';
 import { UploadFile, File, StorageCredentials, StorageParams } from './types';
+import { isValidUrl } from './utils';
 
 export default class StorageClient {
   private client: Minio.Client;
@@ -53,6 +56,30 @@ export default class StorageClient {
         }
       })
     );
+  }
+
+  /**
+   * **Download files from cloud storage.*
+   *
+   * @param {string} url - URL to the file
+   * @returns {Promise<File>} - Downloaded file
+   */
+  public async downloadFileFromUrl(url: string): Promise<File> {
+    if (!isValidUrl(url)) {
+      throw ErrorInvalidUrl;
+    }
+
+    try {
+      const { data } = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return data;
+    } catch (e) {
+      throw ErrorStorageFileNotFound;
+    }
   }
 
   /**
