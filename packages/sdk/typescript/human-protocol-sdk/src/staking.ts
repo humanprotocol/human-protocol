@@ -23,6 +23,7 @@ import {
 } from './error';
 import { gqlFetch, throwError } from './utils';
 import { RAW_REWARDS_QUERY } from './queries';
+import { requiresSigner } from './decorators';
 
 export default class StakingClient {
   public signerOrProvider: Signer | Provider;
@@ -64,6 +65,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async approveStake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
@@ -88,6 +90,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async stake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
@@ -113,6 +116,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async unstake(amount: BigNumber): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
@@ -136,6 +140,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async withdraw(): Promise<void> {
     try {
       await this.stakingContract.withdraw();
@@ -156,6 +161,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async slash(
     slasher: string,
     staker: string,
@@ -203,6 +209,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async allocate(
     escrowAddress: string,
     amount: BigNumber
@@ -238,6 +245,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async closeAllocation(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -262,6 +270,7 @@ export default class StakingClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred, void otherwise
    */
+  @requiresSigner
   public async distributeRewards(escrowAddress: string): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
