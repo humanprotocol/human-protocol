@@ -27,6 +27,7 @@ import {
   ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
+  InvalidEthereumAddressError,
 } from '../src/error';
 import InitClient from '../src/init';
 import {
@@ -143,38 +144,13 @@ describe('EscrowClient', () => {
     test('should throw an error if trustedHandlers contains an invalid address', async () => {
       await expect(
         escrowClient.createEscrow(ethers.constants.AddressZero, [FAKE_ADDRESS])
-      ).rejects.toThrow(ErrorInvalidAddress);
-    });
-
-    test('should create an escrow and return its address', async () => {
-      const tokenAddress = ethers.constants.AddressZero;
-      const trustedHandlers = [ethers.constants.AddressZero];
-      const expectedEscrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.lastEscrow.mockReturnValue(
-        expectedEscrowAddress
-      );
-
-      const result = await escrowClient.createEscrow(
-        tokenAddress,
-        trustedHandlers
-      );
-
-      expect(
-        escrowClient.escrowFactoryContract.createEscrow
-      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers);
-      expect(escrowClient.escrowFactoryContract.lastEscrow).toHaveBeenCalled();
-      expect(result).toEqual(expectedEscrowAddress);
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
     });
 
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
-      const expectedEscrowAddress = ethers.constants.AddressZero;
 
-      escrowClient.escrowFactoryContract.lastEscrow.mockReturnValue(
-        expectedEscrowAddress
-      );
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
         new Error()
       );
@@ -638,7 +614,6 @@ describe('EscrowClient', () => {
   describe('storeResults', () => {
     test('should throw an error if signerOrProvider is not a signer', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
 
@@ -649,96 +624,78 @@ describe('EscrowClient', () => {
       const invalidClient = new EscrowClient(invalidClientParams);
 
       await expect(
-        invalidClient.storeResults(escrowAddress, senderAddress, url, hash)
+        invalidClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow(ErrorSigner);
-    });
-
-    test('should throw an error if senderAddress is an invalid address', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const invalidAddress = FAKE_ADDRESS;
-      const url = VALID_URL;
-      const hash = FAKE_HASH;
-
-      await expect(
-        escrowClient.storeResults(escrowAddress, invalidAddress, url, hash)
-      ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
 
       await expect(
-        escrowClient.storeResults(invalidAddress, senderAddress, url, hash)
+        escrowClient.storeResults(invalidAddress, url, hash)
       ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
     });
 
     test('should throw an error if an hasEscrow return false', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
     test('should throw an error if url is empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = '';
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
     test('should throw an error if results url is invalid url', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = FAKE_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow(ErrorInvalidUrl);
     });
 
     test('should throw an error if hash is empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = '';
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
       await expect(
-        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow(ErrorHashIsEmptyString);
     });
 
     test('should successfully store results escrow', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 
-      await escrowClient.storeResults(escrowAddress, senderAddress, url, hash);
+      await escrowClient.storeResults(escrowAddress, url, hash);
 
       expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
-        senderAddress,
         url,
         hash
       );
@@ -746,7 +703,6 @@ describe('EscrowClient', () => {
 
     test('should throw an error if the store results fails', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const senderAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
 
@@ -756,11 +712,10 @@ describe('EscrowClient', () => {
       );
 
       await expect(
-        escrowClient.storeResults(escrowAddress, senderAddress, url, hash)
+        escrowClient.storeResults(escrowAddress, url, hash)
       ).rejects.toThrow();
 
       expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
-        senderAddress,
         url,
         hash
       );
@@ -966,7 +921,7 @@ describe('EscrowClient', () => {
           finalResultsUrl,
           finalResultsHash
         )
-      ).rejects.toThrow(ErrorInvalidAddress);
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
     });
 
     test('should throw an error if url is empty string', async () => {
@@ -1260,7 +1215,7 @@ describe('EscrowClient', () => {
 
       await expect(
         escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
-      ).rejects.toThrow(ErrorInvalidAddress);
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
     });
 
     test('should successfully addTrustedHandlers escrow', async () => {

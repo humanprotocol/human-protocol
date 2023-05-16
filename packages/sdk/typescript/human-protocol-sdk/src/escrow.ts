@@ -6,7 +6,7 @@ import {
   EscrowFactory__factory,
   Escrow__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, Signer, ethers } from 'ethers';
+import { BigNumber, ContractReceipt, Signer, ethers, providers } from 'ethers';
 import { Provider } from '@ethersproject/abstract-provider';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -21,13 +21,14 @@ import {
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
   ErrorInvalidUrl,
+  ErrorLaunchedEventIsNotEmitted,
   ErrorListOfHandlersCannotBeEmpty,
-  ErrorManifestFileDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
   ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
+  InvalidEthereumAddressError,
 } from './error';
 import {
   IClientParams,
@@ -86,17 +87,23 @@ export default class EscrowClient {
 
     trustedHandlers.forEach((trustedHandler) => {
       if (!ethers.utils.isAddress(trustedHandler)) {
-        throw ErrorInvalidAddress;
+        throw new InvalidEthereumAddressError(trustedHandler);
       }
     });
 
     try {
-      await this.escrowFactoryContract.createEscrow(
-        tokenAddress,
-        trustedHandlers
-      );
+      const result: ContractReceipt = await (
+        await this.escrowFactoryContract.createEscrow(
+          tokenAddress,
+          trustedHandlers
+        )
+      ).wait();
 
-      return this.escrowFactoryContract.lastEscrow();
+      if (!result.events || !result.events[0] || !result.events[0].args) {
+        throw ErrorLaunchedEventIsNotEmitted;
+      }
+
+      return result.events[0].args[1];
     } catch (e: any) {
       return throwError(e);
     }
@@ -139,10 +146,6 @@ export default class EscrowClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
-
     if (
       recordingOracleFee.lte(0) ||
       recordingOracleFee.gt(100) ||
@@ -166,6 +169,10 @@ export default class EscrowClient {
 
     if (!hash) {
       throw ErrorHashIsEmptyString;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
@@ -234,12 +241,12 @@ export default class EscrowClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    if (amount.lte(0)) {
+      throw ErrorAmountMustBeGreaterThanZero;
     }
 
-    if (amount.lt(0) || amount.eq(0)) {
-      throw ErrorAmountMustBeGreaterThanZero;
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
@@ -275,7 +282,6 @@ export default class EscrowClient {
    */
   async storeResults(
     escrowAddress: string,
-    sender: string,
     url: string,
     hash: string
   ): Promise<void> {
@@ -283,16 +289,8 @@ export default class EscrowClient {
       throw ErrorSigner;
     }
 
-    if (!ethers.utils.isAddress(sender)) {
-      throw ErrorInvalidAddress;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     if (!url) {
@@ -307,12 +305,16 @@ export default class EscrowClient {
       throw ErrorHashIsEmptyString;
     }
 
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
     try {
       this.escrowContract = Escrow__factory.connect(
         escrowAddress,
         this.signerOrProvider
       );
-      await this.escrowContract.storeResults(sender, url, hash);
+      await this.escrowContract.storeResults(url, hash);
 
       return;
     } catch (e: any) {
@@ -378,10 +380,6 @@ export default class EscrowClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
-
     if (recipients.length === 0) {
       throw ErrorRecipientCannotBeEmptyArray;
     }
@@ -396,7 +394,7 @@ export default class EscrowClient {
 
     recipients.forEach((recipient) => {
       if (!ethers.utils.isAddress(recipient)) {
-        throw ErrorInvalidAddress;
+        throw new InvalidEthereumAddressError(recipient);
       }
     });
 
@@ -421,6 +419,10 @@ export default class EscrowClient {
 
     if (balance.lt(totalAmount)) {
       throw ErrorEscrowDoesNotHaveEnoughBalance;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
@@ -526,19 +528,19 @@ export default class EscrowClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
-
     if (trustedHandlers.length === 0) {
       throw ErrorListOfHandlersCannotBeEmpty;
     }
 
     trustedHandlers.forEach((trustedHandler) => {
       if (!ethers.utils.isAddress(trustedHandler)) {
-        throw ErrorInvalidAddress;
+        throw new InvalidEthereumAddressError(trustedHandler);
       }
     });
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
 
     try {
       this.escrowContract = Escrow__factory.connect(

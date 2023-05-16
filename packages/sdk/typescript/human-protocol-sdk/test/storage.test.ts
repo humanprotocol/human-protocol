@@ -11,7 +11,6 @@ import {
 } from '../src';
 import {
   ErrorInvalidUrl,
-  ErrorStorageClientNotInitialized,
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from '../src/error';
@@ -210,7 +209,7 @@ describe('Storage tests', () => {
     });
 
     test('should fail URL validation', async () => {
-      expect(storageClient.downloadFileFromUrl(FAKE_URL)).rejects.toThrow(
+      expect(StorageClient.downloadFileFromUrl(FAKE_URL)).rejects.toThrow(
         ErrorInvalidUrl
       );
     });
@@ -228,7 +227,7 @@ describe('Storage tests', () => {
         .digest('hex');
       const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
 
-      const result = await storageClient.downloadFileFromUrl(url);
+      const result = await StorageClient.downloadFileFromUrl(url);
       expect(result).toEqual(file);
     });
 
@@ -241,10 +240,10 @@ describe('Storage tests', () => {
         .digest('hex');
       const url = `http://${DEFAULT_PUBLIC_BUCKET}/${hash}.json`;
 
-      vi.spyOn(storageClient, 'downloadFileFromUrl').mockImplementation(() => {
+      vi.spyOn(StorageClient, 'downloadFileFromUrl').mockImplementation(() => {
         throw ErrorStorageFileNotFound;
       });
-      expect(() => storageClient.downloadFileFromUrl(url)).toThrow(
+      expect(() => StorageClient.downloadFileFromUrl(url)).toThrow(
         ErrorStorageFileNotFound
       );
     });

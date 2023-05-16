@@ -64,7 +64,7 @@ export default class StorageClient {
    * @param {string} url - URL to the file
    * @returns {Promise<File>} - Downloaded file
    */
-  public async downloadFileFromUrl(url: string): Promise<File> {
+  public static async downloadFileFromUrl(url: string): Promise<File> {
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
     }

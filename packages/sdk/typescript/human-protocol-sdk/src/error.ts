@@ -280,6 +280,13 @@ export const ErrorRecipientAndAmountsMustBeSameLength = new Error(
 );
 
 /**
+ * @constant {Error} - Launched event is not emitted.
+ */
+export const ErrorLaunchedEventIsNotEmitted = new Error(
+  'Launched event is not emitted'
+);
+
+/**
  * @constant {Error} - Hash is an empty string.
  */
 export const ErrorHashIsEmptyString = new Error('Hash is an empty string');
@@ -335,5 +342,11 @@ export class TransactionReplaced extends EthereumError {
 export class ContractExecutionError extends EthereumError {
   constructor(reason: string) {
     super(`Contract execution error: ${reason}`);
+  }
+}
+
+export class InvalidEthereumAddressError extends Error {
+  constructor(address: string) {
+    super(`Invalid ethereum address error: ${address}`);
   }
 }
