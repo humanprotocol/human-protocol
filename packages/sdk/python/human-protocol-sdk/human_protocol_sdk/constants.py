@@ -1,8 +1,6 @@
 from enum import Enum
 import os
 
-from web3 import Web3
-
 
 class ChainId(Enum):
     """Enum for chain IDs."""
@@ -168,5 +166,26 @@ NETWORKS = {
     },
 }
 
-ARTIFACTS_FOLDER = os.path.join(os.path.dirname(
-    os.path.dirname(__file__)), "artifacts")
+
+class Status(Enum):
+    """Enum for escrow statuses."""
+
+    Launched = 0
+    Pending = 1
+    Partial = 2
+    Paid = 3
+    Complete = 4
+    Cancelled = 5
+
+
+class Role(Enum):
+    """Enum for roles."""
+
+    validator = "Validator"
+    job_launcher = "Job Launcher"
+    exchange_oracle = "Exchange Oracle"
+    reputation_oracle = "Reputation Oracle"
+    recording_oracle = "Recording Oracle"
+
+
+ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")

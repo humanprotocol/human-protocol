@@ -17,6 +17,7 @@ from human_protocol_sdk.utils import (
     get_staking_interface,
     get_reward_pool_interface,
     get_data_from_subgraph,
+    handle_transaction,
 )
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
@@ -54,13 +55,15 @@ class StakingClient:
 
         # Initialize web3 instance
         self.w3 = w3
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        if not self.w3.middleware_onion.get("geth_poa"):
+            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
         # Load network configuration based on chain_id
         try:
-            self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+            chain_id = self.w3.eth.chain_id
+            self.network = NETWORKS[ChainId(chain_id)]
         except:
-            raise StakingClientError("Invalid ChainId")
+            raise StakingClientError(f"Invalid ChainId: {chain_id}")
 
         if not self.network:
             raise StakingClientError("Empty network configuration")
@@ -98,14 +101,15 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to approve must be greater than 0")
+            raise StakingClientError("Amount to approve must be greater than 0")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Approve stake",
             self.hmtoken_contract.functions.approve(
                 self.network["staking_address"], amount
             ),
+            StakingClientError,
         )
 
     def stake(self, amount: Decimal):
@@ -123,8 +127,11 @@ class StakingClient:
         if amount <= 0:
             raise StakingClientError("Amount to stake must be greater than 0")
 
-        self._handle_transaction(
-            "Stake HMT", self.staking_contract.functions.stake(amount)
+        handle_transaction(
+            self.w3,
+            "Stake HMT",
+            self.staking_contract.functions.stake(amount),
+            StakingClientError,
         )
 
     def allocate(self, escrow_address: str, amount: Decimal):
@@ -141,15 +148,16 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to allocate must be greater than 0")
+            raise StakingClientError("Amount to allocate must be greater than 0")
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError("Invalid escrow")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Allocate HMT",
             self.staking_contract.functions.allocate(escrow_address, amount),
+            StakingClientError,
         )
 
     def close_allocation(self, escrow_address: str):
@@ -164,11 +172,13 @@ class StakingClient:
         """
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError("Invalid escrow")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Close allocation",
             self.staking_contract.functions.closeAllocation(escrow_address),
+            StakingClientError,
         )
 
     def unstake(self, amount: Decimal):
@@ -183,11 +193,13 @@ class StakingClient:
         """
 
         if amount <= 0:
-            raise StakingClientError(
-                "Amount to unstake must be greater than 0")
+            raise StakingClientError("Amount to unstake must be greater than 0")
 
-        self._handle_transaction(
-            "Unstake HMT", self.staking_contract.functions.unstake(amount)
+        handle_transaction(
+            self.w3,
+            "Unstake HMT",
+            self.staking_contract.functions.unstake(amount),
+            StakingClientError,
         )
 
     def withdraw(self):
@@ -197,8 +209,11 @@ class StakingClient:
             - There must be unstaked tokens which is unlocked (on-chain)
         """
 
-        self._handle_transaction(
-            "Withdraw HMT", self.staking_contract.functions.withdraw()
+        handle_transaction(
+            self.w3,
+            "Withdraw HMT",
+            self.staking_contract.functions.withdraw(),
+            StakingClientError,
         )
 
     def slash(self, slasher: str, staker: str, escrow_address: str, amount: Decimal):
@@ -220,13 +235,15 @@ class StakingClient:
             raise StakingClientError("Amount to slash must be greater than 0")
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError("Invalid escrow")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Slash HMT",
             self.staking_contract.functions.slash(
                 slasher, staker, escrow_address, amount
             ),
+            StakingClientError,
         )
 
     def distribute_reward(self, escrow_address: str):
@@ -240,12 +257,13 @@ class StakingClient:
         """
 
         if not self._is_valid_escrow(escrow_address):
-            raise StakingClientError("Invalid escrow")
+            raise StakingClientError(f"Invalid escrow address: {escrow_address}")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Distribute reward",
-            self.reward_pool_contract.functions.distributeReward(
-                escrow_address),
+            self.reward_pool_contract.functions.distributeReward(escrow_address),
+            StakingClientError,
         )
 
     def get_all_stakers_info(self) -> List[dict]:
@@ -377,27 +395,3 @@ rewardAddedEvents(where:{{slasher:"{0}"}}) {{
 
         # TODO: Use Escrow/Job Module once implemented
         return self.factory_contract.functions.hasEscrow(escrow_address).call()
-
-    def _handle_transaction(self, tx_name, tx, read_only=False):
-        """Executes the transaction and waits for the receipt.
-
-        Args:
-            tx_name (str): Name of the transaction
-            tx (obj): Transaction object
-            read_only (bool): True if the transaction is read-only, False otherwise
-
-        Validations:
-            - If the transaction is not read-only, there must be a default account
-
-        """
-
-        if not read_only and not self.w3.eth.default_account:
-            raise StakingClientError(
-                "You must add an account to Web3 instance")
-
-        try:
-            tx_hash = tx.transact()
-            self.w3.eth.waitForTransactionReceipt(tx_hash)
-        except Exception as e:
-            LOG.exception(f"{tx_name} failed due to {e}.")
-            raise StakingClientError("Transaction failed.")

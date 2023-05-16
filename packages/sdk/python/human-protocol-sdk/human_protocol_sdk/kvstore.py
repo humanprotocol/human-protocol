@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.utils import get_kvstore_interface
+from human_protocol_sdk.utils import get_kvstore_interface, handle_transaction
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -38,13 +38,15 @@ class KVStoreClient:
 
         # Initialize web3 instance
         self.w3 = web3
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        if not self.w3.middleware_onion.get("geth_poa"):
+            self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
         # Load network configuration based on chainId
         try:
-            self.network = NETWORKS[ChainId(self.w3.eth.chain_id)]
+            chain_id = self.w3.eth.chain_id
+            self.network = NETWORKS[ChainId(chain_id)]
         except:
-            raise KVStoreClientError("Invalid ChainId")
+            raise KVStoreClientError(f"Invalid ChainId: {chain_id}")
 
         # Initialize contract instances
         kvstore_interface = get_kvstore_interface()
@@ -66,12 +68,12 @@ class KVStoreClient:
 
         if not key:
             raise KVStoreClientError("Key can not be empty")
-        if not self.w3.eth.default_account:
-            raise KVStoreClientError("You must add an account to Web3 instance")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Set",
             self.kvstore_contract.functions.set(key, value),
+            KVStoreClientError,
         )
 
     def set_bulk(self, keys: List[str], values: List[str]):
@@ -88,12 +90,16 @@ class KVStoreClient:
 
         if "" in keys:
             raise KVStoreClientError("Key can not be empty")
-        if not self.w3.eth.default_account:
-            raise KVStoreClientError("You must add an account to Web3 instance")
+        if len(keys) == 0:
+            raise KVStoreClientError("Arrays must have any value")
+        if len(keys) != len(values):
+            raise KVStoreClientError("Arrays must have same length")
 
-        self._handle_transaction(
+        handle_transaction(
+            self.w3,
             "Set Bulk",
             self.kvstore_contract.functions.setBulk(keys, values),
+            KVStoreClientError,
         )
 
     def get(self, address: str, key: str):
@@ -110,21 +116,6 @@ class KVStoreClient:
         if not key:
             raise KVStoreClientError("Key can not be empty")
         if not Web3.isAddress(address):
-            raise KVStoreClientError("Invalid address")
+            raise KVStoreClientError(f"Invalid address: {address}")
         result = self.kvstore_contract.functions.get(address, key).call()
         return result
-
-    def _handle_transaction(self, tx_name, tx):
-        """Executes the transaction and waits for the receipt.
-
-        Args:
-            tx_name (str): Name of the transaction
-            tx (obj): Transaction object
-
-        """
-        try:
-            tx_hash = tx.transact()
-            self.w3.eth.waitForTransactionReceipt(tx_hash)
-        except Exception as e:
-            LOG.exception(f"{tx_name} failed due to {e}.")
-            raise KVStoreClientError("Transaction failed.")
