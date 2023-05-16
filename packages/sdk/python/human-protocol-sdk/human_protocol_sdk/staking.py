@@ -12,7 +12,7 @@ from web3.middleware import geth_poa_middleware
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.utils import (
-    get_hmtoken_interface,
+    get_erc20_interface,
     get_factory_interface,
     get_staking_interface,
     get_reward_pool_interface,
@@ -69,9 +69,9 @@ class StakingClient:
             raise StakingClientError("Empty network configuration")
 
         # Initialize contract instances
-        hmtoken_interface = get_hmtoken_interface()
+        erc20_interface = get_erc20_interface()
         self.hmtoken_contract = self.w3.eth.contract(
-            address=self.network["hmt_address"], abi=hmtoken_interface["abi"]
+            address=self.network["hmt_address"], abi=erc20_interface["abi"]
         )
 
         factory_interface = get_factory_interface()
