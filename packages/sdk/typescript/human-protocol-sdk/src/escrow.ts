@@ -146,13 +146,8 @@ export default class EscrowClient {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (
-      recordingOracleFee.lte(0) ||
-      recordingOracleFee.gt(100) ||
-      reputationOracleFee.lte(0) ||
-      reputationOracleFee.gt(100)
-    ) {
-      throw ErrorFeeMustBeBetweenZeroAndHundred;
+    if (recordingOracleFee.lte(0) || reputationOracleFee.lte(0)) {
+      throw ErrorAmountMustBeGreaterThanZero;
     }
 
     if (recordingOracleFee.add(reputationOracleFee).gt(100)) {
@@ -202,14 +197,14 @@ export default class EscrowClient {
    * @param {string} tokenAddress - Token address to use for pay outs.
    * @param {string[]} trustedHandlers - Array of addresses that can perform actions on the contract.
    * @param {IEscrowConfig} escrowConfig - Configuration object with escrow settings.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   async createAndSetupEscrow(
     tokenAddress: string,
     trustedHandlers: string[],
     escrowConfig: IEscrowConfig
-  ): Promise<void> {
+  ): Promise<string> {
     try {
       const escrowAddress = await this.createEscrow(
         tokenAddress,
@@ -218,7 +213,7 @@ export default class EscrowClient {
 
       await this.setup(escrowAddress, escrowConfig);
 
-      return;
+      return escrowAddress;
     } catch (e: any) {
       return throwError(e);
     }

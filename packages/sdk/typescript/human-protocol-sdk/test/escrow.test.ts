@@ -263,7 +263,7 @@ describe('EscrowClient', () => {
 
       await expect(
         escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
-      ).rejects.toThrow(ErrorFeeMustBeBetweenZeroAndHundred);
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
     });
 
     test('should throw an error if recordingOracleFee > 100 or reputationOracleFee > 100', async () => {
