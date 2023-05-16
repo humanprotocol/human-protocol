@@ -29,6 +29,9 @@ import {
   FundingMethodType,
   JobLaunchResponse,
 } from './types';
+import {uploadFiles, downloadFiles, listObjects} from '../../../../../../sdk/typescript/human-protocol-sdk/src/storage.ts';
+import { File, UploadFile } from '../../../../../../sdk/typescript/human-protocol-sdk/src/storage';
+
 
 type JobRequestProps = {
   fundingMethod: FundingMethodType;
@@ -68,6 +71,47 @@ export const JobRequest = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [tokenAmount, setTokenAmount] = useState(0);
+
+  const handleJobRequestSubmit = async () => {
+
+    try {
+      setIsLoading(true);
+      // Upload job files to cloud storage
+      const files: File[] = [];
+      // Replace bucketName with actual name of bucket to upload files to
+      const uploadedFiles: UploadFile[] = await uploadFiles(files, 'bucketName');
+      // uploaded Files (key - hash)
+      console.log(uploadedFiles);
+
+      // Download files from cloud storage
+      const fileKeys: string[] = []; // Add the keys of the files to download here
+      const downloadedFiles: File[] = await downloadFiles(fileKeys, 'bucketName'); // Replace bucketName with actual name of bucket to download files from
+
+      // Handle the downloaded files
+      downloadedFiles.forEach((file) => {
+        // Access the file properties
+        const key = file.key;
+        const content = file.content;
+        const parsedContent = JSON.parse(content);
+        // No need to handle the 'bucket' property here
+        // Assume files are downloaded from the specified bucket
+
+        // Do something with the parsed content
+        console.log(`File key: ${key}`);
+        console.log('Parsed content:', parsedContent);
+      });
+      
+      // List objects in the bucket
+      const objects: string[] = await listObjects('bucketName');
+
+
+    } catch (error) {
+      console.error(error);
+      // Handle the error
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleJobRequestFormFieldChange = (
     fieldName: string,
@@ -175,6 +219,28 @@ export const JobRequest = ({
   };
 
   return (
+
+    <RoundedBox>
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 8 }}>
+      <Button
+        variant="outlined"
+        sx={{ minWidth: '240px', py: 1 }}
+        onClick={onBack}
+      >
+        Back
+      </Button>
+      <Button
+        variant="contained"
+        sx={{ minWidth: '240px', py: 1 }}
+        onClick={handleJobRequestSubmit}
+        disabled={isLoading}
+      >
+        {isLoading && <CircularProgress size={24} sx={{ mr: 1 }} />} Fund and Request Job
+      </Button>
+    </Box>
+  </RoundedBox>
+
+
     <RoundedBox sx={{ p: '50px 140px' }}>
       <Typography variant="body2" color="primary" mb={4}>
         Job Details
