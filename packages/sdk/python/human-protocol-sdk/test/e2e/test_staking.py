@@ -12,12 +12,18 @@ from test.human_protocol_sdk.utils import (
 )
 
 
+def get_w3_with_priv_key(priv_key: str):
+    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+    gas_payer = w3.eth.account.from_key(priv_key)
+    w3.eth.default_account = gas_payer.address
+    return (w3, gas_payer)
+
+
 class StakingTestCase(unittest.TestCase):
     def setUp(self):
-        self.staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            DEFAULT_GAS_PAYER_PRIV,
-        )
+        (self.w3, self.gas_payer) = get_w3_with_priv_key(DEFAULT_GAS_PAYER_PRIV)
+
+        self.staking_client = StakingClient(self.w3)
 
         self.create_escrow()
 
@@ -28,7 +34,7 @@ class StakingTestCase(unittest.TestCase):
 
         tx_hash = self.staking_client.factory_contract.functions.createEscrow(
             self.staking_client.hmtoken_contract.address,
-            [self.staking_client.gas_payer.address],
+            [self.gas_payer.address],
         ).transact()
 
         tx_receipt = self.staking_client.w3.eth.waitForTransactionReceipt(tx_hash)
@@ -54,7 +60,7 @@ class StakingTestCase(unittest.TestCase):
 
     def get_hmtoken_balance(self):
         return self.staking_client.hmtoken_contract.functions.balanceOf(
-            self.staking_client.gas_payer.address
+            self.gas_payer.address
         ).call()
 
     def mine_blocks(self, blocks: int):
@@ -287,10 +293,10 @@ class StakingTestCase(unittest.TestCase):
         self.assertEqual(balance_after, balance_before)
 
     def test_slash(self):
-        alice_staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+        (alice_w3, alice_gas_payer) = get_w3_with_priv_key(
+            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         )
+        alice_staking_client = StakingClient(alice_w3)
 
         # Alice stakes 100 HMT
         alice_staking_client.approve_stake(100)
@@ -305,8 +311,8 @@ class StakingTestCase(unittest.TestCase):
 
         # Slash 50 HMT
         self.staking_client.slash(
-            self.staking_client.gas_payer.address,
-            alice_staking_client.gas_payer.address,
+            self.gas_payer.address,
+            alice_gas_payer.address,
             self.escrow_address,
             30,
         )
@@ -323,10 +329,10 @@ class StakingTestCase(unittest.TestCase):
         )
 
     def test_slash_invalid(self):
-        alice_staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+        (alice_w3, alice_gas_payer) = get_w3_with_priv_key(
+            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         )
+        alice_staking_client = StakingClient(alice_w3)
 
         # Alice stakes 100 HMT
         alice_staking_client.approve_stake(100)
@@ -342,8 +348,8 @@ class StakingTestCase(unittest.TestCase):
         # Slash -1 HMT
         with self.assertRaises(StakingClientError):
             self.staking_client.slash(
-                self.staking_client.gas_payer.address,
-                alice_staking_client.gas_payer.address,
+                self.gas_payer.address,
+                alice_gas_payer.address,
                 self.escrow_address,
                 -1,
             )
@@ -362,8 +368,8 @@ class StakingTestCase(unittest.TestCase):
         # Slash more than allocated
         with self.assertRaises(StakingClientError):
             self.staking_client.slash(
-                self.staking_client.gas_payer.address,
-                alice_staking_client.gas_payer.address,
+                self.gas_payer.address,
+                alice_gas_payer.address,
                 self.escrow_address,
                 100,
             )
@@ -382,8 +388,8 @@ class StakingTestCase(unittest.TestCase):
         # Slash invalid escrow
         with self.assertRaises(StakingClientError):
             self.staking_client.slash(
-                self.staking_client.gas_payer.address,
-                alice_staking_client.gas_payer.address,
+                self.gas_payer.address,
+                alice_gas_payer.address,
                 "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
                 100,
             )
@@ -399,23 +405,21 @@ class StakingTestCase(unittest.TestCase):
             staker_info_before["tokens_allocated"],
         )
 
-    def test_distribute_rewards(self):
-        print(self.staking_client.staking_contract.functions.owner().call())
-
-        alice_staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d",
+    def test_distribute_reward(self):
+        (alice_w3, alice_gas_payer) = get_w3_with_priv_key(
+            "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
         )
+        alice_staking_client = StakingClient(alice_w3)
 
-        bob_staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a",
+        (bob_w3, bob_gas_payer) = get_w3_with_priv_key(
+            "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"
         )
+        bob_staking_client = StakingClient(bob_w3)
 
-        carol_staking_client = StakingClient(
-            Web3(load_provider_from_uri(URI("http://localhost:8545"))),
-            "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+        (carol_w3, carol_gas_payer) = get_w3_with_priv_key(
+            "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
         )
+        carol_staking_client = StakingClient(carol_w3)
 
         # Alice stakes 100 HMT
         alice_staking_client.approve_stake(100)
@@ -430,8 +434,8 @@ class StakingTestCase(unittest.TestCase):
         bob_staking_client.stake(50)
 
         self.staking_client.slash(
-            bob_staking_client.gas_payer.address,
-            alice_staking_client.gas_payer.address,
+            bob_gas_payer.address,
+            alice_gas_payer.address,
             self.escrow_address,
             10,
         )
@@ -441,8 +445,8 @@ class StakingTestCase(unittest.TestCase):
         carol_staking_client.stake(50)
 
         self.staking_client.slash(
-            carol_staking_client.gas_payer.address,
-            alice_staking_client.gas_payer.address,
+            carol_gas_payer.address,
+            alice_gas_payer.address,
             self.escrow_address,
             20,
         )
@@ -450,29 +454,29 @@ class StakingTestCase(unittest.TestCase):
         # Bob HMT balance before reward distribution
         bob_hmt_balance_before = (
             bob_staking_client.hmtoken_contract.functions.balanceOf(
-                bob_staking_client.gas_payer.address
+                bob_gas_payer.address
             ).call()
         )
 
         # Carol HMT balance before reward distribution
         carol_hmt_balance_before = (
             carol_staking_client.hmtoken_contract.functions.balanceOf(
-                carol_staking_client.gas_payer.address
+                carol_gas_payer.address
             ).call()
         )
 
         # Distribute rewards
-        self.staking_client.distribute_rewards(self.escrow_address)
+        self.staking_client.distribute_reward(self.escrow_address)
 
         # Bob HMT balance after reward distribution
         bob_hmt_balance_after = bob_staking_client.hmtoken_contract.functions.balanceOf(
-            bob_staking_client.gas_payer.address
+            bob_gas_payer.address
         ).call()
 
         # Carol HMT balance after reward distribution
         carol_hmt_balance_after = (
             carol_staking_client.hmtoken_contract.functions.balanceOf(
-                carol_staking_client.gas_payer.address
+                carol_gas_payer.address
             ).call()
         )
 
@@ -482,9 +486,9 @@ class StakingTestCase(unittest.TestCase):
         # Carol HMT balance should increase by 20 HMT (1 HMT is protocol fee)
         self.assertEqual(carol_hmt_balance_after, carol_hmt_balance_before + 19)
 
-    def test_distribute_rewards_invalid(self):
+    def test_distribute_reward_invalid(self):
         with self.assertRaises(StakingClientError):
-            self.staking_client.distribute_rewards(
+            self.staking_client.distribute_reward(
                 "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
             )
 
@@ -541,7 +545,7 @@ class StakingTestCase(unittest.TestCase):
         allocation = self.staking_client.get_allocation(self.escrow_address)
 
         self.assertEqual(allocation["escrow_address"], self.escrow_address)
-        self.assertEqual(allocation["staker"], self.staking_client.gas_payer.address)
+        self.assertEqual(allocation["staker"], self.gas_payer.address)
         self.assertEqual(allocation["tokens"], 100)
         self.assertNotEqual(allocation["created_at"], 0)
         self.assertEqual(allocation["closed_at"], 0)
@@ -553,7 +557,7 @@ class StakingTestCase(unittest.TestCase):
         allocation = self.staking_client.get_allocation(self.escrow_address)
 
         self.assertEqual(allocation["escrow_address"], self.escrow_address)
-        self.assertEqual(allocation["staker"], self.staking_client.gas_payer.address)
+        self.assertEqual(allocation["staker"], self.gas_payer.address)
         self.assertEqual(allocation["tokens"], 0)
         self.assertNotEqual(allocation["created_at"], 0)
         self.assertNotEqual(allocation["closed_at"], 0)
