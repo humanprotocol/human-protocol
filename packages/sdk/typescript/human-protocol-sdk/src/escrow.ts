@@ -13,7 +13,6 @@ import {
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
-  ErrorFeeMustBeBetweenZeroAndHundred,
   ErrorHashIsEmptyString,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
@@ -43,6 +42,7 @@ import {
   RAW_LAUNCHED_ESCROWS_QUERY,
 } from './queries';
 import { EscrowStatus, NetworkData } from './types';
+import { requiresSigner } from './decorators';
 
 export default class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
@@ -73,14 +73,11 @@ export default class EscrowClient {
    * @returns {Promise<string>} - Return the address of the escrow created.
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   public async createEscrow(
     tokenAddress: string,
     trustedHandlers: string[]
   ): Promise<string> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
     }
@@ -117,6 +114,7 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async setup(
     escrowAddress: string,
     escrowConfig: IEscrowConfig
@@ -129,10 +127,6 @@ export default class EscrowClient {
       manifestUrl,
       hash,
     } = escrowConfig;
-
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
 
     if (!ethers.utils.isAddress(recordingOracle)) {
       throw ErrorInvalidRecordingOracleAddressProvided;
@@ -200,6 +194,7 @@ export default class EscrowClient {
    * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async createAndSetupEscrow(
     tokenAddress: string,
     trustedHandlers: string[],
@@ -227,11 +222,8 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async fund(escrowAddress: string, amount: BigNumber): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -275,15 +267,12 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async storeResults(
     escrowAddress: string,
     url: string,
     hash: string
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -324,11 +313,8 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async complete(escrowAddress: string): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -360,6 +346,7 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async bulkPayOut(
     escrowAddress: string,
     recipients: string[],
@@ -367,10 +354,6 @@ export default class EscrowClient {
     finalResultsUrl: string,
     finalResultsHash: string
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -446,11 +429,8 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async cancel(escrowAddress: string): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -478,11 +458,8 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async abort(escrowAddress: string): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -511,14 +488,11 @@ export default class EscrowClient {
    * @returns {Promise<void>}
    * @throws {Error} - An error object if an error occurred.
    */
+  @requiresSigner
   async addTrustedHandlers(
     escrowAddress: string,
     trustedHandlers: string[]
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }

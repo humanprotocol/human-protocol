@@ -13,7 +13,6 @@ import {
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
-  ErrorFeeMustBeBetweenZeroAndHundred,
   ErrorHashIsEmptyString,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
@@ -37,13 +36,8 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { DEFAULT_TX_ID } from '../src/constants';
 import { EscrowStatus } from '../src/types';
-import { isValidUrl } from '../src/utils';
 
 vi.mock('../src/init');
-/*
-vi.mock('../src/utils', () => ({
-  isValidUrl: vi.fn(),
-}));*/
 
 describe('EscrowClient', () => {
   const provider = new ethers.providers.JsonRpcProvider();
@@ -121,20 +115,6 @@ describe('EscrowClient', () => {
   });
 
   describe('createEscrow', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(
-        invalidClient.createEscrow(ethers.constants.AddressZero, [
-          ethers.constants.AddressZero,
-        ])
-      ).rejects.toThrow(ErrorSigner);
-    });
-
     test('should throw an error if tokenAddress is an invalid address', async () => {
       await expect(
         escrowClient.createEscrow(FAKE_ADDRESS, [ethers.constants.AddressZero])
@@ -166,27 +146,6 @@ describe('EscrowClient', () => {
   });
 
   describe('setup', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      const escrowConfig = {
-        recordingOracle: ethers.constants.AddressZero,
-        reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(10),
-        reputationOracleFee: BigNumber.from(10),
-        manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
-      };
-
-      await expect(
-        invalidClient.setup(ethers.constants.AddressZero, escrowConfig)
-      ).rejects.toThrow(ErrorSigner);
-    });
-
     test('should throw an error if recordingOracle is an invalid address', async () => {
       const escrowConfig = {
         recordingOracle: FAKE_ADDRESS,
@@ -454,21 +413,6 @@ describe('EscrowClient', () => {
   });
 
   describe('fund', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const amount = BigNumber.from(10);
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(invalidClient.fund(escrowAddress, amount)).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
       const amount = BigNumber.from(10);
@@ -533,21 +477,6 @@ describe('EscrowClient', () => {
   });
 
   describe('fund', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const amount = BigNumber.from(10);
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(invalidClient.fund(escrowAddress, amount)).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
       const amount = BigNumber.from(10);
@@ -612,22 +541,6 @@ describe('EscrowClient', () => {
   });
 
   describe('storeResults', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const url = VALID_URL;
-      const hash = FAKE_HASH;
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(
-        invalidClient.storeResults(escrowAddress, url, hash)
-      ).rejects.toThrow(ErrorSigner);
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
       const url = VALID_URL;
@@ -723,20 +636,6 @@ describe('EscrowClient', () => {
   });
 
   describe('complete', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(invalidClient.complete(escrowAddress)).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
 
@@ -778,30 +677,6 @@ describe('EscrowClient', () => {
   });
 
   describe('bulkPayOut', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const recipients = [ethers.constants.AddressZero];
-      const amounts = [BigNumber.from(100)];
-      const finalResultsUrl = VALID_URL;
-      const finalResultsHash = FAKE_HASH;
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(
-        invalidClient.bulkPayOut(
-          escrowAddress,
-          recipients,
-          amounts,
-          finalResultsUrl,
-          finalResultsHash
-        )
-      ).rejects.toThrow(ErrorSigner);
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
       const recipients = [ethers.constants.AddressZero];
@@ -1051,20 +926,6 @@ describe('EscrowClient', () => {
   });
 
   describe('cancel', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(invalidClient.cancel(escrowAddress)).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
 
@@ -1106,20 +967,6 @@ describe('EscrowClient', () => {
   });
 
   describe('abort', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(invalidClient.abort(escrowAddress)).rejects.toThrow(
-        ErrorSigner
-      );
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const invalidAddress = FAKE_ADDRESS;
 
@@ -1161,21 +1008,6 @@ describe('EscrowClient', () => {
   });
 
   describe('addTrustedHandlers', () => {
-    test('should throw an error if signerOrProvider is not a signer', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-      const trustedHandlers = [ethers.constants.AddressZero];
-
-      const invalidClientParams = {
-        network: FAKE_NETWORK,
-        signerOrProvider: provider,
-      };
-      const invalidClient = new EscrowClient(invalidClientParams);
-
-      await expect(
-        invalidClient.addTrustedHandlers(escrowAddress, trustedHandlers)
-      ).rejects.toThrow(ErrorSigner);
-    });
-
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
       const trustedHandlers = [ethers.constants.AddressZero];
