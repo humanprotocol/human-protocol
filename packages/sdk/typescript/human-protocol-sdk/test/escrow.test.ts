@@ -136,15 +136,31 @@ describe('EscrowClient', () => {
       const trustedHandlers = [ethers.constants.AddressZero];
       const expectedEscrowAddress = ethers.constants.AddressZero;
 
+      // Create a spy object for the createEscrow method
+      const createEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            events: [
+              {
+                args: {
+                  1: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
       const result = await escrowClient.createEscrow(
         tokenAddress,
         trustedHandlers
       );
 
-      expect(
-        escrowClient.escrowFactoryContract.createEscrow
-      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers);
-      expect(result).toEqual(expectedEscrowAddress);
+      expect(createEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        trustedHandlers
+      );
+      expect(result).toBe(expectedEscrowAddress);
     });
 
     test('should throw an error if the create an escrow fails', async () => {
