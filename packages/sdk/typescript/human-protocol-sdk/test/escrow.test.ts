@@ -131,6 +131,22 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
     });
 
+    test('should create an escrow and return its address', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+      const expectedEscrowAddress = ethers.constants.AddressZero;
+
+      const result = await escrowClient.createEscrow(
+        tokenAddress,
+        trustedHandlers
+      );
+
+      expect(
+        escrowClient.escrowFactoryContract.createEscrow
+      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers);
+      expect(result).toEqual(expectedEscrowAddress);
+    });
+
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
