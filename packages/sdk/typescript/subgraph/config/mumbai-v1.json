@@ -2,12 +2,12 @@
   "network": "mumbai",
   "description": "Human subgraph on Polygon Mumbai testnet",
   "graft": {
-    "base": "QmXoAAEHTkmakBFMhURhvk4KCjVtQYDu4EKvfLxXShB8sU",
-    "block": 32938638
+    "base": "QmNzb8ZxPTx7A4Zmwt5fHbPWwN1qVTQdc9yZeHMpBJPv8f",
+    "block": 35504139
   },
   "EscrowFactory": {
     "address": "0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d",
-    "startBlock": 31433945,
+    "startBlock": 35504129,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
@@ -20,7 +20,7 @@
   },
   "Staking": {
     "address": "0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac",
-    "startBlock": 31433938,
+    "startBlock": 35504134,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
@@ -30,7 +30,7 @@
   },
   "RewardPool": {
     "address": "0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE",
-    "startBlock": 31433950,
+    "startBlock": 35504139,
     "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
   },
   "Reputation": {

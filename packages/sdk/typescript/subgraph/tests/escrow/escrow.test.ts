@@ -65,7 +65,7 @@ describe('Escrow', () => {
       'timestamp',
       newIS.block.timestamp.toString()
     );
-    assert.fieldEquals('ISEvent', id, 'sender', newIS.params._sender.toHex());
+    assert.fieldEquals('ISEvent', id, 'sender', newIS.transaction.from.toHex());
     assert.fieldEquals('ISEvent', id, '_url', newIS.params._url.toString());
     assert.fieldEquals('ISEvent', id, '_hash', newIS.params._hash.toString());
   });

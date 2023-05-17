@@ -6,3 +6,5 @@ export * from './Kvstore';
 export * from './Main';
 export * from './Owner';
 export * from './Profile';
+export * from './MyHMT';
+export * from './ConfigureOracle';

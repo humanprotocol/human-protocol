@@ -404,9 +404,9 @@ export class Job {
       return false;
     }
 
-    const reputationOracleStake =
+    const reputationOracleFeePercentage =
       (this.manifestData?.manifest?.oracle_stake || 0) * 100;
-    const recordingOracleStake =
+    const recordingOracleFeePercentage =
       (this.manifestData?.manifest?.oracle_stake || 0) * 100;
     const repuationOracleAddr =
       this.manifestData?.manifest?.reputation_oracle_addr || '';
@@ -470,8 +470,8 @@ export class Job {
       'setup',
       repuationOracleAddr,
       recordingOracleAddr,
-      reputationOracleStake,
-      recordingOracleStake,
+      reputationOracleFeePercentage,
+      recordingOracleFeePercentage,
       this.manifestData?.manifestlink?.url,
       this.manifestData?.manifestlink?.hash
     );
@@ -679,7 +679,6 @@ export class Job {
     const resultStored = await this._raffleExecute(
       this.contractData.escrow,
       'storeResults',
-      sender,
       key,
       hash
     );

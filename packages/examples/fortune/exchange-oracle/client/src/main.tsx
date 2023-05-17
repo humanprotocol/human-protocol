@@ -1,17 +1,23 @@
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { WagmiConfig } from 'wagmi';
+
 import App from './App';
 import { wagmiClient } from './connectors/connectors';
-import './index.css';
 import reportWebVitals from './reportWebVitals';
+import theme from './theme';
 
 const root = createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
   <React.StrictMode>
     <WagmiConfig client={wagmiClient}>
-      <App />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
     </WagmiConfig>
   </React.StrictMode>
 );

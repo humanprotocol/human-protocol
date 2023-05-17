@@ -7,9 +7,13 @@ import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 async function main() {
   const subgraph = process.env.SUBGRAPH;
   const escrowFactoryAddress = process.env.ESCROW_FACTORY_ADDRESS;
+  const deployEscrowFactory = process.env.DEPLOY_ESCROW_FACTORY;
   const stakingAddress = process.env.STAKING_ADDRESS;
+  const deployStaking = process.env.DEPLOY_STAKING;
   const reputationAddress = process.env.REPUTATION_ADDRESS;
+  const deployReputation = process.env.DEPLOY_REPUTATION;
   const rewardPoolAddress = process.env.REWARD_POOL_ADDRESS;
+  const deployRewardPool = process.env.DEPLOY_REWARD_POOL;
   let blockNumber = 0;
   if (
     (!escrowFactoryAddress &&
@@ -22,7 +26,7 @@ async function main() {
     return;
   }
 
-  if (escrowFactoryAddress) {
+  if (deployEscrowFactory == 'true' && escrowFactoryAddress) {
     const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
     // await upgrades.forceImport(escrowFactoryAddress, EscrowFactory, { kind: 'uups' });  //use this to get ./openzeppelin/[network].json
     const escrowFactoryContract = await upgrades.upgradeProxy(
@@ -53,7 +57,7 @@ async function main() {
     );
   }
 
-  if (stakingAddress) {
+  if (deployStaking == 'true' && stakingAddress) {
     const Staking = await ethers.getContractFactory('Staking');
     const stakingContract = await upgrades.upgradeProxy(
       stakingAddress,
@@ -78,7 +82,7 @@ async function main() {
     );
   }
 
-  if (rewardPoolAddress) {
+  if (deployRewardPool == 'true' && rewardPoolAddress) {
     const RewardPool = await ethers.getContractFactory('RewardPool');
     const rewardPoolContract = await upgrades.upgradeProxy(
       rewardPoolAddress,
@@ -105,7 +109,7 @@ async function main() {
     );
   }
 
-  if (reputationAddress) {
+  if (deployReputation == 'true' && reputationAddress) {
     const Reputation = await ethers.getContractFactory('Reputation');
     const reputationContract = await upgrades.upgradeProxy(
       reputationAddress,

@@ -36,6 +36,7 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
      */
     event RewardAdded(
         address indexed escrowAddress,
+        address indexed staker,
         address indexed slasher,
         uint256 tokens
     );
@@ -71,6 +72,7 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
      */
     function addReward(
         address _escrowAddress,
+        address _staker,
         address _slasher,
         uint256 _tokens
     ) external override onlyStaking {
@@ -88,7 +90,7 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         Reward memory reward = Reward(_escrowAddress, _slasher, rewardAfterFee);
         rewards[_escrowAddress].push(reward);
 
-        emit RewardAdded(_escrowAddress, _slasher, rewardAfterFee);
+        emit RewardAdded(_escrowAddress, _staker, _slasher, rewardAfterFee);
     }
 
     /**

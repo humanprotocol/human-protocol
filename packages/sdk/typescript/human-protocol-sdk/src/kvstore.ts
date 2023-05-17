@@ -11,21 +11,7 @@ import {
   ErrorSigner,
 } from './error';
 import { IClientParams } from './interfaces';
-
-function requiresSigner(
-  target: unknown,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
-) {
-  const originalMethod = descriptor.value;
-  descriptor.value = async function (key: string, value: string) {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-    return originalMethod.call(this, key, value);
-  };
-  return descriptor;
-}
+import { requiresSigner } from './decorators';
 
 export default class KVStoreClient {
   private contract: KVStore;

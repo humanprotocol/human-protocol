@@ -59,14 +59,7 @@ export const Header: FC = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar
-        position="fixed"
-        sx={{
-          background: 'rgba(255, 255, 255, 0.8)',
-          boxShadow: '0px 4px 120px rgba(218, 222, 240, 0.8)',
-          backdropFilter: 'blur(9px)',
-        }}
-      >
+      <AppBar position="fixed" sx={{ background: '#fff', boxShadow: 'none' }}>
         <Toolbar disableGutters>
           <Box sx={{ width: '100%' }}>
             <Box
@@ -94,7 +87,7 @@ export const Header: FC = () => {
               >
                 <img src={logoSvg} alt="logo" />
                 <Typography variant="h6" color="primary" ml="10px">
-                  Fortune
+                  Job Launcher
                 </Typography>
               </Link>
               {!isDownMd && (
