@@ -11,7 +11,7 @@ from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
     get_factory_interface,
-    get_hmtoken_interface,
+    get_erc20_interface,
     handle_transaction,
 )
 from validators import url as URL
@@ -279,15 +279,13 @@ class EscrowClient:
 
         token_address = self.get_token_address(escrow_address)
 
-        hmtoken_interface = get_hmtoken_interface()
-        hmtoken_contract = self.w3.eth.contract(
-            token_address, abi=hmtoken_interface["abi"]
-        )
+        erc20_interface = get_erc20_interface()
+        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
 
         handle_transaction(
             self.w3,
             "Fund",
-            hmtoken_contract.functions.transfer(escrow_address, amount),
+            token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
         )
 
@@ -313,15 +311,13 @@ class EscrowClient:
 
         token_address = self.get_token_address(escrow_address)
 
-        hmtoken_interface = get_hmtoken_interface()
-        hmtoken_contract = self.w3.eth.contract(
-            token_address, abi=hmtoken_interface["abi"]
-        )
+        erc20_interface = get_erc20_interface()
+        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
 
         handle_transaction(
             self.w3,
             "Fund",
-            hmtoken_contract.functions.transfer(escrow_address, amount),
+            token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
         )
 

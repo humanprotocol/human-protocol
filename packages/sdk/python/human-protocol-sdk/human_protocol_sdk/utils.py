@@ -113,16 +113,16 @@ def get_contract_interface(contract_entrypoint):
     return contract_interface
 
 
-def get_hmtoken_interface():
-    """Retrieve the HMToken interface.
+def get_erc20_interface():
+    """Retrieve the ERC20 interface.
 
     Returns:
-        Contract interface: returns the HMToken interface solidity contract.
+        Contract interface: returns the ERC20 interface solidity contract.
 
     """
 
     return get_contract_interface(
-        "{}/contracts/interfaces/HMTokenInterface.sol/HMTokenInterface.json".format(
+        "{}/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json".format(
             ARTIFACTS_FOLDER
         )
     )
