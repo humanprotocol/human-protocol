@@ -23,7 +23,6 @@ import {
   ErrorListOfHandlersCannotBeEmpty,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
-  ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
@@ -278,7 +277,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
     });
 
-    test('should throw an error if manifestUrl is empty string', async () => {
+    test('should throw an error if manifestUrl is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
@@ -295,7 +294,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
-    test('should throw an error if manifestUrl is invalid url', async () => {
+    test('should throw an error if manifestUrl is an invalid url', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
@@ -312,7 +311,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidUrl);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if hash is an empty string', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
@@ -535,7 +534,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
-    test('should throw an error if url is empty string', async () => {
+    test('should throw an error if url is an empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const url = '';
       const hash = FAKE_HASH;
@@ -559,7 +558,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidUrl);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if hash is an empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = '';
@@ -571,7 +570,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorHashIsEmptyString);
     });
 
-    test('should successfully store results escrow', async () => {
+    test('should successfully store results', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const url = VALID_URL;
       const hash = FAKE_HASH;
@@ -687,7 +686,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
-    test('should throw an error if an recipients length to equal 0', async () => {
+    test('should throw an error if recipients length is equal to 0', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [];
       const amounts = [BigNumber.from(100)];
@@ -707,7 +706,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorRecipientCannotBeEmptyArray);
     });
 
-    test('should throw an error if an amounts length to equal 0', async () => {
+    test('should throw an error if amounts length is equal to 0', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [];
@@ -727,7 +726,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorAmountsCannotBeEmptyArray);
     });
 
-    test('should throw an error if an recipient and amounts not the same length', async () => {
+    test('should throw an error if recipients and amounts do not have the same length', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [
@@ -751,7 +750,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorRecipientAndAmountsMustBeSameLength);
     });
 
-    test('should throw an error if the recipients contain invalid addresses', async () => {
+    test('should throw an error if recipients contains invalid addresses', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [FAKE_ADDRESS];
       const amounts = [BigNumber.from(100)];
@@ -771,7 +770,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
     });
 
-    test('should throw an error if url is empty string', async () => {
+    test('should throw an error if url is an empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
@@ -791,7 +790,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorUrlIsEmptyString);
     });
 
-    test('should throw an error if final results url is invalid url', async () => {
+    test('should throw an error if final results url is an invalid url', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
@@ -811,7 +810,7 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidUrl);
     });
 
-    test('should throw an error if hash is empty string', async () => {
+    test('should throw an error if hash is an empty string', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
       const amounts = [BigNumber.from(100)];
@@ -885,7 +884,7 @@ describe('EscrowClient', () => {
       );
     });
 
-    test('should throw an error if the bulkPayOut fails', async () => {
+    test('should throw an error if bulkPayOut fails', async () => {
       const escrowAddress = ethers.constants.AddressZero;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
