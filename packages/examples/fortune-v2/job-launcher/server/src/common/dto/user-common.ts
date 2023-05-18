@@ -13,9 +13,4 @@ export class UserCommonDto implements IUserCommonDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  public username?: string;
 }

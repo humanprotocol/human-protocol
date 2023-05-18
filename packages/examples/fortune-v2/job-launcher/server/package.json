@@ -14,7 +14,7 @@
   "engines": {
     "node": "18.x"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/main.js",
   "scripts": {
     "build": "tsc",
     "db:restart": "docker-compose down && docker-compose up -d",

@@ -3,12 +3,10 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import path from "path";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
-import { AuthEntity } from "../auth/auth.entity";
+import { AuthEntity } from "../modules/auth/auth.entity";
 import { NS } from "../common/constants";
-import { JobEntity } from "../job/job.entity";
-import { PaymentEntity } from "../payment/payment.entity";
-import { TokenEntity } from "../token/token.entity";
-import { UserEntity } from "../user/user.entity";
+import { TokenEntity } from "../modules/auth/token.entity";
+import { UserEntity } from "../modules/user/user.entity";
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
 
@@ -22,7 +20,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
         return {
           name: "default",
           type: "postgres",
-          entities: [AuthEntity, TokenEntity, UserEntity, JobEntity, PaymentEntity],
+          entities: [AuthEntity, TokenEntity, UserEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,

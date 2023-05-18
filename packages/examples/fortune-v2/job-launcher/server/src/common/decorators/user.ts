@@ -7,8 +7,6 @@ export interface IUser extends IBase {
   email: string;
   privateKey: string;
   publicKey: string;
-  socketId: string;
-  stripeCustomerId: string;
   status: UserStatus;
   type: UserType;
 }
