@@ -54,8 +54,6 @@ export class ResendEmailVerificationDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
-
-  public token: string;
 }
 
 export class RestorePasswordDto extends ValidatePasswordDto {
