@@ -8,7 +8,7 @@ yarn workspace @human-protocol/core local &
 sleep 10
 
 # Run test
-pipenv run pytest
+pipenv run pytest ./test/e2e
 
 # Kill running hardhat node
 trap 'kill $(jobs -p)' EXIT
