@@ -10,16 +10,11 @@ async function main() {
   const deployEscrowFactory = process.env.DEPLOY_ESCROW_FACTORY;
   const stakingAddress = process.env.STAKING_ADDRESS;
   const deployStaking = process.env.DEPLOY_STAKING;
-  const reputationAddress = process.env.REPUTATION_ADDRESS;
-  const deployReputation = process.env.DEPLOY_REPUTATION;
   const rewardPoolAddress = process.env.REWARD_POOL_ADDRESS;
   const deployRewardPool = process.env.DEPLOY_REWARD_POOL;
   let blockNumber = 0;
   if (
-    (!escrowFactoryAddress &&
-      !stakingAddress &&
-      !rewardPoolAddress &&
-      !reputationAddress) ||
+    (!escrowFactoryAddress && !stakingAddress && !rewardPoolAddress) ||
     !subgraph
   ) {
     console.error('Env variable missing');
@@ -105,33 +100,6 @@ async function main() {
       'New Reward Pool Implementation Address: ',
       await upgrades.erc1967.getImplementationAddress(
         rewardPoolContract.address
-      )
-    );
-  }
-
-  if (deployReputation == 'true' && reputationAddress) {
-    const Reputation = await ethers.getContractFactory('Reputation');
-    const reputationContract = await upgrades.upgradeProxy(
-      reputationAddress,
-      Reputation
-    );
-    const contract = await reputationContract.deployed();
-    const txReceipt = await ethers.provider.getTransactionReceipt(
-      contract.deployTransaction.hash
-    );
-
-    if (
-      txReceipt.blockNumber &&
-      (txReceipt.blockNumber < blockNumber || blockNumber == 0)
-    ) {
-      blockNumber = txReceipt.blockNumber;
-    }
-
-    console.log('Reputation Proxy Address: ', reputationContract.address);
-    console.log(
-      'New Reputation Implementation Address: ',
-      await upgrades.erc1967.getImplementationAddress(
-        reputationContract.address
       )
     );
   }
