@@ -289,38 +289,6 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def fund(self, escrow_address: str, amount: Decimal):
-        """
-        Adds funds to the escrow.
-
-        Args:
-            escrow_address (str): Address of the escrow to setup
-            amount (Decimal): Amount to be added as funds
-
-        Returns:
-            None
-
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
-        """
-
-        if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-        if 0 > amount:
-            raise EscrowClientError("Amount must be positive")
-
-        token_address = self.get_token_address(escrow_address)
-
-        erc20_interface = get_erc20_interface()
-        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
-
-        handle_transaction(
-            self.w3,
-            "Fund",
-            token_contract.functions.transfer(escrow_address, amount),
-            EscrowClientError,
-        )
-
     def store_results(self, escrow_address: str, url: str, hash: str):
         """Stores the results url.
 
