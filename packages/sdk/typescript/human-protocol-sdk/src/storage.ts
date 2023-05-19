@@ -10,6 +10,7 @@ import {
 } from './error';
 import { UploadFile, File, StorageCredentials, StorageParams } from './types';
 import { isValidUrl } from './utils';
+import { HttpStatus } from './constants';
 
 export default class StorageClient {
   private client: Minio.Client;
@@ -70,11 +71,15 @@ export default class StorageClient {
     }
 
     try {
-      const { data } = await axios.get(url, {
+      const { data, status } = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
+
+      if (status !== HttpStatus.OK) {
+        throw ErrorStorageFileNotFound;
+      }
 
       return data;
     } catch (e) {

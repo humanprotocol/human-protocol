@@ -12,6 +12,11 @@ export const DEFAULT_PUBLIC_BUCKET = 'escrow-public-results';
 export const DEFAULT_ENDPOINT = 'localhost';
 
 /**
+ * @constant Default storage region
+ */
+export const DEFAULT_REGION = 'eu';
+
+/**
  * @constant Default storage port
  */
 export const DEFAULT_PORT = 9000;
@@ -36,6 +41,20 @@ export enum EscrowStatus {
   Paid = 3,
   Complete = 4,
   Cancelled = 5,
+}
+
+/**
+ * @constant Default Enum for escrow statuses.
+ */
+export enum HttpStatus {
+  OK = 200,
+  CREATED = 201,
+  BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  PAYMENT_REQUIRED = 402,
+  FORBIDDEN = 403,
+  NOT_FOUND = 404,
+  INTERNAL_SERVER_ERROR = 500,
 }
 
 /**

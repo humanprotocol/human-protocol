@@ -5,6 +5,7 @@ import {
   DEFAULT_ENDPOINT,
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BUCKET,
+  DEFAULT_REGION,
   DEFAULT_USE_SSL,
   StorageCredentials,
   StorageParams,
@@ -68,11 +69,13 @@ describe('Storage tests', () => {
         endPoint: DEFAULT_ENDPOINT,
         port: DEFAULT_PORT,
         useSSL: DEFAULT_USE_SSL,
+        region: DEFAULT_REGION,
       };
 
       expect(storageParams.endPoint).toEqual(DEFAULT_ENDPOINT);
       expect(storageParams.port).toEqual(DEFAULT_PORT);
       expect(storageParams.useSSL).toEqual(false);
+      expect(storageParams.region).toEqual(DEFAULT_REGION);
     });
 
     test('should init client with empty credentials', async () => {
