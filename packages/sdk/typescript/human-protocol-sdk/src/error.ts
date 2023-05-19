@@ -89,6 +89,25 @@ export const ErrorKVStoreArrayLength = new Error(
 export const ErrorInvalidAddress = new Error('Invalid address');
 
 /**
+ * @constant {Error} - The token address sent is invalid.
+ */
+export const ErrorInvalidTokenAddress = new Error('Invalid token address');
+
+/**
+ * @constant {Error} - Invalid recording oracle address provided.
+ */
+export const ErrorInvalidRecordingOracleAddressProvided = new Error(
+  'Invalid recording oracle address provided'
+);
+
+/**
+ * @constant {Error} - Invalid reputation oracle address provided.
+ */
+export const ErrorInvalidReputationOracleAddressProvided = new Error(
+  'Invalid reputation oracle address provided'
+);
+
+/**
  * @constant {Error} - The Staking value must be positive.
  */
 export const ErrorStakingValueMustBePositive = new Error(
@@ -131,13 +150,6 @@ export const ErrorInvalidEscrowAddressProvided = new Error(
 );
 
 /**
- * @constant {Error} - Escrow address is not provided by the factory.
- */
-export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
-  'Escrow address is not provided by the factory'
-);
-
-/**
  * @constant {Error} - Error getting stakers data.
  */
 export const ErrorStakingGetStakers = new Error('Error getting stakers data');
@@ -171,14 +183,113 @@ export const ErrorInitProviderDoesNotExist = new Error(
 export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
 
 /**
+ * @constant {Error} - Sending a transaction requires a signer.
+ */
+export const ErrorSigner = new Error('Signer required');
+
+/**
+ * @constant {Error} - Escrow address is not provided by the factory.
+ */
+export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
+  'Escrow address is not provided by the factory'
+);
+
+/**
+ * @constant {Error} - Manifest file does not exist.
+ */
+export const ErrorManifestFileDoesNotExist = new Error(
+  'Manifest file does not exist'
+);
+
+/**
+ * @constant {Error} - Storage client does not exist.
+ */
+export const ErrorStorageClientDoesNotExist = new Error(
+  'Storage client does not exist'
+);
+
+/**
+ * @constant {Error} - Invalid URL string.
+ */
+export const ErrorInvalidUrl = new Error('Invalid URL string');
+
+/**
+ * @constant {Error} - URL is an empty string.
+ */
+export const ErrorUrlIsEmptyString = new Error('URL is an empty string');
+
+/**
+ * @constant {Error} - List of handlers cannot be empty.
+ */
+export const ErrorListOfHandlersCannotBeEmpty = new Error(
+  'List of handlers cannot be empty'
+);
+
+/**
  * @constant {Error} - No URL provided.
  */
 export const ErrorNoURLprovided = new Error('No URL provided');
 
 /**
- * @constant {Error} - Sending a transaction requires a signer.
+ * @constant {Error} - Fee must be between 0 and 100.
  */
-export const ErrorSigner = new Error('Signer required');
+export const ErrorFeeMustBeBetweenZeroAndHundred = new Error(
+  'Fee must be between 0 and 100'
+);
+
+/**
+ * @constant {Error} - Total fee must be less than 100.
+ */
+export const ErrorTotalFeeMustBeLessThanHundred = new Error(
+  'Total fee must be less than 100'
+);
+
+/**
+ * @constant {Error} - Recipient cannot be an empty array.
+ */
+export const ErrorRecipientCannotBeEmptyArray = new Error(
+  'Recipient cannot be an empty array'
+);
+
+/**
+ * @constant {Error} - Amount must be greater than zero..
+ */
+export const ErrorAmountMustBeGreaterThanZero = new Error(
+  'Amount must be greater than zero'
+);
+
+/**
+ * @constant {Error} - Escrow does not have enough balance.
+ */
+export const ErrorEscrowDoesNotHaveEnoughBalance = new Error(
+  'Escrow does not have enough balance'
+);
+
+/**
+ * @constant {Error} - Amounts cannot be an empty array.
+ */
+export const ErrorAmountsCannotBeEmptyArray = new Error(
+  'Amounts cannot be an empty array'
+);
+
+/**
+ * @constant {Error} - Recipient and amounts must be the same length.
+ */
+export const ErrorRecipientAndAmountsMustBeSameLength = new Error(
+  'Recipient and amounts must be the same length'
+);
+
+/**
+ * @constant {Error} - Launched event is not emitted.
+ */
+export const ErrorLaunchedEventIsNotEmitted = new Error(
+  'Launched event is not emitted'
+);
+
+/**
+ * @constant {Error} - Hash is an empty string.
+ */
+export const ErrorHashIsEmptyString = new Error('Hash is an empty string');
 
 export class EthereumError extends Error {
   constructor(message: string) {
@@ -231,5 +342,11 @@ export class TransactionReplaced extends EthereumError {
 export class ContractExecutionError extends EthereumError {
   constructor(reason: string) {
     super(`Contract execution error: ${reason}`);
+  }
+}
+
+export class InvalidEthereumAddressError extends Error {
+  constructor(address: string) {
+    super(`Invalid ethereum address error: ${address}`);
   }
 }
