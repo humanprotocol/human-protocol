@@ -62,8 +62,8 @@ export class UserService {
   }
 
   public createPasswordHash(password: string): string {
-    const passwordSalt = this.configService.get<string>("PASSWORD_SALT", "");
-    return bcrypt.hashSync(password, passwordSalt);
+    const passwordSecret = this.configService.get<string>("PASSWORD_SECRET", "");
+    return bcrypt.hashSync(password, passwordSecret);
   }
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {
