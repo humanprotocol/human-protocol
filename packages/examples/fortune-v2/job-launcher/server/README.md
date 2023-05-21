@@ -34,30 +34,33 @@ Make a note of the postgres username, password and database name.
 Hardhat is an Ethereum development environment. Compile your contracts and run them on a development network. To install Hardhat see here:
 https://hardhat.org/hardhat-runner/docs/getting-started
 
-4. AWS credentials
-The server uses AWS S3 to store job details.  To setup an S3 bucket and generate the API Key & Secret follow this guide: https://medium.com/@shamnad.p.s/how-to-create-an-s3-bucket-and-aws-access-key-id-and-secret-access-key-for-accessing-it-5653b6e54337 
+4. S3 credentials
+The server uses S3 to store job details.  To setup an S3 bucket and generate the API Key & Secret follow this guide: https://medium.com/@shamnad.p.s/how-to-create-an-s3-bucket-and-aws-access-key-id-and-secret-access-key-for-accessing-it-5653b6e54337 
 
 Take a note of the AWS region for the S3 bucket you just created, your API Key and Secret.
 
 ## Installation
-5. When installing for the first time it will be necessary to run a database migration.  To do so you should set execute the following command in your terminal:
+5. When installing for the first time it will be necessary to run a database migration.  To do so you should execute the following command in your terminal:
 
 
 6. Clone this repo to your local machine and change directory into the cloned repo:
    
 `git clone git@github.com:humanprotocol/human-protocol.git` 
 
-7. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
-
 8. Install using yarn
    
 `yarn install`
 
+7. Set the variable <NODE_ENV> to development, testing or production. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
+
 9. Run migrations using yarn
 
-`yarn run migration:run`
+`yarn migration:run`
 
-`yarn run migration:create <MIGRATION_NAME>` - Create new migration 
+`yarn migration:create <MIGRATION_NAME>` - Create new migration 
 
-`yarn run migration:revert` - Revert latest migration
+`yarn migration:revert` - Revert latest migration
+
+9. Run application using yarn
+`yarn start`
 

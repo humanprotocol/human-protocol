@@ -9,9 +9,9 @@ import {
   ResendEmailVerificationDto,
   RestorePasswordDto,
   VerifyEmailDto,
+  IJwt,
 } from "./auth.dto";
 import { Public } from "../../common/decorators";
-import { IJwt } from "../../common/jwt";
 import { ApiTags } from "@nestjs/swagger";
 import { UserCreateDto } from "../user/user.dto";
 

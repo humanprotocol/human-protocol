@@ -4,13 +4,13 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { v4 } from "uuid";
 
-import { generateUserCreateDto } from "../../common/test";
 import { DatabaseModule } from "../../database/database.module";
 import { UserService } from "./user.service";
 import { UserSeedModule } from "./user.seed.module";
 import { UserSeedService } from "./user.seed.service";
 import { UserEntity } from "./user.entity";
 import { UserStatus } from "../../common/enums/user";
+import { generateUserCreateDto } from "./user.dto";
 
 describe("UserService", () => {
   let userService: UserService;

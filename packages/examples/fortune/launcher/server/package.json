@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/job-launcher-server",
+  "name": "@human-protocol/fortune-job-launcher-server",
   "version": "1.0.0",
   "description": "Job Launcher Server",
   "main": "index.ts",

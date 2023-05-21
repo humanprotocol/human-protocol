@@ -72,3 +72,10 @@ export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;
 }
+
+export interface IJwt {
+  accessToken: string;
+  accessTokenExpiresAt: number;
+  refreshToken: string;
+  refreshTokenExpiresAt: number;
+}

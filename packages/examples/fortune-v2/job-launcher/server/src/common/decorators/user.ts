@@ -5,8 +5,6 @@ import { IBase } from "./base";
 export interface IUser extends IBase {
   password: string;
   email: string;
-  privateKey: string;
-  publicKey: string;
   status: UserStatus;
   type: UserType;
 }

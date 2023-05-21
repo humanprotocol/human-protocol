@@ -8,11 +8,10 @@ import { v4 } from "uuid";
 import { UserEntity } from "../user/user.entity";
 import { UserService } from "../user/user.service";
 import { AuthEntity } from "./auth.entity";
-import { IJwt } from "../../common/jwt";
 import { TokenType } from "./token.entity";
 import { UserStatus } from "../../common/enums/user";
 import { UserCreateDto } from "../user/user.dto";
-import { ForgotPasswordDto, ResendEmailVerificationDto, RestorePasswordDto, SignInDto, VerifyEmailDto } from "./auth.dto";
+import { ForgotPasswordDto, IJwt, ResendEmailVerificationDto, RestorePasswordDto, SignInDto, VerifyEmailDto } from "./auth.dto";
 import { TokenRepository } from "./token.repository";
 
 @Injectable()

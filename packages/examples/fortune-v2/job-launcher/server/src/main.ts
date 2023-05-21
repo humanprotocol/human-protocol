@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { json, urlencoded } from "body-parser";
 import { useContainer } from "class-validator";
 import helmet from "helmet";
+import bcrypt from "bcrypt";
 
 import { AppModule } from "./app.module";
 
@@ -27,9 +28,15 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  const sessionSecrete = configService.get<string>("SESSION_SECRETE", "");
+  const sessionSalt = configService.get<string>("SESSION_SALT", "");
+  const sessionHash = bcrypt.hashSync(sessionSecrete, sessionSalt);
+
+  console.log(sessionHash)
+
   app.use(
     session({
-      secret: configService.get<string>("SESSION_SECRET", "auth"),
+      secret: sessionHash,
       resave: false,
       saveUninitialized: false,
     }),

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { createHash } from "crypto";
+import bcrypt from "bcrypt";
 import { Not } from "typeorm";
 
 import { UserEntity } from "./user.entity";
@@ -34,9 +34,7 @@ export class UserService {
         email,
         password: this.createPasswordHash(password),
         type: UserType.REQUESTER,
-        status: UserStatus.ACTIVE,
-        privateKey: "pk",
-        publicKey: "pk",
+        status: UserStatus.ACTIVE
       });
   }
 
@@ -64,8 +62,8 @@ export class UserService {
   }
 
   public createPasswordHash(password: string): string {
-    const passwordSecret = this.configService.get<string>("PASSWORD_SECRET", "");
-    return createHash("sha256").update(password).update(passwordSecret).digest("hex");
+    const passwordSalt = this.configService.get<string>("PASSWORD_SALT", "");
+    return bcrypt.hashSync(password, passwordSalt);
   }
 
   public activate(userEntity: UserEntity): Promise<UserEntity> {

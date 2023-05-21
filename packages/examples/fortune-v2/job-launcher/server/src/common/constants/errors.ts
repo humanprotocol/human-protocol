@@ -21,7 +21,7 @@ export enum User {
 
 export enum Payment {
   NotFound = "Payment not found",
-  NotSuccess = "Payment not success",
+  NotSuccess = "Unseccssful payment",
   CustomerNotFound = "Customer not found",
   IncorrectAmount = "Incorrect amount"
 }

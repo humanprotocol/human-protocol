@@ -4,7 +4,7 @@ import { Repository } from "typeorm";
 import { subDays } from "date-fns";
 
 import { UserEntity } from "./user.entity";
-import { generateTestUser } from "../../common/test";
+import { generateTestUser } from "./user.dto";
 
 @Injectable()
 export class UserSeedService {

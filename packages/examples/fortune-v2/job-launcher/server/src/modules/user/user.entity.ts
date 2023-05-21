@@ -15,16 +15,6 @@ export class UserEntity extends BaseEntity implements IUser {
   @Column({ type: "varchar", nullable: true, unique: true })
   public email: string;
 
-  @Exclude()
-  @Column({ type: "varchar", unique: true })
-  public privateKey: string;
-
-  @Column({ type: "varchar", unique: true })
-  public publicKey: string;
-
-  @Column({ type: "varchar", nullable: true, unique: true })
-  public socketId: string;
-
   @Column({ type: "enum", enum: UserType })
   public type: UserType;
 
