@@ -1,32 +1,67 @@
 # Human Protocol Python SDK
 
-Python SDK to launch/manage jobs on [Human Protocol](https://www.humanprotocol.org/)
+Python SDK to interact with [Human Protocol](https://www.humanprotocol.org/)
 
 ## Installation
 
-### Manual
+[Python3](https://www.python.org/) is required.
 
-You need few essential system requirements to successfully install our Python 3 package.
-
-#### Debian / Ubuntu
-
-[Python3](https://www.python.org/), and [pipenv](https://pipenv.pypa.io/en/latest/) is required.
-
-Install virtual environment using `pipenv`.
-
-```
-pipenv install
-```
-
-```
-pip install git+https://github.com/ethereum/trinity@master#egg=trinity \
-            git+https://github.com/sphinx-doc/sphinx@master#egg=sphinx
-
+```bash
 pip install human-protocol-sdk
 ```
 
-### Getting Started
+## Getting Started
 
+### Staking
+
+Before creating an escrow, the you need to stake HMT tokens to become a valid entity on Human Protocol.
+
+`StakingClient` requires `Seb3` instance to be initialized, and to be passed as a constructor argument. Set the `default_account` of `Web3` instance with the private key, so that it can be used for on-chain calls.
+
+```python
+from eth_typing import URI
+from web3 import Web3
+from web3.providers.auto import load_provider_from_uri
+
+w3 = Web3(load_provider_from_uri(URI("JSON_RPC_URL")))
+gas_payer = w3.eth.account.from_key(priv_key)
+w3.eth.default_account = gas_payer.address
+```
+
+Now, you can create a `StakingClient` instance, and stake HMT tokens on behalf of the gas payer you specified.
+```python
+from human_protocol_sdk import StakingClient
+
+staking_client = StakingClient(w3)
+
+# Stake 100 HMT
+staking_client.approve_stake(100)
+staking_client.stake(100)
+```
+
+After staking, and creating an escrow, you can allocate HMT tokens to the escrow.
+
+```python
+# Allocate 10 HMT
+staking_client.allocate(escrow_address, 10)
+```
+
+After the job is finished/cancelled, you can close HMT allocation of the specific escrow.
+
+```python
+staking_client.close_allocation(escrow_address)
+```
+
+You can unstake/withdraw HMT tokens. However, there is some lock period for unstaked tokens to be ready for withdrawal.
+
+```python
+# Unstake 50 HMT
+staking_client.unstake(50)
+
+# Withdraw
+staking_client.withdraw()
+```
+### Escrow
 Creating a new HUMAN Protocol Escrow requires a Web3 instance, an ERC20 token address to
 use for pay outs, a list of addresses that can that can perform actions on the contract
 and an EscrowConfig instance containing all the necessary information to setup an escrow.
@@ -37,7 +72,7 @@ First, a Web3 instance can be created following the specification at
 https://web3py.readthedocs.io/en/stable/quickstart.html. In addition, an account must be
 added to the instance to enable blockchain transaction signing.
 
-Second, Manifest has to follow the specification at https://github.com/hCaptcha/hmt-basemodels
+Second, Manifest has to follow the specification at https://github.com/humanprotocol/human-protocol/tree/main/packages/sdk/python/human-protocol-basemodels
 and can be uploaded using storage client.
 
 Thirdly, EscrowConfig must be created following this format:
