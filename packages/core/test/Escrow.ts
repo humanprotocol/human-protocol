@@ -6,7 +6,6 @@ import { Escrow, HMToken } from '../typechain-types';
 
 const MOCK_URL = 'http://google.com/fake';
 const MOCK_HASH = 'kGKmnj9BRf';
-const MOCK_SOLUTIONS = 3;
 const BULK_MAX_COUNT = 100;
 
 enum Status {
@@ -48,8 +47,7 @@ async function setupEscrow() {
       10,
       10,
       MOCK_URL,
-      MOCK_HASH,
-      MOCK_SOLUTIONS
+      MOCK_HASH
     );
 }
 
@@ -163,7 +161,7 @@ describe('Escrow', function () {
           escrow
             .connect(externalAddress)
             .addTrustedHandlers([await reputationOracle.getAddress()])
-        ).to.be.revertedWith('Address calling cannot add trusted handlers');
+        ).to.be.revertedWith('Address calling not trusted');
       });
     });
 
@@ -176,11 +174,7 @@ describe('Escrow', function () {
         const result = await (
           await escrow
             .connect(reputationOracle)
-            .storeResults(
-              await externalAddress.getAddress(),
-              MOCK_URL,
-              MOCK_HASH
-            )
+            .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
         expect(result.events?.[0].event).to.equal(
@@ -200,13 +194,7 @@ describe('Escrow', function () {
       });
       it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
-          escrow
-            .connect(externalAddress)
-            .storeResults(
-              await externalAddress.getAddress(),
-              MOCK_URL,
-              MOCK_HASH
-            )
+          escrow.connect(externalAddress).storeResults(MOCK_URL, MOCK_HASH)
         ).to.be.revertedWith('Address calling not trusted');
       });
 
@@ -215,13 +203,7 @@ describe('Escrow', function () {
           .connect(owner)
           .addTrustedHandlers([await reputationOracle.getAddress()]);
         await expect(
-          escrow
-            .connect(reputationOracle)
-            .storeResults(
-              await externalAddress.getAddress(),
-              MOCK_URL,
-              MOCK_HASH
-            )
+          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH)
         ).to.be.revertedWith('Escrow not in Pending or Partial status state');
       });
     });
@@ -235,16 +217,10 @@ describe('Escrow', function () {
 
       it('Should emit an event on intermediate storage', async function () {
         await expect(
-          await escrow
-            .connect(owner)
-            .storeResults(
-              await externalAddress.getAddress(),
-              MOCK_URL,
-              MOCK_HASH
-            )
+          await escrow.connect(owner).storeResults(MOCK_URL, MOCK_HASH)
         )
           .to.emit(escrow, 'IntermediateStorage')
-          .withArgs(await externalAddress.getAddress(), MOCK_URL, MOCK_HASH);
+          .withArgs(MOCK_URL, MOCK_HASH);
       });
     });
 
@@ -259,11 +235,7 @@ describe('Escrow', function () {
         const result = await (
           await escrow
             .connect(reputationOracle)
-            .storeResults(
-              await externalAddress.getAddress(),
-              MOCK_URL,
-              MOCK_HASH
-            )
+            .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
         expect(result.events?.[0].event).to.equal(
@@ -290,8 +262,7 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-              MOCK_SOLUTIONS
+              MOCK_HASH
             )
         ).to.be.revertedWith('Address calling not trusted');
       });
@@ -306,8 +277,7 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-              MOCK_SOLUTIONS
+              MOCK_HASH
             )
         ).to.be.revertedWith('Invalid or missing token spender');
       });
@@ -322,42 +292,24 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-              MOCK_SOLUTIONS
+              MOCK_HASH
             )
         ).to.be.revertedWith('Invalid or missing token spender');
       });
 
-      it('Should revert with the right error if set invalid number of solutions', async function () {
+      it('Should revert with the right error if fee percentage out of bounds and too high', async function () {
         await expect(
           escrow
             .connect(owner)
             .setup(
               await reputationOracle.getAddress(),
               await recordingOracle.getAddress(),
-              10,
-              10,
+              80,
+              80,
               MOCK_URL,
-              MOCK_HASH,
-              0
+              MOCK_HASH
             )
-        ).to.be.revertedWith('Invalid or missing solutions');
-      });
-
-      it('Should revert with the right error if stake out of bounds and too high', async function () {
-        await expect(
-          escrow
-            .connect(owner)
-            .setup(
-              await reputationOracle.getAddress(),
-              await recordingOracle.getAddress(),
-              500,
-              500,
-              MOCK_URL,
-              MOCK_HASH,
-              MOCK_SOLUTIONS
-            )
-        ).to.be.revertedWith('Stake out of bounds');
+        ).to.be.revertedWith('Percentage out of bounds');
       });
     });
 
@@ -376,8 +328,7 @@ describe('Escrow', function () {
               10,
               10,
               MOCK_URL,
-              MOCK_HASH,
-              MOCK_SOLUTIONS
+              MOCK_HASH
             )
         )
           .to.emit(escrow, 'Pending')
@@ -400,8 +351,7 @@ describe('Escrow', function () {
             10,
             10,
             MOCK_URL,
-            MOCK_HASH,
-            MOCK_SOLUTIONS
+            MOCK_HASH
           );
 
         expect(await escrow.reputationOracle()).to.equal(
@@ -678,7 +628,7 @@ describe('Escrow', function () {
       it('Should revert with the right error if address calling is not trusted', async function () {
         await expect(
           escrow.connect(externalAddress).complete()
-        ).to.be.revertedWith('Address calling is not trusted');
+        ).to.be.revertedWith('Address calling not trusted');
       });
 
       it('Should revert with the right error if escrow not in Paid status state', async function () {

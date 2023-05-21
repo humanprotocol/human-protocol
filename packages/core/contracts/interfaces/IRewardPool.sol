@@ -14,8 +14,9 @@ interface IRewardPool {
 
     function addReward(
         address _escrowAddress,
-        address slasher,
-        uint256 tokens
+        address _staker,
+        address _slasher,
+        uint256 _tokens
     ) external;
 
     function getRewards(

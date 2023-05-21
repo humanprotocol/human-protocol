@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/jobs/solutions",
+      "methods": ["POST"],
+      "dest": "index.ts",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST,OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "index.ts",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
+      }
+    }
+  ]
+}

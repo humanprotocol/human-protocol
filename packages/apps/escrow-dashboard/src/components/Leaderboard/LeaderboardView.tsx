@@ -56,8 +56,12 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
   const displayRows = useMemo(() => {
     if (!leaders) return [];
     if (!showAll) return leaders.slice(0, 5);
-    return leaders.filter((s) => selectedRoles.includes(s.role) || !s.role);
-  }, [showAll, selectedRoles, leaders]);
+    return leaders.filter(
+      (s) =>
+        selectedNetworks.includes(s.chainId) &&
+        (selectedRoles.includes(s.role) || !s.role)
+    );
+  }, [showAll, selectedRoles, selectedNetworks, leaders]);
 
   const handleRoleCheckbox = (role: string) => (e: any) => {
     if (e.target.checked) {

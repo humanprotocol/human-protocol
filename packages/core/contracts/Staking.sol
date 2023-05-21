@@ -103,6 +103,11 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      */
     event SetRewardPool(address indexed rewardPool);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address _token,
         uint256 _minimumStake,
@@ -277,7 +282,8 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         if (
             allocation.closedAt == 0 &&
-            escrowStatus == IEscrow.EscrowStatuses.Complete
+            (escrowStatus == IEscrow.EscrowStatuses.Complete ||
+                escrowStatus == IEscrow.EscrowStatuses.Cancelled)
         ) {
             return AllocationState.Completed;
         }
@@ -363,10 +369,9 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Unstake tokens from the staker stake, lock them until lock period expires.
      * @param _tokens Amount of tokens to unstake
      */
-    function unstake(uint256 _tokens) external override onlyStaker(msg.sender) {
+    function unstake(uint256 _tokens) external override {
         Stakes.Staker storage staker = stakes[msg.sender];
 
-        require(staker.tokensStaked > 0, 'Must be a positive number');
         require(_tokens > 0, 'Must be a positive number');
         require(
             staker.tokensAvailable() >= _tokens,
@@ -396,7 +401,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     /**
      * @dev Withdraw staker tokens based on the locking period.
      */
-    function withdraw() external override onlyStaker(msg.sender) {
+    function withdraw() external override {
         _withdraw(msg.sender);
     }
 
@@ -434,7 +439,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
 
         Allocation storage allocation = allocations[_escrowAddress];
 
-        require(allocation.tokens > 0, 'Must be a positive number');
+        require(_tokens > 0, 'Must be a positive number');
 
         require(
             _tokens <= allocation.tokens,
@@ -449,7 +454,12 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         _safeTransfer(rewardPool, _tokens);
 
         // Keep record on Reward Pool
-        IRewardPool(rewardPool).addReward(_escrowAddress, _slasher, _tokens);
+        IRewardPool(rewardPool).addReward(
+            _escrowAddress,
+            _staker,
+            _slasher,
+            _tokens
+        );
 
         emit StakeSlashed(_staker, _tokens, _escrowAddress, _slasher);
     }
@@ -462,7 +472,7 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
     function allocate(
         address _escrowAddress,
         uint256 _tokens
-    ) external override onlyStaker(msg.sender) {
+    ) external override {
         _allocate(msg.sender, _escrowAddress, _tokens);
     }
 
@@ -511,9 +521,9 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      * @dev Close an allocation and free the staked tokens.
      * @param _escrowAddress The allocation identifier
      */
-    function closeAllocation(
-        address _escrowAddress
-    ) external override onlyStaker(msg.sender) {
+    function closeAllocation(address _escrowAddress) external override {
+        require(_escrowAddress != address(0), 'Must be a valid address');
+
         _closeAllocation(_escrowAddress);
     }
 
@@ -522,13 +532,17 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
      * @param _escrowAddress The allocation identifier
      */
     function _closeAllocation(address _escrowAddress) private {
+        Allocation storage allocation = allocations[_escrowAddress];
+        require(
+            allocation.staker == msg.sender,
+            'Only the allocator can close the allocation'
+        );
+
         AllocationState allocationState = _getAllocationState(_escrowAddress);
         require(
             allocationState == AllocationState.Completed,
             'Allocation has no completed state'
         );
-
-        Allocation memory allocation = allocations[_escrowAddress];
 
         allocation.closedAt = block.number;
         uint256 diffInBlocks = Math.diffOrZero(
@@ -537,11 +551,14 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
         );
         require(diffInBlocks > 0, 'Allocation cannot be closed so early');
 
-        stakes[allocation.staker].unallocate(allocation.tokens);
+        uint256 _tokens = allocation.tokens;
+
+        stakes[allocation.staker].unallocate(_tokens);
+        allocation.tokens = 0;
 
         emit AllocationClosed(
             allocation.staker,
-            allocation.tokens,
+            _tokens,
             _escrowAddress,
             allocation.closedAt
         );
@@ -562,12 +579,6 @@ contract Staking is IStaking, OwnableUpgradeable, UUPSUpgradeable {
             to,
             value
         );
-    }
-
-    modifier onlyStaker(address _staker) {
-        Stakes.Staker memory staker = stakes[_staker];
-        require(staker.tokensStaked > 0, 'Caller is not a staker');
-        _;
     }
 
     // solhint-disable-next-line no-empty-blocks

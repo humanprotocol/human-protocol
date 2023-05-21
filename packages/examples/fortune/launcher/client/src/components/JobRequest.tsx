@@ -90,7 +90,7 @@ export const JobRequest = ({
     };
     try {
       const contract = new ethers.Contract(data.token, HMTokenABI, signer);
-      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
+      const jobLauncherAddress = import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
         alert('Job Launcher address is missing');
         setIsLoading(false);
@@ -105,22 +105,20 @@ export const JobRequest = ({
         throw new Error('Balance not enough for funding the escrow');
       }
 
-      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      const baseUrl = import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL;
       await axios.post(`${baseUrl}/check-escrow`, data);
 
       const allowance = await contract.allowance(address, jobLauncherAddress);
 
       if (allowance.lt(fundAmount)) {
         const tx = await contract.approve(jobLauncherAddress, fundAmount);
-        const receipt = await tx.wait();
-        console.log(receipt);
+        await tx.wait();
       }
 
       onLaunch();
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err: any) {
-      console.log(err);
+    } catch (err) {
       if (err.name === 'AxiosError') onFail(err.response.data);
       else onFail(err.message);
     }
@@ -155,6 +153,7 @@ export const JobRequest = ({
                   Number(e.target.value)
                 )
               }
+              sx={{ height: '56px' }}
             >
               {SUPPORTED_CHAIN_IDS.map((chainId) => (
                 <MenuItem key={chainId} value={chainId}>

@@ -13,17 +13,26 @@
 |🟠 Polygon Mumbai (Testnet) | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/04/25                  | HMToken        | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 | N/A                                        |
-|2023/03/10                  | EscrowFactory  | 0x988e5Dec3EBEeD675BEC159f667Ea05A979Cd0CA | 0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d |
-|2023/01/26                  | Staking        | 0x19Fc3e859C1813ac9427a7a78BeB9ae102CE96d3 | 0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac |
-|2023/01/26                  | RewardPool     | 0x295514FC4C812Db24C3277d6D3175956AdEA273C | 0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE |
+|2023/05/12                  | EscrowFactory  | 0xE5f91f23e514877af1dC0471637Bc6D9f19e391D | 0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d |
+|2023/05/12                  | Staking        | 0xE014F35dEa4f0EF07aDABb572AD942c7E52A6d4F | 0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac |
+|2023/05/12                  | RewardPool     | 0x658D49E6582E5374e81691CF862568A94A83ad94 | 0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE |
 |2023/01/26                  | EthKVStore     | 0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807 | N/A                                        |
 |2023/01/26                  | Reputation     | 0x7B9f9Dc6c157899C1Eb1c6B86f94855cC2F537dF | 0xC522463d36f76b881bE66484e3068F11e7038Ace |
+
+|🟢 Ethereum (Mainnet)        | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2021/04/06                  | HMToken        | 0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867 | N/A                                        |
+|2023/03/28                  | EscrowFactory  | 0xe44D7eb960f24797D36FAdD8a8FfF29C76375Ef0 | 0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a |
+|2023/03/28                  | Staking        | 0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c | 0x05398211bA2046E296fBc9a9D3EB49e3F15C3123 |
+|2023/04/03                  | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0x4A5963Dd6792692e9147EdC7659936b96251917a |
+|2023/03/28                  | EthKVStore     | 0x70671167176C4934204B1C7e97F5e86695857ef2 | N/A                                        |
+|                            | Reputation     | N/A                                        | N/A                                        |
 
 |🟠 Goerli (Testnet)         | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                  | HMToken        | 0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317 | N/A                                        |
-|2023/03/10                  | EscrowFactory  | 0x558cd800f9F0B02f3B149667bDe003284c867E94 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
-|2023/01/30                  | Staking        | 0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
+|2023/05/12                  | EscrowFactory  | 0xeC86BE882235A3414cb137E1E897cBD76C0c4996 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
+|2023/05/12                  | Staking        | 0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF | 0xf46B45Df3d956369726d8Bd93Ba33963Ab692920 |
 |2023/01/30                  | RewardPool     | 0x6478312bE22FeE34a366d8e945d4dBd97388a306 | 0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4 |
 |2023/01/30                  | EthKVStore     | 0xc9Fe39c4b6e1d7A2991355Af159956982DADf842 | N/A                                        |
 |2023/01/30                  | Reputation     | 0x1BA4F1d2dA691fF0445345436b9306B29eEd3913 | 0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405 |
@@ -93,11 +102,11 @@
 
 |🟢 SKALE Human Protocol Chain (Mainnet)        | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
-|2023/01/18                  | HMToken        | 0xa91B2C7d9704aeE8918460fc4375866e2c415A67 | N/A                                        |
-|2023/02/28                  | EscrowFactory  | 0x6FE287F707cfAd44a135d6d392F5098Dbe09e5FF | 0x27B423cE73d1dBdB48d2dd351398b5Ce8223117c |
-|2023/02/28                  | Staking        | 0x1D9f5Dc3078e9F734E4749f98176C2370516447f | 0xcc98Ad1C0915e271650e43714B20272AC947Ba9A |
-|2023/02/28                  | RewardPool     | 0xca8745D76588C2aa8bA13E8ef14E986b8A74EE3E | 0xEc321ec45dDfBE9049550d461818f4E7759bBE89 |
-|2023/02/28                  | EthKVStore     | 0xb251C9F9276d9EB0B2F4C6a7703AE094e0999BB6 | N/A                                        |
+|2023/03/21                  | HMToken        | 0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd | N/A                                        |
+|2023/03/21                  | EscrowFactory  | 0xB217a23b77D8E9587609293F3F0570D90bC3793c | 0x319070b49C8d1cC015915D1E7Eb5fd8e22833885 |
+|2023/03/21                  | Staking        | 0x1D9f5Dc3078e9F734E4749f98176C2370516447f | 0x79F37FB9C210910733c16228AC4D14a8e32C11BD |
+|2023/03/21                  | RewardPool     | 0xca8745D76588C2aa8bA13E8ef14E986b8A74EE3E | 0x881218246c25C6898aE96145259584340153aDA2 |
+|2023/03/22                  | EthKVStore     | 0xE1055607327b1be2080D31211dCDC4D9338CaF4A | N/A                                        |
 |                            | Reputation     | N/A                                        | N/A                                        |
 
 
@@ -113,6 +122,9 @@
 |2023/01/17                  | Staking        | 0x76E2EF2E177097E0b296E1e305d69Fe8Bae5f774 | 0xf421fD3eB97982C205966ebB514Ab2E435c6d5B7 |
 |2023/01/17                  | EthKVStore     | 0x459EE403d060B84b5014605D6739cCFed32AFb96 | N/A                                        |
 |2023/01/26                  | EscrowFactory  | 0xd319e761b632E39234E68247D307818a20158890 | 0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d |
+|2023/03/10                  | EscrowFactory  | 0x988e5Dec3EBEeD675BEC159f667Ea05A979Cd0CA | 0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d |
+|2023/01/26                  | Staking        | 0x19Fc3e859C1813ac9427a7a78BeB9ae102CE96d3 | 0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac |
+|2023/01/26                  | RewardPool     | 0x295514FC4C812Db24C3277d6D3175956AdEA273C | 0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE |
 
 |🟠 Binance SC (Testnet)     | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
@@ -125,6 +137,8 @@
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/12                  | EscrowFactory  | 0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F |                                            |
 |2023/01/30                  | EscrowFactory  | 0x5D65C42cF4a140863744889BAd07f246C0211754 | 0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c |
+|2023/03/10                  | EscrowFactory  | 0x988e5Dec3EBEeD675BEC159f667Ea05A979Cd0CA | 0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d |
+|2023/01/26                  | Staking        | 0x19Fc3e859C1813ac9427a7a78BeB9ae102CE96d3 | 0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac |
 
 |🟠 Moonbase Alpha (Testnet) | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|

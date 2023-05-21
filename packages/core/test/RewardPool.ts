@@ -148,6 +148,7 @@ describe('RewardPool', function () {
           .addReward(
             ethers.constants.AddressZero,
             ethers.constants.AddressZero,
+            ethers.constants.AddressZero,
             1
           )
       ).to.be.revertedWith('Caller is not staking contract');
@@ -186,6 +187,7 @@ describe('RewardPool', function () {
         .to.emit(rewardPool, 'RewardAdded')
         .withArgs(
           escrowAddress,
+          await operator.getAddress(),
           await validator.getAddress(),
           slashedTokens - rewardFee
         );
@@ -227,6 +229,12 @@ describe('RewardPool', function () {
       escrowAddress = event?.escrow;
 
       await staking.connect(operator).allocate(escrowAddress, allocatedTokens);
+    });
+
+    it('Should revert if there is no reward', async () => {
+      await expect(
+        rewardPool.distributeReward(escrowAddress)
+      ).to.be.revertedWith('No rewards for escrow');
     });
 
     it('Should distribute the reward.', async () => {

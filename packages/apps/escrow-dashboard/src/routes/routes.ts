@@ -9,6 +9,8 @@ import {
   Main,
   Owner,
   Profile,
+  MyHMT,
+  ConfigureOracle,
 } from 'src/pages';
 
 interface Route {
@@ -66,5 +68,17 @@ export const routes: Array<Route> = [
     title: 'Faucet',
     path: '/faucet',
     component: Faucet,
+  },
+  {
+    key: 'my-hmt-route',
+    title: 'My HMT',
+    path: '/my-hmt',
+    component: MyHMT,
+  },
+  {
+    key: 'configure-oracle-route',
+    title: 'Configure Oracle',
+    path: '/configure-oracle',
+    component: ConfigureOracle,
   },
 ];

@@ -4,6 +4,7 @@ dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
+import RateLimit from 'express-rate-limit';
 import NodeCache from 'node-cache';
 import path from 'path';
 import Web3 from 'web3';
@@ -24,6 +25,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 const port = process.env.APP_PORT;
+
+// set up rate limiter: maximum of five requests per second
+app.use(
+  RateLimit({
+    windowMs: 1 * 1000, // 1 second
+    max: 5,
+  })
+);
 
 // init cache
 const blockList = new NodeCache();

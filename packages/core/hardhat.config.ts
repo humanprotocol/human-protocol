@@ -13,6 +13,7 @@ import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-dependency-compiler';
 
 dotenv.config();
 
@@ -66,65 +67,79 @@ const config: HardhatUserConfig = {
     tenderly: {
       url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
     },
+    mainnet: {
+      chainId: 1,
+      url: process.env.ETH_MAINNET_TESTNET_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
+    },
     goerli: {
       chainId: 5,
       url: process.env.ETH_GOERLI_TESTNET_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
     },
     polygon: {
       chainId: 137,
       url: process.env.ETH_POLYGON_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
-      timeout: 1000000000,
+      timeout: 2000000,
     },
     polygonMumbai: {
       chainId: 80001,
       url: process.env.ETH_POLYGON_MUMBAI_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
     },
     bsc: {
       chainId: 56,
       url: process.env.ETH_BSC_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
     },
     bscTestnet: {
       chainId: 97,
       url: process.env.ETH_BSC_TESTNET_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      timeout: 2000000,
     },
     moonbeam: {
       chainId: 1284,
-      timeout: 1000000000,
+      timeout: 2000000,
       url: process.env.ETH_MOONBEAM_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     moonbaseAlpha: {
       chainId: 1287,
-      timeout: 1000000000,
+      timeout: 2000000,
       url: process.env.ETH_MOONBASE_ALPHA_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     avalancheTestnet: {
       chainId: 43113,
+      timeout: 2000000,
       url: 'https://api.avax-test.network/ext/C/rpc',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     avalanche: {
       chainId: 43114,
+      timeout: 2000000,
       url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     skale: {
       chainId: 1273227453,
+      timeout: 2000000,
       url: process.env.ETH_SKALE_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
@@ -177,6 +192,9 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 200000,
+  },
+  dependencyCompiler: {
+    paths: ['@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'],
   },
 };
 

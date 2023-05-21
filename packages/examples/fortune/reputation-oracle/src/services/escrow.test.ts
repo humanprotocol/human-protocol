@@ -1,11 +1,7 @@
 import Web3 from 'web3';
-import {
-  getBalance,
-  bulkPayOut,
-  bulkPaid,
-  getEscrowManifestUrl,
-} from './escrow';
+import { getBalance, bulkPayOut, getEscrowManifestUrl } from './escrow';
 import { describe, expect, it, beforeAll, beforeEach } from '@jest/globals';
+import Proxy from '@human-protocol/core/artifacts/@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol/ERC1967Proxy.json';
 import Escrow from '@human-protocol/core/artifacts/contracts/Escrow.sol/Escrow.json';
 import HMToken from '@human-protocol/core/artifacts/contracts/HMToken.sol//HMToken.json';
 import EscrowFactory from '@human-protocol/core/artifacts/contracts/EscrowFactory.sol/EscrowFactory.json';
@@ -51,8 +47,10 @@ describe('Fortune', () => {
         from: owner.address,
       });
 
+    const proxyContract = new web3.eth.Contract(Proxy.abi as []);
+
     const stakingContract = new web3.eth.Contract(Staking.abi as []);
-    staking = await stakingContract
+    const stakingIml = await stakingContract
       .deploy({
         data: Staking.bytecode,
         arguments: [],
@@ -60,15 +58,32 @@ describe('Fortune', () => {
       .send({
         from: owner.address,
       });
-
-    await staking.methods
-      .initialize(token.options.address, web3.utils.toWei('1', 'ether'), 1)
-      .send({ from: owner.address });
+    const stakingProxy = await proxyContract
+      .deploy({
+        data: Proxy.bytecode,
+        arguments: [
+          stakingIml.options.address,
+          stakingContract.methods
+            .initialize(
+              token.options.address,
+              web3.utils.toWei('1', 'ether'),
+              1
+            )
+            .encodeABI(),
+        ],
+      })
+      .send({
+        from: owner.address,
+      });
+    staking = new web3.eth.Contract(
+      Staking.abi as [],
+      stakingProxy.options.address
+    );
 
     const escrowFactoryContract = new web3.eth.Contract(
       EscrowFactory.abi as []
     );
-    escrowFactory = await escrowFactoryContract
+    const escrowFactoryImpl = await escrowFactoryContract
       .deploy({
         data: EscrowFactory.bytecode,
         arguments: [],
@@ -76,10 +91,23 @@ describe('Fortune', () => {
       .send({
         from: owner.address,
       });
-
-    await escrowFactory.methods.initialize(staking.options.address).send({
-      from: owner.address,
-    });
+    const escrowFactoryProxy = await proxyContract
+      .deploy({
+        data: Proxy.bytecode,
+        arguments: [
+          escrowFactoryImpl.options.address,
+          escrowFactoryContract.methods
+            .initialize(staking.options.address)
+            .encodeABI(),
+        ],
+      })
+      .send({
+        from: owner.address,
+      });
+    escrowFactory = new web3.eth.Contract(
+      EscrowFactory.abi as [],
+      escrowFactoryProxy.options.address
+    );
 
     await token.methods
       .transfer(launcher.address, web3.utils.toWei('1000', 'ether'))
@@ -114,8 +142,7 @@ describe('Fortune', () => {
         10,
         10,
         'manifestUrl',
-        'manifestUrl',
-        3
+        'manifestUrl'
       )
       .send({ from: launcher.address });
   });
@@ -131,21 +158,23 @@ describe('Fortune', () => {
   });
 
   it('Bulk payout rewards, higher amount than balance', async () => {
-    await bulkPayOut(
-      web3,
-      escrowAddress,
-      [worker1, worker2, worker3],
-      [
-        web3.utils.toWei('15', 'ether'),
-        web3.utils.toWei('15', 'ether'),
-        web3.utils.toWei('15', 'ether'),
-      ],
-      'localhost',
-      'localhost'
-    );
-    const result = await bulkPaid(web3, escrowAddress);
+    try {
+      await bulkPayOut(
+        web3,
+        escrowAddress,
+        [worker1, worker2, worker3],
+        [
+          web3.utils.toWei('15', 'ether'),
+          web3.utils.toWei('15', 'ether'),
+          web3.utils.toWei('15', 'ether'),
+        ],
+        'localhost',
+        'localhost'
+      );
+    } catch (e) {
+      expect(e.message).toContain('Not enough balance');
+    }
 
-    expect(result).toBe(false);
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('0', 'ether')
     );
@@ -170,9 +199,7 @@ describe('Fortune', () => {
       'localhost',
       'localhost'
     );
-    const result = await bulkPaid(web3, escrowAddress);
 
-    expect(result).toBe(true);
     expect(await token.methods.balanceOf(worker1).call()).toBe(
       web3.utils.toWei('8', 'ether')
     );

@@ -23,7 +23,7 @@ contract HMToken is HMTokenInterface, Ownable {
     uint256 public totalSupply;
 
     uint256 private constant MAX_UINT256 = ~uint256(0);
-    uint256 private constant BULK_MAX_VALUE = 1000000000 * (10 ** 18);
+    uint256 private constant BULK_MAX_VALUE = (10 ** 9) * (10 ** 18);
     uint32 private constant BULK_MAX_COUNT = 100;
 
     event BulkTransfer(uint256 indexed _txId, uint256 _bulkCount);
@@ -82,9 +82,9 @@ contract HMToken is HMTokenInterface, Ownable {
 
         if (_allowance != MAX_UINT256) {
             // Special case to approve unlimited transfers
-            allowed[_spender][msg.sender] = allowed[_spender][msg.sender].sub(
-                _value
-            );
+            allowed[_spender][msg.sender] =
+                allowed[_spender][msg.sender] -
+                _value;
         }
 
         emit Transfer(_spender, _to, _value);
@@ -125,11 +125,11 @@ contract HMToken is HMTokenInterface, Ownable {
             _oldValue + _delta < _oldValue || _oldValue + _delta == MAX_UINT256
         ) {
             // Truncate upon overflow.
-            allowed[msg.sender][_spender] = MAX_UINT256.sub(1);
+            allowed[msg.sender][_spender] = MAX_UINT256 - 1;
         } else {
-            allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(
-                _delta
-            );
+            allowed[msg.sender][_spender] =
+                allowed[msg.sender][_spender] +
+                _delta;
         }
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;
@@ -149,9 +149,9 @@ contract HMToken is HMTokenInterface, Ownable {
             // Truncate upon overflow.
             allowed[msg.sender][_spender] = 0;
         } else {
-            allowed[msg.sender][_spender] = allowed[msg.sender][_spender].sub(
-                _delta
-            );
+            allowed[msg.sender][_spender] =
+                allowed[msg.sender][_spender] -
+                _delta;
         }
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;

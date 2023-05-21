@@ -5,7 +5,7 @@ import { AppState, useAppDispatch } from '..';
 import { useChainId } from '../escrow/hooks';
 import { fetchTokenStatsAsync } from './reducer';
 
-import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
+import { ChainId, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const usePollTokenStats = () => {
@@ -21,10 +21,7 @@ export const useTokenStatsByChainId = () => {
   const token = useSelector((state: AppState) => state.token);
   const { stats } = token;
 
-  if (
-    currentChainId === ChainId.ALL ||
-    TESTNET_CHAIN_IDS.includes(currentChainId)
-  ) {
+  if (currentChainId === ChainId.ALL) {
     const tokenStats = {
       totalTransferEventCount: 0,
       holders: 0,
@@ -32,7 +29,7 @@ export const useTokenStatsByChainId = () => {
     };
 
     SUPPORTED_CHAIN_IDS.forEach((chainId) => {
-      if (stats[chainId] && !TESTNET_CHAIN_IDS.includes(chainId)) {
+      if (stats[chainId]) {
         tokenStats.totalTransferEventCount +=
           stats[chainId]?.totalTransferEventCount!;
         tokenStats.holders += stats[chainId]?.holders!;

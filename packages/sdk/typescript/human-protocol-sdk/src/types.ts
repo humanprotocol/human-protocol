@@ -244,6 +244,11 @@ export type RestrictedAudience = {
    * Launch group ID
    */
   launch_group_id?: number;
+
+  /**
+   * Interests/Content preferences
+   */
+  interests?: number[];
 };
 
 /**

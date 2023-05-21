@@ -21,7 +21,7 @@ import {
   ESCROW_NETWORKS,
   HM_TOKEN_DECIMALS,
   SUPPORTED_CHAIN_IDS,
-} from 'src/constants';
+} from '../constants';
 import { RoundedBox } from './RoundedBox';
 import {
   CreatePaymentType,
@@ -124,7 +124,7 @@ export const JobRequest = ({
     };
     try {
       const contract = new ethers.Contract(data.token, HMTokenABI, provider);
-      const jobLauncherAddress = process.env.REACT_APP_JOB_LAUNCHER_ADDRESS;
+      const jobLauncherAddress = import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS;
       if (!jobLauncherAddress) {
         alert('Job Launcher address is missing');
         setIsLoading(false);
@@ -139,7 +139,7 @@ export const JobRequest = ({
       if (balance.lt(fundAmount)) {
         throw new Error('Balance not enough for funding the escrow');
       }
-      const baseUrl = process.env.REACT_APP_JOB_LAUNCHER_SERVER_URL;
+      const baseUrl = import.meta.env.VITE_APP_JOB_LAUNCHER_SERVER_URL;
       await axios.post(`${baseUrl}/check-escrow`, data);
 
       const clientSecret = (
@@ -166,8 +166,7 @@ export const JobRequest = ({
       data.paymentId = paymentIntent?.id;
       const result = await axios.post(`${baseUrl}/escrow`, data);
       onSuccess(result.data);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
       if (err.name === 'AxiosError') onFail(err.response.data);
       else onFail(err.message);
     }
@@ -260,58 +259,51 @@ export const JobRequest = ({
           sx={{
             borderRadius: '10px',
             background: '#fbfbfe',
-            px: 2.5,
+            pl: 3,
             py: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
             width: '30vw',
           }}
         >
-          <Typography variant="body2" color="primary">
+          <Typography variant="body2" color="primary" mb={2}>
             Funds
           </Typography>
-          <FormControl>
-            <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
-              Card
-            </Typography>
-            <RoundedBox sx={{ p: 2 }}>
-              <CardElement id="card" />
-            </RoundedBox>
-          </FormControl>
-          <FormControl>
-            <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
-              Name on Card
-            </Typography>
-            <RoundedBox sx={{ p: 2 }}>
+          <Grid container spacing={3} sx={{ width: '100%' }}>
+            <Grid item xs={12}>
+              <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
+                Card
+              </Typography>
+              <RoundedBox sx={{ p: 2, borderRadius: '4px' }}>
+                <CardElement id="card" />
+              </RoundedBox>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
+                Name on Card
+              </Typography>
               <TextField
                 fullWidth
-                variant="standard"
+                variant="outlined"
                 placeholder="John Smith"
                 value={paymentData.name}
                 onChange={(e) =>
                   handlePaymentDataFormFieldChange('name', e.target.value)
                 }
               />
-            </RoundedBox>
-          </FormControl>
-          <Grid container sx={{ width: '100%' }} spacing={3}>
+            </Grid>
             <Grid item xs={12} sm={12} md={6}>
               <FormControl fullWidth>
                 <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
                   Amount
                 </Typography>
-                <RoundedBox sx={{ p: 2 }}>
-                  <TextField
-                    fullWidth
-                    placeholder="10"
-                    variant="standard"
-                    value={paymentData.amount}
-                    onChange={(e) =>
-                      handlePaymentDataFormFieldChange('amount', e.target.value)
-                    }
-                  />
-                </RoundedBox>
+                <TextField
+                  fullWidth
+                  placeholder="10"
+                  variant="outlined"
+                  value={paymentData.amount}
+                  onChange={(e) =>
+                    handlePaymentDataFormFieldChange('amount', e.target.value)
+                  }
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
@@ -319,26 +311,22 @@ export const JobRequest = ({
                 <Typography variant="caption" color="primary" sx={{ mb: 1 }}>
                   Currency
                 </Typography>
-                <RoundedBox sx={{ p: 1 }}>
-                  <Select
-                    size="small"
-                    variant="filled"
-                    value={paymentData.currency}
-                    onChange={(e) =>
-                      handlePaymentDataFormFieldChange(
-                        'currency',
-                        e.target.value
-                      )
-                    }
-                    sx={{ background: 'white', width: '95%', ml: 1 }}
-                  >
-                    {Currencies.map((name) => (
-                      <MenuItem key={name} value={name}>
-                        {name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </RoundedBox>
+                <Select
+                  size="small"
+                  variant="outlined"
+                  value={paymentData.currency}
+                  onChange={(e) =>
+                    handlePaymentDataFormFieldChange('currency', e.target.value)
+                  }
+                  fullWidth
+                  sx={{ background: 'white', height: '56px' }}
+                >
+                  {Currencies.map((name) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
               </FormControl>
             </Grid>
           </Grid>
@@ -364,7 +352,12 @@ export const JobRequest = ({
         </Button>
         <Button
           variant="contained"
-          sx={{ minWidth: '240px', py: 1 }}
+          sx={{
+            minWidth: '240px',
+            py: 1,
+            boxShadow:
+              '0px 3px 1px -2px #858ec6, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2)',
+          }}
           onClick={handleLaunch}
           disabled={isLoading}
         >

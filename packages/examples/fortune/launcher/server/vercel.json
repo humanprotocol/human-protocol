@@ -1,7 +1,5 @@
 {
-  "buildCommand": "yarn workspace @human-protocol/fortune-job-launcher-server build",
-  "installCommand": "yarn install",
-  "outputDirectory": "build",
+  "version": 2,
   "builds": [
     {
       "src": "src/index.ts",

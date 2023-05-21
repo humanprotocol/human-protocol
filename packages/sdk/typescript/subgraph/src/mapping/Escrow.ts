@@ -1,5 +1,7 @@
 import {
   BulkTransfer,
+  Cancelled,
+  Completed,
   IntermediateStorage,
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
@@ -59,7 +61,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 
   // Entity fields can be set based on event parameters
   entity.timestamp = event.block.timestamp;
-  entity.sender = event.params._sender;
+  entity.sender = event.transaction.from;
   entity._url = event.params._url;
   entity._hash = event.params._hash;
 
@@ -78,7 +80,7 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
   statsEntity.save();
   entity.save();
 
-  const worker = createOrLoadWorker(event.params._sender);
+  const worker = createOrLoadWorker(event.transaction.from);
   worker.amountJobsSolved = worker.amountJobsSolved.plus(BigInt.fromI32(1));
   worker.save();
 
@@ -194,7 +196,7 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   }
 }
 
-export function handleCancelled(): void {
+export function handleCancelled(event: Cancelled): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Cancelled';
@@ -202,7 +204,7 @@ export function handleCancelled(): void {
   }
 }
 
-export function handleCompleted(): void {
+export function handleCompleted(event: Completed): void {
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Completed';

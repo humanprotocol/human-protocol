@@ -3,11 +3,15 @@ import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
 import { Signer } from 'ethers';
 import {
+  Escrow,
   EscrowFactory,
   HMToken,
   Staking,
   RewardPool,
 } from '../typechain-types';
+
+const MOCK_URL = 'http://google.com/fake';
+const MOCK_HASH = 'kGKmnj9BRf';
 
 const mineNBlocks = async (n: number) => {
   await Promise.all(
@@ -185,6 +189,14 @@ describe('Staking', function () {
         await expect(
           staking.connect(operator).unstake(amount)
         ).to.be.revertedWith('Must be a positive number');
+      });
+
+      it('Should revert with the right error if total stake is below the unstake amount', async function () {
+        const amount = 15;
+
+        await expect(
+          staking.connect(operator).unstake(amount)
+        ).to.be.revertedWith('Insufficient amount to unstake');
       });
 
       it('Should revert with the right error if total stake is below the minimum threshold', async function () {
@@ -687,7 +699,40 @@ describe('Staking', function () {
         ).to.be.revertedWith('Must be a valid address');
       });
 
-      // TODO: Add additional tests
+      it('Should revert if slash amount exceeds allocation', async function () {
+        await staking
+          .connect(owner)
+          .slash(
+            await validator.getAddress(),
+            await operator.getAddress(),
+            escrowAddress,
+            slashedTokens
+          );
+
+        await expect(
+          staking
+            .connect(owner)
+            .slash(
+              await validator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              allocatedTokens
+            )
+        ).to.be.revertedWith('Slash tokens exceed allocated ones');
+      });
+
+      it('Should revert if slash amount is 0', async function () {
+        await expect(
+          staking
+            .connect(owner)
+            .slash(
+              await validator.getAddress(),
+              await operator.getAddress(),
+              escrowAddress,
+              0
+            )
+        ).to.be.revertedWith('Must be a positive number');
+      });
     });
 
     describe('Events', function () {
@@ -787,6 +832,126 @@ describe('Staking', function () {
           );
         })
       );
+    });
+  });
+
+  describe('closeAllocation', function () {
+    let escrowAddress: string;
+    let escrow: Escrow;
+
+    this.beforeEach(async () => {
+      const amount = 10;
+      const allocationAmount = 5;
+
+      await staking.connect(operator).stake(amount);
+
+      const result = await (
+        await escrowFactory
+          .connect(operator)
+          .createEscrow(token.address, [
+            await validator.getAddress(),
+            await reputationOracle.getAddress(),
+            await recordingOracle.getAddress(),
+          ])
+      ).wait();
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
+
+      expect(event?.token).to.equal(token.address, 'token address is correct');
+      expect(event?.escrow).to.not.be.null;
+
+      escrowAddress = event?.escrow;
+
+      // Fund escrow
+      await token.connect(owner).transfer(escrowAddress, 100);
+
+      const EscrowFactory = await ethers.getContractFactory('Escrow');
+      escrow = await EscrowFactory.attach(escrowAddress);
+
+      // Setup escrow
+      await escrow
+        .connect(operator)
+        .setup(
+          await reputationOracle.getAddress(),
+          await recordingOracle.getAddress(),
+          10,
+          10,
+          MOCK_URL,
+          MOCK_HASH
+        );
+
+      await staking
+        .connect(operator)
+        .allocate(escrowAddress.toString(), allocationAmount);
+    });
+
+    describe('Validations', function () {
+      it('Should revert with the right error if not a valid address', async function () {
+        await expect(
+          staking
+            .connect(operator)
+            .closeAllocation(ethers.constants.AddressZero)
+        ).to.be.revertedWith('Must be a valid address');
+      });
+
+      it('Should revert with the right error if the caller is not the allocator', async function () {
+        await expect(
+          staking.connect(validator).closeAllocation(escrowAddress.toString())
+        ).to.be.revertedWith('Only the allocator can close the allocation');
+      });
+
+      it('Should revert with the right error if escrow is not completed nor cancelled', async function () {
+        await expect(
+          staking.connect(operator).closeAllocation(escrowAddress.toString())
+        ).to.be.revertedWith('Allocation has no completed state');
+      });
+    });
+
+    describe('Close allocation on completed/cancelled escrows', function () {
+      it('Should close allocation on completed escrows', async function () {
+        // Bulk payout & Complete Escrow
+        await escrow
+          .connect(operator)
+          .bulkPayOut(
+            [await operator2.getAddress()],
+            [100],
+            MOCK_URL,
+            MOCK_HASH,
+            '000'
+          );
+
+        await escrow.connect(operator).complete();
+
+        // Close allocation
+        await staking
+          .connect(operator)
+          .closeAllocation(escrowAddress.toString());
+
+        const allocation = await staking
+          .connect(operator)
+          .getAllocation(escrowAddress.toString());
+
+        expect(allocation.closedAt).not.to.be.null;
+        expect(allocation.tokens.toString()).to.equal('0');
+      });
+
+      it('Should close allocation on cancelled escrows', async function () {
+        // Close escrow
+        await escrow.connect(operator).cancel();
+
+        // Close allocation
+        await staking
+          .connect(operator)
+          .closeAllocation(escrowAddress.toString());
+
+        const allocation = await staking
+          .connect(operator)
+          .getAllocation(escrowAddress.toString());
+
+        expect(allocation.closedAt).not.to.be.null;
+        expect(allocation.tokens.toString()).to.equal('0');
+      });
     });
   });
 });
