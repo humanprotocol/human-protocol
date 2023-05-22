@@ -152,6 +152,16 @@ jobs:
           add: "['./packages/core/.openzeppelin', './packages/sdk/typescript/subgraph/config']"
           message: 'Update grafting and upgrade file from CD'
           default_author: github_actions
+          tag_push: '--force'
+      - name: Checkout develop
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+      - name: Rebase develop
+        run: |
+          git fetch
+          git rebase origin/main
+          git push --force
       - name: Trigger Another Workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
