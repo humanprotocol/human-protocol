@@ -5,6 +5,7 @@ import { NS } from "../../common/constants";
 import { BaseEntity } from "../../database/base.entity";
 import { IUser } from "../../common/decorators";
 import { UserStatus, UserType } from "../../common/enums/user";
+import { PaymentEntity } from "../payment/payment.entity";
 
 @Entity({ schema: NS, name: "user" })
 export class UserEntity extends BaseEntity implements IUser {
@@ -23,4 +24,10 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
+
+  @OneToMany(() => JobEntity, job => job.user)
+  public jobs: JobEntity[];
+
+  @OneToMany(() => PaymentEntity, payment => payment.user)
+  public payments: PaymentEntity[];
 }
