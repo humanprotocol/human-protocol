@@ -7,6 +7,7 @@ import {
   DEFAULT_PUBLIC_BUCKET,
   DEFAULT_REGION,
   DEFAULT_USE_SSL,
+  HttpStatus,
   StorageCredentials,
   StorageParams,
 } from '../src';
@@ -221,7 +222,7 @@ describe('Storage tests', () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
 
       vi.spyOn(axios, 'get').mockImplementation(() =>
-        Promise.resolve({ data: file })
+        Promise.resolve({ data: file, status: HttpStatus.OK })
       );
 
       const hash = crypto
