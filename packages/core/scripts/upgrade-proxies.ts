@@ -54,6 +54,7 @@ async function main() {
 
   if (deployStaking == 'true' && stakingAddress) {
     const Staking = await ethers.getContractFactory('Staking');
+    // await upgrades.forceImport(stakingAddress, Staking, { kind: 'uups' }); //use this to get ./openzeppelin/[network].json
     const stakingContract = await upgrades.upgradeProxy(
       stakingAddress,
       Staking
@@ -79,6 +80,7 @@ async function main() {
 
   if (deployRewardPool == 'true' && rewardPoolAddress) {
     const RewardPool = await ethers.getContractFactory('RewardPool');
+    // await upgrades.forceImport(rewardPoolAddress, RewardPool, { kind: 'uups' }); //use this to get ./openzeppelin/[network].json
     const rewardPoolContract = await upgrades.upgradeProxy(
       rewardPoolAddress,
       RewardPool
