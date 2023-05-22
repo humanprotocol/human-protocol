@@ -4,11 +4,11 @@ import bcrypt from "bcrypt";
 import { Not } from "typeorm";
 
 import { UserEntity } from "./user.entity";
-import * as errors from "../../common/constants/errors";
 import { UserStatus, UserType } from "../../common/enums/user";
 import { UserCreateDto, UserUpdateDto } from "./user.dto";
 import { UserReposotory } from "./user.repository";
 import { ValidatePasswordDto } from "../auth/auth.dto";
+import { ErrorUser } from "../../common/constants/errors";
 
 @Injectable()
 export class UserService {
@@ -78,8 +78,8 @@ export class UserService {
     });
 
     if (userEntity) {
-      this.logger.log(errors.User.DuplicateEmail, UserService.name);
-      throw new ConflictException(errors.User.DuplicateEmail);
+      this.logger.log(ErrorUser.DuplicateEmail, UserService.name);
+      throw new ConflictException(ErrorUser.DuplicateEmail);
     }
   }
 }

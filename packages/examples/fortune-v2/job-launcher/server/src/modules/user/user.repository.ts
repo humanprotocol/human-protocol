@@ -1,12 +1,10 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { InjectRepository, TypeOrmDataSourceFactory } from "@nestjs/typeorm";
-import { ConfigService } from "@nestjs/config";
-import { createHash } from "crypto";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { FindConditions, FindManyOptions, FindOneOptions, Not, Repository, getRepository } from "typeorm";
 
 import { UserEntity } from "./user.entity";
-import * as errors from "../../common/constants/errors";
 import { UserCreateDto, UserUpdateDto } from "./user.dto";
+import { ErrorUser } from "../../common/constants/errors";
 
 @Injectable()
 export class UserReposotory {
@@ -24,8 +22,8 @@ export class UserReposotory {
     const userEntity = await this.userEntityRepository.findOne(where);
 
     if (!userEntity) {
-      this.logger.log(errors.User.NotFound, UserReposotory.name);
-      throw new NotFoundException(errors.User.NotFound);
+      this.logger.log(ErrorUser.NotFound, UserReposotory.name);
+      throw new NotFoundException(ErrorUser.NotFound);
     }
 
     Object.assign(userEntity, dto);

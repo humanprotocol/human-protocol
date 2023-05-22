@@ -47,11 +47,11 @@ Take a note of the AWS region for the S3 bucket you just created, your API Key a
    
 `git clone git@github.com:humanprotocol/human-protocol.git` 
 
-8. Install using yarn
+7. Install using yarn
    
 `yarn install`
 
-7. Set the variable <NODE_ENV> to development, testing or production. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
+8. Set the variable <NODE_ENV> to development, testing or production. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
 
 9. Run migrations using yarn
 
@@ -61,6 +61,6 @@ Take a note of the AWS region for the S3 bucket you just created, your API Key a
 
 `yarn migration:revert` - Revert latest migration
 
-9. Run application using yarn
+10. Run application using yarn
 `yarn start`
 
