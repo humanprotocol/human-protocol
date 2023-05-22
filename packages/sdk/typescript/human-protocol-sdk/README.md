@@ -1,6 +1,6 @@
 # Human Protocol Node.js SDK
 
-Node.js SDK to launch/manage jobs on [Human Protocol](https://www.humanprotocol.org/)
+Node.js SDK to launch/manage escrows on [Human Protocol](https://www.humanprotocol.org/)
 
 ## Installation
 

@@ -34,18 +34,6 @@ export const DEFAULT_TX_ID = 1;
 /**
  * @constant Default Enum for escrow statuses.
  */
-export enum EscrowStatus {
-  Launched = 0,
-  Pending = 1,
-  Partial = 2,
-  Paid = 3,
-  Complete = 4,
-  Cancelled = 5,
-}
-
-/**
- * @constant Default Enum for escrow statuses.
- */
 export enum HttpStatus {
   OK = 200,
   CREATED = 201,
