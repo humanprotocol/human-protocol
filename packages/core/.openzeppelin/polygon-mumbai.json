@@ -12,10 +12,6 @@
     {
       "address": "0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE",
       "kind": "uups"
-    },
-    {
-      "address": "0xC522463d36f76b881bE66484e3068F11e7038Ace",
-      "kind": "uups"
     }
   ],
   "impls": {

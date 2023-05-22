@@ -32,10 +32,5 @@
     "address": "0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE",
     "startBlock": 35504139,
     "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
-  },
-  "Reputation": {
-    "address": "0xC522463d36f76b881bE66484e3068F11e7038Ace",
-    "startBlock": 31433953,
-    "abi": "../../../../node_modules/@human-protocol/core/abis/Reputation.json"
   }
 }
