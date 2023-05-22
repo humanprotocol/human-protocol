@@ -14,7 +14,7 @@ pip install human-protocol-sdk
 
 ### Staking
 
-Before creating an escrow, the you need to stake HMT tokens to become a valid entity on Human Protocol.
+Before creating an escrow, you need to stake HMT tokens to become a valid entity on Human Protocol.
 
 `StakingClient` requires `Web3` instance to be initialized, and to be passed as a constructor argument. Set the `default_account` of `Web3` instance with the private key, so that it can be used for on-chain calls.
 
@@ -98,7 +98,7 @@ result_files = storage_client.download_files(files=['file1.txt'], bucket=bucket)
 ### Escrow
 
 Creating a new HUMAN Protocol Escrow requires a `Web3` instance, an ERC20 token address to
-use for pay outs, a list of addresses that can that can perform actions on the contract
+use for pay outs, a list of addresses that can perform actions on the contract
 and an `EscrowConfig` instance containing all the necessary information to setup an escrow.
 
 Additionally, it requires a number of tokens to be previously staked.
