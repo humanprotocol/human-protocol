@@ -1,11 +1,13 @@
 import hashlib
 import io
 import json
-import os
 import logging
-from typing import Optional, List
+import os
+from typing import List, Optional
 
+import requests
 from minio import Minio
+from validators import url as URL
 
 logging.getLogger("minio").setLevel(logging.INFO)
 
@@ -117,6 +119,31 @@ class StorageClient:
             LOG.error(f"Connection with S3 failed because of: {e}")
             raise e
 
+    @staticmethod
+    def download_file_from_url(url):
+        """
+        Downloads a file from the specified URL.
+
+        Args:
+            url (str): The URL of the file to download.
+
+        Returns:
+            bytes: The content of the downloaded file.
+
+        Raises:
+            StorageClientError: If an error occurs while downloading the file.
+        """
+        if not URL(url):
+            raise StorageClientError(f"Invalid URL: {url}")
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            return response.content
+        except Exception as e:
+            raise StorageClientError(str(e))
+
     def download_files(self, files: List[str], bucket: str) -> List:
         """
         Downloads a list of files from the specified S3-compatible bucket.
@@ -135,11 +162,13 @@ class StorageClient:
         result_files = []
         for file in files:
             try:
-                response = self.client.get_object(bucket_name=bucket, object_name=file)
+                response = self.client.get_object(
+                    bucket_name=bucket, object_name=file)
                 result_files.append(response.read())
             except Exception as e:
                 if hasattr(e, "code") and str(e.code) == "NoSuchKey":
-                    raise StorageFileNotFoundError("No object found - returning empty")
+                    raise StorageFileNotFoundError(
+                        "No object found - returning empty")
                 LOG.warning(
                     f"Reading the key {file} with S3 failed" f" because of: {str(e)}"
                 )
