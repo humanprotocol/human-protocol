@@ -9,7 +9,10 @@
     "outDir": "./dist",
     "declarationMap": true,
     "esModuleInterop": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "useUnknownInCatchVariables": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
   },
   "include": ["./src"]
 }
