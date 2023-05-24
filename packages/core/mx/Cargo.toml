@@ -17,10 +17,6 @@ members = [
     "contracts/kv-store",
     "contracts/kv-store/meta",
 
-    # Reputation contract paths
-    "contracts/reputation",
-    "contracts/reputation/meta",
-
     # Rewards pool contract paths
     "contracts/rewards-pool",
     "contracts/rewards-pool/meta",
