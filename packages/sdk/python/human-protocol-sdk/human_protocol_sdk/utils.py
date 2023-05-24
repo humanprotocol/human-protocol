@@ -1,10 +1,15 @@
-import time
+import json
 import logging
+import time
 from typing import Tuple, Optional
+
+import requests
 from web3.contract import Contract
 from web3.types import TxReceipt
 
-logger = logging.getLogger("human_protocol_sdk.job")
+from human_protocol_sdk.constants import ARTIFACTS_FOLDER
+
+logger = logging.getLogger("human_protocol_sdk.utils")
 
 
 def with_retry(fn, retries=3, delay=5, backoff=2):
@@ -91,3 +96,141 @@ def parse_transfer_transaction(
         tx_balance = transfer_event[0].get("args", {}).get("_value")
 
     return hmt_transferred and tx_balance is not None, tx_balance
+
+
+def get_contract_interface(contract_entrypoint):
+    """Retrieve the contract interface of a given contract.
+
+    Args:
+        contract_entrypoint: the entrypoint of the JSON.
+
+    Returns:
+        returns the contract interface containing the contract abi.
+
+    """
+    with open(contract_entrypoint) as f:
+        contract_interface = json.load(f)
+    return contract_interface
+
+
+def get_erc20_interface():
+    """Retrieve the ERC20 interface.
+
+    Returns:
+        Contract interface: returns the ERC20 interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json".format(
+            ARTIFACTS_FOLDER
+        )
+    )
+
+
+def get_factory_interface():
+    """Retrieve the EscrowFactory interface.
+
+    Returns:
+        Contract interface: returns the EscrowFactory interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/EscrowFactory.sol/EscrowFactory.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_staking_interface():
+    """Retrieve the Staking interface.
+
+    Returns:
+        Contract interface: returns the Staking interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/Staking.sol/Staking.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_reward_pool_interface():
+    """Retrieve the RewardPool interface.
+
+    Returns:
+        Contract interface: returns the RewardPool interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/RewardPool.sol/RewardPool.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_escrow_interface():
+    """Retrieve the RewardPool interface.
+
+    Returns:
+        Contract interface: returns the RewardPool interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/Escrow.sol/Escrow.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_kvstore_interface():
+    """Retrieve the KVStore interface.
+
+    Returns:
+        Contract interface: returns the KVStore interface solidity contract.
+
+    """
+
+    return get_contract_interface(
+        "{}/contracts/KVStore.sol/KVStore.json".format(ARTIFACTS_FOLDER)
+    )
+
+
+def get_data_from_subgraph(url: str, query: str):
+    request = requests.post(url, json={"query": query})
+    if request.status_code == 200:
+        return request.json()
+    else:
+        raise Exception(
+            "Subgraph query failed. return code is {}.      {}".format(
+                request.status_code, query
+            )
+        )
+
+
+def handle_transaction(w3, tx_name, tx, exception):
+    """Executes the transaction and waits for the receipt.
+
+    Args:
+        w3 (Web3): Web3 instance
+        tx_name (str): Name of the transaction
+        tx (obj): Transaction object
+        exception (Exception): Exception class to raise in case of error
+
+    Returns:
+        obj: The transaction receipt
+
+    Validations:
+        - There must be a default account
+
+    """
+    if not w3.eth.default_account:
+        raise exception("You must add an account to Web3 instance")
+    try:
+        tx_hash = tx.transact()
+        return w3.eth.wait_for_transaction_receipt(tx_hash)
+    except Exception as e:
+        if "reverted with reason string" in e.args[0]:
+            start_index = e.args[0].find("'") + 1
+            end_index = e.args[0].rfind("'")
+            message = e.args[0][start_index:end_index]
+            raise exception(f"{tx_name} transaction failed: {message}")
+        else:
+            raise exception(f"{tx_name} transaction failed.")

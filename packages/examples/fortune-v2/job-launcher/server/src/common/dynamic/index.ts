@@ -9,6 +9,7 @@ export interface IModuleConfigFactory<T> {
   createModuleConfig(): Promise<T> | T;
 }
 
+
 export interface IAsyncModuleConfig<T> extends Pick<ModuleMetadata, "imports" | "exports"> {
   useExisting?: {
     value: IModuleConfigFactory<T>;
@@ -19,6 +20,12 @@ export interface IAsyncModuleConfig<T> extends Pick<ModuleMetadata, "imports" | 
   inject?: any[];
 }
 
+/**
+ * Creates a module configuration provider based on the provided options.
+ * @param provide - The injection token for the module configuration.
+ * @param options - The options for creating the module configuration provider.
+ * @returns An array of providers for the module configuration.
+ */
 export function createModuleConfigProvider<T>(provide: InjectionToken, options: IAsyncModuleConfig<T>): Provider[] {
   if (options.useFactory) {
     return [

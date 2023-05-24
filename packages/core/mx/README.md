@@ -1,6 +1,5 @@
 # Human Protocol MultiversX Smart Contracts
 
-
 ## Contracts
 
 Available Contracts:
@@ -8,7 +7,6 @@ Available Contracts:
 - EscrowContract
 - EscrowFactoryContract
 - KVStoreContract
-- ReputationContract
 - RewardsPoolContract
 - StakingContract
 
@@ -22,16 +20,17 @@ In order to write contracts and be able to build/test/deploy them there are some
 installed. There is a tutorial section on MultiversX Docs that can be followed to install everything necessary right
 here [MultiversX Docs](https://docs.multiversx.com/developers/tutorials/your-first-dapp#software-prerequisites)
 
-
 For a simple fast install on Debian environments run the following:
 
 **Install python 3.8, pip and libncurses5**
+
 ```bash
 sudo apt-get update
 sudo apt install libncurses5 build-essential python3-pip nodejs npm python3.8-venv
 ```
 
 **Install mxpy**
+
 ```bash
 wget -O mxpy-up.py https://raw.githubusercontent.com/multiversx/mx-sdk-py-cli/main/mxpy-up.py
 python3 mxpy-up.py
@@ -41,7 +40,6 @@ python3 mxpy-up.py
 
 [MultiversX IDE VSCode](https://marketplace.visualstudio.com/items?itemName=Elrond.vscode-elrond-ide)
 
-
 ## Building contracts
 
 You can use a multitude of ways for building the contracts:
@@ -50,17 +48,16 @@ You can use a multitude of ways for building the contracts:
 - directly right click on the contract directory in the source tree and choose build
 - in a console inside the contract directory type `mxpy contract build`
 
-
 For building all the contracts inside the `contracts` directory there is a script called `build-mx-contracts.sh`.
 Run the script from the `mx` root directory and will automatically compile and build all the contracts.
 
 The same principle goes for cleaning the `output` directories of the contracts. Run the script `clean-mx-contracts.sh`
 from the `mx` root directory and will clean all contracts.
 
-
 ## Test contracts
 
 To run all tests from the `mx` directory, run from the root of this directory:
+
 ```bash
 cargo test
 ```
@@ -72,4 +69,3 @@ directory.
 
 If with `cargo test` the test are not able to run, you can try to clean your contract output and build it once again,
 or in other cases just run build once again.
-

@@ -15,6 +15,3 @@ dist
 # ABIs
 artifacts
 contracts
-
-# Minio Data
-minio/data
