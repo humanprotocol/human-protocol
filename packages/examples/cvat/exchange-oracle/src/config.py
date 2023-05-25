@@ -41,8 +41,8 @@ class PolygonMumbaiConfig:
 
 
 class CronConfig:
-    process_incoming_webhooks_int = os.environ.get(
-        "PROCESS_INCOMING_WEBHOOKS_INT", 3000
+    process_incoming_webhooks_int = int(
+        os.environ.get("PROCESS_INCOMING_WEBHOOKS_INT", 3000)
     )
     process_incoming_webhooks_chunk_size = os.environ.get(
         "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
