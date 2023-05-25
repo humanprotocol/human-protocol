@@ -22,7 +22,7 @@
   },
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}'",
-    "start": "vite",
+    "start": "vite --port 3000",
     "build": "vite build",
     "preview": "vite preview",
     "start-prod": "serve -s dist",
