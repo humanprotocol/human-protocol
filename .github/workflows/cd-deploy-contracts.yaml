@@ -121,19 +121,31 @@ jobs:
           REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
 
       - name: Verify Escrow Factory Proxy
-        if: github.event.inputs.escrowFactory == 'true'
+        if: always() && github.event.inputs.escrowFactory == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.escrow_factory }}
         working-directory: ./packages/core
       - name: Verify Staking Proxy
-        if: github.event.inputs.staking == 'true'
+        if: always() && github.event.inputs.staking == 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.staking }}
         working-directory: ./packages/core
       - name: Verify Reward Pool Proxy
-        if: github.event.inputs.rewardPool== 'true'
+        if: always() && github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
+      - name: Check for Changes
+        if: always()
+        id: check_changes
+        run: |
+          git fetch
+          if [[ -n "$(git diff --name-only)" ]]; then
+            echo "Changes detected."
+            echo "::set-output name=changes::true"
+          else
+            echo "No changes detected."
+            echo "::set-output name=changes::false"
+          fi
       - name: Commit changes
-        if: ${{ success() }}
+        if: always() && steps.check_changes.outputs.changes == 'true'
         uses: EndBug/add-and-commit@v9
         with:
           add: "['./packages/core/.openzeppelin', './packages/sdk/typescript/subgraph/config']"
@@ -141,15 +153,17 @@ jobs:
           default_author: github_actions
           tag_push: '--force'
       - name: Checkout develop
+        if: always() && steps.check_changes.outputs.changes == 'true'
         uses: actions/checkout@v3
         with:
           ref: develop
       - name: Rebase develop
+        if: always() && steps.check_changes.outputs.changes == 'true'
         run: |
           git fetch
           git rebase origin/main
           git push --force
-      - name: Trigger Another Workflow
+      - name: Trigger Subgraph Workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Subgraph deployment

@@ -8,7 +8,6 @@ interface IRewardPool {
      */
     struct Reward {
         address escrowAddress;
-        address staker;
         address slasher;
         uint256 tokens; // Tokens allocated to a escrowAddress
     }
