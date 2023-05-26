@@ -12,8 +12,6 @@
 
 - KVStore
 
-- Reputation
-
 # Deploy contracts with proxy to a live network
 
 1. Create a .env file in the root folder of core package, with the following variables(this is an example for Polygon Mumbai, for other networks `check hardhat.config.ts`):

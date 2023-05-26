@@ -9,10 +9,6 @@ import {
 } from './services/escrow';
 import { filterAddressesToReward } from './services/rewards';
 import { uploadResults } from './services/s3';
-import {
-  updateReputations,
-  calculateRewardForWorker,
-} from './services/reputation';
 import getManifest from './services/manifest';
 import { ChainId, REPUTATION_NETWORKS } from './constants/constants';
 
@@ -75,23 +71,13 @@ app.post('/send-fortunes', async (req, res) => {
       const { recordingOracleAddress } = await getManifest(manifestUrl);
 
       const balance = await getBalance(web3, escrow.escrowAddress);
-      const { workerAddresses, reputationValues } = filterAddressesToReward(
+      const { workerAddresses } = filterAddressesToReward(
         web3,
         fortunes,
         recordingOracleAddress
       );
-
-      await updateReputations(
-        web3,
-        network.reputationAddress,
-        reputationValues
-      );
-
-      const rewards = await calculateRewardForWorker(
-        web3,
-        network.reputationAddress,
-        balance.toString(),
-        workerAddresses
+      const rewards = Array(workerAddresses.length).fill(
+        (balance / workerAddresses.length).toString()
       );
 
       // TODO calculate the URL hash(?)

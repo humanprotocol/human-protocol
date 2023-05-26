@@ -15,9 +15,6 @@ on:
       rewardPool:
         description: 'deploy reward pool'
         required: true
-      reputation:
-        description: 'deploy reputation'
-        required: true
 
 jobs:
   deploy-contracts:
@@ -52,7 +49,6 @@ jobs:
               echo "escrow_factory=0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c" >> $GITHUB_OUTPUT
               echo "staking=0xf46B45Df3d956369726d8Bd93Ba33963Ab692920" >> $GITHUB_OUTPUT
               echo "reward_pool=0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4" >> $GITHUB_OUTPUT
-              echo "reputation=0x6B220A6306D8D86C9878A1FBb3F49707b3E2b405" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
               echo "subgraph=goerli-v1" >> $GITHUB_OUTPUT
             ;;
@@ -67,7 +63,6 @@ jobs:
               echo "escrow_factory=0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d" >> $GITHUB_OUTPUT
               echo "staking=0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac" >> $GITHUB_OUTPUT
               echo "reward_pool=0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE" >> $GITHUB_OUTPUT
-              echo "reputation=0xC522463d36f76b881bE66484e3068F11e7038Ace" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
               echo "subgraph=mumbai-v1" >> $GITHUB_OUTPUT
             ;;
@@ -82,7 +77,6 @@ jobs:
               echo "escrow_factory=0x2bfA592DBDaF434DDcbb893B1916120d181DAD18" >> $GITHUB_OUTPUT
               echo "staking=0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18" >> $GITHUB_OUTPUT
               echo "reward_pool=0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29" >> $GITHUB_OUTPUT
-              echo "reputation=0xb8F62639aA3DD51A39d6AACD969363e7F87dcc98" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
               echo "subgraph=bsctest-v1" >> $GITHUB_OUTPUT
             ;;
@@ -97,7 +91,6 @@ jobs:
               echo "escrow_factory=0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed" >> $GITHUB_OUTPUT
               echo "staking=0xBFC7009F3371F93F3B54DdC8caCd02914a37495c" >> $GITHUB_OUTPUT
               echo "reward_pool=0xf46B45Df3d956369726d8Bd93Ba33963Ab692920" >> $GITHUB_OUTPUT
-              echo "reputation=0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c" >> $GITHUB_OUTPUT
               echo "private_key=TESTNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
               echo "subgraph=moonbase-alpha-v1" >> $GITHUB_OUTPUT
             ;;
@@ -122,11 +115,9 @@ jobs:
           SUBGRAPH: ${{ steps.networks.outputs.subgraph }}
           DEPLOY_ESCROW_FACTORY: ${{ github.event.inputs.escrowFactory }}
           DEPLOY_STAKING: ${{ github.event.inputs.staking }}
-          DEPLOY_REPUTATION: ${{ github.event.inputs.reputation }}
           DEPLOY_REWARD_POOL: ${{ github.event.inputs.rewardPool }}
           ESCROW_FACTORY_ADDRESS: ${{ steps.networks.outputs.escrow_factory }}
           STAKING_ADDRESS: ${{ steps.networks.outputs.staking }}
-          REPUTATION_ADDRESS: ${{ steps.networks.outputs.reputation }}
           REWARD_POOL_ADDRESS: ${{ steps.networks.outputs.reward_pool }}
 
       - name: Verify Escrow Factory Proxy
@@ -140,10 +131,6 @@ jobs:
       - name: Verify Reward Pool Proxy
         if: github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
-        working-directory: ./packages/core
-      - name: Verify Reputation Proxy
-        if: github.event.inputs.reputation == 'true' && steps.networks.outputs.reputation != ''
-        run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reputation }}
         working-directory: ./packages/core
       - name: Commit changes
         if: ${{ success() }}

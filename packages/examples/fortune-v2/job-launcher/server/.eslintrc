@@ -1,0 +1,9 @@
+{
+  "parserOptions": {
+    "project": "./tsconfig.test.json"
+  },
+  "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  },
+  "root": true
+}

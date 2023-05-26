@@ -87,7 +87,12 @@ contract RewardPool is IRewardPool, OwnableUpgradeable, UUPSUpgradeable {
         totalFee = totalFee + fees;
 
         // Add reward record
-        Reward memory reward = Reward(_escrowAddress, _slasher, rewardAfterFee);
+        Reward memory reward = Reward(
+            _escrowAddress,
+            _staker,
+            _slasher,
+            rewardAfterFee
+        );
         rewards[_escrowAddress].push(reward);
 
         emit RewardAdded(_escrowAddress, _staker, _slasher, rewardAfterFee);

@@ -16,7 +16,7 @@ async function main() {
   const Staking = await ethers.getContractFactory('Staking');
   const stakingContract = await upgrades.deployProxy(
     Staking,
-    [HMTokenContract.address, 1, 1],
+    [HMTokenContract.address, 1, 10],
     { initializer: 'initialize', kind: 'uups' }
   );
   await stakingContract.deployed();
@@ -69,19 +69,6 @@ async function main() {
       ethers.utils.parseEther('1000')
     );
   }
-
-  const Reputation = await ethers.getContractFactory('Reputation');
-  const reputationContract = await upgrades.deployProxy(
-    Reputation,
-    [stakingContract.address, 1],
-    { initializer: 'initialize', kind: 'uups' }
-  );
-  await reputationContract.deployed();
-  console.log('Reputation Proxy Address: ', reputationContract.address);
-  console.log(
-    'Reputation Implementation Address: ',
-    await upgrades.erc1967.getImplementationAddress(reputationContract.address)
-  );
 }
 
 main().catch((error) => {

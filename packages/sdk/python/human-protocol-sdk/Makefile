@@ -7,22 +7,27 @@ build-contracts:
 format:
 	pipenv run black .
 
-start-minio:
-	docker compose -f ./minio/docker-compose.yml up -d
+unit-test:
+	make build-contracts
+	./scripts/run-unit-test.sh
 
-stop-minio:
-	docker compose -f ./minio/docker-compose.yml down -v
+e2e-start-minio:
+	docker compose -f ./test/e2e/minio/docker-compose.yml up -d
+
+e2e-stop-minio:
+	docker compose -f ./test/e2e/minio/docker-compose.yml down -v
+
+e2e-test:
+	make build-contracts
+	make e2e-start-minio
+	./scripts/run-e2e-test.sh
+	make e2e-stop-minio
 
 run-test:
-	make build-contracts
-	make start-minio
-	./scripts/run-test.sh
-	make stop-minio
+	make unit-test
+	make e2e-test
 
 build-package:
 	make clean-package
 	make build-contracts
 	python3 setup.py sdist bdist_wheel
-
-generate-html-docs:
-	./scripts/generate-docs.sh --format html
