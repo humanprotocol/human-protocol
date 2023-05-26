@@ -15,7 +15,7 @@ class Task(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     def __repr__(self):
-        return f"Webhook. id={self.id}"
+        return f"Task. id={self.id}"
 
 
 class Job(Base):
@@ -29,4 +29,4 @@ class Job(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     def __repr__(self):
-        return f"Webhook. id={self.id}"
+        return f"Job. id={self.id}"
