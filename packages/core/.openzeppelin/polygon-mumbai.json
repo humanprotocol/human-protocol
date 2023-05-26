@@ -252,7 +252,7 @@
             "label": "stakes",
             "offset": 0,
             "slot": "205",
-            "type": "t_mapping(t_address,t_struct(Staker)6260_storage)",
+            "type": "t_mapping(t_address,t_struct(Staker)3453_storage)",
             "contract": "Staking",
             "src": "contracts/Staking.sol:38"
           },
@@ -268,7 +268,7 @@
             "label": "allocations",
             "offset": 0,
             "slot": "207",
-            "type": "t_mapping(t_address,t_struct(Allocation)6120_storage)",
+            "type": "t_mapping(t_address,t_struct(Allocation)3313_storage)",
             "contract": "Staking",
             "src": "contracts/Staking.sol:44"
           },
@@ -306,15 +306,15 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_mapping(t_address,t_struct(Allocation)6120_storage)": {
+          "t_mapping(t_address,t_struct(Allocation)3313_storage)": {
             "label": "mapping(address => struct IStaking.Allocation)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(Staker)6260_storage)": {
+          "t_mapping(t_address,t_struct(Staker)3453_storage)": {
             "label": "mapping(address => struct Stakes.Staker)",
             "numberOfBytes": "32"
           },
-          "t_struct(Allocation)6120_storage": {
+          "t_struct(Allocation)3313_storage": {
             "label": "struct IStaking.Allocation",
             "members": [
               {
@@ -350,7 +350,7 @@
             ],
             "numberOfBytes": "160"
           },
-          "t_struct(Staker)6260_storage": {
+          "t_struct(Staker)3453_storage": {
             "label": "struct Stakes.Staker",
             "members": [
               {
@@ -485,7 +485,7 @@
             "label": "rewards",
             "offset": 0,
             "slot": "204",
-            "type": "t_mapping(t_address,t_array(t_struct(Reward)6066_storage)dyn_storage)",
+            "type": "t_mapping(t_address,t_array(t_struct(Reward)3259_storage)dyn_storage)",
             "contract": "RewardPool",
             "src": "contracts/RewardPool.sol:30"
           },
@@ -503,7 +503,7 @@
             "slot": "206",
             "type": "t_array(t_uint256)45_storage",
             "contract": "RewardPool",
-            "src": "contracts/RewardPool.sol:146"
+            "src": "contracts/RewardPool.sol:150"
           }
         ],
         "types": {
@@ -511,7 +511,7 @@
             "label": "address",
             "numberOfBytes": "20"
           },
-          "t_array(t_struct(Reward)6066_storage)dyn_storage": {
+          "t_array(t_struct(Reward)3259_storage)dyn_storage": {
             "label": "struct IRewardPool.Reward[]",
             "numberOfBytes": "32"
           },
@@ -531,11 +531,11 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_mapping(t_address,t_array(t_struct(Reward)6066_storage)dyn_storage)": {
+          "t_mapping(t_address,t_array(t_struct(Reward)3259_storage)dyn_storage)": {
             "label": "mapping(address => struct IRewardPool.Reward[])",
             "numberOfBytes": "32"
           },
-          "t_struct(Reward)6066_storage": {
+          "t_struct(Reward)3259_storage": {
             "label": "struct IRewardPool.Reward",
             "members": [
               {
