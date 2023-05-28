@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EscrowClient, EscrowStatus, NETWORKS, StorageClient } from "@human-protocol/sdk";
@@ -68,7 +69,9 @@ export class JobService {
       .catch(() => [[]]);
 
     // Validate if the solution is unique
-    if ((existingJobSolutions as any[]).find(({ solution }: { solution: string }) => solution === jobSolution.solution)) {
+    if (
+      (existingJobSolutions as any[]).find(({ solution }: { solution: string }) => solution === jobSolution.solution)
+    ) {
       throw new Error("Solution already exists");
     }
 

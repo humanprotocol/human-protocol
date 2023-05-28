@@ -4,7 +4,7 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { json, urlencoded } from "body-parser";
 import { useContainer } from "class-validator";
-import cookieParser from 'cookie-parser';
+import cookieParser from "cookie-parser";
 import session from "express-session";
 import helmet from "helmet";
 
@@ -36,7 +36,6 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
-
     }),
   );
   app.use(json({ limit: "5mb" }));
@@ -57,6 +56,7 @@ async function bootstrap() {
   app.use(helmet());
 
   await app.listen(port, host, async () => {
+    // eslint-disable-next-line no-console
     console.info(`Recording oracle server is running on http://${host}:${port}`);
   });
 }
