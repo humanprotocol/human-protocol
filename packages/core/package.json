@@ -83,6 +83,8 @@
     ]
   },
   "exports": {
+    "./abis/*": "./abis/*",
+    "./artifacts/*": "./artifacts/*",
     "./typechain-types": {
       "default": "./dist/typechain-types/index.js",
       "require": "./dist/typechain-types/index.js",
