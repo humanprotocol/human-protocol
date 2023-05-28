@@ -18,8 +18,8 @@ jobs:
           node-version: 18.15
       - name: Install Node
         run: yarn --ignore-scripts
-      - run: yarn compile
-        name: Compile smart contracts
+      - run: yarn build
+        name: Build core package
         working-directory: ./packages/core
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
