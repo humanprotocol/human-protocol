@@ -1,18 +1,17 @@
-import session from "express-session";
-import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { json, urlencoded } from "body-parser";
 import { useContainer } from "class-validator";
-import helmet from "helmet";
 import cookieParser from 'cookie-parser';
+import session from "express-session";
+import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
-
   const configService: ConfigService = app.get(ConfigService);
 
   const baseUrl = configService.get<string>("FE_URL", "http://localhost:3001");
@@ -45,22 +44,21 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .addBearerAuth()
-    .setTitle("Fortune Exchange Oracle API")
-    .setDescription("Swagger Fortune Exchange Oracle API")
+    .setTitle("Fortune Recording Oracle API")
+    .setDescription("Swagger Fortune Recording Oracle API")
     .setVersion("1.0")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("swagger", app, document);
 
   const host = configService.get<string>("HOST", "localhost");
-  const port = configService.get<string>("PORT", "5000");
+  const port = configService.get<string>("PORT", "5001");
 
   app.use(helmet());
 
   await app.listen(port, host, async () => {
-    console.info(`Job launcher server is running on http://${host}:${port}`);
+    console.info(`Recording oracle server is running on http://${host}:${port}`);
   });
 }
 
-void bootstrap();
-
+bootstrap();
