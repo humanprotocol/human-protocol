@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import crypto from 'crypto';
 import * as Minio from 'minio';

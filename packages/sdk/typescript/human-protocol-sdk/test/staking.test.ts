@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ethers, BigNumber } from 'ethers';
 import StakingClient from '../src/staking';
@@ -26,7 +27,6 @@ describe('StakingClient', () => {
   let stakingClient: any,
     mockSigner: any,
     mockStakingContract: any,
-    mockRewardPoolContract: any,
     mockEscrowFactoryContract: any,
     mockTokenContract: any;
 
@@ -50,12 +50,6 @@ describe('StakingClient', () => {
       getAllocation: vi.fn(),
       rewardPool: vi.fn().mockResolvedValueOnce(ethers.constants.AddressZero),
       address: FAKE_NETWORK.stakingAddress,
-    };
-
-    mockRewardPoolContract = {
-      distributeRewards: vi.fn(),
-      getRewards: vi.fn(),
-      address: ethers.constants.AddressZero,
     };
 
     mockEscrowFactoryContract = {
@@ -606,12 +600,6 @@ describe('StakingClient', () => {
 
   describe('getRewards', () => {
     const invalidAddress = 'InvalidAddress';
-    const gqlRawResult = {
-      rewardAddedEvents: {
-        escrow: ethers.constants.AddressZero,
-        amount: ethers.utils.parseEther('100'),
-      },
-    };
 
     const mockReward: IReward = {
       escrowAddress: ethers.constants.AddressZero,
