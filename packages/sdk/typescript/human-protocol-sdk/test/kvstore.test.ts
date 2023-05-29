@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { Signer, ethers } from 'ethers';
-import KVStoreClient from '../src/kvstore';
+import { KVStoreClient } from '../src/kvstore';
 import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
   ErrorSigner,
 } from '../src/error';
-import InitClient from '../src/init';
+import { InitClient } from '../src/init';
 import { ChainId } from '../src/enums';
 import { NETWORKS } from '../src/constants';
 import { NetworkData } from '../src/types';

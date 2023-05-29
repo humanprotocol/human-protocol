@@ -7,8 +7,8 @@ import { UserCreateDto, UserUpdateDto } from "./user.dto";
 import { ErrorUser } from "../../common/constants/errors";
 
 @Injectable()
-export class UserReposotory {
-  private readonly logger = new Logger(UserReposotory.name);
+export class UserRepository {
+  private readonly logger = new Logger(UserRepository.name);
   
   constructor(
     @InjectRepository(UserEntity)
@@ -22,7 +22,7 @@ export class UserReposotory {
     const userEntity = await this.userEntityRepository.findOne(where);
 
     if (!userEntity) {
-      this.logger.log(ErrorUser.NotFound, UserReposotory.name);
+      this.logger.log(ErrorUser.NotFound, UserRepository.name);
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
@@ -30,11 +30,18 @@ export class UserReposotory {
     return userEntity.save();
   }
 
-  public findOne(
+  public async findOne(
     where: FindConditions<UserEntity>,
     options?: FindOneOptions<UserEntity>,
-  ): Promise<UserEntity | undefined> {
-    return this.userEntityRepository.findOne({ where, ...options });
+  ): Promise<UserEntity> {
+    const userEntity = await this.userEntityRepository.findOne({ where, ...options });
+
+    if (!userEntity) {
+      this.logger.log(ErrorUser.NotFound, UserRepository.name);
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
+
+    return userEntity;
   }
   
   public find(where: FindConditions<UserEntity>, options?: FindManyOptions<UserEntity>): Promise<UserEntity[]> {

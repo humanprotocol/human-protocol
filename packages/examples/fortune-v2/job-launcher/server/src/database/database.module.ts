@@ -9,6 +9,8 @@ import { TokenEntity } from "../modules/auth/token.entity";
 import { UserEntity } from "../modules/user/user.entity";
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
+import { JobEntity } from "../modules/job/job.entity";
+import { PaymentEntity } from "../modules/payment/payment.entity";
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
         return {
           name: "default",
           type: "postgres",
-          entities: [AuthEntity, TokenEntity, UserEntity],
+          entities: [AuthEntity, TokenEntity, UserEntity, JobEntity, PaymentEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,

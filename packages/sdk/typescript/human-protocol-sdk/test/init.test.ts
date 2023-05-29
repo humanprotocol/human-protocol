@@ -6,7 +6,7 @@ import {
 import { FAKE_NETWORK_NAME, FAKE_NETWORK } from './utils/constants';
 
 import { ethers } from 'ethers';
-import InitClient from '../src/init';
+import { InitClient } from '../src/init';
 import { IClientParams } from '../src/interfaces';
 import { ChainId } from '../src/enums';
 

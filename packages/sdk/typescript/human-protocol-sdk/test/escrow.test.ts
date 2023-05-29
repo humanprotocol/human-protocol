@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ethers, BigNumber } from 'ethers';
-import EscrowClient from '../src/escrow';
+import { EscrowClient } from '../src/escrow';
 import {
   FAKE_ADDRESS,
   FAKE_HASH,
@@ -27,7 +27,7 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from '../src/error';
-import InitClient from '../src/init';
+import { InitClient } from '../src/init';
 import {
   EscrowFactory__factory,
   Escrow__factory,

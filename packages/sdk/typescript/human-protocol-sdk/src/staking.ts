@@ -25,7 +25,7 @@ import { gqlFetch, throwError } from './utils';
 import { RAW_REWARDS_QUERY } from './queries';
 import { requiresSigner } from './decorators';
 
-export default class StakingClient {
+export class StakingClient {
   public signerOrProvider: Signer | Provider;
   public network: NetworkData;
   public tokenContract: HMToken;

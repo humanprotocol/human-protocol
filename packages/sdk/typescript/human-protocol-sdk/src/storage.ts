@@ -12,7 +12,7 @@ import { UploadFile, File, StorageCredentials, StorageParams } from './types';
 import { isValidUrl } from './utils';
 import { HttpStatus } from './constants';
 
-export default class StorageClient {
+export class StorageClient {
   private client: Minio.Client;
 
   /**

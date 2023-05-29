@@ -32,13 +32,29 @@ export enum ErrorUser {
 }
 
 /**
+ * Represents error messages related to token.
+ */
+export enum ErrorToken {
+  NotFound = "Token not found",
+}
+
+/**
  * Represents error messages related to payment.
  */
 export enum ErrorPayment {
   NotFound = "Payment not found",
   NotSuccess = "Unseccssful payment",
   CustomerNotFound = "Customer not found",
-  IncorrectAmount = "Incorrect amount"
+  IncorrectAmount = "Incorrect amount",
+  TransactionNotFoundByHash = "Transaction not found by hash",
+  TransactionHasNotEnoughAmountOfConfirmations = "Transaction has not enough amount of confirmations"
+}
+
+/**
+ * Represents error messages related to currency.
+ */
+export enum ErrorCurrency {
+  PairNotFound = "Pair not found",
 }
 
 /**
@@ -46,5 +62,5 @@ export enum ErrorPayment {
  */
 export enum ErrorBucket {
   NotPublic = "Bucket is not public",
-  UnableSaveFile = "Unable to save file.",
+  UnableSaveFile = "Unable to save file",
 }

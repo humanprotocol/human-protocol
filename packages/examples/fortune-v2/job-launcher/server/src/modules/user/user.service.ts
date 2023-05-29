@@ -6,7 +6,7 @@ import { Not } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { UserStatus, UserType } from "../../common/enums/user";
 import { UserCreateDto, UserUpdateDto } from "./user.dto";
-import { UserReposotory } from "./user.repository";
+import { UserRepository } from "./user.repository";
 import { ValidatePasswordDto } from "../auth/auth.dto";
 import { ErrorUser } from "../../common/constants/errors";
 
@@ -15,7 +15,7 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
 
   constructor(
-    private userRepository: UserReposotory,
+    private userRepository: UserRepository,
     private readonly configService: ConfigService,
   ) {}
 

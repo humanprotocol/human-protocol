@@ -38,6 +38,12 @@ export class addUserTable1677867973538 implements MigrationInterface {
               isNullable: true,
             },
             {
+              name: "stripe_customer_id",
+              type: "varchar",
+              isUnique: true,
+              isNullable: true,
+            },
+            {
               name: "type",
               type: `${NS}.user_type_enum`,
             },

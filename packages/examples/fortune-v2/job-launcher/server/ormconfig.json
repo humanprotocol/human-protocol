@@ -4,12 +4,12 @@
       "type": "postgres",
       "host": "localhost",
       "port": 5432,
-      "username": "fortune",
-      "password": "fortune",
-      "database": "hmt-job-launcher",
+      "username": "hmt-launcher",
+      "password": "qwerty",
+      "database": "hmt-launcher-db",
       "entities": ["dist/**/*.entity{ .ts,.js}"],
       "synchronize": false,
-      "migrations": ["dist/migrations/*{.ts,.js}"],
+      "migrations": ["dist/database/migrations/*{.ts,.js}"],
       "migrationsTableName": "migrations_typeorm",
       "migrationsRun": true
     }
