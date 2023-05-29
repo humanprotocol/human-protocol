@@ -11,7 +11,7 @@
     "dist/typechain-types"
   ],
   "scripts": {
-    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types dist",
+    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types",
     "precompile": "npm run clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
