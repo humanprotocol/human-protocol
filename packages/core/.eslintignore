@@ -2,3 +2,4 @@ artifacts/
 cache/
 coverage/
 typechain-types/
+dist/
