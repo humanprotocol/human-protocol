@@ -6,7 +6,6 @@ from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
 from src.modules.webhook.constants import WebhookStatuses, WebhookTypes
 from src.modules.webhook.model import Webhook
-from .constants import WebhookTypes, WebhookStatuses
 from .api_schema import JLWebhook
 
 
