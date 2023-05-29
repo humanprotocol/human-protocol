@@ -48,7 +48,7 @@ def create_job(
     return job_id
 
 
-def get_job_by_cvat_id(session: Session, cvat_id: int) -> bool:
+def get_job_by_cvat_id(session: Session, cvat_id: int):
     job_query = select(Job).where(Job.cvat_id == cvat_id)
     job = session.execute(job_query).scalars().first()
 
