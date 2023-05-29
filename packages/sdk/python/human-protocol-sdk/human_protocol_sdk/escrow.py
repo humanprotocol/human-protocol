@@ -628,48 +628,6 @@ class EscrowClient:
 
         return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
 
-    def get_recording_oracle_address(self, escrow_address: str):
-        """Gets the recording oracle address of the escrow.
-
-        Args:
-            escrow_address (str): Address of the escrow
-
-        Returns:
-            str: Recording oracle address
-
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
-        """
-
-        if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-
-        return (
-            self._get_escrow_contract(escrow_address).functions.recordingOracle().call()
-        )
-
-    def get_reputation_oracle_address(self, escrow_address: str):
-        """Gets the reputation oracle address of the escrow.
-
-        Args:
-            escrow_address (str): Address of the escrow
-
-        Returns:
-            str: Reputation oracle address
-
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
-        """
-
-        if not Web3.isAddress(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-
-        return (
-            self._get_escrow_contract(escrow_address)
-            .functions.reputationOracle()
-            .call()
-        )
-
     def _get_escrow_contract(self, address: str):
         """Returns the escrow contract instance.
 

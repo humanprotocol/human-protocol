@@ -7,11 +7,10 @@
     "abis/**/*.json",
     "artifacts/@openzeppelin/**/[^.]*.json",
     "artifacts/contracts/**/[^.]*.json",
-    "typechain-types/**/*.ts",
-    "dist/typechain-types"
+    "typechain-types/**/*.ts"
   ],
   "scripts": {
-    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types dist",
+    "clean": "hardhat clean && rm -rf abis cache artifacts typechain-types",
     "precompile": "npm run clean",
     "compile": "hardhat compile",
     "verify": "hardhat verify",
@@ -26,9 +25,7 @@
     "lint:fix": "eslint . --fix",
     "format:contracts": "prettier --write '**/*.sol'",
     "format:scripts": "prettier --write '**/*.ts'",
-    "format": "yarn format:contracts && yarn format:scripts",
-    "build": "npm run clean && npm run compile && tsc",
-    "prepublish": "npm run build"
+    "format": "yarn format:contracts && yarn format:scripts"
   },
   "repository": {
     "type": "git",
@@ -81,15 +78,5 @@
       "prettier --write",
       "eslint --fix"
     ]
-  },
-  "exports": {
-    "./abis/*": "./abis/*",
-    "./artifacts/*": "./artifacts/*",
-    "./typechain-types": {
-      "default": "./dist/typechain-types/index.js",
-      "require": "./dist/typechain-types/index.js",
-      "import": "./typechain-types/index.ts",
-      "types": "./dist/typechain-types/index.d.ts"
-    }
   }
 }

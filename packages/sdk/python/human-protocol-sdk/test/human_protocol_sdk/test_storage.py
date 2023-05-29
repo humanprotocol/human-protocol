@@ -64,7 +64,8 @@ class TestStorageClient(unittest.TestCase):
                 endpoint_url=self.endpoint_url,
             )
             mock_client.assert_called_once()
-            self.assertEqual(mock_client.call_args_list[0].kwargs["region"], None)
+            self.assertEqual(
+                mock_client.call_args_list[0].kwargs["region"], None)
             self.assertEqual(
                 mock_client.call_args_list[0].kwargs["endpoint"], self.endpoint_url
             )
@@ -78,30 +79,29 @@ class TestStorageClient(unittest.TestCase):
                 StorageClient(endpoint_url=self.endpoint_url)
 
     def test_download_file_from_url(self):
-        with patch("requests.get") as mock_get:
+        with patch('requests.get') as mock_get:
             mock_response = mock_get.return_value
             mock_response.raise_for_status.return_value = None
-            mock_response.content = b"Test file content"
-            url = "https://www.example.com/file.txt"
+            mock_response.content = b'Test file content'
+            url = 'https://www.example.com/file.txt'
 
             result = StorageClient.download_file_from_url(url)
 
-            self.assertEqual(result, b"Test file content")
+            self.assertEqual(result, b'Test file content')
 
     def test_download_file_from_url_invalid_url(self):
-        url = "invalid_url"
+        url = 'invalid_url'
 
         with self.assertRaises(StorageClientError) as cm:
             StorageClient.download_file_from_url(url)
         self.assertEqual(f"Invalid URL: {url}", str(cm.exception))
 
     def test_download_file_from_url_error(self):
-        with patch("requests.get") as mock_get:
-            url = "https://www.example.com/file.txt"
+        with patch('requests.get') as mock_get:
+            url = 'https://www.example.com/file.txt'
             mock_response = mock_get.return_value
             mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
-                f"Not Found for url: {url}", response=mock_response
-            )
+                f"Not Found for url: {url}", response=mock_response)
 
             with self.assertRaises(StorageClientError) as cm:
                 StorageClient.download_file_from_url(url)
@@ -115,7 +115,8 @@ class TestStorageClient(unittest.TestCase):
                 MagicMock(read=MagicMock(return_value=expected_result[1])),
             ]
         )
-        result = self.client.download_files(files=self.files, bucket=self.bucket)
+        result = self.client.download_files(
+            files=self.files, bucket=self.bucket)
         self.assertEqual(result, expected_result)
 
     def test_download_files_error(self):
@@ -155,7 +156,8 @@ class TestStorageClient(unittest.TestCase):
 
     def test_upload_files(self):
         file3 = "file3 content"
-        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        data_sha = hashlib.sha1(json.dumps(
+            "file3 content").encode("utf-8")).hexdigest()
         key3 = f"s3{data_sha}.json"
 
         self.client.client.stat_object = MagicMock(
@@ -174,7 +176,8 @@ class TestStorageClient(unittest.TestCase):
 
     def test_upload_files_exist(self):
         file3 = "file3 content"
-        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        data_sha = hashlib.sha1(json.dumps(
+            "file3 content").encode("utf-8")).hexdigest()
         key3 = f"s3{data_sha}.json"
 
         self.client.client.stat_object = MagicMock(
@@ -245,7 +248,8 @@ class TestStorageClient(unittest.TestCase):
         file2 = types.SimpleNamespace()
         file1._object_name = "file1"
         file2._object_name = "file2"
-        self.client.client.list_objects = MagicMock(side_effect=[[file1, file2]])
+        self.client.client.list_objects = MagicMock(
+            side_effect=[[file1, file2]])
         result = self.client.list_objects(bucket=self.bucket)
         self.assertEqual(result, ["file1", "file2"])
 
@@ -281,7 +285,8 @@ class TestStorageClient(unittest.TestCase):
             for i in range(expected_length)
         ]
         with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
-            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            client = StorageClient(
+                endpoint_url="https://example.com", credentials=None)
             object_list = client.list_objects(bucket="my-bucket")
             self.assertEqual(len(object_list), expected_length)
 
@@ -293,7 +298,8 @@ class TestStorageClient(unittest.TestCase):
             for i in range(expected_length)
         ]
         with patch("human_protocol_sdk.storage.Minio", return_value=mock_client):
-            client = StorageClient(endpoint_url="https://example.com", credentials=None)
+            client = StorageClient(
+                endpoint_url="https://example.com", credentials=None)
             object_list = client.list_objects(bucket="my-bucket")
             if len(object_list) != expected_length:
                 raise AssertionError(

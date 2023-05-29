@@ -23,6 +23,6 @@
     "start": "ts-node src/index.ts",
     "test": "concurrently -k -s first --hide 0 \"hardhat node --port 8548\" \"jest\"",
     "lint": "eslint '**/*.ts'",
-    "vercel-build": "yarn workspace @human-protocol/core build"
+    "vercel-build": "yarn workspace @human-protocol/core compile"
   }
 }

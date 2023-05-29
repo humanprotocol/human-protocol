@@ -71,8 +71,6 @@ describe('EscrowClient', () => {
       getLaunchedEscrows: vi.fn(),
       getEscrowsFiltered: vi.fn(),
       address: ethers.constants.AddressZero,
-      recordingOracle: vi.fn(),
-      reputationOracle: vi.fn(),
     };
 
     mockEscrowFactoryContract = {
@@ -1336,114 +1334,6 @@ describe('EscrowClient', () => {
         mockLaunchedEscrowsResult,
         mockLaunchedEscrowsResult,
       ]);
-    });
-  });
-
-  describe('getRecordingOracleAddress', () => {
-    test('should throw an error if escrowAddress is an invalid address', async () => {
-      const escrowAddress = FAKE_ADDRESS;
-
-      await expect(
-        escrowClient.getRecordingOracleAddress(escrowAddress)
-      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
-    });
-
-    test('should throw an error if hasEscrow returns false', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
-
-      await expect(
-        escrowClient.getRecordingOracleAddress(escrowAddress)
-      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
-    });
-
-    test('should successfully getRecordingOracleAddress', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.recordingOracle.mockReturnValue(
-        ethers.constants.AddressZero
-      );
-
-      const recordingOracleAddress =
-        await escrowClient.getRecordingOracleAddress(escrowAddress);
-
-      expect(recordingOracleAddress).toEqual(ethers.constants.AddressZero);
-      expect(
-        escrowClient.escrowContract.recordingOracle
-      ).toHaveBeenCalledWith();
-    });
-
-    test('should throw an error if getRecordingOracleAddress fails', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.recordingOracle.mockRejectedValueOnce(
-        new Error()
-      );
-
-      await expect(
-        escrowClient.getRecordingOracleAddress(escrowAddress)
-      ).rejects.toThrow();
-
-      expect(
-        escrowClient.escrowContract.recordingOracle
-      ).toHaveBeenCalledWith();
-    });
-  });
-
-  describe('getReputationOracleAddress', () => {
-    test('should throw an error if escrowAddress is an invalid address', async () => {
-      const escrowAddress = FAKE_ADDRESS;
-
-      await expect(
-        escrowClient.getReputationOracleAddress(escrowAddress)
-      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
-    });
-
-    test('should throw an error if hasEscrow returns false', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
-
-      await expect(
-        escrowClient.getReputationOracleAddress(escrowAddress)
-      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
-    });
-
-    test('should successfully getReputationOracleAddress', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.reputationOracle.mockReturnValue(
-        ethers.constants.AddressZero
-      );
-
-      const reputationOracleAddress =
-        await escrowClient.getReputationOracleAddress(escrowAddress);
-
-      expect(reputationOracleAddress).toEqual(ethers.constants.AddressZero);
-      expect(
-        escrowClient.escrowContract.reputationOracle
-      ).toHaveBeenCalledWith();
-    });
-
-    test('should throw an error if getReputationOracleAddress fails', async () => {
-      const escrowAddress = ethers.constants.AddressZero;
-
-      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
-      escrowClient.escrowContract.reputationOracle.mockRejectedValueOnce(
-        new Error()
-      );
-
-      await expect(
-        escrowClient.getReputationOracleAddress(escrowAddress)
-      ).rejects.toThrow();
-
-      expect(
-        escrowClient.escrowContract.reputationOracle
-      ).toHaveBeenCalledWith();
     });
   });
 });

@@ -8,7 +8,7 @@ import {
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from './error';
-import { UploadFile, StorageCredentials, StorageParams } from './types';
+import { UploadFile, File, StorageCredentials, StorageParams } from './types';
 import { isValidUrl } from './utils';
 import { HttpStatus } from './constants';
 
@@ -39,7 +39,7 @@ export default class StorageClient {
    * @param {string} keys - Keys of files
    * @returns {Promise<File>} - Downloaded file
    */
-  public async downloadFiles(keys: string[], bucket: string): Promise<any[]> {
+  public async downloadFiles(keys: string[], bucket: string): Promise<File[]> {
     const isBucketExists = await this.client.bucketExists(bucket);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
@@ -65,7 +65,7 @@ export default class StorageClient {
    * @param {string} url - URL to the file
    * @returns {Promise<File>} - Downloaded file
    */
-  public static async downloadFileFromUrl(url: string): Promise<any> {
+  public static async downloadFileFromUrl(url: string): Promise<File> {
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
     }
@@ -95,7 +95,7 @@ export default class StorageClient {
    * @returns {Promise<UploadFile>} - Uploaded file with key/hash
    */
   public async uploadFiles(
-    files: any[],
+    files: File[],
     bucket: string
   ): Promise<UploadFile[]> {
     const isBucketExists = await this.client.bucketExists(bucket);

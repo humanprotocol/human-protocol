@@ -65,6 +65,13 @@ export type StorageParams = {
 };
 
 /**
+ * Generic file data
+ * @readonly
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type File = Record<string, any>;
+
+/**
  * Upload file data
  * @readonly
  */

@@ -1,14 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": ["ES2017", "ES7", "ES6"],
-    "declaration": true,
-    "outDir": "./dist",
-    "declarationMap": true,
-    "esModuleInterop": true
+    "baseUrl": "."
   },
   "include": ["./scripts", "./test", "./typechain-types"],
   "files": ["./hardhat.config.ts"]
