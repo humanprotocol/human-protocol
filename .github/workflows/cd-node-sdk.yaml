@@ -24,6 +24,9 @@ jobs:
           file: ./packages/sdk/typescript/human-protocol-sdk/package.json
           field: version
           value: ${{ github.event.release.tag_name }}
+      - run: yarn build
+        name: Build SDK package
+        working-directory: ./packages/sdk/typescript/human-protocol-sdk
       - uses: JS-DevTools/npm-publish@v1
         name: Publish
         with:

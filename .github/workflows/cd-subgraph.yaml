@@ -32,7 +32,7 @@ jobs:
     name: Deploy Subgraph
     environment: deploy-subgraph
     needs: contracts-check
-    runs-on: ubuntu-latest   
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         network:
@@ -69,9 +69,9 @@ jobs:
       - run: yarn --ignore-scripts
         if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Install dependencies
-      - run: yarn compile
+      - run: yarn build
         if: ${{steps.continue_check.outputs.stop != 'true'}}
-        name: Compile smart contracts
+        name: Build core package
         working-directory: ./packages/core
       - run: yarn global add @graphprotocol/graph-cli
         if: ${{steps.continue_check.outputs.stop != 'true'}}
