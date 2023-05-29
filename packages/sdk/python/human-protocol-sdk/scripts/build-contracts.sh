@@ -2,5 +2,5 @@
 set -eux
 
 rm -rf artifacts
-yarn workspace @human-protocol/core compile
+yarn workspace @human-protocol/core build
 cp -r ../../../core/artifacts .

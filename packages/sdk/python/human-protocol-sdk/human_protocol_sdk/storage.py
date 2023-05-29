@@ -162,13 +162,11 @@ class StorageClient:
         result_files = []
         for file in files:
             try:
-                response = self.client.get_object(
-                    bucket_name=bucket, object_name=file)
+                response = self.client.get_object(bucket_name=bucket, object_name=file)
                 result_files.append(response.read())
             except Exception as e:
                 if hasattr(e, "code") and str(e.code) == "NoSuchKey":
-                    raise StorageFileNotFoundError(
-                        "No object found - returning empty")
+                    raise StorageFileNotFoundError("No object found - returning empty")
                 LOG.warning(
                     f"Reading the key {file} with S3 failed" f" because of: {str(e)}"
                 )
