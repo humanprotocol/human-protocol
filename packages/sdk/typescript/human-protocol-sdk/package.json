@@ -4,9 +4,7 @@
   "version": "1.0.3",
   "files": [
     "src",
-    "dist",
-    "example",
-    "test"
+    "dist"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
