@@ -751,4 +751,31 @@ export default class EscrowClient {
       return throwError(e);
     }
   }
+
+  /**
+   * Returns the reputation oracle address of given escrow
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<string>} - Address of the reputation oracle.
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getReputationOracleAddress(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.reputationOracle();
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
 }
