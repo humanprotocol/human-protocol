@@ -2,8 +2,8 @@
   "network": "moonbeam",
   "description": "Human subgraph on Moonbeam network",
   "graft": {
-    "base": "QmfPG7dSeccKtGYvQACFwVAWm4K3nfFkz6JjbYAMY9iXq5",
-    "block": 3116433
+    "base": "Qmdjpy13L5NxCM4gkvKP7xVZMb1NuMrZXh75w4Z3b7D5Ub",
+    "block": 3672079
   },
   "EscrowFactory": {
     "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",

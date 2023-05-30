@@ -19,6 +19,12 @@ export interface IReputationNetwork {
 export const REPUTATION_NETWORKS: {
   [chainId in ChainId]?: IReputationNetwork;
 } = {
+  [ChainId.MAINNET]: {
+    chainId: ChainId.MAINNET,
+    title: 'Ethereum',
+    rpcUrl:
+      'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
+  },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
     title: 'Ethereum Goerli',

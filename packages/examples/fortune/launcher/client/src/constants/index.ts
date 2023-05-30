@@ -7,6 +7,7 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
+  MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
   SKALE = 1273227453,
 }
@@ -39,6 +40,17 @@ export interface IEscrowNetwork {
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: IEscrowNetwork;
 } = {
+  [ChainId.MAINNET]: {
+    chainId: ChainId.MAINNET,
+    title: 'Ethereum',
+    scanUrl: 'https://etherscan.io',
+    rpcUrl:
+      'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v1',
+    factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+    hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
+  },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
     title: 'Ethereum Goerli',
@@ -106,6 +118,17 @@ export const ESCROW_NETWORKS: {
   //   factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
   //   hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
   // },
+  [ChainId.MOONBASE_ALPHA]: {
+    chainId: ChainId.MOONBASE_ALPHA,
+    title: 'Moonbase Alpha',
+    scanUrl: 'https://moonbase.moonscan.io/',
+    rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1',
+
+    factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
+  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
