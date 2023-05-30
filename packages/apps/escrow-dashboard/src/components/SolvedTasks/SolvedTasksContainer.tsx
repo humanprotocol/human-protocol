@@ -48,7 +48,7 @@ export const SolvedTasksContainer: FC = () => {
         sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 }, pl: 14 }}
         lineHeight={1}
       >
-        {numeral(solvedTasksCount).format('0,0')}
+        {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
       </Typography>
     </Box>
   );
