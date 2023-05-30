@@ -20,7 +20,7 @@ export const ESCROW_NETWORKS: {
     rpcUrl:
       'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
     factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-    hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867'
+    hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
   },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
