@@ -3,7 +3,7 @@ import { IsEnum, IsNumber, IsString, Min } from "class-validator";
 import { CoingeckoId, Currency, PaymentSource, PaymentType, TokenId } from "../../common/enums/payment";
 import { JobMode, JobRequestType } from "../../common/enums/job";
 import { BigNumber } from 'ethers';
-import { ChainId } from "@human-protocol/sdk/src";
+import { ChainId } from "@human-protocol/sdk";
 
 export class PaymentFiatConfirmDto {
   @ApiProperty()

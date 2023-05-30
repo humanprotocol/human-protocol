@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsEnum, IsNumber, IsPositive, IsString, IsUrl, Matches } from "class-validator";
-import { ChainId } from "@human-protocol/sdk/src"
+import { ChainId } from "@human-protocol/sdk";
 import { JobStatus } from "../../common/enums/job";
 
 export class JobCreateDto {
@@ -18,7 +18,7 @@ export class JobFortuneCreateDto {
   })
   @IsEnum(ChainId)
   public chainId: ChainId;
-  
+
   @ApiProperty()
   @IsNumber()
   public fortunesRequired: number;
@@ -51,9 +51,8 @@ export class JobCvatCreateDto {
 
   @ApiProperty()
   @IsUrl()
-  @Matches (/(s3-|s3\.)?(.*)\.amazonaws\.com/, {
-    message:
-      'URL must be in the correct S3 bucket format',
+  @Matches(/(s3-|s3\.)?(.*)\.amazonaws\.com/, {
+    message: "URL must be in the correct S3 bucket format",
   })
   public dataUrl: string;
 
@@ -87,15 +86,15 @@ export class JobCvatCreateDto {
 }
 
 export class JobLaunchDto {
-    @ApiProperty()
-    @IsNumber()
-    public jobId: number
-  
-    @ApiProperty()
-    @IsString()
-    public paymentId: string
+  @ApiProperty()
+  @IsNumber()
+  public jobId: number;
+
+  @ApiProperty()
+  @IsString()
+  public paymentId: string;
 }
-  
+
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,
