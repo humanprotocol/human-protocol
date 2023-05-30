@@ -145,8 +145,9 @@ describe('EscrowClient', () => {
           wait: async () => ({
             events: [
               {
+                topics: [ethers.utils.id('Launched(address,address)')],
                 args: {
-                  1: expectedEscrowAddress,
+                  escrow: expectedEscrowAddress,
                 },
               },
             ],

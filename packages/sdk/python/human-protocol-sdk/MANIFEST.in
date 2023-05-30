@@ -1,1 +1,1 @@
-recursive-include contracts *
+recursive-include artifacts *.json
