@@ -13,12 +13,14 @@ export enum ChainId {
 }
 
 export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
+  ChainId.MAINNET,
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
+  ChainId.MOONBASE_ALPHA,
   ChainId.SKALE,
 ];
 
