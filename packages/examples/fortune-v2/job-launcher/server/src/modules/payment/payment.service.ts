@@ -93,10 +93,9 @@ export class PaymentService {
 
   public async createCryptoPayment(userId: number, dto: PaymentCryptoCreateDto) {
     try {
-      const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key");
-      const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
+      const signer = this.ethersSigner.createWallet(this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key"));
       
-      const transaction = await operator.provider.getTransactionReceipt(dto.transactionHash);
+      const transaction = await signer.provider.getTransactionReceipt(dto.transactionHash);
       console.log(transaction)
       if (!transaction) { 
         this.logger.error(ErrorPayment.TransactionNotFoundByHash)

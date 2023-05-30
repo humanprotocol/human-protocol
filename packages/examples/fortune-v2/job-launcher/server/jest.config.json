@@ -1,7 +1,7 @@
 {
   "coverageDirectory": "../coverage",
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": "src",
+  "rootDir": "src/modules",
   "testEnvironment": "node",
   "testRegex": ".spec.ts$",
   "transform": {

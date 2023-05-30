@@ -36,10 +36,10 @@ export class JobFortuneCreateDto {
   @IsPositive()
   public price: number;
 
-  public userId: number;
-  public manifestUrl: string;
-  public status: JobStatus;
-  public waitUntil: Date;
+  public userId?: number;
+  public manifestUrl?: string;
+  public status?: JobStatus;
+  public waitUntil?: Date;
 }
 
 export class JobCvatCreateDto {
@@ -110,4 +110,9 @@ export class JobUpdateDto {
 export class SaveManifestDto {
   public manifestUrl: string;
   public manifestHash: string;
+}
+
+export class SendWebhookDto {
+  public escrowAddress: string;
+  public chainId: number;
 }

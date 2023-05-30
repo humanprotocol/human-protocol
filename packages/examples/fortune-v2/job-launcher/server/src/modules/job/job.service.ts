@@ -8,25 +8,28 @@ import { JobEntity } from "./job.entity";
 import { JobRepository } from "./job.repository";
 import { ErrorBucket, ErrorEscrow, ErrorJob } from "../../common/constants/errors";
 import { EscrowClient, File, InitClient, NETWORKS, StorageClient, StorageCredentials, StorageParams, UploadFile } from "@human-protocol/sdk";
-import { JobCvatCreateDto, JobFortuneCreateDto, SaveManifestDto } from "./job.dto";
+import { JobCvatCreateDto, JobFortuneCreateDto, SaveManifestDto, SendWebhookDto } from "./job.dto";
 import { ManifestDto } from "../payment/payment.dto";
 import { EthersSigner, InjectSignerProvider } from "nestjs-ethers";
 import { PaymentSource, PaymentType } from "../../common/enums/payment";
+import { firstValueFrom } from "rxjs";
+import { HttpService } from "@nestjs/axios";
 
 
 @Injectable()
 export class JobService {
-  private readonly logger = new Logger(JobService.name);
-  private readonly storageClient: StorageClient;
-  private readonly storageParams: StorageParams;
-  private readonly bucket: string;
+  public readonly logger = new Logger(JobService.name);
+  public readonly storageClient: StorageClient;
+  public readonly storageParams: StorageParams;
+  public readonly bucket: string;
 
   constructor(
     @InjectSignerProvider()
-    private readonly ethersSigner: EthersSigner,
-    private readonly jobRepository: JobRepository,
-    private readonly paymentService: PaymentService,
-    private readonly configService: ConfigService,
+    public readonly ethersSigner: EthersSigner,
+    public readonly jobRepository: JobRepository,
+    public readonly paymentService: PaymentService,
+    public readonly httpService: HttpService,
+    public readonly configService: ConfigService,
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>("S3_ACCESS_KEY", ""),
@@ -143,9 +146,7 @@ export class JobService {
 
   public async launchJob(jobEntity: JobEntity): Promise<boolean> {
     try {
-      const jobLauncherPK = this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key");
-      const operator: Wallet = this.ethersSigner.createWallet(jobLauncherPK);
-      const signer: Signer = this.ethersSigner.createVoidSigner(await operator.getAddress());
+      const signer = this.ethersSigner.createWallet(this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key"));
       const clientParams = await InitClient.getParams(signer);
 
       const escrowClient = new EscrowClient(clientParams);
@@ -181,7 +182,18 @@ export class JobService {
       jobEntity.status = JobStatus.LAUNCHED;
       await jobEntity.save();
 
-      // TODO: Send webhook to exchangeOracleWebhookUrl
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+
+      if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+        this.sendWebhook(
+          exchangeOracleWebhookUrl,
+          {
+            escrowAddress: jobEntity.escrowAddress,
+            chainId: jobEntity.chainId
+          }
+        )
+      }
+
       return true;
     } catch (e) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
@@ -189,7 +201,7 @@ export class JobService {
     }
   }
 
-  private async saveManifest(encryptedManifest: File, bucket: string): Promise<SaveManifestDto> {
+  public async saveManifest(encryptedManifest: File, bucket: string): Promise<SaveManifestDto> {
     try {
       const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles([encryptedManifest], bucket);
 
@@ -207,11 +219,35 @@ export class JobService {
     }
   }
 
-  private createFileUrl(key: string): string {
+  public createFileUrl(key: string): string {
     if (this.storageParams.port) {
       return `${this.storageParams.endPoint}:${this.storageParams.port}/${this.bucket}/${key}.json`
     } else {
       return `${this.storageParams.endPoint}/${this.bucket}/${key}.json`
     }
+  }
+
+  public async getManifest(manifestUrl: string): Promise<ManifestDto> {
+    const { data } = await firstValueFrom(
+      await this.httpService.get(manifestUrl),
+    );
+    
+    if (!data) {
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
+    }
+
+    return data;
+  }
+
+  public async sendWebhook(webhookUrl: string, webhookData: SendWebhookDto): Promise<boolean> {
+    const { data } = await firstValueFrom(
+        await this.httpService.post(webhookUrl, webhookData)
+    );
+
+    if (!data) {
+      throw new NotFoundException(ErrorJob.WebhookWasNotReceived);
+    }
+
+    return true;
   }
 }
