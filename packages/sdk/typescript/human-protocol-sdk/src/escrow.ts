@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   HMToken__factory,
   HMToken,
@@ -6,7 +7,7 @@ import {
   EscrowFactory__factory,
   Escrow__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, ContractReceipt, Signer, ethers, providers } from 'ethers';
+import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
 import { Provider } from '@ethersproject/abstract-provider';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -24,7 +25,6 @@ import {
   ErrorListOfHandlersCannotBeEmpty,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
-  ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
