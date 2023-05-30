@@ -1,6 +1,7 @@
 import { IEscrowNetwork } from '../interfaces/networks';
 
 export enum ChainId {
+  MAINNET = 1,
   GOERLI = 5,
   BSC_TESTNET = 97,
   POLYGON = 137,
@@ -13,6 +14,14 @@ export enum ChainId {
 export const ESCROW_NETWORKS: {
   [chainId in ChainId]?: IEscrowNetwork;
 } = {
+  [ChainId.MAINNET]: {
+    chainId: ChainId.MAINNET,
+    title: 'Ethereum',
+    rpcUrl:
+      'https://eth-mainnet.g.alchemy.com/v2/VVDrD3TpJv8ZBP4CiwH2m5Oj6r0hM2st',
+    factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
+    hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867'
+  },
   [ChainId.GOERLI]: {
     chainId: ChainId.GOERLI,
     title: 'Ethereum Goerli',
@@ -41,13 +50,13 @@ export const ESCROW_NETWORKS: {
     factoryAddress: '0x79aE9b3Ad106AEdc1F813AaD98f550FADd9e2254',
     hmtAddress: '0xc2B8bb720e5df43e6E13b84B27dF5543B3485EA4',
   },
-  // [ChainId.MOONBASE_ALPHA]: {
-  //   chainId: ChainId.MOONBASE_ALPHA,
-  //   title: 'Moonbase Alpha',
-  //   rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
-  //   factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
-  //   hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
-  // },
+  [ChainId.MOONBASE_ALPHA]: {
+    chainId: ChainId.MOONBASE_ALPHA,
+    title: 'Moonbase Alpha',
+    rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+    factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
+    hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
+  },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,
     title: 'Localhost',
