@@ -12,6 +12,7 @@ from human_protocol_sdk.storage import (
     StorageClientError,
     StorageFileNotFoundError,
 )
+import requests
 
 
 class TestCredentials(unittest.TestCase):
@@ -75,6 +76,36 @@ class TestStorageClient(unittest.TestCase):
             mock_client.side_effect = Exception("Connection error")
             with self.assertRaises(Exception):
                 StorageClient(endpoint_url=self.endpoint_url)
+
+    def test_download_file_from_url(self):
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.raise_for_status.return_value = None
+            mock_response.content = b"Test file content"
+            url = "https://www.example.com/file.txt"
+
+            result = StorageClient.download_file_from_url(url)
+
+            self.assertEqual(result, b"Test file content")
+
+    def test_download_file_from_url_invalid_url(self):
+        url = "invalid_url"
+
+        with self.assertRaises(StorageClientError) as cm:
+            StorageClient.download_file_from_url(url)
+        self.assertEqual(f"Invalid URL: {url}", str(cm.exception))
+
+    def test_download_file_from_url_error(self):
+        with patch("requests.get") as mock_get:
+            url = "https://www.example.com/file.txt"
+            mock_response = mock_get.return_value
+            mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+                f"Not Found for url: {url}", response=mock_response
+            )
+
+            with self.assertRaises(StorageClientError) as cm:
+                StorageClient.download_file_from_url(url)
+            self.assertEqual(f"Not Found for url: {url}", str(cm.exception))
 
     def test_download_files(self):
         expected_result = [b"file1 contents", b"file2 contents"]

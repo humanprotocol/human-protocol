@@ -18,8 +18,8 @@ jobs:
           node-version: 18.15
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn compile
-        name: Compile smart contracts
+      - run: yarn build
+        name: Build core package
         working-directory: ./packages/core
       - run: yarn lint
         name: Run lint
