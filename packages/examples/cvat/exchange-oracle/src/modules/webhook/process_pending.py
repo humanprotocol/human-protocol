@@ -4,8 +4,8 @@ from sqlalchemy import update
 from src.db import SessionLocal
 from src.config import CronConfig
 
-from src.modules.cvat.cvat_calls import job_creation_process
-from src.utils.escrow import check_escrow_status, get_manifest
+from src.modules.cvat.job_creation import job_creation_process
+from src.utils.escrow import get_escrow_manifest
 from src.utils.helpers import parse_manifest
 
 from .model import Webhook, WebhookStatuses
@@ -29,12 +29,10 @@ def process_incoming_webhooks() -> None:
                 session, CronConfig.process_incoming_webhooks_chunk_size
             )
             for webhook in webhooks:
-                check_escrow_status(webhook.escrow_address)
-                manifest = get_manifest(webhook.escrow_address)
-                (bucket_name, region, labels) = parse_manifest(manifest)
-                job_creation_process(
-                    webhook.escrow_address, labels, bucket_name, region
-                )
+                # TODO: Check escrow status and balance, retrieve manifest file.
+                manifest = get_escrow_manifest(webhook.escrow_address)
+                # TODO: Parse manifest file and start job creation process on CVAT
+                job_creation_process(webhook.escrow_address, manifest)
                 upd = (
                     update(Webhook)
                     .where(Webhook.id == webhook.id)
