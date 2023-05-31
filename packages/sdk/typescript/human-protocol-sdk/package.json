@@ -1,7 +1,7 @@
 {
   "name": "@human-protocol/sdk",
   "description": "Human Protocol SDK",
-  "version": "1.0.3",
+  "version": "1.0.9",
   "files": [
     "src",
     "dist"
@@ -38,8 +38,10 @@
   "dependencies": {
     "@human-protocol/core": "*",
     "aws-sdk": "^2.1255.0",
+    "axios": "^1.4.0",
     "crypto": "^1.0.1",
     "ethers": "^5.7.2",
+    "minio": "^7.0.32",
     "secp256k1": "^4.0.3",
     "vitest": "^0.30.1",
     "winston": "^3.8.2"
