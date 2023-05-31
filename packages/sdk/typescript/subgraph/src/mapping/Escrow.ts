@@ -124,6 +124,7 @@ export function handlePending(event: Pending): void {
   // Update escrow entity
   const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
   if (escrowEntity) {
+    escrowEntity.manifestUrl = event.params.manifest;
     escrowEntity.status = 'Pending';
     escrowEntity.save();
   }
