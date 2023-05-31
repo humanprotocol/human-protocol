@@ -16,6 +16,7 @@ def save_webhook(
     jl_webhook: JLWebhook,
     human_signature: Union[str, None] = Header(default=None),
 ):
+    # TODO: Add escrow checks
     with SessionLocal.begin() as session:
         webhook_id = create_webhook(session, jl_webhook, human_signature)
 
