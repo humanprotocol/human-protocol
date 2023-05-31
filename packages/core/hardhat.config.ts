@@ -69,7 +69,7 @@ const config: HardhatUserConfig = {
     },
     mainnet: {
       chainId: 1,
-      url: process.env.ETH_MAINNET_TESTNET_URL || '',
+      url: process.env.ETH_MAINNET_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       timeout: 2000000,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   HMToken__factory,
   HMToken,
@@ -6,7 +7,7 @@ import {
   EscrowFactory__factory,
   Escrow__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, ContractReceipt, Signer, ethers, providers } from 'ethers';
+import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
 import { Provider } from '@ethersproject/abstract-provider';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -24,7 +25,6 @@ import {
   ErrorListOfHandlersCannotBeEmpty,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
-  ErrorSigner,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
@@ -96,11 +96,15 @@ export default class EscrowClient {
         )
       ).wait();
 
-      if (!result.events || !result.events[0] || !result.events[0].args) {
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
+
+      if (!event) {
         throw ErrorLaunchedEventIsNotEmitted;
       }
 
-      return result.events[0].args[1];
+      return event.escrow;
     } catch (e: any) {
       return throwError(e);
     }

@@ -162,13 +162,7 @@ export const createEscrow: FastifyPluginAsync = async (server) => {
       );
       const data = escrow.addOraclesData(escrowData);
       const url = await s3.uploadManifest(data, escrowAddress);
-      const fortunesRequested = Number(escrowData.fortunesRequired);
-      await escrow.setupEscrow(
-        web3Client,
-        escrowAddress,
-        url,
-        fortunesRequested
-      );
+      await escrow.setupEscrow(web3Client, escrowAddress, url);
       return {
         escrowAddress,
         exchangeUrl: `${data.exchangeOracleUrl}?address=${escrowAddress}`,

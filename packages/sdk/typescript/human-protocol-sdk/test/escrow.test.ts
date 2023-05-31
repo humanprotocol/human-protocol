@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ethers, BigNumber } from 'ethers';
 import EscrowClient from '../src/escrow';
@@ -144,8 +145,9 @@ describe('EscrowClient', () => {
           wait: async () => ({
             events: [
               {
+                topics: [ethers.utils.id('Launched(address,address)')],
                 args: {
-                  1: expectedEscrowAddress,
+                  escrow: expectedEscrowAddress,
                 },
               },
             ],
@@ -690,7 +692,7 @@ describe('EscrowClient', () => {
 
     test('should throw an error if recipients length is equal to 0', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const recipients = [];
+      const recipients: string[] = [];
       const amounts = [BigNumber.from(100)];
       const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
@@ -711,7 +713,7 @@ describe('EscrowClient', () => {
     test('should throw an error if amounts length is equal to 0', async () => {
       const escrowAddress = ethers.constants.AddressZero;
       const recipients = [ethers.constants.AddressZero];
-      const amounts = [];
+      const amounts: number[] = [];
       const finalResultsUrl = VALID_URL;
       const finalResultsHash = FAKE_HASH;
 
@@ -1003,7 +1005,7 @@ describe('EscrowClient', () => {
 
     test('should throw an error if trusted handlers length is equal to 0', async () => {
       const escrowAddress = ethers.constants.AddressZero;
-      const trustedHandlers = [];
+      const trustedHandlers: string[] = [];
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
 

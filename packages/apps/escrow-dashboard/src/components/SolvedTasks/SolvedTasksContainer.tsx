@@ -11,10 +11,13 @@ const SOLVED_TASKS = [
   { date: '2022-07-31', value: 2181348 },
   { date: '2022-08-31', value: 2537442 },
   { date: '2022-09-30', value: 7014852 },
-  { date: '2022-10-31', value: 17189000 },
-  { date: '2022-11-30', value: 97000578 },
-  { date: '2022-12-31', value: 247392072 },
-  { date: '2023-01-31', value: 209000000 },
+  { date: '2022-10-31', value: 42615432 },
+  { date: '2022-11-30', value: 88708986 },
+  { date: '2022-12-31', value: 203793543 },
+  { date: '2023-01-31', value: 209093427 },
+  { date: '2023-02-28', value: 237012318 },
+  { date: '2023-03-31', value: 212012559 },
+  { date: '2023-04-30', value: 182462076 },
 ];
 
 export const SolvedTasksContainer: FC = () => {
@@ -45,7 +48,7 @@ export const SolvedTasksContainer: FC = () => {
         sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 }, pl: 14 }}
         lineHeight={1}
       >
-        {numeral(solvedTasksCount).format('0,0')}
+        {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
       </Typography>
     </Box>
   );

@@ -1,4 +1,3 @@
-from glob import glob
 import setuptools
 
 setuptools.setup(
@@ -16,10 +15,6 @@ setuptools.setup(
         "Programming Language :: Python",
     ],
     packages=setuptools.find_packages() + ["artifacts"],
-    install_requires=[
-        "boto3",
-        "cryptography",
-        "hmt-basemodels>=0.1.18",
-        "web3==5.24.0",
-    ],
+    setup_requires="setuptools-pipfile",
+    use_pipfile=True,
 )
