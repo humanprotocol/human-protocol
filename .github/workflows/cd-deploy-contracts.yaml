@@ -36,6 +36,8 @@ jobs:
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
         with:
           node-version: 18.15
@@ -132,6 +134,23 @@ jobs:
         if: always() && github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
+      
+        #Deploy subgraph
+      - run: graph auth --product hosted-service ${API_KEY}
+        name: Authenticate Graph CLI
+        env:
+          API_KEY: ${{ secrets.HP_GRAPH_API_KEY }}
+      - run: yarn generate
+        name: Generate Subgraph
+        working-directory: ./packages/sdk/typescript/subgraph
+        env:
+          NETWORK: ${{ steps.networks.outputs.subgraph }}
+      - run: graph deploy --product hosted-service humanprotocol/${NETWORK}
+        name: Deploy Subgraph
+        working-directory: ./packages/sdk/typescript/subgraph
+        env:
+          NETWORK: ${{ steps.networks.outputs.subgraph }}
+        #Commit changes to develop
       - name: Check for Changes
         if: always()
         id: check_changes
@@ -144,6 +163,21 @@ jobs:
             echo "No changes detected."
             echo "::set-output name=changes::false"
           fi
+
+      - name: stash
+        run: |
+          git status
+          git stash --include-untracked
+      - name: Checkout develop
+        if: always() && steps.check_changes.outputs.changes == 'true'
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+          token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
+      - name: pop
+        run: |
+          git stash pop
+          git status
       - name: Commit changes
         if: always() && steps.check_changes.outputs.changes == 'true'
         uses: EndBug/add-and-commit@v9
@@ -152,19 +186,6 @@ jobs:
           message: 'Update grafting and upgrade file from CD'
           default_author: github_actions
           tag_push: '--force'
-      - name: Checkout develop
-        if: always() && steps.check_changes.outputs.changes == 'true'
-        uses: actions/checkout@v3
-        with:
-          ref: develop
-      - name: Rebase develop
-        if: always() && steps.check_changes.outputs.changes == 'true'
-        run: |
-          git fetch
-          git rebase origin/main
-          git push --force
-      - name: Trigger Subgraph Workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Subgraph deployment
-          inputs: '{ "subgraph-name": "${{ steps.networks.outputs.subgraph }}" }'
+          github_token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
+
+
