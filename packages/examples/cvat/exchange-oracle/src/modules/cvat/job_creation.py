@@ -3,6 +3,7 @@ from typing import Dict, List
 import requests
 
 from src.config import Config
+from utils.helpers import parse_manifest
 from cvat_sdk.api_client import Configuration, ApiClient, models, exceptions
 
 configuration = Configuration(
@@ -12,11 +13,10 @@ configuration = Configuration(
 )
 
 
-def job_creation_process(
-    escrow_address: str, labels: list, bucket_name: str, region: str
-):
+def job_creation_process(escrow_address: str, manifest: dict):
+    (bucket_name, region, labels) = parse_manifest(manifest)
     # Create a cloudstorage on CVAT for not storing datasets on CVAT instance
-    cloudstorage = 35  # = create_cloudstorage(bucket_name, region)
+    cloudstorage = create_cloudstorage(bucket_name, region)
     # Creating a project on CVAT. Necessary because otherwise webhooks aren't available
     project = create_project(escrow_address, labels)
     # Setup webhooks for a project (on job:update)
