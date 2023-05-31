@@ -1,13 +1,13 @@
 def parse_manifest(manifest: dict):
-    bucket_name = "chimpanzee-gorilla-annotation-4"
-    region = "eu-west-1"
+    bucket_name = "example_bucket_name"
+    region = "example_region"
     labels = [
         {
-            "name": "chimpanzee",
+            "name": "label_1",
             "type": "tag",
         },
         {
-            "name": "gorilla",
+            "name": "label_2",
             "type": "tag",
         },
     ]
