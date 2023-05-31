@@ -13,7 +13,6 @@ export enum ChainId {
 }
 
 export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
-  ChainId.MAINNET,
   ChainId.GOERLI,
   ChainId.BSC_MAINNET,
   ChainId.BSC_TESTNET,
