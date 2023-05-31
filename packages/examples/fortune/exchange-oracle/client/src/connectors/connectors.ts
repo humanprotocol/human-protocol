@@ -13,7 +13,7 @@ import {
   bscTestnet,
   skaleHumanProtocol,
   moonbeam,
-  moonbaseAlpha
+  moonbaseAlpha,
 } from 'wagmi/chains';
 import { fortune } from './chains';
 
@@ -37,7 +37,7 @@ const chains = [
   bscTestnet,
   fortune,
   moonbeam,
-  moonbaseAlpha
+  moonbaseAlpha,
 ];
 
 const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
