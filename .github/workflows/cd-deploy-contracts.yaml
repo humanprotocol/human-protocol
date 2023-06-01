@@ -112,7 +112,7 @@ jobs:
               ;;
           esac
       - name: Upgrade Proxies
-        if: github.event.inputs.escrowFactory == 'true'
+        if: github.event.inputs.escrowFactory == 'true' || github.event.inputs.staking == 'true' || github.event.inputs.rewardPool== 'true'
         run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
         working-directory: ./packages/core
         env:
