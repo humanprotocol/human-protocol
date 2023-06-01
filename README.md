@@ -76,3 +76,8 @@ If you are a developer and would like to build on top of HUMAN please see [examp
 #### Usage and Installation
 
 Navigate to the folder that you would like to install and follow the instructions in the README file
+
+## LEGAL NOTICE
+
+The Protocol is an open-source, blockchain-based network that organizes, evaluates, and compensates human labor (the “Protocol”).  Your use of the Protocol is entirely at your own risk. The Protocol is available on an “as is” basis without warranties of any kind, either express or implied, including, but not limited to, warranties of merchantability, title, fitness for a particular purpose and non-infringement. You assume all risks associated with using the Protocol, and digital assets   and   decentralized   systems   generally,   including   but   not
+limited to, that: (a) digital assets are highly volatile; (b) using digital assets is inherently risky due to both features of such assets and the potential unauthorized acts of third parties; (c) you may not have ready access to digital assets; and (d) you may lose some or all of your tokens or other digital assets. You agree that you will have no recourse against anyone else for any losses due to the use of the Protocol. For example, these losses may arise from or relate to: (i) incorrect   information;   (ii)   software   or   network   failures;  (iii) corrupted digital wallet files; (iv) unauthorized access; (v) errors, mistakes, or inaccuracies; or (vi) third-party activities. The Protocol does not collect any personal data, and your interaction with the Protocol will solely be through your public digital wallet address. Any personal or other data that you may make available in connection with the Protocol may not be private or secure. 
