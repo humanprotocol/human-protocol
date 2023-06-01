@@ -6,7 +6,7 @@
       "port": 5432,
       "username": "hmt-launcher",
       "password": "qwerty",
-      "database": "hmt-launcher-db",
+      "database": "hmt-reputation-db",
       "entities": ["dist/**/*.entity{ .ts,.js}"],
       "synchronize": false,
       "migrations": ["dist/database/migrations/*{.ts,.js}"],
