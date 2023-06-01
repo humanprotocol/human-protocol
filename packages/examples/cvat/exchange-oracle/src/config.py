@@ -25,8 +25,6 @@ class Postgres:
 class PolygonMainnetConfig:
     network_id = "polygon_mainnet"
     rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
-    hmt_addr = os.environ.get("POLYGON_MAINNET_HMT_ADDR")
-    factory_addr = os.environ.get("POLYGON_MAINNET_FACTORY_ADDR")
     private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
@@ -34,8 +32,6 @@ class PolygonMainnetConfig:
 class PolygonMumbaiConfig:
     network_id = "polygon_mumbai"
     rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
-    hmt_addr = os.environ.get("POLYGON_MUMBAI_HMT_ADDR")
-    factory_addr = os.environ.get("POLYGON_MUMBAI_FACTORY_ADDR")
     private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MUMBAI_ADDR")
 
