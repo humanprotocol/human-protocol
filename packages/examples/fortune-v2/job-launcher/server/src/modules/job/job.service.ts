@@ -7,7 +7,7 @@ import { PaymentService } from "../payment/payment.service";
 import { JobEntity } from "./job.entity";
 import { JobRepository } from "./job.repository";
 import { ErrorBucket, ErrorEscrow, ErrorJob } from "../../common/constants/errors";
-import { EscrowClient, File, InitClient, NETWORKS, StorageClient, StorageCredentials, StorageParams, UploadFile } from "@human-protocol/sdk";
+import { EscrowClient, InitClient, NETWORKS, StorageClient, StorageCredentials, StorageParams, UploadFile } from "@human-protocol/sdk";
 import { JobCvatCreateDto, JobFortuneCreateDto, SaveManifestDto, SendWebhookDto } from "./job.dto";
 import { ManifestDto } from "../payment/payment.dto";
 import { EthersSigner, InjectSignerProvider } from "nestjs-ethers";
@@ -164,7 +164,7 @@ export class JobService {
         recordingOracleFee: BigNumber.from(recordingOracleStake),
         reputationOracleFee: BigNumber.from(reputationOracleStake),
         manifestUrl: jobEntity.manifestUrl,
-        manifestHash: jobEntity.manifestHash,
+        hash: jobEntity.manifestHash,
       }
 
       const escrowAddress = await escrowClient.createAndSetupEscrow(
@@ -172,6 +172,7 @@ export class JobService {
         [],
         escrowConfig
       )
+
 
       if (!escrowAddress) {
         this.logger.log(ErrorEscrow.NotCreated, JobService.name);
@@ -201,7 +202,7 @@ export class JobService {
     }
   }
 
-  public async saveManifest(encryptedManifest: File, bucket: string): Promise<SaveManifestDto> {
+  public async saveManifest(encryptedManifest: any, bucket: string): Promise<SaveManifestDto> {
     try {
       const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles([encryptedManifest], bucket);
 
