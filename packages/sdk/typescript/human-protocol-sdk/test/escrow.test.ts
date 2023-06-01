@@ -237,7 +237,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
@@ -339,7 +339,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -364,7 +364,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -396,7 +396,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -430,7 +430,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
