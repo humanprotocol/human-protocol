@@ -15,3 +15,4 @@ class WebhookTypes(str, Enum):
 class WebhookStatuses(str, Enum):
     pending = "pending"
     completed = "completed"
+    failed = "failed"
