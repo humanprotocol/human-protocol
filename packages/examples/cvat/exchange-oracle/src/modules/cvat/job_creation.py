@@ -3,7 +3,7 @@ from typing import Dict, List
 import requests
 
 from src.config import Config
-from utils.helpers import parse_manifest
+from src.utils.helpers import parse_manifest
 from cvat_sdk.api_client import Configuration, ApiClient, models, exceptions
 
 configuration = Configuration(
