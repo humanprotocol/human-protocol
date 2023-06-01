@@ -164,7 +164,7 @@ export class JobService {
         recordingOracleFee: BigNumber.from(recordingOracleStake),
         reputationOracleFee: BigNumber.from(reputationOracleStake),
         manifestUrl: jobEntity.manifestUrl,
-        hash: jobEntity.manifestHash,
+        manifestHash: jobEntity.manifestHash,
       }
 
       const escrowAddress = await escrowClient.createAndSetupEscrow(
