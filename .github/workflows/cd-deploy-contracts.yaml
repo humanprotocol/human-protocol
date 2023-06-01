@@ -26,7 +26,7 @@ jobs:
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
       ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
       ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
+      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
       ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
       ETH_MAINNET_TESTNET_URL: ${{ secrets.ETH_MAINNET_TESTNET_URL }}
