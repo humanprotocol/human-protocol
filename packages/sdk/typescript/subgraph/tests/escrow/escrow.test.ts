@@ -105,6 +105,12 @@ describe('Escrow', () => {
       'status',
       'Pending'
     );
+    assert.fieldEquals(
+      'LaunchedEscrow',
+      escrowAddress.toHex(),
+      'manifestUrl',
+      newPending1.params.manifest.toString()
+    );
   });
 
   test('Should properly handle BulkTransfer events', () => {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   HMToken__factory,
   HMToken,
@@ -95,12 +96,16 @@ export class EscrowClient {
         )
       ).wait();
 
-      if (!result.events || !result.events[0] || !result.events[0].args) {
+      const event = result.events?.find(({ topics }) =>
+        topics.includes(ethers.utils.id('Launched(address,address)'))
+      )?.args;
+
+      if (!event) {
         throw ErrorLaunchedEventIsNotEmitted;
       }
 
-      return result.events[0].args[1];
-    } catch (e) {
+      return event.escrow;
+    } catch (e: any) {
       return throwError(e);
     }
   }

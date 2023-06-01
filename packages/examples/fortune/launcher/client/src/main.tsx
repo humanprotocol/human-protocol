@@ -15,6 +15,8 @@ import {
   bsc,
   bscTestnet,
   skaleHumanProtocol,
+  moonbeam,
+  moonbaseAlpha,
 } from 'wagmi/chains';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
@@ -58,6 +60,8 @@ const { chains, provider, webSocketProvider } = configureChains(
     bsc,
     bscTestnet,
     fortune,
+    moonbeam,
+    moonbaseAlpha,
   ],
   [publicProvider()]
 );
