@@ -16,7 +16,7 @@ export class addReputationWorkerTable1678094042234 implements MigrationInterface
           type: "int",
         },
         {
-          name: "public_key",
+          name: "address",
           type: "varchar",
         },
         {
