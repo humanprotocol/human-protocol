@@ -291,7 +291,7 @@ class Job:
         else:
             raise ValueError("Job instantiation wrong, double-check arguments.")
 
-    def launch(self, pub_key: bytes) -> bool:
+    def launch(self, pub_key: bytes, **kwargs) -> bool:
         """Launches an escrow contract to the network, uploads the manifest
         to S3 with the public key of the Reputation Oracle and stores
         the S3 url to the escrow contract.
@@ -343,7 +343,7 @@ class Job:
         # Use factory to deploy a new escrow contract.
         trusted_handlers = [addr for addr, priv_key in self.multi_credentials]
 
-        txn = self._create_escrow(trusted_handlers)
+        txn = self._create_escrow(trusted_handlers, **kwargs)
 
         if not txn["txn_succeeded"]:
             raise Exception("Unable to create escrow")
@@ -359,7 +359,7 @@ class Job:
         self.manifest_hash = hash_
         return self.status() == Status.Launched and self.balance() == 0
 
-    def setup(self, sender: str = None) -> bool:
+    def setup(self, sender: str = None, **kwargs) -> bool:
         """Sets the escrow contract to be ready to receive answers from the Recording Oracle.
         The contract needs to be deployed and funded first.
 
@@ -419,6 +419,8 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
+
         if sender:
             txn_func = hmtoken_contract.functions.transferFrom
             func_args = [sender, self.job_contract.address, hmt_amount]
@@ -442,7 +444,7 @@ class Job:
                 )
             except Exception as e:
                 LOG.debug(
-                    f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                    f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
                 )
 
         if not hmt_transferred:
@@ -492,7 +494,7 @@ class Job:
 
         return str(self.status()) == str(Status.Pending) and tx_balance == hmt_amount
 
-    def add_trusted_handlers(self, handlers: List[str]) -> bool:
+    def add_trusted_handlers(self, handlers: List[str], **kwargs) -> bool:
         """Add trusted handlers that can freely transact with the contract and
          perform aborts and cancels for example.
 
@@ -534,6 +536,7 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
         func_args = [handlers]
 
         try:
@@ -561,6 +564,7 @@ class Job:
         pub_key: bytes,
         encrypt_final_results: bool = True,
         store_pub_final_results: bool = False,
+        **kwargs,
     ) -> bool:
         """Performs a payout to multiple ethereum addresses. When the payout happens,
         final results are uploaded to IPFS and contract's state is updated to Partial or Paid
@@ -634,6 +638,7 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
 
         hash_, url = upload(
             msg=results,
@@ -664,18 +669,18 @@ class Job:
             bulk_paid = self._check_transfer_event(tx_receipt)
 
             LOG.debug(
-                f"Bulk paid: {bulk_paid} with main credentials: {self.gas_payer} and transaction receipt: {tx_receipt}."
+                f"Bulk paid: {bulk_paid} with main credentials: {txn_info['gas_payer']} and transaction receipt: {tx_receipt}."
             )
         except Exception as e:
             LOG.warning(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         if bulk_paid:
             return bulk_paid
 
         LOG.warning(
-            f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv}. Using secondary ones..."
+            f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']}. Using secondary ones..."
         )
 
         raffle_txn_res = self._raffle_txn(
@@ -691,7 +696,7 @@ class Job:
 
         return bulk_paid
 
-    def abort(self) -> bool:
+    def abort(self, **kwargs) -> bool:
         """Kills the contract and returns the HMT back to the gas payer.
         The contract cannot be aborted if the contract is in Partial, Paid or Complete state.
 
@@ -773,13 +778,15 @@ class Job:
             "hmt_server_addr": self.hmt_server_addr,
         }
 
+        txn_info.update(kwargs)
+
         try:
             handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             # After abort the contract should be destroyed
             return w3.eth.getCode(self.job_contract.address) == b""
         except Exception as e:
             LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         raffle_txn_res = self._raffle_txn(
@@ -792,7 +799,7 @@ class Job:
 
         return w3.eth.getCode(self.job_contract.address) == b""
 
-    def cancel(self) -> bool:
+    def cancel(self, **kwargs) -> bool:
         """Returns the HMT back to the gas payer. It's the softer version of abort as the contract is not destroyed.
 
         >>> credentials = {
@@ -854,13 +861,14 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             return self.status() == Status.Cancelled
         except Exception as e:
             LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         raffle_txn_res = self._raffle_txn(
@@ -873,7 +881,9 @@ class Job:
 
         return self.status() == Status.Cancelled
 
-    def store_intermediate_results(self, results: Dict, pub_key: bytes) -> bool:
+    def store_intermediate_results(
+        self, results: Dict, pub_key: bytes, **kwargs
+    ) -> bool:
         """Recording Oracle stores intermediate results with Reputation Oracle's public key to S3
         and updates the contract's state.
 
@@ -938,6 +948,7 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
         (hash_, url) = upload(results, pub_key)
 
         self.intermediate_manifest_hash = hash_
@@ -950,7 +961,7 @@ class Job:
             return True
         except Exception as e:
             LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         raffle_txn_res = self._raffle_txn(
@@ -965,9 +976,7 @@ class Job:
 
         return results_stored
 
-    def complete(
-        self, blocking: bool = False, retries: int = 3, delay: int = 5, backoff: int = 2
-    ) -> bool:
+    def complete(self, **kwargs) -> bool:
         """Completes the Job if it has been paid.
 
         >>> from test.human_protocol_sdk.utils import manifest
@@ -1014,13 +1023,14 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
 
         try:
             handle_transaction_with_retry(txn_func, self.retry, *[], **txn_info)
             return self.status() == Status.Complete
         except Exception as e:
             LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         raffle_txn_res = self._raffle_txn(
@@ -1439,7 +1449,7 @@ class Job:
             {"from": self.gas_payer, "gas": Wei(self.gas)}
         )
 
-    def _create_escrow(self, trusted_handlers=[]) -> RaffleTxn:
+    def _create_escrow(self, trusted_handlers=[], **kwargs) -> RaffleTxn:
         """Launches a new escrow contract to the ethereum network.
 
         >>> from test.human_protocol_sdk.utils import manifest
@@ -1481,6 +1491,7 @@ class Job:
             "gas": self.gas,
             "hmt_server_addr": self.hmt_server_addr,
         }
+        txn_info.update(kwargs)
         func_args = [trusted_handlers]
 
         try:
@@ -1490,7 +1501,7 @@ class Job:
             return {"txn_succeeded": True, "tx_receipt": tx_receipt}
         except Exception as e:
             LOG.info(
-                f"{txn_event} failed with main credentials: {self.gas_payer}, {self.gas_payer_priv} due to {e}. Using secondary ones..."
+                f"{txn_event} failed with main credentials: {txn_info['gas_payer']}, {txn_info['gas_payer_priv']} due to {e}. Using secondary ones..."
             )
 
         raffle_txn_res = self._raffle_txn(
