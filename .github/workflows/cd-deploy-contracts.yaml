@@ -72,9 +72,9 @@ jobs:
               echo "subgraph=mumbai-v1" >> $GITHUB_OUTPUT
             ;;
             "bsc")
-              echo "escrow_factory=0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a" >> $GITHUB_OUTPUT
-              echo "staking=0x05398211bA2046E296fBc9a9D3EB49e3F15C3123" >> $GITHUB_OUTPUT
-              echo "reward_pool=0x4A5963Dd6792692e9147EdC7659936b96251917a" >> $GITHUB_OUTPUT
+              echo "escrow_factory=0x92FD968AcBd521c232f5fB8c33b342923cC72714" >> $GITHUB_OUTPUT
+              echo "staking=0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C" >> $GITHUB_OUTPUT
+              echo "reward_pool=0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e" >> $GITHUB_OUTPUT
               echo "private_key=MAINNET_PRIVATE_KEY" >> $GITHUB_OUTPUT
               echo "subgraph=bsc-v1" >> $GITHUB_OUTPUT
             ;;

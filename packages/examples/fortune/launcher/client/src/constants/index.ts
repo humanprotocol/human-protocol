@@ -67,8 +67,8 @@ export const ESCROW_NETWORKS: {
   //   scanUrl: 'https://bscscan.com',
   //   rpcUrl: 'https://bsc-dataseed1.binance.org/',
   //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
-  //   factoryAddress: '0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a',
-  //   hmtAddress: '0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7',
+  //   factoryAddress: '0x92FD968AcBd521c232f5fB8c33b342923cC72714',
+  //   hmtAddress: '0x711Fd6ab6d65A98904522d4e3586F492B989c527',
   // },
   [ChainId.BSC_TESTNET]: {
     chainId: ChainId.BSC_TESTNET,
