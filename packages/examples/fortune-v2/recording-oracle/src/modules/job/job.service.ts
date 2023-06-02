@@ -14,7 +14,9 @@ export class JobService {
   async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<any> {
     // Initialize Escrow Client
     const network = NETWORKS[jobSolution.chainId];
-    const signer = new ethers.Wallet(this.configService.get<string>("ETHEREUM_PRIVATE_KEY", ""));
+
+    const provider = new ethers.providers.JsonRpcProvider(this.configService.get<string>("ethereum.jsonRpcUrl", ""));
+    const signer = new ethers.Wallet(this.configService.get<string>("ethereum.privateKey", ""), provider);
 
     if (!network) {
       throw new Error(`Unsupported chainId: ${jobSolution.chainId}`);
@@ -27,6 +29,7 @@ export class JobService {
 
     // Validate if recording oracle address is valid
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
+
     if (ethers.utils.getAddress(recordingOracleAddress) !== (await signer.getAddress())) {
       throw new Error("Escrow Recording Oracle address mismatches the current one");
     }
@@ -51,33 +54,36 @@ export class JobService {
     // Initialize Storage Client
     const storageClient = new StorageClient(
       {
-        accessKey: this.configService.get<string>("STORAGE_ACCESS_KEY", ""),
-        secretKey: this.configService.get<string>("STORAGE_SECRET_KEY", ""),
+        accessKey: this.configService.get<string>("storage.accessKey", ""),
+        secretKey: this.configService.get<string>("storage.secretKey", ""),
       },
       {
-        endPoint: this.configService.get<string>("STORAGE_ENDPOINT", ""),
-        port: this.configService.get<number | undefined>("STORAGE_PORT"),
-        useSSL: this.configService.get<boolean>("STORAGE_USE_SSL", false),
+        endPoint: this.configService.get<string>("storage.endPoint", ""),
+        port: +this.configService.get<number>("storage.port", 9000),
+        useSSL: this.configService.get<boolean>("storage.useSSL", false),
       },
     );
-    const bucket = this.configService.get<string>("STORAGE_BUCKET", "");
+    const bucket = this.configService.get<string>("storage.bucket", "");
 
     // Download existing solution if any
     const existingJobSolutionsURL = await escrowClient.getResultsUrl(jobSolution.escrowAddress);
+
     const [existingJobSolutions] = await storageClient
       .downloadFiles([existingJobSolutionsURL], bucket)
       .catch(() => [[]]);
 
     // Validate if the solution is unique
     if (
-      (existingJobSolutions as any[]).find(({ solution }: { solution: string }) => solution === jobSolution.solution)
+      (existingJobSolutions.content as any[]).find(
+        ({ solution }: { solution: string }) => solution === jobSolution.solution,
+      )
     ) {
       throw new Error("Solution already exists");
     }
 
     // Save new solution to S3
     const newJobSolutions = [
-      ...(existingJobSolutions as any[]),
+      ...(existingJobSolutions.content as any[]),
       {
         exchangeAddress: jobSolution.exchangeAddress,
         workerAddress: jobSolution.workerAddress,

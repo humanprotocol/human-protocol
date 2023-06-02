@@ -8,39 +8,44 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import helmet from "helmet";
 
+import { GlobalExceptionsFilter } from "@/common/filter";
+
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>("FE_URL", "http://localhost:3001");
+  const feUrl = configService.get<string>("server.feUrl", "");
 
+  // Modules
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  // Filters
+  app.useGlobalFilters(new GlobalExceptionsFilter());
+
+  // Middlewares
   app.enableCors({
     origin:
       process.env.NODE_ENV === "development" || process.env.NODE_ENV === "staging"
-        ? [`http://localhost:3001`, `http://127.0.0.1:3001`, `http://0.0.0.0:3001`, baseUrl]
-        : [baseUrl],
+        ? [`http://localhost:3001`, `http://127.0.0.1:3001`, `http://0.0.0.0:3001`, feUrl]
+        : [feUrl],
     credentials: true,
     exposedHeaders: ["Content-Disposition"],
   });
-
-  useContainer(app.select(AppModule), { fallbackOnErrors: true });
-
   app.use(cookieParser());
-
-  const sessionSecret = configService.get<string>("SESSION_SECRET", "");
-
   app.use(
     session({
-      secret: sessionSecret,
+      secret: configService.get<string>("server.sessionSecret", ""),
       resave: false,
       saveUninitialized: false,
     }),
   );
   app.use(json({ limit: "5mb" }));
   app.use(urlencoded({ limit: "5mb", extended: true }));
+  app.use(helmet());
 
+  // Swagger
   const config = new DocumentBuilder()
     .addBearerAuth()
     .setTitle("Fortune Recording Oracle API")
@@ -50,10 +55,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("swagger", app, document);
 
-  const host = configService.get<string>("HOST", "localhost");
-  const port = configService.get<string>("PORT", "5001");
-
-  app.use(helmet());
+  const host = configService.get<string>("server.host", "localhost");
+  const port = configService.get<number>("server.port", 5001);
 
   await app.listen(port, host, async () => {
     // eslint-disable-next-line no-console

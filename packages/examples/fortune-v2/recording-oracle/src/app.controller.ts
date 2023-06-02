@@ -4,10 +4,10 @@ import { ApiTags } from "@nestjs/swagger";
 import { Public } from "@/common/decorators";
 
 @Controller("/")
-@ApiTags("Main")
 export class AppController {
   @Public()
   @Get("/")
+  @ApiTags("Health Check")
   public health(): string {
     return "OK";
   }
