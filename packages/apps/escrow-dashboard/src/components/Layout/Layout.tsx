@@ -7,7 +7,7 @@ import { Header } from '../Header';
 export const Layout: FC<PropsWithChildren<{}>> = ({ children }) => (
   <Box
     sx={{
-      marginTop: '104px',
+      marginTop: '115px',
     }}
   >
     <Header />

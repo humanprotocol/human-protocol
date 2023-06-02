@@ -65,6 +65,7 @@ export const EscrowContainer: FC = () => {
       <ViewTitle title="Network" iconUrl={networkSvg} />
       <Tabs
         sx={{
+          borderBottom: '1px solid #858EC6',
           my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
         }}
         value={chainId}

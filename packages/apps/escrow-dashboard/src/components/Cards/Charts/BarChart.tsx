@@ -45,7 +45,21 @@ export const BarChart: FC<BarChartProps> = ({ title, totalValue, series }) => {
             data={series}
             margin={{ top: 30, left: 4, right: 4 }}
           >
-            <XAxis dataKey="date" axisLine={false} tickLine={false} />
+            <XAxis
+              dataKey="date"
+              type="category"
+              axisLine={false}
+              tickLine={false}
+              interval="preserveStartEnd"
+              ticks={[
+                series[0].date,
+                series[series.length / 2 - 1].date,
+                series[series.length - 1].date,
+              ]}
+              tick={{ fill: '#320A8D', fontSize: '12px', fontFamily: 'Inter' }}
+              tickMargin={12}
+              padding={{ left: 10, right: 10 }}
+            />
             <Tooltip />
             <Bar dataKey="value" fill={theme.palette.primary.main} />
           </RechartsBarChart>
