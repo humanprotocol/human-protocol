@@ -1,13 +1,12 @@
 import logging
 from sqlalchemy import update
-from web3 import Web3
 
 from src.db import SessionLocal
 from src.config import CronConfig
 
 from src.modules.cvat.job_creation import job_creation_process
-from src.utils.escrow import get_escrow_manifest
-from src.utils.helpers import get_web3
+from src.modules.chain.escrow import get_escrow_manifest
+from src.validators.escrow import validate_escrow
 
 from .model import Webhook, WebhookStatuses
 from .service import get_pending_webhooks
@@ -31,25 +30,29 @@ def process_incoming_webhooks() -> None:
             )
             for webhook in webhooks:
                 try:
+                    validate_escrow(webhook.networ_id, webhook.escrow_address)
                     manifest = get_escrow_manifest(
-                        get_web3(webhook.network_id),
-                        Web3.toChecksumAddress(webhook.escrow_address),
+                        webhook.network_id,
+                        webhook.escrow_address,
                     )
+                    # TODO: Parse manifest file and start job creation process on CVAT
+                    job_creation_process(webhook.escrow_address, manifest)
+                    upd = (
+                        update(Webhook)
+                        .where(Webhook.id == webhook.id)
+                        .values(status=WebhookStatuses.completed)
+                    )
+                    session.execute(upd)
                 except Exception as e:
+                    logger.error(
+                        f"Webhook: {webhook.id} failed during execution. Error {e}"
+                    )
                     upd = (
                         update(Webhook)
                         .where(Webhook.id == webhook.id)
                         .values(status=WebhookStatuses.failed)
                     )
                     session.execute(upd)
-                # TODO: Parse manifest file and start job creation process on CVAT
-                job_creation_process(webhook.escrow_address, manifest)
-                upd = (
-                    update(Webhook)
-                    .where(Webhook.id == webhook.id)
-                    .values(status=WebhookStatuses.completed)
-                )
-                session.execute(upd)
 
         logger.info(f"{LOG_MODULE} Finishing cron job")
         return None

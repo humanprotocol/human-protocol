@@ -1,8 +1,8 @@
-"""task_job_tables
+"""initial_migration
 
-Revision ID: 221ef85c045e
-Revises: b819f6138bca
-Create Date: 2023-03-16 13:35:26.592067
+Revision ID: f0087a598807
+Revises: 
+Create Date: 2023-06-01 12:05:57.935749
 
 """
 from alembic import op
@@ -11,8 +11,8 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "221ef85c045e"
-down_revision = "b819f6138bca"
+revision = "f0087a598807"
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -35,6 +35,43 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_tasks_cvat_id"), "tasks", ["cvat_id"], unique=True)
     op.create_index(op.f("ix_tasks_id"), "tasks", ["id"], unique=False)
+    op.create_table(
+        "webhooks",
+        sa.Column("id", sa.String(), nullable=False),
+        sa.Column("signature", sa.String(), nullable=False),
+        sa.Column("escrow_address", sa.String(length=42), nullable=False),
+        sa.Column("network_id", sa.String(), nullable=False),
+        sa.Column(
+            "type",
+            sa.Enum("jl_webhook", "recoracle_webhook", name="webhooktypes"),
+            nullable=True,
+        ),
+        sa.Column(
+            "status",
+            sa.Enum("pending", "completed", "failed", name="webhookstatuses"),
+            server_default="pending",
+            nullable=True,
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "wait_until",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("escrow_address"),
+    )
+    op.create_index(op.f("ix_webhooks_id"), "webhooks", ["id"], unique=False)
+    op.create_index(
+        op.f("ix_webhooks_signature"), "webhooks", ["signature"], unique=True
+    )
     op.create_table(
         "jobs",
         sa.Column("id", sa.String(), nullable=False),
@@ -67,6 +104,9 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_jobs_cvat_id"), table_name="jobs")
     op.drop_index(op.f("ix_jobs_assignee"), table_name="jobs")
     op.drop_table("jobs")
+    op.drop_index(op.f("ix_webhooks_signature"), table_name="webhooks")
+    op.drop_index(op.f("ix_webhooks_id"), table_name="webhooks")
+    op.drop_table("webhooks")
     op.drop_index(op.f("ix_tasks_id"), table_name="tasks")
     op.drop_index(op.f("ix_tasks_cvat_id"), table_name="tasks")
     op.drop_table("tasks")

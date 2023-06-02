@@ -3,8 +3,9 @@ from sqlalchemy import Column, String, DateTime, Enum
 from sqlalchemy.sql import func
 
 
-from .constants import Networks, WebhookTypes, WebhookStatuses
+from .constants import WebhookTypes, WebhookStatuses
 from src.db import Base
+from src.constants import Networks
 
 
 class Webhook(Base):

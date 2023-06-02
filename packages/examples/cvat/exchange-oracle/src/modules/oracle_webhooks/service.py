@@ -4,9 +4,9 @@ import uuid
 from sqlalchemy import update
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
-from src.modules.webhook.constants import WebhookStatuses, WebhookTypes
-from src.modules.webhook.model import Webhook
-from .api_schema import JLWebhook
+from src.modules.oracle_webhooks.constants import WebhookStatuses, WebhookTypes
+from src.modules.oracle_webhooks.model import Webhook
+from src.modules.api_schema import JLWebhook
 
 
 def create_webhook(session: Session, jl_webhook: JLWebhook, signature: str):
