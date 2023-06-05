@@ -4,7 +4,7 @@ from typing import Union
 from .api_schema import JLWebhook, JLWebhookResponse, CvatWebhook
 from src.db import SessionLocal
 
-from src.validators.escrow import validate_escrow
+from src.modules.chain.escrow import validate_escrow
 from src.validators.signature import validate_signature
 
 from .cvat.constants import EventTypes
@@ -23,7 +23,7 @@ def jl_webhook(
     human_signature: Union[str, None] = Header(default=None),
 ):
     validate_signature(human_signature)
-    validate_escrow(jl_webhook.network, jl_webhook.escrow_address)
+    validate_escrow(jl_webhook.network_id, jl_webhook.escrow_address)
 
     with SessionLocal.begin() as session:
         webhook_id = create_webhook(session, jl_webhook, human_signature)

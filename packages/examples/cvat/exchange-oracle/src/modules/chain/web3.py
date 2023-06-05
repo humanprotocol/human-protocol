@@ -5,7 +5,10 @@ from src.config import Config
 
 
 def get_web3(network_id: Networks):
-    if network_id == Config.polygon_mainnet.network_id:
-        return Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
-    else:
-        return Web3(HTTPProvider(Config.polygon_mumbai.rpc_api))
+    match network_id:
+        case Config.polygon_mainnet.network_id:
+            return Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
+        case Config.polygon_mumbai.network_id:
+            return Web3(HTTPProvider(Config.polygon_mumbai.rpc_api))
+        case _:
+            raise ValueError(f"{network_id} is not in available list of networks.")

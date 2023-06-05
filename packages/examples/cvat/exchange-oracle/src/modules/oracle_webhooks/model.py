@@ -1,5 +1,5 @@
 # pylint: disable=too-few-public-methods
-from sqlalchemy import Column, String, DateTime, Enum
+from sqlalchemy import Column, String, DateTime, Enum, Integer
 from sqlalchemy.sql import func
 
 
@@ -13,9 +13,11 @@ class Webhook(Base):
     id = Column(String, primary_key=True, index=True)
     signature = Column(String, unique=True, index=True, nullable=False)
     escrow_address = Column(String(42), unique=True, nullable=False)
-    network_id = Column(String, Enum(Networks), nullable=False)
-    type = Column(Enum(WebhookTypes))
-    status = Column(Enum(WebhookStatuses), server_default=WebhookStatuses.pending.value)
+    network_id = Column(Integer, Enum(Networks), nullable=False)
+    type = Column(String, Enum(WebhookTypes), nullable=False)
+    status = Column(
+        String, Enum(WebhookStatuses), server_default=WebhookStatuses.pending.value
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     wait_until = Column(DateTime(timezone=True), server_default=func.now())

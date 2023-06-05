@@ -5,8 +5,7 @@ from src.db import SessionLocal
 from src.config import CronConfig
 
 from src.modules.cvat.job_creation import job_creation_process
-from src.modules.chain.escrow import get_escrow_manifest
-from src.validators.escrow import validate_escrow
+from src.modules.chain.escrow import get_escrow_manifest, validate_escrow
 
 from .model import Webhook, WebhookStatuses
 from .service import get_pending_webhooks

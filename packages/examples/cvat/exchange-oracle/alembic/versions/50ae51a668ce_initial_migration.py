@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: f0087a598807
+Revision ID: 50ae51a668ce
 Revises: 
-Create Date: 2023-06-01 12:05:57.935749
+Create Date: 2023-06-05 11:52:07.652449
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "f0087a598807"
+revision = "50ae51a668ce"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,18 +40,9 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("signature", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
-        sa.Column("network_id", sa.String(), nullable=False),
-        sa.Column(
-            "type",
-            sa.Enum("jl_webhook", "recoracle_webhook", name="webhooktypes"),
-            nullable=True,
-        ),
-        sa.Column(
-            "status",
-            sa.Enum("pending", "completed", "failed", name="webhookstatuses"),
-            server_default="pending",
-            nullable=True,
-        ),
+        sa.Column("network_id", sa.Integer(), nullable=False),
+        sa.Column("type", sa.String(), nullable=False),
+        sa.Column("status", sa.String(), server_default="pending", nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

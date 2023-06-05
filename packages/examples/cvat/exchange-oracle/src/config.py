@@ -23,14 +23,14 @@ class Postgres:
 
 
 class PolygonMainnetConfig:
-    network_id = "polygon_mainnet"
+    network_id = 137
     rpc_api = os.environ.get("POLYGON_MAINNET_RPC_API_URL")
     private_key = os.environ.get("POLYGON_MAINNET_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MAINNET_ADDR")
 
 
 class PolygonMumbaiConfig:
-    network_id = "polygon_mumbai"
+    network_id = 80001
     rpc_api = os.environ.get("POLYGON_MUMBAI_RPC_API_URL")
     private_key = os.environ.get("POLYGON_MUMBAI_PRIVATE_KEY")
     addr = os.environ.get("POLYGON_MUMBAI_ADDR")

@@ -20,9 +20,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        network = Networks.polygon_mainnet
+        network_id = Networks.polygon_mainnet
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, network=network)
+        jl_webhook = JLWebhook(escrow_address=escrow_address, network_id=network_id)
 
         webhook_id = create_webhook(
             self.session, jl_webhook=jl_webhook, signature=signature
@@ -31,26 +31,26 @@ class ServiceIntegrationTest(unittest.TestCase):
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
         self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.network_id, network)
+        self.assertEqual(webhook.network_id, network_id)
         self.assertEqual(webhook.signature, signature)
         self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
         self.assertEqual(webhook.status, WebhookStatuses.pending)
 
     def test_create_webhook_none_escrow_address(self):
         with self.assertRaises(ValidationError):
-            JLWebhook(escrow_address=None, network=Networks.polygon_mainnet)
+            JLWebhook(escrow_address=None, network_id=Networks.polygon_mainnet)
 
     def test_create_webhook_none_network(self):
         with self.assertRaises(ValidationError):
             JLWebhook(
                 escrow_address="0x1234567890123456789012345678901234567890",
-                network=None,
+                network_id=None,
             )
 
     def test_create_webhook_none_signature(self):
         jl_webhook = JLWebhook(
             escrow_address="0x1234567890123456789012345678901234567890",
-            network=Networks.polygon_mainnet,
+            network_id=Networks.polygon_mainnet,
         )
 
         create_webhook(self.session, jl_webhook=jl_webhook, signature=None)
@@ -58,14 +58,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_get_pending_webhooks(self):
-        network = Networks.polygon_mainnet
+        network_id = Networks.polygon_mainnet
 
         webhook1_id = str(uuid.uuid4())
         webhook1 = Webhook(
             id=webhook1_id,
             signature="signature1",
             escrow_address="0x1234567890123456789012345678901234567890",
-            network_id=network,
+            network_id=network_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.pending,
         )
@@ -74,7 +74,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=webhook2_id,
             signature="signature2",
             escrow_address="0x1234567890123456789012345678901234567891",
-            network_id=network,
+            network_id=network_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.pending,
         )
@@ -83,7 +83,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=webhook3_id,
             signature="signature3",
             escrow_address="0x1234567890123456789012345678901234567892",
-            network_id=network,
+            network_id=network_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.completed,
         )

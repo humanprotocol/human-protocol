@@ -22,7 +22,7 @@ def create_webhook(session: Session, jl_webhook: JLWebhook, signature: str):
             id=webhook_id,
             signature=signature,
             escrow_address=jl_webhook.escrow_address.lower(),
-            network_id=jl_webhook.network,
+            network_id=jl_webhook.network_id,
             type=WebhookTypes.jl_webhook.value,
             status=WebhookStatuses.pending.value,
             # .lower() is to conform s3 bucket naming rules
