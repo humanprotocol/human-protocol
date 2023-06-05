@@ -32,7 +32,7 @@
     "start:dev": "NODE_ENV=${NODE_ENV:=development} tsc",
     "start:production": "NODE_ENV=${NODE_ENV:=production} tsc-watch --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
     "start:staging": "NODE_ENV=${NODE_ENV:=staging} node .",
-    "test": "NODE_ENV=${NODE_ENV:=test} jest --config jest.config.json"
+    "test": "NODE_ENV=${NODE_ENV:=test} jest --config jest.config.js --verbose"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
@@ -72,7 +72,6 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
-    "@nestjs/testing": "^9.4.2",
     "@types/bcrypt": "^5.0.0",
     "@types/chai": "^4.3.4",
     "@types/cookie-parser": "^1.4.3",
