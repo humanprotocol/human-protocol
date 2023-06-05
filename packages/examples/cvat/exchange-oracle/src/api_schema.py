@@ -25,9 +25,7 @@ class ResponseError(BaseModel):
 
 
 class SupportedNetwork(BaseModel):
-    network_id: str
-    hmt_addr: Optional[str]
-    escrow_factory_addr: Optional[str]
+    chain_id: int
     addr: Optional[str]
 
 

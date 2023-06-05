@@ -23,7 +23,7 @@ def jl_webhook(
     human_signature: Union[str, None] = Header(default=None),
 ):
     validate_signature(human_signature)
-    validate_escrow(jl_webhook.network_id, jl_webhook.escrow_address)
+    validate_escrow(jl_webhook.chain_id, jl_webhook.escrow_address)
 
     with SessionLocal.begin() as session:
         webhook_id = create_webhook(session, jl_webhook, human_signature)

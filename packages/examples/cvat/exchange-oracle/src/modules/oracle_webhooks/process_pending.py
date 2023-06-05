@@ -29,9 +29,9 @@ def process_incoming_webhooks() -> None:
             )
             for webhook in webhooks:
                 try:
-                    validate_escrow(webhook.networ_id, webhook.escrow_address)
+                    validate_escrow(webhook.chain_id, webhook.escrow_address)
                     manifest = get_escrow_manifest(
-                        webhook.network_id,
+                        webhook.chain_id,
                         webhook.escrow_address,
                     )
                     # TODO: Parse manifest file and start job creation process on CVAT

@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: 50ae51a668ce
+Revision ID: ce33c3abb3b5
 Revises: 
-Create Date: 2023-06-05 11:52:07.652449
+Create Date: 2023-06-05 18:23:06.327987
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "50ae51a668ce"
+revision = "ce33c3abb3b5"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -40,7 +40,7 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("signature", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
-        sa.Column("network_id", sa.Integer(), nullable=False),
+        sa.Column("chain_id", sa.Integer(), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("status", sa.String(), server_default="pending", nullable=True),
         sa.Column(

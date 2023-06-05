@@ -18,7 +18,7 @@ def meta_route() -> MetaResponse:
 
     networks_info = [
         {
-            "network_id": network.network_id,
+            "chain_id": network.chain_id,
             "addr": network.addr,
         }
         for network in networks

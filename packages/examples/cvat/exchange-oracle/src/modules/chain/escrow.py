@@ -16,8 +16,8 @@ def validate_address(escrow_address: str):
     return Web3.toChecksumAddress(escrow_address)
 
 
-def validate_escrow(network_id: int, escrow_address: str):
-    web3 = get_web3(network_id)
+def validate_escrow(chain_id: int, escrow_address: str):
+    web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
 
     if escrow_client.get_balance(escrow_address) == 0:
@@ -30,8 +30,8 @@ def validate_escrow(network_id: int, escrow_address: str):
         )
 
 
-def get_escrow_manifest(network_id: int, escrow_address: str):
-    web3 = get_web3(network_id)
+def get_escrow_manifest(chain_id: int, escrow_address: str):
+    web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
 
     manifest_url = escrow_client.get_manifest_url(escrow_address)

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 
-from web3 import Web3
 from src.constants import Networks
 from src.modules.chain.escrow import validate_address
 
@@ -15,7 +14,7 @@ class CvatWebhook(BaseModel):
 
 class JLWebhook(BaseModel):
     escrow_address: str
-    network_id: Networks
+    chain_id: Networks
 
     @validator("escrow_address", allow_reuse=True)
     def validate_escrow_(cls, value):
@@ -26,7 +25,7 @@ class JLWebhook(BaseModel):
         schema_extra = {
             "example": {
                 "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
-                "network_id": 80001,
+                "chain_id": 80001,
             }
         }
 
