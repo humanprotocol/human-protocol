@@ -105,7 +105,7 @@ describe('Storage tests', () => {
         const StorageClient = vi.fn().mockImplementation(() => {
           throw ErrorStorageClientNotInitialized;
         });
-      
+
         return {
           default: StorageClient
         }
@@ -165,6 +165,9 @@ describe('Storage tests', () => {
         }
       );
       expect(uploadedResults[0].key).toEqual(key);
+      expect(uploadedResults[0].url).toEqual(
+        `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${key}`
+      );
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
@@ -338,6 +341,9 @@ describe('Storage tests', () => {
         }
       );
       expect(uploadedResults[0].key).toEqual(key);
+      expect(uploadedResults[0].url).toEqual(
+        `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${key}`
+      );
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 

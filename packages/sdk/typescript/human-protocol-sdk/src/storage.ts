@@ -15,6 +15,7 @@ import { HttpStatus } from './constants';
 
 export default class StorageClient {
   private client: Minio.Client;
+  private clientParams: StorageParams;
 
   /**
    * **Storage client constructor**
@@ -24,6 +25,8 @@ export default class StorageClient {
    */
   constructor(credentials: StorageCredentials, params: StorageParams) {
     try {
+      this.clientParams = params;
+
       this.client = new Minio.Client({
         ...params,
         accessKey: credentials.accessKey,
@@ -116,7 +119,15 @@ export default class StorageClient {
             'Content-Type': 'application/json',
           });
 
-          return { key, hash };
+          return {
+            key,
+            url: `${this.clientParams.useSSL ? 'https' : 'http'}://${
+              this.clientParams.endPoint
+            }${
+              this.clientParams.port ? `:${this.clientParams.port}` : ''
+            }/${bucket}/${key}`,
+            hash,
+          };
         } catch (e) {
           throw ErrorStorageFileNotUploaded;
         }
