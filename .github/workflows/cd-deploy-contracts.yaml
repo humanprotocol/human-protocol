@@ -26,7 +26,7 @@ jobs:
       ETH_POLYGON_URL: ${{ secrets.ETH_POLYGON_URL }}
       ETH_POLYGON_MUMBAI_URL: ${{ secrets.ETH_POLYGON_MUMBAI_URL }}
       ETH_BSC_URL: ${{ secrets.ETH_BSC_URL }}
-      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}å
+      ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
       ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
       ETH_MAINNET_TESTNET_URL: ${{ secrets.ETH_MAINNET_TESTNET_URL }}
@@ -43,6 +43,9 @@ jobs:
           node-version: 18.15
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
+      - run: yarn build
+        name: Build core package
+        working-directory: ./packages/core
       - name: Networks list
         id: networks
         run: |
@@ -109,7 +112,7 @@ jobs:
               ;;
           esac
       - name: Upgrade Proxies
-        if: github.event.inputs.escrowFactory == 'true'
+        if: github.event.inputs.escrowFactory == 'true' || github.event.inputs.staking == 'true' || github.event.inputs.rewardPool== 'true'
         run: yarn upgrade:proxy --network ${{ github.event.inputs.network }}
         working-directory: ./packages/core
         env:
@@ -136,6 +139,8 @@ jobs:
         working-directory: ./packages/core
       
         #Deploy subgraph
+      - run: yarn global add @graphprotocol/graph-cli
+        name: Install Graph CLI
       - run: graph auth --product hosted-service ${API_KEY}
         name: Authenticate Graph CLI
         env:
@@ -165,6 +170,7 @@ jobs:
           fi
 
       - name: stash
+        if: always() && steps.check_changes.outputs.changes == 'true'
         run: |
           git status
           git stash --include-untracked
@@ -175,6 +181,7 @@ jobs:
           ref: develop
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       - name: pop
+        if: always() && steps.check_changes.outputs.changes == 'true'
         run: |
           git stash pop
           git status
