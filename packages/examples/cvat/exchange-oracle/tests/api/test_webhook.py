@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 
 def test_incoming_webhook_200(client: TestClient) -> None:
     data = {
-        "escrow_address": "0x651D3F1Ac7620eCEc0887200406de58b44854111",
-        "network": "polygon_mumbai",
+        "escrow_address": "0xFE776895f6b00AA53969b20119a4777Ed920676a",
+        "chain_id": 80001,
     }
     response = client.post(
         f"/webhook/job-launcher",
@@ -17,7 +17,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
 def test_incoming_webhook_400(client: TestClient) -> None:
     data = {
         "escrow_address": "bad_address",
-        "network": "polygon_mumbai",
+        "chain_id": 80001,
     }
     response = client.post(
         f"/webhook/job-launcher",
@@ -27,8 +27,8 @@ def test_incoming_webhook_400(client: TestClient) -> None:
     assert response.status_code == 400
 
     data = {
-        "escrow_address": "0x651D3F1Ac7620eCEc0887200406de58b44854111",
-        "network": "unsupported_network",
+        "escrow_address": "0xFE776895f6b00AA53969b20119a4777Ed920676a",
+        "chain_id": 1370,
     }
     response = client.post(
         f"/webhook/job-launcher",
