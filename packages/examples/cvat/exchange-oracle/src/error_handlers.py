@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from src.config import Config
-from src.utils.validation import ValidationResult
+from src.validators.validation import ValidationResult
 
 
 def setup_error_handlers(app: FastAPI):
