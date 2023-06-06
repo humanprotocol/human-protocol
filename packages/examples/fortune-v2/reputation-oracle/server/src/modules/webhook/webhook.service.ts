@@ -3,7 +3,7 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
-import { EscrowClient, InitClient, NETWORKS, StorageClient, StorageCredentials, StorageParams, UploadFile } from "@human-protocol/sdk";
+import { EscrowClient, InitClient, NETWORKS, StorageClient, StorageCredentials, StorageParams, UploadFile, } from "@human-protocol/sdk";
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
 import { Repository } from "typeorm";
 import { WebhookIncomingCreateDto } from "./webhook.dto";
@@ -77,6 +77,7 @@ export class WebhookService {
       const manifestUrl = await escrowClient.getManifestUrl(webhookEntity.escrowAddress);
     
       const manifest = await StorageClient.downloadFileFromUrl(manifestUrl)
+    
       return true;
     } catch (e) {
       return false;
