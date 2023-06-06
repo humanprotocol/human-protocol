@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.config import Config
-from src.modules.webhook.process_pending import process_incoming_webhooks
+from src.modules.oracle_webhooks.process_pending import process_incoming_webhooks
 
 
 def setup_cron_jobs(app: FastAPI):
