@@ -74,6 +74,10 @@ export type UploadFile = {
    */
   key: string;
   /**
+   * Uploaded object URL
+   */
+  url: string;
+  /**
    * Hash of uploaded object key
    */
   hash: string;

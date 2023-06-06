@@ -68,22 +68,16 @@ export class JobService {
     // Download existing solution if any
     const existingJobSolutionsURL = await escrowClient.getResultsUrl(jobSolution.escrowAddress);
 
-    const [existingJobSolutions] = await storageClient
-      .downloadFiles([existingJobSolutionsURL], bucket)
-      .catch(() => [[]]);
+    const existingJobSolutions = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL).catch(() => []);
 
     // Validate if the solution is unique
-    if (
-      (existingJobSolutions.content as any[]).find(
-        ({ solution }: { solution: string }) => solution === jobSolution.solution,
-      )
-    ) {
+    if (existingJobSolutions.find(({ solution }: { solution: string }) => solution === jobSolution.solution)) {
       throw new Error("Solution already exists");
     }
 
     // Save new solution to S3
     const newJobSolutions = [
-      ...(existingJobSolutions.content as any[]),
+      ...existingJobSolutions,
       {
         exchangeAddress: jobSolution.exchangeAddress,
         workerAddress: jobSolution.workerAddress,
@@ -94,7 +88,7 @@ export class JobService {
     const [jobSolutionUploaded] = await storageClient.uploadFiles([newJobSolutions], bucket);
 
     // Save solution URL/HASH on-chain
-    await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.key, jobSolutionUploaded.hash);
+    await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
 
     // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
     if (newJobSolutions.length === fortunesRequired) {
