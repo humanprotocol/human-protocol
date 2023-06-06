@@ -3,11 +3,12 @@ import uuid
 
 from pydantic import ValidationError
 from src.db import SessionLocal
-from src.modules.webhook.constants import WebhookStatuses, WebhookTypes, Networks
-from src.modules.webhook.model import Webhook
-from src.modules.webhook.api_schema import JLWebhook
+from src.constants import Networks
+from src.modules.oracle_webhooks.constants import WebhookStatuses, WebhookTypes
+from src.modules.oracle_webhooks.model import Webhook
+from src.modules.oracle_webhooks.service import create_webhook, get_pending_webhooks
+from src.modules.api_schema import JLWebhook
 from sqlalchemy.exc import IntegrityError
-from src.modules.webhook.service import create_webhook, get_pending_webhooks
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -19,9 +20,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        network = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, network=network)
+        jl_webhook = JLWebhook(escrow_address=escrow_address, chain_id=chain_id)
 
         webhook_id = create_webhook(
             self.session, jl_webhook=jl_webhook, signature=signature
@@ -30,26 +31,26 @@ class ServiceIntegrationTest(unittest.TestCase):
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
         self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.network_id, network)
+        self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.signature, signature)
         self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
         self.assertEqual(webhook.status, WebhookStatuses.pending)
 
     def test_create_webhook_none_escrow_address(self):
         with self.assertRaises(ValidationError):
-            JLWebhook(escrow_address=None, network=Networks.polygon_mainnet)
+            JLWebhook(escrow_address=None, chain_id=Networks.polygon_mainnet)
 
     def test_create_webhook_none_network(self):
         with self.assertRaises(ValidationError):
             JLWebhook(
                 escrow_address="0x1234567890123456789012345678901234567890",
-                network=None,
+                chain_id=None,
             )
 
     def test_create_webhook_none_signature(self):
         jl_webhook = JLWebhook(
             escrow_address="0x1234567890123456789012345678901234567890",
-            network=Networks.polygon_mainnet,
+            chain_id=Networks.polygon_mainnet,
         )
 
         create_webhook(self.session, jl_webhook=jl_webhook, signature=None)
@@ -57,14 +58,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_get_pending_webhooks(self):
-        network = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet
 
         webhook1_id = str(uuid.uuid4())
         webhook1 = Webhook(
             id=webhook1_id,
             signature="signature1",
             escrow_address="0x1234567890123456789012345678901234567890",
-            network_id=network,
+            chain_id=chain_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.pending,
         )
@@ -73,7 +74,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=webhook2_id,
             signature="signature2",
             escrow_address="0x1234567890123456789012345678901234567891",
-            network_id=network,
+            chain_id=chain_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.pending,
         )
@@ -82,7 +83,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             id=webhook3_id,
             signature="signature3",
             escrow_address="0x1234567890123456789012345678901234567892",
-            network_id=network,
+            chain_id=chain_id,
             type=WebhookTypes.jl_webhook,
             status=WebhookStatuses.completed,
         )
