@@ -3,8 +3,8 @@ from typing import Dict, List
 import requests
 
 from src.config import Config
-from src.utils.helpers import parse_manifest
 from cvat_sdk.api_client import Configuration, ApiClient, models, exceptions
+from .helpers import parse_manifest
 
 configuration = Configuration(
     host=Config.cvat_config.cvat_url,
