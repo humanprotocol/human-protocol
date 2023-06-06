@@ -1,20 +1,65 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 
-import { ReputationOracleEntity } from "./reputation-oracle.entity";
-import { ReputationWorkerEntity } from "./reputation-worker.entity";
-import { Repository } from "typeorm";
+import { ReputationEntity } from "./reputation.entity";
+import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import { ErrorReputation } from "../../common/constants/errors";
+import { WebhookIncomingEntity } from "../webhook/webhook-incoming.entity";
+import { ReputationCreateDto, ReputationUpdateDto } from "./reputation.dto";
 
 @Injectable()
-export class ReputationService {
-  private readonly logger = new Logger(ReputationService.name);
+export class ReputationRepository {
+  private readonly logger = new Logger(ReputationRepository.name);
 
   constructor(
-    @InjectRepository(ReputationOracleEntity)
-    private readonly ReputationOracleEntityRepository: Repository<ReputationOracleEntity>,
-    @InjectRepository(ReputationWorkerEntity)
-    private readonly ReputationWorkerEntityRepository: Repository<ReputationWorkerEntity>,
+    @InjectRepository(ReputationEntity)
+    private readonly reputationEntityRepository: Repository<ReputationEntity>,
     private readonly configService: ConfigService,
   ) {}
+  
+  public async updateOne(
+    where: FindConditions<ReputationEntity>,
+    dto: Partial<ReputationUpdateDto>,
+  ): Promise<ReputationEntity> {
+    const reputationEntity = await this.reputationEntityRepository.findOne(where);
+
+    if (!reputationEntity) {
+      this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
+      throw new NotFoundException(ErrorReputation.NotFound);
+    }
+
+    Object.assign(ReputationEntity, dto);
+    return reputationEntity.save();
+  }
+
+  public async findOne(
+    where: FindConditions<ReputationEntity>,
+    options?: FindOneOptions<ReputationEntity>,
+  ): Promise<ReputationEntity> {
+    const reputationEntity = await this.reputationEntityRepository.findOne({ where, ...options });
+
+    if (!reputationEntity) {
+      this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
+      throw new NotFoundException(ErrorReputation.NotFound);
+    }
+
+    return reputationEntity;
+  }
+  
+  public find(where: FindConditions<ReputationEntity>, options?: FindManyOptions<ReputationEntity>): Promise<ReputationEntity[]> {
+    return this.reputationEntityRepository.find({
+      where,
+      order: {
+        createdAt: "DESC",
+      },
+      ...options,
+    });
+  }
+
+  public async create(dto: ReputationCreateDto): Promise<ReputationEntity> {
+    return this.reputationEntityRepository
+      .create(dto)
+      .save();
+  }
 }

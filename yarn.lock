@@ -3074,7 +3074,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/axios/-/axios-2.0.0.tgz#2116fad483e232ef102a877b503a9f19926bd102"
   integrity sha512-F6oceoQLEn031uun8NiommeMkRIojQqVryxQy/mK7fx0CI0KbgkJL3SloCQcsOD+agoEnqKJKXZpEvL6FNswJg==
 
-"@nestjs/common@^9.3.9":
+"@nestjs/common@^9.3.9", "@nestjs/common@^9.4.2":
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-9.4.2.tgz#d1f8a685217e2d94f8950d00b618c542ffa2a5f1"
   integrity sha512-sea+qZnbD5x3YWZDVQT/wbVJ2NiABaM1tyZTLuW9hpkcM2KFA96xKtK3VaCxyz49zoXIgSOefsyK7HuUMCe27Q==
@@ -3083,7 +3083,7 @@
     iterare "1.2.1"
     tslib "2.5.2"
 
-"@nestjs/config@^2.3.1":
+"@nestjs/config@^2.3.1", "@nestjs/config@^2.3.2":
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/@nestjs/config/-/config-2.3.2.tgz#6c5b1d2c87f39d3ceab2ab3fb3a8ef518bccc0fa"
   integrity sha512-VtGV8PBpxzMzz68kdxTWqPm9v7SYCSZXQ0tC72AMNnjdmU+CVjUSLpEpdnm0XcWHxE1nV6wSI3HZxsATIV4ZxA==
@@ -3093,7 +3093,7 @@
     lodash "4.17.21"
     uuid "9.0.0"
 
-"@nestjs/core@^9.3.9":
+"@nestjs/core@^9.3.9", "@nestjs/core@^9.4.2":
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-9.4.2.tgz#51b02e07da42a0f68a0b91d188ea49c402805c35"
   integrity sha512-S5K9GTpjBqEJtu5VxRsVaaGEBZ1bkY+Ht4+2hqZSKsI+rzcEB5hcvR+5KiMsMY1VGYvlZ99lxYz72p4h8B0mKw==
@@ -3123,7 +3123,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/passport/-/passport-9.0.3.tgz#4df0e6de3176e04a5770cb432e58f129c8e49f9e"
   integrity sha512-HplSJaimEAz1IOZEu+pdJHHJhQyBOPAYWXYHfAPQvRqWtw4FJF1VXl1Qtk9dcXQX1eKytDtH+qBzNQc19GWNEg==
 
-"@nestjs/platform-express@^9.3.9":
+"@nestjs/platform-express@^9.3.9", "@nestjs/platform-express@^9.4.2":
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-9.4.2.tgz#5d1bcb5035d2172b5f144f60d3e037cd64d5318c"
   integrity sha512-FVSJmVH+kndcDjvUK7xUzE3AmtQwlcXKN2hwJolyyIS7WXs6Awyb78cJGr0w27ESKoVQeSKPVbom0sLJFG153A==
@@ -3161,7 +3161,7 @@
     boxen "5.1.2"
     check-disk-space "3.3.1"
 
-"@nestjs/testing@^9.3.9":
+"@nestjs/testing@^9.3.9", "@nestjs/testing@^9.4.2":
   version "9.4.2"
   resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-9.4.2.tgz#d6533195f5a50c84cf7e1df5a241585d1f360e44"
   integrity sha512-4WZPJz85zLVZkhmWYq+Unr43MixISelg/TyuX1YFZYOeukIN+O6fRtAAPIKLqRQsiY0rE/h8FAEbYGWhNrRfSA==

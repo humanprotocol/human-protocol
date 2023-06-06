@@ -12,7 +12,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
 import { JobEntity } from "../modules/job/job.entity";
 import { PaymentEntity } from "../modules/payment/payment.entity";
 import { WebhookIncomingEntity } from "../modules/webhook/webhook-incoming.entity";
-import { ReputationOracleEntity } from "../modules/reputation/reputation-oracle.entity";
+import { ReputationOracleEntity } from "../modules/reputation/reputation.entity";
 
 @Module({
   imports: [

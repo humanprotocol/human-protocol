@@ -1,9 +1,42 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { WebhookService } from "./webhook.service";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { InjectRepository } from "@nestjs/typeorm";
+import { WebhookRepository } from "./webhook.repository";
+import { RETRIES_COUNT_THRESHOLD } from "../../common/constants";
+import { SortDirection } from "../../common/collection";
+import { LessThanOrEqual } from "typeorm";
+import { WebhookStatus } from "../../common/decorators";
 
 @Injectable()
 export class WebhookCron {
   private readonly logger = new Logger(WebhookCron.name);
 
-  constructor(private readonly webhookService: WebhookService) {}
+  constructor(
+    private readonly webhookService: WebhookService,
+    private readonly webhookRepository: WebhookRepository
+  ) {}
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  public async processPendingWebhook() {
+    try {
+      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+      const webhookEntity = await this.webhookRepository.findOne({
+          status: WebhookStatus.PENDING,
+          retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date())
+        }, {
+          order: {
+            waitUntil: SortDirection.ASC
+          },
+        }
+      );
+
+      if (!webhookEntity) return;
+
+      await this.webhookService.processPendingWebhook(webhookEntity);
+    } catch (e) {
+      return;
+    }
+  }
 }

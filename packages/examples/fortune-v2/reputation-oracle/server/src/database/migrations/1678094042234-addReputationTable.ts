@@ -1,10 +1,20 @@
 import { MigrationInterface, QueryRunner, Table } from "typeorm";
-import { NS } from "../common/constants";
+import { NS } from "../../common/constants";
 
-export class addReputationWorkerTable1678094042234 implements MigrationInterface {
+export class addReputationTable1678094042234 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
+    await queryRunner.query(`
+        CREATE TYPE ${NS}.reputation_type_enum AS ENUM (
+          'WORKER',
+          'JOB_LAUNCHER',
+          'EXCHANGE_ORACLE',
+          'RECORDING_ORACLE',
+          'REPUTATION_ORACLE'
+        );
+      `);
+
     const table = new Table({
-      name: `${NS}.reputation_oracle`,
+      name: `${NS}.reputation`,
       columns: [
         {
           name: "id",
@@ -24,6 +34,10 @@ export class addReputationWorkerTable1678094042234 implements MigrationInterface
           type: "int",
         },
         {
+          name: "type",
+          type: `${NS}.reputation_type_enum`,
+        },
+        {
           name: "created_at",
           type: "timestamptz",
         },
@@ -38,6 +52,7 @@ export class addReputationWorkerTable1678094042234 implements MigrationInterface
   }
 
   public async down(queryRunner: QueryRunner): Promise<any> {
-    await queryRunner.dropTable(`${NS}.reputation_oracle`);
+    await queryRunner.dropTable(`${NS}.reputation`);
+    await queryRunner.query(`DROP TYPE ${NS}.reputation_type_enum;`);
   }
 }

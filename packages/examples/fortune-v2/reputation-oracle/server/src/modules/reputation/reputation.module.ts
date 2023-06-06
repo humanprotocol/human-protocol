@@ -3,7 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 
 import { ReputationService } from "./reputation.service";
-import { ReputationOracleEntity } from "./reputation-oracle.entity";
+import { ReputationOracleEntity } from "./reputation.entity";
 import { ReputationWorkerEntity } from "./reputation-worker.entity";
 import { ReputationController } from "./reputation.controller";
 import { ReputationCron } from "./reputation.cron";

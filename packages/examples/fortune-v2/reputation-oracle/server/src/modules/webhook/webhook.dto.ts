@@ -4,16 +4,19 @@ import { WebhookStatus } from "../../common/decorators";
 import { ChainId } from "@human-protocol/sdk";
 
 export class WebhookIncomingCreateDto {
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   public escrowAddress: string;
+
+  public status?: WebhookStatus;
+  public waitUntil?: Date;
 }
 
-export class UpdateIncomingWebhookDto {
+export class WebhookIncomingUpdateDto {
   @ApiPropertyOptional()
   @IsEnum(ChainId)
   public chainId: ChainId;

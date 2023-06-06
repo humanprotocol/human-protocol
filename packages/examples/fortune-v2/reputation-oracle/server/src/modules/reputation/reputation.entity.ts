@@ -4,8 +4,8 @@ import { NS } from "../../common/constants";
 import { BaseEntity } from "../../database/base.entity";
 import { ReputationEntityType } from "../../common/decorators";
 
-@Entity({ schema: NS, name: "reputation_oracle" })
-export class ReputationOracleEntity extends BaseEntity {
+@Entity({ schema: NS, name: "reputation" })
+export class ReputationEntity extends BaseEntity {
   @Column({ type: "int" })
   public chainId: number;
 

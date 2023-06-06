@@ -9,6 +9,7 @@ export interface IReputationOracle extends IBase {
 }
 
 export enum ReputationEntityType {
+  WORKER = "WORKER",
   JOB_LAUNCHER = "JOB_LAUNCHER",
   EXCHANGE_ORACLE = "EXCHANGE_ORACLE",
   RECORDING_ORACLE = "RECORDING_ORACLE",

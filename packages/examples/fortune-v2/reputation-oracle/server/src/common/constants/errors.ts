@@ -66,3 +66,19 @@ export enum ErrorBucket {
   NotPublic = "Bucket is not public",
   UnableSaveFile = "Unable to save file",
 }
+
+/**
+ * Represents error messages related to webhook.
+ */
+export enum ErrorWebhook {
+  NotFound = "Webhook not found",
+  NotCreated = "Webhook has not been created",
+}
+
+/**
+ * Represents error messages related to reputation.
+ */
+export enum ErrorReputation {
+  NotFound = "Reputation not found",
+  NotCreated = "Reputation has not been created",
+}

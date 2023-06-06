@@ -1,21 +1,16 @@
-import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
-import { Repository } from "typeorm";
-import { IWebhookIncomingCreateDto, IWebhookOutgoingCreateDto } from "./interfaces";
-import { WebhookStatus } from "../common/decorators";
-import * as errors from "../common/enums/errors";
-import { getSignedData, sign, verify } from "../common/helpers";
-import { IVerifyMessage } from "../common/interfaces/encryption";
-import { ISignature } from "../common/interfaces/signature";
+import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import { ErrorWebhook } from "../../common/constants/errors";
+import { WebhookIncomingCreateDto, WebhookIncomingUpdateDto } from "./webhook.dto";
 
 @Injectable()
-export class WebhookService {
-  private readonly logger = new Logger(WebhookService.name);
+export class WebhookRepository {
+  private readonly logger = new Logger(WebhookRepository.name);
 
   constructor(
     @InjectRepository(WebhookIncomingEntity)
@@ -24,56 +19,48 @@ export class WebhookService {
     private readonly httpService: HttpService
   ) {}
 
-  public async createIncomingWebhook(dto: IWebhookIncomingCreateDto): Promise<boolean> {
-    // TODO: Get signature from headers
-    const { signature } = dto;
+  public async updateOne(
+    where: FindConditions<WebhookIncomingEntity>,
+    dto: Partial<WebhookIncomingUpdateDto>,
+  ): Promise<WebhookIncomingEntity> {
+    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOne(where);
 
-    const verifyData: IVerifyMessage = {
-      publicKey: this.configService.get<string>("RECORDING_ORACLE_PGP_PUBLIC_KEY", ""),
-      message: signature
+    if (!webhookIncomingEntity) {
+      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
+      throw new NotFoundException(ErrorWebhook.NotFound);
     }
 
-    const isVerified = await verify(verifyData);
-
-
-    if (!isVerified) {
-      throw new UnauthorizedException(errors.Auth.Unauthorized);
-    }
-
-    // Extract signed data from signature
-    const payload: ISignature = await getSignedData(signature);
-
-    if (!payload.escrowAddress || !payload.chainId) {
-      this.logger.log(errors.Webhook.BadParams, WebhookService.name);
-      throw new BadRequestException(errors.Webhook.BadParams);
-    }
-
-    try {
-      const webhookEntity = await this.webhookIncomingEntityRepository
-        .create({
-          chainId: payload.chainId,
-          escrowAddress: payload.escrowAddress,
-          signature,
-          status: WebhookStatus.PENDING,
-          waitUntil: new Date(),
-        })
-        .save();
-
-      if (!webhookEntity) {
-        this.logger.log(errors.Webhook.NotCreated, WebhookService.name);
-        throw new NotFoundException(errors.Webhook.NotCreated);
-      }
-
-      return true;
-    } catch (e) {
-      this.logger.log(errors.Webhook.NotCreated, WebhookService.name);
-      return false;
-    }
+    Object.assign(WebhookIncomingEntity, dto);
+    return webhookIncomingEntity.save();
   }
 
-  public async processIncommingWebhook(webhookIncomingEntity: WebhookIncomingEntity): Promise<boolean> {
-    // TODO: https://github.com/humanprotocol/human-protocol/issues/300
-    return true;
+  public async findOne(
+    where: FindConditions<WebhookIncomingEntity>,
+    options?: FindOneOptions<WebhookIncomingEntity>,
+  ): Promise<WebhookIncomingEntity> {
+    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOne({ where, ...options });
+
+    if (!webhookIncomingEntity) {
+      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
+      throw new NotFoundException(ErrorWebhook.NotFound);
+    }
+
+    return webhookIncomingEntity;
+  }
+  
+  public find(where: FindConditions<WebhookIncomingEntity>, options?: FindManyOptions<WebhookIncomingEntity>): Promise<WebhookIncomingEntity[]> {
+    return this.webhookIncomingEntityRepository.find({
+      where,
+      order: {
+        createdAt: "DESC",
+      },
+      ...options,
+    });
   }
 
+  public async create(dto: WebhookIncomingCreateDto): Promise<WebhookIncomingEntity> {
+    return this.webhookIncomingEntityRepository
+      .create(dto)
+      .save();
+  }
 }

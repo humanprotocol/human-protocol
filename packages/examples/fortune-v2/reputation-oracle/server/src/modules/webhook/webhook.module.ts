@@ -6,13 +6,13 @@ import { WebhookService } from "./webhook.service";
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
 import { WebhookController } from "./webhook.controller";
 import { WebhookCron } from "./webhook.cron";
-import { StorageModule } from "../storage/storage.module";
 import { HttpModule } from "@nestjs/axios";
+import { WebhookRepository } from "./webhook.repository";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WebhookIncomingEntity]), ConfigModule, StorageModule, HttpModule],
+  imports: [TypeOrmModule.forFeature([WebhookIncomingEntity]), ConfigModule, HttpModule],
   controllers: [WebhookController],
-  providers: [Logger, WebhookService, WebhookCron],
+  providers: [Logger, WebhookService, WebhookRepository, WebhookCron],
   exports: [WebhookService],
 })
 export class WebhookModule {}
