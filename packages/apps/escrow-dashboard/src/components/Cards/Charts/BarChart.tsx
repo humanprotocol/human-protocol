@@ -53,7 +53,7 @@ export const BarChart: FC<BarChartProps> = ({ title, totalValue, series }) => {
               interval="preserveStartEnd"
               ticks={[
                 series[0].date,
-                series[series.length / 2 - 1].date,
+                series[Math.ceil(series.length / 2) - 1].date,
                 series[series.length - 1].date,
               ]}
               tick={{ fill: '#320A8D', fontSize: '12px', fontFamily: 'Inter' }}
