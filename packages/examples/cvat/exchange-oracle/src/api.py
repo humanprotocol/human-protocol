@@ -4,8 +4,7 @@ from fastapi import APIRouter, FastAPI
 from .api_schema import ValidationErrorResponse, ResponseError, MetaResponse
 from .config import Config
 
-from .modules.webhook.api import router as webhook_router
-from .modules.cvat.api import router as cvat_router
+from .modules.api import router
 
 
 greet_router = APIRouter()
@@ -19,9 +18,7 @@ def meta_route() -> MetaResponse:
 
     networks_info = [
         {
-            "network_id": network.network_id,
-            "hmt_addr": network.hmt_addr,
-            "escrow_factory_addr": network.factory_addr,
+            "chain_id": network.chain_id,
             "addr": network.addr,
         }
         for network in networks
@@ -47,7 +44,6 @@ def init_api(app: FastAPI) -> FastAPI:
     }
 
     app.include_router(greet_router)
-    app.include_router(webhook_router, prefix="/webhook", responses=default_responses)
-    app.include_router(cvat_router, prefix="/webhook", responses=default_responses)
+    app.include_router(router, prefix="/webhook", responses=default_responses)
 
     return app
