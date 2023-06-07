@@ -209,7 +209,7 @@ export const Header: FC = () => {
                       )} */}
                       {renderNavLinks()}
                       <ConnectButton />
-                      {address && <MyHMTButton href="/staking" />}
+                      {/* {address && <MyHMTButton href="/staking" />} */}
                     </Box>
                   )}
                   {isDownLg && (
