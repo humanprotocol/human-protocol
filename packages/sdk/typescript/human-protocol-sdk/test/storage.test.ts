@@ -154,7 +154,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = hash;
+      const key = `s3${hash}.json`;
 
       expect(storageClient['client'].putObject).toHaveBeenCalledWith(
         DEFAULT_PUBLIC_BUCKET,
@@ -188,7 +188,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = hash;
+      const key = `s3${hash}.json`;
 
       const downloadedResults = await storageClient.downloadFiles(
         [key],
@@ -261,14 +261,14 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file1))
         .digest('hex');
-      const key1 = hash1;
+      const key1 = `s3${hash1}.json`;
 
       const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
       const hash2 = crypto
         .createHash('sha1')
         .update(JSON.stringify(file2))
         .digest('hex');
-      const key2 = hash2;
+      const key2 = `s3${hash2}.json`;
 
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() =>
         Promise.resolve([key1, key2])
@@ -330,7 +330,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = hash;
+      const key = `s3${hash}.json`;
 
       expect(storageClient['client'].putObject).toHaveBeenCalledWith(
         DEFAULT_PUBLIC_BUCKET,
@@ -364,7 +364,7 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file))
         .digest('hex');
-      const key = hash;
+      const key = `s3${hash}.json`;
 
       const downloadedResults = await storageClient.downloadFiles(
         [key],
@@ -397,14 +397,14 @@ describe('Storage tests', () => {
         .createHash('sha1')
         .update(JSON.stringify(file1))
         .digest('hex');
-      const key1 = hash1;
+      const key1 = `s3${hash1}.json`;
 
       const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
       const hash2 = crypto
         .createHash('sha1')
         .update(JSON.stringify(file2))
         .digest('hex');
-      const key2 = hash2;
+      const key2 = `s3${hash2}.json`;
 
       vi.spyOn(storageClient, 'listObjects').mockImplementation(() =>
         Promise.resolve([key1, key2])

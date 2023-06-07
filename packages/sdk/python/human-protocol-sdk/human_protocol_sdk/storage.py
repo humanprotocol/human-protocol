@@ -198,8 +198,8 @@ class StorageClient:
                 raise e
 
             data = artifact.encode("utf-8")
-            hash = hashlib.sha1(data).hexdigest()
-            key = hash
+            data_sha = hashlib.sha1(data).hexdigest()
+            key = f"s3{data_sha}.json"
             url = (
                 f"{'https' if self.secure else 'http'}://{self.endpoint}/{bucket}/{key}"
             )
@@ -233,7 +233,7 @@ class StorageClient:
                 except Exception as e:
                     raise StorageClientError(str(e))
 
-            result_files.append({"key": key, "url": url, "hash": hash})
+            result_files.append({"key": key, "url": url, "hash": data_sha})
 
         return result_files
 

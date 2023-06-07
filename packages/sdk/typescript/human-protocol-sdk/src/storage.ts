@@ -112,7 +112,7 @@ export default class StorageClient {
         const content = JSON.stringify(file);
 
         const hash = crypto.createHash('sha1').update(content).digest('hex');
-        const key = hash;
+        const key = `s3${hash}.json`;
 
         try {
           await this.client.putObject(bucket, key, content, {
