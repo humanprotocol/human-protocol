@@ -1,4 +1,3 @@
-import { Wallet } from '@ethersproject/wallet';
 import {
   BadGatewayException,
   Injectable,
@@ -6,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BigNumber } from 'ethers';
+import { Wallet, providers, BigNumber } from 'ethers';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
@@ -31,10 +30,10 @@ import {
   SendWebhookDto,
 } from './job.dto';
 import { ManifestDto } from '../payment/payment.dto';
-import { EthersSigner, InjectSignerProvider } from 'nestjs-ethers';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { networkMap } from '../../common/decorators';
 
 @Injectable()
 export class JobService {
@@ -44,8 +43,6 @@ export class JobService {
   public readonly bucket: string;
 
   constructor(
-    @InjectSignerProvider()
-    public readonly ethersSigner: EthersSigner,
     public readonly jobRepository: JobRepository,
     public readonly paymentService: PaymentService,
     public readonly httpService: HttpService,
@@ -203,11 +200,17 @@ export class JobService {
 
   public async launchJob(jobEntity: JobEntity): Promise<boolean> {
     try {
-      const signer = this.ethersSigner.createWallet(
+      const provider = new providers.JsonRpcProvider(
+        Object.values(networkMap).find(
+          (item) => item.network.chainId === jobEntity.chainId,
+        )?.rpcUrl,
+      );
+      const signer = new Wallet(
         this.configService.get<string>(
           'WEB3_JOB_LAUNCHER_PRIVATE_KEY',
           'web3 private key',
         ),
+        provider,
       );
       const clientParams = await InitClient.getParams(signer);
 

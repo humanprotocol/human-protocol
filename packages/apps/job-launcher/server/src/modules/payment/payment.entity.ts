@@ -41,10 +41,7 @@ export class PaymentEntity extends BaseEntity {
   public source: PaymentSource;
 
   @JoinColumn()
-  @ManyToOne(
-    () => UserEntity,
-    user => user.payments,
-  )
+  @ManyToOne(() => UserEntity, (user) => user.payments)
   public user: UserEntity;
 
   @Column({ type: 'int' })

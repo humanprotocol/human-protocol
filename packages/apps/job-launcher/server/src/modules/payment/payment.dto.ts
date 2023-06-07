@@ -8,7 +8,6 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { JobMode, JobRequestType } from '../../common/enums/job';
-import { BigNumber } from 'ethers';
 import { ChainId } from '@human-protocol/sdk';
 
 export class PaymentFiatConfirmDto {

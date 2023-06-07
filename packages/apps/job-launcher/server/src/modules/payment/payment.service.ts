@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, Signer } from 'ethers';
+import { BigNumber, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import { CurrencyService } from './currency.service';
@@ -18,9 +18,8 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { EthersSigner, InjectSignerProvider } from 'nestjs-ethers';
-import { Wallet } from '@ethersproject/wallet';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
+import { networkMap } from '../../common/decorators';
 
 @Injectable()
 export class PaymentService {
@@ -30,8 +29,6 @@ export class PaymentService {
 
   // TODO: add crypto variant
   constructor(
-    @InjectSignerProvider()
-    private readonly ethersSigner: EthersSigner,
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
     private configService: ConfigService,
@@ -124,14 +121,13 @@ export class PaymentService {
     dto: PaymentCryptoCreateDto,
   ) {
     try {
-      const signer = this.ethersSigner.createWallet(
-        this.configService.get<string>(
-          'WEB3_JOB_LAUNCHER_PRIVATE_KEY',
-          'web3 private key',
-        ),
+      const provider = new providers.JsonRpcProvider(
+        Object.values(networkMap).find(
+          (item) => item.network.chainId === dto.chainId,
+        )?.rpcUrl,
       );
 
-      const transaction = await signer.provider.getTransactionReceipt(
+      const transaction = await provider.getTransactionReceipt(
         dto.transactionHash,
       );
       console.log(transaction);
@@ -200,13 +196,13 @@ export class PaymentService {
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
-    let finalAmount = BigNumber.from(0);
+    const finalAmount = BigNumber.from(0);
 
-    paymentEntities.forEach(payment => {
+    paymentEntities.forEach((payment) => {
       if (payment.type === PaymentType.WITHDRAWAL) {
-        BigNumber.from(finalAmount).sub(payment.amount);
+        finalAmount.sub(payment.amount);
       } else {
-        BigNumber.from(finalAmount).add(payment.amount);
+        finalAmount.add(payment.amount);
       }
     });
 
