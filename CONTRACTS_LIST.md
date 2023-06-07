@@ -44,9 +44,9 @@
 |🟢 Binance SC (Mainnet)     | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/08/18                  | HMToken        | 0x711Fd6ab6d65A98904522d4e3586F492B989c527 | N/A                                        |
-|2023/06/01                  | EscrowFactory  | 0x33A6AD8201D68D3bDc71Ccc6444887313496b1a7 | 0x92FD968AcBd521c232f5fB8c33b342923cC72714 |
-|2023/06/01                  | Staking        | 0x3eB07971307fABa34A9386F64cBa18a3Fe90290a | 0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C |
-|2023/06/01                  | RewardPool     | 0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D | 0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e |
+|2023/06/01                  | EscrowFactory  | 0xa8e32d777a3839440cc7c24D591A64B9481753B3 | 0x92FD968AcBd521c232f5fB8c33b342923cC72714 |
+|2023/06/01                  | Staking        | 0x7CDE135F949FE81b16d989cfb4D20e11caa4dE14 | 0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C |
+|2023/06/01                  | RewardPool     | 0xB595F5d0621B7412B208e7963974226603c8dEE5 | 0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e |
 |2023/02/08                  | EthKVStore     | 0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6 | N/A                                        |
 
 |🟠 Binance SC (Testnet)     | Contract       | Address                                    | Proxy                                      |
