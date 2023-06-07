@@ -155,8 +155,8 @@ class TestStorageClient(unittest.TestCase):
 
     def test_upload_files(self):
         file3 = "file3 content"
-        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
-        key3 = f"s3{data_sha}.json"
+        hash = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{hash}.json"
 
         self.client.client.stat_object = MagicMock(
             side_effect=S3Error(
@@ -174,12 +174,12 @@ class TestStorageClient(unittest.TestCase):
         self.assertEqual(
             result[0]["url"], f"https://s3.us-west-2.amazonaws.com/my-bucket/{key3}"
         )
-        self.assertEqual(result[0]["hash"], data_sha)
+        self.assertEqual(result[0]["hash"], hash)
 
     def test_upload_files_exist(self):
         file3 = "file3 content"
-        data_sha = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
-        key3 = f"s3{data_sha}.json"
+        hash = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
+        key3 = f"s3{hash}.json"
 
         self.client.client.stat_object = MagicMock(
             side_effect=[{"_object_name": "1234567890"}]
@@ -190,7 +190,7 @@ class TestStorageClient(unittest.TestCase):
         self.assertEqual(
             result[0]["url"], f"https://s3.us-west-2.amazonaws.com/my-bucket/{key3}"
         )
-        self.assertEqual(result[0]["hash"], data_sha)
+        self.assertEqual(result[0]["hash"], hash)
 
     def test_upload_files_error(self):
         file3 = "file3 content"
