@@ -15,12 +15,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
-    "@nestjs/cli": "^9.5.0",
     "@nestjs/common": "^9.3.9",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.3.9",
@@ -34,8 +32,8 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@nestjs/cli": "^9.5.0",
     "@nestjs/testing": "^9.3.9",
-    "@types/express": "^4.17.13",
-    "tsconfig-paths": "4.2.0"
+    "@types/express": "^4.17.13"
   }
 }
