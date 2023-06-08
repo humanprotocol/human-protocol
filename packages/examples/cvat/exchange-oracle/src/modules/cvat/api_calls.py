@@ -23,15 +23,14 @@ def create_cloudstorage(bucket_name: str, region: str) -> int:
             description=bucket_name,
             manifests=["manifest.jsonl"],
         )  # CloudStorageWriteRequest
+        try:
+            (data, response) = api_client.cloudstorages_api.create(
+                cloud_storage_write_request,
+            )
 
-    try:
-        (data, response) = api_client.cloudstorages_api.create(
-            cloud_storage_write_request,
-        )
-
-        return data
-    except exceptions.ApiException as e:
-        logger.error(f"Exception when calling CloudstoragesApi.create(): {e}\n")
+            return data
+        except exceptions.ApiException as e:
+            logger.error(f"Exception when calling CloudstoragesApi.create(): {e}\n")
 
 
 def create_project(escrow_address: str, labels: list) -> Dict:
@@ -66,14 +65,13 @@ def setup_cvat_webhooks(project_id: int) -> Dict:
                 models.EventsEnum("update:task"),
             ],
         )  # WebhookWriteRequest
-
-    try:
-        (data, response) = api_client.webhooks_api.create(
-            webhook_write_request,
-        )
-        return data
-    except exceptions.ApiException as e:
-        logger.error(f"Exception when calling WebhooksApi.create(): {e}\n")
+        try:
+            (data, response) = api_client.webhooks_api.create(
+                webhook_write_request,
+            )
+            return data
+        except exceptions.ApiException as e:
+            logger.error(f"Exception when calling WebhooksApi.create(): {e}\n")
 
 
 def create_task(project_id: int, escrow_address: str) -> Dict:
