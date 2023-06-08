@@ -44,7 +44,7 @@ import {
 import { EscrowStatus, NetworkData } from './types';
 import { requiresSigner } from './decorators';
 
-export default class EscrowClient {
+export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
   private escrowContract?: Escrow;
   private signerOrProvider: Signer | Provider;
@@ -129,7 +129,7 @@ export default class EscrowClient {
       recordingOracleFee,
       reputationOracleFee,
       manifestUrl,
-      hash,
+      manifestHash,
     } = escrowConfig;
 
     if (!ethers.utils.isAddress(recordingOracle)) {
@@ -160,7 +160,7 @@ export default class EscrowClient {
       throw ErrorInvalidUrl;
     }
 
-    if (!hash) {
+    if (!manifestHash) {
       throw ErrorHashIsEmptyString;
     }
 
@@ -174,16 +174,16 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       await this.escrowContract.setup(
-        reputationOracle,
         recordingOracle,
-        reputationOracleFee,
+        reputationOracle,
         recordingOracleFee,
+        reputationOracleFee,
         manifestUrl,
-        hash
+        manifestHash
       );
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -213,7 +213,7 @@ export default class EscrowClient {
       await this.setup(escrowAddress, escrowConfig);
 
       return escrowAddress;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -256,7 +256,7 @@ export default class EscrowClient {
       await tokenContract.transfer(escrowAddress, amount);
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -305,7 +305,7 @@ export default class EscrowClient {
       await this.escrowContract.storeResults(url, hash);
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -334,7 +334,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.complete();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -421,7 +421,7 @@ export default class EscrowClient {
         DEFAULT_TX_ID
       );
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -450,7 +450,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.cancel();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -479,7 +479,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.abort();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -522,7 +522,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.addTrustedHandlers(trustedHandlers);
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -549,7 +549,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.getBalance();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -576,7 +576,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.manifestUrl();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -603,7 +603,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.finalResultsUrl();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -630,7 +630,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.token();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -657,7 +657,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.status();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -686,7 +686,7 @@ export default class EscrowClient {
       );
 
       return data;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -724,7 +724,7 @@ export default class EscrowClient {
       );
 
       return data;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }

@@ -3,16 +3,11 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import path from "path";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
-import { AuthEntity } from "../modules/auth/auth.entity";
 import { NS } from "../common/constants";
-import { TokenEntity } from "../modules/auth/token.entity";
-import { UserEntity } from "../modules/user/user.entity";
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from "./typeorm";
-import { JobEntity } from "../modules/job/job.entity";
-import { PaymentEntity } from "../modules/payment/payment.entity";
 import { WebhookIncomingEntity } from "../modules/webhook/webhook-incoming.entity";
-import { ReputationOracleEntity } from "../modules/reputation/reputation.entity";
+import { ReputationEntity } from "../modules/reputation/reputation.entity";
 
 @Module({
   imports: [
@@ -24,7 +19,7 @@ import { ReputationOracleEntity } from "../modules/reputation/reputation.entity"
         return {
           name: "default",
           type: "postgres",
-          entities: [WebhookIncomingEntity, ReputationOracleEntity],
+          entities: [WebhookIncomingEntity, ReputationEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,

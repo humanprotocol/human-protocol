@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ethers, BigNumber } from 'ethers';
-import StakingClient from '../src/staking';
+import { StakingClient } from '../src/staking';
 import {
   FAKE_AMOUNT,
   FAKE_BLOCK_NUMBER,
@@ -17,7 +17,7 @@ import {
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
 } from '../src/error';
-import InitClient from '../src/init';
+import { InitClient } from '../src/init';
 import { IAllocation, IReward, IStaker } from '../src/interfaces';
 
 vi.mock('../src/init');

@@ -12,4 +12,7 @@ export class ReputationService {
     private readonly reputationRepository: ReputationRepository,
     private readonly configService: ConfigService,
   ) {}
+
+  public async increaseReputation(address: string): Promise<void> {}
+  public async decreaseReputation(address: string): Promise<void> {}
 }

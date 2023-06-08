@@ -82,3 +82,12 @@ export enum ErrorReputation {
   NotFound = "Reputation not found",
   NotCreated = "Reputation has not been created",
 }
+
+/**
+ * Represents error messages related to results.
+ */
+export enum ErrorResults {
+  NoRecordingOracleResultsFound = "No recording oracle results found",
+  NoResultsHaveBeenVerified = "No results have been verified"
+}
+

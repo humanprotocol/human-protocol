@@ -2298,11 +2298,6 @@
   resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.10.tgz#946bc87cd8f8cf0eae5b410c27d227c0de5d599f"
   integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
 
-"@human-protocol/core@workspace:*":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.1.4.tgz#fb9733f2a2ee65f16e1e80ed0aab30de7023fc0f"
-  integrity sha512-JjKb+RwxLPqTbxHNQx8kPjjidIyEHc4gaJrGvIfZYj2/bi8ezxCbaI7WA2umSXHqFldEwfOOFQeEVeHAeNirpw==
-
 "@humanwhocodes/config-array@^0.11.8":
   version "0.11.8"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.8.tgz#03595ac2075a4dc0f191cc2131de14fbd7d410b9"

@@ -39,4 +39,27 @@ export class WebhookCron {
       return;
     }
   }
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  public async processPaidWebhook() {
+    try {
+      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+      const webhookEntity = await this.webhookRepository.findOne({
+          status: WebhookStatus.PENDING,
+          retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date())
+        }, {
+          order: {
+            waitUntil: SortDirection.ASC
+          },
+        }
+      );
+
+      if (!webhookEntity) return;
+
+      await this.webhookService.processPaidWebhook(webhookEntity);
+    } catch (e) {
+      return;
+    }
+  }
 }

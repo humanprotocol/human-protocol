@@ -8,9 +8,10 @@ import { WebhookController } from "./webhook.controller";
 import { WebhookCron } from "./webhook.cron";
 import { HttpModule } from "@nestjs/axios";
 import { WebhookRepository } from "./webhook.repository";
+import { ReputationModule } from "../reputation/reputation.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WebhookIncomingEntity]), ConfigModule, HttpModule],
+  imports: [TypeOrmModule.forFeature([WebhookIncomingEntity]), ConfigModule, HttpModule, ReputationModule],
   controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository, WebhookCron],
   exports: [WebhookService],

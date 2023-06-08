@@ -8,7 +8,7 @@ import { ReputationEntityType } from "../../common/decorators";
 export class ReputationEntity extends BaseEntity {
   @Column({ type: "int" })
   public chainId: number;
-
+ 
   @Column({ type: "varchar" })
   public address: string;
 

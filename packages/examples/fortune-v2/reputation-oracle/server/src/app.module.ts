@@ -7,12 +7,10 @@ import { DatabaseModule } from "./database/database.module";
 import { JwtHttpGuard, RolesGuard } from "./common/guards";
 import { HttpValidationPipe } from "./common/pipes";
 import { HealthModule } from "./modules/health/health.module";
-import { AuthModule } from "./modules/auth/auth.module";
-import { UserModule } from "./modules/user/user.module";
+import { WebhookModule } from "./modules/webhook/webhook.module";
+import { ReputationModule } from "./modules/reputation/reputation.module";
 import { EthersModule } from "nestjs-ethers";
 import { networkMap, networks } from "./common/decorators/networks";
-import { JobModule } from "./modules/job/job.module";
-import { PaymentModule } from "./modules/payment/payment.module";
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -51,10 +49,8 @@ const ethersModules = networks.map(network => {
     }),
     DatabaseModule,
     HealthModule,
-    AuthModule,
-    UserModule,
-    JobModule,
-    PaymentModule
+    WebhookModule,
+    ReputationModule
   ],
   controllers: [AppController],
 })

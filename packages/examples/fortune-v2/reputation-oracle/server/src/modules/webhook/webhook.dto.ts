@@ -1,7 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsDate, IsEnum, IsString, IsUrl } from "class-validator";
+import { IsBoolean, IsDate, IsEnum, IsNumber, IsString, IsUrl } from "class-validator";
 import { WebhookStatus } from "../../common/decorators";
 import { ChainId } from "@human-protocol/sdk";
+import { JobRequestType } from "../../common/enums/job";
+import { JobMode } from "../../../../../../../sdk/typescript/human-protocol-basemodels/src";
 
 export class WebhookIncomingCreateDto {
   @ApiProperty()
@@ -29,6 +31,14 @@ export class WebhookIncomingUpdateDto {
   @IsUrl()
   public resultsUrl: string;
 
+  @ApiPropertyOptional()
+  @IsBoolean()
+  public checkPassed: boolean;
+
+  @ApiPropertyOptional()
+  @IsNumber()
+  public retriesCount: number;
+
   @ApiPropertyOptional({
     enum: WebhookStatus,
   })
@@ -38,4 +48,31 @@ export class WebhookIncomingUpdateDto {
   @ApiPropertyOptional()
   @IsDate()
   public waitUntil: Date;
+}
+
+export class ManifestDto {
+  chainId: ChainId;
+  escrowAddress?: string;
+  dataUrl?: string;
+  labels?: string[];
+  submissionsRequired: number;
+  requesterTitle?: string;
+  requesterDescription: string;
+  requesterAccuracyTarget?: number;
+  price: number;
+  requestType: JobRequestType;
+  mode: JobMode;
+}
+
+export class FinalResult {
+  exchangeAddress: string;
+  workerAddress: string;
+  solution: string;
+}
+
+export class VerifiedResult {
+  exchangeAddress: string;
+  workerAddress: string;
+  solution: string;
+  checkPassed: boolean;
 }
