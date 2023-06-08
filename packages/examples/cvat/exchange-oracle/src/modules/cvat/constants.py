@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class EventTypes(str, Enum):
-    create_task = "create:task"
+    update_task = "update:task"
     update_job = "update:job"
 
 
