@@ -8,7 +8,7 @@ from src.modules.chain.escrow import validate_escrow
 from src.validators.signature import validate_signature
 
 from .cvat.constants import EventTypes
-from .cvat.handlers import handle_task_event, handle_job_event
+from .cvat.handlers import handle_task_update_event, handle_job_event
 from .oracle_webhooks.service import create_webhook
 
 router = APIRouter()
@@ -38,7 +38,7 @@ def jl_webhook(
 )
 def cvat_webhook(cvat_webhook: CvatWebhook):
     match cvat_webhook.event:
-        case EventTypes.create_task.value:
-            handle_task_event(cvat_webhook.task)
+        case EventTypes.update_task.value:
+            handle_task_update_event(cvat_webhook)
         case EventTypes.update_job.value:
             handle_job_event(cvat_webhook)
