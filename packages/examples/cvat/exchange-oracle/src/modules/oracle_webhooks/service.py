@@ -21,12 +21,10 @@ def create_webhook(session: Session, jl_webhook: JLWebhook, signature: str):
         webhook = Webhook(
             id=webhook_id,
             signature=signature,
-            escrow_address=jl_webhook.escrow_address.lower(),
+            escrow_address=jl_webhook.escrow_address,
             chain_id=jl_webhook.chain_id,
             type=WebhookTypes.jl_webhook.value,
             status=WebhookStatuses.pending.value,
-            # .lower() is to conform s3 bucket naming rules
-            # https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
         )
 
         session.add(webhook)
