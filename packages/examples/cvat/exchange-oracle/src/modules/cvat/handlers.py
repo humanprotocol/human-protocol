@@ -1,13 +1,24 @@
 from src.db import SessionLocal
 
-from .service import create_task, create_job, get_job_by_cvat_id, update_job
+from .api_calls import fetch_task_jobs
+from .service import create_job, get_job_by_cvat_id, update_job
 
 
-def handle_task_event(payload: dict) -> int:
+def handle_task_update_event(payload: dict):
     with SessionLocal.begin() as session:
-        task_id = create_task(session, payload["id"], payload["status"])
-
-    return task_id
+        if "mode" in payload.before_update:
+            if payload.task["mode"] == "annotation":
+                jobs = fetch_task_jobs(payload.task["id"])
+                for job in jobs.results:
+                    create_job(
+                        session,
+                        job["id"],
+                        job["task_id"],
+                        job["assignee"]["username"]
+                        if job["assignee"] is not None
+                        else "",
+                        job["state"],
+                    )            
 
 
 def handle_job_event(payload: dict):
@@ -18,7 +29,9 @@ def handle_job_event(payload: dict):
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
-                payload.job["assignee"]["username"],
+                payload.job["assignee"]["username"]
+                if payload.job["assignee"] is not None
+                else "",
                 payload.job["state"],
             )
         else:
