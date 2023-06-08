@@ -1,36 +1,32 @@
 {
   "network": "bsc",
   "description": "Human subgraph on Binance Smart Chain network",
-  "graft": {
-    "base": "QmVqeByVZxkEybQnQxnhQf6doAe2mXLzSS96daGwhBo48j",
-    "block": 28719116
-  },
   "EscrowFactory": {
-    "address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
-    "startBlock": 25486222,
+    "address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
+    "startBlock": 28745625,
     "abi": "../../../../node_modules/@human-protocol/core/abis/EscrowFactory.json"
   },
   "HMToken": {
-    "address": "0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7",
-    "startBlock": 20541027,
+    "address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
+    "startBlock": 25383172,
     "abi": "../../../../node_modules/@human-protocol/core/abis/HMToken.json"
   },
   "Escrow": {
     "abi": "../../../../node_modules/@human-protocol/core/abis/Escrow.json"
   },
   "Staking": {
-    "address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
-    "startBlock": 25486218,
+    "address": "0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C",
+    "startBlock": 28745621,
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
-    "startBlock": 25486223,
+    "address": "0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6",
+    "startBlock": 28745627,
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
   "RewardPool": {
-    "address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
-    "startBlock": 25486227,
+    "address": "0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e",
+    "startBlock": 28745631,
     "abi": "../../../../node_modules/@human-protocol/core/abis/RewardPool.json"
   }
 }
