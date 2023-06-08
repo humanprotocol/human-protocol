@@ -34,7 +34,7 @@ export const FAUCET_NETWORKS: {
   //   scanUrl: 'https://bscscan.com',
   //   rpcUrl: 'https://bsc-dataseed1.binance.org/',
   //   subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
-  //   hmtAddress: '0x0d501B743F22b641B8C8dfe00F1AAb881D57DDC7',
+  //   hmtAddress: '0x711Fd6ab6d65A98904522d4e3586F492B989c527',
   // },
   [ChainId.BSC_TESTNET]: {
     chainId: ChainId.BSC_TESTNET,
