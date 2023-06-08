@@ -3513,10 +3513,10 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@openzeppelin/contracts-upgradeable@^4.8.3":
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.0.tgz#70aaef469c8ac5bb0ff781480f3d321cbf7be3a8"
-  integrity sha512-+6i2j6vr2fdudTqkBvG+UOosankukxYzg3WN1nqU7ijjQ5A4osWaD3ip6CEz6YvDoSdZgcFVZoiGr7zRlUUoZw==
+"@openzeppelin/contracts-upgradeable@^4.9.1":
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.1.tgz#03e33b8059ce43884995e69e4479f5a7f084b404"
+  integrity sha512-UZf5/VdaBA/0kxF7/gg+2UrC8k+fbgiUM0Qw1apAhwpBWBxULbsHw0ZRMgT53nd6N8hr53XFjhcWNeTRGIiCVw==
 
 "@openzeppelin/contracts@^4.8.3":
   version "4.9.0"
