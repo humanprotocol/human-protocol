@@ -11,7 +11,7 @@ setuptools-pipfile = "*"
 
 [packages]
 cryptography = "*"
-hmt-basemodels = "==0.1.18"
+human-protocol-basemodels = {editable = true, path = "./../human-protocol-basemodels"}
 minio = "*"
 validators = "*"
 web3 = "==5.24.0"

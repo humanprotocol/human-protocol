@@ -1,3 +1,6 @@
+setup:
+	pipenv install --dev
+
 clean-package:
 	rm -rf build dist *.egg-info
 
