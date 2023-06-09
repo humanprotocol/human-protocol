@@ -4,7 +4,7 @@ import { FC } from 'react';
 import { ViewTitle } from '../ViewTitle';
 import { NewsView } from './NewsView';
 import { SolvedTasksView } from './SolvedTasksView';
-import lbankSvg from 'src/assets/lbank.svg';
+import newsSvg from 'src/assets/news.svg';
 import tasksSvg from 'src/assets/tasks.svg';
 
 export const SolvedTasksContainer: FC = () => {
@@ -27,7 +27,7 @@ export const SolvedTasksContainer: FC = () => {
             <NewsView
               title="Commonwealth voting: 1 HMT (ERC-20) required"
               content="The HUMAN Protocol Commonwealth forum is the center of all things related to community governance."
-              image={lbankSvg}
+              image={newsSvg}
             />
           </Grid>
         </Grid>

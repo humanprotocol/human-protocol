@@ -29,7 +29,7 @@ export const NewsView = ({
           display: { xs: 'none', sm: 'block' },
         }}
       >
-        <img src={image} alt="lbank" />
+        <img src={image} alt="news" />
       </Box>
     )}
   </CardContainer>
