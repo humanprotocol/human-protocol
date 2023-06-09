@@ -34,6 +34,7 @@
   "devDependencies": {
     "@nestjs/cli": "^9.5.0",
     "@nestjs/testing": "^9.3.9",
-    "@types/express": "^4.17.13"
+    "@types/express": "^4.17.13",
+    "tsconfig-paths-jest": "^0.0.1"
   }
 }
