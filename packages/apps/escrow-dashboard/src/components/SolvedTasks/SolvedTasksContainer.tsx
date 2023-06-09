@@ -16,6 +16,7 @@ const SOLVED_TASKS = [
   { date: '2023-02-28', value: 237012318 },
   { date: '2023-03-31', value: 212012559 },
   { date: '2023-04-30', value: 182462076 },
+  { date: '2023-05-31', value: 148126905 },
 ];
 
 export const SolvedTasksContainer: FC = () => {
