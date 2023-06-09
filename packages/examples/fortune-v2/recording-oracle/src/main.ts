@@ -1,4 +1,3 @@
-import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
@@ -11,12 +10,11 @@ import helmet from "helmet";
 import { GlobalExceptionsFilter } from "@/common/filter";
 
 import { AppModule } from "./app.module";
+import { ServerConfigType, serverConfigKey } from "./common/config";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
-  const configService: ConfigService = app.get(ConfigService);
-
-  const feUrl = configService.get<string>("server.feUrl", "");
+  const { feUrl, sessionSecret, host, port }: ServerConfigType = app.get(serverConfigKey);
 
   // Modules
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -36,7 +34,7 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(
     session({
-      secret: configService.get<string>("server.sessionSecret", ""),
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
     }),
@@ -54,9 +52,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("swagger", app, document);
-
-  const host = configService.get<string>("server.host", "localhost");
-  const port = configService.get<number>("server.port", 5001);
 
   await app.listen(port, host, async () => {
     // eslint-disable-next-line no-console

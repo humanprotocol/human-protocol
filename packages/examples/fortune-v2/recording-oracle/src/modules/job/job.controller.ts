@@ -12,7 +12,7 @@ export class JobController {
 
   @Public()
   @Post("/solve")
-  public async solve(@Body() fortune: JobSolutionRequestDto): Promise<any> {
+  public async solve(@Body() fortune: JobSolutionRequestDto): Promise<string> {
     return await this.jobService.processJobSolution(fortune);
   }
 }
