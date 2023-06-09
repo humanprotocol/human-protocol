@@ -3,7 +3,7 @@
   "description": "Human subgraph on Binance Smart Chain testnet",
   "graft": {
     "base": "QmSrHm8fmWQEKFeDYuZYVnmFVcMZAfC2nnqa17W4YBkpkK",
-    "block": 30306144
+    "block": 30306150
   },
   "EscrowFactory": {
     "address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
