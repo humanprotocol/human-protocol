@@ -30,7 +30,7 @@ def jl_webhook(
             webhook_id = create_webhook(session, jl_webhook, human_signature)
 
         return JLWebhookResponse(id=webhook_id)
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -46,5 +46,5 @@ def cvat_webhook(cvat_webhook: CvatWebhook):
                 handle_task_update_event(cvat_webhook)
             case EventTypes.update_job.value:
                 handle_job_event(cvat_webhook)
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
