@@ -7,8 +7,12 @@
   "scripts": {
     "job-launcher-server:dev": "cd job-launcher/server && yarn start",
     "recording-oracle:dev": "cd recording-oracle && yarn start:dev",
+    "recording-oracle:lint": "yarn workspace @human-protocol/fortune-v2-recording-oracle lint",
+    "recording-oracle:test": "yarn workspace @human-protocol/fortune-v2-recording-oracle test",
     "local": "docker compose down && (concurrently --hide 0 \"docker compose up -d\" \"yarn job-launcher-server:dev\" \"yarn recording-oracle:dev\" )",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "concurrently npm:recording-oracle:lint",
+    "lint:fix": "concurrently npm:recording-oracle:lint:fix",
+    "pretest": "yarn workspace @human-protocol/sdk build",
+    "test": "concurrently npm:recording-oracle:test"
   }
 }
