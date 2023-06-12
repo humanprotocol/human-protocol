@@ -52,13 +52,13 @@ export enum TokenId {
 }
 
 export enum PaymentSource {
-  FIAT = 'fiat',
-  CRYPTO = 'crypto',
-  BALANCE = 'balance',
+  FIAT = 'FIAT',
+  CRYPTO = 'CRYPTO',
+  BALANCE = 'BALANCE',
 }
 
 export enum PaymentFiatMethodType {
-  CARD = 'card',
+  CARD = 'CARD',
 }
 
 export enum PaymentType {

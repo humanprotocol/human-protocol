@@ -58,8 +58,8 @@ export class JobService {
         'S3_ENDPOINT',
         'http://127.0.0.1',
       ),
-      port: this.configService.get<number>('S3_PORT', 9000),
-      useSSL: this.configService.get<boolean>('S3_USE_SSL', false),
+      port: Number(this.configService.get<number>('S3_PORT', 9000)),
+      useSSL: Boolean(this.configService.get<boolean>('S3_USE_SSL', false)),
     };
 
     this.bucket = this.configService.get<string>('S3_BUCKET', 'launcher');
@@ -79,11 +79,11 @@ export class JobService {
       fortunesRequired,
       requesterTitle,
       requesterDescription,
-      price,
+      fundAmount,
     } = dto;
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const amount = BigNumber.from(price).mul(fortunesRequired);
+    const amount = BigNumber.from(fundAmount).mul(fortunesRequired);
 
     if (userBalance.lte(amount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -91,11 +91,10 @@ export class JobService {
     }
 
     const manifestData: ManifestDto = {
-      chainId,
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
-      price,
+      fundAmount,
       mode: JobMode.DESCRIPTIVE,
       requestType: JobRequestType.FORTUNE,
     };
@@ -143,11 +142,11 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      price,
+      fundAmount,
     } = dto;
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const amount = BigNumber.from(price).mul(annotationsPerImage);
+    const amount = BigNumber.from(fundAmount).mul(annotationsPerImage);
 
     if (userBalance.lte(amount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -155,13 +154,12 @@ export class JobService {
     }
 
     const manifestData: ManifestDto = {
-      chainId,
       dataUrl,
       submissionsRequired: annotationsPerImage,
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      price,
+      fundAmount,
       mode: JobMode.BATCH,
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
@@ -216,10 +214,6 @@ export class JobService {
 
       const escrowClient = new EscrowClient(clientParams);
 
-      const exchangeOracle = this.configService.get<string>(
-        'EXCHANGE_ORACLE_ADDRESS',
-        '',
-      );
       const exchangeOracleWebhookUrl = this.configService.get<string>(
         'EXCHANGE_ORACLE_WEBHOOK_URL',
         '',
@@ -334,7 +328,7 @@ export class JobService {
     );
 
     if (!data) {
-      throw new NotFoundException(ErrorJob.WebhookWasNotReceived);
+      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
     }
 
     return true;

@@ -33,16 +33,6 @@ export class UserUpdateDto {
   public status?: UserStatus;
 }
 
-export class UserUpdateTokenAddressDto {
-  @ApiProperty()
-  @IsString()
-  public tokenAddress: string;
-
-  public status?: UserStatus;
-
-  public socketId?: string;
-}
-
 export const generateUserCreateDto = (
   data: Partial<UserCreateDto> = {},
 ): UserCreateDto => {

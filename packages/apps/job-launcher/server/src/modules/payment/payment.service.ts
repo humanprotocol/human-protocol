@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { BigNumber, providers } from 'ethers';
@@ -68,7 +68,6 @@ export class PaymentService {
     dto: PaymentFiatCreateDto,
   ) {
     const { amount, currency } = dto;
-    const paymentMethodOptions = {};
 
     const params: Stripe.PaymentIntentCreateParams = {
       payment_method_types: [PaymentFiatMethodType.CARD],
@@ -78,10 +77,7 @@ export class PaymentService {
 
     params.confirm = true;
     params.customer = customerId;
-
-    if (paymentMethodOptions) {
-      params.payment_method_options = paymentMethodOptions;
-    }
+    params.payment_method_options = {};
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
@@ -130,10 +126,15 @@ export class PaymentService {
       const transaction = await provider.getTransactionReceipt(
         dto.transactionHash,
       );
-      console.log(transaction);
+      
       if (!transaction) {
         this.logger.error(ErrorPayment.TransactionNotFoundByHash);
         throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
+      }
+
+      if (!transaction.logs[0] || !transaction.logs[0].data) {
+        this.logger.error(ErrorPayment.InvalidTransactionData);
+        throw new NotFoundException(ErrorPayment.InvalidTransactionData);
       }
 
       if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
@@ -145,11 +146,65 @@ export class PaymentService {
         );
       }
 
+      const amount = BigInt(transaction.logs[0].data).toString()
+
+      const paymentEntity = await this.paymentRepository.findOne({ transactionHash: transaction.transactionHash })
+
+      if (paymentEntity) {
+        this.logger.log(ErrorPayment.TransactionHashAlreadyExists, PaymentRepository.name);
+        throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
+      }
+
       await this.savePayment(
         userId,
         PaymentSource.CRYPTO,
         PaymentType.DEPOSIT,
-        BigNumber.from(dto.amount),
+        BigNumber.from(amount),
+      );
+
+      return true;
+    } catch (e) {
+      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
+      return false;
+    }
+  }
+
+  public async test() {
+    try {
+      const provider = new providers.JsonRpcProvider(
+        Object.values(networkMap).find(
+          (item) => item.network.chainId === 80001,
+        )?.rpcUrl,
+      );
+
+      const transaction = await provider.getTransactionReceipt('0x13cfce64389a9019d927a9c95b58997e25795fb030865e12113dbcda9cdd3bde');
+      
+      if (!transaction) {
+        this.logger.error(ErrorPayment.TransactionNotFoundByHash);
+        throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
+      }
+
+      if (!transaction.logs[0] || !transaction.logs[0].data) {
+        this.logger.error(ErrorPayment.InvalidTransactionData);
+        throw new NotFoundException(ErrorPayment.InvalidTransactionData);
+      }
+
+      const amount = BigInt(transaction.logs[0].data).toString()
+
+      if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
+        this.logger.error(
+          `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
+        );
+        throw new NotFoundException(
+          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+        );
+      }
+
+      await this.savePayment(
+        1,
+        PaymentSource.CRYPTO,
+        PaymentType.DEPOSIT,
+        BigNumber.from(amount),
       );
 
       return true;

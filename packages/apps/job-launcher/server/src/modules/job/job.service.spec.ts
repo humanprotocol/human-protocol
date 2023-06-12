@@ -50,11 +50,11 @@ describe('JobService', () => {
         fortunesRequired: 5,
         requesterTitle: 'Test Job',
         requesterDescription: 'This is a test job',
-        price: 1,
+        fundAmount: 1,
       };
 
       const userBalance = BigNumber.from('10000000000000000000'); // 10 ETH
-      const amount = BigNumber.from(dto.price).mul(dto.fortunesRequired);
+      const amount = BigNumber.from(dto.fundAmount).mul(dto.fortunesRequired);
 
       jest
         .spyOn(paymentService, 'getUserBalance')
@@ -86,11 +86,11 @@ describe('JobService', () => {
     //     fortunesRequired: 5,
     //     requesterTitle: 'Test Job',
     //     requesterDescription: 'This is a test job',
-    //     price: 1,
+    //     fundAmount: 1,
     //   };
 
     //   const userBalance = BigNumber.from('1000000000000000000'); // 1 ETH
-    //   const amount = BigNumber.from(dto.price).mul(dto.fortunesRequired);
+    //   const amount = BigNumber.from(dto.fundAmount).mul(dto.fortunesRequired);
 
     //   jest
     //     .spyOn(paymentService, 'getUserBalance')

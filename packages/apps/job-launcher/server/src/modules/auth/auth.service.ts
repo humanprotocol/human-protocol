@@ -49,7 +49,9 @@ export class AuthService {
   }
 
   public async signup(data: UserCreateDto): Promise<UserEntity> {
+    console.log(data)
     const userEntity = await this.userService.create(data);
+    console.log(3333)
 
     const tokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,

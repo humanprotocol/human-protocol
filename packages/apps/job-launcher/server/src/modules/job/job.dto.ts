@@ -42,7 +42,7 @@ export class JobFortuneCreateDto {
   @ApiProperty()
   @IsNumber()
   @IsPositive()
-  public price: number;
+  public fundAmount: number;
 
   public userId?: number;
   public manifestUrl?: string;
@@ -84,7 +84,7 @@ export class JobCvatCreateDto {
   @ApiProperty()
   @IsNumber()
   @IsPositive()
-  public price: number;
+  public fundAmount: number;
 
   public userId: number;
 

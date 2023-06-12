@@ -27,16 +27,6 @@ export class PaymentFiatCreateDto {
   })
   @IsEnum(Currency)
   public currency: Currency;
-
-  @ApiProperty({
-    enum: PaymentSource,
-  })
-  @IsEnum(PaymentSource)
-  public source: PaymentSource;
-
-  public userId: number;
-  public rate: number;
-  public type: PaymentType;
 }
 
 export class PaymentCryptoCreateDto {
@@ -49,14 +39,6 @@ export class PaymentCryptoCreateDto {
   @ApiProperty()
   @IsString()
   public transactionHash: string;
-
-  @ApiProperty()
-  @IsString()
-  public amount: string;
-
-  public userId: number;
-  public rate: number;
-  public type: PaymentType;
 }
 
 export class PaymentCreateDto {
@@ -89,15 +71,13 @@ export class GetRateDto {
 }
 
 export class ManifestDto {
-  chainId: number;
-  escrowAddress?: string;
   dataUrl?: string;
   labels?: string[];
   submissionsRequired: number;
   requesterTitle?: string;
   requesterDescription: string;
   requesterAccuracyTarget?: number;
-  price: number;
+  fundAmount: number;
   requestType: JobRequestType;
   mode: JobMode;
 }

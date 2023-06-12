@@ -13,7 +13,7 @@ export enum ErrorJob {
   NotCreated = 'Job has not been created',
   NotEnoughFunds = 'Not enough funds',
   ManifestNotFound = 'Manifest not found',
-  WebhookWasNotReceived = 'Webhook was not received',
+  WebhookWasNotSent= 'Webhook was not sent',
 }
 
 /**
@@ -48,7 +48,9 @@ export enum ErrorPayment {
   NotSuccess = 'Unseccssful payment',
   CustomerNotFound = 'Customer not found',
   IncorrectAmount = 'Incorrect amount',
+  TransactionHashAlreadyExists = 'transaction hash already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
+  InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
 }
 

@@ -9,8 +9,6 @@ import {
 import { JobEntity } from './job.entity';
 import {
   JobCreateDto,
-  JobCvatCreateDto,
-  JobFortuneCreateDto,
   JobUpdateDto,
 } from './job.dto';
 import { ErrorJob } from '../../common/constants/errors';

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import path from 'path';
+import * as path from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthEntity } from '../modules/auth/auth.entity';
 import { NS } from '../common/constants';
@@ -50,11 +50,11 @@ import { PaymentEntity } from '../modules/payment/payment.entity';
           logger: typeOrmLoggerService,
           host: configService.get<string>('POSTGRES_HOST', 'localhost'),
           port: configService.get<number>('POSTGRES_PORT', 5432),
-          username: configService.get<string>('POSTGRES_USER', 'fortune'),
-          password: configService.get<string>('POSTGRES_PASSWORD', 'fortune'),
+          username: configService.get<string>('POSTGRES_USER', 'operator'),
+          password: configService.get<string>('POSTGRES_PASSWORD', 'qwerty'),
           database: configService.get<string>(
             'POSTGRES_DB',
-            'hmt-job-launcher',
+            'job-launcher',
           ),
           keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
           migrationsRun: false,

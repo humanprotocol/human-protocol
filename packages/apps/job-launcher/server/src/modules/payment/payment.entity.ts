@@ -16,7 +16,7 @@ export class PaymentEntity extends BaseEntity {
   @Column({ type: 'varchar', default: null, nullable: true })
   public transactionHash: string;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'varchar' })
   public amount: string;
 
   @Column({ type: 'decimal', precision: 5, scale: 2 })

@@ -246,7 +246,7 @@ export class JobService {
     );
 
     if (!data) {
-      throw new NotFoundException(ErrorJob.WebhookWasNotReceived);
+      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
     }
 
     return true;

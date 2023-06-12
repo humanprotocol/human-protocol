@@ -5,7 +5,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import zxcvbn from 'zxcvbn';
+import * as zxcvbn from 'zxcvbn';
 
 interface IPasswordConstraints {
   required: boolean;

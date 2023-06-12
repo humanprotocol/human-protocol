@@ -13,7 +13,7 @@ export enum ErrorJob {
   NotCreated = "Job has not been created",
   NotEnoughFunds = "Not enough funds",
   ManifestNotFound = "Manifest not found",
-  WebhookWasNotReceived = "Webhook was not received"
+  WebhookWasNotSent = "Webhook was not sent"
 }
 
 /**

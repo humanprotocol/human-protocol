@@ -37,16 +37,11 @@ export class PaymentRepository {
   public async findOne(
     where: FindConditions<PaymentEntity>,
     options?: FindOneOptions<PaymentEntity>,
-  ): Promise<PaymentEntity> {
+  ): Promise<PaymentEntity | undefined> {
     const paymentEntity = await this.paymentEntityRepository.findOne({
       where,
       ...options,
     });
-
-    if (!paymentEntity) {
-      this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new NotFoundException(ErrorPayment.NotFound);
-    }
 
     return paymentEntity;
   }

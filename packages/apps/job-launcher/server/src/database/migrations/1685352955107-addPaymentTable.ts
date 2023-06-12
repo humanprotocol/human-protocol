@@ -51,7 +51,7 @@ export class addPaymentTable1685352955107 implements MigrationInterface {
         },
         {
           name: 'amount',
-          type: 'bigint',
+          type: 'varchar',
         },
         {
           name: 'rate',

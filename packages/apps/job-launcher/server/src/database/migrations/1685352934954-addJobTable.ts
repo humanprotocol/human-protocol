@@ -44,11 +44,11 @@ export class addJobTable1685352934954 implements MigrationInterface {
         },
         {
           name: 'fee',
-          type: 'bigint',
+          type: 'varchar',
         },
         {
           name: 'fund_amount',
-          type: 'bigint',
+          type: 'varchar',
         },
         {
           name: 'status',

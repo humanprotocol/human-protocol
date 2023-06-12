@@ -40,16 +40,15 @@ export class UserRepository {
   public async findOne(
     where: FindConditions<UserEntity>,
     options?: FindOneOptions<UserEntity>,
-  ): Promise<UserEntity> {
+  ): Promise<UserEntity | undefined> {
     const userEntity = await this.userEntityRepository.findOne({
       where,
       ...options,
     });
-
-    if (!userEntity) {
-      this.logger.log(ErrorUser.NotFound, UserRepository.name);
-      throw new NotFoundException(ErrorUser.NotFound);
-    }
+    console.log({
+      where,
+      ...options,
+    })
 
     return userEntity;
   }

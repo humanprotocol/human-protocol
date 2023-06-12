@@ -29,6 +29,14 @@ export class PaymentController {
   ) {}
 
   @UseGuards(RolesGuard)
+  @Post('/test')
+  public async test(
+    @Request() req: any
+  ): Promise<void> {
+    this.paymentService.test();
+  }
+
+  @UseGuards(RolesGuard)
   @Post('/fiat')
   public async createFiatPayment(
     @Request() req: any,
