@@ -2,6 +2,7 @@
   "extends": "../../../../tsconfig.json",
   "compilerOptions": {
     "alwaysStrict": true,
+    "allowJs": true,
     "declaration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

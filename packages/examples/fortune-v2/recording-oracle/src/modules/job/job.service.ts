@@ -8,8 +8,8 @@ import { JobSolutionRequestDto } from "./job.dto";
 
 @Injectable()
 export class JobService {
-  private escrowClient: EscrowClient;
-  private signer: ethers.Wallet;
+  escrowClient: EscrowClient;
+  signer: ethers.Wallet;
 
   constructor(
     @Inject(ethereumConfigKey)
