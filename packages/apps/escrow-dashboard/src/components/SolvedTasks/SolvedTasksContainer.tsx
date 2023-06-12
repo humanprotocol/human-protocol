@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { FC } from 'react';
 
 import { ViewTitle } from '../ViewTitle';
@@ -19,18 +19,28 @@ export const SolvedTasksContainer: FC = () => {
         ></Typography>
       </Box>
       <Box mt={{ xs: 4, md: 8 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6} lg={8}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 4,
+            flexDirection: { xs: 'column', lg: 'row' },
+          }}
+        >
+          <Box
+            sx={{
+              minWidth: { xs: 'auto', xl: '960px' },
+            }}
+          >
             <SolvedTasksView />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
+          </Box>
+          <Box sx={{ flex: 1 }}>
             <NewsView
               title="Commonwealth voting: 1 HMT (ERC-20) required"
               content="The HUMAN Protocol Commonwealth forum is the center of all things related to community governance."
               image={newsSvg}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
