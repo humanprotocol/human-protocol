@@ -1,4 +1,4 @@
-name: Fortune check
+name: Fortune V2 check
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   fortune-test:
-    name: Fortune Test
+    name: Fortune V2 Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
