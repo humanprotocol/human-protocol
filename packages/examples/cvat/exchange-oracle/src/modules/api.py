@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, HTTPException, Header
 from typing import Union
 
 from .api_schema import JLWebhook, JLWebhookResponse, CvatWebhook
@@ -22,13 +22,16 @@ def jl_webhook(
     jl_webhook: JLWebhook,
     human_signature: Union[str, None] = Header(default=None),
 ):
-    validate_signature(human_signature)
-    validate_escrow(jl_webhook.chain_id, jl_webhook.escrow_address)
+    try:
+        validate_signature(human_signature)
+        validate_escrow(jl_webhook.chain_id, jl_webhook.escrow_address)
 
-    with SessionLocal.begin() as session:
-        webhook_id = create_webhook(session, jl_webhook, human_signature)
+        with SessionLocal.begin() as session:
+            webhook_id = create_webhook(session, jl_webhook, human_signature)
 
-    return JLWebhookResponse(id=webhook_id)
+        return JLWebhookResponse(id=webhook_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # TODO: Add CVAT signature and validate it
@@ -37,8 +40,11 @@ def jl_webhook(
     description="Consumes a webhook from a cvat",
 )
 def cvat_webhook(cvat_webhook: CvatWebhook):
-    match cvat_webhook.event:
-        case EventTypes.update_task.value:
-            handle_task_update_event(cvat_webhook)
-        case EventTypes.update_job.value:
-            handle_job_event(cvat_webhook)
+    try:
+        match cvat_webhook.event:
+            case EventTypes.update_task.value:
+                handle_task_update_event(cvat_webhook)
+            case EventTypes.update_job.value:
+                handle_job_event(cvat_webhook)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
