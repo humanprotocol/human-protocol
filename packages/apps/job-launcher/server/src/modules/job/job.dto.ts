@@ -123,3 +123,17 @@ export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
 }
+
+export class ManifestDto {
+  chainId: ChainId;
+  escrowAddress?: string;
+  dataUrl?: string;
+  labels?: string[];
+  submissionsRequired: number;
+  requesterTitle?: string;
+  requesterDescription: string;
+  requesterAccuracyTarget?: number;
+  fundAmount: number;
+  requestType: JobRequestType;
+  mode: JobMode;
+}

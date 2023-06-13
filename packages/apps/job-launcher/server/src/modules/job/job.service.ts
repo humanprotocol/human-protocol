@@ -86,7 +86,8 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    const totalFee = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
+    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
+    const totalFee = BigNumber.from(fundAmount).mul(totalFeePercentage).div(100);
     const totalAmount = BigNumber.from(fundAmount).add(totalFee)
 
     if (userBalance.lte(totalAmount)) {
@@ -151,7 +152,11 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    if (userBalance.lte(fundAmount)) {
+    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
+    const totalFee = BigNumber.from(fundAmount).mul(totalFeePercentage).div(100);
+    const totalAmount = BigNumber.from(fundAmount).add(totalFee)
+
+    if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new NotFoundException(ErrorJob.NotEnoughFunds);
     }
@@ -162,7 +167,7 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      fundAmount,
+      fundAmount: totalAmount.toString(),
       mode: JobMode.BATCH,
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
@@ -290,15 +295,13 @@ export class JobService {
   }
 
   public async getManifest(manifestUrl: string): Promise<ManifestDto> {
-    const { data } = await firstValueFrom(
-      await this.httpService.get(manifestUrl),
-    );
+    const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(manifestUrl)
 
-    if (!data) {
+    if (!manifest) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
 
-    return data;
+    return manifest;
   }
 
   public async sendWebhook(
