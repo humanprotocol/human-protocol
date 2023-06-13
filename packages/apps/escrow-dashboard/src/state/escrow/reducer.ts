@@ -38,6 +38,7 @@ type EscrowState = {
   statsLoaded: boolean;
   amounts: EscrowAmountsType;
   amountsLoaded: boolean;
+  range: number;
 };
 
 const initialState: EscrowState = {
@@ -49,13 +50,14 @@ const initialState: EscrowState = {
   statsLoaded: false,
   amounts: {},
   amountsLoaded: false,
+  range: 30,
 };
 
 export const fetchEscrowEventsAsync = createAsyncThunk<
   EscrowEventsType,
-  void,
+  number,
   { state: AppState }
->('escrow/fetchEscrowEventsAsync', async () => {
+>('escrow/fetchEscrowEventsAsync', async (days: number) => {
   let escrowEvents: EscrowEventsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
@@ -64,16 +66,16 @@ export const fetchEscrowEventsAsync = createAsyncThunk<
       } else {
         let eventDayDatas = await getEventDayData(
           ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-          30
+          days
         );
 
         if (
           ESCROW_NETWORKS[chainId]?.oldSubgraphUrl &&
-          eventDayDatas.length < 30
+          eventDayDatas.length < days
         ) {
           const oldData = await getEventDayData(
             ESCROW_NETWORKS[chainId]?.oldSubgraphUrl!,
-            30 - eventDayDatas.length
+            days - eventDayDatas.length
           );
           eventDayDatas = eventDayDatas.concat(oldData);
         }
@@ -105,7 +107,8 @@ const getEventDayData = async (subgraphUrl: string, count: number) => {
           Number(d.dailyPendingEvents),
         dailyEscrowAmounts: Number(d.dailyEscrowAmounts),
       }))
-    );
+    )
+    .catch((err) => []);
 };
 
 export const fetchEscrowStatsAsync = createAsyncThunk<
@@ -167,7 +170,13 @@ const getEscrowStats = async (subgraphUrl: string) => {
           Number(pendingEventCount) +
           Number(bulkTransferEventCount),
       };
-    });
+    })
+    .catch((err) => ({
+      intermediateStorageEventCount: 0,
+      pendingEventCount: 0,
+      bulkTransferEventCount: 0,
+      totalEventCount: 0,
+    }));
 };
 
 export const fetchEscrowAmountsAsync = createAsyncThunk<
@@ -204,6 +213,8 @@ export const fetchEscrowAmountsAsync = createAsyncThunk<
 
 export const setChainId = createAction<ChainId>('escrow/setChainId');
 
+export const setRange = createAction<number>('escrow/setRange');
+
 type UnknownAsyncThunkFulfilledOrPendingAction =
   | UnknownAsyncThunkFulfilledAction
   | UnknownAsyncThunkPendingAction
@@ -223,6 +234,9 @@ const serializeLoadingKey = (
 export default createReducer(initialState, (builder) => {
   builder.addCase(setChainId, (state, action) => {
     state.chainId = action.payload;
+  });
+  builder.addCase(setRange, (state, action) => {
+    state.range = action.payload;
   });
   builder.addCase(fetchEscrowEventsAsync.fulfilled, (state, action) => {
     state.events = action.payload;
