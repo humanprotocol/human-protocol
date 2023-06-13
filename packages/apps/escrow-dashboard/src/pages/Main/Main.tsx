@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import { FC } from 'react';
 
 import {
@@ -12,14 +12,7 @@ import {
 export const Main: FC = () => {
   return (
     <PageWrapper>
-      <Grid container spacing={4}>
-        <Grid item xs={12} lg={6}>
-          <SolvedTasksContainer />
-        </Grid>
-        {/* <Grid item xs={12} lg={6}>
-            <News />
-          </Grid> */}
-      </Grid>
+      <SolvedTasksContainer />
       <EscrowContainer />
       <TokenContainer />
       <LeaderboardContainer showAll={false} />
