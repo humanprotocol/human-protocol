@@ -20,7 +20,6 @@ export class WebhookCron {
   @Cron(CronExpression.EVERY_10_SECONDS)
   public async processPendingWebhook() {
     try {
-      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
       const webhookEntity = await this.webhookRepository.findOne({
           status: WebhookStatus.PENDING,
           retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
@@ -43,7 +42,6 @@ export class WebhookCron {
   @Cron(CronExpression.EVERY_10_SECONDS)
   public async processPaidWebhook() {
     try {
-      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
       const webhookEntity = await this.webhookRepository.findOne({
           status: WebhookStatus.PENDING,
           retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),

@@ -2,8 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsBoolean, IsDate, IsEnum, IsNumber, IsString, IsUrl } from "class-validator";
 import { WebhookStatus } from "../../common/decorators";
 import { ChainId } from "@human-protocol/sdk";
-import { JobRequestType } from "../../common/enums/job";
-import { JobMode } from "../../../../../../../sdk/typescript/human-protocol-basemodels/src";
+import { JobMode, JobRequestType } from "../../common/enums/job";
 
 export class WebhookIncomingCreateDto {
   @ApiProperty()

@@ -4,12 +4,12 @@
       "type": "postgres",
       "host": "localhost",
       "port": 5432,
-      "username": "hmt-launcher",
+      "username": "operator",
       "password": "qwerty",
-      "database": "hmt-reputation-db",
-      "entities": ["dist/**/*.entity{ .ts,.js}"],
+      "database": "job-launcher",
+      "entities": ["dist/src/**/*.entity{ .ts,.js}"],
       "synchronize": false,
-      "migrations": ["dist/database/migrations/*{.ts,.js}"],
+      "migrations": ["dist/src/database/migrations/*{.ts,.js}"],
       "migrationsTableName": "migrations_typeorm",
       "migrationsRun": true
     }

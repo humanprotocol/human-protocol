@@ -9,7 +9,7 @@ import { Repository } from "typeorm";
 import { FinalResult, ManifestDto, VerifiedResult, WebhookIncomingCreateDto } from "./webhook.dto";
 import { ErrorResults, ErrorWebhook } from "../../common/constants/errors";
 import { WebhookRepository } from "./webhook.repository";
-import { WebhookStatus } from "../../common/decorators";
+import { ReputationEntityType, WebhookStatus } from "../../common/decorators";
 import { EthersSigner, InjectSignerProvider } from "nestjs-ethers";
 import { JobRequestType } from "../../common/enums/job";
 import { RETRIES_COUNT_THRESHOLD } from "../../common/constants";
@@ -37,9 +37,9 @@ export class WebhookService {
     };
 
     this.storageParams = {
-      endPoint: this.configService.get<string>("S3_ENDPOINT", "http://127.0.0.1"),
-      port: this.configService.get<number>("S3_PORT", 9000),
-      useSSL: this.configService.get<boolean>("S3_USE_SSL", false),
+      endPoint: this.configService.get<string>("S3_ENDPOINT", "127.0.0.1"),
+      port: Number(this.configService.get<number>("S3_PORT", 9000)),
+      useSSL: Boolean(this.configService.get<boolean>("S3_USE_SSL", false)),
     };
 
     this.bucket = this.configService.get<string>("S3_BUCKET", "launcher");
@@ -107,15 +107,15 @@ export class WebhookService {
       }
 
       await Promise.all(finalResults.map(async (result) => {
-        await this.reputationService.increaseReputation(result.workerAddress);
+        await this.reputationService.increaseReputation(clientParams.network.chainId, result.workerAddress, ReputationEntityType.WORKER);
       }));
 
       const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(webhookEntity.escrowAddress);
 
       if (webhookEntity.checkPassed) {
-        this.reputationService.increaseReputation(recordingOracleAddress);
+        this.reputationService.increaseReputation(clientParams.network.chainId, recordingOracleAddress, ReputationEntityType.RECORDING_ORACLE);
       } else {
-        this.reputationService.decreaseReputation(recordingOracleAddress);
+        this.reputationService.decreaseReputation(clientParams.network.chainId, recordingOracleAddress, ReputationEntityType.RECORDING_ORACLE);
       }
 
       await this.webhookRepository

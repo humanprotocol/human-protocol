@@ -29,20 +29,15 @@ export class ReputationRepository {
       throw new NotFoundException(ErrorReputation.NotFound);
     }
 
-    Object.assign(ReputationEntity, dto);
+    Object.assign(reputationEntity, dto);
     return reputationEntity.save();
   }
 
   public async findOne(
     where: FindConditions<ReputationEntity>,
     options?: FindOneOptions<ReputationEntity>,
-  ): Promise<ReputationEntity> {
+  ): Promise<ReputationEntity | undefined> {
     const reputationEntity = await this.reputationEntityRepository.findOne({ where, ...options });
-
-    if (!reputationEntity) {
-      this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
-      throw new NotFoundException(ErrorReputation.NotFound);
-    }
 
     return reputationEntity;
   }

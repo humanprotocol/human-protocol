@@ -1,56 +1,73 @@
-# Reputation Oracle Server
-Pre-reading: https://github.com/humanprotocol/.github/wiki
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+</p>
 
-## Software Requirements
-The Reputation Oracle Server requires of a number key components, before installing the Server you should ensure you have completed the pre-install steps below.
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-1. Node.js and NPM
-To see if you have installed Node.js and npm, execute the following commands in your terminal:
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-`node -v`
+## Description
 
-`npm -v`
-
-If you do not have these installed you can follow the guide here:
-https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-
-2. Postgres Database
-The server uses postgres as a database to store user emails and passwords.  Ensure that you have installed postgres and created a database before installing the actual server itself.  For postgres install instructions see here: 
-https://www.postgresql.org/download/ 
-
-Make a note of the postgres username, password and database name. 
-
-3. Hardhat
-Hardhat is an Ethereum development environment. Compile your contracts and run them on a development network. To install Hardhat see here:
-https://hardhat.org/hardhat-runner/docs/getting-started
-
-4. S3 credentials
-The server uses S3 to store job details.  To setup an S3 bucket and generate the API Key & Secret follow this guide: https://medium.com/@shamnad.p.s/how-to-create-an-s3-bucket-and-aws-access-key-id-and-secret-access-key-for-accessing-it-5653b6e54337 
-
-Take a note of the AWS region for the S3 bucket you just created, your API Key and Secret.
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
-5. When installing for the first time it will be necessary to run a database migration.  To do so you should execute the following command in your terminal:
 
+```bash
+$ yarn install
+```
 
-6. Clone this repo to your local machine and change directory into the cloned repo:
-   
-`git clone git@github.com:humanprotocol/human-protocol.git` 
+## Running the app
 
-7. Install using yarn
-   
-`yarn install`
+```bash
+# development
+$ yarn run start
 
-8. Set the variable <NODE_ENV> to development, testing or production. Populate the .env.<NODE_ENV> file with the values you noted down in steps 2, 3 and 4. Use .env.example file to start.
+# watch mode
+$ yarn run start:dev
 
-9. Run migrations using yarn
+# production mode
+$ yarn run start:prod
+```
 
-`yarn migration:run`
+## Test
 
-`yarn migration:create <MIGRATION_NAME>` - Create new migration 
+```bash
+# unit tests
+$ yarn run test
 
-`yarn migration:revert` - Revert latest migration
+# e2e tests
+$ yarn run test:e2e
 
-10. Run application using yarn
-`yarn start`
+# test coverage
+$ yarn run test:cov
+```
 
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](LICENSE).

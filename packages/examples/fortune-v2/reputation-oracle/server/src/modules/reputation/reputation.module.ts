@@ -7,6 +7,7 @@ import { ReputationEntity } from "./reputation.entity";
 import { ReputationController } from "./reputation.controller";
 import { ReputationCron } from "./reputation.cron";
 import { HttpModule } from "@nestjs/axios";
+import { ReputationRepository } from "./reputation.repository";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { HttpModule } from "@nestjs/axios";
     HttpModule,
   ],
   controllers: [ReputationController],
-  providers: [Logger, ReputationService, ReputationCron],
+  providers: [Logger, ReputationService, ReputationRepository, ReputationCron],
   exports: [ReputationService],
 })
 export class ReputationModule {}

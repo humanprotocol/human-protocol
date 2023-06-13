@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import path from "path";
+import * as path from "path";
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 import { NS } from "../common/constants";
 

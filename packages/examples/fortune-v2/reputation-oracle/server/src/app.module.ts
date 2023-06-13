@@ -1,16 +1,16 @@
-import { Module } from "@nestjs/common";
-import { APP_GUARD, APP_PIPE } from "@nestjs/core";
-import { ConfigModule } from "@nestjs/config";
-import { ScheduleModule } from "@nestjs/schedule";
-import { AppController } from "./app.controller";
-import { DatabaseModule } from "./database/database.module";
-import { JwtHttpGuard, RolesGuard } from "./common/guards";
-import { HttpValidationPipe } from "./common/pipes";
-import { HealthModule } from "./modules/health/health.module";
-import { WebhookModule } from "./modules/webhook/webhook.module";
-import { ReputationModule } from "./modules/reputation/reputation.module";
-import { EthersModule } from "nestjs-ethers";
-import { networkMap, networks } from "./common/decorators/networks";
+import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AppController } from './app.controller';
+import { DatabaseModule } from './database/database.module';
+import { JwtHttpGuard, RolesGuard } from './common/guards';
+import { HttpValidationPipe } from './common/pipes';
+import { HealthModule } from './modules/health/health.module';
+import { EthersModule } from 'nestjs-ethers';
+import { networkMap, networks } from './common/decorators/networks';
+import { ReputationModule } from './modules/reputation/reputation.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
@@ -49,8 +49,8 @@ const ethersModules = networks.map(network => {
     }),
     DatabaseModule,
     HealthModule,
+    ReputationModule,
     WebhookModule,
-    ReputationModule
   ],
   controllers: [AppController],
 })
