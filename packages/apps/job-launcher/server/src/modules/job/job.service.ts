@@ -18,6 +18,7 @@ import {
 import {
   EscrowClient,
   InitClient,
+  NETWORKS,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -34,6 +35,7 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/decorators';
+import { EXCHANGE_ORACLE_WEBHOOK_URL, JOB_LAUNCHER_FEE, RECORDING_ORACLE_ADDRESS, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_ADDRESS, REPUTATION_ORACLE_FEE } from 'src/common/constants';
 
 @Injectable()
 export class JobService {
@@ -84,7 +86,10 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    if (userBalance.lte(fundAmount)) {
+    const totalFee = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
+    const totalAmount = BigNumber.from(fundAmount).add(totalFee)
+
+    if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new NotFoundException(ErrorJob.NotEnoughFunds);
     }
@@ -93,7 +98,7 @@ export class JobService {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
-      fundAmount,
+      fundAmount: totalAmount.toString(),
       mode: JobMode.DESCRIPTIVE,
       requestType: JobRequestType.FORTUNE,
     };
@@ -121,7 +126,7 @@ export class JobService {
       userId,
       PaymentSource.BALANCE,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(fundAmount),
+      BigNumber.from(totalAmount),
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -204,7 +209,7 @@ export class JobService {
       const signer = new Wallet(
         this.configService.get<string>(
           'WEB3_JOB_LAUNCHER_PRIVATE_KEY',
-          'web3 private key',
+          'web3_private_key',
         ),
         provider,
       );
@@ -212,32 +217,11 @@ export class JobService {
 
       const escrowClient = new EscrowClient(clientParams);
 
-      const exchangeOracleWebhookUrl = this.configService.get<string>(
-        'EXCHANGE_ORACLE_WEBHOOK_URL',
-        '',
-      );
-      const recordingOracle = this.configService.get<string>(
-        'RECORDING_ORACLE_ADDRESS',
-        '',
-      );
-      const reputationOracle = this.configService.get<string>(
-        'REPUTATION_ORACLE_ADDRESS',
-        '',
-      );
-      const recordingOracleStFee = this.configService.get<number>(
-        'RECORDING_ORACLE_FEE',
-        0,
-      );
-      const reputationOracleFee = this.configService.get<number>(
-        'REPUTATION_ORACLE_FEE',
-        0,
-      );
-
       const escrowConfig = {
-        recordingOracle,
-        reputationOracle,
-        recordingOracleFee: BigNumber.from(recordingOracleStFee),
-        reputationOracleFee: BigNumber.from(reputationOracleFee),
+        recordingOracle: RECORDING_ORACLE_ADDRESS,
+        reputationOracle: REPUTATION_ORACLE_ADDRESS,
+        recordingOracleFee: BigNumber.from(RECORDING_ORACLE_FEE),
+        reputationOracleFee: BigNumber.from(REPUTATION_ORACLE_FEE),
         manifestUrl: jobEntity.manifestUrl,
         manifestHash: jobEntity.manifestHash,
       };
@@ -260,7 +244,7 @@ export class JobService {
       const manifest = await this.getManifest(jobEntity.manifestUrl);
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        this.sendWebhook(exchangeOracleWebhookUrl, {
+        this.sendWebhook(EXCHANGE_ORACLE_WEBHOOK_URL, {
           escrowAddress: jobEntity.escrowAddress,
           chainId: jobEntity.chainId,
         });

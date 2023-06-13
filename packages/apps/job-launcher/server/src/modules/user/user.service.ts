@@ -94,8 +94,8 @@ export class UserService {
     });
 
     if (userEntity) {
-      this.logger.log(ErrorUser.DuplicatedEmail, UserService.name);
-      throw new ConflictException(ErrorUser.DuplicatedEmail);
+      this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
+      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
     }
   }
 }

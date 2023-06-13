@@ -169,51 +169,6 @@ export class PaymentService {
     }
   }
 
-  public async test() {
-    try {
-      const provider = new providers.JsonRpcProvider(
-        Object.values(networkMap).find(
-          (item) => item.network.chainId === 80001,
-        )?.rpcUrl,
-      );
-
-      const transaction = await provider.getTransactionReceipt('0x13cfce64389a9019d927a9c95b58997e25795fb030865e12113dbcda9cdd3bde');
-      
-      if (!transaction) {
-        this.logger.error(ErrorPayment.TransactionNotFoundByHash);
-        throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
-      }
-
-      if (!transaction.logs[0] || !transaction.logs[0].data) {
-        this.logger.error(ErrorPayment.InvalidTransactionData);
-        throw new NotFoundException(ErrorPayment.InvalidTransactionData);
-      }
-
-      const amount = BigInt(transaction.logs[0].data).toString()
-
-      if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
-        this.logger.error(
-          `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
-        );
-        throw new NotFoundException(
-          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
-        );
-      }
-
-      await this.savePayment(
-        1,
-        PaymentSource.CRYPTO,
-        PaymentType.DEPOSIT,
-        BigNumber.from(amount),
-      );
-
-      return true;
-    } catch (e) {
-      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
-      return false;
-    }
-  }
-
   public async savePayment(
     userId: number,
     source: PaymentSource,

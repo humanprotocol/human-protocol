@@ -29,7 +29,7 @@ export enum ErrorEscrow {
  */
 export enum ErrorUser {
   NotFound = 'User not found',
-  DuplicatedEmail = 'Duplicated email',
+  AccountCannotBeRegistered = 'Account cannot be registered',
 }
 
 /**

@@ -10,17 +10,14 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EthersModule } from 'nestjs-ethers';
+import { networkMap, networks } from './common/decorators/network';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 
-import { NETWORKS } from '@human-protocol/sdk';
-
-export const networks = Object.values(NETWORKS).map(network => network)
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
-    token: network.title,
-    network: { chainId: network.chainId, name: network.title },
+    network: network.network,
     custom: network.rpcUrl,
     useDefaultProvider: false,
   });
