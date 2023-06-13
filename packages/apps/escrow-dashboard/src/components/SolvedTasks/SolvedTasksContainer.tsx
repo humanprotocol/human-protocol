@@ -5,7 +5,6 @@ import { ViewTitle } from '../ViewTitle';
 import { NewsView } from './NewsView';
 import { SolvedTasksView } from './SolvedTasksView';
 import newsSvg from 'src/assets/news.svg';
-import tasksSvg from 'src/assets/tasks.svg';
 
 export const SolvedTasksContainer: FC = () => {
   return (

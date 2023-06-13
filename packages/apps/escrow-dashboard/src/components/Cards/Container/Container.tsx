@@ -19,8 +19,8 @@ export const Container: FC<PropsWithChildren<ContainerProps>> = ({
           '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2)',
         borderRadius: { xs: '8px', xl: '16px' },
         padding: densed
-          ? { xs: '10px 18px 12px', xl: '24px 42px 32px' }
-          : { xs: '21px 24px 12px', xl: '54px 60px 32px' },
+          ? { xs: '18px 24px', xl: '32px 40px' }
+          : { xs: '24px 32px', xl: '64px 80px' },
         height: '100%',
         position: 'relative',
       }}
