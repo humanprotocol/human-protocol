@@ -4,7 +4,7 @@ import { WebhookStatus } from "../../common/decorators";
 import { ChainId } from "@human-protocol/sdk";
 import { JobMode, JobRequestType } from "../../common/enums/job";
 
-export class WebhookIncomingCreateDto {
+export class WebhookIncomingDto {
   @ApiProperty()
   @IsEnum(ChainId)
   public chainId: ChainId;
@@ -12,10 +12,16 @@ export class WebhookIncomingCreateDto {
   @ApiProperty()
   @IsString()
   public escrowAddress: string;
-
-  public status?: WebhookStatus;
-  public waitUntil?: Date;
 }
+
+export class WebhookIncomingCreateDto extends WebhookIncomingDto {
+  @IsEnum(WebhookStatus)
+  public status: WebhookStatus;
+
+  @IsDate()
+  public waitUntil: Date;
+}
+
 
 export class WebhookIncomingUpdateDto {
   @ApiPropertyOptional()
