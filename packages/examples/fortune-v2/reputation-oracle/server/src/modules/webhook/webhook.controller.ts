@@ -1,4 +1,4 @@
-import { Body, Controller, Header, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Post, Request } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Public } from "../../common/decorators";
 import { WebhookService } from "./webhook.service";

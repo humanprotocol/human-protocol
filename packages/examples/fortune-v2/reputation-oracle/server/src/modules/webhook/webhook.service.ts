@@ -1,12 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
-import { firstValueFrom } from "rxjs";
-import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { EscrowClient, InitClient, StorageClient, StorageCredentials, StorageParams } from "@human-protocol/sdk";
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
-import { Repository } from "typeorm";
-import { FinalResult, ManifestDto, VerifiedResult, WebhookIncomingCreateDto } from "./webhook.dto";
+import { FinalResult, ManifestDto, WebhookIncomingCreateDto } from "./webhook.dto";
 import { ErrorResults, ErrorWebhook } from "../../common/constants/errors";
 import { WebhookRepository } from "./webhook.repository";
 import { ReputationEntityType, WebhookStatus } from "../../common/decorators";
@@ -15,6 +12,7 @@ import { JobRequestType } from "../../common/enums/job";
 import { RETRIES_COUNT_THRESHOLD } from "../../common/constants";
 import { checkCurseWords } from "../../common/helpers/utils";
 import { ReputationService } from "../reputation/reputation.service";
+import { BigNumber } from "ethers";
 
 @Injectable()
 export class WebhookService {
@@ -183,7 +181,7 @@ export class WebhookService {
         })
       
       const recipients = finalResults.map(item => item.workerAddress);
-      const amounts = new Array(recipients.length).fill(manifest.price / recipients.length);
+      const amounts = new Array(recipients.length).fill(BigNumber.from(manifest.fundAmount).div(recipients.length));
   
       await escrowClient.bulkPayOut(webhookEntity.escrowAddress, recipients, amounts, finalResultsUrl, finalResultsHash)
       return true;

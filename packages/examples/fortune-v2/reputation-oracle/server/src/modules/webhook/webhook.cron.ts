@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { WebhookService } from "./webhook.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
 import { WebhookRepository } from "./webhook.repository";
 import { RETRIES_COUNT_THRESHOLD } from "../../common/constants";
 import { SortDirection } from "../../common/collection";

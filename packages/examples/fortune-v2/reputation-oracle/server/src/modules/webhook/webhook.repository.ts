@@ -1,7 +1,5 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { HttpService } from "@nestjs/axios";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ConfigService } from "@nestjs/config";
 
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
 import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
@@ -15,8 +13,6 @@ export class WebhookRepository {
   constructor(
     @InjectRepository(WebhookIncomingEntity)
     private readonly webhookIncomingEntityRepository: Repository<WebhookIncomingEntity>,
-    private readonly configService: ConfigService,
-    private readonly httpService: HttpService
   ) {}
 
   public async updateOne(
