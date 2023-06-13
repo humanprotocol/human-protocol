@@ -22,7 +22,7 @@ export class AuthEntity extends BaseEntity {
   public refreshTokenExpiresAt: number;
 
   @JoinColumn()
-  @OneToOne(_type => UserEntity)
+  @OneToOne((_type) => UserEntity)
   public user: UserEntity;
 
   @Column({ type: 'int' })

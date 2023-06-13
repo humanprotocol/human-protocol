@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { BigNumber, providers } from 'ethers';
@@ -126,7 +131,7 @@ export class PaymentService {
       const transaction = await provider.getTransactionReceipt(
         dto.transactionHash,
       );
-      
+
       if (!transaction) {
         this.logger.error(ErrorPayment.TransactionNotFoundByHash);
         throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
@@ -146,13 +151,20 @@ export class PaymentService {
         );
       }
 
-      const amount = BigInt(transaction.logs[0].data).toString()
+      const amount = BigInt(transaction.logs[0].data).toString();
 
-      const paymentEntity = await this.paymentRepository.findOne({ transactionHash: transaction.transactionHash })
+      const paymentEntity = await this.paymentRepository.findOne({
+        transactionHash: transaction.transactionHash,
+      });
 
       if (paymentEntity) {
-        this.logger.log(ErrorPayment.TransactionHashAlreadyExists, PaymentRepository.name);
-        throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
+        this.logger.log(
+          ErrorPayment.TransactionHashAlreadyExists,
+          PaymentRepository.name,
+        );
+        throw new BadRequestException(
+          ErrorPayment.TransactionHashAlreadyExists,
+        );
       }
 
       await this.savePayment(

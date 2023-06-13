@@ -14,8 +14,7 @@ import { networkMap, networks } from './common/decorators/network';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 
-
-const ethersModules = networks.map(network => {
+const ethersModules = networks.map((network) => {
   return EthersModule.forRoot({
     network: network.network,
     custom: network.rpcUrl,

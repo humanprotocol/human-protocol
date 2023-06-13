@@ -48,7 +48,7 @@ export class UserRepository {
     console.log({
       where,
       ...options,
-    })
+    });
 
     return userEntity;
   }

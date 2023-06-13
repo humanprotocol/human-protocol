@@ -18,7 +18,6 @@ import {
 import {
   EscrowClient,
   InitClient,
-  NETWORKS,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -35,7 +34,14 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/decorators';
-import { EXCHANGE_ORACLE_WEBHOOK_URL, JOB_LAUNCHER_FEE, RECORDING_ORACLE_ADDRESS, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_ADDRESS, REPUTATION_ORACLE_FEE } from 'src/common/constants';
+import {
+  EXCHANGE_ORACLE_WEBHOOK_URL,
+  JOB_LAUNCHER_FEE,
+  RECORDING_ORACLE_ADDRESS,
+  RECORDING_ORACLE_FEE,
+  REPUTATION_ORACLE_ADDRESS,
+  REPUTATION_ORACLE_FEE,
+} from 'src/common/constants';
 
 @Injectable()
 export class JobService {
@@ -86,9 +92,13 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmount).mul(totalFeePercentage).div(100);
-    const totalAmount = BigNumber.from(fundAmount).add(totalFee)
+    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
+      .add(RECORDING_ORACLE_FEE)
+      .add(REPUTATION_ORACLE_FEE);
+    const totalFee = BigNumber.from(fundAmount)
+      .mul(totalFeePercentage)
+      .div(100);
+    const totalAmount = BigNumber.from(fundAmount).add(totalFee);
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -152,9 +162,13 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE).add(RECORDING_ORACLE_FEE).add(REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmount).mul(totalFeePercentage).div(100);
-    const totalAmount = BigNumber.from(fundAmount).add(totalFee)
+    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
+      .add(RECORDING_ORACLE_FEE)
+      .add(REPUTATION_ORACLE_FEE);
+    const totalFee = BigNumber.from(fundAmount)
+      .mul(totalFeePercentage)
+      .div(100);
+    const totalAmount = BigNumber.from(fundAmount).add(totalFee);
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -295,7 +309,9 @@ export class JobService {
   }
 
   public async getManifest(manifestUrl: string): Promise<ManifestDto> {
-    const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(manifestUrl)
+    const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(
+      manifestUrl,
+    );
 
     if (!manifest) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);

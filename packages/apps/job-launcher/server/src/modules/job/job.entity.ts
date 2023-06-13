@@ -32,11 +32,7 @@ export class JobEntity extends BaseEntity implements IJob {
   })
   public status: JobStatus;
 
-  @ManyToOne(
-    () => UserEntity,
-    user => user.jobs,
-    { eager: true },
-  )
+  @ManyToOne(() => UserEntity, (user) => user.jobs, { eager: true })
   user: UserEntity;
 
   @Column({ type: 'int' })

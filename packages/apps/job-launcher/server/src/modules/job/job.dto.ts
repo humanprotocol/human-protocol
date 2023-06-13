@@ -9,7 +9,7 @@ import {
   Matches,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobStatus } from '../../common/enums/job';
+import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 
 export class JobCreateDto {
   public chainId: ChainId;

@@ -52,10 +52,7 @@ import { PaymentEntity } from '../modules/payment/payment.entity';
           port: configService.get<number>('POSTGRES_PORT', 5432),
           username: configService.get<string>('POSTGRES_USER', 'operator'),
           password: configService.get<string>('POSTGRES_PASSWORD', 'qwerty'),
-          database: configService.get<string>(
-            'POSTGRES_DB',
-            'job-launcher',
-          ),
+          database: configService.get<string>('POSTGRES_DB', 'job-launcher'),
           keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
           migrationsRun: false,
         };

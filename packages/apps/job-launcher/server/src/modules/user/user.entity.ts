@@ -29,15 +29,9 @@ export class UserEntity extends BaseEntity implements IUser {
   })
   public status: UserStatus;
 
-  @OneToMany(
-    () => JobEntity,
-    job => job.user,
-  )
+  @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];
 
-  @OneToMany(
-    () => PaymentEntity,
-    payment => payment.user,
-  )
+  @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
 }

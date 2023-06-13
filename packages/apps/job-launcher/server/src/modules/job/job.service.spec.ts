@@ -5,12 +5,8 @@ import { PaymentService } from '../payment/payment.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
-import { NotFoundException, BadGatewayException } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { StorageClient } from '@human-protocol/sdk';
-import { JobEntity } from './job.entity';
-import { JobStatus } from 'src/common/enums/job';
-import { UserEntity } from '../user/user.entity';
 
 jest.mock('@human-protocol/sdk');
 

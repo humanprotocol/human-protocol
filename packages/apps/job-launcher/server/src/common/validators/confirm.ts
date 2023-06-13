@@ -25,9 +25,8 @@ class ValidateConfirm implements ValidatorConstraintInterface {
   }
 
   private static isValid(value: unknown, args: ValidationArguments): string {
-    const {
-      relatedPropertyName = 'password',
-    }: IConfirmConstraints = args.constraints[0];
+    const { relatedPropertyName = 'password' }: IConfirmConstraints =
+      args.constraints[0];
 
     const relatedValue = (args.object as any)[relatedPropertyName];
 
