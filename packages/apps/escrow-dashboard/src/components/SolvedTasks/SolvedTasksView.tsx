@@ -61,8 +61,14 @@ export const SolvedTasksView: FC = () => {
 
   return (
     <CardContainer>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        <Box sx={{ flex: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-evenly',
+        }}
+      >
+        <Box>
           <Typography variant="body2" color="primary" fontWeight={600} mb="8px">
             {`Solved Tasks till ${dayjs(
               SOLVED_TASKS[SOLVED_TASKS.length - 1].date
