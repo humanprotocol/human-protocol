@@ -8,13 +8,12 @@ import { JwtHttpGuard, RolesGuard } from './common/guards';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
 import { EthersModule } from 'nestjs-ethers';
-import { networkMap, networks } from './common/decorators/networks';
+import { networkMap, networks } from './common/decorators/network';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 
 const ethersModules = networks.map(network => {
   return EthersModule.forRoot({
-    token: network.key,
     network: network.network,
     custom: network.rpcUrl,
     useDefaultProvider: false,
