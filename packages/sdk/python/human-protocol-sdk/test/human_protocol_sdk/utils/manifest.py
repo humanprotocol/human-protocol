@@ -51,8 +51,8 @@ def test_manifest(
     if request_config:
         model.update({"request_config": request_config})
 
-    manifest = basemodels.Manifest(model)
-    manifest.validate()
+    manifest = basemodels.Manifest.construct(**model)
+    manifest.check()
 
     return manifest
 

@@ -1,4 +1,4 @@
-FROM node:16.13-buster
+FROM node:16.18.1-buster
 
 ARG JOB_LAUNCHER_SERVER_URL
 

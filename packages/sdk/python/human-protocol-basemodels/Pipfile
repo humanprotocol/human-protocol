@@ -4,13 +4,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
+pytest = "*"
+pylint = "*"
+setuptools-pipfile = "*"
 
 [packages]
 requests = "*"
 pydantic = "==1.10.4"
-pytest = "*"
-black = "*"
-pylint = "*"
 httpretty = "*"
 
 [requires]
