@@ -42,14 +42,4 @@ export class JobCron {
       return;
     }
   }
-
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  public async releaseFunds() {
-    try {
-      // TODO: Implement logic of release funds
-      // await this.paymentService.savePayment(userId, PaymentType.REFUND, amount)
-    } catch (e) {
-      return;
-    }
-  }
 }

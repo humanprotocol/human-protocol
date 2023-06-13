@@ -83,9 +83,8 @@ export class JobService {
     } = dto;
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const amount = BigNumber.from(fundAmount).mul(fortunesRequired);
 
-    if (userBalance.lte(amount)) {
+    if (userBalance.lte(fundAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new NotFoundException(ErrorJob.NotEnoughFunds);
     }
@@ -122,7 +121,7 @@ export class JobService {
       userId,
       PaymentSource.BALANCE,
       PaymentType.WITHDRAWAL,
-      amount,
+      BigNumber.from(fundAmount),
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -146,9 +145,8 @@ export class JobService {
     } = dto;
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const amount = BigNumber.from(fundAmount).mul(annotationsPerImage);
 
-    if (userBalance.lte(amount)) {
+    if (userBalance.lte(fundAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new NotFoundException(ErrorJob.NotEnoughFunds);
     }
@@ -187,7 +185,7 @@ export class JobService {
       userId,
       PaymentSource.BALANCE,
       PaymentType.WITHDRAWAL,
-      amount,
+      BigNumber.from(fundAmount),
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -196,7 +194,7 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async launchJob(jobEntity: JobEntity): Promise<boolean> {
+  public async launchJob(jobEntity: JobEntity): Promise<void> {
     try {
       const provider = new providers.JsonRpcProvider(
         Object.values(networkMap).find(
@@ -226,20 +224,20 @@ export class JobService {
         'REPUTATION_ORACLE_ADDRESS',
         '',
       );
-      const recordingOracleStake = this.configService.get<number>(
-        'RECORDING_ORACLE_ADDRESS',
+      const recordingOracleStFee = this.configService.get<number>(
+        'RECORDING_ORACLE_FEE',
         0,
       );
-      const reputationOracleStake = this.configService.get<number>(
-        'REPUTATION_ORACLE_ADDRESS',
+      const reputationOracleFee = this.configService.get<number>(
+        'REPUTATION_ORACLE_FEE',
         0,
       );
 
       const escrowConfig = {
         recordingOracle,
         reputationOracle,
-        recordingOracleFee: BigNumber.from(recordingOracleStake),
-        reputationOracleFee: BigNumber.from(reputationOracleStake),
+        recordingOracleFee: BigNumber.from(recordingOracleStFee),
+        reputationOracleFee: BigNumber.from(reputationOracleFee),
         manifestUrl: jobEntity.manifestUrl,
         manifestHash: jobEntity.manifestHash,
       };
@@ -268,10 +266,10 @@ export class JobService {
         });
       }
 
-      return true;
+      return;
     } catch (e) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-      return true;
+      return;
     }
   }
 

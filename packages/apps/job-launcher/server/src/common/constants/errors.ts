@@ -29,8 +29,7 @@ export enum ErrorEscrow {
  */
 export enum ErrorUser {
   NotFound = 'User not found',
-  DuplicateUsername = 'Duplicate username',
-  DuplicateEmail = 'Duplicate email',
+  DuplicatedEmail = 'Duplicated email',
 }
 
 /**
@@ -45,7 +44,7 @@ export enum ErrorToken {
  */
 export enum ErrorPayment {
   NotFound = 'Payment not found',
-  NotSuccess = 'Unseccssful payment',
+  NotSuccess = 'Unsuccessful payment',
   CustomerNotFound = 'Customer not found',
   IncorrectAmount = 'Incorrect amount',
   TransactionHashAlreadyExists = 'transaction hash already exists',

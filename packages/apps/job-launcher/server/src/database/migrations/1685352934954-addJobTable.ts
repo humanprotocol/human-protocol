@@ -77,7 +77,7 @@ export class addJobTable1685352934954 implements MigrationInterface {
           columnNames: ['user_id'],
           referencedColumnNames: ['id'],
           referencedTableName: `${NS}.user`,
-          onDelete: 'CASCADE',
+          onDelete: 'NO ACTION',
         },
       ],
     });

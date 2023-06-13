@@ -94,8 +94,8 @@ export class UserService {
     });
 
     if (userEntity) {
-      this.logger.log(ErrorUser.DuplicateEmail, UserService.name);
-      throw new ConflictException(ErrorUser.DuplicateEmail);
+      this.logger.log(ErrorUser.DuplicatedEmail, UserService.name);
+      throw new ConflictException(ErrorUser.DuplicatedEmail);
     }
   }
 }
