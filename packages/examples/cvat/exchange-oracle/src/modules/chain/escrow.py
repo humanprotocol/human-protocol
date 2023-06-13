@@ -21,12 +21,12 @@ def validate_escrow(chain_id: int, escrow_address: str):
     escrow_client = EscrowClient(web3)
 
     if escrow_client.get_balance(escrow_address) == 0:
-        raise ValueError("Escrow doesn't have funds.")
+        raise ValueError("Escrow doesn't have funds")
 
     escrow_status = escrow_client.get_status(escrow_address)
     if escrow_status != Status.Pending:
         raise ValueError(
-            f"Escrow is not in a Pending state. Current state: {escrow_status.name}."
+            f"Escrow is not in a Pending state. Current state: {escrow_status.name}"
         )
 
 
