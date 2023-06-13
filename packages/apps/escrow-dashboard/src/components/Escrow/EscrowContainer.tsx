@@ -1,6 +1,5 @@
 import { Box, CircularProgress } from '@mui/material';
 import { FC } from 'react';
-import { useSwitchNetwork } from 'wagmi';
 
 import { NetworkSelect } from '../NetworkSelect';
 import TimeRangeButtons from '../TimeRangeButtons';
@@ -20,7 +19,6 @@ import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
 export const EscrowContainer: FC = () => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
-  const { switchNetwork } = useSwitchNetwork();
 
   usePollEventsData();
 
@@ -30,8 +28,6 @@ export const EscrowContainer: FC = () => {
     const id = e.target.value;
     dispatch(setEscrowChainId(id));
     dispatch(setLeaderChainId(id));
-
-    switchNetwork?.(id);
   };
 
   return (

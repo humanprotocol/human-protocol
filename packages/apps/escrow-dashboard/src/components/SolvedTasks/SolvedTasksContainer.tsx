@@ -3,8 +3,6 @@ import dayjs from 'dayjs';
 import numeral from 'numeral';
 import { FC } from 'react';
 
-import { ViewTitle } from '../ViewTitle';
-
 import tasksSvg from 'src/assets/tasks.svg';
 
 const SOLVED_TASKS = [
@@ -25,32 +23,36 @@ export const SolvedTasksContainer: FC = () => {
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
 
   return (
-    <Box
-      id="solved-tasks-container"
-      sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
-      <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="Solved Tasks" iconUrl={tasksSvg} />
+    <Box id="solved-tasks-container" display="flex" alignItems="start">
+      <Box marginLeft="-32px">
+        <img src={tasksSvg} alt="network" />
+      </Box>
+      <Box mt={3}>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Typography variant="h4" color="primary">
+            Solved Tasks
+          </Typography>
+          <Typography
+            color="text.secondary"
+            fontSize={14}
+            sx={{ mt: 1.5, ml: 2 }}
+          >
+            till{' '}
+            {dayjs(SOLVED_TASKS[SOLVED_TASKS.length - 1].date).format(
+              'MMM D, YYYY'
+            )}
+          </Typography>
+        </Box>
         <Typography
-          color="text.secondary"
-          fontSize={14}
-          sx={{ mt: 1.5, ml: 2 }}
+          variant="h2"
+          color="primary"
+          fontWeight={800}
+          sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
+          lineHeight={1}
         >
-          till{' '}
-          {dayjs(SOLVED_TASKS[SOLVED_TASKS.length - 1].date).format(
-            'MMM D, YYYY'
-          )}
+          {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
         </Typography>
       </Box>
-      <Typography
-        variant="h2"
-        color="primary"
-        fontWeight={600}
-        sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 }, pl: 14 }}
-        lineHeight={1}
-      >
-        {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
-      </Typography>
     </Box>
   );
 };
