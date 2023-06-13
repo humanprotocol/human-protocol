@@ -3,6 +3,7 @@ import { FC } from 'react';
 import { useSwitchNetwork } from 'wagmi';
 
 import { NetworkSelect } from '../NetworkSelect';
+import TimeRangeButtons from '../TimeRangeButtons';
 import { ViewTitle } from '../ViewTitle';
 import { EscrowView } from './EscrowView';
 
@@ -40,15 +41,22 @@ export const EscrowContainer: FC = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mb: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
+          flexWrap: 'wrap',
+          gap: 4,
+          mb: 4,
         }}
       >
         <ViewTitle title="Network" iconUrl={networkSvg} />
-        <NetworkSelect
-          value={chainId}
-          onChange={handleChangeChain}
-          showAllNetwork
-        />
+        <Box sx={{ ml: 'auto' }}>
+          <NetworkSelect
+            value={chainId}
+            onChange={handleChangeChain}
+            showAllNetwork
+          />
+        </Box>
+        <Box sx={{ ml: 'auto' }}>
+          <TimeRangeButtons />
+        </Box>
       </Box>
       {dataLoaded ? (
         <EscrowView />
