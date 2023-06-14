@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class EventTypes(str, Enum):
-    update_task = "update:task"
     update_job = "update:job"
+    create_job = "create:job"
 
 
 class TaskStatuses(str, Enum):

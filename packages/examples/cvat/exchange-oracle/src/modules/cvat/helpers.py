@@ -1,6 +1,6 @@
 def parse_manifest(manifest: dict):
-    bucket_name = "example_bucket_name"
-    region = "example_region"
+    bucket_name = "nurseshark-whaleshark-annotation2"
+    region = "eu-west-2"
     labels = [
         {
             "name": "label_1",
