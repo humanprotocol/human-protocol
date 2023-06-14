@@ -12,6 +12,3 @@ services:
     ports:
       - 5433:5432
     command: ["postgres", "-c", "log_statement=all"]
-
-volumes:
-  postgres:    
