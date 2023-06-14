@@ -53,6 +53,14 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,
 ];
 
+export const L1_L2_CHAIN_IDS = [
+  ChainId.BSC_MAINNET,
+  ChainId.POLYGON,
+  ChainId.SKALE,
+  ChainId.MOONBEAM,
+  ChainId.AVALANCHE,
+];
+
 export const TESTNET_CHAIN_IDS = [
   ChainId.RINKEBY,
   ChainId.GOERLI,

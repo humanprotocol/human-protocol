@@ -72,7 +72,14 @@ export const fetchTokenStatsAsync = createAsyncThunk<
             holders: Number(holders),
             totalSupply: '0',
           };
-        });
+        })
+        .catch((err) => ({
+          totalApprovalEventCount: 0,
+          totalTransferEventCount: 0,
+          totalValueTransfered: 0,
+          holders: 0,
+          totalSupply: '0',
+        }));
 
       const rpcUrl = ESCROW_NETWORKS[chainId]?.rpcUrl!;
       const hmtAddress = ESCROW_NETWORKS[chainId]?.hmtAddress!;
