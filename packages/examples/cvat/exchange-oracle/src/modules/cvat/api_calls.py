@@ -56,13 +56,13 @@ def setup_cvat_webhooks(project_id: int) -> Dict:
             description="Update",
             type=models.WebhookType("project"),
             content_type=models.WebhookContentType("application/json"),
-            secret="secret_example",
+            secret=Config.cvat_config.cvat_webhook_secret,
             is_active=True,
             # enable_ssl=True,
             project_id=project_id,
             events=[
                 models.EventsEnum("update:job"),
-                models.EventsEnum("update:task"),
+                models.EventsEnum("create:job"),
             ],
         )  # WebhookWriteRequest
         try:
