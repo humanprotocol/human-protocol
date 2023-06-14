@@ -23,4 +23,4 @@ def job_creation_process(escrow_address: str, manifest: dict):
     with SessionLocal.begin() as session:
         create_db_task(session, task.id, task.status)
     # Actual job creation on CVAT. Async process (will be created in DB once 'update:task' or 'update:job' webhook is received)
-    put_task_data(task.id, 54)
+    put_task_data(task.id, cloudstorage.id)
