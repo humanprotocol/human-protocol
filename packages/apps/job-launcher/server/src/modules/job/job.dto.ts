@@ -7,6 +7,7 @@ import {
   IsString,
   IsUrl,
   Matches,
+  IsDate
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
@@ -20,7 +21,7 @@ export class JobCreateDto {
   public waitUntil: Date;
 }
 
-export class JobFortuneCreateDto {
+export class JobFortuneDto {
   @ApiProperty({
     enum: ChainId,
   })
@@ -43,14 +44,23 @@ export class JobFortuneCreateDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-
-  public userId?: number;
-  public manifestUrl?: string;
-  public status?: JobStatus;
-  public waitUntil?: Date;
 }
 
-export class JobCvatCreateDto {
+export class JobFortuneCreateDto extends JobFortuneDto {
+  @IsNumber()
+  public userId: number;
+
+  @IsString()
+  public manifestUrl: string;
+
+  @IsEnum(JobStatus)
+  public status: JobStatus;
+
+  @IsDate()
+  public waitUntil: Date;
+}
+
+export class JobCvatDto {
   @ApiProperty({
     enum: ChainId,
   })
@@ -85,11 +95,19 @@ export class JobCvatCreateDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
+}
 
+export class JobCvatCreateDto extends JobCvatDto {
+  @IsNumber()
   public userId: number;
 
+  @IsString()
   public manifestUrl: string;
+
+  @IsEnum(JobStatus)
   public status: JobStatus;
+
+  @IsDate()
   public waitUntil: Date;
 }
 
@@ -109,9 +127,14 @@ export class JobUpdateDto {
   })
   @IsEnum(JobStatus)
   public status: JobStatus;
+}
 
-  public retriesCount?: number;
-  public waitUntil?: Date;
+export class JobUpdateDataDto extends JobUpdateDto {
+  @IsNumber()
+  public retriesCount: number;
+
+  @IsDate()
+  public waitUntil: Date;
 }
 
 export class SaveManifestDto {

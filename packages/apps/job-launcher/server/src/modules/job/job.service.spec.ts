@@ -7,6 +7,9 @@ import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { StorageClient } from '@human-protocol/sdk';
+import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { JobStatus } from '../../common/enums/job';
+import { JOB_LAUNCHER_FEE, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_FEE } from '../../common/constants';
 
 jest.mock('@human-protocol/sdk');
 
@@ -50,7 +53,15 @@ describe('JobService', () => {
       };
 
       const userBalance = BigNumber.from('10000000000000000000'); // 10 ETH
-      const amount = BigNumber.from(dto.fundAmount).mul(dto.fortunesRequired);
+
+      const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
+        .add(RECORDING_ORACLE_FEE)
+        .add(REPUTATION_ORACLE_FEE);
+
+      const totalFee = BigNumber.from(dto.fundAmount)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(dto.fundAmount).add(totalFee);
 
       jest
         .spyOn(paymentService, 'getUserBalance')
@@ -61,16 +72,16 @@ describe('JobService', () => {
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
-        'balance',
-        'WITHDRAWAL',
-        amount,
+        PaymentSource.BALANCE,
+        PaymentType.WITHDRAWAL,
+        BigNumber.from(totalAmount),
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        status: 'PENDING',
+        status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
     });

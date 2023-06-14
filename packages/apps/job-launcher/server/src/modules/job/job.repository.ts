@@ -7,7 +7,7 @@ import {
   Repository,
 } from 'typeorm';
 import { JobEntity } from './job.entity';
-import { JobCreateDto, JobUpdateDto } from './job.dto';
+import { JobCreateDto, JobUpdateDataDto } from './job.dto';
 import { ErrorJob } from '../../common/constants/errors';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class JobRepository {
 
   public async updateOne(
     where: FindConditions<JobEntity>,
-    dto: Partial<JobUpdateDto>,
+    dto: Partial<JobUpdateDataDto>,
   ): Promise<JobEntity> {
     const jobEntity = await this.jobEntityRepository.findOne(where);
 

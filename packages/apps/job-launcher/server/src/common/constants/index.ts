@@ -13,3 +13,5 @@ export const REPUTATION_ORACLE_ADDRESS = '';
 export const JOB_LAUNCHER_FEE = 50;
 export const RECORDING_ORACLE_FEE = 50;
 export const REPUTATION_ORACLE_FEE = 50;
+
+export const S3_PORT = 9000;

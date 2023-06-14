@@ -25,7 +25,9 @@ import {
 } from '@human-protocol/sdk';
 import {
   JobCvatCreateDto,
+  JobCvatDto,
   JobFortuneCreateDto,
+  JobFortuneDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -34,14 +36,7 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/decorators';
-import {
-  EXCHANGE_ORACLE_WEBHOOK_URL,
-  JOB_LAUNCHER_FEE,
-  RECORDING_ORACLE_ADDRESS,
-  RECORDING_ORACLE_FEE,
-  REPUTATION_ORACLE_ADDRESS,
-  REPUTATION_ORACLE_FEE,
-} from 'src/common/constants';
+import { EXCHANGE_ORACLE_WEBHOOK_URL, JOB_LAUNCHER_FEE, RECORDING_ORACLE_ADDRESS, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_ADDRESS, REPUTATION_ORACLE_FEE, S3_PORT } from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -66,7 +61,7 @@ export class JobService {
         'S3_ENDPOINT',
         'http://127.0.0.1',
       ),
-      port: Number(this.configService.get<number>('S3_PORT', 9000)),
+      port: S3_PORT,
       useSSL: Boolean(this.configService.get<boolean>('S3_USE_SSL', false)),
     };
 
@@ -80,7 +75,7 @@ export class JobService {
 
   public async createFortuneJob(
     userId: number,
-    dto: JobFortuneCreateDto,
+    dto: JobFortuneDto,
   ): Promise<number> {
     const {
       chainId,
@@ -148,7 +143,7 @@ export class JobService {
 
   public async createCvatJob(
     userId: number,
-    dto: JobCvatCreateDto,
+    dto: JobCvatDto,
   ): Promise<number> {
     const {
       chainId,
