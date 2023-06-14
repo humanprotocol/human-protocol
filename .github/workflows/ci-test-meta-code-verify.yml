@@ -3,8 +3,13 @@ name: meta-code-verify CI
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/meta-code-verify/**'
   workflow_dispatch:
 
 jobs:
