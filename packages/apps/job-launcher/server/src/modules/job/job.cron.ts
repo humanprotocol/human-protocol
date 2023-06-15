@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
-import { SortDirection } from '../../common/collection';
+import { SortDirection } from '../../common/enums/collection';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';

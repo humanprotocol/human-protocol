@@ -10,7 +10,7 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { EthersModule } from 'nestjs-ethers';
-import { networkMap, networks } from './common/decorators/network';
+import { networkMap, networks } from './common/constants/network';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 

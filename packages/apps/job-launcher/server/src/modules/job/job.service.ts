@@ -24,9 +24,7 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
-  JobCvatCreateDto,
   JobCvatDto,
-  JobFortuneCreateDto,
   JobFortuneDto,
   SaveManifestDto,
   SendWebhookDto,
@@ -35,8 +33,16 @@ import { ManifestDto } from '../payment/payment.dto';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { networkMap } from '../../common/decorators';
-import { EXCHANGE_ORACLE_WEBHOOK_URL, JOB_LAUNCHER_FEE, RECORDING_ORACLE_ADDRESS, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_ADDRESS, REPUTATION_ORACLE_FEE, S3_PORT } from '../../common/constants';
+import { networkMap } from '../../common/constants/network';
+import {
+  EXCHANGE_ORACLE_WEBHOOK_URL,
+  JOB_LAUNCHER_FEE,
+  RECORDING_ORACLE_ADDRESS,
+  RECORDING_ORACLE_FEE,
+  REPUTATION_ORACLE_ADDRESS,
+  REPUTATION_ORACLE_FEE,
+  S3_PORT,
+} from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -141,10 +147,7 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async createCvatJob(
-    userId: number,
-    dto: JobCvatDto,
-  ): Promise<number> {
+  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
     const {
       chainId,
       dataUrl,

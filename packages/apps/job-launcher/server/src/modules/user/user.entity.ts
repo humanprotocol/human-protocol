@@ -3,7 +3,7 @@ import { Exclude } from 'class-transformer';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { IUser } from '../../common/decorators';
+import { IUser } from '../../common/interfaces';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';

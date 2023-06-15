@@ -62,7 +62,7 @@ export class UserService {
     return userEntity;
   }
 
-  public async getByEmail(email: string): Promise<UserEntity | undefined> {
+  public async getByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findOne({ email });
   }
 

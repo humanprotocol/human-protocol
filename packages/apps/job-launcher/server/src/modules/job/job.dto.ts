@@ -7,10 +7,10 @@ import {
   IsString,
   IsUrl,
   Matches,
-  IsDate
+  IsDate,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobStatus } from '../../common/enums/job';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -111,16 +111,6 @@ export class JobCvatCreateDto extends JobCvatDto {
   public waitUntil: Date;
 }
 
-export class JobLaunchDto {
-  @ApiProperty()
-  @IsNumber()
-  public jobId: number;
-
-  @ApiProperty()
-  @IsString()
-  public paymentId: string;
-}
-
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,
@@ -145,18 +135,4 @@ export class SaveManifestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
-}
-
-export class ManifestDto {
-  chainId: ChainId;
-  escrowAddress?: string;
-  dataUrl?: string;
-  labels?: string[];
-  submissionsRequired: number;
-  requesterTitle?: string;
-  requesterDescription: string;
-  requesterAccuracyTarget?: number;
-  fundAmount: number;
-  requestType: JobRequestType;
-  mode: JobMode;
 }
