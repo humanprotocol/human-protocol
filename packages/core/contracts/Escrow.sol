@@ -123,8 +123,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         reputationOracle = _reputationOracle;
         recordingOracle = _recordingOracle;
-        areTrustedHandlers[reputationOracle] = true;
-        areTrustedHandlers[recordingOracle] = true;
 
         reputationOracleFeePercentage = _reputationOracleFeePercentage;
         recordingOracleFeePercentage = _recordingOracleFeePercentage;
@@ -158,7 +156,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
-    function complete() external override notExpired trusted {
+    function complete() external override notExpired trustedOrReputationOracle {
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
         emit Completed();
@@ -167,7 +165,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function storeResults(
         string memory _url,
         string memory _hash
-    ) external override trusted notExpired {
+    ) external override trustedOrRecordingOracle notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
@@ -203,7 +201,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     )
         external
         override
-        trusted
+        trustedOrReputationOracle
         notBroke
         notLaunched
         notPaid
@@ -308,6 +306,22 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     modifier trusted() {
         require(areTrustedHandlers[msg.sender], 'Address calling not trusted');
+        _;
+    }
+
+    modifier trustedOrReputationOracle() {
+        require(
+            areTrustedHandlers[msg.sender] || msg.sender == reputationOracle,
+            'Address calling not trusted'
+        );
+        _;
+    }
+
+    modifier trustedOrRecordingOracle() {
+        require(
+            areTrustedHandlers[msg.sender] || msg.sender == recordingOracle,
+            'Address calling not trusted'
+        );
         _;
     }
 
