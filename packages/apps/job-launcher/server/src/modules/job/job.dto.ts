@@ -7,7 +7,7 @@ import {
   IsString,
   IsUrl,
   Matches,
-  IsDate
+  IsDate,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';

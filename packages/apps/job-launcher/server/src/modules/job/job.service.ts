@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 import {
   BadGatewayException,
   Injectable,
@@ -36,7 +37,15 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/decorators';
-import { EXCHANGE_ORACLE_WEBHOOK_URL, JOB_LAUNCHER_FEE, RECORDING_ORACLE_ADDRESS, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_ADDRESS, REPUTATION_ORACLE_FEE, S3_PORT } from '../../common/constants';
+import {
+  EXCHANGE_ORACLE_WEBHOOK_URL,
+  JOB_LAUNCHER_FEE,
+  RECORDING_ORACLE_ADDRESS,
+  RECORDING_ORACLE_FEE,
+  REPUTATION_ORACLE_ADDRESS,
+  REPUTATION_ORACLE_FEE,
+  S3_PORT,
+} from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -87,13 +96,18 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
+    const fundAmountInWei = ethers.utils.parseUnits(
+      fundAmount.toString(),
+      'ether',
+    );
+
     const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
       .add(RECORDING_ORACLE_FEE)
       .add(REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmount)
+    const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
-    const totalAmount = BigNumber.from(fundAmount).add(totalFee);
+    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -141,10 +155,7 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async createCvatJob(
-    userId: number,
-    dto: JobCvatDto,
-  ): Promise<number> {
+  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
     const {
       chainId,
       dataUrl,
@@ -157,13 +168,18 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
+    const fundAmountInWei = ethers.utils.parseUnits(
+      fundAmount.toString(),
+      'ether',
+    );
+
     const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
       .add(RECORDING_ORACLE_FEE)
       .add(REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmount)
+    const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
-    const totalAmount = BigNumber.from(fundAmount).add(totalFee);
+    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
@@ -213,13 +229,14 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async launchJob(jobEntity: JobEntity): Promise<void> {
+  public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     try {
       const provider = new providers.JsonRpcProvider(
         Object.values(networkMap).find(
           (item) => item.network.chainId === jobEntity.chainId,
         )?.rpcUrl,
       );
+
       const signer = new Wallet(
         this.configService.get<string>(
           'WEB3_JOB_LAUNCHER_PRIVATE_KEY',
@@ -264,10 +281,10 @@ export class JobService {
         });
       }
 
-      return;
+      return jobEntity;
     } catch (e) {
-      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-      return;
+      this.logger.log(ErrorEscrow.NotLaunched, JobService.name);
+      throw new Error(ErrorEscrow.NotLaunched);
     }
   }
 

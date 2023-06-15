@@ -32,30 +32,3 @@ export class UserUpdateDto {
   @IsEnum(UserStatus)
   public status?: UserStatus;
 }
-
-export const generateUserCreateDto = (
-  data: Partial<UserCreateDto> = {},
-): UserCreateDto => {
-  return Object.assign(
-    {
-      password: 'human',
-      confirm: 'human',
-      type: UserType.REQUESTER,
-      status: UserStatus.ACTIVE,
-      email: `human+${v4()}@human.com`,
-    },
-    data,
-  );
-};
-
-export const generateTestUser = (data: Partial<IUser> = {}): Partial<IUser> => {
-  return Object.assign(
-    {
-      password: 'HUMAN',
-      email: `human+${v4()}@hmt.ai`,
-      type: UserType.REQUESTER,
-      status: UserStatus.ACTIVE,
-    },
-    data,
-  );
-};

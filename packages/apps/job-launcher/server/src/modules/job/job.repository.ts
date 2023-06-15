@@ -64,7 +64,11 @@ export class JobRepository {
     });
   }
 
-  public async create(dto: JobCreateDto): Promise<JobEntity> {
-    return this.jobEntityRepository.create(dto).save();
+  public async create(dto: JobCreateDto): Promise<JobEntity | undefined> {
+    try {
+      return this.jobEntityRepository.create(dto).save();
+    } catch (e) {
+      return;
+    }
   }
 }
