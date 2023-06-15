@@ -5,6 +5,11 @@ on:
     branches:
       - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/apps/faucet-server/**'
   workflow_dispatch:
 
 jobs:
