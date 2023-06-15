@@ -11,6 +11,7 @@ def handle_update_job_event(payload: dict):
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
+                payload.job["project_id"],
                 payload.job["assignee"]["username"]
                 if payload.job["assignee"] is not None
                 else "",
@@ -36,6 +37,7 @@ def handle_create_job_event(payload: dict):
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
+                payload.job["project_id"],
                 payload.job["assignee"]["username"]
                 if payload.job["assignee"] is not None
                 else "",

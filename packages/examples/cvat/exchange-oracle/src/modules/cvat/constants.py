@@ -6,6 +6,12 @@ class EventTypes(str, Enum):
     create_job = "create:job"
 
 
+class ProjectStatuses(str, Enum):
+    annotation = "annotation"
+    completed = "completed"
+    recorded = "recorded"
+
+
 class TaskStatuses(str, Enum):
     annotation = "annotation"
     completed = "completed"

@@ -8,6 +8,7 @@ from .api_calls import (
 )
 from .helpers import parse_manifest
 from .service import create_task as create_db_task
+from .service import create_project as create_db_project
 
 
 def job_creation_process(escrow_address: str, manifest: dict):
@@ -16,11 +17,13 @@ def job_creation_process(escrow_address: str, manifest: dict):
     cloudstorage = create_cloudstorage(provider, bucket_name)
     # Creating a project on CVAT. Necessary because otherwise webhooks aren't available
     project = create_project(escrow_address, labels)
+    with SessionLocal.begin() as session:
+        create_db_project(session, project.id)
     # Setup webhooks for a project (update:task, update:job)
     setup_cvat_webhooks(project.id)
     # Task creation
     task = create_task(project.id, escrow_address)
     with SessionLocal.begin() as session:
-        create_db_task(session, task.id, task.status)
+        create_db_task(session, task.id, project.id, task.status)
     # Actual job creation on CVAT. Async process (will be created in DB once 'update:task' or 'update:job' webhook is received)
     put_task_data(task.id, cloudstorage.id)

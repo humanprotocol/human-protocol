@@ -7,7 +7,7 @@ from sqlalchemy.sql import select
 
 from src.db import SessionLocal
 from src.config import CvatConfig
-from src.modules.cvat.model import Task, Job
+from src.modules.cvat.model import Project, Task, Job
 
 
 def generate_cvat_signature(data: dict):
@@ -23,12 +23,27 @@ def generate_cvat_signature(data: dict):
     return signature
 
 
-def add_cvat_task_to_db(cvat_id: int, status: str) -> str:
+def add_cvat_project_to_db(cvat_id: int) -> str:
+    with SessionLocal.begin() as session:
+        project_id = str(uuid.uuid4())
+        project = Project(
+            id=project_id,
+            cvat_id=cvat_id,
+            status="annotation",
+        )
+
+        session.add(project)
+
+    return project_id
+
+
+def add_cvat_task_to_db(cvat_id: int, cvat_project_id: int, status: str) -> str:
     with SessionLocal.begin() as session:
         task_id = str(uuid.uuid4())
         task = Task(
             id=task_id,
             cvat_id=cvat_id,
+            cvat_project_id=cvat_project_id,
             status=status,
         )
 
@@ -37,13 +52,16 @@ def add_cvat_task_to_db(cvat_id: int, status: str) -> str:
     return task_id
 
 
-def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, status: str) -> str:
+def add_cvat_job_to_db(
+    cvat_id: int, cvat_task_id: int, cvat_project_id: int, status: str
+) -> str:
     with SessionLocal.begin() as session:
         job_id = str(uuid.uuid4())
         job = Job(
             id=job_id,
             cvat_id=cvat_id,
             cvat_task_id=cvat_task_id,
+            cvat_project_id=cvat_project_id,
             status=status,
             assignee="",
         )
