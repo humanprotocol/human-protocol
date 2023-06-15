@@ -47,6 +47,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public manifestUrl;
     string public manifestHash;
 
+    string public intermediateResultsUrl;
+    string public intermediateResultsHash;
+
     string public finalResultsUrl;
     string public finalResultsHash;
 
@@ -171,7 +174,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
                 status == EscrowStatuses.Partial,
             'Escrow not in Pending or Partial status state'
         );
-        _storeResult(_url, _hash);
+        require(bytes(_url).length != 0, "URL can't be empty");
+        require(bytes(_hash).length != 0, "Hash can't be empty");
+
+        intermediateResultsUrl = _url;
+        intermediateResultsHash = _hash;
+
         emit IntermediateStorage(_url, _hash);
     }
 
@@ -229,7 +237,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(aggregatedBulkAmount <= balance, 'Not enough balance');
 
-        _storeResult(_url, _hash);
+        require(bytes(_url).length != 0, "URL can't be empty");
+        require(bytes(_hash).length != 0, "Hash can't be empty");
+
+        finalResultsUrl = _url;
+        finalResultsHash = _hash;
 
         (
             uint256[] memory finalAmounts,
@@ -293,15 +305,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     function _safeTransfer(address to, uint256 value) internal {
         SafeERC20.safeTransfer(IERC20(token), to, value);
-    }
-
-    function _storeResult(string memory _url, string memory _hash) internal {
-        bool writeOnchain = bytes(_hash).length != 0 || bytes(_url).length != 0;
-        if (writeOnchain) {
-            // Be sure both of them are not zero
-            finalResultsUrl = _url;
-            finalResultsHash = _hash;
-        }
     }
 
     modifier trusted() {
