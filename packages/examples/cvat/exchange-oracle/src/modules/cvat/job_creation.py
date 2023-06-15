@@ -11,9 +11,9 @@ from .service import create_task as create_db_task
 
 
 def job_creation_process(escrow_address: str, manifest: dict):
-    (bucket_name, region, labels) = parse_manifest(manifest)
+    (provider, bucket_name, labels) = parse_manifest(manifest)
     # Create a cloudstorage on CVAT for not storing datasets on CVAT instance
-    cloudstorage = create_cloudstorage(bucket_name, region)
+    cloudstorage = create_cloudstorage(provider, bucket_name)
     # Creating a project on CVAT. Necessary because otherwise webhooks aren't available
     project = create_project(escrow_address, labels)
     # Setup webhooks for a project (update:task, update:job)

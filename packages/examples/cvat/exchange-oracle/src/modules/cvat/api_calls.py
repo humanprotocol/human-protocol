@@ -11,15 +11,14 @@ configuration = Configuration(
 )
 
 
-def create_cloudstorage(bucket_name: str, region: str) -> int:
+def create_cloudstorage(provider: str, bucket_name: str) -> int:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
-            provider_type=models.ProviderTypeEnum("AWS_S3_BUCKET"),
+            provider_type=models.ProviderTypeEnum(provider),
             resource=bucket_name,
             display_name=bucket_name,
             credentials_type=models.CredentialsTypeEnum("ANONYMOUS_ACCESS"),
-            specific_attributes=f"region={region}",
             description=bucket_name,
             manifests=["manifest.jsonl"],
         )  # CloudStorageWriteRequest
