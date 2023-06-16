@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -103,7 +104,7 @@ export class JobService {
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new NotFoundException(ErrorJob.NotEnoughFunds);
+      throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
     const manifestData: ManifestDto = {
