@@ -1,12 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  FindConditions,
+  FindOptionsWhere,
   FindManyOptions,
   FindOneOptions,
-  Not,
   Repository,
-  getRepository,
 } from 'typeorm';
 
 import { UserEntity } from './user.entity';
@@ -23,10 +21,10 @@ export class UserRepository {
   ) {}
 
   public async updateOne(
-    where: FindConditions<UserEntity>,
+    where: FindOptionsWhere<UserEntity>,
     dto: Partial<UserUpdateDto>,
   ): Promise<UserEntity> {
-    const userEntity = await this.userEntityRepository.findOne(where);
+    const userEntity = await this.userEntityRepository.findOneBy(where);
 
     if (!userEntity) {
       this.logger.log(ErrorUser.NotFound, UserRepository.name);
@@ -38,9 +36,9 @@ export class UserRepository {
   }
 
   public async findOne(
-    where: FindConditions<UserEntity>,
+    where: FindOptionsWhere<UserEntity>,
     options?: FindOneOptions<UserEntity>,
-  ): Promise<UserEntity | undefined> {
+  ): Promise<UserEntity | null> {
     const userEntity = await this.userEntityRepository.findOne({
       where,
       ...options,
@@ -54,7 +52,7 @@ export class UserRepository {
   }
 
   public find(
-    where: FindConditions<UserEntity>,
+    where: FindOptionsWhere<UserEntity>,
     options?: FindManyOptions<UserEntity>,
   ): Promise<UserEntity[]> {
     return this.userEntityRepository.find({

@@ -7,7 +7,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, FindConditions, Repository } from 'typeorm';
+import { DeleteResult, FindOptionsWhere, Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
 import { UserEntity } from '../user/user.entity';
@@ -66,13 +66,13 @@ export class AuthService {
   }
 
   public async logout(
-    where: FindConditions<AuthEntity>,
+    where: FindOptionsWhere<AuthEntity>,
   ): Promise<DeleteResult> {
     return this.authEntityRepository.delete(where);
   }
 
   public async refresh(
-    where: FindConditions<AuthEntity>,
+    where: FindOptionsWhere<AuthEntity>,
     ip: string,
   ): Promise<IJwt> {
     const authEntity = await this.authEntityRepository.findOne({

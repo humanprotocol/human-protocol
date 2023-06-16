@@ -1,14 +1,13 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  FindConditions,
+  FindOptionsWhere,
   FindManyOptions,
   FindOneOptions,
   Repository,
 } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
-import { ErrorPayment } from '../../common/constants/errors';
-import { PaymentCreateDto, PaymentUpdateDto } from './payment.dto';
+import { PaymentCreateDto } from './payment.dto';
 
 @Injectable()
 export class PaymentRepository {
@@ -19,25 +18,10 @@ export class PaymentRepository {
     private readonly paymentEntityRepository: Repository<PaymentEntity>,
   ) {}
 
-  public async updateOne(
-    where: FindConditions<PaymentEntity>,
-    dto: Partial<PaymentUpdateDto>,
-  ): Promise<PaymentEntity> {
-    const jobEntity = await this.paymentEntityRepository.findOne(where);
-
-    if (!jobEntity) {
-      this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new NotFoundException(ErrorPayment.NotFound);
-    }
-
-    Object.assign(jobEntity, dto);
-    return jobEntity.save();
-  }
-
   public async findOne(
-    where: FindConditions<PaymentEntity>,
+    where: FindOptionsWhere<PaymentEntity>,
     options?: FindOneOptions<PaymentEntity>,
-  ): Promise<PaymentEntity | undefined> {
+  ): Promise<PaymentEntity | null> {
     const paymentEntity = await this.paymentEntityRepository.findOne({
       where,
       ...options,
@@ -47,7 +31,7 @@ export class PaymentRepository {
   }
 
   public find(
-    where: FindConditions<PaymentEntity>,
+    where: FindOptionsWhere<PaymentEntity>,
     options?: FindManyOptions<PaymentEntity>,
   ): Promise<PaymentEntity[]> {
     return this.paymentEntityRepository.find({

@@ -3,7 +3,7 @@ import { Column, Entity, Generated, JoinColumn, OneToOne } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
 import { NS } from '../../common/constants';
-import { IBase } from '../../common/decorators/base';
+import { IBase } from '../../common/interfaces/base';
 
 export enum TokenType {
   EMAIL = 'EMAIL',
