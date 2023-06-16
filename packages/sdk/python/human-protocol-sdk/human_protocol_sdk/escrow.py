@@ -529,6 +529,28 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.finalResultsUrl().call()
         )
 
+    def get_intermediate_results_url(self, escrow_address: str):
+        """Gets the intermediate results file URL.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Intermediate results file url
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.isAddress(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address)
+            .functions.intermediateResultsUrl()
+            .call()
+        )
+
     def get_token_address(self, escrow_address: str):
         """Gets the address of the token used to fund the escrow.
 

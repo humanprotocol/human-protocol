@@ -48,7 +48,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public manifestHash;
 
     string public intermediateResultsUrl;
-    string public intermediateResultsHash;
 
     string public finalResultsUrl;
     string public finalResultsHash;
@@ -178,7 +177,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(bytes(_hash).length != 0, "Hash can't be empty");
 
         intermediateResultsUrl = _url;
-        intermediateResultsHash = _hash;
 
         emit IntermediateStorage(_url, _hash);
     }
