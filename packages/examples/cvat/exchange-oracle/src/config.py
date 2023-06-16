@@ -43,6 +43,16 @@ class CronConfig:
     process_incoming_webhooks_chunk_size = os.environ.get(
         "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
     )
+    track_completed_projects_int = int(
+        os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 3000)
+    )
+    track_completed_projects_chunk_size = os.environ.get(
+        "TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5
+    )
+    track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 3000))
+    track_completed_tasks_chunk_size = os.environ.get(
+        "TRACK_COMPLETED_TASKS_CHUNK_SIZE", 5
+    )
 
 
 class CvatConfig:
