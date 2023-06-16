@@ -2,9 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CurrencyService } from './currency.service';
 import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { Currency, TokenId } from '../../common/enums/payment';
+import { COINGECKO_API_URL } from 'src/common/constants';
+import {
+  NotFoundException,
+} from '@nestjs/common';
+import { ErrorCurrency } from 'src/common/constants/errors';
 
 describe('CurrencyService', () => {
-  let service: CurrencyService;
+  let currencyService: CurrencyService;
   let httpService: DeepMocked<HttpService>;
 
   beforeEach(async () => {
@@ -18,11 +24,46 @@ describe('CurrencyService', () => {
       ],
     }).compile();
 
-    service = module.get<CurrencyService>(CurrencyService);
+    currencyService = module.get<CurrencyService>(CurrencyService);
     httpService = module.get(HttpService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('getRate', () => {
+    it('should return the rate for the given token ID and currency', async () => {
+      const tokenId = TokenId.HUMAN_PROTOCOL;
+      const currency = Currency.USD;
+
+      const coingeckoResponse = {
+        data: {
+          [tokenId]: {
+            [currency]: 1.2345,
+          },
+        },
+      };
+
+      jest.spyOn(httpService, 'get').mockResolvedValue(coingeckoResponse);
+
+      const result = await currencyService.getRate(tokenId, currency);
+
+      expect(httpService.get).toHaveBeenCalledWith(
+        `${COINGECKO_API_URL}?ids=${tokenId}&vs_currencies=${currency}`
+      );
+      expect(result).toBe(1.2345);
+    });
+
+    it('should throw a not found exception if the pair is not found', async () => {
+      const tokenId = TokenId.HUMAN_PROTOCOL;
+      const currency = Currency.USD;
+
+      const coingeckoResponse = {
+        data: {},
+      };
+
+      jest.spyOn(httpService, 'get').mockResolvedValue(coingeckoResponse);
+
+      await expect(
+        currencyService.getRate(tokenId, currency)
+      ).rejects.toThrowError(new NotFoundException(ErrorCurrency.PairNotFound));
+    });
   });
 });

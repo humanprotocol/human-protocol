@@ -537,46 +537,4 @@ describe('JobService', () => {
       );
     });
   });
-
-  /*describe('sendWebhook', () => {
-    let httpService: HttpService;
-    let jobService: JobService;
-    const webhookUrl = 'https://example.com/webhook';
-    const webhookData: SendWebhookDto = {
-    };
-  
-    beforeEach(() => {
-      httpService = new HttpService();
-      jobService = new JobService(httpService);
-    });
-  
-    it('should send the webhook successfully', async () => {
-      const response = {
-        data: 'Webhook sent successfully',
-      };
-  
-      jest.spyOn(httpService, 'post').mockReturnValueOnce(
-        Promise.resolve({
-          data: response,
-        })
-      );
-  
-      const result = await jobService.sendWebhook(webhookUrl, webhookData);
-  
-      expect(httpService.post).toHaveBeenCalledWith(webhookUrl, webhookData);
-      expect(result).toBe(true);
-    });
-  
-    it('should throw a NotFoundException if the webhook was not sent', async () => {
-      jest.spyOn(httpService, 'post').mockReturnValueOnce(
-        Promise.resolve({
-          data: null,
-        })
-      );
-  
-      await expect(jobService.sendWebhook(webhookUrl, webhookData)).rejects.toThrowError(
-        new NotFoundException(ErrorJob.WebhookWasNotSent)
-      );
-    });
-  }); */
 });

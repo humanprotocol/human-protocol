@@ -209,7 +209,7 @@ export class PaymentService {
     return true;
   }
 
-  private async getPayment(
+  public async getPayment(
     paymentId: string,
   ): Promise<Stripe.Response<Stripe.PaymentIntent>> {
     return this.stripe.paymentIntents.retrieve(paymentId);
