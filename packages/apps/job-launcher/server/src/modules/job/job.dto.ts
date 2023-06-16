@@ -10,7 +10,7 @@ import {
   IsDate,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobStatus } from '../../common/enums/job';
+import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -135,4 +135,16 @@ export class SaveManifestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
+}
+
+export class ManifestDto {
+  dataUrl?: string;
+  labels?: string[];
+  submissionsRequired: number;
+  requesterTitle?: string;
+  requesterDescription: string;
+  requesterAccuracyTarget?: number;
+  fundAmount: string;
+  requestType: JobRequestType;
+  mode: JobMode;
 }

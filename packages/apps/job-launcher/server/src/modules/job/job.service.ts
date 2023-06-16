@@ -28,10 +28,10 @@ import {
 import {
   JobCvatDto,
   JobFortuneDto,
+  ManifestDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
-import { ManifestDto } from '../payment/payment.dto';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';

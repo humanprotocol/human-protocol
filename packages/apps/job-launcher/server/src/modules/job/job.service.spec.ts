@@ -24,7 +24,6 @@ import {
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import {
-  EXCHANGE_ORACLE_WEBHOOK_URL,
   JOB_LAUNCHER_FEE,
   RECORDING_ORACLE_ADDRESS,
   RECORDING_ORACLE_FEE,
@@ -512,11 +511,10 @@ describe('JobService', () => {
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
       const manifest: ManifestDto = {
-        chainId: MOCK_CHAIN_ID,
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
+        fundAmount: (10).toString(),
         mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };

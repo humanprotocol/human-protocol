@@ -7,7 +7,6 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { JobMode, JobRequestType } from '../../common/enums/job';
 import { ChainId } from '@human-protocol/sdk';
 
 export class PaymentFiatConfirmDto {
@@ -63,16 +62,4 @@ export class GetRateDto {
   })
   @IsEnum(Currency)
   public currency: Currency;
-}
-
-export class ManifestDto {
-  dataUrl?: string;
-  labels?: string[];
-  submissionsRequired: number;
-  requesterTitle?: string;
-  requesterDescription: string;
-  requesterAccuracyTarget?: number;
-  fundAmount: string;
-  requestType: JobRequestType;
-  mode: JobMode;
 }
