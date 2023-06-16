@@ -9,7 +9,11 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { StorageClient } from '@human-protocol/sdk';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { JobStatus } from '../../common/enums/job';
-import { JOB_LAUNCHER_FEE, RECORDING_ORACLE_FEE, REPUTATION_ORACLE_FEE } from '../../common/constants';
+import {
+  JOB_LAUNCHER_FEE,
+  RECORDING_ORACLE_FEE,
+  REPUTATION_ORACLE_FEE,
+} from '../../common/constants';
 
 jest.mock('@human-protocol/sdk');
 

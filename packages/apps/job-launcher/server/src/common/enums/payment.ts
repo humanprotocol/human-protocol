@@ -43,10 +43,6 @@ export enum Currency {
   ZAR = 'zar',
 }
 
-export enum TokenName {
-  HMT = 'hmt',
-}
-
 export enum TokenId {
   HUMAN_PROTOCOL = 'human-protocol',
 }

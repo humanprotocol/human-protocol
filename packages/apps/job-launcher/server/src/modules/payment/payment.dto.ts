@@ -51,11 +51,6 @@ export class PaymentCreateDto {
   public type?: PaymentType;
 }
 
-export class PaymentUpdateDto {
-  public paymentId: string;
-  public transactionHash: string;
-}
-
 export class GetRateDto {
   @ApiProperty({
     enum: CoingeckoId,

@@ -24,7 +24,7 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { networkMap } from '../../common/decorators';
+import { networkMap } from '../../common/constants/network';
 
 @Injectable()
 export class PaymentService {
