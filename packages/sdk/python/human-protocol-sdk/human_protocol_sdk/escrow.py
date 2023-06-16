@@ -221,10 +221,10 @@ class EscrowClient:
             self.w3,
             "Setup",
             self._get_escrow_contract(escrow_address).functions.setup(
-                escrow_config.recording_oracle_address,
                 escrow_config.reputation_oracle_address,
-                escrow_config.recording_oracle_fee,
+                escrow_config.recording_oracle_address,
                 escrow_config.reputation_oracle_fee,
+                escrow_config.recording_oracle_fee,
                 escrow_config.manifest_url,
                 escrow_config.hash,
             ),

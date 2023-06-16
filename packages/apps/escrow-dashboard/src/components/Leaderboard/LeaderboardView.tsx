@@ -155,9 +155,17 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                 '0px 3px 1px -2px #E9EBFA, 0px 2px 2px rgba(233, 235, 250, 0.5), 0px 1px 5px rgba(233, 235, 250, 0.2);',
             }}
           >
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table
+              sx={{
+                minWidth: 650,
+                th: { borderWidth: '2px', borderColor: '#cacfe8' },
+                td: { borderColor: '#cacfe8' },
+              }}
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
+                  <TableCell></TableCell>
                   <TableCell>Address</TableCell>
                   <TableCell align="left">Role</TableCell>
                   <TableCell align="left">Stake</TableCell>
@@ -166,7 +174,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {displayRows.map((staker) => (
+                {displayRows.map((staker, i) => (
                   <TableRow
                     key={`${staker.chainId}-${staker.address}`}
                     sx={{
@@ -177,9 +185,8 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                       handleClickLeader(staker.chainId, staker.address)
                     }
                   >
-                    <TableCell component="th" scope="row">
-                      {shortenAddress(staker.address)}
-                    </TableCell>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>{shortenAddress(staker.address)}</TableCell>
                     <TableCell align="left">{staker.role}</TableCell>
                     <TableCell align="left">
                       {staker.amountStaked} HMT
