@@ -1,11 +1,4 @@
 /**
- * Represents error messages related to auth.
- */
-export enum ErrorAuth {
-  Unauthorized = 'Unauthorized',
-}
-
-/**
  * Represents error messages associated with a job.
  */
 export enum ErrorJob {

@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -25,9 +26,7 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
-  JobCvatCreateDto,
   JobCvatDto,
-  JobFortuneCreateDto,
   JobFortuneDto,
   SaveManifestDto,
   SendWebhookDto,
@@ -36,7 +35,7 @@ import { ManifestDto } from '../payment/payment.dto';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { networkMap } from '../../common/decorators';
+import { networkMap } from '../../common/constants/network';
 import {
   EXCHANGE_ORACLE_WEBHOOK_URL,
   JOB_LAUNCHER_FEE,
@@ -111,7 +110,7 @@ export class JobService {
 
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new NotFoundException(ErrorJob.NotEnoughFunds);
+      throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
     const manifestData: ManifestDto = {

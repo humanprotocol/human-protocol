@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  FindConditions,
+  FindOptionsWhere,
   FindManyOptions,
   FindOneOptions,
   Repository,
@@ -20,10 +20,10 @@ export class JobRepository {
   ) {}
 
   public async updateOne(
-    where: FindConditions<JobEntity>,
+    where: FindOptionsWhere<JobEntity>,
     dto: Partial<JobUpdateDataDto>,
   ): Promise<JobEntity> {
-    const jobEntity = await this.jobEntityRepository.findOne(where);
+    const jobEntity = await this.jobEntityRepository.findOneBy(where);
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobRepository.name);
@@ -35,7 +35,7 @@ export class JobRepository {
   }
 
   public async findOne(
-    where: FindConditions<JobEntity>,
+    where: FindOptionsWhere<JobEntity>,
     options?: FindOneOptions<JobEntity>,
   ): Promise<JobEntity> {
     const jobEntity = await this.jobEntityRepository.findOne({
@@ -52,7 +52,7 @@ export class JobRepository {
   }
 
   public find(
-    where: FindConditions<JobEntity>,
+    where: FindOptionsWhere<JobEntity>,
     options?: FindManyOptions<JobEntity>,
   ): Promise<JobEntity[]> {
     return this.jobEntityRepository.find({

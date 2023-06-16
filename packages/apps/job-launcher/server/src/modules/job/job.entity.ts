@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { NS } from '../../common/constants';
-import { IJob } from '../../common/decorators';
+import { IJob } from '../../common/interfaces';
 import { JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';

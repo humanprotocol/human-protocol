@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { TokenEntity } from './token.entity';
 import { TokenCreateDto } from './auth.dto';
 import { ErrorToken } from '../../common/constants/errors';
@@ -15,7 +15,7 @@ export class TokenRepository {
   ) {}
 
   public async findOne(
-    where: FindConditions<TokenEntity>,
+    where: FindOptionsWhere<TokenEntity>,
   ): Promise<TokenEntity | undefined> {
     const tokenEntity = await this.tokenEntityRepository.findOne({
       where,
