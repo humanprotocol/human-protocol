@@ -40,7 +40,7 @@ describe('JobController', () => {
   describe('getDetails', () => {
     it('should return job details', async () => {
       const chainId = 1;
-      const escrowAddress = '0x123abc';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
       const expectedDetails: JobDetailsDto = {
         escrowAddress,
         chainId,
@@ -67,8 +67,11 @@ describe('JobController', () => {
   describe('getPendingJobs', () => {
     it('should return pending jobs', async () => {
       const chainId = 1;
-      const workerAddress = '0x456def';
-      const expectedJobs: any[] = ['0xescrowaddress1', '0xescrowaddress2'];
+      const workerAddress = '0x1234567890123456789012345678901234567890';
+      const expectedJobs: any[] = [
+        '0x1234567890123456789012345678901234567891',
+        '0x1234567890123456789012345678901234567892',
+      ];
 
       jest.spyOn(jobService, 'getPendingJobs').mockResolvedValue(expectedJobs);
 
@@ -85,8 +88,8 @@ describe('JobController', () => {
   describe('solveJob', () => {
     it('should solve a job', async () => {
       const chainId = 1;
-      const escrowAddress = '0xescrowaddress';
-      const workerAddress = '0xworkeraddress';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'job-solution';
       const solveJobDto: SolveJobDto = {
         chainId,
