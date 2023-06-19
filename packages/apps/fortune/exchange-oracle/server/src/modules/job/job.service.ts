@@ -83,7 +83,7 @@ export class JobService {
     this.storage[escrowAddress].push(workerAddress);
 
     await this.httpService.post(
-      recordingOracleURL || 'http://localhost:3005/' + '/job/solve',
+      recordingOracleURL || 'http://localhost:3005' + '/job/solve',
       {
         escrowAddress: escrowAddress,
         chainId: chainId,
