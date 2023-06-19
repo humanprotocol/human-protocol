@@ -609,6 +609,33 @@ export default class EscrowClient {
   }
 
   /**
+   * Returns the intermediate results file URL.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.intermediateResultsUrl();
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
    * Returns the value for a specified key and address
    *
    * @param {string} escrowAddress - Address of the escrow.
