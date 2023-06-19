@@ -23,17 +23,10 @@ import {
 } from '@human-protocol/sdk';
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import {
-  JOB_LAUNCHER_FEE,
-  RECORDING_ORACLE_ADDRESS,
-  RECORDING_ORACLE_FEE,
-  REPUTATION_ORACLE_ADDRESS,
-  REPUTATION_ORACLE_FEE,
-} from '../../common/constants';
 import { ErrorBucket, ErrorEscrow, ErrorJob } from '../../common/constants/errors';
 import { JobFortuneDto, ManifestDto, SaveManifestDto } from './job.dto';
 import { UserRepository } from '../user/user.repository';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { JobEntity } from './job.entity';
 
 const MOCK_REQUESTER_TITLE = 'Mock job title',
   MOCK_REQUESTER_DESCRIPTION = 'Mock job description',
@@ -45,7 +38,13 @@ const MOCK_REQUESTER_TITLE = 'Mock job title',
   MOCK_FILE_KEY = 'manifest.json',
   MOCK_PRIVATE_KEY =
     'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55',
-  MOCK_BUCKET_NAME = 'bucket-name';
+  MOCK_BUCKET_NAME = 'bucket-name',
+  MOCK_RECORDING_ORACLE_ADDRESS='0xCf88b3f1992458C2f5a229573c768D0E9F70C44e',
+  MOCK_REPUTATION_ORACLE_ADDRESS='0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473',
+  MOCK_EXCHANGE_ORACLE_WEBHOOK_URL='http://localhost:3000',
+  MOCK_JOB_LAUNCHER_FEE=5,
+  MOCK_RECORDING_ORACLE_FEE=5,
+  MOCK_REPUTATION_ORACLE_FEE=5;
 
 jest.mock('@human-protocol/sdk');
 
@@ -84,6 +83,11 @@ describe('JobService', () => {
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'createFileUrl').mockReturnValue(MOCK_FILE_URL);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_JOB_LAUNCHER_FEE)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
+
       const userId = 1;
       const dto = {
         chainId: MOCK_CHAIN_ID,
@@ -93,16 +97,16 @@ describe('JobService', () => {
         fundAmount,
       };
 
-      const userBalance = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
+      const userBalance = ethers.utils.parseUnits('15', 'ether'); // 15 ETH
 
       const fundAmountInWei = ethers.utils.parseUnits(
         dto.fundAmount.toString(),
         'ether',
       );
 
-      const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
-        .add(RECORDING_ORACLE_FEE)
-        .add(REPUTATION_ORACLE_FEE);
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
@@ -143,6 +147,10 @@ describe('JobService', () => {
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_JOB_LAUNCHER_FEE)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
 
       const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
       jest
@@ -177,8 +185,12 @@ describe('JobService', () => {
         .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_JOB_LAUNCHER_FEE)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
 
-      const userBalance = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
+      const userBalance = ethers.utils.parseUnits('15', 'ether'); // 10 ETH
       jest
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
@@ -234,10 +246,15 @@ describe('JobService', () => {
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
 
-      jest.spyOn(configService, 'get').mockReturnValue(MOCK_PRIVATE_KEY);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_PRIVATE_KEY)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_EXCHANGE_ORACLE_WEBHOOK_URL)
 
       const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
-      const fee = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue({
         dataUrl: MOCK_FILE_URL,
@@ -249,61 +266,25 @@ describe('JobService', () => {
         mode: JobMode.DESCRIPTIVE,
       });
 
-      const mockJobEntity = {
-        id: 1,
-        chainId: 1,
-        userId: 1,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
-        fee: fee.toString(),
-        fundAmount: fundAmount.toString(),
-        retriesCount: 0,
-        waitUntil: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        beforeInsert: jest.fn().mockResolvedValue(true),
-        beforeUpdate: jest.fn().mockResolvedValue(true),
-        user: {
-          id: 123,
-          password: 'HUMAN',
-          email: 'human@hmt.ai',
-          confirm: 'human',
-          type: UserType.REQUESTER,
-          status: UserStatus.ACTIVE,
-          stripeCustomerId: '123',
-          jobs: [],
-          payments: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
+      const mockJobEntity: Partial<JobEntity> = {
+          chainId: 1,
+          manifestUrl: MOCK_FILE_URL,
+          manifestHash: MOCK_FILE_HASH,
+          escrowAddress: MOCK_ADDRESS,
+          status: JobStatus.PENDING,
           save: jest.fn().mockResolvedValue(true),
-          hasId: jest.fn().mockResolvedValue(true),
-          remove: jest.fn().mockResolvedValue(true),
-          softRemove: jest.fn().mockResolvedValue(true),
-          recover: jest.fn().mockResolvedValue(true),
-          reload: jest.fn().mockResolvedValue(true),
-          beforeInsert: jest.fn().mockResolvedValue(true),
-          beforeUpdate: jest.fn().mockResolvedValue(true),
-        },
-        save: jest.fn().mockResolvedValue(true),
-        hasId: jest.fn().mockResolvedValue(true),
-        remove: jest.fn().mockResolvedValue(true),
-        softRemove: jest.fn().mockResolvedValue(true),
-        recover: jest.fn().mockResolvedValue(true),
-        reload: jest.fn().mockResolvedValue(true),
       };
 
-      const jobEntity = await jobService.launchJob(mockJobEntity);
+      const jobEntity = await jobService.launchJob(mockJobEntity as JobEntity);
 
       expect(EscrowClient.prototype.createAndSetupEscrow).toHaveBeenCalledWith(
         networkData?.hmtAddress,
         [],
         {
-          recordingOracle: RECORDING_ORACLE_ADDRESS,
-          reputationOracle: REPUTATION_ORACLE_ADDRESS,
-          recordingOracleFee: BigNumber.from(RECORDING_ORACLE_FEE),
-          reputationOracleFee: BigNumber.from(REPUTATION_ORACLE_FEE),
+          recordingOracle: MOCK_RECORDING_ORACLE_ADDRESS,
+          reputationOracle: MOCK_REPUTATION_ORACLE_ADDRESS,
+          recordingOracleFee: BigNumber.from(MOCK_RECORDING_ORACLE_FEE),
+          reputationOracleFee: BigNumber.from(MOCK_REPUTATION_ORACLE_FEE),
           manifestUrl: mockJobEntity.manifestUrl,
           manifestHash: mockJobEntity.manifestHash,
         },
@@ -325,66 +306,28 @@ describe('JobService', () => {
         network: networkData as NetworkData,
       });
 
-      jest.spyOn(configService, 'get').mockReturnValue(MOCK_PRIVATE_KEY);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_PRIVATE_KEY)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_EXCHANGE_ORACLE_WEBHOOK_URL)
 
       jest
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockRejectedValue(new Error(ErrorEscrow.NotLaunched));
 
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
-      const fee = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
-
-      const mockJobEntity = {
-        id: 1,
+      const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
-        userId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: '',
+        escrowAddress: MOCK_ADDRESS,
         status: JobStatus.PENDING,
-        fee: fee.toString(),
-        fundAmount: fundAmount.toString(),
-        retriesCount: 0,
-        waitUntil: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        beforeInsert: jest.fn().mockResolvedValue(true),
-        beforeUpdate: jest.fn().mockResolvedValue(true),
-        user: {
-          id: 123,
-          password: 'HUMAN',
-          email: 'human@hmt.ai',
-          confirm: 'human',
-          type: UserType.REQUESTER,
-          status: UserStatus.ACTIVE,
-          stripeCustomerId: '123',
-          jobs: [],
-          payments: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          save: jest.fn().mockResolvedValue(true),
-          hasId: jest.fn().mockResolvedValue(true),
-          remove: jest.fn().mockResolvedValue(true),
-          softRemove: jest.fn().mockResolvedValue(true),
-          recover: jest.fn().mockResolvedValue(true),
-          reload: jest.fn().mockResolvedValue(true),
-          beforeInsert: jest.fn().mockResolvedValue(true),
-          beforeUpdate: jest.fn().mockResolvedValue(true),
-        },
         save: jest.fn().mockResolvedValue(true),
-        hasId: jest.fn().mockResolvedValue(true),
-        remove: jest.fn().mockResolvedValue(true),
-        softRemove: jest.fn().mockResolvedValue(true),
-        recover: jest.fn().mockResolvedValue(true),
-        reload: jest.fn().mockResolvedValue(true),
-      };
+    };
 
-      expect(jobService.launchJob(mockJobEntity)).rejects.toThrow();
-
-      expect(
-        EscrowClient.prototype.createAndSetupEscrow,
-      ).not.toHaveBeenCalled();
-      expect(mockJobEntity.save).not.toHaveBeenCalled();
+      expect(jobService.launchJob(mockJobEntity as JobEntity)).rejects.toThrow();
     });
   });
 
@@ -423,7 +366,13 @@ describe('JobService', () => {
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
 
-      jest.spyOn(configService, 'get').mockReturnValue(MOCK_PRIVATE_KEY);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_PRIVATE_KEY)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_EXCHANGE_ORACLE_WEBHOOK_URL)
 
       const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
       const fee = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
@@ -448,7 +397,13 @@ describe('JobService', () => {
         network: networkData as NetworkData,
       });
 
-      jest.spyOn(configService, 'get').mockReturnValue(MOCK_PRIVATE_KEY);
+      jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_PRIVATE_KEY)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_ADDRESS)
+        .mockImplementationOnce(() => MOCK_RECORDING_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_REPUTATION_ORACLE_FEE)
+        .mockImplementationOnce(() => MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
 
       jest
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')

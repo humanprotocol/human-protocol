@@ -32,20 +32,21 @@ export class PaymentService {
   private stripe: Stripe;
   private endpointSecrete: string;
 
-  // TODO: add crypto variant
   constructor(
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
     private configService: ConfigService,
   ) {
+    try {
+      console.log(this.configService.get<string>('STRIPE_SECRET_KEY', 'secrete-key'))
     this.stripe = new Stripe(
-      this.configService.get('STRIPE_SECRET_KEY', 'secrete-key'),
+      this.configService.get<string>('STRIPE_SECRET_KEY', 'secrete-key'),
       {
-        apiVersion: this.configService.get('STRIPE_API_VERSION', '2022-11-15'),
+        apiVersion: this.configService.get<any>('STRIPE_API_VERSION', '2022-11-15'),
         appInfo: {
-          name: this.configService.get('NAME', 'Fortune'),
-          version: this.configService.get('VERSION'),
-          url: this.configService.get('STRIPE_APP_INFO_URL'),
+          name: this.configService.get<string>('NAME', 'Fortune'),
+          version: this.configService.get<string>('VERSION'),
+          url: this.configService.get<string>('STRIPE_APP_INFO_URL'),
         },
       },
     );
@@ -53,42 +54,49 @@ export class PaymentService {
       'STRIPE_ENDPOINT_SECRETE',
       'secrete-key',
     );
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   public async createCustomer(email: string) {
-    const customer = await this.stripe.customers.create({
-      email,
-    });
-
-    if (!customer) {
+    try {
+      return this.stripe.customers.create({
+        email,
+      });
+    } catch (e) {
+      console.log(e)
       this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
       throw new NotFoundException(ErrorPayment.CustomerNotFound);
     }
-
-    return customer.id;
   }
 
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
   ) {
-    const { amount, currency } = dto;
+    try {
+      const { amount, currency } = dto;
 
-    const params: Stripe.PaymentIntentCreateParams = {
-      payment_method_types: [PaymentFiatMethodType.CARD],
-      amount: amount * 100,
-      currency: currency,
-    };
+      const params: Stripe.PaymentIntentCreateParams = {
+        payment_method_types: [PaymentFiatMethodType.CARD],
+        amount: amount * 100,
+        currency: currency,
+      };
 
-    params.confirm = true;
-    params.customer = customerId;
-    params.payment_method_options = {};
+      params.confirm = true;
+      params.customer = customerId;
+      params.payment_method_options = {};
 
-    const paymentIntent = await this.stripe.paymentIntents.create(params);
+      const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    return {
-      clientSecret: paymentIntent.client_secret,
-    };
+      return {
+        clientSecret: paymentIntent.client_secret,
+      };
+    } catch (e) {
+      this.logger.log(ErrorPayment.IntentNotCreated, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.IntentNotCreated);
+    }
   }
 
   public async confirmFiatPayment(
@@ -100,7 +108,12 @@ export class PaymentService {
 
       if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
         this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-        throw new NotFoundException(ErrorPayment.NotSuccess);
+        throw new BadRequestException(ErrorPayment.NotSuccess);
+      }
+
+      if (!paymentData) {
+        this.logger.log(ErrorPayment.NotFound, PaymentService.name);
+        throw new NotFoundException(ErrorPayment.NotFound);
       }
 
       await this.savePayment(
@@ -112,7 +125,6 @@ export class PaymentService {
 
       return true;
     } catch (e) {
-      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
       return false;
     }
   }
@@ -176,7 +188,6 @@ export class PaymentService {
 
       return true;
     } catch (e) {
-      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
       return false;
     }
   }
@@ -211,7 +222,7 @@ export class PaymentService {
 
   public async getPayment(
     paymentId: string,
-  ): Promise<Stripe.Response<Stripe.PaymentIntent>> {
+  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
     return this.stripe.paymentIntents.retrieve(paymentId);
   }
 

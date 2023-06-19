@@ -31,11 +31,7 @@ export class UserService {
   public async create(dto: UserCreateDto): Promise<UserEntity> {
     const { email, password, ...rest } = dto;
 
-    console.log(2222);
-
     await this.checkEmail(email, 0);
-
-    console.log(2222111);
 
     return this.userRepository.create({
       ...rest,

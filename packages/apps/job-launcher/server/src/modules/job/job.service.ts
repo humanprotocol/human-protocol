@@ -36,15 +36,6 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/constants/network';
-import {
-  EXCHANGE_ORACLE_WEBHOOK_URL,
-  JOB_LAUNCHER_FEE,
-  RECORDING_ORACLE_ADDRESS,
-  RECORDING_ORACLE_FEE,
-  REPUTATION_ORACLE_ADDRESS,
-  REPUTATION_ORACLE_FEE,
-  S3_PORT,
-} from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -69,7 +60,7 @@ export class JobService {
         'S3_ENDPOINT',
         'http://127.0.0.1',
       ),
-      port: S3_PORT,
+      port: 9000,
       useSSL: Boolean(this.configService.get<boolean>('S3_USE_SSL', false)),
     };
 
@@ -85,73 +76,81 @@ export class JobService {
     userId: number,
     dto: JobFortuneDto,
   ): Promise<number> {
-    const {
-      chainId,
-      fortunesRequired,
-      requesterTitle,
-      requesterDescription,
-      fundAmount,
-    } = dto;
+      const {
+        chainId,
+        fortunesRequired,
+        requesterTitle,
+        requesterDescription,
+        fundAmount,
+      } = dto;
 
-    const userBalance = await this.paymentService.getUserBalance(userId);
+      const userBalance = await this.paymentService.getUserBalance(userId);
 
-    const fundAmountInWei = ethers.utils.parseUnits(
-      fundAmount.toString(),
-      'ether',
-    );
+      const fundAmountInWei = ethers.utils.parseUnits(
+        fundAmount.toString(),
+        'ether',
+      );
 
-    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
-      .add(RECORDING_ORACLE_FEE)
-      .add(REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      const totalFeePercentage = BigNumber.from(this.configService.get<number>(
+          'JOB_LAUNCHER_FEE',
+          0,
+        ))
+        .add(this.configService.get<number>(
+          'RECORDING_ORACLE_FEE',
+          0,
+        ))
+        .add(this.configService.get<number>(
+          'REPUTATION_ORACLE_FEE',
+          0,
+        ));
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      if (userBalance.lte(totalAmount)) {
+        this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
+        throw new BadRequestException(ErrorJob.NotEnoughFunds);
+      }
 
-    if (userBalance.lte(totalAmount)) {
-      this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new BadRequestException(ErrorJob.NotEnoughFunds);
-    }
+      const manifestData: ManifestDto = {
+        submissionsRequired: fortunesRequired,
+        requesterTitle,
+        requesterDescription,
+        fundAmount: totalAmount.toString(),
+        mode: JobMode.DESCRIPTIVE,
+        requestType: JobRequestType.FORTUNE,
+      };
 
-    const manifestData: ManifestDto = {
-      submissionsRequired: fortunesRequired,
-      requesterTitle,
-      requesterDescription,
-      fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
-      requestType: JobRequestType.FORTUNE,
-    };
+      const { manifestUrl, manifestHash } = await this.saveManifest(
+        manifestData,
+        this.bucket,
+      );
 
-    const { manifestUrl, manifestHash } = await this.saveManifest(
-      manifestData,
-      this.bucket,
-    );
+      const jobEntity = await this.jobRepository.create({
+        chainId,
+        userId,
+        manifestUrl,
+        manifestHash,
+        status: JobStatus.PENDING,
+        waitUntil: new Date(),
+      });
 
-    const jobEntity = await this.jobRepository.create({
-      chainId,
-      userId,
-      manifestUrl,
-      manifestHash,
-      status: JobStatus.PENDING,
-      waitUntil: new Date(),
-    });
+      if (!jobEntity) {
+        this.logger.log(ErrorJob.NotCreated, JobService.name);
+        throw new NotFoundException(ErrorJob.NotCreated);
+      }
 
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorJob.NotCreated);
-    }
+      await this.paymentService.savePayment(
+        userId,
+        PaymentSource.BALANCE,
+        PaymentType.WITHDRAWAL,
+        BigNumber.from(totalAmount),
+      );
 
-    await this.paymentService.savePayment(
-      userId,
-      PaymentSource.BALANCE,
-      PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
-    );
+      jobEntity.status = JobStatus.PAID;
+      await jobEntity.save();
 
-    jobEntity.status = JobStatus.PAID;
-    await jobEntity.save();
-
-    return jobEntity.id;
+      return jobEntity.id;
   }
 
   public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
@@ -172,9 +171,18 @@ export class JobService {
       'ether',
     );
 
-    const totalFeePercentage = BigNumber.from(JOB_LAUNCHER_FEE)
-      .add(RECORDING_ORACLE_FEE)
-      .add(REPUTATION_ORACLE_FEE);
+    const totalFeePercentage = BigNumber.from(this.configService.get<number>(
+      'JOB_LAUNCHER_FEE',
+      0,
+    ))
+      .add(this.configService.get<number>(
+        'RECORDING_ORACLE_FEE',
+        0,
+      ))
+      .add(this.configService.get<number>(
+        'REPUTATION_ORACLE_FEE',
+        0,
+      ));
     const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
@@ -243,15 +251,28 @@ export class JobService {
         ),
         provider,
       );
+      
       const clientParams = await InitClient.getParams(signer);
 
       const escrowClient = new EscrowClient(clientParams);
 
       const escrowConfig = {
-        recordingOracle: RECORDING_ORACLE_ADDRESS,
-        reputationOracle: REPUTATION_ORACLE_ADDRESS,
-        recordingOracleFee: BigNumber.from(RECORDING_ORACLE_FEE),
-        reputationOracleFee: BigNumber.from(REPUTATION_ORACLE_FEE),
+        recordingOracle: this.configService.get<string>(
+          'RECORDING_ORACLE_ADDRESS',
+          '',
+        ),
+        reputationOracle: this.configService.get<string>(
+          'REPUTATION_ORACLE_ADDRESS',
+          '',
+        ),
+        recordingOracleFee: BigNumber.from(this.configService.get<number>(
+          'RECORDING_ORACLE_FEE',
+          0,
+        )),
+        reputationOracleFee: BigNumber.from(this.configService.get<number>(
+          'REPUTATION_ORACLE_FEE',
+          0,
+        )),
         manifestUrl: jobEntity.manifestUrl,
         manifestHash: jobEntity.manifestHash,
       };
@@ -274,7 +295,11 @@ export class JobService {
       const manifest = await this.getManifest(jobEntity.manifestUrl);
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        this.sendWebhook(EXCHANGE_ORACLE_WEBHOOK_URL, {
+        this.sendWebhook(
+          this.configService.get<string>(
+            'EXCHANGE_ORACLE_WEBHOOK_URL',
+            '',
+          ), {
           escrowAddress: jobEntity.escrowAddress,
           chainId: jobEntity.chainId,
         });

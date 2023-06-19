@@ -13,27 +13,18 @@ import { BigNumber } from 'ethers';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
 import { CurrencyService } from './currency.service';
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { Currency, PaymentFiatMethodType, PaymentSource, PaymentStatus, PaymentType } from 'src/common/enums/payment';
-import { TX_CONFIRMATION_TRESHOLD } from 'src/common/constants';
+import { TransactionReceipt, Log } from "@ethersproject/abstract-provider";
+import { Currency, PaymentFiatMethodType, PaymentSource, PaymentType } from '../../common/enums/payment';
+import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 
-const MOCK_REQUESTER_TITLE = 'Mock job title',
-      MOCK_REQUESTER_DESCRIPTION = 'Mock job description',
-      MOCK_FORTUNES_REQUIRED = 5,
-      MOCK_CHAIN_ID = 1,
-      MOCK_ADDRESS = '0x1234567890abcdef',
-      MOCK_FILE_URL = 'mockedFileUrl',
-      MOCK_FILE_HASH = 'mockedFileHash',
-      MOCK_FILE_KEY = 'manifest.json',
-      MOCK_PRIVATE_KEY =
-        'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55',
+const MOCK_ADDRESS = '0x1234567890abcdef',
       MOCK_TRANSACTION_HASH = '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc',
-      MOCK_BUCKET_NAME = 'bucket-name',
-      MOCK_STRIPE_SECRET_KEY = 'secrete key',
+      MOCK_STRIPE_SECRET_KEY = 'secrete_key',
       MOCK_STRIPE_API_VERSION = '2022-11-15',
       MOCK_STRIPE_APP_NAME = 'Some name',
       MOCK_STRIPE_APP_VERSION = '0.0.1',
-      MOCK_STRIPE_APP_INFO_URL = 'some url' 
+      MOCK_STRIPE_APP_INFO_URL = 'some url',
+      MOCK_STRIPE_ENDPOINT_SECRETE = 'secrete-key'
 
 jest.mock('@human-protocol/sdk');
 
@@ -56,50 +47,64 @@ describe('PaymentService', () => {
       ],
     }).compile();
 
-
-    stripe = new Stripe(
-      MOCK_STRIPE_SECRET_KEY
-      {
-        apiVersion: MOCK_STRIPE_API_VERSION,
-        appInfo: {
-          name: MOCK_STRIPE_APP_NAME,
-          version: MOCK_STRIPE_APP_VERSION,
-          url: MOCK_STRIPE_APP_INFO_URL,
-        },
-      },
-    );
-    
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     paymentRepository = moduleRef.get(PaymentRepository);
     currencyService = moduleRef.get(CurrencyService);
     configService = moduleRef.get(ConfigService);
     httpService = moduleRef.get(HttpService);
+
+    jest.spyOn(configService, 'get' as any)
+        .mockImplementationOnce(() => MOCK_STRIPE_SECRET_KEY)
+        .mockImplementationOnce(() => MOCK_STRIPE_API_VERSION)
+        .mockImplementationOnce(() => MOCK_STRIPE_APP_NAME)
+        .mockImplementationOnce(() => MOCK_STRIPE_APP_VERSION)
+        .mockImplementationOnce(() => MOCK_STRIPE_APP_INFO_URL)
+        .mockImplementationOnce(() => MOCK_STRIPE_ENDPOINT_SECRETE)
+
+    stripe = {
+      customers: {
+        create: jest.fn(),
+      },
+      paymentIntents: {
+        create: jest.fn(),
+      }
+    } as any;
+  });
+
+  describe('createCustomer', () => {
+    it.only('should create a customer with the given email', async () => {
+      const email = 'test@example.com';
+      const createdCustomer = { id: 'customer_id', email };
+
+      jest.spyOn(stripe.customers, 'create').mockResolvedValue(createdCustomer as Stripe.Response<Stripe.Customer>);
+
+      const result = await paymentService.createCustomer(email);
+
+      expect(result).toEqual(createdCustomer);
+      expect(stripe.customers.create).toHaveBeenCalledWith({ email });
+    });
+
+    it('should throw a NotFoundException if customer creation fails', async () => {
+      const email = 'test@example.com';
+
+      jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
+
+      await expect(
+        paymentService.createCustomer(email)
+      ).rejects.toThrowError(new NotFoundException(ErrorPayment.CustomerNotFound));
+      expect(stripe.customers.create).toHaveBeenCalledWith({ email });
+    });
   });
 
   describe('createCustomer', () => {
     it('should create a customer successfully', async () => {
       const email = 'test@example.com';
 
-      const customer = {
-        id: '123',
-        object: 'customer',
-        balance: 1,
-        created: new Date(),
-        default_source: null,
-        description: null,
-        email: null,
-        invoice_settings: {
-          custom_fields: null,
-          default_payment_method: null,
-          footer: null,
-          rendering_options: null
-        },
-        livemode: false,
-        metadata: [{some: 'data'}],
-        shipping: null
+      const customer: Partial<Stripe.Response<Stripe.Customer>> = {
+        id: '123'
       };
 
-      jest.spyOn(stripe.customers, 'create').mockResolvedValue(customer);
+      jest.spyOn(stripe.customers, 'create').mockResolvedValue(customer as Stripe.Response<Stripe.Customer>);
 
       const result = await paymentService.createCustomer(email);
 
@@ -107,14 +112,14 @@ describe('PaymentService', () => {
       expect(result).toBe(customer.id);
     });
 
-    it('should throw a NotFoundException if the customer was not found', async () => {
+    it('should throw a not found exception if the customer creation fails', async () => {
       const email = 'test@example.com';
 
-      jest.spyOn(stripe.customers, 'create').mockResolvedValue(null);
+      jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
 
-      await expect(paymentService.createCustomer(email)).rejects.toThrowError(
-        new NotFoundException(ErrorPayment.CustomerNotFound)
-      );
+      await expect(
+        paymentService.createCustomer(email)
+      ).rejects.toThrowError(new NotFoundException(ErrorPayment.CustomerNotFound));
     });
   });
 
@@ -126,11 +131,11 @@ describe('PaymentService', () => {
         currency: Currency.USD,
       };
 
-      const paymentIntent = {
+      const paymentIntent: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
         client_secret: 'clientSecret123',
       };
 
-      jest.spyOn(stripe.paymentIntents, 'create').mockResolvedValue(paymentIntent);
+      jest.spyOn(stripe.paymentIntents, 'create').mockResolvedValue(paymentIntent as Stripe.Response<Stripe.PaymentIntent>);
 
       const result = await paymentService.createFiatPayment(customerId, dto);
 
@@ -146,6 +151,21 @@ describe('PaymentService', () => {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    it('should throw a bad request exception if the payment intent creation fails', async () => {
+      const customerId = 'customer123';
+
+      const dto = {
+        amount: 100,
+        currency: Currency.USD,
+      };
+
+      jest.spyOn(stripe.paymentIntents, 'create').mockRejectedValue(new Error());
+
+      await expect(
+        paymentService.createFiatPayment(customerId, dto)
+      ).rejects.toThrowError(new BadRequestException(ErrorPayment.IntentNotCreated));
+    });
   });
 
   describe('confirmFiatPayment', () => {
@@ -155,12 +175,12 @@ describe('PaymentService', () => {
         paymentId: 'payment123',
       };
 
-      const paymentData = {
-        status: PaymentStatus.SUCCEEDED,
-        amount: '100',
+      const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
+        status: 'succeeded',
+        amount: 100,
       };
 
-      jest.spyOn(paymentService, 'getPayment').mockResolvedValue(paymentData);
+      jest.spyOn(paymentService, 'getPayment').mockResolvedValue(paymentData as Stripe.Response<Stripe.PaymentIntent>);
       jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
@@ -175,21 +195,21 @@ describe('PaymentService', () => {
       expect(result).toBe(true);
     });
 
-    it('should throw a not found exception if the payment is not successful', async () => {
+    it('should throw a bad request exception if the payment is not successful', async () => {
       const userId = 1;
       const dto = {
         paymentId: 'payment123',
       };
 
-      const paymentData = {
-        status: PaymentStatus.FAILED,
-        amount: '100',
+      const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
+        status: 'canceled',
+        amount: 100,
       };
 
-      jest.spyOn(paymentService, 'getPayment').mockResolvedValue(paymentData);
+      jest.spyOn(paymentService, 'getPayment').mockResolvedValue(paymentData as Stripe.Response<Stripe.PaymentIntent>);
 
       await expect(paymentService.confirmFiatPayment(userId, dto)).rejects.toThrowError(
-        new NotFoundException(ErrorPayment.NotSuccess)
+        new BadRequestException(ErrorPayment.NotSuccess)
       );
     });
 
@@ -201,9 +221,9 @@ describe('PaymentService', () => {
 
       jest.spyOn(paymentService, 'getPayment').mockResolvedValue(null);
 
-      const result = await paymentService.confirmFiatPayment(userId, dto);
-
-      expect(result).toBe(false);
+      await expect(paymentService.confirmFiatPayment(userId, dto)).rejects.toThrowError(
+        new NotFoundException(ErrorPayment.NotFound)
+      );
     });
   });
 
@@ -215,18 +235,26 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: TransactionReceipt = {
+      const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
-            data: '100'
+            data: '100',
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: MOCK_ADDRESS,
+            topics: [],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
           },
         ],
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
 
-      jest.spyOn(ethers.providers, 'JsonRpcProvider').mockImplementation(() => ({
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      }));
+      const provider = new ethers.providers.JsonRpcProvider();
+
+      jest.spyOn(provider, 'getTransactionReceipt').mockResolvedValue(transactionReceipt as TransactionReceipt)
 
       jest.spyOn(paymentRepository, 'findOne').mockResolvedValue(null);
 
@@ -256,9 +284,9 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      jest.spyOn(ethers.providers, 'JsonRpcProvider').mockImplementation(() => ({
-        getTransactionReceipt: jest.fn().mockResolvedValue(null),
-      }));
+      const provider = new ethers.providers.JsonRpcProvider();
+
+      jest.spyOn(provider, 'getTransactionReceipt').mockResolvedValue({} as TransactionReceipt)
 
       await expect(
         paymentService.createCryptoPayment(userId, dto)
@@ -272,14 +300,14 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: TransactionReceipt = {
+      const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [],
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
 
-      jest.spyOn(ethers.providers, 'JsonRpcProvider').mockImplementation(() => ({
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      }));
+      const provider = new ethers.providers.JsonRpcProvider();
+
+      jest.spyOn(provider, 'getTransactionReceipt').mockResolvedValue(transactionReceipt as TransactionReceipt)
 
       await expect(
         paymentService.createCryptoPayment(userId, dto)
@@ -293,18 +321,26 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: TransactionReceipt = {
+      const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
             data: '100',
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: MOCK_ADDRESS,
+            topics: [],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
           },
         ],
         confirmations: TX_CONFIRMATION_TRESHOLD - 1, // Fewer confirmations than required
       };
 
-      jest.spyOn(providers, 'JsonRpcProvider').mockImplementation(() => ({
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      }));
+      const provider = new ethers.providers.JsonRpcProvider();
+
+      jest.spyOn(provider, 'getTransactionReceipt').mockResolvedValue(transactionReceipt as TransactionReceipt)
 
       await expect(
         paymentService.createCryptoPayment(userId, dto)
@@ -318,18 +354,26 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: TransactionReceipt = {
+      const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
             data: '100',
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: MOCK_ADDRESS,
+            topics: [],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
           },
         ],
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
 
-      jest.spyOn(ethers.providers, 'JsonRpcProvider').mockImplementation(() => ({
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      }));
+      const provider = new ethers.providers.JsonRpcProvider();
+
+      jest.spyOn(provider, 'getTransactionReceipt').mockResolvedValue(transactionReceipt as TransactionReceipt)
 
       jest.spyOn(paymentRepository, 'findOne').mockResolvedValue({} as any); // Mock an existing payment entity
 

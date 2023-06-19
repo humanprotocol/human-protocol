@@ -39,6 +39,7 @@ export enum ErrorToken {
 export enum ErrorPayment {
   NotFound = 'Payment not found',
   NotSuccess = 'Unsuccessful payment',
+  IntentNotCreated = 'Payment intent not created',
   CustomerNotFound = 'Customer not found',
   IncorrectAmount = 'Incorrect amount',
   TransactionHashAlreadyExists = 'transaction hash already exists',
