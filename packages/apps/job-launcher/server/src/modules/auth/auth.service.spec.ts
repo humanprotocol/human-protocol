@@ -31,7 +31,7 @@ describe('AuthService', () => {
   let authRepository: DeepMocked<AuthRepository>;
   let jwtService: JwtService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string, defaultValue?: any) => {
         switch (key) {

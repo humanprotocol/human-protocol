@@ -23,7 +23,7 @@ describe('UserService', () => {
   let configService: DeepMocked<ConfigService>;
   let httpService: DeepMocked<HttpService>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string, defaultValue?: any) => {
         switch (key) {

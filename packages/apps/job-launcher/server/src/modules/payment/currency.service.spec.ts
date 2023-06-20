@@ -12,7 +12,7 @@ describe('CurrencyService', () => {
   let currencyService: CurrencyService;
   let httpService: DeepMocked<HttpService>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CurrencyService,
