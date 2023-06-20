@@ -4,7 +4,6 @@ import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Currency, TokenId } from '../../common/enums/payment';
 import { COINGECKO_API_URL } from '../../common/constants';
-import { NotFoundException } from '@nestjs/common';
 import { ErrorCurrency } from '../../common/constants/errors';
 import { of } from 'rxjs';
 

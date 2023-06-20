@@ -18,13 +18,7 @@ import {
   PaymentType,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-
-const MOCK_ADDRESS = '0x1234567890abcdef',
-  MOCK_TRANSACTION_HASH =
-    '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc',
-  MOCK_EMAIL = 'test@example.com',
-  MOCK_CUSTOMER_ID = 'customer123',
-  MOCK_PAYMENT_ID = 'payment123';
+import { MOCK_ADDRESS, MOCK_CUSTOMER_ID, MOCK_EMAIL, MOCK_PAYMENT_ID, MOCK_TRANSACTION_HASH } from 'src/common/test/constants';
 
 jest.mock('@human-protocol/sdk');
 jest.mock('stripe', () => ({

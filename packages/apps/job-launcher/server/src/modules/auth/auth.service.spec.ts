@@ -19,8 +19,7 @@ import { v4 } from 'uuid';
 import { UserStatus } from '../../common/enums/user';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
-
-const MOCK_EXPIRES_IN = 1787260813820;
+import { MOCK_EXPIRES_IN } from 'src/common/test/constants';
 
 jest.mock('@human-protocol/sdk');
 
