@@ -10,6 +10,7 @@ import { AuthJwtController } from './auth.jwt.controller';
 import { AuthEntity } from './auth.entity';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
+import { AuthRepository } from './auth.repository';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { TokenRepository } from './token.repository';
     }),
     TypeOrmModule.forFeature([AuthEntity, TokenEntity]),
   ],
-  providers: [JwtHttpStrategy, AuthService, TokenRepository],
+  providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository],
   controllers: [AuthJwtController],
   exports: [AuthService],
 })

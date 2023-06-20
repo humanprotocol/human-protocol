@@ -4,12 +4,11 @@ import { HttpService } from '@nestjs/axios';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Currency, TokenId } from '../../common/enums/payment';
 import { COINGECKO_API_URL } from '../../common/constants';
-import {
-  NotFoundException,
-} from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { ErrorCurrency } from '../../common/constants/errors';
+import { of } from 'rxjs';
 
-describe.skip('CurrencyService', () => {
+describe('CurrencyService', () => {
   let currencyService: CurrencyService;
   let httpService: DeepMocked<HttpService>;
 
@@ -29,41 +28,41 @@ describe.skip('CurrencyService', () => {
   });
 
   describe('getRate', () => {
-    it('should return the rate for the given token ID and currency', async () => {
+    it('should get the rate for a given token ID and currency', async () => {
       const tokenId = TokenId.HUMAN_PROTOCOL;
       const currency = Currency.USD;
-
-      const coingeckoResponse = {
+      const rate = 1.5;
+  
+      const response = {
         data: {
           [tokenId]: {
-            [currency]: 1.2345,
+            [currency]: rate,
           },
         },
       };
-
-      jest.spyOn(httpService, 'get').mockResolvedValue(coingeckoResponse as never);
-
+  
+      jest.spyOn(httpService, 'get').mockReturnValueOnce(of(response as any));
       const result = await currencyService.getRate(tokenId, currency);
-
+  
       expect(httpService.get).toHaveBeenCalledWith(
-        `${COINGECKO_API_URL}?ids=${tokenId}&vs_currencies=${currency}`
+        `${COINGECKO_API_URL}?ids=${tokenId}&vs_currencies=${currency}`,
       );
-      expect(result).toBe(1.2345);
+      expect(result).toBe(rate);
     });
 
-    it('should throw a not found exception if the pair is not found', async () => {
+    it('should throw NotFoundException if the rate is not found', async () => {
       const tokenId = TokenId.HUMAN_PROTOCOL;
       const currency = Currency.USD;
-
-      const coingeckoResponse = {
+  
+      const response = {
         data: {},
       };
-
-      jest.spyOn(httpService, 'get').mockResolvedValue(coingeckoResponse as never);
-
-      await expect(
-        currencyService.getRate(tokenId, currency)
-      ).rejects.toThrowError(new NotFoundException(ErrorCurrency.PairNotFound));
+  
+      jest.spyOn(httpService, 'get').mockReturnValueOnce(of(response as any));
+  
+      await expect(currencyService.getRate(tokenId, currency)).rejects.toThrow(
+        ErrorCurrency.PairNotFound,
+      );
     });
   });
 });

@@ -52,7 +52,7 @@ export class UserService {
     });
 
     if (!userEntity) {
-      throw new NotFoundException('Invalid email or password');
+      throw new NotFoundException(ErrorUser.NotFound);
     }
 
     return userEntity;

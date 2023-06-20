@@ -16,7 +16,7 @@ export class CurrencyService {
       ),
     );
 
-    if (!data[tokenId][currency]) {
+    if (!data[tokenId] || !data[tokenId][currency]) {
       throw new NotFoundException(ErrorCurrency.PairNotFound);
     }
 

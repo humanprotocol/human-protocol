@@ -68,6 +68,13 @@ export class VerifyEmailDto {
   public token: string;
 }
 
+export class AuthDto {
+  public user: UserEntity;
+  public refreshToken: string;
+  public refreshTokenExpiresAt: number;
+  public ip: string;
+}
+
 export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;

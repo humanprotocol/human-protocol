@@ -25,6 +25,8 @@ import {
   VerifyEmailDto,
 } from './auth.dto';
 import { TokenRepository } from './token.repository';
+import { AuthRepository } from './auth.repository';
+import { ErrorAuth } from '../../common/constants/errors';
 
 @Injectable()
 export class AuthService {
@@ -35,8 +37,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly tokenRepository: TokenRepository,
-    @InjectRepository(AuthEntity)
-    private readonly authEntityRepository: Repository<AuthEntity>,
+    private readonly authRepository: AuthRepository,
   ) {}
 
   public async signin(data: SignInDto, ip: string): Promise<IJwt> {
@@ -44,6 +45,10 @@ export class AuthService {
       data.email,
       data.password,
     );
+
+    if (!userEntity) {
+      throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
+    }
 
     return this.auth(userEntity, ip);
   }
@@ -66,27 +71,24 @@ export class AuthService {
   public async logout(
     where: FindOptionsWhere<AuthEntity>,
   ): Promise<DeleteResult> {
-    return this.authEntityRepository.delete(where);
+    return this.authRepository.delete(where);
   }
 
   public async refresh(
     where: FindOptionsWhere<AuthEntity>,
     ip: string,
   ): Promise<IJwt> {
-    const authEntity = await this.authEntityRepository.findOne({
-      where,
-      relations: ['user'],
-    });
+    const authEntity = await this.authRepository.findOne(where, { relations: ['user']});
 
     if (
       !authEntity ||
       authEntity.refreshTokenExpiresAt < new Date().getTime()
     ) {
-      throw new UnauthorizedException('Refresh token has expired');
+      throw new UnauthorizedException(ErrorAuth.RefreshTokenHasExpired);
     }
 
     if (authEntity.user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('User not active');
+      throw new UnauthorizedException(ErrorAuth.UserNotActive);
     }
 
     return this.auth(authEntity.user, ip);
@@ -105,14 +107,13 @@ export class AuthService {
       30 * 24 * 60 * 60,
     );
 
-    await this.authEntityRepository
+    await this.authRepository
       .create({
         user: userEntity,
         refreshToken,
         refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
-        ip,
+        ip
       })
-      .save();
 
     return {
       accessToken: this.jwtService.sign(
@@ -131,7 +132,7 @@ export class AuthService {
     if (!userEntity) return;
 
     if (userEntity.status !== UserStatus.ACTIVE)
-      throw new UnauthorizedException('User is not active');
+      throw new UnauthorizedException(ErrorAuth.UserNotActive);
 
     const tokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.PASSWORD,

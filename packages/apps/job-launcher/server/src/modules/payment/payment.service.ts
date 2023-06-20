@@ -37,12 +37,13 @@ export class PaymentService {
     private readonly currencyService: CurrencyService,
     private configService: ConfigService,
   ) {
-    try {
-      console.log(this.configService.get<string>('STRIPE_SECRET_KEY', 'secrete-key'))
     this.stripe = new Stripe(
       this.configService.get<string>('STRIPE_SECRET_KEY', 'secrete-key'),
       {
-        apiVersion: this.configService.get<any>('STRIPE_API_VERSION', '2022-11-15'),
+        apiVersion: this.configService.get<any>(
+          'STRIPE_API_VERSION',
+          '2022-11-15',
+        ),
         appInfo: {
           name: this.configService.get<string>('NAME', 'Fortune'),
           version: this.configService.get<string>('VERSION'),
@@ -54,20 +55,23 @@ export class PaymentService {
       'STRIPE_ENDPOINT_SECRETE',
       'secrete-key',
     );
-    } catch (e) {
-      console.log(e)
-    }
   }
 
-  public async createCustomer(email: string) {
+  public async createCustomer(email: string): Promise<string> {
     try {
-      return this.stripe.customers.create({
+      const customer = await this.stripe.customers.create({
         email,
       });
+
+      if (!customer) {
+        this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
+        throw new NotFoundException(ErrorPayment.CustomerNotCreated);
+      }
+
+      return customer.id;
     } catch (e) {
-      console.log(e)
-      this.logger.log(ErrorPayment.CustomerNotFound, PaymentService.name);
-      throw new NotFoundException(ErrorPayment.CustomerNotFound);
+      this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.CustomerNotCreated);
     }
   }
 
@@ -106,14 +110,17 @@ export class PaymentService {
     try {
       const paymentData = await this.getPayment(dto.paymentId);
 
-      if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
-        this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-        throw new BadRequestException(ErrorPayment.NotSuccess);
-      }
-
       if (!paymentData) {
         this.logger.log(ErrorPayment.NotFound, PaymentService.name);
         throw new NotFoundException(ErrorPayment.NotFound);
+      }
+
+      if (
+        !paymentData ||
+        paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
+      ) {
+        this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
+        throw new BadRequestException(ErrorPayment.NotSuccess);
       }
 
       await this.savePayment(
@@ -125,7 +132,7 @@ export class PaymentService {
 
       return true;
     } catch (e) {
-      return false;
+      throw new Error(e);
     }
   }
 
@@ -188,7 +195,7 @@ export class PaymentService {
 
       return true;
     } catch (e) {
-      return false;
+      throw new Error(e);
     }
   }
 

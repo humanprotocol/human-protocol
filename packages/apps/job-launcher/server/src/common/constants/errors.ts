@@ -27,6 +27,16 @@ export enum ErrorUser {
 }
 
 /**
+ * Represents error messages related to auth.
+ */
+export enum ErrorAuth {
+  NotFound = 'Auth not found',
+  InvalidEmailOrPassword = 'Invalid email or password',
+  RefreshTokenHasExpired = 'Refresh token has expired',
+  UserNotActive = 'User not active'
+}
+
+/**
  * Represents error messages related to token.
  */
 export enum ErrorToken {
@@ -41,6 +51,7 @@ export enum ErrorPayment {
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
   CustomerNotFound = 'Customer not found',
+  CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',
   TransactionHashAlreadyExists = 'transaction hash already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
