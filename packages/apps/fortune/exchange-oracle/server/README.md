@@ -1,6 +1,6 @@
 # Exchange Oracle Server
 
-Exchange Oracle Server is an API built with Nest in TypeScript that allows Human Protocol users to create jobs. It provides endpoints to retrieve a list of jobs, get the job details
+Exchange Oracle Server is an API built with Nest in TypeScript that allows Human Protocol users to interact with created jobs. It provides endpoints to retrieve a list of jobs, get the job details
 and submit a solution using the worker address, escrow addres, chainId, and solution field.
 
 ## Endpoints
