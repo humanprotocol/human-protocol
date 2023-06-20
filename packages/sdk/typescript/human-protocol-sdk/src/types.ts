@@ -74,6 +74,10 @@ export type UploadFile = {
    */
   key: string;
   /**
+   * Uploaded object URL
+   */
+  url: string;
+  /**
    * Hash of uploaded object key
    */
   hash: string;
@@ -107,6 +111,10 @@ export type NetworkData = {
    * Staking contract address
    */
   stakingAddress: string;
+  /**
+   * RewardPool contract address
+   */
+  rewardPoolAddress: string;
   /**
    * KVStore contract address
    */

@@ -37,7 +37,7 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
-      
+
     }),
   );
   app.use(json({ limit: "5mb" }));
@@ -58,7 +58,7 @@ async function bootstrap() {
   app.use(helmet());
 
   await app.listen(port, host, async () => {
-    console.info(`API server is running on http://${host}:${port}`);
+    console.info(`Job launcher server is running on http://${host}:${port}`);
   });
 }
 

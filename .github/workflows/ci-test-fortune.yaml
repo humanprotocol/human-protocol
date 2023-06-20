@@ -3,8 +3,13 @@ name: Fortune check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/examples/fortune/**'
   workflow_dispatch:
 
 jobs:

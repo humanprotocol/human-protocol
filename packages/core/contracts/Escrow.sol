@@ -47,6 +47,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
     string public manifestUrl;
     string public manifestHash;
 
+    string public intermediateResultsUrl;
+
     string public finalResultsUrl;
     string public finalResultsHash;
 
@@ -123,8 +125,6 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         reputationOracle = _reputationOracle;
         recordingOracle = _recordingOracle;
-        areTrustedHandlers[reputationOracle] = true;
-        areTrustedHandlers[recordingOracle] = true;
 
         reputationOracleFeePercentage = _reputationOracleFeePercentage;
         recordingOracleFeePercentage = _recordingOracleFeePercentage;
@@ -158,7 +158,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
         return true;
     }
 
-    function complete() external override notExpired trusted {
+    function complete() external override notExpired trustedOrReputationOracle {
         require(status == EscrowStatuses.Paid, 'Escrow not in Paid state');
         status = EscrowStatuses.Complete;
         emit Completed();
@@ -167,13 +167,17 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function storeResults(
         string memory _url,
         string memory _hash
-    ) external override trusted notExpired {
+    ) external override trustedOrRecordingOracle notExpired {
         require(
             status == EscrowStatuses.Pending ||
                 status == EscrowStatuses.Partial,
             'Escrow not in Pending or Partial status state'
         );
-        _storeResult(_url, _hash);
+        require(bytes(_url).length != 0, "URL can't be empty");
+        require(bytes(_hash).length != 0, "Hash can't be empty");
+
+        intermediateResultsUrl = _url;
+
         emit IntermediateStorage(_url, _hash);
     }
 
@@ -203,7 +207,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     )
         external
         override
-        trusted
+        trustedOrReputationOracle
         notBroke
         notLaunched
         notPaid
@@ -231,7 +235,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
         require(aggregatedBulkAmount < BULK_MAX_VALUE, 'Bulk value too high');
         require(aggregatedBulkAmount <= balance, 'Not enough balance');
 
-        _storeResult(_url, _hash);
+        require(bytes(_url).length != 0, "URL can't be empty");
+        require(bytes(_hash).length != 0, "Hash can't be empty");
+
+        finalResultsUrl = _url;
+        finalResultsHash = _hash;
 
         (
             uint256[] memory finalAmounts,
@@ -297,17 +305,24 @@ contract Escrow is IEscrow, ReentrancyGuard {
         SafeERC20.safeTransfer(IERC20(token), to, value);
     }
 
-    function _storeResult(string memory _url, string memory _hash) internal {
-        bool writeOnchain = bytes(_hash).length != 0 || bytes(_url).length != 0;
-        if (writeOnchain) {
-            // Be sure both of them are not zero
-            finalResultsUrl = _url;
-            finalResultsHash = _hash;
-        }
-    }
-
     modifier trusted() {
         require(areTrustedHandlers[msg.sender], 'Address calling not trusted');
+        _;
+    }
+
+    modifier trustedOrReputationOracle() {
+        require(
+            areTrustedHandlers[msg.sender] || msg.sender == reputationOracle,
+            'Address calling not trusted'
+        );
+        _;
+    }
+
+    modifier trustedOrRecordingOracle() {
+        require(
+            areTrustedHandlers[msg.sender] || msg.sender == recordingOracle,
+            'Address calling not trusted'
+        );
         _;
     }
 

@@ -13,5 +13,6 @@ setuptools.setup(
         "Programming Language :: Python",
     ],
     packages=setuptools.find_packages(),
-    install_requires=["requests>=2", "typing-extensions", "pydantic>=1.6"],
+    setup_requires="setuptools-pipfile",
+    use_pipfile=True,
 )
