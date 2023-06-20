@@ -15,6 +15,7 @@ import { HttpStatus } from './constants';
 
 export class StorageClient {
   private client: Minio.Client;
+  private clientParams: StorageParams;
 
   /**
    * **Storage client constructor**
@@ -24,6 +25,8 @@ export class StorageClient {
    */
   constructor(credentials: StorageCredentials, params: StorageParams) {
     try {
+      this.clientParams = params;
+
       this.client = new Minio.Client({
         ...params,
         accessKey: credentials.accessKey,
@@ -109,14 +112,22 @@ export class StorageClient {
         const content = JSON.stringify(file);
 
         const hash = crypto.createHash('sha1').update(content).digest('hex');
-        const key = hash;
+        const key = `s3${hash}.json`;
 
         try {
           await this.client.putObject(bucket, key, content, {
             'Content-Type': 'application/json',
           });
 
-          return { key, hash };
+          return {
+            key,
+            url: `${this.clientParams.useSSL ? 'https' : 'http'}://${
+              this.clientParams.endPoint
+            }${
+              this.clientParams.port ? `:${this.clientParams.port}` : ''
+            }/${bucket}/${key}`,
+            hash,
+          };
         } catch (e) {
           throw ErrorStorageFileNotUploaded;
         }

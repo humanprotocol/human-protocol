@@ -174,10 +174,10 @@ export class EscrowClient {
         this.signerOrProvider
       );
       await this.escrowContract.setup(
-        recordingOracle,
         reputationOracle,
-        recordingOracleFee,
+        recordingOracle,
         reputationOracleFee,
+        recordingOracleFee,
         manifestUrl,
         manifestHash
       );
@@ -604,6 +604,33 @@ export class EscrowClient {
       );
       return this.escrowContract.finalResultsUrl();
     } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the intermediate results file URL.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.intermediateResultsUrl();
+    } catch (e: any) {
       return throwError(e);
     }
   }

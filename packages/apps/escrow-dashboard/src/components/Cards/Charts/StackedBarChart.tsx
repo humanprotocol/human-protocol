@@ -23,6 +23,43 @@ type StackedBarChartProps = {
   pendingEventCount?: string | number;
 };
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box
+        sx={{
+          background: '#fff',
+          border: '1px solid rgba(218, 222, 240, 0.8)',
+          borderRadius: '16px',
+          padding: '30px 38px',
+        }}
+      >
+        <Typography color="text.primary" variant="body2" fontWeight={600}>
+          {label}
+        </Typography>
+        <Box mt={2}>
+          <Typography color="text.primary" variant="caption" component="p">
+            Amount of Escrows
+          </Typography>
+          <Typography color="text.primary" variant="h6" fontWeight={500}>
+            {payload[1].value}
+          </Typography>
+        </Box>
+        <Box mt={2}>
+          <Typography color="secondary.main" variant="caption" component="p">
+            Escrows Pending Events
+          </Typography>
+          <Typography color="text.primary" variant="h6" fontWeight={500}>
+            {payload[0].value}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  return null;
+};
+
 export const StackedBarChart: FC<StackedBarChartProps> = ({
   series,
   allEscrowAmount,
@@ -35,34 +72,28 @@ export const StackedBarChart: FC<StackedBarChartProps> = ({
       <Grid container>
         <Grid item container justifyContent="center" xs={12} sm={12} md={4}>
           <Grid item xs={12} sm={6} md={12}>
-            <Typography
-              variant="body2"
-              color="primary"
-              fontWeight={600}
-              mb="4px"
-            >
+            <Typography variant="body2" color="primary" fontWeight={600}>
               Amount of Escrows
             </Typography>
             <Typography
-              variant="h2"
               color="primary"
+              variant="h2"
+              lineHeight={1}
+              mt={3}
               sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
             >
               {numeral(allEscrowAmount).format('0,0')}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={6} md={12}>
-            <Typography
-              variant="body2"
-              color="secondary"
-              fontWeight={600}
-              mb="4px"
-            >
+            <Typography variant="body2" color="secondary" fontWeight={600}>
               All Escrows Pending Events
             </Typography>
             <Typography
+              color="primary"
               variant="h2"
-              color="secondary"
+              lineHeight={1}
+              mt={3}
               sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
             >
               {numeral(pendingEventCount).format('0,0')}
@@ -76,8 +107,25 @@ export const StackedBarChart: FC<StackedBarChartProps> = ({
                 data={series}
                 margin={{ top: 30, left: 4, right: 4 }}
               >
-                <XAxis dataKey="date" axisLine={false} tickLine={false} />
-                <Tooltip />
+                <XAxis
+                  dataKey="date"
+                  type="category"
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                  ticks={[series[0].date, series[series.length - 1].date]}
+                  tick={{
+                    fill: '#320A8D',
+                    fontSize: '12px',
+                    fontFamily: 'Inter',
+                  }}
+                  tickMargin={12}
+                  padding={{ left: 10, right: 10 }}
+                />
+                <Tooltip
+                  cursor={{ fill: '#dadef0' }}
+                  content={<CustomTooltip />}
+                />
                 <Bar
                   dataKey="dailyPendingEvents"
                   stackId="a"

@@ -1,26 +1,12 @@
-import {
-  Box,
-  CircularProgress,
-  Tab,
-  Tabs,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { FC, ReactElement } from 'react';
-import { useSwitchNetwork } from 'wagmi';
+import { Box, CircularProgress } from '@mui/material';
+import { FC } from 'react';
 
-import {
-  BinanceSmartChainIcon,
-  EthereumIcon,
-  HumanIcon,
-  MoonbeamIcon,
-  PolygonIcon,
-} from '../Icons';
+import { NetworkSelect } from '../NetworkSelect';
+import TimeRangeButtons from '../TimeRangeButtons';
 import { ViewTitle } from '../ViewTitle';
 import { EscrowView } from './EscrowView';
 
 import networkSvg from 'src/assets/network.svg';
-import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useAppDispatch } from 'src/state';
 import {
   useChainId,
@@ -30,65 +16,44 @@ import {
 import { setChainId as setEscrowChainId } from 'src/state/escrow/reducer';
 import { setChainId as setLeaderChainId } from 'src/state/leader/reducer';
 
-const NETWORK_ICONS: { [chainId in ChainId]?: ReactElement } = {
-  [ChainId.MAINNET]: <EthereumIcon />,
-  [ChainId.RINKEBY]: <EthereumIcon />,
-  [ChainId.GOERLI]: <EthereumIcon />,
-  [ChainId.POLYGON]: <PolygonIcon />,
-  [ChainId.POLYGON_MUMBAI]: <PolygonIcon />,
-  [ChainId.BSC_MAINNET]: <BinanceSmartChainIcon />,
-  [ChainId.BSC_TESTNET]: <BinanceSmartChainIcon />,
-  [ChainId.MOONBEAM]: <MoonbeamIcon />,
-};
-
 export const EscrowContainer: FC = () => {
   const chainId = useChainId();
   const dispatch = useAppDispatch();
-  const { switchNetwork } = useSwitchNetwork();
 
   usePollEventsData();
 
   const dataLoaded = useEscrowDataLoaded();
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  const handleChangeChain = (_e: React.SyntheticEvent, id: ChainId) => {
+  const handleChangeChain = (e: any) => {
+    const id = e.target.value;
     dispatch(setEscrowChainId(id));
     dispatch(setLeaderChainId(id));
-
-    switchNetwork?.(id);
   };
 
   return (
     <Box id="network" mt={{ xs: 4, md: 8 }}>
-      <ViewTitle title="Network" iconUrl={networkSvg} />
-      <Tabs
+      <Box
         sx={{
-          my: { xs: '12px', sm: '18px', md: '26px', lg: '32px', xl: '44px' },
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 4,
+          mb: 4,
         }}
-        value={chainId}
-        onChange={handleChangeChain}
-        variant="scrollable"
-        scrollButtons="auto"
-        allowScrollButtonsMobile
       >
-        <Tab
-          value={ChainId.ALL}
-          label="All Networks"
-          icon={<HumanIcon />}
-          iconPosition={isMobile ? 'top' : 'start'}
-        />
-        {SUPPORTED_CHAIN_IDS.map((chainId) => (
-          <Tab
-            key={chainId}
+        <ViewTitle title="Network" iconUrl={networkSvg} />
+        <Box sx={{ ml: 'auto' }}>
+          <NetworkSelect
             value={chainId}
-            label={ESCROW_NETWORKS[chainId]?.title}
-            icon={NETWORK_ICONS[chainId] ?? ''}
-            iconPosition={isMobile ? 'top' : 'start'}
+            onChange={handleChangeChain}
+            showAllNetwork
           />
-        ))}
-      </Tabs>
+        </Box>
+        <Box sx={{ ml: 'auto' }}>
+          <TimeRangeButtons />
+        </Box>
+      </Box>
       {dataLoaded ? (
         <EscrowView />
       ) : (

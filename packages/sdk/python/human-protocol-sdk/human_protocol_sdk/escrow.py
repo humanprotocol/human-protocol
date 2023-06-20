@@ -221,10 +221,10 @@ class EscrowClient:
             self.w3,
             "Setup",
             self._get_escrow_contract(escrow_address).functions.setup(
-                escrow_config.recording_oracle_address,
                 escrow_config.reputation_oracle_address,
-                escrow_config.recording_oracle_fee,
+                escrow_config.recording_oracle_address,
                 escrow_config.reputation_oracle_fee,
+                escrow_config.recording_oracle_fee,
                 escrow_config.manifest_url,
                 escrow_config.hash,
             ),
@@ -527,6 +527,28 @@ class EscrowClient:
 
         return (
             self._get_escrow_contract(escrow_address).functions.finalResultsUrl().call()
+        )
+
+    def get_intermediate_results_url(self, escrow_address: str):
+        """Gets the intermediate results file URL.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Intermediate results file url
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.isAddress(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address)
+            .functions.intermediateResultsUrl()
+            .call()
         )
 
     def get_token_address(self, escrow_address: str):

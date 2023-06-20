@@ -18,6 +18,5 @@ export * from './Escrow';
 export * from './Faucet';
 export * from './Kvstore';
 export * from './Leaderboard';
-export * from './News';
 export * from './SolvedTasks';
 export * from './Token';

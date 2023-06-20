@@ -160,12 +160,12 @@ export const Header: FC = () => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 width: '100%',
-                height: '104px',
+                height: '88px',
                 boxSizing: 'border-box',
                 padding: {
-                  xs: '30px 8px 26px',
-                  sm: '30px 28px 26px',
-                  md: '30px 52px 26px',
+                  xs: '22px 8px 18px',
+                  sm: '22px 28px 18px',
+                  md: '22px 52px 18px',
                 },
               }}
             >
@@ -209,7 +209,7 @@ export const Header: FC = () => {
                       )} */}
                       {renderNavLinks()}
                       <ConnectButton />
-                      {address && <MyHMTButton href="/staking" />}
+                      {/* {address && <MyHMTButton href="/staking" />} */}
                     </Box>
                   )}
                   {isDownLg && (
