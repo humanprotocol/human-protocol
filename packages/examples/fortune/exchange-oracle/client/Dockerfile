@@ -1,4 +1,4 @@
-FROM node:16.18.1-buster
+FROM node:16.20.0-buster
 
 ARG PUBLIC_URL
 WORKDIR /usr/src/app
