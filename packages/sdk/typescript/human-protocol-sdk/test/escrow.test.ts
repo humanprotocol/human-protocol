@@ -74,6 +74,7 @@ describe('EscrowClient', () => {
       address: ethers.constants.AddressZero,
       recordingOracle: vi.fn(),
       reputationOracle: vi.fn(),
+      intermediateResultsUrl: vi.fn(),
     };
 
     mockEscrowFactoryContract = {
@@ -1195,6 +1196,59 @@ describe('EscrowClient', () => {
 
       expect(
         escrowClient.escrowContract.finalResultsUrl
+      ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getIntermediateResultsUrl', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getIntermediateResultsUrl(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getIntermediateResultsUrl(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getIntermediateResultsUrl', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = FAKE_URL;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.intermediateResultsUrl.mockReturnValue(url);
+
+      const intermediateResultsUrl =
+        await escrowClient.getIntermediateResultsUrl(escrowAddress);
+
+      expect(intermediateResultsUrl).toEqual(url);
+      expect(
+        escrowClient.escrowContract.intermediateResultsUrl
+      ).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if intermediateResultsUrl fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.intermediateResultsUrl.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getIntermediateResultsUrl(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.intermediateResultsUrl
       ).toHaveBeenCalledWith();
     });
   });
