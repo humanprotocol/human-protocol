@@ -26,8 +26,12 @@ describe('JobService', () => {
   let jobService: JobService;
   let web3Service: Web3Service;
 
+  const chainId = 1;
+  const escrowAddress = '0x1234567890123456789012345678901234567890';
+  const workerAddress = '0x1234567890123456789012345678901234567891';
+
   const signerMock = {
-    address: '0x1234567890123456789012345678901234567890',
+    address: '0x1234567890123456789012345678901234567892',
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
@@ -60,8 +64,6 @@ describe('JobService', () => {
 
   describe('getDetails', () => {
     it('should return job details', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
       const manifest = {
         title: 'Example Title',
         description: 'Example Description',
@@ -89,7 +91,6 @@ describe('JobService', () => {
     });
 
     it('should fail if the escrow address is invalid', async () => {
-      const chainId = 1;
       const escrowAddress = 'invalid_address';
       (EscrowClient as any).mockImplementation(() => ({
         getManifestUrl: jest
@@ -104,8 +105,6 @@ describe('JobService', () => {
     });
 
     it('should fail if the file does not exist', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
       (EscrowClient as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
@@ -128,18 +127,16 @@ describe('JobService', () => {
         getEscrowsFiltered: jest
           .fn()
           .mockResolvedValue([
-            '0x1234567890123456789012345678901234567891',
-            '0x1234567890123456789012345678901234567892',
+            '0x1234567890123456789012345678901234567893',
+            '0x1234567890123456789012345678901234567894',
           ]),
       }));
-      const chainId = 1;
-      const workerAddress = '0x1234567890123456789012345678901234567893';
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
       expect(result).toEqual([
-        '0x1234567890123456789012345678901234567891',
-        '0x1234567890123456789012345678901234567892',
+        '0x1234567890123456789012345678901234567893',
+        '0x1234567890123456789012345678901234567894',
       ]);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
@@ -149,51 +146,35 @@ describe('JobService', () => {
         getEscrowsFiltered: jest
           .fn()
           .mockResolvedValue([
-            '0x1234567890123456789012345678901234567891',
-            '0x1234567890123456789012345678901234567892',
+            '0x1234567890123456789012345678901234567893',
+            '0x1234567890123456789012345678901234567894',
           ]),
       }));
-      const chainId = 1;
-      const workerAddress = '0x1234567890123456789012345678901234567893';
 
-      jobService['storage']['0x1234567890123456789012345678901234567891'] = [
+      jobService['storage']['0x1234567890123456789012345678901234567893'] = [
         workerAddress,
       ];
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
-      expect(result).toEqual(['0x1234567890123456789012345678901234567892']);
+      expect(result).toEqual(['0x1234567890123456789012345678901234567894']);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
     it('should return an empty array if there are no pending jobs', async () => {
       (EscrowClient as any).mockImplementation(() => ({
-        getEscrowsFiltered: jest
-          .fn()
-          .mockResolvedValue([
-            '0x1234567890123456789012345678901234567891',
-            '0x1234567890123456789012345678901234567892',
-          ]),
+        getEscrowsFiltered: jest.fn().mockResolvedValue([]),
       }));
-      const chainId = 1;
-      const workerAddress = '0x1234567890123456789012345678901234567893';
-
-      jobService['storage']['0x1234567890123456789012345678901234567891'] = [
-        workerAddress,
-      ];
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
-      expect(result).toEqual(['0x1234567890123456789012345678901234567892']);
+      expect(result).toEqual([]);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
 
   describe('solveJob', () => {
     it('should solve a job', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'job-solution';
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
@@ -201,7 +182,7 @@ describe('JobService', () => {
       (EscrowClient as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567892'),
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
       (KVStoreClient as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue(recordingOracleURLMock),
@@ -229,9 +210,7 @@ describe('JobService', () => {
     });
 
     it('should fail if the escrow address is invalid', async () => {
-      const chainId = 1;
       const escrowAddress = 'invalid_address';
-      const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'job-solution';
       (EscrowClient as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
@@ -245,40 +224,42 @@ describe('JobService', () => {
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
-    it('should call localhost recording oracle if empty kvstore value', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const workerAddress = '0x1234567890123456789012345678901234567891';
+    it('should fail if recording oracle url is empty', async () => {
       const solution = 'job-solution';
 
       (EscrowClient as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567892'),
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
       (KVStoreClient as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue(''),
       }));
 
-      const result = await jobService.solveJob(
-        chainId,
-        escrowAddress,
-        workerAddress,
-        solution,
-      );
-
-      expect(result).toBe(true);
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
+      ).rejects.toThrow('Unable to get Recording Oracle URL');
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-      expect(httpServicePostMock).toHaveBeenCalledWith(
-        'http://localhost:3005/job/solve',
-        expect.objectContaining({
-          escrowAddress,
-          chainId,
-          exchangeAddress: signerMock.address,
-          workerAddress,
-          solution,
-        }),
-      );
+    });
+
+    it('should fail if user has already submitted a solution', async () => {
+      const solution = 'job-solution';
+
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      }));
+      (KVStoreClient as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue('https://example.com/recordingoracle'),
+      }));
+
+      jobService['storage'][escrowAddress] = [workerAddress];
+
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
+      ).rejects.toThrow('User has already submitted a solution');
+      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
 });

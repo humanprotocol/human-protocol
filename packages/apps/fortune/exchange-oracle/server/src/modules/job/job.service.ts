@@ -56,7 +56,7 @@ export class JobService {
     });
 
     return escrows.filter(
-      (escrow) => !this.storage[escrow]?.includes(workerAddress),
+      (escrow: string) => !this.storage[escrow]?.includes(workerAddress),
     );
   }
 
@@ -77,21 +77,27 @@ export class JobService {
       KVStoreKeys.webhook_url,
     );
 
+    if (!recordingOracleURL)
+      throw new Error('Unable to get Recording Oracle URL');
+
+    if (
+      this.storage[escrowAddress] &&
+      this.storage[escrowAddress].includes(workerAddress)
+    )
+      throw new Error('User has already submitted a solution');
+
     if (!this.storage[escrowAddress]) {
       this.storage[escrowAddress] = [];
     }
     this.storage[escrowAddress].push(workerAddress);
 
-    await this.httpService.post(
-      (recordingOracleURL || 'http://localhost:3005') + '/job/solve',
-      {
-        escrowAddress: escrowAddress,
-        chainId: chainId,
-        exchangeAddress: signer.address,
-        workerAddress: workerAddress,
-        solution: solution,
-      },
-    );
+    await this.httpService.post(recordingOracleURL + '/job/solve', {
+      escrowAddress: escrowAddress,
+      chainId: chainId,
+      exchangeAddress: signer.address,
+      workerAddress: workerAddress,
+      solution: solution,
+    });
 
     return true;
   }

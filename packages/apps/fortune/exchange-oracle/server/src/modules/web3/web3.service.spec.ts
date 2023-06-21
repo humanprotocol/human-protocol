@@ -8,7 +8,7 @@ describe('Web3Service', () => {
   const privateKey =
     '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const configServiceMock = {
       get: jest.fn().mockReturnValue(privateKey),
     };

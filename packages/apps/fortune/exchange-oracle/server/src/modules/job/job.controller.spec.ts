@@ -10,7 +10,11 @@ describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
 
-  beforeEach(async () => {
+  const chainId = 1;
+  const escrowAddress = '0x1234567890123456789012345678901234567890';
+  const workerAddress = '0x1234567890123456789012345678901234567891';
+
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [JobController],
       providers: [
@@ -19,7 +23,7 @@ describe('JobController', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue({
-              address: '0xsigneraddress',
+              address: '0x1234567890123456789012345678901234567892',
               getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
             }),
           },
@@ -39,8 +43,6 @@ describe('JobController', () => {
 
   describe('getDetails', () => {
     it('should return job details', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
       const expectedDetails: JobDetailsDto = {
         escrowAddress,
         chainId,
@@ -66,8 +68,6 @@ describe('JobController', () => {
 
   describe('getPendingJobs', () => {
     it('should return pending jobs', async () => {
-      const chainId = 1;
-      const workerAddress = '0x1234567890123456789012345678901234567890';
       const expectedJobs: any[] = [
         '0x1234567890123456789012345678901234567891',
         '0x1234567890123456789012345678901234567892',
@@ -87,9 +87,6 @@ describe('JobController', () => {
 
   describe('solveJob', () => {
     it('should solve a job', async () => {
-      const chainId = 1;
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'job-solution';
       const solveJobDto: SolveJobDto = {
         chainId,
