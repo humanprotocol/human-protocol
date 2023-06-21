@@ -1,0 +1,36 @@
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { JobService } from './job.service';
+import { JobDetailsDto, SolveJobDto } from './job.dto';
+
+@ApiTags('Job')
+@Controller('job')
+export class JobController {
+  constructor(private readonly jobService: JobService) {}
+
+  @Get('details/:chainId/:escrowAddress')
+  getDetails(
+    @Param('chainId') chainId: number,
+    @Param('escrowAddress') escrowAddress: string,
+  ): Promise<JobDetailsDto> {
+    return this.jobService.getDetails(chainId, escrowAddress);
+  }
+
+  @Get('pending/:chainId/:workerAddress')
+  getPendingJobs(
+    @Param('chainId') chainId: number,
+    @Param('workerAddress') escrowAddress: string,
+  ): Promise<any> {
+    return this.jobService.getPendingJobs(chainId, escrowAddress);
+  }
+
+  @Post('solve')
+  solveJob(@Body() body: SolveJobDto): Promise<any> {
+    return this.jobService.solveJob(
+      body.chainId,
+      body.escrowAddress,
+      body.workerAddress,
+      body.solution,
+    );
+  }
+}

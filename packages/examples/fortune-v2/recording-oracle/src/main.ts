@@ -26,7 +26,7 @@ async function bootstrap() {
   app.enableCors({
     origin:
       process.env.NODE_ENV === "development" || process.env.NODE_ENV === "staging"
-        ? [`http://localhost:3001`, `http://127.0.0.1:3001`, `http://0.0.0.0:3001`, feUrl]
+        ? [`http://localhost:3005`, `http://127.0.0.1:3005`, `http://0.0.0.0:3005`, feUrl]
         : [feUrl],
     credentials: true,
     exposedHeaders: ["Content-Disposition"],

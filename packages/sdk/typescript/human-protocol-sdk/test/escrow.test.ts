@@ -1374,7 +1374,7 @@ describe('EscrowClient', () => {
       const requesterAddress = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getEscrowsFiltered(requesterAddress)
+        escrowClient.getEscrowsFiltered({ address: requesterAddress })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -1386,7 +1386,9 @@ describe('EscrowClient', () => {
         Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
       );
 
-      const results = await escrowClient.getEscrowsFiltered(requesterAddress);
+      const results = await escrowClient.getEscrowsFiltered({
+        address: requesterAddress,
+      });
 
       expect(results).toEqual([
         mockLaunchedEscrowsResult,

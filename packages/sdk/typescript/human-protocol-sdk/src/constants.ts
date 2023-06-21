@@ -236,3 +236,10 @@ export const NETWORKS: {
     oldFactoryAddress: '',
   },
 };
+
+export const KVStoreKeys = {
+  role: 'role',
+  webhook_url: 'webhook_url',
+  fee: 'fee',
+  public_key: 'public_key',
+};
