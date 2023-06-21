@@ -52,8 +52,8 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .addBearerAuth()
-    .setTitle('Fortune Exchange Oracle API')
-    .setDescription('Swagger Fortune Exchange Oracle API')
+    .setTitle('Job Launcher API')
+    .setDescription('Swagger Job Launcher API')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

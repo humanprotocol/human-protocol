@@ -1,10 +1,3 @@
-import {
-  BINANCE_NETWORK,
-  BINANCE_TESTNET_NETWORK,
-  GOERLI_NETWORK,
-  MUMBAI_NETWORK,
-  POLYGON_NETWORK,
-} from 'nestjs-ethers';
 import { Network } from '@ethersproject/providers';
 
 export interface NetworkDto {
@@ -18,29 +11,47 @@ interface NetworkMapDto {
 
 export const networkMap: NetworkMapDto = {
   polygon: {
-    network: POLYGON_NETWORK,
+    network: {
+      chainId: 137,
+      name: 'matic',
+    },
     rpcUrl:
       'https://polygon-mainnet.g.alchemy.com/v2/0Lorh5KRkGl5FsRwy2epTg8fEFFoqUfY',
   },
   bsc: {
-    network: BINANCE_NETWORK,
+    network: {
+      chainId: 56,
+      name: 'bnb',
+    },
     rpcUrl: 'https://bsc-dataseed1.binance.org/',
   },
   mumbai: {
-    network: MUMBAI_NETWORK,
+    network: {
+      chainId: 80001,
+      name: 'maticmum',
+    },
     rpcUrl:
       'https://polygon-mumbai.g.alchemy.com/v2/vKNSJzJf6SW2sdW-05bgFwoyFxUrMzii',
   },
   goerli: {
-    network: GOERLI_NETWORK,
+    network: {
+      chainId: 420,
+      name: 'optimism-goerli',
+    },
     rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
   },
   moonbeam: {
-    network: BINANCE_NETWORK,
+    network: {
+      chainId: 56,
+      name: 'bnb',
+    },
     rpcUrl: 'https://rpc.api.moonbeam.network',
   },
   bsctest: {
-    network: BINANCE_TESTNET_NETWORK,
+    network: {
+      chainId: 97,
+      name: 'bnbt',
+    },
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
 };
