@@ -8,7 +8,7 @@ import { PaymentService } from '../payment/payment.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
   EscrowClient,
@@ -27,16 +27,33 @@ import {
 } from '../../common/constants/errors';
 import { JobFortuneDto, ManifestDto, SaveManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
-import { MOCK_ADDRESS, MOCK_BUCKET_NAME, MOCK_CHAIN_ID, MOCK_EXCHANGE_ORACLE_WEBHOOK_URL, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_FORTUNES_REQUIRED, MOCK_JOB_LAUNCHER_FEE, MOCK_RECORDING_ORACLE_ADDRESS, MOCK_RECORDING_ORACLE_FEE, MOCK_REPUTATION_ORACLE_ADDRESS, MOCK_REPUTATION_ORACLE_FEE, MOCK_REQUESTER_DESCRIPTION, MOCK_REQUESTER_TITLE } from 'src/common/test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_BUCKET_NAME,
+  MOCK_CHAIN_ID,
+  MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
+  MOCK_FILE_HASH,
+  MOCK_FILE_KEY,
+  MOCK_FILE_URL,
+  MOCK_FORTUNES_REQUIRED,
+  MOCK_JOB_LAUNCHER_FEE,
+  MOCK_PRIVATE_KEY,
+  MOCK_RECORDING_ORACLE_ADDRESS,
+  MOCK_RECORDING_ORACLE_FEE,
+  MOCK_REPUTATION_ORACLE_ADDRESS,
+  MOCK_REPUTATION_ORACLE_FEE,
+  MOCK_REQUESTER_DESCRIPTION,
+  MOCK_REQUESTER_TITLE,
+} from '../../common/test/constants';
 
 jest.mock('@human-protocol/sdk');
 
 describe('JobService', () => {
   let jobService: JobService;
-  let jobRepository: DeepMocked<JobRepository>;
-  let paymentService: DeepMocked<PaymentService>;
-  let configService: DeepMocked<ConfigService>;
-  let httpService: DeepMocked<HttpService>;
+  let jobRepository: JobRepository;
+  let paymentService: PaymentService;
+  let configService: ConfigService;
+  let httpService: HttpService;
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {

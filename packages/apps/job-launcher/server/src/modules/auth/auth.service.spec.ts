@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { TokenRepository } from './token.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { DeleteResult, Repository } from 'typeorm';
@@ -12,22 +12,21 @@ import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { IJwt, SignInDto } from './auth.dto';
 import { UserEntity } from '../user/user.entity';
-import { UnauthorizedException } from '@nestjs/common';
 import { UserCreateDto } from '../user/user.dto';
 import { TokenEntity, TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { UserStatus } from '../../common/enums/user';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
-import { MOCK_EXPIRES_IN } from 'src/common/test/constants';
+import { MOCK_EXPIRES_IN } from '../../common/test/constants';
 
 jest.mock('@human-protocol/sdk');
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let tokenRepository: DeepMocked<TokenRepository>;
+  let tokenRepository: TokenRepository;
   let userService: UserService;
-  let authRepository: DeepMocked<AuthRepository>;
+  let authRepository: AuthRepository;
   let jwtService: JwtService;
 
   beforeAll(async () => {
@@ -45,7 +44,8 @@ describe('AuthService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         AuthService,
-        UserService,{
+        UserService,
+        {
           provide: getRepositoryToken(AuthEntity),
           useClass: Repository,
         },
@@ -73,7 +73,7 @@ describe('AuthService', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
-  
+
   describe('signin', () => {
     it('should sign in the user and return the JWT', async () => {
       const signInDto: SignInDto = {
@@ -118,9 +118,7 @@ describe('AuthService', () => {
         password: 'password123',
       };
 
-      jest
-        .spyOn(authRepository, 'create' as any)
-        .mockResolvedValue({});
+      jest.spyOn(authRepository, 'create' as any).mockResolvedValue({});
 
       jest
         .spyOn(userService, 'getByCredentials' as any)
@@ -157,8 +155,12 @@ describe('AuthService', () => {
         user: userEntity,
       };
 
-      jest.spyOn(userService, 'create').mockResolvedValue(userEntity as UserEntity);
-      jest.spyOn(tokenRepository, 'create').mockResolvedValue(tokenEntity as TokenEntity);
+      jest
+        .spyOn(userService, 'create')
+        .mockResolvedValue(userEntity as UserEntity);
+      jest
+        .spyOn(tokenRepository, 'create')
+        .mockResolvedValue(tokenEntity as TokenEntity);
 
       const result = await authService.signup(userCreateDto);
 
@@ -180,7 +182,9 @@ describe('AuthService', () => {
         affected: 1,
       };
 
-      jest.spyOn(authRepository, 'delete').mockResolvedValue(deleteResult as DeleteResult);
+      jest
+        .spyOn(authRepository, 'delete')
+        .mockResolvedValue(deleteResult as DeleteResult);
 
       const result = await authService.logout(where);
 
@@ -199,8 +203,8 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'hashedPassword',
         status: UserStatus.ACTIVE,
-      }
-      
+      };
+
       const authEntity: Partial<AuthEntity> = {
         id: 1,
         user: userEntity as UserEntity,
@@ -225,10 +229,7 @@ describe('AuthService', () => {
       expect(authRepository.findOne).toHaveBeenCalledWith(where, {
         relations: ['user'],
       });
-      expect(authService.auth).toHaveBeenCalledWith(
-        authEntity.user,
-        ip,
-      );
+      expect(authService.auth).toHaveBeenCalledWith(authEntity.user, ip);
       expect(result).toBe(jwt);
     });
 
@@ -241,7 +242,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'hashedPassword',
         status: UserStatus.ACTIVE,
-      }
+      };
 
       const authEntity: Partial<AuthEntity> = {
         id: 1,
@@ -254,7 +255,7 @@ describe('AuthService', () => {
         .mockResolvedValue(authEntity as AuthEntity);
 
       await expect(authService.refresh(where, ip)).rejects.toThrow(
-        ErrorAuth.RefreshTokenHasExpired
+        ErrorAuth.RefreshTokenHasExpired,
       );
 
       expect(authRepository.findOne).toHaveBeenCalledWith(where, {
@@ -268,8 +269,8 @@ describe('AuthService', () => {
 
       const userEntity: Partial<UserEntity> = {
         id: 1,
-        status: UserStatus.INACTIVE
-      }
+        status: UserStatus.INACTIVE,
+      };
 
       const authEntity: Partial<AuthEntity> = {
         id: 1,
@@ -297,7 +298,7 @@ describe('AuthService', () => {
       const userEntity: Partial<UserEntity> = {
         id: 1,
         email: 'test@example.com',
-        password: 'hashedPassword'
+        password: 'hashedPassword',
       };
 
       const refreshToken = v4();
@@ -322,7 +323,10 @@ describe('AuthService', () => {
 
       jest.spyOn(jwtService, 'sign').mockReturnValue('access_token');
 
-      const result = await authService.auth(userEntity as UserEntity, '127.0.0.1');
+      const result = await authService.auth(
+        userEntity as UserEntity,
+        '127.0.0.1',
+      );
 
       expect(authRepository.create).toHaveBeenCalledWith({
         user: userEntity,

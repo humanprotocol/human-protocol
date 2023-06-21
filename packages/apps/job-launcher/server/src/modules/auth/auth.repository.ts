@@ -53,7 +53,9 @@ export class AuthRepository {
     return this.authEntityRepository.create(dto).save();
   }
 
-  public async delete(where: FindOptionsWhere<AuthEntity>): Promise<DeleteResult> {
+  public async delete(
+    where: FindOptionsWhere<AuthEntity>,
+  ): Promise<DeleteResult> {
     return this.authEntityRepository.delete(where);
   }
 }

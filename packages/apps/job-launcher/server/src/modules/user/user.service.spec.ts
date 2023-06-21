@@ -3,10 +3,8 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { PaymentService } from '../payment/payment.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import {
-  ErrorUser,
-} from '../../common/constants/errors';
+import { createMock } from '@golevelup/ts-jest';
+import { ErrorUser } from '../../common/constants/errors';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
@@ -19,9 +17,9 @@ jest.mock('@human-protocol/sdk');
 
 describe('UserService', () => {
   let userService: UserService;
-  let userRepository: DeepMocked<UserRepository>;
-  let configService: DeepMocked<ConfigService>;
-  let httpService: DeepMocked<HttpService>;
+  let userRepository: UserRepository;
+  let configService: ConfigService;
+  let httpService: HttpService;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -63,7 +61,9 @@ describe('UserService', () => {
         status: dto.status,
       };
 
-      jest.spyOn(userRepository, 'updateOne').mockResolvedValue(updatedUser as UserEntity);
+      jest
+        .spyOn(userRepository, 'updateOne')
+        .mockResolvedValue(updatedUser as UserEntity);
 
       const result = await userService.update(userId, dto);
 
@@ -80,17 +80,19 @@ describe('UserService', () => {
       const dto: UserCreateDto = {
         email: 'test@example.com',
         password: 'password123',
-        confirm: 'password123'
+        confirm: 'password123',
       };
 
       const createdUser: Partial<UserEntity> = {
         id: 1,
         email: dto.email,
-        password: 'hashedPassword'
+        password: 'hashedPassword',
       };
 
       jest.spyOn(userService, 'checkEmail').mockResolvedValue(undefined);
-      jest.spyOn(userRepository, 'create').mockResolvedValue(createdUser as UserEntity);
+      jest
+        .spyOn(userRepository, 'create')
+        .mockResolvedValue(createdUser as UserEntity);
       jest
         .spyOn(userService, 'createPasswordHash')
         .mockReturnValue('hashedPassword');
@@ -117,7 +119,9 @@ describe('UserService', () => {
 
       jest
         .spyOn(userService, 'checkEmail')
-        .mockRejectedValue(new ConflictException(ErrorUser.AccountCannotBeRegistered));
+        .mockRejectedValue(
+          new ConflictException(ErrorUser.AccountCannotBeRegistered),
+        );
 
       await expect(userService.create(dto)).rejects.toThrow(
         ErrorUser.AccountCannotBeRegistered,
@@ -135,10 +139,12 @@ describe('UserService', () => {
       const userEntity: Partial<UserEntity> = {
         id: 1,
         email,
-        password: 'hashedPassword'
+        password: 'hashedPassword',
       };
 
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(userEntity as UserEntity);
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue(userEntity as UserEntity);
       jest
         .spyOn(userService, 'createPasswordHash')
         .mockReturnValue('hashedPassword');

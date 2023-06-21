@@ -33,7 +33,7 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
-  UserNotActive = 'User not active'
+  UserNotActive = 'User not active',
 }
 
 /**

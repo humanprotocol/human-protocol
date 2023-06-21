@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import Stripe from 'stripe';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
@@ -18,37 +18,23 @@ import {
   PaymentType,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { MOCK_ADDRESS, MOCK_CUSTOMER_ID, MOCK_EMAIL, MOCK_PAYMENT_ID, MOCK_TRANSACTION_HASH } from 'src/common/test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_CUSTOMER_ID,
+  MOCK_EMAIL,
+  MOCK_PAYMENT_ID,
+  MOCK_TRANSACTION_HASH,
+} from '../../common/test/constants';
 
 jest.mock('@human-protocol/sdk');
-jest.mock('stripe', () => ({
-  ...jest.requireActual('stripe'),
-  Stripe: {
-    customers: {
-      create: jest.fn(),
-    },
-    paymentIntents: {
-      create: jest.fn(),
-    },
-  },
-}));
-/*
-jest.mock('ethers', () => ({
-  ...jest.requireActual('ethers'),
-  providers: {
-    JsonRpcProvider: {
-      getTransactionReceipt: jest.fn(),
-    }
-  }
-}));
-*/
+
 describe('PaymentService', () => {
   let stripe: Stripe;
   let paymentService: PaymentService;
-  let paymentRepository: DeepMocked<PaymentRepository>;
-  let currencyService: DeepMocked<CurrencyService>;
-  let configService: DeepMocked<ConfigService>;
-  let httpService: DeepMocked<HttpService>;
+  let paymentRepository: PaymentRepository;
+  let currencyService: CurrencyService;
+  let configService: ConfigService;
+  let httpService: HttpService;
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {

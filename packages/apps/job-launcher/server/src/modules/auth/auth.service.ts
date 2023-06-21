@@ -78,7 +78,9 @@ export class AuthService {
     where: FindOptionsWhere<AuthEntity>,
     ip: string,
   ): Promise<IJwt> {
-    const authEntity = await this.authRepository.findOne(where, { relations: ['user']});
+    const authEntity = await this.authRepository.findOne(where, {
+      relations: ['user'],
+    });
 
     if (
       !authEntity ||
@@ -107,13 +109,12 @@ export class AuthService {
       30 * 24 * 60 * 60,
     );
 
-    await this.authRepository
-      .create({
-        user: userEntity,
-        refreshToken,
-        refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
-        ip
-      })
+    await this.authRepository.create({
+      user: userEntity,
+      refreshToken,
+      refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
+      ip,
+    });
 
     return {
       accessToken: this.jwtService.sign(
