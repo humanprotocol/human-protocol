@@ -53,6 +53,14 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.AVALANCHE,
 ];
 
+export const L1_L2_CHAIN_IDS = [
+  ChainId.BSC_MAINNET,
+  ChainId.POLYGON,
+  ChainId.SKALE,
+  ChainId.MOONBEAM,
+  ChainId.AVALANCHE,
+];
+
 export const TESTNET_CHAIN_IDS = [
   ChainId.RINKEBY,
   ChainId.GOERLI,
@@ -146,7 +154,7 @@ export const ESCROW_NETWORKS: {
     chainId: ChainId.BSC_TESTNET,
     title: 'Binance Smart Chain (Testnet)',
     scanUrl: 'https://testnet.bscscan.com',
-    rpcUrl: 'https://endpoints.omniatech.io/v1/bsc/testnet/public',
+    rpcUrl: 'https://bsc-testnet.publicnode.com',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1',
     wagmiChain: bscTestnet,

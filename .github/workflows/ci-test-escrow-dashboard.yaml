@@ -3,8 +3,14 @@ name: Escrow dashboard check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/sdk/typescript/subgraph/**'
+      - 'packages/apps/escrow-dashboard/**'
   workflow_dispatch:
 
 jobs:

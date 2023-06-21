@@ -5,6 +5,11 @@ on:
     branches:
       - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/examples/fortune-v2/**'
   workflow_dispatch:
 
 jobs:

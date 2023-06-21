@@ -23,7 +23,7 @@ let owner: Signer,
   recordingOracle: Signer,
   externalAddress: Signer,
   restAccounts: Signer[],
-  trustedHandlers: string[];
+  trustedHandlers: Signer[];
 
 let token: HMToken, escrow: Escrow;
 
@@ -34,7 +34,9 @@ async function deployEscrow() {
     token.address,
     await owner.getAddress(),
     100,
-    trustedHandlers
+    await Promise.all(
+      trustedHandlers.map(async (handler) => await handler.getAddress())
+    )
   );
 }
 
@@ -49,12 +51,6 @@ async function setupEscrow() {
       MOCK_URL,
       MOCK_HASH
     );
-}
-
-async function addTrustedHandlers() {
-  await escrow
-    .connect(owner)
-    .addTrustedHandlers([await reputationOracle.getAddress()]);
 }
 
 async function fundEscrow() {
@@ -72,10 +68,8 @@ describe('Escrow', function () {
       externalAddress,
       ...restAccounts
     ] = await ethers.getSigners();
-    trustedHandlers = [
-      await reputationOracle.getAddress(),
-      await recordingOracle.getAddress(),
-    ];
+
+    trustedHandlers = [restAccounts[0], restAccounts[1]];
 
     // Deploy HMTToken Contract
     const HMToken = await ethers.getContractFactory('HMToken');
@@ -117,13 +111,12 @@ describe('Escrow', function () {
   });
 
   describe('abort', () => {
-    before(async () => {
-      await deployEscrow();
-      await setupEscrow();
-      await addTrustedHandlers();
-    });
-
     describe('Validations', function () {
+      before(async () => {
+        await deployEscrow();
+        await setupEscrow();
+      });
+
       it('Should revert when aborting with not trusted address', async function () {
         // const tx = await escrow.connect(externalAddress).abort()
         // console.log(`Abort costs: ${tx.receipt.gasUsed} wei.`);
@@ -131,20 +124,46 @@ describe('Escrow', function () {
           escrow.connect(externalAddress).abort()
         ).to.be.revertedWith('Address calling not trusted');
       });
+
+      it('Should revert when aborting from reputation oracle', async function () {
+        await expect(
+          escrow.connect(reputationOracle).abort()
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
+      it('Should revert when aborting from recording oracle', async function () {
+        await expect(
+          escrow.connect(recordingOracle).abort()
+        ).to.be.revertedWith('Address calling not trusted');
+      });
     });
 
     describe('Calling abort', function () {
+      beforeEach(async () => {
+        await deployEscrow();
+        await setupEscrow();
+      });
+
       it('Should transfer tokens to owner if contract funded when abort is called', async function () {
         const amount = 100;
         await token.connect(owner).transfer(escrow.address, amount);
 
         await escrow.connect(owner).abort();
 
-        const result = await token.connect(owner).balanceOf(escrow.address);
-        expect(result.toString()).to.equal(
-          '0',
-          'Escrow has not been properly aborted'
-        );
+        expect(
+          (await token.connect(owner).balanceOf(escrow.address)).toString()
+        ).to.equal('0', 'Escrow has not been properly aborted');
+      });
+
+      it('Should transfer tokens to owner if contract funded when abort is called from trusted handler', async function () {
+        const amount = 100;
+        await token.connect(owner).transfer(escrow.address, amount);
+
+        await escrow.connect(trustedHandlers[0]).abort();
+
+        expect(
+          (await token.connect(owner).balanceOf(escrow.address)).toString()
+        ).to.equal('0', 'Escrow has not been properly aborted');
       });
     });
   });
@@ -163,17 +182,33 @@ describe('Escrow', function () {
             .addTrustedHandlers([await reputationOracle.getAddress()])
         ).to.be.revertedWith('Address calling not trusted');
       });
+
+      it('Should revert when aborting from reputation oracle', async function () {
+        await expect(
+          escrow
+            .connect(reputationOracle)
+            .addTrustedHandlers([await externalAddress.getAddress()])
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
+      it('Should revert when aborting from recording oracle', async function () {
+        await expect(
+          escrow
+            .connect(recordingOracle)
+            .addTrustedHandlers([await externalAddress.getAddress()])
+        ).to.be.revertedWith('Address calling not trusted');
+      });
     });
 
     describe('Add trusted handlers', async function () {
       it('Should succeed when the contract launcher address trusted handlers and a trusted handler stores results', async () => {
         await escrow
           .connect(owner)
-          .addTrustedHandlers([await reputationOracle.getAddress()]);
+          .addTrustedHandlers([await restAccounts[2].getAddress()]);
 
         const result = await (
           await escrow
-            .connect(reputationOracle)
+            .connect(restAccounts[2])
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
@@ -181,8 +216,23 @@ describe('Escrow', function () {
           'IntermediateStorage',
           'IntermediateStorage event was not emitted'
         );
-        // expect(event._url).to.equal(MOCK_URL, "Manifest url is not correct")
-        // expect(event._hash).to.equal(MOCK_HASH, "Manifest hash is not correct")
+      });
+
+      it('Should succeed when add a new trusted handler from trusted handler and a trusted handler stores results', async () => {
+        await escrow
+          .connect(trustedHandlers[0])
+          .addTrustedHandlers([await restAccounts[3].getAddress()]);
+
+        const result = await (
+          await escrow
+            .connect(restAccounts[3])
+            .storeResults(MOCK_URL, MOCK_HASH)
+        ).wait();
+
+        expect(result.events?.[0].event).to.equal(
+          'IntermediateStorage',
+          'IntermediateStorage event was not emitted'
+        );
       });
     });
   });
@@ -195,6 +245,12 @@ describe('Escrow', function () {
       it('Should revert with the right error if address calling not trusted', async function () {
         await expect(
           escrow.connect(externalAddress).storeResults(MOCK_URL, MOCK_HASH)
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
+      it('Should revert with the right error if address calling is reputation oracle', async function () {
+        await expect(
+          escrow.connect(reputationOracle).storeResults(MOCK_URL, MOCK_HASH)
         ).to.be.revertedWith('Address calling not trusted');
       });
 
@@ -212,7 +268,6 @@ describe('Escrow', function () {
       before(async () => {
         await deployEscrow();
         await setupEscrow();
-        await addTrustedHandlers();
       });
 
       it('Should emit an event on intermediate storage', async function () {
@@ -228,13 +283,25 @@ describe('Escrow', function () {
       before(async () => {
         await deployEscrow();
         await setupEscrow();
-        await addTrustedHandlers();
       });
 
-      it('Should succeed when the contract launcher address trusted handlers and a trusted handler stores results', async () => {
+      it('Should succeed when recording oracle stores results', async () => {
         const result = await (
           await escrow
-            .connect(reputationOracle)
+            .connect(recordingOracle)
+            .storeResults(MOCK_URL, MOCK_HASH)
+        ).wait();
+
+        expect(result.events?.[0].event).to.equal(
+          'IntermediateStorage',
+          'IntermediateStorage event was not emitted'
+        );
+      });
+
+      it('Should succeed when a trusted handler stores results', async () => {
+        const result = await (
+          await escrow
+            .connect(trustedHandlers[0])
             .storeResults(MOCK_URL, MOCK_HASH)
         ).wait();
 
@@ -337,7 +404,7 @@ describe('Escrow', function () {
     });
 
     describe('Setup escrow', async function () {
-      before(async () => {
+      beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
       });
@@ -345,6 +412,29 @@ describe('Escrow', function () {
       it('Should set correct escrow with params', async () => {
         await escrow
           .connect(owner)
+          .setup(
+            await reputationOracle.getAddress(),
+            await recordingOracle.getAddress(),
+            10,
+            10,
+            MOCK_URL,
+            MOCK_HASH
+          );
+
+        expect(await escrow.reputationOracle()).to.equal(
+          await reputationOracle.getAddress()
+        );
+        expect(await escrow.recordingOracle()).to.equal(
+          await recordingOracle.getAddress()
+        );
+        expect(await escrow.manifestUrl()).to.equal(MOCK_URL);
+        expect(await escrow.manifestHash()).to.equal(MOCK_HASH);
+        expect(await escrow.status()).to.equal(Status.Pending);
+      });
+
+      it('Should set correct escrow with params by trusted handler', async () => {
+        await escrow
+          .connect(trustedHandlers[0])
           .setup(
             await reputationOracle.getAddress(),
             await recordingOracle.getAddress(),
@@ -390,10 +480,22 @@ describe('Escrow', function () {
           escrow.connect(externalAddress).cancel()
         ).to.be.revertedWith('Address calling not trusted');
       });
+
+      it('Should revert with the right error if address calling is reputation oracle', async function () {
+        await expect(
+          escrow.connect(reputationOracle).cancel()
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
+      it('Should revert with the right error if address calling is recording oracle', async function () {
+        await expect(
+          escrow.connect(recordingOracle).cancel()
+        ).to.be.revertedWith('Address calling not trusted');
+      });
     });
 
     describe('Cancel escrow', async function () {
-      before(async () => {
+      beforeEach(async () => {
         await deployEscrow();
         await fundEscrow();
         await setupEscrow();
@@ -404,8 +506,21 @@ describe('Escrow', function () {
         const ststus = await escrow.status();
         expect(ststus).to.equal(Status.Cancelled);
 
-        const balance = await token.connect(owner).balanceOf(escrow.address);
-        expect(balance).to.equal('0', 'Escrow has not been properly canceled');
+        expect(await token.connect(owner).balanceOf(escrow.address)).to.equal(
+          '0',
+          'Escrow has not been properly canceled'
+        );
+      });
+
+      it('Should succeed when the contract was canceled by trusted handler', async () => {
+        await escrow.connect(trustedHandlers[0]).cancel();
+        const ststus = await escrow.status();
+        expect(ststus).to.equal(Status.Cancelled);
+
+        expect(await token.connect(owner).balanceOf(escrow.address)).to.equal(
+          '0',
+          'Escrow has not been properly canceled'
+        );
       });
     });
   });
@@ -425,6 +540,17 @@ describe('Escrow', function () {
         await expect(
           escrow
             .connect(externalAddress)
+            .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
+      it('Should revert with the right error if address calling is recording oracle', async function () {
+        const recepients = [await restAccounts[0].getAddress()];
+        const amounts = [10];
+
+        await expect(
+          escrow
+            .connect(recordingOracle)
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         ).to.be.revertedWith('Address calling not trusted');
       });
@@ -582,7 +708,7 @@ describe('Escrow', function () {
       });
 
       it('Should runs from setup to bulkPayOut to complete correctly', async () => {
-        const recepients = [await restAccounts[0].getAddress()];
+        const recepients = [await restAccounts[3].getAddress()];
         const amounts = [100];
 
         expect(await escrow.status()).to.equal(Status.Pending);
@@ -598,9 +724,9 @@ describe('Escrow', function () {
 
       it('Should runs from setup to bulkPayOut to complete correctly with multiple addresses', async () => {
         const recepients = [
-          await restAccounts[0].getAddress(),
-          await restAccounts[1].getAddress(),
-          await restAccounts[2].getAddress(),
+          await restAccounts[3].getAddress(),
+          await restAccounts[4].getAddress(),
+          await restAccounts[5].getAddress(),
         ];
         const amounts = [10, 20, 70];
 
@@ -631,6 +757,12 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
+      it('Should revert with the right error if address calling is recording oracle', async function () {
+        await expect(
+          escrow.connect(recordingOracle).complete()
+        ).to.be.revertedWith('Address calling not trusted');
+      });
+
       it('Should revert with the right error if escrow not in Paid status state', async function () {
         await expect(escrow.connect(owner).complete()).to.be.revertedWith(
           'Escrow not in Paid state'
@@ -655,8 +787,13 @@ describe('Escrow', function () {
           );
       });
 
-      it('Should succeed when the contract launcher address trusted handlers and a trusted handler stores results', async () => {
+      it('Should succeed when the launcher completes', async () => {
         await escrow.connect(owner).complete();
+        expect(await escrow.status()).to.equal(Status.Complete);
+      });
+
+      it('Should succeed when the trusted handler completes', async () => {
+        await escrow.connect(trustedHandlers[0]).complete();
         expect(await escrow.status()).to.equal(Status.Complete);
       });
     });

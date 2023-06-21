@@ -3,8 +3,11 @@ name: Node.js Base Models check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/sdk/json-schema/**'
+      - 'packages/sdk/typescript/human-protocol-basemodels/**'
   workflow_dispatch:
 
 jobs:
