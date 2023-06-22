@@ -50,7 +50,6 @@
     "cookie-parser": "^1.4.6",
     "ethers": "^5.7.2",
     "helmet": "^7.0.0",
-    "nestjs-ethers": "^2.0.3",
     "nestjs-minio-client": "^2.0.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",

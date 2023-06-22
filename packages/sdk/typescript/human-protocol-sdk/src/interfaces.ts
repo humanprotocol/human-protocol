@@ -1,6 +1,6 @@
 import { BigNumber, Signer } from 'ethers';
 import { Provider } from '@ethersproject/abstract-provider';
-import { NetworkData } from './types';
+import { EscrowStatus, NetworkData } from './types';
 
 export interface IClientParams {
   signerOrProvider: Signer | Provider;
@@ -29,9 +29,9 @@ export interface IStaker {
 }
 
 export interface IEscrowsFilter {
-  address: string;
+  address?: string;
   role?: number;
-  status?: number;
+  status?: EscrowStatus;
   from?: Date;
   to?: Date;
 }
@@ -43,8 +43,4 @@ export interface IEscrowConfig {
   reputationOracleFee: BigNumber;
   manifestUrl: string;
   manifestHash: string;
-}
-
-export interface ILauncherEscrowsResult {
-  id: string;
 }
