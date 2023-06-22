@@ -5,12 +5,16 @@
   "description": "Human Protocol Fortune",
   "license": "MIT",
   "scripts": {
-    "launcher-server": "cd job-launcher/server && yarn start",
+    "recording-oracle:dev": "cd recording-oracle && yarn start:dev",
+    "recording-oracle:lint": "cd recording-oracle && yarn lint",
+    "recording-oracle:test": "cd recording-oracle && yarn test",
     "minio": "docker compose up -d minio-mc",
     "postgres": "docker compose up -d postgres",
     "docker": "docker compose up -d",
-    "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn launcher-server\")",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )",
+    "lint": "concurrently npm:recording-oracle:lint",
+    "lint:fix": "concurrently npm:recording-oracle:lint:fix",
+    "pretest": "yarn workspace @human-protocol/sdk build",
+    "test": "concurrently npm:recording-oracle:test"
   }
 }
