@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import {
   BadGatewayException,
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -36,6 +37,7 @@ import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { networkMap } from '../../common/constants/network';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class JobService {
@@ -45,6 +47,8 @@ export class JobService {
   public readonly bucket: string;
 
   constructor(
+    @Inject(Web3Service)
+    private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
     public readonly paymentService: PaymentService,
     public readonly httpService: HttpService,
@@ -235,19 +239,7 @@ export class JobService {
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     try {
-      const provider = new providers.JsonRpcProvider(
-        Object.values(networkMap).find(
-          (item) => item.network.chainId === jobEntity.chainId,
-        )?.rpcUrl,
-      );
-
-      const signer = new Wallet(
-        this.configService.get<string>(
-          'WEB3_JOB_LAUNCHER_PRIVATE_KEY',
-          'web3_private_key',
-        ),
-        provider,
-      );
+     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
       const clientParams = await InitClient.getParams(signer);
 
@@ -301,6 +293,7 @@ export class JobService {
 
       return jobEntity;
     } catch (e) {
+      console.log(e)
       this.logger.log(ErrorEscrow.NotLaunched, JobService.name);
       throw new Error(ErrorEscrow.NotLaunched);
     }

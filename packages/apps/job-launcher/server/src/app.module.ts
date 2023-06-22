@@ -11,6 +11,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { Web3Module } from './modules/web3/web3.module';
 
 @Module({
   providers: [
@@ -38,6 +39,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     UserModule,
     JobModule,
     PaymentModule,
+    Web3Module
   ],
   controllers: [AppController],
 })
