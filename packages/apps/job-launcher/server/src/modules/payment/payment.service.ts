@@ -236,13 +236,13 @@ export class PaymentService {
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
-    const finalAmount = BigNumber.from(0);
+    let finalAmount = BigNumber.from(0);
 
     paymentEntities.forEach((payment) => {
       if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount.sub(payment.amount);
+        finalAmount = finalAmount.sub(payment.amount);
       } else {
-        finalAmount.add(payment.amount);
+        finalAmount = finalAmount.add(payment.amount);
       }
     });
 

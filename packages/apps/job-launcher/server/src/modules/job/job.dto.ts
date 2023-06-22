@@ -17,6 +17,8 @@ export class JobCreateDto {
   public userId: number;
   public manifestUrl: string;
   public manifestHash: string;
+  public fee: string;
+  public fundAmount: string;
   public status: JobStatus;
   public waitUntil: Date;
 }
@@ -69,9 +71,6 @@ export class JobCvatDto {
 
   @ApiProperty()
   @IsUrl()
-  @Matches(/(s3-|s3\.)?(.*)\.amazonaws\.com/, {
-    message: 'URL must be in the correct S3 bucket format',
-  })
   public dataUrl: string;
 
   @ApiProperty()
@@ -144,6 +143,7 @@ export class ManifestDto {
   requesterTitle?: string;
   requesterDescription: string;
   requesterAccuracyTarget?: number;
+  fee: string;
   fundAmount: string;
   requestType: JobRequestType;
   mode: JobMode;

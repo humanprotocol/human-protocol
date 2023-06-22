@@ -58,18 +58,22 @@ export class JobService {
     this.storageParams = {
       endPoint: this.configService.get<string>(
         'S3_ENDPOINT',
-        'http://127.0.0.1',
+        '127.0.0.1',
       ),
       port: 9000,
-      useSSL: Boolean(this.configService.get<boolean>('S3_USE_SSL', false)),
+      useSSL: JSON.parse(this.configService.get<string>('S3_USE_SSL', 'false')),
     };
 
+    console.log(this.storageParams)
+    
     this.bucket = this.configService.get<string>('S3_BUCKET', 'launcher');
 
     this.storageClient = new StorageClient(
       storageCredentials,
       this.storageParams,
     );
+
+    console.log(this.storageClient)
   }
 
   public async createFortuneJob(
@@ -109,6 +113,7 @@ export class JobService {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
+      fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
       mode: JobMode.DESCRIPTIVE,
       requestType: JobRequestType.FORTUNE,
@@ -124,6 +129,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
+      fee: totalFee.toString(),
+      fundAmount: totalAmount.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -164,11 +171,15 @@ export class JobService {
       'ether',
     );
 
+    const jobLauncherFee = BigNumber.from(this.configService.get<number>('JOB_LAUNCHER_FEE', 0));
+    const recordingOracleFee = BigNumber.from(this.configService.get<number>('RECORDING_ORACLE_FEE', 0));
+    const reputationOracleFee = BigNumber.from(this.configService.get<number>('REPUTATION_ORACLE_FEE', 0));
+
     const totalFeePercentage = BigNumber.from(
-      this.configService.get<number>('JOB_LAUNCHER_FEE', 0),
+      jobLauncherFee,
     )
-      .add(this.configService.get<number>('RECORDING_ORACLE_FEE', 0))
-      .add(this.configService.get<number>('REPUTATION_ORACLE_FEE', 0));
+      .add(recordingOracleFee)
+      .add(reputationOracleFee);
     const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
@@ -185,6 +196,7 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
+      fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
       mode: JobMode.BATCH,
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
@@ -200,6 +212,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
+      fee: totalFee.toString(),
+      fundAmount: totalAmount.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -213,7 +227,7 @@ export class JobService {
       userId,
       PaymentSource.BALANCE,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(fundAmount),
+      BigNumber.from(totalAmount),
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -315,6 +329,7 @@ export class JobService {
 
       return { manifestUrl, manifestHash: hash };
     } catch (e) {
+      console.log(e)
       throw new Error(e.message);
     }
   }

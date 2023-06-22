@@ -33,6 +33,7 @@ export class StorageClient {
         secretKey: credentials.secretKey,
       });
     } catch (e) {
+      console.log(e);
       throw ErrorStorageClientNotInitialized;
     }
   }
