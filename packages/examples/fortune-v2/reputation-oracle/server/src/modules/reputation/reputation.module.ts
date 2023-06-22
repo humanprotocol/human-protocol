@@ -4,7 +4,6 @@ import { ConfigModule } from "@nestjs/config";
 
 import { ReputationService } from "./reputation.service";
 import { ReputationEntity } from "./reputation.entity";
-import { ReputationCron } from "./reputation.cron";
 import { HttpModule } from "@nestjs/axios";
 import { ReputationRepository } from "./reputation.repository";
 
@@ -14,7 +13,7 @@ import { ReputationRepository } from "./reputation.repository";
     ConfigModule,
     HttpModule,
   ],
-  providers: [Logger, ReputationService, ReputationRepository, ReputationCron],
+  providers: [Logger, ReputationService, ReputationRepository],
   exports: [ReputationService],
 })
 export class ReputationModule {}

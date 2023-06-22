@@ -56,8 +56,6 @@ export class WebhookIncomingUpdateDto {
 }
 
 export class ManifestDto {
-  chainId: ChainId;
-  escrowAddress?: string;
   dataUrl?: string;
   labels?: string[];
   submissionsRequired: number;

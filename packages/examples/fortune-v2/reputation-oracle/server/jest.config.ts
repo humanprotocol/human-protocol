@@ -10,5 +10,6 @@ module.exports = {
   },
   moduleNameMapper: {
     '^uuid$': require.resolve('uuid'),
+    '^typeorm$': require.resolve('typeorm'),
   },
 };

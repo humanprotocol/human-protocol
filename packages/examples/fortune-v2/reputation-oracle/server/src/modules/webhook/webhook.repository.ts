@@ -2,7 +2,12 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import {
+  FindOptionsWhere,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
 import { ErrorWebhook } from "../../common/constants/errors";
 import { WebhookIncomingCreateDto, WebhookIncomingUpdateDto } from "./webhook.dto";
 
@@ -16,10 +21,10 @@ export class WebhookRepository {
   ) {}
 
   public async updateOne(
-    where: FindConditions<WebhookIncomingEntity>,
+    where: FindOptionsWhere<WebhookIncomingEntity>,
     dto: Partial<WebhookIncomingUpdateDto>,
   ): Promise<WebhookIncomingEntity> {
-    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOne(where);
+    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOneBy(where);
 
     if (!webhookIncomingEntity) {
       this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
@@ -31,20 +36,13 @@ export class WebhookRepository {
   }
 
   public async findOne(
-    where: FindConditions<WebhookIncomingEntity>,
+    where: FindOptionsWhere<WebhookIncomingEntity>,
     options?: FindOneOptions<WebhookIncomingEntity>,
-  ): Promise<WebhookIncomingEntity> {
-    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOne({ where, ...options });
-
-    if (!webhookIncomingEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
-    }
-
-    return webhookIncomingEntity;
+  ): Promise<WebhookIncomingEntity | null> {
+    return this.webhookIncomingEntityRepository.findOne({ where, ...options });
   }
   
-  public find(where: FindConditions<WebhookIncomingEntity>, options?: FindManyOptions<WebhookIncomingEntity>): Promise<WebhookIncomingEntity[]> {
+  public find(where: FindOptionsWhere<WebhookIncomingEntity>, options?: FindManyOptions<WebhookIncomingEntity>): Promise<WebhookIncomingEntity[]> {
     return this.webhookIncomingEntityRepository.find({
       where,
       order: {

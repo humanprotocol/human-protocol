@@ -1,13 +1,14 @@
 import { Controller, Get, Redirect } from '@nestjs/common';
-
 import { Public } from './common/decorators';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExcludeController } from '@nestjs/swagger';
 
 @Controller('/')
-@ApiTags('Main')
+@ApiExcludeController()
 export class AppController {
   @Public()
   @Get('/')
   @Redirect('/swagger', 301)
-  public redirect(): void {}
+  public health(): string {
+    return 'OK';
+  }
 }

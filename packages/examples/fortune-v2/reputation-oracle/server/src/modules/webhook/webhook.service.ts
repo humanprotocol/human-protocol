@@ -1,18 +1,17 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { HttpService } from "@nestjs/axios";
+import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EscrowClient, InitClient, StorageClient, StorageCredentials, StorageParams } from "@human-protocol/sdk";
 import { WebhookIncomingEntity } from "./webhook-incoming.entity";
-import { FinalResult, ManifestDto, WebhookIncomingCreateDto } from "./webhook.dto";
+import { FinalResult, ManifestDto, WebhookIncomingCreateDto, WebhookIncomingDto } from "./webhook.dto";
 import { ErrorResults, ErrorWebhook } from "../../common/constants/errors";
 import { WebhookRepository } from "./webhook.repository";
 import { ReputationEntityType, WebhookStatus } from "../../common/decorators";
-import { EthersSigner, InjectSignerProvider } from "nestjs-ethers";
 import { JobRequestType } from "../../common/enums/job";
 import { RETRIES_COUNT_THRESHOLD } from "../../common/constants";
 import { checkCurseWords } from "../../common/helpers/utils";
 import { ReputationService } from "../reputation/reputation.service";
-import { BigNumber } from "ethers";
+import { BigNumber } from 'ethers';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class WebhookService {
@@ -22,12 +21,10 @@ export class WebhookService {
   public readonly bucket: string;
 
   constructor(
-    @InjectSignerProvider()
-    public readonly ethersSigner: EthersSigner,
+    private readonly web3Service: Web3Service,
     private readonly webhookRepository: WebhookRepository,
     private readonly reputationService: ReputationService,
-    private readonly configService: ConfigService,
-    private readonly httpService: HttpService
+    private readonly configService: ConfigService
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>("S3_ACCESS_KEY", ""),
@@ -48,7 +45,7 @@ export class WebhookService {
     );
   }
 
-  public async createIncomingWebhook(dto: WebhookIncomingCreateDto): Promise<boolean> {
+  public async createIncomingWebhook(dto: WebhookIncomingDto): Promise<boolean> {
     try {
       const webhookEntity = await this.webhookRepository
         .create({
@@ -65,13 +62,13 @@ export class WebhookService {
 
       return true;
     } catch (e) {
-      this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
-      return false;
+      throw new Error(e);
     }
   }
 
   public async processPendingWebhook(webhookEntity: WebhookIncomingEntity): Promise<boolean> {
-    const signer = this.ethersSigner.createWallet(this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key"));
+    const signer = this.web3Service.getSigner(webhookEntity.chainId);
+    
     const clientParams = await InitClient.getParams(signer);
     const escrowClient = new EscrowClient(clientParams);
     
@@ -92,7 +89,7 @@ export class WebhookService {
   }
 
   public async processPaidWebhook(webhookEntity: WebhookIncomingEntity): Promise<boolean> {
-    const signer = this.ethersSigner.createWallet(this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key"));
+    const signer = this.web3Service.getSigner(webhookEntity.chainId);
     const clientParams = await InitClient.getParams(signer);
     const escrowClient = new EscrowClient(clientParams);
 
@@ -142,7 +139,7 @@ export class WebhookService {
   }
 
   public async validateFortune(webhookEntity: WebhookIncomingEntity, manifest: ManifestDto): Promise<boolean> {  
-    const signer = this.ethersSigner.createWallet(this.configService.get<string>("WEB3_JOB_LAUNCHER_PRIVATE_KEY", "web3 private key"));
+    const signer = this.web3Service.getSigner(webhookEntity.chainId);
     const clientParams = await InitClient.getParams(signer);
     const escrowClient = new EscrowClient(clientParams)
       

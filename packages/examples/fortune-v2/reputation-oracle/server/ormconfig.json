@@ -6,7 +6,7 @@
       "port": 5432,
       "username": "operator",
       "password": "qwerty",
-      "database": "job-launcher",
+      "database": "reputation-oracle",
       "entities": ["dist/src/**/*.entity{ .ts,.js}"],
       "synchronize": false,
       "migrations": ["dist/src/database/migrations/*{.ts,.js}"],

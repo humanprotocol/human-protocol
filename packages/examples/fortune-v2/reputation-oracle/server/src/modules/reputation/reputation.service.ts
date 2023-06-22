@@ -1,10 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-
 import { ReputationRepository } from "./reputation.repository";
 import { ChainId } from "@human-protocol/sdk";
-import { INITIAL_REPUTATION } from "src/common/constants";
-import { ReputationEntityType } from "src/common/decorators";
+import { INITIAL_REPUTATION } from "../../common/constants";
+import { ReputationEntityType } from "../../common/decorators";
 
 @Injectable()
 export class ReputationService {

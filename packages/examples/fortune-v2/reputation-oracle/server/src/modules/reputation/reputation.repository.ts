@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 
 import { ReputationEntity } from "./reputation.entity";
-import { FindConditions, FindManyOptions, FindOneOptions, Repository } from "typeorm";
+import { FindOptionsWhere, FindManyOptions, FindOneOptions, Repository } from "typeorm";
 import { ErrorReputation } from "../../common/constants/errors";
 import { WebhookIncomingEntity } from "../webhook/webhook-incoming.entity";
 import { ReputationCreateDto, ReputationUpdateDto } from "./reputation.dto";
@@ -19,10 +19,10 @@ export class ReputationRepository {
   ) {}
   
   public async updateOne(
-    where: FindConditions<ReputationEntity>,
+    where: FindOptionsWhere<ReputationEntity>,
     dto: Partial<ReputationUpdateDto>,
   ): Promise<ReputationEntity> {
-    const reputationEntity = await this.reputationEntityRepository.findOne(where);
+    const reputationEntity = await this.reputationEntityRepository.findOneBy(where);
 
     if (!reputationEntity) {
       this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
@@ -34,15 +34,13 @@ export class ReputationRepository {
   }
 
   public async findOne(
-    where: FindConditions<ReputationEntity>,
+    where: FindOptionsWhere<ReputationEntity>,
     options?: FindOneOptions<ReputationEntity>,
-  ): Promise<ReputationEntity | undefined> {
-    const reputationEntity = await this.reputationEntityRepository.findOne({ where, ...options });
-
-    return reputationEntity;
+  ): Promise<ReputationEntity | null> {
+    return this.reputationEntityRepository.findOne({ where, ...options });
   }
   
-  public find(where: FindConditions<ReputationEntity>, options?: FindManyOptions<ReputationEntity>): Promise<ReputationEntity[]> {
+  public find(where: FindOptionsWhere<ReputationEntity>, options?: FindManyOptions<ReputationEntity>): Promise<ReputationEntity[]> {
     return this.reputationEntityRepository.find({
       where,
       order: {
