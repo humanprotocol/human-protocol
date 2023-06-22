@@ -7,9 +7,29 @@ from sqlalchemy.exc import IntegrityError
 import src.modules.cvat.service as cvat_service
 
 
+def create_project(session: SessionLocal) -> tuple:
+    cvat_project = Project(
+        id=str(uuid.uuid4()),
+        cvat_id=1,
+        status=ProjectStatuses.annotation,
+        job_type="IMAGE_LABEL_BINARY",
+        escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
+        bucket_url="https://test.storage.googleapis.com/",
+    )
+    session.add(cvat_project)
+    session.commit()
+
+    return cvat_project
+
+
 def create_project_and_task(session: SessionLocal) -> tuple:
     cvat_project = Project(
-        id=str(uuid.uuid4()), cvat_id=123, status=ProjectStatuses.annotation
+        id=str(uuid.uuid4()),
+        cvat_id=123,
+        status=ProjectStatuses.annotation,
+        job_type="IMAGE_LABEL_BINARY",
+        escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
+        bucket_url="https://test.storage.googleapis.com/",
     )
     cvat_task = Task(
         id=str(uuid.uuid4()),
@@ -34,7 +54,12 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_project(self):
         cvat_id = 1
-        project_id = cvat_service.create_project(self.session, cvat_id)
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        project_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
 
         project = self.session.query(Project).filter_by(id=project_id).first()
 
@@ -42,39 +67,110 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(project.id, project_id)
         self.assertEqual(project.cvat_id, cvat_id)
         self.assertEqual(project.status, "annotation")
+        self.assertEqual(project.job_type, job_type)
+        self.assertEqual(project.escrow_address, escrow_address)
+        self.assertEqual(project.bucket_url, bucket_url)
 
     def test_create_duplicated_project(self):
-        cvat_id = 123
-
-        cvat_service.create_project(self.session, cvat_id)
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
         self.session.commit()
 
-        cvat_service.create_project(self.session, cvat_id)
+        cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_cvat_id(self):
-        cvat_service.create_project(self.session, None)
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session, None, job_type, escrow_address, bucket_url
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
+
+    def test_create_project_none_job_type(self):
+        cvat_id = 1
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session, cvat_id, None, escrow_address, bucket_url
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
+
+    def test_create_project_none_escrow_address(self):
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        bucket_url = "https://test.storage.googleapis.com/"
+        cvat_service.create_project(self.session, cvat_id, job_type, None, bucket_url)
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
+
+    def test_create_project_none_bucket_url(self):
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, None
+        )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_get_project_by_id(self):
-        p_id = cvat_service.create_project(self.session, 1)
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        p_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
 
         project = cvat_service.get_project_by_id(self.session, p_id)
 
         assert project.id == p_id
         assert project.cvat_id == 1
         assert project.status == ProjectStatuses.annotation
+        assert project.job_type == job_type
+        assert project.escrow_address == escrow_address
+        assert project.bucket_url == bucket_url
 
         project = cvat_service.get_project_by_id(self.session, "dummy_id")
 
         assert project == None
 
     def test_get_projects_by_status(self):
-        p_id = cvat_service.create_project(self.session, 1)
-        cvat_service.create_project(self.session, 2)
-        cvat_service.create_project(self.session, 3)
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        p_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
+
+        cvat_id = 2
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        bucket_url = "https://test2.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
+
+        cvat_id = 3
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
+        bucket_url = "https://test3.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
 
         projects = cvat_service.get_projects_by_status(
             self.session, ProjectStatuses.annotation
@@ -99,7 +195,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert len(projects) == 1
 
     def test_update_project_status(self):
-        p_id = cvat_service.create_project(self.session, 1)
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        p_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
 
         cvat_service.update_project_status(
             self.session, p_id, ProjectStatuses.completed
@@ -110,20 +212,29 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert project.id == p_id
         assert project.cvat_id == 1
         assert project.status == ProjectStatuses.completed
+        assert project.job_type == job_type
+        assert project.escrow_address == escrow_address
+        assert project.bucket_url == bucket_url
 
     def test_update_project_invalid_status(self):
-        p_id = cvat_service.create_project(self.session, 1)
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        p_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
         with self.assertRaises(ValueError):
             cvat_service.update_project_status(self.session, p_id, "Invalid Status")
 
     def test_create_task(self):
-        cvat_id = 123
-        cvat_service.create_project(self.session, cvat_id)
-        cvat_project_id = 123
+        cvat_project = create_project(self.session)
+
+        cvat_id = 1
         status = TaskStatuses.annotation
 
         task_id = cvat_service.create_task(
-            self.session, cvat_id, cvat_project_id, status
+            self.session, cvat_id, cvat_project.cvat_id, status
         )
 
         task = self.session.query(Task).filter_by(id=task_id).first()
@@ -131,19 +242,19 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsNotNone(task)
         self.assertEqual(task.id, task_id)
         self.assertEqual(task.cvat_id, cvat_id)
-        self.assertEqual(task.cvat_project_id, cvat_project_id)
+        self.assertEqual(task.cvat_project_id, cvat_project.cvat_id)
         self.assertEqual(task.status, status.value)
 
     def test_create_task_duplicated_cvat_id(self):
-        cvat_id = 123
-        cvat_service.create_project(self.session, cvat_id)
-        cvat_project_id = 123
+        cvat_project = create_project(self.session)
+
+        cvat_id = 1
         status = TaskStatuses.annotation
 
-        cvat_service.create_task(self.session, cvat_id, cvat_project_id, status)
+        cvat_service.create_task(self.session, cvat_id, cvat_project.cvat_id, status)
         self.session.commit()
 
-        cvat_service.create_task(self.session, cvat_id, cvat_project_id, status)
+        cvat_service.create_task(self.session, cvat_id, cvat_project.cvat_id, status)
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
@@ -168,14 +279,16 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_get_task_by_id(self):
-        cvat_service.create_project(self.session, 1)
+        cvat_project = create_project(self.session)
 
-        task_id = cvat_service.create_task(self.session, 1, 1, TaskStatuses.annotation)
+        task_id = cvat_service.create_task(
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
+        )
         task = cvat_service.get_task_by_id(self.session, task_id)
 
         assert task.id == task_id
         assert task.cvat_id == 1
-        assert task.cvat_project_id == 1
+        assert task.cvat_project_id == cvat_project.cvat_id
         assert task.status == TaskStatuses.annotation
 
         task = cvat_service.get_task_by_id(self.session, "dummy_id")
@@ -183,10 +296,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert task == None
 
     def test_get_tasks_by_status(self):
-        cvat_service.create_project(self.session, 1)
-        cvat_service.create_task(self.session, 1, 1, TaskStatuses.annotation)
-        cvat_service.create_task(self.session, 2, 1, TaskStatuses.annotation)
-        cvat_service.create_task(self.session, 3, 1, TaskStatuses.completed)
+        cvat_project = create_project(self.session)
+
+        cvat_service.create_task(
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
+        )
+        cvat_service.create_task(
+            self.session, 2, cvat_project.cvat_id, TaskStatuses.annotation
+        )
+        cvat_service.create_task(
+            self.session, 3, cvat_project.cvat_id, TaskStatuses.completed
+        )
 
         tasks = cvat_service.get_tasks_by_status(self.session, TaskStatuses.annotation)
 
@@ -201,8 +321,11 @@ class ServiceIntegrationTest(unittest.TestCase):
         assert len(tasks) == 0
 
     def test_update_task_status(self):
-        cvat_service.create_project(self.session, 1)
-        task_id = cvat_service.create_task(self.session, 1, 1, TaskStatuses.annotation)
+        cvat_project = create_project(self.session)
+
+        task_id = cvat_service.create_task(
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
+        )
 
         cvat_service.update_task_status(self.session, task_id, TaskStatuses.completed)
 
@@ -210,26 +333,45 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         assert task.id == task_id
         assert task.cvat_id == 1
-        assert task.cvat_project_id == 1
+        assert task.cvat_project_id == cvat_project.cvat_id
         assert task.status == TaskStatuses.completed
 
     def test_update_task_invalid_status(self):
-        cvat_service.create_project(self.session, 1)
-        task_id = cvat_service.create_task(self.session, 1, 1, TaskStatuses.annotation)
+        cvat_project = create_project(self.session)
+
+        task_id = cvat_service.create_task(
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
+        )
 
         with self.assertRaises(ValueError):
             cvat_service.update_task_status(self.session, task_id, "Invalid status")
 
     def test_get_tasks_by_cvat_project_id(self):
-        cvat_service.create_project(self.session, 1)
-        cvat_service.create_task(self.session, 1, 1, TaskStatuses.annotation)
-        cvat_service.create_task(self.session, 2, 1, TaskStatuses.annotation)
-        cvat_service.create_task(self.session, 3, 1, TaskStatuses.completed)
+        cvat_project = create_project(self.session)
 
-        cvat_service.create_project(self.session, 2)
+        cvat_service.create_task(
+            self.session, 1, cvat_project.cvat_id, TaskStatuses.annotation
+        )
+        cvat_service.create_task(
+            self.session, 2, cvat_project.cvat_id, TaskStatuses.annotation
+        )
+        cvat_service.create_task(
+            self.session, 3, cvat_project.cvat_id, TaskStatuses.completed
+        )
+
+        cvat_id = 2
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
+        bucket_url = "https://test2.storage.googleapis.com/"
+        project_id = cvat_service.create_project(
+            self.session, cvat_id, job_type, escrow_address, bucket_url
+        )
+
         cvat_service.create_task(self.session, 4, 2, TaskStatuses.annotation)
 
-        tasks = cvat_service.get_tasks_by_cvat_project_id(self.session, 1)
+        tasks = cvat_service.get_tasks_by_cvat_project_id(
+            self.session, cvat_project.cvat_id
+        )
 
         assert len(tasks) == 3
 
@@ -285,11 +427,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_create_job_without_task(self):
-        cvat_project = Project(
-            id=str(uuid.uuid4()), cvat_id=123, status=ProjectStatuses.annotation
-        )
-        self.session.add(cvat_project)
-        self.session.commit()
+        cvat_project = create_project(self.session)
 
         cvat_service.create_job(
             session=self.session,

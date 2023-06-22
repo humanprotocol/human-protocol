@@ -8,6 +8,7 @@ from src.modules.cvat.track_completed import (
     track_completed_projects,
     track_completed_tasks,
 )
+from src.modules.cvat.retrieve_annotations import retrieve_annotations
 from src.modules.oracle_webhooks.process_pending import process_incoming_webhooks
 
 
@@ -29,5 +30,10 @@ def setup_cron_jobs(app: FastAPI):
             track_completed_tasks,
             "interval",
             seconds=Config.cron_config.track_completed_tasks_int,
+        )
+        scheduler.add_job(
+            retrieve_annotations,
+            "interval",
+            seconds=Config.cron_config.retrieve_annotatons_int,
         )
         scheduler.start()

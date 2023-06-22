@@ -1,5 +1,4 @@
 import logging
-import requests
 
 from src.db import SessionLocal
 from src.config import CronConfig
@@ -32,7 +31,9 @@ def track_completed_projects() -> None:
                 tasks = cvat_service.get_tasks_by_cvat_project_id(
                     session, project.cvat_id
                 )
-                if all(task.status == TaskStatuses.completed for task in tasks):
+                if len(tasks) > 0 and all(
+                    task.status == TaskStatuses.completed for task in tasks
+                ):
                     cvat_service.update_project_status(
                         session, project.id, ProjectStatuses.completed
                     )
@@ -56,12 +57,13 @@ def track_completed_tasks() -> None:
             tasks = cvat_service.get_tasks_by_status(
                 session,
                 TaskStatuses.annotation,
-                limit=CronConfig.track_completed_tasks_chunk_size,
             )
 
             for task in tasks:
                 jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
-                if all(job.status == JobStatuses.completed for job in jobs):
+                if len(jobs) > 0 and all(
+                    job.status == JobStatuses.completed for job in jobs
+                ):
                     cvat_service.update_task_status(
                         session, task.id, TaskStatuses.completed
                     )

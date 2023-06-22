@@ -53,6 +53,10 @@ class CronConfig:
     track_completed_tasks_chunk_size = os.environ.get(
         "TRACK_COMPLETED_TASKS_CHUNK_SIZE", 5
     )
+    retrieve_annotatons_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 3000))
+    retrieve_annotations_chunk_size = os.environ.get(
+        "RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5
+    )
 
 
 class CvatConfig:
@@ -69,6 +73,14 @@ class CvatConfig:
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
 
+class GoogleCloudStorageConfig:
+    endpoint_url = os.environ.get("GCS_ENDPOINT_URL", "storage.googleapis.com")
+    region = os.environ.get("GCS_REGION", "")
+    access_key = os.environ.get("GCS_ACCESS_KEY", "")
+    secret_key = os.environ.get("GCS_SECRET_KEY", "")
+    results_bucket_name = os.environ.get("GCS_RESULTS_BUCKET_NAME", "")
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -80,3 +92,4 @@ class Config:
     postgres_config = Postgres
     cron_config = CronConfig
     cvat_config = CvatConfig
+    gcs_config = GoogleCloudStorageConfig

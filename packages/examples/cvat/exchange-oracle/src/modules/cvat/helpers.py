@@ -11,10 +11,16 @@ def parse_data_url(data_url: str) -> tuple:
 
     if parsed_url.netloc.endswith("s3.amazonaws.com"):
         # AWS S3 bucket
-        return {"provider": Providers.aws.value, "bucket": parsed_url.path.strip("/")}
+        return {
+            "provider": Providers.aws.value,
+            "bucket": parsed_url.netloc.split(".")[0],
+        }
     elif parsed_url.netloc.endswith("storage.googleapis.com"):
         # Google Cloud Storage (GCS) bucket
-        return {"provider": Providers.gcs.value, "bucket": parsed_url.path.strip("/")}
+        return {
+            "provider": Providers.gcs.value,
+            "bucket": parsed_url.netloc.split(".")[0],
+        }
     else:
         raise ValueError(f"{parsed_url.netloc} cloud provider is not supported by CVAT")
 
@@ -31,4 +37,12 @@ def parse_manifest(manifest: dict) -> tuple:
         {"name": label, "type": type_mapping.get(job_type)}
         for label in manifest["labels"]
     ]
-    return provider, bucket_name, labels
+    return provider, bucket_name, labels, job_type
+
+
+def compose_bucket_url(bucket_name: str, provider: str) -> str:
+    match provider:
+        case Providers.aws.value:
+            return f"https://{bucket_name}.s3.amazonaws.com/"
+        case Providers.gcs.value:
+            return f"https://{bucket_name}.storage.googleapis.com/"

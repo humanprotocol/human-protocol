@@ -30,6 +30,9 @@ def add_cvat_project_to_db(cvat_id: int) -> str:
             id=project_id,
             cvat_id=cvat_id,
             status="annotation",
+            job_type="IMAGE_LABEL_BINARY",
+            escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
+            bucket_url="https://test.storage.googleapis.com/",
         )
 
         session.add(project)

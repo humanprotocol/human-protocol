@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: 8de5745691ff
+Revision ID: a91dda117eaa
 Revises: 
-Create Date: 2023-06-15 17:47:11.004061
+Create Date: 2023-06-22 17:32:02.919110
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "8de5745691ff"
+revision = "a91dda117eaa"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,6 +24,9 @@ def upgrade() -> None:
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("cvat_id", sa.Integer(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
+        sa.Column("job_type", sa.String(), nullable=False),
+        sa.Column("escrow_address", sa.String(length=42), nullable=False),
+        sa.Column("bucket_url", sa.String(), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -32,6 +35,7 @@ def upgrade() -> None:
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("bucket_url"),
     )
     op.create_index(op.f("ix_projects_cvat_id"), "projects", ["cvat_id"], unique=True)
     op.create_index(op.f("ix_projects_id"), "projects", ["id"], unique=False)

@@ -2,7 +2,7 @@
 from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Integer
 from sqlalchemy.sql import func
 
-from .constants import TaskStatuses, JobStatuses
+from .constants import ProjectStatuses, TaskStatuses, JobStatuses, JobTypes
 from src.db import Base
 
 
@@ -10,7 +10,10 @@ class Project(Base):
     __tablename__ = "projects"
     id = Column(String, primary_key=True, index=True)
     cvat_id = Column(Integer, unique=True, index=True, nullable=False)
-    status = Column(String, Enum(TaskStatuses), nullable=False)
+    status = Column(String, Enum(ProjectStatuses), nullable=False)
+    job_type = Column(String, Enum(JobTypes), nullable=False)
+    escrow_address = Column(String(42), nullable=False)
+    bucket_url = Column(String, unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

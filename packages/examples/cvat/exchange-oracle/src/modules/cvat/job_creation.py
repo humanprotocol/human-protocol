@@ -6,19 +6,25 @@ from .api_calls import (
     setup_cvat_webhooks,
     put_task_data,
 )
-from .helpers import parse_manifest
+from .helpers import parse_manifest, compose_bucket_url
 from .service import create_task as create_db_task
 from .service import create_project as create_db_project
 
 
 def job_creation_process(escrow_address: str, manifest: dict):
-    (provider, bucket_name, labels) = parse_manifest(manifest)
+    (provider, bucket_name, labels, job_type) = parse_manifest(manifest)
     # Create a cloudstorage on CVAT for not storing datasets on CVAT instance
     cloudstorage = create_cloudstorage(provider, bucket_name)
     # Creating a project on CVAT. Necessary because otherwise webhooks aren't available
     project = create_project(escrow_address, labels)
     with SessionLocal.begin() as session:
-        create_db_project(session, project.id)
+        create_db_project(
+            session,
+            project.id,
+            job_type,
+            escrow_address,
+            compose_bucket_url(bucket_name, provider),
+        )
     # Setup webhooks for a project (update:task, update:job)
     setup_cvat_webhooks(project.id)
     # Task creation
