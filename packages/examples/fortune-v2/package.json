@@ -14,5 +14,11 @@
     "lint:fix": "concurrently npm:recording-oracle:lint:fix",
     "pretest": "yarn workspace @human-protocol/sdk build",
     "test": "concurrently npm:recording-oracle:test"
+  },
+  "devDependencies": {
+    "@human-protocol/core": "*",
+    "axios": "^1.1.3",
+    "hardhat": "^2.12.2",
+    "web3": "^1.8.0"
   }
 }

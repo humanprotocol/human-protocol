@@ -70,5 +70,8 @@
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0",
     "fast-xml-parser": "4.2.2"
+  },
+  "dependencies": {
+    "ejs": "^3.1.8"
   }
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ethers, BigNumber } from 'ethers';
-import EscrowClient from '../src/escrow';
+import { EscrowClient } from '../src/escrow';
 import {
   FAKE_ADDRESS,
   FAKE_HASH,
@@ -28,7 +28,7 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from '../src/error';
-import InitClient from '../src/init';
+import { InitClient } from '../src/init';
 import {
   EscrowFactory__factory,
   Escrow__factory,
@@ -238,7 +238,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
@@ -340,7 +340,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -365,7 +365,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -397,7 +397,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
@@ -431,7 +431,7 @@ describe('EscrowClient', () => {
         recordingOracleFee: BigNumber.from(50),
         reputationOracleFee: BigNumber.from(50),
         manifestUrl: VALID_URL,
-        hash: FAKE_HASH,
+        manifestHash: FAKE_HASH,
       };
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
