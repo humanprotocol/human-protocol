@@ -31,6 +31,20 @@
 ```bash
 $ yarn install
 ```
+## Setup database
+1. Run database server
+2. Execute
+```bash
+$ CREATE DATABASE "job-launcher";
+$ CREATE USER operator WITH ENCRYPTED PASSWORD 'qwerty';
+$ GRANT ALL PRIVILEGES ON DATABASE "job-launcher" TO "operator";
+$ \c "job-launcher" postgres
+$ GRANT CREATE ON SCHEMA public TO operator;
+```
+3. Run migrations
+```bash
+yarn migration:run
+```
 
 ## Running the app
 
