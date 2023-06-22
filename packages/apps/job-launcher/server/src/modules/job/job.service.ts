@@ -55,16 +55,15 @@ export class JobService {
       secretKey: this.configService.get<string>('S3_SECRET_KEY', ''),
     };
 
+    let useSSL = this.configService.get<string>('S3_USE_SSL', 'false') === "true";
     this.storageParams = {
       endPoint: this.configService.get<string>(
         'S3_ENDPOINT',
         '127.0.0.1',
       ),
       port: 9000,
-      useSSL: JSON.parse(this.configService.get<string>('S3_USE_SSL', 'false')),
+      useSSL,
     };
-
-    console.log(this.storageParams)
     
     this.bucket = this.configService.get<string>('S3_BUCKET', 'launcher');
 
@@ -72,8 +71,6 @@ export class JobService {
       storageCredentials,
       this.storageParams,
     );
-
-    console.log(this.storageClient)
   }
 
   public async createFortuneJob(
@@ -329,7 +326,6 @@ export class JobService {
 
       return { manifestUrl, manifestHash: hash };
     } catch (e) {
-      console.log(e)
       throw new Error(e.message);
     }
   }

@@ -99,7 +99,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
-        .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
+        .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'createFileUrl').mockReturnValue(MOCK_FILE_URL);
 
       const userId = 1;
@@ -144,6 +144,8 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -159,7 +161,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
-        .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
+        .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
 
       const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
@@ -192,7 +194,7 @@ describe('JobService', () => {
 
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
-        .mockResolvedValue([{ key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH }]);
+        .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined);
 
@@ -251,14 +253,25 @@ describe('JobService', () => {
       jest
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
-
+        
       const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
+      const fundAmountInWei = ethers.utils.parseUnits(
+        fundAmount.toString(),
+        'ether',
+      );
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue({
         dataUrl: MOCK_FILE_URL,
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
         fundAmount: fundAmount.toString(),
         requestType: JobRequestType.FORTUNE,
         mode: JobMode.DESCRIPTIVE,
@@ -358,14 +371,24 @@ describe('JobService', () => {
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
 
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
-      const fee = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
+      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
+      const fundAmountInWei = ethers.utils.parseUnits(
+        fundAmount.toString(),
+        'ether',
+      );
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue({
         dataUrl: MOCK_FILE_URL,
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
         fundAmount: fundAmount.toString(),
         requestType: JobRequestType.FORTUNE,
         mode: JobMode.DESCRIPTIVE,
@@ -395,7 +418,7 @@ describe('JobService', () => {
       const encryptedManifest = { data: 'encrypted data' };
 
       const uploadResult: UploadFile[] = [
-        { key: MOCK_FILE_KEY, hash: MOCK_FILE_HASH },
+        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
       ];
 
       jest
@@ -450,10 +473,23 @@ describe('JobService', () => {
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
+      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
+      const fundAmountInWei = ethers.utils.parseUnits(
+        fundAmount.toString(),
+        'ether',
+      );
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+
       const manifest: ManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
         fundAmount: (10).toString(),
         mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
