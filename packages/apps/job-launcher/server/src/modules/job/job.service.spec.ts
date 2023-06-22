@@ -44,15 +44,22 @@ import {
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
 } from '../../common/test/constants';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk');
 
 describe('JobService', () => {
   let jobService: JobService;
+  let web3Service: Web3Service;
   let jobRepository: JobRepository;
   let paymentService: PaymentService;
   let configService: ConfigService;
   let httpService: HttpService;
+
+  const signerMock = {
+    address: '0x1234567890123456789012345678901234567892',
+    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -72,6 +79,12 @@ describe('JobService', () => {
             return MOCK_REPUTATION_ORACLE_ADDRESS;
           case 'EXCHANGE_ORACLE_WEBHOOK_URL':
             return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
+          case 'HOST':
+            return '127.0.0.1';
+          case 'PORT':
+            return 5000;
+          case 'WEB3_PRIVATE_KEY':
+            return '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
         }
       }),
     };
@@ -79,6 +92,12 @@ describe('JobService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+          },
+        },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -100,7 +119,6 @@ describe('JobService', () => {
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
-      jest.spyOn(jobService, 'createFileUrl').mockReturnValue(MOCK_FILE_URL);
 
       const userId = 1;
       const dto = {
@@ -424,7 +442,6 @@ describe('JobService', () => {
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue(uploadResult);
-      jest.spyOn(jobService, 'createFileUrl').mockReturnValue(MOCK_FILE_URL);
 
       const result = await jobService.saveManifest(
         encryptedManifest,
@@ -435,7 +452,6 @@ describe('JobService', () => {
         [encryptedManifest],
         MOCK_BUCKET_NAME,
       );
-      expect(jobService.createFileUrl).toHaveBeenCalledWith(MOCK_FILE_KEY);
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,

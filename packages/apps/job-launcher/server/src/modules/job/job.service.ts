@@ -293,7 +293,6 @@ export class JobService {
 
       return jobEntity;
     } catch (e) {
-      console.log(e)
       this.logger.log(ErrorEscrow.NotLaunched, JobService.name);
       throw new Error(ErrorEscrow.NotLaunched);
     }
