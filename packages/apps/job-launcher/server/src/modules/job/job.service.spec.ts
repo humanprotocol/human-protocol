@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
-import { MUMBAI_NETWORK } from 'nestjs-ethers';
 import { JobService } from './job.service';
 import { JobRepository } from './job.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -228,7 +227,7 @@ describe('JobService', () => {
         getAddress: jest.fn().mockReturnValue(ethers.constants.AddressZero),
       };
 
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       const getClientParamsMock = InitClient.getParams as jest.Mock;
@@ -241,7 +240,7 @@ describe('JobService', () => {
     });
 
     it('should launch a job successfully', async () => {
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       jest.spyOn(InitClient, 'getParams').mockResolvedValue({
@@ -297,7 +296,7 @@ describe('JobService', () => {
     });
 
     it('should handle error during job launch', async () => {
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       jest.spyOn(InitClient, 'getParams').mockResolvedValue({
@@ -334,7 +333,7 @@ describe('JobService', () => {
         getAddress: jest.fn().mockReturnValue(ethers.constants.AddressZero),
       };
 
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       const getClientParamsMock = InitClient.getParams as jest.Mock;
@@ -347,7 +346,7 @@ describe('JobService', () => {
     });
 
     it('should launch a job successfully', async () => {
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       jest.spyOn(InitClient, 'getParams').mockResolvedValue({
@@ -374,7 +373,7 @@ describe('JobService', () => {
     });
 
     it('should handle error during job launch', async () => {
-      const chainId: ChainId = MUMBAI_NETWORK.chainId;
+      const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
       jest.spyOn(InitClient, 'getParams').mockResolvedValue({
