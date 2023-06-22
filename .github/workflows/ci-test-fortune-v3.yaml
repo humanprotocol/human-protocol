@@ -1,4 +1,4 @@
-name: Fortune V2 check
+name: Fortune V3 check
 
 on:
   push:
