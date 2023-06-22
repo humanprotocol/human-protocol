@@ -73,12 +73,12 @@ class CvatConfig:
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
 
-class GoogleCloudStorageConfig:
-    endpoint_url = os.environ.get("GCS_ENDPOINT_URL", "storage.googleapis.com")
-    region = os.environ.get("GCS_REGION", "")
-    access_key = os.environ.get("GCS_ACCESS_KEY", "")
-    secret_key = os.environ.get("GCS_SECRET_KEY", "")
-    results_bucket_name = os.environ.get("GCS_RESULTS_BUCKET_NAME", "")
+class StorageConfig:
+    endpoint_url = os.environ.get("ENDPOINT_URL", "storage.googleapis.com")
+    region = os.environ.get("REGION", "")
+    access_key = os.environ.get("ACCESS_KEY", "")
+    secret_key = os.environ.get("SECRET_KEY", "")
+    results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
 
 
 class Config:
@@ -92,4 +92,4 @@ class Config:
     postgres_config = Postgres
     cron_config = CronConfig
     cvat_config = CvatConfig
-    gcs_config = GoogleCloudStorageConfig
+    storage_config = StorageConfig

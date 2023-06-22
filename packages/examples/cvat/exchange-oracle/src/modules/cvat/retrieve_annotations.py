@@ -3,7 +3,7 @@ import logging
 from human_protocol_sdk.storage import StorageClient, Credentials
 
 from src.db import SessionLocal
-from src.config import CronConfig, GoogleCloudStorageConfig
+from src.config import CronConfig, StorageConfig
 
 from src.modules.cvat.constants import (
     ProjectStatuses,
@@ -69,15 +69,15 @@ def retrieve_annotations() -> None:
                                     job.assignee,
                                 )
                 storage_client = StorageClient(
-                    GoogleCloudStorageConfig.endpoint_url,
-                    GoogleCloudStorageConfig.region,
+                    StorageConfig.endpoint_url,
+                    StorageConfig.region,
                     Credentials(
-                        GoogleCloudStorageConfig.access_key,
-                        GoogleCloudStorageConfig.secret_key,
+                        StorageConfig.access_key,
+                        StorageConfig.secret_key,
                     ),
                 )
                 files = storage_client.upload_files(
-                    [annotations], GoogleCloudStorageConfig.results_bucket_name
+                    [annotations], StorageConfig.results_bucket_name
                 )
 
                 cvat_service.update_project_status(
