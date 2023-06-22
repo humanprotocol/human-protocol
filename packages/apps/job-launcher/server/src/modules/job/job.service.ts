@@ -314,20 +314,12 @@ export class JobService {
         throw new BadGatewayException(ErrorBucket.UnableSaveFile);
       }
 
-      const { key, hash } = uploadedFiles[0];
-      const manifestUrl = this.createFileUrl(key);
+      const { key, url, hash } = uploadedFiles[0];
+      const manifestUrl = url;
 
       return { manifestUrl, manifestHash: hash };
     } catch (e) {
       throw new Error(e.message);
-    }
-  }
-
-  public createFileUrl(key: string): string {
-    if (this.storageParams.port) {
-      return `${this.storageParams.endPoint}:${this.storageParams.port}/${this.bucket}/${key}.json`;
-    } else {
-      return `${this.storageParams.endPoint}/${this.bucket}/${key}.json`;
     }
   }
 
