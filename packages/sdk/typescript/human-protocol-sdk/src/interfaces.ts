@@ -44,3 +44,10 @@ export interface IEscrowConfig {
   manifestUrl: string;
   manifestHash: string;
 }
+
+export interface IKeyPair {
+  privateKey: string;
+  publicKey: string;
+  passphrase: string;
+  revocationCertificate?: string;
+}
