@@ -46,7 +46,8 @@ On the other hand, it can be cancelled anytime.
 
 - `addTrustedHandlers(trustedHandlers)`
 
-  Adds more trusted handlers. Only trusted handlers can call this function.
+  Adds more trusted handlers. 
+  > Only trusted handlers can call this function.
 
 - `getBalance()`
 
