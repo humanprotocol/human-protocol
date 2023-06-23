@@ -36,7 +36,8 @@ On the other hand, it can be cancelled anytime.
 
 - `abort()`
 
-  Cancels the escrow, and self destruct the contract instance. Only trusted handlers can call this function.
+  Cancels the escrow, and self destruct the contract instance. 
+  > Only trusted handlers can call this function.
 
 - `cancel()`
 
