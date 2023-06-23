@@ -1,4 +1,5 @@
 import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Button, Grid, Paper, Snackbar, Typography } from '@mui/material';
 import { saveAs } from 'file-saver';
 import JSzip from 'jszip';
@@ -13,8 +14,6 @@ import {
 import { Alert } from '../Alert';
 import { NFT_STORAGE_CLIENT } from './constants';
 import { Key } from './types';
-
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
 async function downloadKey(
   publicKey: string,
@@ -72,8 +71,7 @@ export const Success: FC<SuccessProps> = ({ setStep, setPage, keys, what }) => {
     }
   }, [keys.publicKey]);
   const { config } = usePrepareContractWrite({
-    address: ESCROW_NETWORKS[chain?.id as ChainId]
-      ?.kvstoreAddress as `0x${string}`,
+    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'set',
     args: ['public_key', cid],

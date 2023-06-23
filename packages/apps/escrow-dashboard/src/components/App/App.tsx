@@ -2,6 +2,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { FC } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { WagmiConfig, createClient, configureChains } from 'wagmi';
+import * as wagmiChains from 'wagmi/chains';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
@@ -10,28 +11,33 @@ import { publicProvider } from 'wagmi/providers/public';
 
 import { Layout } from '../Layout';
 
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
+import { RPC_URLS } from 'src/constants';
 import { routes as appRoutes } from 'src/routes';
 import theme from 'src/theme';
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
 
-const chain = Object.values(ESCROW_NETWORKS)
-  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
-  .map(({ wagmiChain }) => wagmiChain);
-const rpcUrls = Object.values(ESCROW_NETWORKS)
-  .filter(({ chainId }) => chainId !== ChainId.RINKEBY)
-  .map(({ rpcUrl }) =>
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        http: rpcUrl,
-      }),
-    })
-  );
+const defaultChains = [
+  wagmiChains.mainnet,
+  wagmiChains.goerli,
+  wagmiChains.bsc,
+  wagmiChains.bscTestnet,
+  wagmiChains.polygon,
+  wagmiChains.polygonMumbai,
+  wagmiChains.moonbeam,
+  wagmiChains.moonbaseAlpha,
+  wagmiChains.avalancheFuji,
+  wagmiChains.avalanche,
+  wagmiChains.skaleHumanProtocol,
+];
 
-const { chains, provider, webSocketProvider } = configureChains(chain, [
+const rpcProviders = Object.values(RPC_URLS).map((rpcUrl) =>
+  jsonRpcProvider({ rpc: (chain) => ({ http: rpcUrl }) })
+);
+
+const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
   publicProvider(),
-  ...rpcUrls,
+  ...rpcProviders,
 ]);
 
 const client = createClient({
