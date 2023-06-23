@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from tests.utils import (
     generate_cvat_signature,
+    add_cvat_project_to_db,
     add_cvat_task_to_db,
     get_cvat_job_from_db,
 )
@@ -22,7 +23,8 @@ def test_incoming_webhook_200(client: TestClient) -> None:
     assert response.status_code == 200
 
     # Create some entities in test DB
-    task = add_cvat_task_to_db(1, "annotation")
+    project = add_cvat_project_to_db(cvat_id=1)
+    task = add_cvat_task_to_db(cvat_id=1, cvat_project_id=1, status="annotation")
 
     # Payload for "create:job" event
     data = {
@@ -52,6 +54,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
     job = get_cvat_job_from_db(1)
     assert job.cvat_id == 1
     assert job.cvat_task_id == 1
+    assert job.cvat_project_id == 1
     assert job.assignee == ""
 
     # Check if "update:job" event works correctly
