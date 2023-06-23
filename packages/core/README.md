@@ -16,37 +16,44 @@ On the other hand, it can be cancelled anytime.
 
 - `setup(reputationOracle, recordingOracle, reputationOracleFeePercentage, recordingOracleFeePercentage, url, hash)`
 
-  Assigns the reputation, and recording oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status. 
+  Assigns the reputation, and recording oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status.
+
   > Only trusted handlers can call this function.
 
 - `storeResults(url, hash)`
 
-  Stores intermediate results. Can be called when the escrow is in `Pending`, or `Partial` status. 
+  Stores intermediate results. Can be called when the escrow is in `Pending`, or `Partial` status.
+
   > Trusted handlers, and recording oracle can call this function.
 
 - `bulkPayOut(recipients, amounts, url, hash, txId)`
 
-  Pay out the workers. Final result URL is recorded. If the escrow is fully paid out, escrow status is changed to `Paid`, otherwise it's changed to `Partial`. 
+  Pay out the workers. Final result URL is recorded. If the escrow is fully paid out, escrow status is changed to `Paid`, otherwise it's changed to `Partial`.
+
   > Trusted handlers, and reputation oracle can call this funciton.
 
 - `complete()`
 
-  Finishes the job. Escrow is now in `Completed` status. Can be called only if the escrow is in `Paid` status. 
+  Finishes the job. Escrow is now in `Completed` status. Can be called only if the escrow is in `Paid` status.
+
   > Only trusted handlers can call this function.
 
 - `abort()`
 
-  Cancels the escrow, and self destruct the contract instance. 
+  Cancels the escrow, and self destruct the contract instance.
+
   > Only trusted handlers can call this function.
 
 - `cancel()`
 
   Cancels the escrow, and sends the remaining funds to the canceler. Escrow status is changed to `Cancelled`.
+
   > Only trusted handlers can call this function.
 
 - `addTrustedHandlers(trustedHandlers)`
 
-  Adds more trusted handlers. 
+  Adds more trusted handlers.
+
   > Only trusted handlers can call this function.
 
 - `getBalance()`
@@ -113,6 +120,12 @@ RewardPool is the reward system of Human Protocol. It keeps track of slashes, an
 
   Distributes token slashes of the escrow after fee.
 
+- `withdraw(to)`
+
+  Withdraw collected fees to a specific account.
+
+  > Only owner can call this.
+
 ### KVStore
 
 KVStore is the simple key-value store.
@@ -124,6 +137,10 @@ KVStore is the simple key-value store.
 - `setBulk(keys, values)`
 
   Save multiple `key` -> `value` pairs as bulk for the user.
+
+  - `get(account, key)`
+
+  Read the value of the given `key` for the `account`.
 
 ## Deployment
 
