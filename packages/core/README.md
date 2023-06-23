@@ -21,7 +21,8 @@ On the other hand, it can be cancelled anytime.
 
 - `storeResults(url, hash)`
 
-  Stores intermediate results. Can be called when the escrow is in `Pending`, or `Partial` status. Trusted handlers, and recording oracle can call this function.
+  Stores intermediate results. Can be called when the escrow is in `Pending`, or `Partial` status. 
+  > Trusted handlers, and recording oracle can call this function.
 
 - `bulkPayOut(recipients, amounts, url, hash, txId)`
 
