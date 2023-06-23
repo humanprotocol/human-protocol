@@ -1,4 +1,8 @@
+import io
+import zipfile
+import xmltodict
 import logging
+from http import HTTPStatus
 from typing import Dict, List
 
 from src.config import Config
@@ -11,15 +15,14 @@ configuration = Configuration(
 )
 
 
-def create_cloudstorage(bucket_name: str, region: str) -> int:
+def create_cloudstorage(provider: str, bucket_name: str) -> int:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
-            provider_type=models.ProviderTypeEnum("AWS_S3_BUCKET"),
+            provider_type=models.ProviderTypeEnum(provider),
             resource=bucket_name,
             display_name=bucket_name,
             credentials_type=models.CredentialsTypeEnum("ANONYMOUS_ACCESS"),
-            specific_attributes=f"region={region}",
             description=bucket_name,
             manifests=["manifest.jsonl"],
         )  # CloudStorageWriteRequest
@@ -136,3 +139,25 @@ def fetch_task_jobs(task_id: int) -> List[Dict]:
             return data
         except exceptions.ApiException as e:
             logger.error(f"Exception when calling JobsApi.list: {e}\n")
+
+
+def get_job_annotations(cvat_project_id: int) -> Dict:
+    logger = logging.getLogger("app")
+    with ApiClient(configuration) as api_client:
+        try:
+            for _ in range(5):
+                (_, response) = api_client.jobs_api.retrieve_annotations(
+                    id=cvat_project_id,
+                    action="download",
+                    format="CVAT for images 1.1",
+                    _parse_response=False,
+                )
+                if response.status == HTTPStatus.OK:
+                    break
+            buffer = io.BytesIO(response.data)
+            with zipfile.ZipFile(buffer, "r") as zip_file:
+                xml_content = zip_file.read("annotations.xml").decode("utf-8")
+            annotations = xmltodict.parse(xml_content, attr_prefix="")
+            return annotations["annotations"]
+        except exceptions.ApiException as e:
+            logger.error(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
