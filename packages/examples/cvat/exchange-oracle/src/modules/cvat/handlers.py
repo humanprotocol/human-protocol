@@ -1,16 +1,17 @@
 from src.db import SessionLocal
 
-from .service import create_job, get_job_by_cvat_id, update_job
+import src.modules.cvat.service as cvat_service
 
 
 def handle_update_job_event(payload: dict):
     with SessionLocal.begin() as session:
-        job = get_job_by_cvat_id(session, payload.job["id"])
+        job = cvat_service.get_job_by_cvat_id(session, payload.job["id"])
         if not job:
-            create_job(
+            cvat_service.create_job(
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
+                payload.job["project_id"],
                 payload.job["assignee"]["username"]
                 if payload.job["assignee"] is not None
                 else "",
@@ -18,24 +19,25 @@ def handle_update_job_event(payload: dict):
             )
         else:
             if "assignee" in payload.before_update:
-                fields = {
-                    "assignee": payload.job["assignee"]["username"]
+                assignee = (
+                    payload.job["assignee"]["username"]
                     if payload.job["assignee"]
-                    else "",
-                }
+                    else ""
+                )
+                cvat_service.update_job_assignee(session, job.id, assignee)
             if "state" in payload.before_update:
-                fields = {"status": payload.job["state"]}
-            update_job(session, job.id, fields)
+                cvat_service.update_job_status(session, job.id, payload.job["state"])
 
 
 def handle_create_job_event(payload: dict):
     with SessionLocal.begin() as session:
-        job = get_job_by_cvat_id(session, payload.job["id"])
+        job = cvat_service.get_job_by_cvat_id(session, payload.job["id"])
         if not job:
-            create_job(
+            cvat_service.create_job(
                 session,
                 payload.job["id"],
                 payload.job["task_id"],
+                payload.job["project_id"],
                 payload.job["assignee"]["username"]
                 if payload.job["assignee"] is not None
                 else "",
