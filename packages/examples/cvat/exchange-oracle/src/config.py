@@ -43,6 +43,20 @@ class CronConfig:
     process_incoming_webhooks_chunk_size = os.environ.get(
         "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
     )
+    track_completed_projects_int = int(
+        os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 3000)
+    )
+    track_completed_projects_chunk_size = os.environ.get(
+        "TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5
+    )
+    track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 3000))
+    track_completed_tasks_chunk_size = os.environ.get(
+        "TRACK_COMPLETED_TASKS_CHUNK_SIZE", 5
+    )
+    retrieve_annotatons_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 3000))
+    retrieve_annotations_chunk_size = os.environ.get(
+        "RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5
+    )
 
 
 class CvatConfig:
@@ -59,6 +73,14 @@ class CvatConfig:
     cvat_webhook_secret = os.environ.get("CVAT_WEBHOOK_SECRET", "thisisasamplesecret")
 
 
+class StorageConfig:
+    endpoint_url = os.environ.get("ENDPOINT_URL", "storage.googleapis.com")
+    region = os.environ.get("REGION", "")
+    access_key = os.environ.get("ACCESS_KEY", "")
+    secret_key = os.environ.get("SECRET_KEY", "")
+    results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
+
+
 class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
@@ -70,3 +92,4 @@ class Config:
     postgres_config = Postgres
     cron_config = CronConfig
     cvat_config = CvatConfig
+    storage_config = StorageConfig
