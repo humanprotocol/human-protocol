@@ -31,7 +31,8 @@ On the other hand, it can be cancelled anytime.
 
 - `complete()`
 
-  Finishes the job. Escrow is now in `Completed` status. Can be called only if the escrow is in `Paid` status. Only trusted handlers can call this function.
+  Finishes the job. Escrow is now in `Completed` status. Can be called only if the escrow is in `Paid` status. 
+  > Only trusted handlers can call this function.
 
 - `abort()`
 
