@@ -16,7 +16,8 @@ On the other hand, it can be cancelled anytime.
 
 - `setup(reputationOracle, recordingOracle, reputationOracleFeePercentage, recordingOracleFeePercentage, url, hash)`
 
-  Assigns the reputation, and recording oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status. Only trusted handlers can call this function.
+  Assigns the reputation, and recording oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status. 
+  > Only trusted handlers can call this function.
 
 - `storeResults(url, hash)`
 
