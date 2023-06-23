@@ -20,6 +20,7 @@ cvat-sdk = "^2.4.4"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
 human-protocol-sdk = "^1.1.5"
+xmltodict = "^0.13.0"
 
 
 [tool.poetry.group.dev.dependencies]

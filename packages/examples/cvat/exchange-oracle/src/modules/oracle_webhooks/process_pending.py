@@ -34,7 +34,6 @@ def process_incoming_webhooks() -> None:
                         webhook.chain_id,
                         webhook.escrow_address,
                     )
-                    # TODO: Parse manifest file and start job creation process on CVAT
                     job_creation_process(webhook.escrow_address, manifest)
                     upd = (
                         update(Webhook)
