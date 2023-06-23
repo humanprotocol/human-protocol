@@ -26,7 +26,8 @@ On the other hand, it can be cancelled anytime.
 
 - `bulkPayOut(recipients, amounts, url, hash, txId)`
 
-  Pay out the workers. Final result URL is recorded. If the escrow is fully paid out, escrow status is changed to `Paid`, otherwise it's changed to `Partial`. Trusted handlers, and reputation oracle can call this funciton.
+  Pay out the workers. Final result URL is recorded. If the escrow is fully paid out, escrow status is changed to `Paid`, otherwise it's changed to `Partial`. 
+  > Trusted handlers, and reputation oracle can call this funciton.
 
 - `complete()`
 
