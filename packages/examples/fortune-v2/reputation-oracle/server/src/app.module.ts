@@ -7,7 +7,6 @@ import { DatabaseModule } from './database/database.module';
 import { JwtHttpGuard, RolesGuard } from './common/guards';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
-import { networkMap, networks } from './common/decorators/network';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
