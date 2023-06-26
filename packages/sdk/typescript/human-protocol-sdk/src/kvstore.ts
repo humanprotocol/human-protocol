@@ -13,7 +13,7 @@ import {
 import { IClientParams } from './interfaces';
 import { requiresSigner } from './decorators';
 
-export default class KVStoreClient {
+export class KVStoreClient {
   private contract: KVStore;
   private signerOrProvider: Signer | Provider;
 
@@ -39,7 +39,7 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   @requiresSigner
-  public async set(key: string, value: string) {
+  public async set(key: string, value: string): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
@@ -58,7 +58,7 @@ export default class KVStoreClient {
    * @throws {Error} - An error object if an error occurred
    */
   @requiresSigner
-  public async setBulk(keys: string[], values: string[]) {
+  public async setBulk(keys: string[], values: string[]): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
@@ -76,10 +76,10 @@ export default class KVStoreClient {
    *
    * @param {string} address - The Ethereum address associated with the key-value pair
    * @param {string} key - The key of the key-value pair to get
-   * @returns {string} - The value of the key-value pair if it exists
+   * @returns {Promise<string>} - The value of the key-value pair if it exists
    * @throws {Error} - An error object if an error occurred
    */
-  public async get(address: string, key: string) {
+  public async get(address: string, key: string): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
     if (!ethers.utils.isAddress(address)) throw ErrorInvalidAddress;
 
@@ -88,6 +88,7 @@ export default class KVStoreClient {
       return result;
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get value: ${e.message}`);
+      return e;
     }
   }
 }

@@ -16,7 +16,7 @@ import {
   ErrorStorageFileNotFound,
   ErrorStorageFileNotUploaded,
 } from '../src/error';
-import StorageClient from '../src/storage';
+import { StorageClient } from '../src/storage';
 import {
   FAKE_URL,
   STORAGE_FAKE_BUCKET,

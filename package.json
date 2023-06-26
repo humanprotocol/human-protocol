@@ -18,8 +18,8 @@
     "faucet-server:lint": "yarn workspace @human-protocol/faucet-server lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
-    "fortune-v2:test": "yarn workspace @human-protocol/fortune-v2 test",
-    "fortune-v2:lint": "yarn workspace @human-protocol/fortune-v2 lint",
+    "fortune-v3:test": "yarn workspace @human-protocol/fortune-v3 test",
+    "fortune-v3:lint": "yarn workspace @human-protocol/fortune-v3 lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
     "sdk:lint": "yarn workspace @human-protocol/sdk lint",
     "basemodels:test": "yarn workspace @human-protocol/basemodels test",
@@ -71,5 +71,8 @@
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0",
     "fast-xml-parser": "4.2.2"
+  },
+  "dependencies": {
+    "ejs": "^3.1.8"
   }
 }

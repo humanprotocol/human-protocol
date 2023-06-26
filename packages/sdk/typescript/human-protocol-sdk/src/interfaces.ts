@@ -42,5 +42,5 @@ export interface IEscrowConfig {
   recordingOracleFee: BigNumber;
   reputationOracleFee: BigNumber;
   manifestUrl: string;
-  hash: string;
+  manifestHash: string;
 }

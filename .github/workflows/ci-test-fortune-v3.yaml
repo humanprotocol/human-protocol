@@ -1,0 +1,30 @@
+name: Fortune V3 check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/app/fortune/**'
+  workflow_dispatch:
+
+jobs:
+  fortune-test:
+    name: Fortune V3 Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
+        with:
+          node-version: 18.15
+      - run: npm install --global yarn && yarn
+        name: Install dependencies
+      - run: yarn build
+        name: Build core package
+        working-directory: ./packages/core
+      - run: yarn fortune-v3:test
+        name: Run fortune V3 test
