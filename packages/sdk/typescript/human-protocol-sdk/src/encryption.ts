@@ -4,18 +4,43 @@ import { IKeyPair } from './interfaces';
  * Class for encryption and decryption operations.
  */
 export class Encryption {
-  private privateKeyArmored: string;
-  private passphrase: string;
+  private privateKey: openpgp.PrivateKey;
 
   /**
    * Constructor for the Encryption class.
    *
-   * @param {string} privateKey - The private key in armored format.
-   * @param {string} passphrase - The passphrase for the private key.
+   * @param {PrivateKey} privateKey - The private key.
    */
-  constructor(privateKey: string, passphrase: string) {
-    this.privateKeyArmored = privateKey;
-    this.passphrase = passphrase;
+  constructor(privateKey: openpgp.PrivateKey) {
+    this.privateKey = privateKey;
+  }
+
+  /**
+   * Builds an Encryption instance by decrypting the private key from an encrypted private key and passphrase.
+   *
+   * @param {string} privateKeyArmored - The encrypted private key in armored format.
+   * @param {string} passphrase - Optional: The passphrase for the private key.
+   * @returns {Promise<Encryption>} - The Encryption instance.
+   */
+  public static async build(
+    privateKeyArmored: string,
+    passphrase?: string
+  ): Promise<Encryption> {
+    const options = {
+      armoredKey: privateKeyArmored,
+    };
+
+    if (!passphrase) {
+      return new Encryption(await openpgp.readPrivateKey(options));
+    }
+
+    const privateKey = await openpgp.readPrivateKey(options);
+    return new Encryption(
+      await openpgp.decryptKey({
+        privateKey,
+        passphrase,
+      })
+    );
   }
 
   /**
@@ -27,10 +52,6 @@ export class Encryption {
    */
   public async encrypt(message: string, publicKeys: string[]): Promise<string> {
     const plaintext = message;
-    const privateKey = await EncryptionUtils.getDecryptedPrivateKey(
-      this.privateKeyArmored,
-      this.passphrase
-    );
 
     const pgpPublicKeys = await Promise.all(
       publicKeys.map((armoredKey) => openpgp.readKey({ armoredKey }))
@@ -40,7 +61,7 @@ export class Encryption {
     const encrypted = await openpgp.encrypt({
       message: pgpMessage,
       encryptionKeys: pgpPublicKeys,
-      signingKeys: privateKey,
+      signingKeys: this.privateKey,
     });
 
     return encrypted as string;
@@ -54,15 +75,11 @@ export class Encryption {
    * @returns {Promise<string>} - The decrypted message.
    */
   public async decrypt(message: string, publicKey?: string): Promise<string> {
-    const privateKey = await EncryptionUtils.getDecryptedPrivateKey(
-      this.privateKeyArmored,
-      this.passphrase
-    );
     const pgpMessage = await openpgp.readMessage({ armoredMessage: message });
 
     const decryptionOptions: openpgp.DecryptOptions = {
       message: pgpMessage,
-      decryptionKeys: privateKey,
+      decryptionKeys: this.privateKey,
       expectSigned: !!publicKey,
     };
 
@@ -83,23 +100,19 @@ export class Encryption {
    * @returns {Promise<string>} - The signed message.
    */
   public async sign(message: string): Promise<string> {
-    const privateKey = await EncryptionUtils.getDecryptedPrivateKey(
-      this.privateKeyArmored,
-      this.passphrase
-    );
-
     const unsignedMessage = await openpgp.createCleartextMessage({
       text: message,
     });
     const cleartextMessage = await openpgp.sign({
       message: unsignedMessage,
-      signingKeys: privateKey,
+      signingKeys: this.privateKey,
       format: 'armored',
     });
 
     return cleartextMessage;
   }
 }
+
 /**
  * Utility class for encryption-related operations.
  */
@@ -107,8 +120,8 @@ export class EncryptionUtils {
   /**
    * Verifies the signature of a signed message using the public key.
    *
-   * @param {string} publicKeyArmored - The public key in armored format.
    * @param {string} message - The signed message.
+   * @param {string} publicKey - The public key in armored format.
    * @returns {Promise<boolean>} - A boolean indicating if the signature is valid.
    */
   public static async verify(
@@ -154,6 +167,7 @@ export class EncryptionUtils {
    *
    * @param {string} name - The name for the key pair.
    * @param {string} email - The email for the key pair.
+   * @param {string} passphrase - The passphrase used to encrypt the private key.
    * @returns {Promise<IKeyPair>} - The generated key pair.
    */
   public static async generateKeyPair(
@@ -176,31 +190,5 @@ export class EncryptionUtils {
       publicKey,
       revocationCertificate,
     };
-  }
-
-  /**
-   * Gets the decrypted private key from an encrypted private key and passphrase.
-   *
-   * @param {string} privateKey - The encrypted private key in armored format.
-   * @param {string} passphrase - The passphrase for the private key.
-   * @returns {Promise<string>} - The decrypted private key.
-   */
-  public static async getDecryptedPrivateKey(
-    privateKeyArmored: string,
-    passphrase: string
-  ): Promise<openpgp.PrivateKey> {
-    const options = {
-      armoredKey: privateKeyArmored,
-    };
-
-    if (!passphrase) {
-      return openpgp.readPrivateKey(options);
-    }
-
-    const privateKey = await openpgp.readPrivateKey(options);
-    return openpgp.decryptKey({
-      privateKey,
-      passphrase,
-    });
   }
 }

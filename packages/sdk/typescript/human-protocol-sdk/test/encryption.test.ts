@@ -159,9 +159,27 @@ describe('Encryption', async () => {
     keyPair3 = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
   });
 
+  describe('build', () => {
+    test('should build correctly', async () => {
+      const encryption = await Encryption.build(
+        keyPair1.privateKey,
+        keyPair1.passphrase
+      );
+      expect(encryption).toBeInstanceOf(Encryption);
+    });
+
+    test('should throw an error when an invalid private key is provided', async () => {
+      const invalidPrivateKey = 'Invalid Private Key';
+      const passphrase = 'passphrase';
+      await expect(
+        Encryption.build(invalidPrivateKey, passphrase)
+      ).rejects.toThrowError('Misformed armored text');
+    });
+  });
+
   describe('encrypt', () => {
     test('should encrypt a message', async () => {
-      const encryption = new Encryption(
+      const encryption = await Encryption.build(
         keyPair1.privateKey,
         keyPair1.passphrase
       );
@@ -177,18 +195,8 @@ describe('Encryption', async () => {
       expect(encryptedMessage.includes(expectedMessageFooter)).toBeTruthy();
     });
 
-    test('should throw an error when an invalid private key is provided', async () => {
-      const invalidPrivateKey = 'Invalid Private Key';
-      const passphrase = 'passphrase';
-      const encryption = new Encryption(invalidPrivateKey, passphrase);
-
-      await expect(
-        encryption.encrypt('Human Protocol', [keyPair2.publicKey])
-      ).rejects.toThrowError('Misformed armored text');
-    });
-
     test('should throw an error when an invalid public key is provided', async () => {
-      const encryption = new Encryption(
+      const encryption = await Encryption.build(
         keyPair1.privateKey,
         keyPair1.passphrase
       );
@@ -200,7 +208,7 @@ describe('Encryption', async () => {
     });
 
     test('should throw an error when no public keys are provided', async () => {
-      const encryption = new Encryption(
+      const encryption = await Encryption.build(
         keyPair1.privateKey,
         keyPair1.passphrase
       );
@@ -217,7 +225,10 @@ describe('Encryption', async () => {
     let encryption: Encryption;
     let encryptedMessage: string;
     beforeAll(async () => {
-      encryption = new Encryption(keyPair1.privateKey, keyPair1.passphrase);
+      encryption = await Encryption.build(
+        keyPair1.privateKey,
+        keyPair1.passphrase
+      );
       encryptedMessage = await encryption.encrypt('Human Protocol', [
         keyPair2.publicKey,
         keyPair3.publicKey,
@@ -225,7 +236,7 @@ describe('Encryption', async () => {
     });
 
     test('should decrypt a message', async () => {
-      const encryption2 = new Encryption(
+      const encryption2 = await Encryption.build(
         keyPair2.privateKey,
         keyPair2.passphrase
       );
@@ -236,7 +247,7 @@ describe('Encryption', async () => {
 
       expect(decryptedMessage).toBe('Human Protocol');
 
-      const encryption3 = new Encryption(
+      const encryption3 = await Encryption.build(
         keyPair3.privateKey,
         keyPair3.passphrase
       );
@@ -245,18 +256,6 @@ describe('Encryption', async () => {
         keyPair1.publicKey
       );
       expect(decryptedMessage2).toBe('Human Protocol');
-    });
-
-    test('should throw an error when an incorrect private key is used for decryption', async () => {
-      const invalidPrivateKey = 'Invalid Private Key';
-      const invalidClient = new Encryption(
-        invalidPrivateKey,
-        keyPair1.passphrase
-      );
-
-      await expect(
-        invalidClient.decrypt(encryptedMessage, keyPair1.publicKey)
-      ).rejects.toThrowError('Misformed armored text');
     });
 
     test('should throw an error when no encrypted message is provided', async () => {
@@ -278,7 +277,7 @@ describe('Encryption', async () => {
 
   describe('sign', () => {
     test('should encrypt a message', async () => {
-      const encryption = new Encryption(
+      const encryption = await Encryption.build(
         keyPair1.privateKey,
         keyPair1.passphrase
       );
@@ -293,16 +292,6 @@ describe('Encryption', async () => {
       expect(signedMessage.includes(expectedMessage)).toBeTruthy();
       expect(signedMessage.includes(expectedSignatureHeader)).toBeTruthy();
       expect(signedMessage.includes(expectedSignatureFooter)).toBeTruthy();
-    });
-
-    test('should throw an error when an invalid private key is used for signing', async () => {
-      const invalidPrivateKey = 'Invalid Private Key';
-      const passphrase = 'passphrase';
-      const encryption = new Encryption(invalidPrivateKey, passphrase);
-
-      await expect(encryption.sign('Human Protocol')).rejects.toThrowError(
-        'Misformed armored text'
-      );
     });
   });
 });
