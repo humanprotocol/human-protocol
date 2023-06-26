@@ -26,8 +26,8 @@
     "basemodels:lint": "yarn workspace @human-protocol/basemodels lint",
     "meta-code-verify:test": "yarn workspace @human-protocol/meta-code-verify test",
     "meta-code-verify:lint": "yarn workspace @human-protocol/meta-code-verify lint",
-    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:fortune-v2:test npm:sdk:test npm:basemodels:test npm:faucet-server:test npm:meta-code-verify:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:fortune-v2:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint npm:meta-code-verify:lint",
+    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:fortune-v3:test npm:sdk:test npm:basemodels:test npm:faucet-server:test npm:meta-code-verify:test",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:fortune-v3:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint npm:meta-code-verify:lint",
     "prepare": "husky install",
     "postinstall": "yarn workspace @human-protocol/sdk build"
   },
