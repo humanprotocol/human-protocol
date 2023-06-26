@@ -70,7 +70,8 @@
     "test": "vitest -u",
     "format:prettier": "prettier --write '**/*.{ts,tsx}'",
     "format:lint": "eslint --fix '**/*.{ts,tsx}'",
-    "format": "npm run format:prettier && npm run format:lint"
+    "format": "npm run format:prettier && npm run format:lint",
+    "vercel-build": "yarn workspace @human-protocol/sdk build"
   },
   "browserslist": {
     "production": [
