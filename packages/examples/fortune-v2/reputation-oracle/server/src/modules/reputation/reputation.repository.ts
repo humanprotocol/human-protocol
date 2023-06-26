@@ -1,12 +1,17 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { ConfigService } from "@nestjs/config";
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
-import { ReputationEntity } from "./reputation.entity";
-import { FindOptionsWhere, FindManyOptions, FindOneOptions, Repository } from "typeorm";
-import { ErrorReputation } from "../../common/constants/errors";
-import { WebhookIncomingEntity } from "../webhook/webhook-incoming.entity";
-import { ReputationCreateDto, ReputationUpdateDto } from "./reputation.dto";
+import { ReputationEntity } from './reputation.entity';
+import {
+  FindOptionsWhere,
+  FindManyOptions,
+  FindOneOptions,
+  Repository,
+} from 'typeorm';
+import { ErrorReputation } from '../../common/constants/errors';
+import { WebhookIncomingEntity } from '../webhook/webhook-incoming.entity';
+import { ReputationCreateDto, ReputationUpdateDto } from './reputation.dto';
 
 @Injectable()
 export class ReputationRepository {
@@ -17,12 +22,14 @@ export class ReputationRepository {
     private readonly reputationEntityRepository: Repository<ReputationEntity>,
     private readonly configService: ConfigService,
   ) {}
-  
+
   public async updateOne(
     where: FindOptionsWhere<ReputationEntity>,
     dto: Partial<ReputationUpdateDto>,
   ): Promise<ReputationEntity> {
-    const reputationEntity = await this.reputationEntityRepository.findOneBy(where);
+    const reputationEntity = await this.reputationEntityRepository.findOneBy(
+      where,
+    );
 
     if (!reputationEntity) {
       this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
@@ -39,20 +46,21 @@ export class ReputationRepository {
   ): Promise<ReputationEntity | null> {
     return this.reputationEntityRepository.findOne({ where, ...options });
   }
-  
-  public find(where: FindOptionsWhere<ReputationEntity>, options?: FindManyOptions<ReputationEntity>): Promise<ReputationEntity[]> {
+
+  public find(
+    where: FindOptionsWhere<ReputationEntity>,
+    options?: FindManyOptions<ReputationEntity>,
+  ): Promise<ReputationEntity[]> {
     return this.reputationEntityRepository.find({
       where,
       order: {
-        createdAt: "DESC",
+        createdAt: 'DESC',
       },
       ...options,
     });
   }
 
   public async create(dto: ReputationCreateDto): Promise<ReputationEntity> {
-    return this.reputationEntityRepository
-      .create(dto)
-      .save();
+    return this.reputationEntityRepository.create(dto).save();
   }
 }

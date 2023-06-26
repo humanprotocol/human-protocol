@@ -1,6 +1,6 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { JobStatus } from "../enums/job";
-import { IBase } from "./base";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { JobStatus } from '../enums/job';
+import { IBase } from './base';
 
 export interface IJob extends IBase {
   userId: number;
@@ -15,7 +15,9 @@ export interface IJob extends IBase {
   waitUntil: Date;
 }
 
-export const Job = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
-  return (request.job as IJob) || null;
-});
+export const Job = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return (request.job as IJob) || null;
+  },
+);

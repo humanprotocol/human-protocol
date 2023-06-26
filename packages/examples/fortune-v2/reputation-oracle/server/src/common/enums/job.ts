@@ -1,9 +1,9 @@
 export enum JobStatus {
-  PENDING = "PENDING",
-  PAID = "PAID",
-  LAUNCHED = "LAUNCHED",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  LAUNCHED = 'LAUNCHED',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }
 
 export enum EscrowStatus {
@@ -15,11 +15,11 @@ export enum EscrowStatus {
 }
 
 export enum JobMode {
-  BATCH = "BATCH",
-  DESCRIPTIVE = "DESCRIPTIVE",
+  BATCH = 'BATCH',
+  DESCRIPTIVE = 'DESCRIPTIVE',
 }
 
 export enum JobRequestType {
-  IMAGE_LABEL_BINARY = "IMAGE_LABEL_BINARY",
-  FORTUNE = "FORTUNE",
+  IMAGE_LABEL_BINARY = 'IMAGE_LABEL_BINARY',
+  FORTUNE = 'FORTUNE',
 }

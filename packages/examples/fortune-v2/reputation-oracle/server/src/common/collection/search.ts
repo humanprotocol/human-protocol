@@ -1,7 +1,7 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsOptional } from "class-validator";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional } from 'class-validator';
 
-import { IPaginationDto, PaginationDto } from "./pagination";
+import { IPaginationDto, PaginationDto } from './pagination';
 
 export interface ISearchDto extends IPaginationDto {
   query: string;

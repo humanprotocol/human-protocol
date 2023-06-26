@@ -1,2 +1,2 @@
-export * from "./not-found";
-export * from "./pagination";
+export * from './not-found';
+export * from './pagination';

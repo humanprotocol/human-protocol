@@ -1,2 +1,2 @@
-export * from "./password";
-export * from "./confirm";
+export * from './password';
+export * from './confirm';

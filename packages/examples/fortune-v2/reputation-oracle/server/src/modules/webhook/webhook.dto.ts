@@ -1,8 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsEnum, IsNumber, IsString, IsUrl } from "class-validator";
-import { WebhookStatus } from "../../common/decorators";
-import { ChainId } from "@human-protocol/sdk";
-import { JobMode, JobRequestType } from "../../common/enums/job";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsString,
+  IsUrl,
+} from 'class-validator';
+import { WebhookStatus } from '../../common/decorators';
+import { ChainId } from '@human-protocol/sdk';
+import { JobMode, JobRequestType } from '../../common/enums/job';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -21,7 +28,6 @@ export class WebhookIncomingCreateDto extends WebhookIncomingDto {
   @IsDate()
   public waitUntil: Date;
 }
-
 
 export class WebhookIncomingUpdateDto {
   @ApiPropertyOptional()

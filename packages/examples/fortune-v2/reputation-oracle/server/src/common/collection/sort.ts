@@ -1,10 +1,10 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsOptional, IsEnum } from "class-validator";
-import { ISearchDto, SearchDto } from "./search";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { ISearchDto, SearchDto } from './search';
 
 export enum SortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 export interface ISortDto<T> extends ISearchDto {

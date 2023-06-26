@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { IBase } from "./base";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { IBase } from './base';
 
 export interface IWebhook extends IBase {
   signature: string;
@@ -20,13 +20,15 @@ export enum ChainId {
 }
 
 export enum WebhookStatus {
-  PENDING = "PENDING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
-  PAID = "PAID"
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  PAID = 'PAID',
 }
 
-export const Webhook = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
-  return (request.job as IWebhook) || null;
-});
+export const Webhook = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return (request.job as IWebhook) || null;
+  },
+);

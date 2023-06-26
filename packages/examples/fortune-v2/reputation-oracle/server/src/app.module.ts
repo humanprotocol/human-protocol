@@ -11,7 +11,6 @@ import { ReputationModule } from './modules/reputation/reputation.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
 
-
 @Module({
   providers: [
     {
@@ -36,7 +35,7 @@ import { Web3Module } from './modules/web3/web3.module';
     HealthModule,
     ReputationModule,
     WebhookModule,
-    Web3Module
+    Web3Module,
   ],
   controllers: [AppController],
 })

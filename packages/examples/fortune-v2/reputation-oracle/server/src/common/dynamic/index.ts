@@ -1,7 +1,7 @@
-import { DynamicModule, Provider, Type } from "@nestjs/common";
-import { ModuleMetadata } from "@nestjs/common/interfaces";
-import { firstValueFrom, interval, race, Subject } from "rxjs";
-import { first, map } from "rxjs/operators";
+import { DynamicModule, Provider, Type } from '@nestjs/common';
+import { ModuleMetadata } from '@nestjs/common/interfaces';
+import { firstValueFrom, interval, race, Subject } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 
 type InjectionToken = string | symbol | Type<any>;
 
@@ -9,8 +9,8 @@ export interface IModuleConfigFactory<T> {
   createModuleConfig(): Promise<T> | T;
 }
 
-
-export interface IAsyncModuleConfig<T> extends Pick<ModuleMetadata, "imports" | "exports"> {
+export interface IAsyncModuleConfig<T>
+  extends Pick<ModuleMetadata, 'imports' | 'exports'> {
   useExisting?: {
     value: IModuleConfigFactory<T>;
     provide?: InjectionToken;
@@ -26,7 +26,10 @@ export interface IAsyncModuleConfig<T> extends Pick<ModuleMetadata, "imports" | 
  * @param options - The options for creating the module configuration provider.
  * @returns An array of providers for the module configuration.
  */
-export function createModuleConfigProvider<T>(provide: InjectionToken, options: IAsyncModuleConfig<T>): Provider[] {
+export function createModuleConfigProvider<T>(
+  provide: InjectionToken,
+  options: IAsyncModuleConfig<T>,
+): Provider[] {
   if (options.useFactory) {
     return [
       {
@@ -42,7 +45,11 @@ export function createModuleConfigProvider<T>(provide: InjectionToken, options: 
     useFactory: async (moduleConfigFactory: IModuleConfigFactory<T>) => {
       return moduleConfigFactory.createModuleConfig();
     },
-    inject: [options.useClass || options.useExisting?.provide || (options.useExisting as any).value.constructor.name],
+    inject: [
+      options.useClass ||
+        options.useExisting?.provide ||
+        (options.useExisting as any).value.constructor.name,
+    ],
   };
 
   if (options.useClass) {
@@ -59,7 +66,9 @@ export function createModuleConfigProvider<T>(provide: InjectionToken, options: 
     return [
       optionsProvider,
       {
-        provide: options.useExisting.provide || options.useExisting.value.constructor.name,
+        provide:
+          options.useExisting.provide ||
+          options.useExisting.value.constructor.name,
         useValue: options.useExisting.value,
       },
     ];
@@ -75,14 +84,22 @@ export interface IConfigurableDynamicRootModule<T, U> {
 
   forRoot(moduleCtor: Type<T>, moduleConfig: U): DynamicModule;
 
-  forRootAsync(moduleCtor: Type<T>, asyncModuleConfig: IAsyncModuleConfig<U>): DynamicModule;
+  forRootAsync(
+    moduleCtor: Type<T>,
+    asyncModuleConfig: IAsyncModuleConfig<U>,
+  ): DynamicModule;
 
-  externallyConfigured(moduleCtor: Type<T>, wait: number): Promise<DynamicModule>;
+  externallyConfigured(
+    moduleCtor: Type<T>,
+    wait: number,
+  ): Promise<DynamicModule>;
 }
 
 export function createConfigurableDynamicRootModule<T, U>(
   moduleConfigToken: InjectionToken,
-  moduleProperties: Partial<Pick<ModuleMetadata, "imports" | "exports" | "providers" | "controllers">> = {
+  moduleProperties: Partial<
+    Pick<ModuleMetadata, 'imports' | 'exports' | 'providers' | 'controllers'>
+  > = {
     imports: [],
     exports: [],
     providers: [],
@@ -91,11 +108,20 @@ export function createConfigurableDynamicRootModule<T, U>(
   abstract class DynamicRootModule {
     static moduleSubject = new Subject<DynamicModule>();
 
-    static forRootAsync(moduleCtor: Type<T>, asyncModuleConfig: IAsyncModuleConfig<U>): DynamicModule {
+    static forRootAsync(
+      moduleCtor: Type<T>,
+      asyncModuleConfig: IAsyncModuleConfig<U>,
+    ): DynamicModule {
       const dynamicModule = {
         module: moduleCtor,
-        imports: [...(asyncModuleConfig.imports || []), ...(moduleProperties.imports || [])],
-        exports: [...(asyncModuleConfig.exports || []), ...(moduleProperties.exports || [])],
+        imports: [
+          ...(asyncModuleConfig.imports || []),
+          ...(moduleProperties.imports || []),
+        ],
+        exports: [
+          ...(asyncModuleConfig.exports || []),
+          ...(moduleProperties.exports || []),
+        ],
         providers: [
           ...createModuleConfigProvider(moduleConfigToken, asyncModuleConfig),
           ...(moduleProperties.providers || []),
@@ -127,7 +153,10 @@ export function createConfigurableDynamicRootModule<T, U>(
       return dynamicModule;
     }
 
-    static async externallyConfigured(moduleCtor: Type<T>, wait: number): Promise<DynamicModule> {
+    static async externallyConfigured(
+      moduleCtor: Type<T>,
+      wait: number,
+    ): Promise<DynamicModule> {
       const timeout$ = interval(wait).pipe(
         first(),
         map(() => {
@@ -137,7 +166,9 @@ export function createConfigurableDynamicRootModule<T, U>(
         }),
       );
 
-      return firstValueFrom(race(timeout$, DynamicRootModule.moduleSubject.pipe(first())));
+      return firstValueFrom(
+        race(timeout$, DynamicRootModule.moduleSubject.pipe(first())),
+      );
     }
   }
 

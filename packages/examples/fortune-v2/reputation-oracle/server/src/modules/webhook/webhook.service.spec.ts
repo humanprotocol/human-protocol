@@ -7,13 +7,30 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
 import { Web3Service } from '../web3/web3.service';
 import { FinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
-import { ChainId, EscrowClient, InitClient, NETWORKS, NetworkData, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  EscrowClient,
+  InitClient,
+  NETWORKS,
+  NetworkData,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { BigNumber, ethers } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { JobMode, JobRequestType } from '../../common/enums/job';
-import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_JOB_LAUNCHER_FEE, MOCK_RECORDING_ORACLE_FEE, MOCK_REPUTATION_ORACLE_FEE, MOCK_REQUESTER_DESCRIPTION, MOCK_REQUESTER_TITLE } from '../../common/test/constants';
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_HASH,
+  MOCK_FILE_KEY,
+  MOCK_FILE_URL,
+  MOCK_JOB_LAUNCHER_FEE,
+  MOCK_RECORDING_ORACLE_FEE,
+  MOCK_REPUTATION_ORACLE_FEE,
+  MOCK_REQUESTER_DESCRIPTION,
+  MOCK_REQUESTER_TITLE,
+} from '../../common/test/constants';
 import { WebhookStatus } from '../../common/decorators';
 
 jest.mock('@human-protocol/sdk');
@@ -62,8 +79,14 @@ describe('WebhookService', () => {
           },
         },
         ReputationService,
-        { provide: ReputationRepository, useValue: createMock<ReputationRepository>() },
-        { provide: WebhookRepository, useValue: createMock<WebhookRepository>() },
+        {
+          provide: ReputationRepository,
+          useValue: createMock<ReputationRepository>(),
+        },
+        {
+          provide: WebhookRepository,
+          useValue: createMock<WebhookRepository>(),
+        },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
@@ -85,7 +108,9 @@ describe('WebhookService', () => {
         escrowAddress: '0x123456789',
       };
 
-      jest.spyOn(webhookRepository, 'create').mockResolvedValueOnce({ id: 1 } as any);
+      jest
+        .spyOn(webhookRepository, 'create')
+        .mockResolvedValueOnce({ id: 1 } as any);
 
       const result = await webhookService.createIncomingWebhook(dto);
 
@@ -104,9 +129,13 @@ describe('WebhookService', () => {
         escrowAddress: '0x123456789',
       };
 
-      jest.spyOn(webhookRepository, 'create').mockResolvedValueOnce(undefined as any);
+      jest
+        .spyOn(webhookRepository, 'create')
+        .mockResolvedValueOnce(undefined as any);
 
-      await expect(webhookService.createIncomingWebhook(dto)).rejects.toThrow(ErrorWebhook.NotCreated);
+      await expect(webhookService.createIncomingWebhook(dto)).rejects.toThrow(
+        ErrorWebhook.NotCreated,
+      );
       expect(webhookRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         escrowAddress: dto.escrowAddress,
@@ -137,7 +166,7 @@ describe('WebhookService', () => {
 
       escrowClient = new EscrowClient(await InitClient.getParams(mockSigner));
     });
-    
+
     it.only('should process a pending webhook and return true', async () => {
       const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
@@ -161,11 +190,13 @@ describe('WebhookService', () => {
         escrowAddress: MOCK_ADDRESS,
       };
 
-      const recordingOracleResults: FinalResult[] = [{
-        exchangeAddress: 'string',
-        workerAddress: 'string',
-        solution: 'string'
-      }]
+      const recordingOracleResults: FinalResult[] = [
+        {
+          exchangeAddress: 'string',
+          workerAddress: 'string',
+          solution: 'string',
+        },
+      ];
 
       const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
@@ -190,30 +221,39 @@ describe('WebhookService', () => {
       };
       const manifestUrl = MOCK_FILE_URL;
 
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce(mockSigner);
 
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest)
         .mockResolvedValue(recordingOracleResults);
-      
-      jest.spyOn(StorageClient.prototype, 'uploadFiles').mockResolvedValueOnce([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
-    
 
-      const result = await webhookService.processPendingWebhook(webhookEntity as WebhookIncomingEntity);
+      jest
+        .spyOn(StorageClient.prototype, 'uploadFiles')
+        .mockResolvedValueOnce([
+          { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+        ]);
+
+      const result = await webhookService.processPendingWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
 
       expect(web3Service.getSigner).toHaveBeenCalledWith(webhookEntity.chainId);
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: webhookEntity.id },
-        { 
-          status: WebhookStatus.PAID, 
+        {
+          status: WebhookStatus.PAID,
           resultsUrl: MOCK_FILE_KEY,
           checkPassed: true,
-          retriesCount: 0
-        }
+          retriesCount: 0,
+        },
       );
-      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(manifestUrl);
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        manifestUrl,
+      );
       expect(result).toBe(true);
     });
   });
@@ -227,19 +267,33 @@ describe('WebhookService', () => {
       };
 
       const finalResultsUrl = MOCK_FILE_URL;
-      const finalResults = [{ workerAddress: '0x123', solution: 'result' }] as any[];
+      const finalResults = [
+        { workerAddress: '0x123', solution: 'result' },
+      ] as any[];
       const recordingOracleAddress = '0x789';
 
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(StorageClient, 'downloadFileFromUrl').mockResolvedValueOnce(finalResults);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(finalResults);
 
-      const result = await webhookService.processPaidWebhook(webhookEntity as WebhookIncomingEntity);
+      const result = await webhookService.processPaidWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
 
       expect(web3Service.getSigner).toHaveBeenCalledWith(webhookEntity.chainId);
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
@@ -250,7 +304,9 @@ describe('WebhookService', () => {
         { id: webhookEntity.id },
         { status: 'FAILED' },
       );
-      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(finalResultsUrl);
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        finalResultsUrl,
+      );
       expect(result).toBe(true);
     });
   });
@@ -265,13 +321,12 @@ describe('WebhookService', () => {
         getAddress: jest.fn().mockReturnValue(ethers.constants.AddressZero),
       };
       escrowClient = new EscrowClient(await InitClient.getParams(mockSigner));
-    
+
       const webhookEntity = {
         chainId: '123',
         escrowAddress: '0x123456789',
         retriesCount: 0,
       } as any;
-
 
       const manifestUrl = MOCK_FILE_URL;
       const manifest = { fundAmount: '100' } as any;
@@ -279,26 +334,51 @@ describe('WebhookService', () => {
       const recordingOracleResults = [{ solution: 'result' }] as any[];
       const finalResultsUrl = 'http://example.com/final-results';
       const finalResultsHash = 'hash';
-      const finalResults = [{ workerAddress: '0x123', solution: 'result' }] as any[];
+      const finalResults = [
+        { workerAddress: '0x123', solution: 'result' },
+      ] as any[];
       const recipients = ['0x123'];
       const amounts = ['50'] as any;
 
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
       jest.spyOn(web3Service, 'getSigner').mockReturnValueOnce({} as any);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(StorageClient, 'downloadFileFromUrl').mockResolvedValueOnce(recordingOracleResults);
-      jest.spyOn(webhookRepository, 'updateOne').mockResolvedValueOnce({} as any);
-      jest.spyOn(StorageClient, 'downloadFileFromUrl').mockResolvedValueOnce(finalResults);
-      jest.spyOn(StorageClient.prototype, 'uploadFiles').mockResolvedValueOnce([{ key: finalResultsUrl, url: manifestUrl, hash: finalResultsHash }]);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(recordingOracleResults);
+      jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce({} as any);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(finalResults);
+      jest
+        .spyOn(StorageClient.prototype, 'uploadFiles')
+        .mockResolvedValueOnce([
+          { key: finalResultsUrl, url: manifestUrl, hash: finalResultsHash },
+        ]);
       jest.spyOn(escrowClient, 'storeResults').mockResolvedValueOnce(undefined);
       jest.spyOn(escrowClient, 'bulkPayOut').mockResolvedValueOnce(undefined);
 
-      const result = await webhookService.validateFortune(webhookEntity, manifest);
+      const result = await webhookService.validateFortune(
+        webhookEntity,
+        manifest,
+      );
 
       expect(web3Service.getSigner).toHaveBeenCalledWith(webhookEntity.chainId);
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
@@ -310,10 +390,21 @@ describe('WebhookService', () => {
           retriesCount: 0,
         },
       );
-      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(recordingOracleResultsUrl);
-      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(finalResultsUrl);
-      expect(StorageClient.prototype.uploadFiles).toHaveBeenCalledWith([finalResults], 'launcher');
-      expect(escrowClient.storeResults).toHaveBeenCalledWith(webhookEntity.escrowAddress, finalResultsUrl, finalResultsHash);
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        recordingOracleResultsUrl,
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        finalResultsUrl,
+      );
+      expect(StorageClient.prototype.uploadFiles).toHaveBeenCalledWith(
+        [finalResults],
+        'launcher',
+      );
+      expect(escrowClient.storeResults).toHaveBeenCalledWith(
+        webhookEntity.escrowAddress,
+        finalResultsUrl,
+        finalResultsHash,
+      );
       expect(escrowClient.bulkPayOut).toHaveBeenCalledWith(
         webhookEntity.escrowAddress,
         recipients,

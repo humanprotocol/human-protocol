@@ -1,15 +1,18 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { WebhookIncomingEntity } from "./webhook-incoming.entity";
+import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import {
   FindOptionsWhere,
   FindManyOptions,
   FindOneOptions,
   Repository,
 } from 'typeorm';
-import { ErrorWebhook } from "../../common/constants/errors";
-import { WebhookIncomingCreateDto, WebhookIncomingUpdateDto } from "./webhook.dto";
+import { ErrorWebhook } from '../../common/constants/errors';
+import {
+  WebhookIncomingCreateDto,
+  WebhookIncomingUpdateDto,
+} from './webhook.dto';
 
 @Injectable()
 export class WebhookRepository {
@@ -24,7 +27,8 @@ export class WebhookRepository {
     where: FindOptionsWhere<WebhookIncomingEntity>,
     dto: Partial<WebhookIncomingUpdateDto>,
   ): Promise<WebhookIncomingEntity> {
-    const webhookIncomingEntity = await this.webhookIncomingEntityRepository.findOneBy(where);
+    const webhookIncomingEntity =
+      await this.webhookIncomingEntityRepository.findOneBy(where);
 
     if (!webhookIncomingEntity) {
       this.logger.log(ErrorWebhook.NotFound, WebhookRepository.name);
@@ -41,20 +45,23 @@ export class WebhookRepository {
   ): Promise<WebhookIncomingEntity | null> {
     return this.webhookIncomingEntityRepository.findOne({ where, ...options });
   }
-  
-  public find(where: FindOptionsWhere<WebhookIncomingEntity>, options?: FindManyOptions<WebhookIncomingEntity>): Promise<WebhookIncomingEntity[]> {
+
+  public find(
+    where: FindOptionsWhere<WebhookIncomingEntity>,
+    options?: FindManyOptions<WebhookIncomingEntity>,
+  ): Promise<WebhookIncomingEntity[]> {
     return this.webhookIncomingEntityRepository.find({
       where,
       order: {
-        createdAt: "DESC",
+        createdAt: 'DESC',
       },
       ...options,
     });
   }
 
-  public async create(dto: WebhookIncomingCreateDto): Promise<WebhookIncomingEntity> {
-    return this.webhookIncomingEntityRepository
-      .create(dto)
-      .save();
+  public async create(
+    dto: WebhookIncomingCreateDto,
+  ): Promise<WebhookIncomingEntity> {
+    return this.webhookIncomingEntityRepository.create(dto).save();
   }
 }

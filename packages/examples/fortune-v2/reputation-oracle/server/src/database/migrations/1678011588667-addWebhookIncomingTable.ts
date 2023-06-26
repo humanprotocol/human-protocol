@@ -1,7 +1,9 @@
-import { MigrationInterface, QueryRunner, Table } from "typeorm";
-import { NS } from "../../common/constants";
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import { NS } from '../../common/constants';
 
-export class addWebhookIncomingTable1678011588667 implements MigrationInterface {
+export class addWebhookIncomingTable1678011588667
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.query(`
         CREATE TYPE ${NS}.webhook_incoming_status_enum AS ENUM (
@@ -16,50 +18,50 @@ export class addWebhookIncomingTable1678011588667 implements MigrationInterface 
       name: `${NS}.webhook_incoming`,
       columns: [
         {
-          name: "id",
-          type: "serial",
+          name: 'id',
+          type: 'serial',
           isPrimary: true,
         },
         {
-          name: "chain_id",
-          type: "int",
+          name: 'chain_id',
+          type: 'int',
         },
         {
-          name: "oracle_address",
-          type: "varchar",
+          name: 'oracle_address',
+          type: 'varchar',
         },
         {
-          name: "escrow_address",
-          type: "varchar"
+          name: 'escrow_address',
+          type: 'varchar',
         },
         {
-          name: "results_url",
-          type: "varchar"
+          name: 'results_url',
+          type: 'varchar',
         },
         {
-          name: "check_passed",
-          type: "boolean"
+          name: 'check_passed',
+          type: 'boolean',
         },
         {
-          name: "retries_count",
-          type: "int",
+          name: 'retries_count',
+          type: 'int',
           default: 0,
         },
         {
-          name: "status",
+          name: 'status',
           type: `${NS}.webhook_incoming_status_enum`,
         },
         {
-          name: "created_at",
-          type: "timestamptz",
+          name: 'created_at',
+          type: 'timestamptz',
         },
         {
-          name: "updated_at",
-          type: "timestamptz",
+          name: 'updated_at',
+          type: 'timestamptz',
         },
         {
-          name: "wait_until",
-          type: "timestamptz",
+          name: 'wait_until',
+          type: 'timestamptz',
         },
       ],
     });

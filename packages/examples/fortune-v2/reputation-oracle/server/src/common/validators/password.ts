@@ -4,8 +4,8 @@ import {
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-} from "class-validator";
-import zxcvbn from "zxcvbn";
+} from 'class-validator';
+import zxcvbn from 'zxcvbn';
 
 interface IPasswordConstraints {
   required: boolean;
@@ -26,32 +26,36 @@ class ValidatePassword implements ValidatorConstraintInterface {
   }
 
   private static isValid(value: unknown, args: ValidationArguments): string {
-    const { required = true, score = 0 }: IPasswordConstraints = args.constraints[0];
+    const { required = true, score = 0 }: IPasswordConstraints =
+      args.constraints[0];
 
-    if (typeof value === "undefined" || value === "") {
+    if (typeof value === 'undefined' || value === '') {
       if (required) {
-        return "valueMissing";
+        return 'valueMissing';
       } else {
-        return "";
+        return '';
       }
     }
 
-    if (typeof value !== "string") {
-      return "typeMismatch";
+    if (typeof value !== 'string') {
+      return 'typeMismatch';
     }
 
     if (zxcvbn(value).score < score) {
-      return "weak";
+      return 'weak';
     }
 
-    return "";
+    return '';
   }
 }
 
-export function IsPassword(constraints: Partial<IPasswordConstraints> = {}, validationOptions?: ValidationOptions) {
+export function IsPassword(
+  constraints: Partial<IPasswordConstraints> = {},
+  validationOptions?: ValidationOptions,
+) {
   return (object: Record<string, any>, propertyName: string): void => {
     registerDecorator({
-      name: "isPassword",
+      name: 'isPassword',
       target: object.constructor,
       propertyName,
       constraints: [constraints],

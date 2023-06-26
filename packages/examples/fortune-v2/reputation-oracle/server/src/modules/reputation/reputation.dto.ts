@@ -1,7 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNumber, IsString } from "class-validator";
-import { ChainId } from "@human-protocol/sdk";
-import { ReputationEntityType } from "../../common/decorators";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { ChainId } from '@human-protocol/sdk';
+import { ReputationEntityType } from '../../common/decorators';
 
 export class ReputationCreateDto {
   @ApiProperty()
