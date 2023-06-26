@@ -62,6 +62,7 @@ export class ManifestDto {
   requesterTitle?: string;
   requesterDescription: string;
   requesterAccuracyTarget?: number;
+  fee: string;
   fundAmount: string;
   requestType: JobRequestType;
   mode: JobMode;

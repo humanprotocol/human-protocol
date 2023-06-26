@@ -50,7 +50,6 @@
     "cookie-parser": "^1.4.6",
     "ethers": "^5.7.2",
     "helmet": "^7.0.0",
-    "nestjs-ethers": "^2.0.3",
     "nestjs-minio-client": "^2.0.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
@@ -59,7 +58,6 @@
     "rxjs": "^7.2.0",
     "typeorm": "^0.3.16",
     "typeorm-naming-strategies": "^4.1.0",
-    "joi": "^17.9.2",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

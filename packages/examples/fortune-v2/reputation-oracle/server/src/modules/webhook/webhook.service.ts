@@ -95,6 +95,7 @@ export class WebhookService {
 
     try {
       const finalResultsUrl = await escrowClient.getResultsUrl(webhookEntity.escrowAddress);
+    
       const finalResults: FinalResult[] = await StorageClient.downloadFileFromUrl(finalResultsUrl).catch(() => []);
       if (finalResults.length === 0) {
         this.logger.log(ErrorResults.NoResultsHaveBeenVerified, WebhookService.name);
@@ -151,18 +152,17 @@ export class WebhookService {
         this.logger.log(ErrorResults.NoRecordingOracleResultsFound, WebhookService.name);
         throw new Error(ErrorResults.NoRecordingOracleResultsFound);
       }
-
-      const finalResults: FinalResult[] = recordingOracleResults.filter(item => checkCurseWords(item.solution) || !finalResults.some(result => result.solution === item.solution));
+      const finalResults: FinalResult[] = recordingOracleResults.filter(item => !checkCurseWords(item.solution) || !recordingOracleResults.some(result => result.solution === item.solution));
+    
       if (finalResults.length === 0) {
         this.logger.log(ErrorResults.NoResultsHaveBeenVerified, WebhookService.name);
         throw new Error(ErrorResults.NoResultsHaveBeenVerified);
       }
 
       const [uploadedResult] = await this.storageClient.uploadFiles([finalResults], this.bucket);
-
+      
       const finalResultsUrl = uploadedResult.key;
       const finalResultsHash = uploadedResult.hash
-
       await escrowClient.storeResults(webhookEntity.escrowAddress, finalResultsUrl, finalResultsHash);
 
       const checkPassed = recordingOracleResults.length <= finalResults.length;
@@ -181,6 +181,7 @@ export class WebhookService {
       const amounts = new Array(recipients.length).fill(BigNumber.from(manifest.fundAmount).div(recipients.length));
   
       await escrowClient.bulkPayOut(webhookEntity.escrowAddress, recipients, amounts, finalResultsUrl, finalResultsHash)
+
       return true;
     } catch (e) {
       if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {

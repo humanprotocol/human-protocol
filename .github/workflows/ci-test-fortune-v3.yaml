@@ -1,4 +1,4 @@
-name: Fortune V2 check
+name: Fortune V3 check
 
 on:
   push:
@@ -9,12 +9,12 @@ on:
       - 'packages/core/**'
       - '!packages/core/mx/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
-      - 'packages/examples/fortune-v2/**'
+      - 'packages/app/fortune/**'
   workflow_dispatch:
 
 jobs:
   fortune-test:
-    name: Fortune V2 Test
+    name: Fortune V3 Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,5 +26,5 @@ jobs:
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
-      - run: yarn fortune-v2:test
-        name: Run fortune V2 test
+      - run: yarn fortune-v3:test
+        name: Run fortune V3 test
