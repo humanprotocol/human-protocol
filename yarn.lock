@@ -2339,26 +2339,6 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@human-protocol/core@1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.10.tgz#946bc87cd8f8cf0eae5b410c27d227c0de5d599f"
-  integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
-
-"@human-protocol/sdk@^1.1.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@human-protocol/sdk/-/sdk-1.1.5.tgz#045393cb1bf366b9ee7e155a652c8235caa25f36"
-  integrity sha512-EtCPJgsTfbFD3mSXgzcx/jV5kQV6Oq1ogmN4KI/OnyBOBIqiWOewq0bD/c6YE7D2qNnc5wF/HxfqDm0eWzlRVA==
-  dependencies:
-    "@human-protocol/core" "*"
-    aws-sdk "^2.1255.0"
-    axios "^1.4.0"
-    crypto "^1.0.1"
-    ethers "^5.7.2"
-    minio "^7.0.32"
-    secp256k1 "^4.0.3"
-    vitest "^0.30.1"
-    winston "^3.8.2"
-
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.10.tgz#5a3ffe32cc9306365fb3fd572596cd602d5e12d2"
