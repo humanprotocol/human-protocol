@@ -1,13 +1,11 @@
+import { ChainId, NetworkData } from '@human-protocol/sdk';
 import { Button, Grid, Paper, Typography } from '@mui/material';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { ChainId } from 'src/constants';
-
-import { EscrowNetwork } from 'src/types';
 
 export type SuccessProps = {
   txHash: string;
-  network: EscrowNetwork;
+  network: NetworkData;
 };
 
 export const Success: FC<SuccessProps> = ({ txHash, network }) => {

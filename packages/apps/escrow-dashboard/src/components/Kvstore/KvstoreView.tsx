@@ -1,12 +1,11 @@
 import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { useState, useEffect, FC } from 'react';
 import { useAccount, useContractRead, useNetwork } from 'wagmi';
 
 import { AfterConnect } from './AfterConnect';
 import { Dashboard } from './Dashboard';
 import { MainPage } from './MainPage';
-
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
 export const KvstoreView: FC = () => {
   const { isConnected, address } = useAccount();
@@ -16,8 +15,7 @@ export const KvstoreView: FC = () => {
   const [page, setPage] = useState<number>(0);
   const [pubkeyExist, setPubkeyExist] = useState<boolean>(false);
   const { data, refetch } = useContractRead({
-    address: ESCROW_NETWORKS[chain?.id as ChainId]
-      ?.kvstoreAddress as `0x${string}`,
+    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'get',
     args: [address, 'public_key'],

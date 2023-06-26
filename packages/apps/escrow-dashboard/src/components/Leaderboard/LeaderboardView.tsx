@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
@@ -21,12 +22,7 @@ import {
 import { FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  ChainId,
-  ESCROW_NETWORKS,
-  ROLES,
-  SUPPORTED_CHAIN_IDS,
-} from 'src/constants';
+import { ROLES, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useLeadersByChainID } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
 
@@ -104,7 +100,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                     checked={selectedNetworks.includes(chainId)}
                   />
                 }
-                label={ESCROW_NETWORKS[chainId]?.title}
+                label={NETWORKS[chainId]?.title}
                 key={chainId}
               />
             ))}

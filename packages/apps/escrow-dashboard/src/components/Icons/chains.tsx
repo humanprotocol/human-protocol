@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import { ReactElement } from 'react';
 
 import { AvalancheIcon } from './AvalancheIcon';
@@ -8,7 +9,6 @@ import { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
 import { MoonbeamIcon } from './MoonbeamIcon';
 import { PolygonIcon } from './PolygonIcon';
 import { SkaleHumanProtocolIcon } from './SkaleHumanProtocolIcon';
-import { ChainId } from 'src/constants';
 
 export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.ALL]: <HumanIcon />,

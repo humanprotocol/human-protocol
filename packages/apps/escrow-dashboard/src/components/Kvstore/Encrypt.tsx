@@ -1,4 +1,5 @@
 import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Grid, Paper, Typography, Box, Button, TextField } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import * as openpgp from 'openpgp';
@@ -7,8 +8,6 @@ import { useWaitForTransaction, useContractWrite, useNetwork } from 'wagmi';
 
 import { Alert } from '../Alert';
 import { NFT_STORAGE_CLIENT } from './constants';
-
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
 export type EncryptProps = {
   publicKey: string;
@@ -26,8 +25,7 @@ export const Encrypt: FC<EncryptProps> = ({ publicKey }) => {
 
   const { data, writeAsync } = useContractWrite({
     mode: 'recklesslyUnprepared',
-    address: ESCROW_NETWORKS[chain?.id as ChainId]
-      ?.kvstoreAddress as `0x${string}`,
+    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     chainId: chain?.id,
     functionName: 'set',

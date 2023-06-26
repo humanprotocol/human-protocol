@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import { useSelector } from 'react-redux';
 
 import { AppState, useAppDispatch } from '..';
@@ -7,8 +8,7 @@ import {
   fetchEscrowStatsAsync,
 } from './reducer';
 import { EscrowData } from './types';
-
-import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
+import { SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const usePollEventsData = () => {

@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS, NetworkData } from '@human-protocol/sdk';
 import {
   Button,
   FormControl,
@@ -12,18 +13,15 @@ import {
 } from '@mui/material';
 import { Dispatch, FC, useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import { Alert } from '../Alert';
-
-import { ChainId, ESCROW_NETWORKS, FAUCET_CHAIN_IDS } from 'src/constants';
-import { EscrowNetwork } from 'src/types';
+import { FAUCET_CHAIN_IDS } from 'src/constants';
 
 export type RequestDataProps = {
   step: number;
   setStep: Dispatch<number>;
   setTxHash: Dispatch<string>;
-  network: EscrowNetwork;
-  setNetwork: Dispatch<EscrowNetwork>;
+  network: NetworkData;
+  setNetwork: Dispatch<NetworkData>;
 };
 
 export const RequestData: FC<RequestDataProps> = ({
@@ -94,12 +92,12 @@ export const RequestData: FC<RequestDataProps> = ({
               variant="outlined"
               value={network.chainId}
               onChange={(e) =>
-                setNetwork(ESCROW_NETWORKS[Number(e.target.value) as ChainId]!)
+                setNetwork(NETWORKS[Number(e.target.value) as ChainId]!)
               }
             >
               {FAUCET_CHAIN_IDS.map((chainId) => (
                 <MenuItem key={chainId} value={chainId}>
-                  {ESCROW_NETWORKS[chainId]?.title}
+                  {NETWORKS[chainId]?.title}
                 </MenuItem>
               ))}
             </Select>
