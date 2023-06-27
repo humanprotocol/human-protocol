@@ -18,6 +18,7 @@ class Webhook(Base):
     status = Column(
         String, Enum(WebhookStatuses), server_default=WebhookStatuses.pending.value
     )
+    attempts = Column(Integer, server_default="0")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     wait_until = Column(DateTime(timezone=True), server_default=func.now())
