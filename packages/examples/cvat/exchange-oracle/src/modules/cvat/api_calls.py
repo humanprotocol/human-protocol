@@ -161,3 +161,21 @@ def get_job_annotations(cvat_project_id: int) -> Dict:
             return annotations["annotations"]
         except exceptions.ApiException as e:
             logger.error(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
+
+
+def delete_project(cvat_id: int):
+    logger = logging.getLogger("app")
+    with ApiClient(configuration) as api_client:
+        try:
+            api_client.projects_api.destroy(cvat_id)
+        except exceptions.ApiException as e:
+            logger.error(f"Exception when calling ProjectsApi.destroy(): {e}\n")
+
+
+def delete_cloustorage(cvat_id: int):
+    logger = logging.getLogger("app")
+    with ApiClient(configuration) as api_client:
+        try:
+            api_client.cloudstorages_api.destroy(cvat_id)
+        except exceptions.ApiException as e:
+            logger.error(f"Exception when calling CloudstoragesApi.destroy(): {e}\n")
