@@ -29,6 +29,7 @@ def add_cvat_project_to_db(cvat_id: int) -> str:
         project = Project(
             id=project_id,
             cvat_id=cvat_id,
+            cvat_cloudstorage_id=1,
             status="annotation",
             job_type="IMAGE_LABEL_BINARY",
             escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
