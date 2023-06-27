@@ -11,6 +11,7 @@ def create_project(session: SessionLocal) -> tuple:
     cvat_project = Project(
         id=str(uuid.uuid4()),
         cvat_id=1,
+        cvat_cloudstorage_id=1,
         status=ProjectStatuses.annotation,
         job_type="IMAGE_LABEL_BINARY",
         escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
@@ -25,7 +26,8 @@ def create_project(session: SessionLocal) -> tuple:
 def create_project_and_task(session: SessionLocal) -> tuple:
     cvat_project = Project(
         id=str(uuid.uuid4()),
-        cvat_id=123,
+        cvat_id=1,
+        cvat_cloudstorage_id=1,
         status=ProjectStatuses.annotation,
         job_type="IMAGE_LABEL_BINARY",
         escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
@@ -33,8 +35,8 @@ def create_project_and_task(session: SessionLocal) -> tuple:
     )
     cvat_task = Task(
         id=str(uuid.uuid4()),
-        cvat_id=123,
-        cvat_project_id=123,
+        cvat_id=1,
+        cvat_project_id=1,
         status=TaskStatuses.annotation,
     )
     session.add(cvat_project)
@@ -56,17 +58,23 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        cvat_cloudstorage_id = 1
         bucket_url = "https://test.storage.googleapis.com/"
-        project_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+        p_id = cvat_service.create_project(
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
-        project = self.session.query(Project).filter_by(id=project_id).first()
+        project = self.session.query(Project).filter_by(id=p_id).first()
 
         self.assertIsNotNone(project)
-        self.assertEqual(project.id, project_id)
+        self.assertEqual(project.id, p_id)
         self.assertEqual(project.cvat_id, cvat_id)
-        self.assertEqual(project.status, "annotation")
+        self.assertEqual(project.status, ProjectStatuses.annotation)
         self.assertEqual(project.job_type, job_type)
         self.assertEqual(project.escrow_address, escrow_address)
         self.assertEqual(project.bucket_url, bucket_url)
@@ -75,101 +83,202 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        cvat_cloudstorage_id = 1
         bucket_url = "https://test.storage.googleapis.com/"
-        cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+        project_id = cvat_service.create_project(
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
         self.session.commit()
 
         cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_cvat_id(self):
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
-            self.session, None, job_type, escrow_address, bucket_url
+            self.session,
+            None,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
+
+    def test_create_project_none_cvat_cloudstorage_id(self):
+        cvat_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        cvat_service.create_project(
+            self.session,
+            cvat_id,
+            None,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_job_type(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
-            self.session, cvat_id, None, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            None,
+            escrow_address,
+            bucket_url,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_escrow_address(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         bucket_url = "https://test.storage.googleapis.com/"
-        cvat_service.create_project(self.session, cvat_id, job_type, None, bucket_url)
+        cvat_service.create_project(
+            self.session, cvat_id, cvat_cloudstorage_id, job_type, None, bucket_url
+        )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_create_project_none_bucket_url(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, None
+            self.session, cvat_id, cvat_cloudstorage_id, job_type, escrow_address, None
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_get_project_by_id(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         project = cvat_service.get_project_by_id(self.session, p_id)
 
-        assert project.id == p_id
-        assert project.cvat_id == 1
-        assert project.status == ProjectStatuses.annotation
-        assert project.job_type == job_type
-        assert project.escrow_address == escrow_address
-        assert project.bucket_url == bucket_url
+        self.assertIsNotNone(project)
+        self.assertEqual(project.id, p_id)
+        self.assertEqual(project.cvat_id, cvat_id)
+        self.assertEqual(project.status, ProjectStatuses.annotation)
+        self.assertEqual(project.job_type, job_type)
+        self.assertEqual(project.escrow_address, escrow_address)
+        self.assertEqual(project.bucket_url, bucket_url)
 
         project = cvat_service.get_project_by_id(self.session, "dummy_id")
 
-        assert project == None
+        self.assertIsNone(project)
 
-    def test_get_projects_by_status(self):
+    def test_get_project_escrow_address(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
+        )
+
+        project = cvat_service.get_project_by_escrow_address(
+            self.session, escrow_address
+        )
+
+        self.assertIsNotNone(project)
+        self.assertEqual(project.id, p_id)
+        self.assertEqual(project.cvat_id, cvat_id)
+        self.assertEqual(project.status, ProjectStatuses.annotation)
+        self.assertEqual(project.job_type, job_type)
+        self.assertEqual(project.escrow_address, escrow_address)
+        self.assertEqual(project.bucket_url, bucket_url)
+
+        project = cvat_service.get_project_by_escrow_address(
+            self.session, "invalid escrow address"
+        )
+
+        self.assertIsNone(project)
+
+    def test_get_projects_by_status(self):
+        cvat_id = 1
+        cvat_cloudstorage_id = 1
+        job_type = "IMAGE_LABEL_BINARY"
+        escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
+        bucket_url = "https://test.storage.googleapis.com/"
+        p_id = cvat_service.create_project(
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         cvat_id = 2
+        cvat_cloudstorage_id = 2
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
         bucket_url = "https://test2.storage.googleapis.com/"
         cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         cvat_id = 3
+        cvat_cloudstorage_id = 3
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC69"
         bucket_url = "https://test3.storage.googleapis.com/"
         cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         projects = cvat_service.get_projects_by_status(
@@ -196,11 +305,17 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_update_project_status(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         cvat_service.update_project_status(
@@ -209,20 +324,27 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         project = cvat_service.get_project_by_id(self.session, p_id)
 
-        assert project.id == p_id
-        assert project.cvat_id == 1
-        assert project.status == ProjectStatuses.completed
-        assert project.job_type == job_type
-        assert project.escrow_address == escrow_address
-        assert project.bucket_url == bucket_url
+        self.assertIsNotNone(project)
+        self.assertEqual(project.id, p_id)
+        self.assertEqual(project.cvat_id, cvat_id)
+        self.assertEqual(project.status, ProjectStatuses.completed)
+        self.assertEqual(project.job_type, job_type)
+        self.assertEqual(project.escrow_address, escrow_address)
+        self.assertEqual(project.bucket_url, bucket_url)
 
     def test_update_project_invalid_status(self):
         cvat_id = 1
+        cvat_cloudstorage_id = 1
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
         with self.assertRaises(ValueError):
             cvat_service.update_project_status(self.session, p_id, "Invalid Status")
@@ -286,14 +408,15 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         task = cvat_service.get_task_by_id(self.session, task_id)
 
-        assert task.id == task_id
-        assert task.cvat_id == 1
-        assert task.cvat_project_id == cvat_project.cvat_id
-        assert task.status == TaskStatuses.annotation
+        self.assertIsNotNone(task)
+        self.assertEqual(task.id, task_id)
+        self.assertEqual(task.cvat_id, cvat_project.cvat_id)
+        self.assertEqual(task.cvat_project_id, cvat_project.cvat_id)
+        self.assertEqual(task.status, TaskStatuses.annotation)
 
         task = cvat_service.get_task_by_id(self.session, "dummy_id")
 
-        assert task == None
+        self.assertIsNone(task)
 
     def test_get_tasks_by_status(self):
         cvat_project = create_project(self.session)
@@ -331,10 +454,11 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         task = cvat_service.get_task_by_id(self.session, task_id)
 
-        assert task.id == task_id
-        assert task.cvat_id == 1
-        assert task.cvat_project_id == cvat_project.cvat_id
-        assert task.status == TaskStatuses.completed
+        self.assertIsNotNone(task)
+        self.assertEqual(task.id, task_id)
+        self.assertEqual(task.cvat_id, cvat_project.cvat_id)
+        self.assertEqual(task.cvat_project_id, cvat_project.cvat_id)
+        self.assertEqual(task.status, TaskStatuses.completed)
 
     def test_update_task_invalid_status(self):
         cvat_project = create_project(self.session)
@@ -360,11 +484,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
         cvat_id = 2
+        cvat_cloudstorage_id = 2
         job_type = "IMAGE_LABEL_BINARY"
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
         bucket_url = "https://test2.storage.googleapis.com/"
         project_id = cvat_service.create_project(
-            self.session, cvat_id, job_type, escrow_address, bucket_url
+            self.session,
+            cvat_id,
+            cvat_cloudstorage_id,
+            job_type,
+            escrow_address,
+            bucket_url,
         )
 
         cvat_service.create_task(self.session, 4, 2, TaskStatuses.annotation)
@@ -532,7 +662,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         job = cvat_service.get_job_by_id(self.session, "Dummy id")
 
-        assert job == None
+        self.assertIsNone(job)
 
     def test_get_job_by_cvat_id(self):
         (cvat_project, cvat_task) = create_project_and_task(self.session)
@@ -716,3 +846,49 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
         assert len(jobs) == 3
+
+    def test_delete_project(self):
+        (cvat_project, cvat_task) = create_project_and_task(self.session)
+        cvat_service.create_job(
+            session=self.session,
+            cvat_id=1,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_project_id=cvat_project.cvat_id,
+            assignee="John Doe",
+            status=JobStatuses.new,
+        )
+        cvat_service.create_job(
+            session=self.session,
+            cvat_id=2,
+            cvat_task_id=cvat_task.cvat_id,
+            cvat_project_id=cvat_project.cvat_id,
+            assignee="John Doe",
+            status=JobStatuses.new,
+        )
+        self.session.commit()
+
+        cvat_project_db = cvat_service.get_project_by_id(self.session, cvat_project.id)
+        cvat_task_db = cvat_service.get_task_by_id(self.session, cvat_task.id)
+        jobs = cvat_service.get_jobs_by_cvat_task_id(
+            self.session, cvat_task_id=cvat_task.cvat_id
+        )
+
+        self.assertIsNotNone(cvat_project)
+        self.assertEqual(cvat_project_db.id, cvat_project.id)
+
+        self.assertIsNotNone(cvat_task_db)
+        self.assertEqual(cvat_task_db.id, cvat_task.id)
+
+        self.assertEqual(len(jobs), 2)
+
+        cvat_service.delete_project(self.session, cvat_project_db.id)
+
+        cvat_project_db = cvat_service.get_project_by_id(self.session, cvat_project.id)
+        cvat_task_db = cvat_service.get_task_by_id(self.session, cvat_task.id)
+        jobs = cvat_service.get_jobs_by_cvat_task_id(
+            self.session, cvat_task_id=cvat_task.cvat_id
+        )
+
+        self.assertIsNone(cvat_project_db)
+        self.assertIsNone(cvat_task_db)
+        self.assertEqual(len(jobs), 0)

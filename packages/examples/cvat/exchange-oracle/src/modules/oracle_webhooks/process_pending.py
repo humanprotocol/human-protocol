@@ -5,10 +5,15 @@ from src.db import SessionLocal
 from src.config import CronConfig
 
 from src.modules.cvat.job_creation import job_creation_process
+from src.modules.cvat.revert_job_creation import revert_job_creation
 from src.modules.chain.escrow import get_escrow_manifest, validate_escrow
 
 from .model import Webhook, WebhookStatuses
-from .service import get_pending_webhooks
+from src.modules.oracle_webhooks.service import (
+    get_pending_webhooks,
+    handle_webhook_fail,
+    update_webhook_status,
+)
 
 
 LOG_MODULE = "[cron][webhook][process_incoming]"
@@ -35,22 +40,15 @@ def process_incoming_webhooks() -> None:
                         webhook.escrow_address,
                     )
                     job_creation_process(webhook.escrow_address, manifest)
-                    upd = (
-                        update(Webhook)
-                        .where(Webhook.id == webhook.id)
-                        .values(status=WebhookStatuses.completed)
+                    update_webhook_status(
+                        session, webhook.id, WebhookStatuses.completed
                     )
-                    session.execute(upd)
                 except Exception as e:
                     logger.error(
                         f"Webhook: {webhook.id} failed during execution. Error {e}"
                     )
-                    upd = (
-                        update(Webhook)
-                        .where(Webhook.id == webhook.id)
-                        .values(status=WebhookStatuses.failed)
-                    )
-                    session.execute(upd)
+                    revert_job_creation(webhook.escrow_address)
+                    handle_webhook_fail(session, webhook.id)
 
         logger.info(f"{LOG_MODULE} Finishing cron job")
         return None

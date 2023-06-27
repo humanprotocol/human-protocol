@@ -10,7 +10,12 @@ from .model import Project, Task, Job
 
 # Project
 def create_project(
-    session: Session, cvat_id: int, job_type: str, escrow_address: str, bucket_url: str
+    session: Session,
+    cvat_id: int,
+    cvat_cloudstorage_id: int,
+    job_type: str,
+    escrow_address: str,
+    bucket_url: str,
 ) -> id:
     """
     Create a project from CVAT.
@@ -19,6 +24,7 @@ def create_project(
     project = Project(
         id=project_id,
         cvat_id=cvat_id,
+        cvat_cloudstorage_id=cvat_cloudstorage_id,
         status=ProjectStatuses.annotation.value,
         job_type=job_type,
         escrow_address=escrow_address,
@@ -32,6 +38,13 @@ def create_project(
 
 def get_project_by_id(session: Session, project_id: id):
     project_query = select(Project).where(Project.id == project_id)
+    project = session.execute(project_query).scalars().first()
+
+    return project
+
+
+def get_project_by_escrow_address(session: Session, escrow_address: str):
+    project_query = select(Project).where(Project.escrow_address == escrow_address)
     project = session.execute(project_query).scalars().first()
 
     return project
@@ -54,6 +67,11 @@ def update_project_status(session: Session, project_id: id, status: ProjectStatu
         raise ValueError(f"{status} is not available")
     upd = update(Project).where(Project.id == project_id).values(status=status)
     session.execute(upd)
+
+
+def delete_project(session: Session, project_id: id):
+    project = session.query(Project).filter_by(id=project_id).first()
+    session.delete(project)
 
 
 # Task
