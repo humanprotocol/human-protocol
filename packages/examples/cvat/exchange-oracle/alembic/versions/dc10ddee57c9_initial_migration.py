@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: a91dda117eaa
+Revision ID: dc10ddee57c9
 Revises: 
-Create Date: 2023-06-22 17:32:02.919110
+Create Date: 2023-06-27 13:41:06.640762
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "a91dda117eaa"
+revision = "dc10ddee57c9"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,6 +23,7 @@ def upgrade() -> None:
         "projects",
         sa.Column("id", sa.String(), nullable=False),
         sa.Column("cvat_id", sa.Integer(), nullable=False),
+        sa.Column("cvat_cloudstorage_id", sa.Integer(), nullable=False),
         sa.Column("status", sa.String(), nullable=False),
         sa.Column("job_type", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
@@ -36,6 +37,13 @@ def upgrade() -> None:
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("bucket_url"),
+        sa.UniqueConstraint("escrow_address"),
+    )
+    op.create_index(
+        op.f("ix_projects_cvat_cloudstorage_id"),
+        "projects",
+        ["cvat_cloudstorage_id"],
+        unique=False,
     )
     op.create_index(op.f("ix_projects_cvat_id"), "projects", ["cvat_id"], unique=True)
     op.create_index(op.f("ix_projects_id"), "projects", ["id"], unique=False)
@@ -47,6 +55,7 @@ def upgrade() -> None:
         sa.Column("chain_id", sa.Integer(), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("status", sa.String(), server_default="pending", nullable=True),
+        sa.Column("attempts", sa.Integer(), server_default="0", nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -81,8 +90,7 @@ def upgrade() -> None:
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(
-            ["cvat_project_id"],
-            ["projects.cvat_id"],
+            ["cvat_project_id"], ["projects.cvat_id"], ondelete="CASCADE"
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -108,8 +116,7 @@ def upgrade() -> None:
             ["projects.cvat_id"],
         ),
         sa.ForeignKeyConstraint(
-            ["cvat_task_id"],
-            ["tasks.cvat_id"],
+            ["cvat_task_id"], ["tasks.cvat_id"], ondelete="CASCADE"
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -133,5 +140,6 @@ def downgrade() -> None:
     op.drop_table("webhooks")
     op.drop_index(op.f("ix_projects_id"), table_name="projects")
     op.drop_index(op.f("ix_projects_cvat_id"), table_name="projects")
+    op.drop_index(op.f("ix_projects_cvat_cloudstorage_id"), table_name="projects")
     op.drop_table("projects")
     # ### end Alembic commands ###

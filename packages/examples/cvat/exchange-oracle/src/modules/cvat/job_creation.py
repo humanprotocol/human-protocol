@@ -21,6 +21,7 @@ def job_creation_process(escrow_address: str, manifest: dict):
         create_db_project(
             session,
             project.id,
+            cloudstorage.id,
             job_type,
             escrow_address,
             compose_bucket_url(bucket_name, provider),
@@ -31,5 +32,6 @@ def job_creation_process(escrow_address: str, manifest: dict):
     task = create_task(project.id, escrow_address)
     with SessionLocal.begin() as session:
         create_db_task(session, task.id, project.id, task.status)
+
     # Actual job creation on CVAT. Async process (will be created in DB once 'update:task' or 'update:job' webhook is received)
     put_task_data(task.id, cloudstorage.id)
