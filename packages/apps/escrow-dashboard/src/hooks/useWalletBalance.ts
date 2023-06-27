@@ -1,8 +1,7 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Address, useAccount, useBalance, useChainId } from 'wagmi';
 
 import { useHMTPrice } from './useHMTPrice';
-
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 
 export default function useWalletBalance() {
   const { address } = useAccount();
@@ -10,7 +9,7 @@ export default function useWalletBalance() {
   const { data: balance } = useBalance({
     address,
     chainId,
-    token: ESCROW_NETWORKS[chainId as ChainId]?.hmtAddress as Address,
+    token: NETWORKS[chainId as ChainId]?.hmtAddress as Address,
     watch: true,
   });
   const price = useHMTPrice();

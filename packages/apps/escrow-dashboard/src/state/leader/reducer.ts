@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import {
   createAction,
   createAsyncThunk,
@@ -10,10 +11,8 @@ import {
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
 import stringify from 'fast-json-stable-stringify';
-
 import { LeaderData, LeaderEscrowData } from './types';
-
-import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
+import { SUPPORTED_CHAIN_IDS } from 'src/constants';
 import {
   RAW_DATA_SAVED_EVENTS_QUERY,
   RAW_LEADERS_QUERY,
@@ -54,12 +53,10 @@ export const fetchLeadersAsync = createAsyncThunk<
 >('leader/fetchLeadersAsync', async () => {
   const leaders = (
     await Promise.all(
-      SUPPORTED_CHAIN_IDS.map(async (chainId) => {
-        return {
-          chainId,
-          leaders: await getLeaders(ESCROW_NETWORKS[chainId]?.subgraphUrl!),
-        };
-      })
+      SUPPORTED_CHAIN_IDS.map(async (chainId) => ({
+        chainId,
+        leaders: await getLeaders(NETWORKS[chainId]?.subgraphUrl!),
+      }))
     )
   ).reduce((leaders, { chainId, leaders: chainLeaders }) => {
     leaders[chainId] = chainLeaders;
@@ -96,10 +93,7 @@ export const fetchLeaderAsync = createAsyncThunk<
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderAsync', async ({ chainId, address }) => {
-  const leader = await getLeader(
-    ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-    address
-  );
+  const leader = await getLeader(NETWORKS[chainId]?.subgraphUrl!, address);
 
   if (!leader) {
     throw new Error('Error fetching leader detail');
@@ -153,10 +147,7 @@ export const fetchLeaderEscrowsAsync = createAsyncThunk<
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderEscrowsAsync', async ({ chainId, address }) => {
-  return await getLeaderEscrows(
-    ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-    address
-  );
+  return await getLeaderEscrows(NETWORKS[chainId]?.subgraphUrl!, address);
 });
 
 const getLeaderEscrows = async (subgraphUrl: string, address: string) => {

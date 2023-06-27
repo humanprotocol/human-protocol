@@ -1,13 +1,11 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Box, Button, Grid, IconButton, Link, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import { FC, useMemo } from 'react';
-
 import { CardBarChart, CardStackedBarChart } from '../Cards';
 import { CopyFilledIcon } from '../Icons';
-
 import lowAmountEscrowSvg from 'src/assets/low-amount-escrow.svg';
-import { ChainId, ESCROW_NETWORKS } from 'src/constants';
 import { useChainId, useEscrowDataByChainID } from 'src/state/escrow/hooks';
 
 const TextBox = styled(Box)`
@@ -134,7 +132,7 @@ export const EscrowView: FC = () => {
                   fontWeight={600}
                   sx={{ mb: 2 }}
                 >
-                  {ESCROW_NETWORKS[chainId]?.title} Token Supply
+                  {NETWORKS[chainId]?.title} Token Supply
                 </Typography>
                 <TextBox>
                   <Typography variant="body2" fontWeight={600} color="primary">
@@ -144,8 +142,8 @@ export const EscrowView: FC = () => {
               </Box>
             )}
             <Box>
-              {(ESCROW_NETWORKS[chainId]?.factoryAddress ||
-                ESCROW_NETWORKS[chainId]?.hmtAddress) && (
+              {(NETWORKS[chainId]?.factoryAddress ||
+                NETWORKS[chainId]?.hmtAddress) && (
                 <Typography
                   color="primary"
                   variant="body2"
@@ -155,7 +153,7 @@ export const EscrowView: FC = () => {
                   Contract Address
                 </Typography>
               )}
-              {ESCROW_NETWORKS[chainId]?.factoryAddress && (
+              {NETWORKS[chainId]?.factoryAddress && (
                 <>
                   <Typography
                     color="primary"
@@ -168,7 +166,7 @@ export const EscrowView: FC = () => {
                   <TextBox sx={{ mb: 2 }}>
                     <Link
                       sx={{ overflow: 'hidden', textDecoration: 'none' }}
-                      href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.factoryAddress}`}
+                      href={`${NETWORKS[chainId]?.scanUrl}/address/${NETWORKS[chainId]?.factoryAddress}`}
                       target="_blank"
                     >
                       <Typography
@@ -177,16 +175,16 @@ export const EscrowView: FC = () => {
                         color="primary"
                         sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                       >
-                        {ESCROW_NETWORKS[chainId]?.factoryAddress}
+                        {NETWORKS[chainId]?.factoryAddress}
                       </Typography>
                     </Link>
                     <CopyAddressButton
-                      address={ESCROW_NETWORKS[chainId]?.factoryAddress}
+                      address={NETWORKS[chainId]?.factoryAddress}
                     />
                   </TextBox>
                 </>
               )}
-              {ESCROW_NETWORKS[chainId]?.hmtAddress && (
+              {NETWORKS[chainId]?.hmtAddress && (
                 <>
                   <Typography
                     color="primary"
@@ -199,7 +197,7 @@ export const EscrowView: FC = () => {
                   <TextBox sx={{ mb: 2 }}>
                     <Link
                       sx={{ overflow: 'hidden', textDecoration: 'none' }}
-                      href={`${ESCROW_NETWORKS[chainId]?.scanUrl}/address/${ESCROW_NETWORKS[chainId]?.hmtAddress}`}
+                      href={`${NETWORKS[chainId]?.scanUrl}/address/${NETWORKS[chainId]?.hmtAddress}`}
                       target="_blank"
                     >
                       <Typography
@@ -208,11 +206,11 @@ export const EscrowView: FC = () => {
                         color="primary"
                         sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                       >
-                        {ESCROW_NETWORKS[chainId]?.hmtAddress}
+                        {NETWORKS[chainId]?.hmtAddress}
                       </Typography>
                     </Link>
                     <CopyAddressButton
-                      address={ESCROW_NETWORKS[chainId]?.hmtAddress}
+                      address={NETWORKS[chainId]?.hmtAddress}
                     />
                   </TextBox>
                 </>

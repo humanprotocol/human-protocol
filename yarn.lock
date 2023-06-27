@@ -2339,11 +2339,6 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@human-protocol/core@1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@human-protocol/core/-/core-1.0.10.tgz#946bc87cd8f8cf0eae5b410c27d227c0de5d599f"
-  integrity sha512-oANinraKrMEwLwQU3lrE52K7aFKY2BL/6rbWImQDIIcSYGcSGPGayfV4lBHCdboKWvmXMamXSXY1IsHE+GEELw==
-
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.10.tgz#5a3ffe32cc9306365fb3fd572596cd602d5e12d2"
@@ -3181,7 +3176,7 @@
     lodash "4.17.21"
     uuid "9.0.0"
 
-"@nestjs/core@^9.3.9", "@nestjs/core@^9.4.3":
+"@nestjs/core@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-9.4.3.tgz#7d6d3417e18c0a598684b87c955e4caac4f56dd4"
   integrity sha512-Qi63+wi55Jh4sDyaj5Hhx2jOpKqT386aeo+VOKsxnd+Ql9VvkO/FjmuwBGUyzkJt29ENYc+P0Sx/k5LtstNpPQ==
@@ -3216,7 +3211,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/passport/-/passport-10.0.0.tgz#92d36d4b8796b373da3f4d1a055db03cb246b127"
   integrity sha512-IlKKc6M7JOe+4dBbW6gZsXBSD05ZYgwfGf3GJhgCmUGYVqffpDdALQSS6JftnExrE+12rACoEmHkzYwKAGVK0Q==
 
-"@nestjs/platform-express@^9.3.9", "@nestjs/platform-express@^9.4.3":
+"@nestjs/platform-express@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-9.4.3.tgz#f61b75686bdfce566be3b54fa7bb20a4d87ed619"
   integrity sha512-FpdczWoRSC0zz2dNL9u2AQLXKXRVtq4HgHklAhbL59X0uy+mcxhlSThG7DHzDMkoSnuuHY8ojDVf7mDxk+GtCw==
@@ -3245,7 +3240,7 @@
     jsonc-parser "3.2.0"
     pluralize "8.0.0"
 
-"@nestjs/swagger@^6.2.1":
+"@nestjs/swagger@^6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-6.3.0.tgz#2963395a398374c25548a012eb15f03f53ad6e53"
   integrity sha512-Gnig189oa1tD+h0BYIfUwhp/wvvmTn6iO3csR2E4rQrDTgCxSxZDlNdfZo3AC+Rmf8u0KX4ZAX1RZN1qXTtC7A==
@@ -3256,10 +3251,21 @@
     path-to-regexp "3.2.0"
     swagger-ui-dist "4.18.2"
 
-"@nestjs/swagger@^7.0.6":
+"@nestjs/swagger@^7.0.4":
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.0.6.tgz#5f6108cefb25ecc409ad34804d142186da9f3fc6"
   integrity sha512-srSOYRD0oCV5kzgClAXqCYeJmxZtp1kGefNGjhBQObNan/B69vvrSkjJFDceP4s3y7OYl3Klu2nepcmAl4vFrA==
+  dependencies:
+    "@nestjs/mapped-types" "2.0.2"
+    js-yaml "4.1.0"
+    lodash "4.17.21"
+    path-to-regexp "3.2.0"
+    swagger-ui-dist "5.1.0"
+
+"@nestjs/terminus@^9.2.2":
+  version "9.2.2"
+  resolved "https://registry.yarnpkg.com/@nestjs/terminus/-/terminus-9.2.2.tgz#88c78061307eaf19308b1f6a6055aa6c33750195"
+  integrity sha512-AWUA8XLcgxWUjUFYHDqi42M7CZn2e+DEWxP+MqNAbMzz4ybB5jGcFK5Fy8qwaNBoWg6KMF1JiXOOygGXgk9ydg==
   dependencies:
     "@nestjs/mapped-types" "2.0.2"
     js-yaml "4.1.0"
@@ -3275,7 +3281,7 @@
     boxen "5.1.2"
     check-disk-space "3.4.0"
 
-"@nestjs/testing@^9.3.9", "@nestjs/testing@^9.4.3":
+"@nestjs/testing@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-9.4.3.tgz#53ffbabdd38f500b145c30f2fbb76dedad393d79"
   integrity sha512-LDT8Ai2eKnTzvnPaJwWOK03qTaFap5uHHsJCv6dL0uKWk6hyF9jms8DjyVaGsaujCaXDG8izl1mDEER0OmxaZA==
@@ -4746,6 +4752,11 @@
     "@types/express-serve-static-core" "^4.17.33"
     "@types/qs" "*"
     "@types/serve-static" "*"
+
+"@types/file-saver@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.5.tgz#9ee342a5d1314bb0928375424a2f162f97c310c7"
+  integrity sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==
 
 "@types/filesystem@*":
   version "0.0.32"
