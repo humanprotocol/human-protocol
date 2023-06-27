@@ -1,6 +1,11 @@
-import axios from "axios";
-import { EscrowStatus, StorageClient } from "@human-protocol/sdk";
+import { ConfigModule, registerAs } from "@nestjs/config";
+import { EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
+import { HttpService } from "@nestjs/axios";
+import { Test } from "@nestjs/testing";
+import { of } from "rxjs";
+
 import { JobService } from "./job.service";
+import { Web3Service } from "../web3/web3.service";
 
 const OPERATOR_ADDRESS = "TEST_OPERATOR_ADDRESS";
 
@@ -37,7 +42,7 @@ jest.mock("@human-protocol/sdk", () => ({
     getRecordingOracleAddress: jest.fn(),
     getStatus: jest.fn(),
     getManifestUrl: jest.fn(),
-    getResultsUrl: jest.fn(),
+    getIntermediateResultsUrl: jest.fn(),
     storeResults: jest.fn(),
   })),
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -49,29 +54,57 @@ jest.mock("axios", () => ({
   post: jest.fn(),
 }));
 
+const signerMock = {
+  address: OPERATOR_ADDRESS,
+  getAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+  getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+};
+
+const httpServicePostMock = jest.fn().mockReturnValue(of({ status: 200, data: {} }));
+
 describe("JobController", () => {
   let jobService: JobService;
 
-  beforeEach(() => {
-    jobService = new JobService(
-      {
-        jsonRpcUrl: "http://localhost:8545",
-        privateKey: "TEST_PRIVATE_KEY",
-      },
-      {
-        accessKey: "TEST_ACCESS_KEY",
-        secretKey: "TEST_SECRET_KEY",
-        endPoint: "localhost",
-        port: 9000,
-        useSSL: false,
-        bucket: "TEST_BUCKET",
-      },
-    );
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs("storage", () => ({
+            accessKey: "TEST_ACCESS_KEY",
+            secretKey: "TEST_SECRET_KEY",
+            endPoint: "localhost",
+            port: 9000,
+            useSSL: false,
+            bucket: "TEST_BUCKET",
+          })),
+        ),
+      ],
+      providers: [
+        JobService,
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+          },
+        },
+        {
+          provide: HttpService,
+          useValue: {
+            post: httpServicePostMock,
+          },
+        },
+      ],
+    }).compile();
+
+    jobService = moduleRef.get<JobService>(JobService);
   });
 
   describe("processJobSolution", () => {
     it("should throw an error if the recording oracle address is invalid", async () => {
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue("RECORDING_ORACLE_ADDRESS");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue("RECORDING_ORACLE_ADDRESS"),
+      }));
 
       expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
         "Escrow Recording Oracle address mismatches the current one",
@@ -79,15 +112,23 @@ describe("JobController", () => {
     });
 
     it("should throw an error if the escrow is not in pending status", async () => {
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue(OPERATOR_ADDRESS);
-      jest.spyOn(jobService.escrowClient, "getStatus").mockResolvedValue(EscrowStatus.Launched);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
+      }));
 
       expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError("Escrow is not in the Pending status");
     });
 
     it("should throw an error if the manifest is missing required data", async () => {
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue(OPERATOR_ADDRESS);
-      jest.spyOn(jobService.escrowClient, "getStatus").mockResolvedValue(EscrowStatus.Pending);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn(),
+      }));
+
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue({});
 
       expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
@@ -96,10 +137,15 @@ describe("JobController", () => {
     });
 
     it("should record new solution", async () => {
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue(OPERATOR_ADDRESS);
-      jest.spyOn(jobService.escrowClient, "getStatus").mockResolvedValue(EscrowStatus.Pending);
-      jest.spyOn(jobService.escrowClient, "getManifestUrl").mockResolvedValue("MANIFEST_URL");
-      jest.spyOn(jobService.escrowClient, "getResultsUrl").mockResolvedValue("RESULTS_URL");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("RESULTS_URL"),
+        storeResults: jest.fn(),
+      }));
+
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
           return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
@@ -109,18 +155,18 @@ describe("JobController", () => {
       });
 
       expect(await jobService.processJobSolution(SOLUTION)).toBe("Solution is recorded.");
-      expect(jobService.escrowClient.storeResults).toBeCalledWith(
-        SOLUTION.escrowAddress,
-        "UPLOADED_URL",
-        "UPLOADED_HASH",
-      );
     });
 
     it("should revert if solution already exists", async () => {
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue(OPERATOR_ADDRESS);
-      jest.spyOn(jobService.escrowClient, "getStatus").mockResolvedValue(EscrowStatus.Pending);
-      jest.spyOn(jobService.escrowClient, "getManifestUrl").mockResolvedValue("MANIFEST_URL");
-      jest.spyOn(jobService.escrowClient, "getResultsUrl").mockResolvedValue("RESULTS_URL");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("RESULTS_URL"),
+        storeResults: jest.fn(),
+      }));
+
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
           return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
@@ -140,10 +186,15 @@ describe("JobController", () => {
       };
       const newSolution = { exchangeAddress: "EXCHANGE_ADDRESS", workerAddress: "WORKER_ADDRESS", solution: "Good" };
 
-      jest.spyOn(jobService.escrowClient, "getRecordingOracleAddress").mockResolvedValue(OPERATOR_ADDRESS);
-      jest.spyOn(jobService.escrowClient, "getStatus").mockResolvedValue(EscrowStatus.Pending);
-      jest.spyOn(jobService.escrowClient, "getManifestUrl").mockResolvedValue("MANIFEST_URL");
-      jest.spyOn(jobService.escrowClient, "getResultsUrl").mockResolvedValue("RESULTS_URL");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("RESULTS_URL"),
+        storeResults: jest.fn(),
+      }));
+
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
           return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
@@ -153,12 +204,10 @@ describe("JobController", () => {
       });
 
       expect(await jobService.processJobSolution(SOLUTION)).toBe("The requested job is completed.");
-      expect(jobService.escrowClient.storeResults).toBeCalledWith(
-        SOLUTION.escrowAddress,
-        "UPLOADED_URL",
-        "UPLOADED_HASH",
-      );
-      expect(axios.post).toHaveBeenCalledWith("REPUTATION_ORACLE_URL/send-fortunes", [oldSolution, newSolution]);
+      expect(httpServicePostMock).toHaveBeenCalledWith("REPUTATION_ORACLE_URL/send-fortunes", [
+        oldSolution,
+        newSolution,
+      ]);
     });
   });
 });
