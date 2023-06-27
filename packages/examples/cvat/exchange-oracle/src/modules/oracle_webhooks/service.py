@@ -66,7 +66,8 @@ def handle_webhook_fail(session: Session, webhook_id: id):
                 (Webhook.attempts + 1 >= Config.webhook_max_retries, "failed"),
                 else_=WebhookStatuses.pending,
             ),
-            wait_until=Webhook.wait_until + datetime.timedelta(minutes=5),
+            wait_until=Webhook.wait_until
+            + datetime.timedelta(minutes=Config.webhook_delay_if_failed),
         )
     )
     session.execute(upd)
