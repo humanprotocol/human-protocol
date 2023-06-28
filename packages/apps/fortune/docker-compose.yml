@@ -14,7 +14,7 @@ services:
         max-file: "3"
     ports:
       - '5432:5432'
-    volumes: 
+    volumes:
       - ./db:/var/lib/postgresql/data
   minio:
     container_name: minio
@@ -44,4 +44,6 @@ services:
       /usr/bin/mc config host add myminio http://minio:9000 dev devdevdev;
       /usr/bin/mc mb myminio/launcher;
       /usr/bin/mc anonymous set public myminio/launcher;
+      /usr/bin/mc mb myminio/solution;
+      /usr/bin/mc anonymous set public myminio/solution;
       "

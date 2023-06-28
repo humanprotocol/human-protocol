@@ -1,4 +1,4 @@
-import { ChainId } from 'src/constants';
+import { ChainId } from '@human-protocol/sdk';
 
 export type LeaderData = {
   chainId: ChainId;

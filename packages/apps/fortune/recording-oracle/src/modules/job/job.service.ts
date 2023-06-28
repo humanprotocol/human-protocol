@@ -1,48 +1,41 @@
+import { HttpService } from "@nestjs/axios";
 import { Inject, Injectable } from "@nestjs/common";
 import { EscrowClient, EscrowStatus, InitClient, StorageClient } from "@human-protocol/sdk";
-import axios from "axios";
 import { ethers } from "ethers";
 
-import { ethereumConfigKey, EthereumConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
+import { storageConfigKey, StorageConfigType } from "@/common/config";
 import { JobSolutionRequestDto } from "./job.dto";
+import { Web3Service } from "../web3/web3.service";
 
 @Injectable()
 export class JobService {
-  escrowClient: EscrowClient;
-  signer: ethers.Wallet;
-
   constructor(
-    @Inject(ethereumConfigKey)
-    private ethereumConfig: EthereumConfigType,
     @Inject(storageConfigKey)
     private storageConfig: StorageConfigType,
-  ) {
-    this.initEscrowClient();
-  }
-
-  async initEscrowClient() {
-    const provider = new ethers.providers.JsonRpcProvider(this.ethereumConfig.jsonRpcUrl);
-    this.signer = new ethers.Wallet(this.ethereumConfig.privateKey, provider);
-
-    this.escrowClient = new EscrowClient(await InitClient.getParams(provider));
-  }
+    @Inject(Web3Service)
+    private readonly web3Service: Web3Service,
+    private readonly httpService: HttpService,
+  ) {}
 
   async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<string> {
-    // Validate if recording oracle address is valid
-    const recordingOracleAddress = await this.escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
+    const signer = this.web3Service.getSigner(jobSolution.chainId);
+    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
 
-    if (ethers.utils.getAddress(recordingOracleAddress) !== (await this.signer.getAddress())) {
+    // Validate if recording oracle address is valid
+    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
+
+    if (ethers.utils.getAddress(recordingOracleAddress) !== (await signer.getAddress())) {
       throw new Error("Escrow Recording Oracle address mismatches the current one");
     }
 
     // Validate if the escrow is in the correct state
-    const escrowStatus = await this.escrowClient.getStatus(jobSolution.escrowAddress);
+    const escrowStatus = await escrowClient.getStatus(jobSolution.escrowAddress);
     if (escrowStatus !== EscrowStatus.Pending) {
       throw new Error("Escrow is not in the Pending status");
     }
 
     // Validate if the escrow has the correct manifest
-    const manifestUrl = await this.escrowClient.getManifestUrl(jobSolution.escrowAddress);
+    const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
     const { fortunesRequired, reputationOracleUrl } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
       string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +61,7 @@ export class JobService {
     const bucket = this.storageConfig.bucket;
 
     // Download existing solution if any
-    const existingJobSolutionsURL = await this.escrowClient.getResultsUrl(jobSolution.escrowAddress);
+    const existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
 
     const existingJobSolutions = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL).catch(() => []);
 
@@ -90,11 +83,11 @@ export class JobService {
     const [jobSolutionUploaded] = await storageClient.uploadFiles([newJobSolutions], bucket);
 
     // Save solution URL/HASH on-chain
-    await this.escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
+    await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
 
     // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
     if (newJobSolutions.length === fortunesRequired) {
-      await axios.post(`${reputationOracleUrl.replace(/\/+$/, "")}/send-fortunes`, newJobSolutions);
+      await this.httpService.post(`${reputationOracleUrl.replace(/\/+$/, "")}/send-fortunes`, newJobSolutions);
       return "The requested job is completed.";
     }
 

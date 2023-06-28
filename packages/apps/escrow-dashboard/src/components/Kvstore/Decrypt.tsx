@@ -1,4 +1,5 @@
 import KVStore from '@human-protocol/core/abis/KVStore.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
@@ -15,8 +16,6 @@ import { useState, ChangeEvent, FC } from 'react';
 import { useContractRead, useAccount, useNetwork } from 'wagmi';
 
 import { Alert } from '../Alert';
-
-import { ESCROW_NETWORKS, ChainId } from 'src/constants';
 import { showIPFS } from 'src/services';
 
 export const Decrypt: FC = () => {
@@ -33,8 +32,7 @@ export const Decrypt: FC = () => {
 
   const { address } = useAccount();
   const { refetch } = useContractRead({
-    address: ESCROW_NETWORKS[chain?.id as ChainId]
-      ?.kvstoreAddress as `0x${string}`,
+    address: NETWORKS[chain?.id as ChainId]?.kvstoreAddress as `0x${string}`,
     abi: KVStore,
     functionName: 'get',
     args: [address, key],

@@ -53,6 +53,14 @@ export default defineConfig(({ mode }) => {
         reporter: ['text', 'json', 'html'],
       },
     },
+    optimizeDeps: {
+      include: ['@human-protocol/sdk'],
+    },
+    build: {
+      commonjsOptions: {
+        include: [/human-protocol-sdk/, /node_modules/],
+      },
+    },
     server: {
       port: 3002,
     },

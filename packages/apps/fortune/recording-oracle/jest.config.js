@@ -9,6 +9,7 @@ module.exports = {
   },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
-    uuid: require.resolve("uuid"),
+    "^axios$": require.resolve("axios"),
+    "^uuid$": require.resolve("uuid"),
   },
 };

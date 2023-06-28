@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { ArrowDropDown as ArrowDropDownIcon } from '@mui/icons-material';
 import {
   Box,
@@ -11,12 +12,9 @@ import {
 import { styled } from '@mui/material/styles';
 import { FC, MouseEvent, useState } from 'react';
 import { useAccount, useChainId } from 'wagmi';
-
 import { CopyLinkIcon, OpenInNewIcon } from '../Icons';
 import { WalletModal } from '../WalletModal';
-
 import profileSvg from 'src/assets/profile.svg';
-import { ChainId, ESCROW_NETWORKS } from 'src/constants';
 import useWalletBalance from 'src/hooks/useWalletBalance';
 import { shortenAddress } from 'src/utils';
 
@@ -59,7 +57,7 @@ export const ConnectButton: FC = () => {
 
   const walletBalance = useWalletBalance();
 
-  const network = ESCROW_NETWORKS[chainId as ChainId];
+  const network = NETWORKS[chainId as ChainId];
   const accountUrl = `${network?.scanUrl}/address/${address}`;
   const tokenUrl = `${network?.scanUrl}/token/${network?.hmtAddress}`;
 

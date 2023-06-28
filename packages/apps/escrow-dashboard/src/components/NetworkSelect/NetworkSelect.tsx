@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import {
   FormControl,
   InputLabel,
@@ -7,9 +8,8 @@ import {
   SelectProps,
 } from '@mui/material';
 import { FC } from 'react';
-
 import { CHAIN_ICONS } from '../Icons/chains';
-import { ChainId, ESCROW_NETWORKS, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { SUPPORTED_CHAIN_IDS } from 'src/constants';
 
 interface NetworkSelectProps extends SelectProps {
   showAllNetwork?: boolean;
@@ -53,7 +53,7 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
                 {IconComponent}
               </ListItemIcon>
             )}
-            {ESCROW_NETWORKS[chainId]?.title}
+            {NETWORKS[chainId]?.title}
           </MenuItem>
         );
       })}

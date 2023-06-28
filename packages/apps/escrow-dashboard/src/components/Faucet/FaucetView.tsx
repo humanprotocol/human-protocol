@@ -1,3 +1,4 @@
+import { ChainId, NETWORKS, NetworkData } from '@human-protocol/sdk';
 import {
   Box,
   Grid,
@@ -8,12 +9,8 @@ import {
   Typography,
 } from '@mui/material';
 import { FC, useState } from 'react';
-
 import { RequestData } from './RequestData';
 import { Success } from './Success';
-
-import { ChainId, ESCROW_NETWORKS } from 'src/constants';
-import { EscrowNetwork } from 'src/types';
 
 const STEPS = ['Wallet Address', 'Send Test tokens', 'Confirmation'];
 const STEPS_FOR_SKALE = ['Wallet Address', 'Send sFUEL', 'Confirmation'];
@@ -21,8 +18,8 @@ const STEPS_FOR_SKALE = ['Wallet Address', 'Send sFUEL', 'Confirmation'];
 export const FaucetView: FC = () => {
   const [step, setStep] = useState<number>(0);
   const [txHash, setTxHash] = useState<string>('');
-  const [network, setNetwork] = useState<EscrowNetwork>(
-    ESCROW_NETWORKS[ChainId.POLYGON_MUMBAI]!
+  const [network, setNetwork] = useState<NetworkData>(
+    NETWORKS[ChainId.POLYGON_MUMBAI]!
   );
 
   return (

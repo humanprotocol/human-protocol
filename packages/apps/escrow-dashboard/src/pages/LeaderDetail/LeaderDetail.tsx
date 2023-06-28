@@ -1,3 +1,4 @@
+import { NETWORKS } from '@human-protocol/sdk';
 import {
   Box,
   Button,
@@ -28,7 +29,6 @@ import {
   PageWrapper,
   ViewTitle,
 } from 'src/components';
-import { ESCROW_NETWORKS } from 'src/constants';
 import { AppState } from 'src/state';
 import { useFetchLeaderData } from 'src/state/leader/hooks';
 
@@ -120,7 +120,7 @@ export const LeaderDetail: FC = () => {
                   <CardTextRow label="Role" value={currentLeader?.role} />
                   <CardTextRow
                     label="Network"
-                    value={ESCROW_NETWORKS[currentLeader.chainId]?.title}
+                    value={NETWORKS[currentLeader.chainId]?.title}
                   />
                   <CardTextRow label="World Rank" value="#1003" />
                   <CardTextRow
