@@ -10,7 +10,6 @@ import {
   Repository,
 } from 'typeorm';
 import { ErrorReputation } from '../../common/constants/errors';
-import { WebhookIncomingEntity } from '../webhook/webhook-incoming.entity';
 import { ReputationCreateDto, ReputationUpdateDto } from './reputation.dto';
 
 @Injectable()

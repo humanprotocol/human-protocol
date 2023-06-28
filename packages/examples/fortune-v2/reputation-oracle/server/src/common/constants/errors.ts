@@ -87,6 +87,13 @@ export enum ErrorReputation {
  * Represents error messages related to results.
  */
 export enum ErrorResults {
-  NoRecordingOracleResultsFound = 'No recording oracle results found',
+  NoIntermediateResultsFound = 'No intermediate results found',
   NoResultsHaveBeenVerified = 'No results have been verified',
+}
+
+/**
+ * Represents error messages related to manifest.
+ */
+export enum ErrorManifest {
+  ManifestUrlDoesNotExist = 'Manifest url does not exist',
 }

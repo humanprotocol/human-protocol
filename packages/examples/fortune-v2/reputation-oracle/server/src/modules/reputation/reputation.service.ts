@@ -51,10 +51,14 @@ export class ReputationService {
       this.reputationRepository.create({
         chainId,
         address,
-        reputationPoints: INITIAL_REPUTATION - 1,
+        reputationPoints: INITIAL_REPUTATION,
         type,
       });
 
+      return;
+    }
+
+    if (reputationEntity.reputationPoints === INITIAL_REPUTATION) {
       return;
     }
 

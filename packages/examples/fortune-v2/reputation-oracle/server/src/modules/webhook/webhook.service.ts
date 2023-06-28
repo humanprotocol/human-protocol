@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  ChainId,
   EscrowClient,
   InitClient,
   StorageClient,
@@ -8,13 +9,12 @@ import {
   StorageParams,
 } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
+import { FinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
 import {
-  FinalResult,
-  ManifestDto,
-  WebhookIncomingCreateDto,
-  WebhookIncomingDto,
-} from './webhook.dto';
-import { ErrorResults, ErrorWebhook } from '../../common/constants/errors';
+  ErrorManifest,
+  ErrorResults,
+  ErrorWebhook,
+} from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
 import { ReputationEntityType, WebhookStatus } from '../../common/decorators';
 import { JobRequestType } from '../../common/enums/job';
@@ -23,6 +23,7 @@ import { checkCurseWords } from '../../common/helpers/utils';
 import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class WebhookService {
@@ -38,17 +39,17 @@ export class WebhookService {
     private readonly configService: ConfigService,
   ) {
     const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>('S3_ACCESS_KEY', ''),
-      secretKey: this.configService.get<string>('S3_SECRET_KEY', ''),
+      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
+      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
     };
 
     this.storageParams = {
-      endPoint: this.configService.get<string>('S3_ENDPOINT', '127.0.0.1'),
-      port: Number(this.configService.get<number>('S3_PORT', 9000)),
-      useSSL: Boolean(this.configService.get<boolean>('S3_USE_SSL', false)),
+      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
+      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
+      useSSL: Boolean(this.configService.get<boolean>(ConfigNames.S3_USE_SSL)!),
     };
 
-    this.bucket = this.configService.get<string>('S3_BUCKET', 'launcher');
+    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -56,6 +57,12 @@ export class WebhookService {
     );
   }
 
+  /**
+   * Create a incoming webhook using the DTO data.
+   * @param dto - Data to create an incoming webhook.
+   * @returns {Promise<boolean>} - Return the boolean result of the method.
+   * @throws {Error} - An error object if an error occurred.
+   */
   public async createIncomingWebhook(
     dto: WebhookIncomingDto,
   ): Promise<boolean> {
@@ -78,6 +85,12 @@ export class WebhookService {
     }
   }
 
+  /**
+   * Processing a webhook of an entity with a pending status.
+   * @param webhookEntity - The webhook is the entity to process.
+   * @returns {Promise<boolean>} - Return the boolean result of the method.
+   * @throws {Error} - An error object if an error occurred.
+   */
   public async processPendingWebhook(
     webhookEntity: WebhookIncomingEntity,
   ): Promise<boolean> {
@@ -90,22 +103,163 @@ export class WebhookService {
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,
       );
+
+      if (!manifestUrl) {
+        this.logger.log(
+          ErrorManifest.ManifestUrlDoesNotExist,
+          WebhookService.name,
+        );
+        throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
+      }
       const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(
         manifestUrl,
       );
 
+      const intermediateResults = await this.getIntermediateResults(
+        webhookEntity.chainId,
+        webhookEntity.escrowAddress,
+      );
+
+      let finalResults: FinalResult[] = [];
       if (manifest.requestType === JobRequestType.FORTUNE) {
-        await this.validateFortune(webhookEntity, manifest);
+        finalResults = await this.finalizeFortuneResults(intermediateResults);
       } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         // TODO: Implement CVAT job processing
       }
 
+      const [{ url, hash }] = await this.storageClient.uploadFiles(
+        [finalResults],
+        this.bucket,
+      );
+
+      await escrowClient.storeResults(webhookEntity.escrowAddress, url, hash);
+
+      const checkPassed = intermediateResults.length <= finalResults.length;
+
+      await this.webhookRepository.updateOne(
+        {
+          id: webhookEntity.id,
+        },
+        {
+          resultsUrl: url,
+          checkPassed,
+          status: WebhookStatus.PAID,
+          retriesCount: 0,
+        },
+      );
+
+      const recipients = finalResults.map((item) => item.workerAddress);
+
+      const amounts = new Array(recipients.length).fill(
+        BigNumber.from(manifest.fundAmount).div(recipients.length),
+      );
+
+      await escrowClient.bulkPayOut(
+        webhookEntity.escrowAddress,
+        recipients,
+        amounts,
+        url,
+        hash,
+      );
+
       return true;
     } catch (e) {
+      if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {
+        await this.webhookRepository.updateOne(
+          {
+            id: webhookEntity.id,
+          },
+          { status: WebhookStatus.FAILED },
+        );
+      } else {
+        await this.webhookRepository.updateOne(
+          {
+            id: webhookEntity.id,
+          },
+          {
+            retriesCount: webhookEntity.retriesCount + 1,
+            waitUntil: new Date(),
+          },
+        );
+      }
+
+      this.logger.log(
+        'An error occurred during webhook validation: ',
+        e,
+        WebhookService.name,
+      );
+
       return false;
     }
   }
 
+  /**
+   * Get the oracle intermediate results at the escrow address.
+   * @param chainId - Chain id.
+   * @param escrowAddress - Escrow address for which results will be obtained.
+   * @returns {Promise<FinalResult[]>} - Return an array of intermediate results.
+   * @throws {Error} - An error object if an error occurred.
+   */
+  public async getIntermediateResults(
+    chainId: ChainId,
+    escrowAddress: string,
+  ): Promise<FinalResult[]> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const clientParams = await InitClient.getParams(signer);
+    const escrowClient = new EscrowClient(clientParams);
+
+    const intermediateResultsUrl = await escrowClient.getResultsUrl(
+      escrowAddress,
+    );
+    const intermediateResults: FinalResult[] =
+      await StorageClient.downloadFileFromUrl(intermediateResultsUrl).catch(
+        () => [],
+      );
+
+    if (intermediateResults.length === 0) {
+      this.logger.log(
+        ErrorResults.NoIntermediateResultsFound,
+        WebhookService.name,
+      );
+      throw new Error(ErrorResults.NoIntermediateResultsFound);
+    }
+
+    return intermediateResults;
+  }
+
+  /**
+   * Validate intermediate fortune results for curses and uniqueness and return their final version.
+   * @param results - Intermediate results to be validated and finalized.
+   * @returns {Promise<FinalResult[]>} - Return an array of final results.
+   * @throws {Error} - An error object if an error occurred.
+   */
+  public async finalizeFortuneResults(
+    results: FinalResult[],
+  ): Promise<FinalResult[]> {
+    const finalResults: FinalResult[] = results.filter(
+      (item) =>
+        !checkCurseWords(item.solution) ||
+        !results.some((result) => result.solution === item.solution),
+    );
+
+    if (finalResults.length === 0) {
+      this.logger.log(
+        ErrorResults.NoResultsHaveBeenVerified,
+        WebhookService.name,
+      );
+      throw new Error(ErrorResults.NoResultsHaveBeenVerified);
+    }
+
+    return finalResults;
+  }
+
+  /**
+   * Processing a webhook of an entity with a paid status.
+   * @param webhookEntity - The webhook is the entity to process.
+   * @returns {Promise<boolean>} - Return the boolean result of the method.
+   * @throws {Error} - An error object if an error occurred.
+   */
   public async processPaidWebhook(
     webhookEntity: WebhookIncomingEntity,
   ): Promise<boolean> {
@@ -122,6 +276,7 @@ export class WebhookService {
         await StorageClient.downloadFileFromUrl(finalResultsUrl).catch(
           () => [],
         );
+
       if (finalResults.length === 0) {
         this.logger.log(
           ErrorResults.NoResultsHaveBeenVerified,
@@ -164,117 +319,6 @@ export class WebhookService {
           id: webhookEntity.id,
         },
         { status: WebhookStatus.COMPLETED },
-      );
-
-      return true;
-    } catch (e) {
-      if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {
-        await this.webhookRepository.updateOne(
-          {
-            id: webhookEntity.id,
-          },
-          { status: WebhookStatus.FAILED },
-        );
-      } else {
-        await this.webhookRepository.updateOne(
-          {
-            id: webhookEntity.id,
-          },
-          {
-            retriesCount: webhookEntity.retriesCount + 1,
-            waitUntil: new Date(),
-          },
-        );
-      }
-
-      this.logger.log(
-        'An error occurred during webhook validation: ',
-        e,
-        WebhookService.name,
-      );
-
-      return false;
-    }
-  }
-
-  public async validateFortune(
-    webhookEntity: WebhookIncomingEntity,
-    manifest: ManifestDto,
-  ): Promise<boolean> {
-    const signer = this.web3Service.getSigner(webhookEntity.chainId);
-    const clientParams = await InitClient.getParams(signer);
-    const escrowClient = new EscrowClient(clientParams);
-
-    try {
-      const recordingOracleResultsUrl = await escrowClient.getResultsUrl(
-        webhookEntity.escrowAddress,
-      );
-      const recordingOracleResults: FinalResult[] =
-        await StorageClient.downloadFileFromUrl(
-          recordingOracleResultsUrl,
-        ).catch(() => []);
-
-      if (recordingOracleResults.length === 0) {
-        this.logger.log(
-          ErrorResults.NoRecordingOracleResultsFound,
-          WebhookService.name,
-        );
-        throw new Error(ErrorResults.NoRecordingOracleResultsFound);
-      }
-      const finalResults: FinalResult[] = recordingOracleResults.filter(
-        (item) =>
-          !checkCurseWords(item.solution) ||
-          !recordingOracleResults.some(
-            (result) => result.solution === item.solution,
-          ),
-      );
-
-      if (finalResults.length === 0) {
-        this.logger.log(
-          ErrorResults.NoResultsHaveBeenVerified,
-          WebhookService.name,
-        );
-        throw new Error(ErrorResults.NoResultsHaveBeenVerified);
-      }
-
-      const [uploadedResult] = await this.storageClient.uploadFiles(
-        [finalResults],
-        this.bucket,
-      );
-
-      const finalResultsUrl = uploadedResult.key;
-      const finalResultsHash = uploadedResult.hash;
-      await escrowClient.storeResults(
-        webhookEntity.escrowAddress,
-        finalResultsUrl,
-        finalResultsHash,
-      );
-
-      const checkPassed = recordingOracleResults.length <= finalResults.length;
-
-      await this.webhookRepository.updateOne(
-        {
-          id: webhookEntity.id,
-        },
-        {
-          resultsUrl: finalResultsUrl,
-          checkPassed,
-          status: WebhookStatus.PAID,
-          retriesCount: 0,
-        },
-      );
-
-      const recipients = finalResults.map((item) => item.workerAddress);
-      const amounts = new Array(recipients.length).fill(
-        BigNumber.from(manifest.fundAmount).div(recipients.length),
-      );
-
-      await escrowClient.bulkPayOut(
-        webhookEntity.escrowAddress,
-        recipients,
-        amounts,
-        finalResultsUrl,
-        finalResultsHash,
       );
 
       return true;
