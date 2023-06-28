@@ -22,6 +22,10 @@ export class WebhookIncomingDto {
 }
 
 export class WebhookIncomingCreateDto extends WebhookIncomingDto {
+  @ApiProperty()
+  @IsString()
+  public oracleAddress: string;
+
   @IsEnum(WebhookStatus)
   public status: WebhookStatus;
 

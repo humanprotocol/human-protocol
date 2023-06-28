@@ -69,6 +69,7 @@ export class WebhookService {
     try {
       const webhookEntity = await this.webhookRepository.create({
         chainId: dto.chainId,
+        oracleAddress: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),

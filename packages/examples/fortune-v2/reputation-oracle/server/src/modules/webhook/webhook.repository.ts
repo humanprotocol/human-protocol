@@ -42,8 +42,15 @@ export class WebhookRepository {
   public async findOne(
     where: FindOptionsWhere<WebhookIncomingEntity>,
     options?: FindOneOptions<WebhookIncomingEntity>,
-  ): Promise<WebhookIncomingEntity | null> {
-    return this.webhookIncomingEntityRepository.findOne({ where, ...options });
+  ): Promise<WebhookIncomingEntity> {
+    const webhookEntity = await this.webhookIncomingEntityRepository.findOne({ where, ...options });
+
+    if (!webhookEntity) {
+      this.logger.log(ErrorWebhook.NotFound, WebhookIncomingEntity.name);
+      throw new NotFoundException(ErrorWebhook.NotFound);
+    }
+
+    return webhookEntity;
   }
 
   public find(
@@ -61,7 +68,11 @@ export class WebhookRepository {
 
   public async create(
     dto: WebhookIncomingCreateDto,
-  ): Promise<WebhookIncomingEntity> {
-    return this.webhookIncomingEntityRepository.create(dto).save();
+  ): Promise<WebhookIncomingEntity | undefined> {
+    try {
+      return this.webhookIncomingEntityRepository.create(dto).save();
+    } catch (e) {
+      return;
+    }
   }
 }
