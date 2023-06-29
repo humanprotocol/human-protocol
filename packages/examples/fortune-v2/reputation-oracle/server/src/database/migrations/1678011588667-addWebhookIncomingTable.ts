@@ -37,10 +37,12 @@ export class addWebhookIncomingTable1678011588667
         {
           name: 'results_url',
           type: 'varchar',
+          isNullable: true,
         },
         {
           name: 'check_passed',
           type: 'boolean',
+          isNullable: true,
         },
         {
           name: 'retries_count',
