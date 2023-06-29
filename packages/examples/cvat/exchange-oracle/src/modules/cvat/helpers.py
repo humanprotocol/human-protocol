@@ -1,9 +1,9 @@
 from urllib.parse import urlparse
 
-from .constants import JobTypes, Providers, CvatLabelTypes
+from src.modules.cvat.constants import JobTypes, Providers, CvatLabelTypes
 
 
-type_mapping = {JobTypes.image_label_binary: CvatLabelTypes.tag}
+type_mapping = {JobTypes.image_label_binary: CvatLabelTypes.tag.value}
 
 
 def parse_data_url(data_url: str) -> tuple:

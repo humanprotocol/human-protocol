@@ -1,9 +1,10 @@
 from src.db import SessionLocal
+from src.modules.cvat.constants import EventTypes
 
 import src.modules.cvat.service as cvat_service
 
 
-def handle_update_job_event(payload: dict):
+def handle_update_job_event(payload: dict) -> None:
     with SessionLocal.begin() as session:
         job = cvat_service.get_job_by_cvat_id(session, payload.job["id"])
         if not job:
@@ -29,7 +30,7 @@ def handle_update_job_event(payload: dict):
                 cvat_service.update_job_status(session, job.id, payload.job["state"])
 
 
-def handle_create_job_event(payload: dict):
+def handle_create_job_event(payload: dict) -> None:
     with SessionLocal.begin() as session:
         job = cvat_service.get_job_by_cvat_id(session, payload.job["id"])
         if not job:
@@ -43,3 +44,11 @@ def handle_create_job_event(payload: dict):
                 else "",
                 payload.job["state"],
             )
+
+
+def cvat_webhook_handler(cvat_webhook: dict) -> None:
+    match cvat_webhook.event:
+        case EventTypes.update_job.value:
+            handle_update_job_event(cvat_webhook)
+        case EventTypes.create_job.value:
+            handle_create_job_event(cvat_webhook)
