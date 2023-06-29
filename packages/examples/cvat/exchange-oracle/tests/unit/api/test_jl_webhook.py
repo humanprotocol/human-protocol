@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 from human_protocol_sdk.constants import Status
-from src.modules.api_schema import JLWebhook
+from src.modules.api_schema import OracleWebhook
 
 
 def test_incoming_webhook_200(client: TestClient) -> None:
@@ -47,7 +47,11 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         )
         mock_session_local.assert_called_once()
         mock_create_webhook.assert_called_once_with(
-            mock_session, JLWebhook(**data), "mocked signature"
+            mock_session,
+            data["escrow_address"],
+            data["chain_id"],
+            "job_launcher",
+            "mocked signature",
         )
 
 

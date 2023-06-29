@@ -23,7 +23,7 @@ def track_completed_projects() -> None:
             # Get active projects from db
             projects = cvat_service.get_projects_by_status(
                 session,
-                ProjectStatuses.annotation,
+                ProjectStatuses.annotation.value,
                 limit=CronConfig.track_completed_projects_chunk_size,
             )
 
@@ -32,10 +32,10 @@ def track_completed_projects() -> None:
                     session, project.cvat_id
                 )
                 if len(tasks) > 0 and all(
-                    task.status == TaskStatuses.completed for task in tasks
+                    task.status == TaskStatuses.completed.value for task in tasks
                 ):
                     cvat_service.update_project_status(
-                        session, project.id, ProjectStatuses.completed
+                        session, project.id, ProjectStatuses.completed.value
                     )
 
         logger.info(f"{LOG_MODULE}[track_completed_projects] Finishing cron job")
@@ -56,16 +56,16 @@ def track_completed_tasks() -> None:
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
                 session,
-                TaskStatuses.annotation,
+                TaskStatuses.annotation.value,
             )
 
             for task in tasks:
                 jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
                 if len(jobs) > 0 and all(
-                    job.status == JobStatuses.completed for job in jobs
+                    job.status == JobStatuses.completed.value for job in jobs
                 ):
                     cvat_service.update_task_status(
-                        session, task.id, TaskStatuses.completed
+                        session, task.id, TaskStatuses.completed.value
                     )
 
         logger.info(f"{LOG_MODULE}[track_completed_tasks] Finishing cron job")

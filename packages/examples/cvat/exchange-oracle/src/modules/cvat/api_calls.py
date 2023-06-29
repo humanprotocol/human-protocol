@@ -15,7 +15,7 @@ configuration = Configuration(
 )
 
 
-def create_cloudstorage(provider: str, bucket_name: str) -> int:
+def create_cloudstorage(provider: str, bucket_name: str) -> Dict:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
@@ -95,7 +95,7 @@ def create_task(project_id: int, escrow_address: str) -> Dict:
             logger.error(f"Exception when calling tasks_api.create: {e}\n")
 
 
-def get_cloudstorage_content(cloudstorage_id: int) -> List:
+def get_cloudstorage_content(cloudstorage_id: int) -> List[str]:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         try:
@@ -163,7 +163,7 @@ def get_job_annotations(cvat_project_id: int) -> Dict:
             logger.error(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
 
 
-def delete_project(cvat_id: int):
+def delete_project(cvat_id: int) -> None:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         try:
@@ -172,7 +172,7 @@ def delete_project(cvat_id: int):
             logger.error(f"Exception when calling ProjectsApi.destroy(): {e}\n")
 
 
-def delete_cloustorage(cvat_id: int):
+def delete_cloustorage(cvat_id: int) -> None:
     logger = logging.getLogger("app")
     with ApiClient(configuration) as api_client:
         try:

@@ -50,9 +50,7 @@ class CronConfig:
         "TRACK_COMPLETED_PROJECTS_CHUNK_SIZE", 5
     )
     track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT", 3000))
-    track_completed_tasks_chunk_size = os.environ.get(
-        "TRACK_COMPLETED_TASKS_CHUNK_SIZE", 5
-    )
+
     retrieve_annotatons_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT", 3000))
     retrieve_annotations_chunk_size = os.environ.get(
         "RETRIEVE_ANNOTATIONS_CHUNK_SIZE", 5
@@ -79,6 +77,12 @@ class StorageConfig:
     access_key = os.environ.get("ACCESS_KEY", "")
     secret_key = os.environ.get("SECRET_KEY", "")
     results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
+
+    @classmethod
+    def bucket_url(cls):
+        return (
+            f"https://{StorageConfig.results_bucket_name}.{StorageConfig.endpoint_url}/"
+        )
 
 
 class Config:
