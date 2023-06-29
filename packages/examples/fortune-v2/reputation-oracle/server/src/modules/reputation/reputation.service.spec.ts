@@ -10,7 +10,7 @@ import { createMock } from '@golevelup/ts-jest';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,
-      reputationRepository: ReputationRepository;
+    reputationRepository: ReputationRepository;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -35,7 +35,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
     const type = ReputationEntityType.WORKER;
-    
+
     it('should create a new reputation entity if not found', async () => {
       jest
         .spyOn(reputationRepository, 'findOne')
@@ -76,7 +76,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
     const type = ReputationEntityType.WORKER;
-    
+
     it('should create a new reputation entity if not found', async () => {
       jest
         .spyOn(reputationRepository, 'findOne')

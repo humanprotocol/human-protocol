@@ -43,7 +43,10 @@ export class WebhookRepository {
     where: FindOptionsWhere<WebhookIncomingEntity>,
     options?: FindOneOptions<WebhookIncomingEntity>,
   ): Promise<WebhookIncomingEntity> {
-    const webhookEntity = await this.webhookIncomingEntityRepository.findOne({ where, ...options });
+    const webhookEntity = await this.webhookIncomingEntityRepository.findOne({
+      where,
+      ...options,
+    });
 
     if (!webhookEntity) {
       this.logger.log(ErrorWebhook.NotFound, WebhookIncomingEntity.name);

@@ -43,7 +43,10 @@ export class ReputationRepository {
     where: FindOptionsWhere<ReputationEntity>,
     options?: FindOneOptions<ReputationEntity>,
   ): Promise<ReputationEntity> {
-    const reputationEntity = await this.reputationEntityRepository.findOne({ where, ...options });
+    const reputationEntity = await this.reputationEntityRepository.findOne({
+      where,
+      ...options,
+    });
 
     if (!reputationEntity) {
       this.logger.log(ErrorReputation.NotFound, ReputationEntity.name);
