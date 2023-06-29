@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: dc10ddee57c9
+Revision ID: 60c33707b2dc
 Revises: 
-Create Date: 2023-06-27 13:41:06.640762
+Create Date: 2023-06-29 13:40:04.052820
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "dc10ddee57c9"
+revision = "60c33707b2dc"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.Column("status", sa.String(), nullable=False),
         sa.Column("job_type", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
+        sa.Column("chain_id", sa.Integer(), nullable=False),
         sa.Column("bucket_url", sa.String(), nullable=False),
         sa.Column(
             "created_at",
@@ -112,8 +113,7 @@ def upgrade() -> None:
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(
-            ["cvat_project_id"],
-            ["projects.cvat_id"],
+            ["cvat_project_id"], ["projects.cvat_id"], ondelete="CASCADE"
         ),
         sa.ForeignKeyConstraint(
             ["cvat_task_id"], ["tasks.cvat_id"], ondelete="CASCADE"

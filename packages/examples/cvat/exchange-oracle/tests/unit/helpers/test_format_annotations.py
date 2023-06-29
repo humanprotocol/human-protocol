@@ -1,4 +1,6 @@
-from src.modules.cvat.format_annotations import process_image_label_binary_annotations
+from src.modules.cvat.handlers.annotation import (
+    process_image_label_binary_raw_annotations,
+)
 from tests.unit.helpers.predefined_annotations import (
     raw_binary_annotations,
     binary_annotations,
@@ -8,13 +10,9 @@ from tests.unit.helpers.predefined_annotations import (
 def test_process_image_label_binary_annotations():
     bucket_url = "https://test.storage.googleapis.com/"
     assignee = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
-    annotations = process_image_label_binary_annotations([], [], bucket_url, assignee)
+    handler = process_image_label_binary_raw_annotations
 
-    assert annotations == []
-
-    annotations = process_image_label_binary_annotations(
-        annotations, raw_binary_annotations, bucket_url, assignee
-    )
+    annotations = handler([], raw_binary_annotations, bucket_url, assignee)
     annotations_check = [
         {
             "url": f"{bucket_url}1.jpg",
@@ -31,7 +29,7 @@ def test_process_image_label_binary_annotations():
     ]
     assert annotations == annotations_check
 
-    new_annotations = process_image_label_binary_annotations(
+    new_annotations = handler(
         binary_annotations, raw_binary_annotations, bucket_url, assignee
     )
 

@@ -1,10 +1,10 @@
 """ API endpoints """
 from fastapi import APIRouter, FastAPI
 
-from .api_schema import ValidationErrorResponse, ResponseError, MetaResponse
-from .config import Config
+from src.api_schema import ValidationErrorResponse, ResponseError, MetaResponse
+from src.config import Config
 
-from .modules.api import router
+from src.modules.api import router
 
 
 greet_router = APIRouter()

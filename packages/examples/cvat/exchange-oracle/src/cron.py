@@ -1,15 +1,13 @@
-from typing import Callable
-
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.config import Config
-from src.modules.cvat.track_completed import (
+from src.modules.cvat.jobs.track_completed import (
     track_completed_projects,
     track_completed_tasks,
 )
-from src.modules.cvat.retrieve_annotations import retrieve_annotations
-from src.modules.oracle_webhooks.process_pending import process_incoming_webhooks
+from src.modules.cvat.jobs.retrieve_annotations import retrieve_annotations
+from src.modules.oracle_webhook.jobs.process_incoming import process_incoming_webhooks
 
 
 def setup_cron_jobs(app: FastAPI):
