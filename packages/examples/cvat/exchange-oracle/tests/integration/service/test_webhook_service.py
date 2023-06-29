@@ -4,12 +4,19 @@ import uuid
 from pydantic import ValidationError
 from src.db import SessionLocal
 from src.constants import Networks
-from src.modules.oracle_webhooks.constants import WebhookStatuses, WebhookTypes
-from src.modules.oracle_webhooks.model import Webhook
-from src.modules.api_schema import JLWebhook
+from src.modules.oracle_webhook.constants import (
+    OracleWebhookTypes,
+    OracleWebhookStatuses,
+)
+from src.modules.oracle_webhook.model import Webhook
+from src.modules.api_schema import OracleWebhook
 from sqlalchemy.exc import IntegrityError
 
-from src.modules.oracle_webhooks import service as webhook_service
+from src.modules.oracle_webhook.constants import (
+    OracleWebhookTypes,
+    OracleWebhookStatuses,
+)
+from src.modules.oracle_webhook import service as webhook_service
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -21,12 +28,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet.value
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, chain_id=chain_id)
 
         webhook_id = webhook_service.create_webhook(
-            self.session, jl_webhook=jl_webhook, signature=signature
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
         )
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
@@ -35,34 +45,51 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 0)
         self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
-        self.assertEqual(webhook.status, WebhookStatuses.pending)
+        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
     def test_create_webhook_none_escrow_address(self):
-        with self.assertRaises(ValidationError):
-            JLWebhook(escrow_address=None, chain_id=Networks.polygon_mainnet)
+        chain_id = Networks.polygon_mainnet.value
+        signature = "signature"
+        webhook_service.create_webhook(
+            self.session,
+            escrow_address=None,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
 
-    def test_create_webhook_none_network(self):
-        with self.assertRaises(ValidationError):
-            JLWebhook(
-                escrow_address="0x1234567890123456789012345678901234567890",
-                chain_id=None,
-            )
+    def test_create_webhook_none_chain_id(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        signature = "signature"
+        webhook_service.create_webhook(
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=None,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
 
     def test_create_webhook_none_signature(self):
-        jl_webhook = JLWebhook(
-            escrow_address="0x1234567890123456789012345678901234567890",
-            chain_id=Networks.polygon_mainnet,
-        )
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        chain_id = Networks.polygon_mainnet.value
 
         webhook_service.create_webhook(
-            self.session, jl_webhook=jl_webhook, signature=None
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=None,
         )
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
     def test_get_pending_webhooks(self):
-        chain_id = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet.value
 
         webhook1_id = str(uuid.uuid4())
         webhook1 = Webhook(
@@ -70,8 +97,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             signature="signature1",
             escrow_address="0x1234567890123456789012345678901234567890",
             chain_id=chain_id,
-            type=WebhookTypes.jl_webhook,
-            status=WebhookStatuses.pending,
+            type=OracleWebhookTypes.job_launcher.value,
+            status=OracleWebhookStatuses.pending.value,
         )
         webhook2_id = str(uuid.uuid4())
         webhook2 = Webhook(
@@ -79,8 +106,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             signature="signature2",
             escrow_address="0x1234567890123456789012345678901234567891",
             chain_id=chain_id,
-            type=WebhookTypes.jl_webhook,
-            status=WebhookStatuses.pending,
+            type=OracleWebhookTypes.job_launcher.value,
+            status=OracleWebhookStatuses.pending.value,
         )
         webhook3_id = str(uuid.uuid4())
         webhook3 = Webhook(
@@ -88,8 +115,8 @@ class ServiceIntegrationTest(unittest.TestCase):
             signature="signature3",
             escrow_address="0x1234567890123456789012345678901234567892",
             chain_id=chain_id,
-            type=WebhookTypes.jl_webhook,
-            status=WebhookStatuses.completed,
+            type=OracleWebhookTypes.job_launcher.value,
+            status=OracleWebhookStatuses.completed.value,
         )
 
         self.session.add(webhook1)
@@ -108,16 +135,19 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_update_webhook_status(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet.value
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, chain_id=chain_id)
 
         webhook_id = webhook_service.create_webhook(
-            self.session, jl_webhook=jl_webhook, signature=signature
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
         )
 
         webhook_service.update_webhook_status(
-            self.session, webhook_id, WebhookStatuses.completed
+            self.session, webhook_id, OracleWebhookStatuses.completed.value
         )
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
@@ -126,20 +156,21 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 0)
         self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
-        self.assertEqual(webhook.status, WebhookStatuses.completed)
+        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
 
-    def test_update_task_invalid_status(self):
+    def test_update_webhook_invalid_status(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet.value
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, chain_id=chain_id)
 
         webhook_id = webhook_service.create_webhook(
-            self.session, jl_webhook=jl_webhook, signature=signature
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
         )
-
-        webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
         with self.assertRaises(ValueError):
             webhook_service.update_webhook_status(
@@ -148,12 +179,15 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_handle_webhook_fail(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet
+        chain_id = Networks.polygon_mainnet.value
         signature = "signature"
-        jl_webhook = JLWebhook(escrow_address=escrow_address, chain_id=chain_id)
 
         webhook_id = webhook_service.create_webhook(
-            self.session, jl_webhook=jl_webhook, signature=signature
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.job_launcher.value,
+            signature=signature,
         )
 
         webhook_service.handle_webhook_fail(self.session, webhook_id)
@@ -164,8 +198,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 1)
         self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
-        self.assertEqual(webhook.status, WebhookStatuses.pending)
+        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
         for i in range(4):
             webhook_service.handle_webhook_fail(self.session, webhook_id)
@@ -176,5 +210,5 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.chain_id, chain_id)
         self.assertEqual(webhook.attempts, 5)
         self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, WebhookTypes.jl_webhook)
-        self.assertEqual(webhook.status, WebhookStatuses.failed)
+        self.assertEqual(webhook.type, OracleWebhookTypes.job_launcher.value)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.failed.value)
