@@ -12,7 +12,7 @@ class CvatWebhook(BaseModel):
     before_update: Optional[dict]
 
 
-class JLWebhook(BaseModel):
+class OracleWebhook(BaseModel):
     escrow_address: str
     chain_id: Networks
 
@@ -30,5 +30,5 @@ class JLWebhook(BaseModel):
         }
 
 
-class JLWebhookResponse(BaseModel):
+class OracleWebhookResponse(BaseModel):
     id: str

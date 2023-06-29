@@ -3,7 +3,13 @@ from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from .constants import ProjectStatuses, TaskStatuses, JobStatuses, JobTypes
+from src.constants import Networks
+from src.modules.cvat.constants import (
+    ProjectStatuses,
+    TaskStatuses,
+    JobStatuses,
+    JobTypes,
+)
 from src.db import Base
 
 
@@ -15,6 +21,7 @@ class Project(Base):
     status = Column(String, Enum(ProjectStatuses), nullable=False)
     job_type = Column(String, Enum(JobTypes), nullable=False)
     escrow_address = Column(String(42), unique=True, nullable=False)
+    chain_id = Column(Integer, Enum(Networks), nullable=False)
     bucket_url = Column(String, unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -1,6 +1,5 @@
 import json
 
-from pydantic import validator
 from web3 import Web3
 
 from human_protocol_sdk.constants import Status
@@ -10,13 +9,13 @@ from human_protocol_sdk.storage import StorageClient
 from src.modules.chain.web3 import get_web3
 
 
-def validate_address(escrow_address: str):
+def validate_address(escrow_address: str) -> str:
     if not Web3.isAddress(escrow_address):
         raise ValueError(f"{escrow_address} is not a correct Web3 address")
     return Web3.toChecksumAddress(escrow_address)
 
 
-def validate_escrow(chain_id: int, escrow_address: str):
+def validate_escrow(chain_id: int, escrow_address: str) -> None:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
 
@@ -30,7 +29,7 @@ def validate_escrow(chain_id: int, escrow_address: str):
         )
 
 
-def get_escrow_manifest(chain_id: int, escrow_address: str):
+def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
 
@@ -39,3 +38,10 @@ def get_escrow_manifest(chain_id: int, escrow_address: str):
     return json.loads(
         (StorageClient.download_file_from_url(manifest_url)).decode("utf-8")
     )
+
+
+def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)
+
+    escrow_client.store_results(escrow_address, url, hash)
