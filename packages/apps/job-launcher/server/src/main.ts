@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
+import { ConfigNames } from './common/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -17,7 +18,7 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>('FE_URL', 'http://localhost:3001');
+  const baseUrl = configService.get<string>(ConfigNames.FE_URL)!;
 
   app.enableCors({
     origin:
@@ -38,7 +39,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const sessionSecret = configService.get<string>('SESSION_SECRET', '');
+  const sessionSecret = configService.get<string>(ConfigNames.SESSION_SECRET)!;
 
   app.use(
     session({
@@ -59,8 +60,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  const host = configService.get<string>('HOST', 'localhost');
-  const port = configService.get<string>('PORT', '5000');
+  const host = configService.get<string>(ConfigNames.HOST)!;
+  const port = configService.get<string>(ConfigNames.PORT)!;
 
   app.use(helmet());
 

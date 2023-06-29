@@ -7,7 +7,6 @@ import {
   Repository,
   DeleteResult,
 } from 'typeorm';
-import { ErrorAuth } from '../../common/constants/errors';
 import { AuthEntity } from './auth.entity';
 import { AuthDto } from './auth.dto';
 

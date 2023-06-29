@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, FindOptionsWhere, Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
@@ -27,6 +26,7 @@ import {
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class AuthService {
@@ -100,14 +100,8 @@ export class AuthService {
     const refreshToken = v4();
     const date = new Date();
 
-    const accessTokenExpiresIn = ~~this.configService.get<number>(
-      'JWT_ACCESS_TOKEN_EXPIRES_IN',
-      5 * 60,
-    );
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(
-      'JWT_REFRESH_TOKEN_EXPIRES_IN',
-      30 * 24 * 60 * 60,
-    );
+    const accessTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN)!;
+    const refreshTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN)!;
 
     await this.authRepository.create({
       user: userEntity,
