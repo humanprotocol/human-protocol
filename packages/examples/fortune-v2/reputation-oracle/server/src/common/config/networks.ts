@@ -35,5 +35,3 @@ export const networkMap: NetworkMapDto = {
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
   },
 };
-
-export const networks = Object.values(networkMap).map((network) => network);

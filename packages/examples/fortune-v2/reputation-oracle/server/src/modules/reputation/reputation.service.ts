@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ReputationRepository } from './reputation.repository';
 import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
-import { ReputationEntityType } from '../../common/decorators';
+import { ReputationEntityType } from '../../common/enums';
 
 @Injectable()
 export class ReputationService {

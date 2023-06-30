@@ -16,8 +16,8 @@ import {
   ErrorWebhook,
 } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { ReputationEntityType, WebhookStatus } from '../../common/decorators';
-import { JobRequestType } from '../../common/enums/job';
+import { ReputationEntityType, WebhookStatus } from '../../common/enums';
+import { JobRequestType } from '../../common/enums';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { checkCurseWords } from '../../common/helpers/utils';
 import { ReputationService } from '../reputation/reputation.service';

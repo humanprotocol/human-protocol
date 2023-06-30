@@ -22,7 +22,7 @@ import {
   ErrorResults,
   ErrorWebhook,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType } from '../../common/enums/job';
+import { JobMode, JobRequestType } from '../../common/enums';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_HASH,
@@ -33,8 +33,8 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-} from '../../common/test/constants';
-import { WebhookStatus } from '../../common/decorators';
+} from '../../../test/constants';
+import { WebhookStatus } from '../../common/enums';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
 
