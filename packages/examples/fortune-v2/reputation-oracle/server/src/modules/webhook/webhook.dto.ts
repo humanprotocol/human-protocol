@@ -7,9 +7,9 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { WebhookStatus } from '../../common/decorators';
+import { WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
-import { JobMode, JobRequestType } from '../../common/enums/job';
+import { JobMode, JobRequestType } from '../../common/enums';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -80,9 +80,3 @@ export class FinalResult {
   solution: string;
 }
 
-export class VerifiedResult {
-  exchangeAddress: string;
-  workerAddress: string;
-  solution: string;
-  checkPassed: boolean;
-}

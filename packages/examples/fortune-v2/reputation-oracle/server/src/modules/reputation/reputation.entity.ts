@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { ReputationEntityType } from '../../common/decorators';
+import { ReputationEntityType } from '../../common/enums';
 
 @Entity({ schema: NS, name: 'reputation' })
 export class ReputationEntity extends BaseEntity {

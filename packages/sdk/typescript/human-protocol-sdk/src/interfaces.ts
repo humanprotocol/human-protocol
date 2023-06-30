@@ -44,7 +44,3 @@ export interface IEscrowConfig {
   manifestUrl: string;
   manifestHash: string;
 }
-
-export interface ILauncherEscrowsResult {
-  id: string;
-}
