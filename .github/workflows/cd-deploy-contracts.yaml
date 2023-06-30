@@ -38,9 +38,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
-      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
-        with:
-          node-version: 18.15
       - name: Install dependencies
         run: npm install --global yarn && yarn --ignore-scripts
       - run: yarn build
@@ -107,7 +104,7 @@ jobs:
               echo "subgraph=mainnet-v1" >> $GITHUB_OUTPUT
             ;;
             *)
-              echo "Invalid network" 
+              echo "Invalid network"
               exit 1
               ;;
           esac
@@ -137,7 +134,7 @@ jobs:
         if: always() && github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
-      
+
         #Deploy subgraph
       - run: yarn global add @graphprotocol/graph-cli
         name: Install Graph CLI

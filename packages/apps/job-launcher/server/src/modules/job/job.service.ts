@@ -36,8 +36,8 @@ import {
 import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { networkMap } from '../../common/constants/network';
 import { Web3Service } from '../web3/web3.service';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class JobService {
@@ -55,21 +55,18 @@ export class JobService {
     public readonly configService: ConfigService,
   ) {
     const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>('S3_ACCESS_KEY', ''),
-      secretKey: this.configService.get<string>('S3_SECRET_KEY', ''),
+      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
+      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
     };
 
-    let useSSL = this.configService.get<string>('S3_USE_SSL', 'false') === "true";
+    let useSSL = this.configService.get<string>(ConfigNames.S3_USE_SSL) === "true";
     this.storageParams = {
-      endPoint: this.configService.get<string>(
-        'S3_ENDPOINT',
-        '127.0.0.1',
-      ),
+      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
       port: 9000,
       useSSL,
     };
     
-    this.bucket = this.configService.get<string>('S3_BUCKET', 'launcher');
+    this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -97,10 +94,10 @@ export class JobService {
     );
 
     const totalFeePercentage = BigNumber.from(
-      this.configService.get<number>('JOB_LAUNCHER_FEE', 0),
+      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
     )
-      .add(this.configService.get<number>('RECORDING_ORACLE_FEE', 0))
-      .add(this.configService.get<number>('REPUTATION_ORACLE_FEE', 0));
+      .add(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!)
+      .add(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
     const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
@@ -172,9 +169,9 @@ export class JobService {
       'ether',
     );
 
-    const jobLauncherFee = BigNumber.from(this.configService.get<number>('JOB_LAUNCHER_FEE', 0));
-    const recordingOracleFee = BigNumber.from(this.configService.get<number>('RECORDING_ORACLE_FEE', 0));
-    const reputationOracleFee = BigNumber.from(this.configService.get<number>('REPUTATION_ORACLE_FEE', 0));
+    const jobLauncherFee = BigNumber.from(this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!);
+    const recordingOracleFee = BigNumber.from(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!);
+    const reputationOracleFee = BigNumber.from(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
 
     const totalFeePercentage = BigNumber.from(
       jobLauncherFee,
@@ -246,19 +243,13 @@ export class JobService {
       const escrowClient = new EscrowClient(clientParams);
 
       const escrowConfig = {
-        recordingOracle: this.configService.get<string>(
-          'RECORDING_ORACLE_ADDRESS',
-          '',
-        ),
-        reputationOracle: this.configService.get<string>(
-          'REPUTATION_ORACLE_ADDRESS',
-          '',
-        ),
+        recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
+        reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
         recordingOracleFee: BigNumber.from(
-          this.configService.get<number>('RECORDING_ORACLE_FEE', 0),
+          this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
         ),
         reputationOracleFee: BigNumber.from(
-          this.configService.get<number>('REPUTATION_ORACLE_FEE', 0),
+          this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
         ),
         manifestUrl: jobEntity.manifestUrl,
         manifestHash: jobEntity.manifestHash,
@@ -283,7 +274,7 @@ export class JobService {
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         this.sendWebhook(
-          this.configService.get<string>('EXCHANGE_ORACLE_WEBHOOK_URL', ''),
+          this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
           {
             escrowAddress: jobEntity.escrowAddress,
             chainId: jobEntity.chainId,

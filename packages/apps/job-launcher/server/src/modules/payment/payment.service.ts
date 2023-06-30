@@ -25,12 +25,12 @@ import {
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class PaymentService {
   private readonly logger = new Logger(PaymentService.name);
   private stripe: Stripe;
-  private endpointSecrete: string;
 
   constructor(
     private readonly paymentRepository: PaymentRepository,
@@ -38,22 +38,15 @@ export class PaymentService {
     private configService: ConfigService,
   ) {
     this.stripe = new Stripe(
-      this.configService.get<string>('STRIPE_SECRET_KEY', 'secrete-key'),
+      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
       {
-        apiVersion: this.configService.get<any>(
-          'STRIPE_API_VERSION',
-          '2022-11-15',
-        ),
+        apiVersion: this.configService.get<any>(ConfigNames.STRIPE_API_VERSION)!,
         appInfo: {
-          name: this.configService.get<string>('NAME', 'Fortune'),
-          version: this.configService.get<string>('VERSION'),
-          url: this.configService.get<string>('STRIPE_APP_INFO_URL'),
+          name: this.configService.get<string>(ConfigNames.STRIPE_APP_NAME, 'Fortune')!,
+          version: this.configService.get<string>(ConfigNames.STRIPE_APP_VERSION)!,
+          url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
         },
       },
-    );
-    this.endpointSecrete = this.configService.get(
-      'STRIPE_ENDPOINT_SECRETE',
-      'secrete-key',
     );
   }
 
