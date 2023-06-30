@@ -4,8 +4,8 @@
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
-<h1 align="center">Reputation Oracle</h1>
-  <p align="center">The Reputation Oracle application directly interacts with the Exchange Oracle and Recording Oracle to validate their results. Then, it records the reputation information to a new file and database.</p>
+<h1 align="center">Job Launcher</h1>
+  <p align="center">API that allows Human Protocol users to create jobs.</p>
 
 <p align="center">
   <a href="https://github.com/humanprotocol/human-protocol/blob/main/LICENSE">
