@@ -169,10 +169,10 @@ export class EscrowClient {
         this.signerOrProvider
       );
       await this.escrowContract.setup(
-        recordingOracle,
         reputationOracle,
-        recordingOracleFee,
+        recordingOracle,
         reputationOracleFee,
+        recordingOracleFee,
         manifestUrl,
         manifestHash
       );
