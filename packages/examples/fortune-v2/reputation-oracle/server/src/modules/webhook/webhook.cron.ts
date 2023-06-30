@@ -3,9 +3,9 @@ import { WebhookService } from './webhook.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { WebhookRepository } from './webhook.repository';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
-import { SortDirection } from '../../common/collection';
 import { LessThanOrEqual } from 'typeorm';
-import { WebhookStatus } from '../../common/decorators';
+import { WebhookStatus } from '../../common/enums/webhook';
+import { SortDirection } from '../../common/enums';
 
 @Injectable()
 export class WebhookCron {

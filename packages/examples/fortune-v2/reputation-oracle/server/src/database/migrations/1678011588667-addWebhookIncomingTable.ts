@@ -29,6 +29,7 @@ export class addWebhookIncomingTable1678011588667
         {
           name: 'oracle_address',
           type: 'varchar',
+          isNullable: true,
         },
         {
           name: 'escrow_address',

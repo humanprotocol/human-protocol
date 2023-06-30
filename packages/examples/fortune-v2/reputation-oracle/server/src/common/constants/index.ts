@@ -1,9 +1,5 @@
 export const NS = 'hmt';
-export const COMPANY_NAME = 'Human Protocol Foundation';
-export const COINGECKO_API_URL =
-  'https://api.coingecko.com/api/v3/simple/price';
 export const RETRIES_COUNT_THRESHOLD = 3;
-export const TX_CONFIRMATION_TRESHOLD = 1;
 export const INITIAL_REPUTATION = 0;
 
 export const CURSE_WORDS = [

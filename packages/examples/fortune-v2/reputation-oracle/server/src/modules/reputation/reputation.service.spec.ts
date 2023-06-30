@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
-import { ReputationEntityType } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntity } from './reputation.entity';
 import { MOCK_ADDRESS } from '../../common/test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
+import { ReputationEntityType } from '../../common/enums';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,

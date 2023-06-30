@@ -16,14 +16,15 @@ import {
   ErrorWebhook,
 } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { ReputationEntityType, WebhookStatus } from '../../common/decorators';
-import { JobRequestType } from '../../common/enums/job';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { checkCurseWords } from '../../common/helpers/utils';
 import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
+import { WebhookStatus } from '../../common/enums/webhook';
+import { JobRequestType } from '../../common/enums/job';
+import { ReputationEntityType } from '../../common/enums/reputation';
 
 @Injectable()
 export class WebhookService {
@@ -69,9 +70,6 @@ export class WebhookService {
     try {
       const webhookEntity = await this.webhookRepository.create({
         chainId: dto.chainId,
-        oracleAddress: this.configService.get<string>(
-          ConfigNames.RECORDING_ORACLE_ADDRESS,
-        )!,
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),

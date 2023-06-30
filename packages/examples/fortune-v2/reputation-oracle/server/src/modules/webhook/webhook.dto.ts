@@ -7,9 +7,9 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { WebhookStatus } from '../../common/decorators';
 import { ChainId } from '@human-protocol/sdk';
-import { JobMode, JobRequestType } from '../../common/enums/job';
+import { WebhookStatus } from '../../common/enums/webhook';
+import { JobMode, JobRequestType } from '../../common/enums';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -22,10 +22,6 @@ export class WebhookIncomingDto {
 }
 
 export class WebhookIncomingCreateDto extends WebhookIncomingDto {
-  @ApiProperty()
-  @IsString()
-  public oracleAddress: string;
-
   @IsEnum(WebhookStatus)
   public status: WebhookStatus;
 

@@ -9,6 +9,7 @@ import { HealthModule } from './modules/health/health.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
+import { envValidator } from './common/config';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { Web3Module } from './modules/web3/web3.module';
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`
         : '.env',
+        validationSchema: envValidator,
     }),
     DatabaseModule,
     HealthModule,
