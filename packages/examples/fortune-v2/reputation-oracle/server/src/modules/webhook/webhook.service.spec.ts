@@ -166,15 +166,15 @@ describe('WebhookService', () => {
   });
 
   describe('processPendingWebhook', () => {
-    let webhookEntity: Partial<WebhookIncomingEntity> = {
+    const webhookEntity: Partial<WebhookIncomingEntity> = {
       id: 1,
       chainId: ChainId.LOCALHOST,
       escrowAddress: MOCK_ADDRESS,
       status: WebhookStatus.PENDING,
       waitUntil: new Date(),
     };
-    
-    let intermediateResults: FinalResult[] = [
+
+    const intermediateResults: FinalResult[] = [
       {
         exchangeAddress: 'string',
         workerAddress: 'string',

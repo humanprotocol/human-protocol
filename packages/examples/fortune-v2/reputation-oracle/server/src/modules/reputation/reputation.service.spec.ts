@@ -1,16 +1,16 @@
 import { Test } from '@nestjs/testing';
 import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
-import { ReputationEntityType } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntity } from './reputation.entity';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
+import { ReputationEntityType } from '../../common/enums';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,
-      reputationRepository: ReputationRepository;
+    reputationRepository: ReputationRepository;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -35,7 +35,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
     const type = ReputationEntityType.WORKER;
-    
+
     it('should create a new reputation entity if not found', async () => {
       jest
         .spyOn(reputationRepository, 'findOne')
@@ -76,7 +76,7 @@ describe('ReputationService', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
     const type = ReputationEntityType.WORKER;
-    
+
     it('should create a new reputation entity if not found', async () => {
       jest
         .spyOn(reputationRepository, 'findOne')
