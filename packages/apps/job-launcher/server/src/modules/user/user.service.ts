@@ -14,6 +14,7 @@ import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class UserService {
@@ -71,10 +72,7 @@ export class UserService {
   }
 
   public createPasswordHash(password: string): string {
-    const passwordSecret = this.configService.get<string>(
-      'PASSWORD_SECRET',
-      '',
-    );
+    const passwordSecret = this.configService.get<string>(ConfigNames.PASSWORD_SECRET)!;
     return bcrypt.hashSync(password, passwordSecret);
   }
 

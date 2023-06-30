@@ -50,8 +50,6 @@ describe('PaymentService', () => {
             return '0.0.1';
           case 'STRIPE_APP_INFO_URL':
             return 'https://test-app-url.com';
-          case 'STRIPE_ENDPOINT_SECRETE':
-            return 'https://test-app-url.com';
           default:
             return defaultValue;
         }

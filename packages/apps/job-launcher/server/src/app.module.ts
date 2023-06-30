@@ -12,6 +12,7 @@ import { UserModule } from './modules/user/user.module';
 import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { Web3Module } from './modules/web3/web3.module';
+import { envValidator } from './common/config';
 
 @Module({
   providers: [
@@ -31,7 +32,10 @@ import { Web3Module } from './modules/web3/web3.module';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV as string}`,
+      envFilePath: process.env.NODE_ENV
+        ? `.env.${process.env.NODE_ENV as string}`
+        : '.env',
+      validationSchema: envValidator,
     }),
     DatabaseModule,
     HealthModule,

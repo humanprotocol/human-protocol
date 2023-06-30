@@ -116,10 +116,7 @@ gas_payer = w3.eth.account.from_key(priv_key)
 w3.eth.default_account = gas_payer.address
 ```
 
-Second, Manifest has to follow the specification at https://github.com/humanprotocol/human-protocol/tree/main/packages/sdk/python/human-protocol-basemodels
-and can be uploaded using [Storage](#storage).
-
-Thirdly, `EscrowConfig` must be created following this format:
+Secondly, `EscrowConfig` must be created following this format:
 
 ```python
 from human_protocol_sdk import EscrowConfig
