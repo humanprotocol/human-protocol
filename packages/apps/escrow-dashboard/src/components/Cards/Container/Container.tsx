@@ -1,13 +1,16 @@
+import { SxProps } from '@mui/material';
 import Box, { BoxProps } from '@mui/material/Box';
 import { FC, PropsWithChildren } from 'react';
 
 type ContainerProps = BoxProps & {
   densed?: boolean;
+  sxProps?: SxProps;
 };
 
 export const Container: FC<PropsWithChildren<ContainerProps>> = ({
   children,
   densed = false,
+  sxProps = {},
   ...rest
 }) => {
   return (
@@ -23,6 +26,7 @@ export const Container: FC<PropsWithChildren<ContainerProps>> = ({
           : { xs: '24px 32px', xl: '64px 80px' },
         height: '100%',
         position: 'relative',
+        ...sxProps,
       }}
       {...rest}
     >

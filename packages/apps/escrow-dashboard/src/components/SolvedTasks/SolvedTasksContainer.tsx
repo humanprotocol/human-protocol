@@ -25,8 +25,8 @@ export const SolvedTasksContainer: FC = () => {
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
             <NewsView
-              title="Commonwealth voting: 1 HMT (ERC-20) required"
-              content="The HUMAN Protocol Commonwealth forum is the center of all things related to community governance."
+              title="HUMAN APP: Task limits"
+              content="Part of the Protocol's growth being implemented in the interests of the community as a whole."
               image={newsSvg}
             />
           </Grid>
