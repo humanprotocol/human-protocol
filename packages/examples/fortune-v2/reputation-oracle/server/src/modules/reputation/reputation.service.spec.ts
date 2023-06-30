@@ -3,7 +3,7 @@ import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
 import { ChainId } from '@human-protocol/sdk';
 import { ReputationEntity } from './reputation.entity';
-import { MOCK_ADDRESS } from '../../common/test/constants';
+import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { ReputationEntityType } from '../../common/enums';

@@ -22,7 +22,7 @@ import {
   ErrorResults,
   ErrorWebhook,
 } from '../../common/constants/errors';
-import { WebhookStatus } from '../../common/enums/webhook';
+import { JobMode, JobRequestType } from '../../common/enums';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_HASH,
@@ -33,10 +33,10 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-} from '../../common/test/constants';
+} from '../../../test/constants';
+import { WebhookStatus } from '../../common/enums';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
-import { JobMode, JobRequestType } from '../../common/enums';
 
 jest.mock('@human-protocol/sdk');
 

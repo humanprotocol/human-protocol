@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookStatus } from '../../common/enums/webhook';
+import { WebhookStatus } from '../../common/enums';
 
 @Entity({ schema: NS, name: 'webhook_incoming' })
 export class WebhookIncomingEntity extends BaseEntity {

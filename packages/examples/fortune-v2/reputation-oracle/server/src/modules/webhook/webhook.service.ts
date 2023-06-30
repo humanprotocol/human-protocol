@@ -22,9 +22,9 @@ import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import { WebhookStatus } from '../../common/enums/webhook';
-import { JobRequestType } from '../../common/enums/job';
-import { ReputationEntityType } from '../../common/enums/reputation';
+import { WebhookStatus } from '../../common/enums';
+import { JobRequestType } from '../../common/enums';
+import { ReputationEntityType } from '../../common/enums';
 
 @Injectable()
 export class WebhookService {
