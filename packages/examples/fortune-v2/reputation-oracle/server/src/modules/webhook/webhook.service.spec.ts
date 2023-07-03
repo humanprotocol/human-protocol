@@ -233,9 +233,6 @@ describe('WebhookService', () => {
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
       jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
-      jest
         .spyOn(webhookService, 'finalizeFortuneResults')
         .mockResolvedValueOnce(intermediateResults);
 
@@ -243,10 +240,6 @@ describe('WebhookService', () => {
         webhookEntity as WebhookIncomingEntity,
       );
 
-      expect(webhookService.getIntermediateResults).toHaveBeenCalledWith(
-        webhookEntity.chainId,
-        webhookEntity.escrowAddress,
-      );
       expect(webhookService.finalizeFortuneResults).toHaveBeenCalledWith(
         intermediateResults,
       );
@@ -288,9 +281,6 @@ describe('WebhookService', () => {
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
         .mockRejectedValueOnce(new Error());
-      jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
 
       const result = await webhookService.processPendingWebhook(
         webhookEntity as WebhookIncomingEntity,
@@ -419,18 +409,11 @@ describe('WebhookService', () => {
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
-      jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
 
       const result = await webhookService.processPendingWebhook(
         webhookEntity as WebhookIncomingEntity,
       );
 
-      expect(webhookService.getIntermediateResults).toHaveBeenCalledWith(
-        webhookEntity.chainId,
-        webhookEntity.escrowAddress,
-      );
       expect(uploadFilesSpy).toHaveBeenCalledWith(
         [intermediateResults],
         webhookService.bucket,
@@ -469,9 +452,6 @@ describe('WebhookService', () => {
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
         .mockRejectedValueOnce(new Error());
-      jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
 
       const result = await webhookService.processPendingWebhook(
         webhookEntity as WebhookIncomingEntity,

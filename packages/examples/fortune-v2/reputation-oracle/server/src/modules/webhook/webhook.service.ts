@@ -121,11 +121,12 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      let finalResults = [];
+      let finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[] = [];
+
       if (manifest.requestType === JobRequestType.FORTUNE) {
-        finalResults = await this.finalizeFortuneResults(intermediateResults);
+        finalResults = await this.finalizeFortuneResults(intermediateResults as FortuneFinalResult[]);
       } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        finalResults = intermediateResults;
+        finalResults = intermediateResults as ImageLabelBinaryFinalResult[];
       }
 
       const [{ url, hash }] = await this.storageClient.uploadFiles(
@@ -149,16 +150,8 @@ export class WebhookService {
         },
       );
 
-      let recipients: string[] = [];
-      if (manifest.requestType === JobRequestType.FORTUNE) {
-        recipients = finalResults.map((item: FortuneFinalResult) => item.workerAddress);
-      } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        recipients = recipients.concat(finalResults.map((item: ImageLabelBinaryFinalResult) => item.correct));
-      }
-
-      const amounts = new Array(recipients.length).fill(
-        BigNumber.from(manifest.fundAmount).div(recipients.length),
-      );
+      const recipients = this.getRecipients(finalResults, manifest.requestType);
+      const amounts = this.calculatePayoutAmounts(manifest.fundAmount, recipients.length);
 
       await escrowClient.bulkPayOut(
         webhookEntity.escrowAddress,
@@ -209,7 +202,7 @@ export class WebhookService {
   public async getIntermediateResults(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<any> {
+  ): Promise<FortuneFinalResult[] | ImageLabelBinaryFinalResult[]> {
     const signer = this.web3Service.getSigner(chainId);
 
     const clientParams = await InitClient.getParams(signer);
@@ -232,6 +225,33 @@ export class WebhookService {
     }
 
     return intermediateResults;
+  }
+
+  /**
+   * Calculates the payout amounts for the recipients.
+   * @param totalAmount - The total amount to be distributed.
+   * @param recipientCount - The number of recipients.
+   * @returns {BigNumber[]} - Returns an array of payout amounts.
+   */
+  public calculatePayoutAmounts(totalAmount: string, recipientCount: number): BigNumber[] {
+    const payoutAmount = BigNumber.from(totalAmount).div(recipientCount);
+    return new Array(recipientCount).fill(payoutAmount);
+  }
+
+  /**
+   * Retrieves the recipients based on the final results and request type.
+   * @param finalResults - The final results.
+   * @param requestType - The request type.
+   * @returns {string[]} - Returns an array of recipient addresses.
+   */
+  public getRecipients(finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[], requestType: JobRequestType): string[] {
+    if (requestType === JobRequestType.FORTUNE) {
+      return finalResults.map((item) => (item as FortuneFinalResult).workerAddress);
+    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      return finalResults.flatMap((item) => (item as ImageLabelBinaryFinalResult).correct);
+    }
+
+    return []
   }
 
   /**
