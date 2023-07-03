@@ -10,16 +10,16 @@ export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   public oracleAddress: string;
 
   @Column({ type: 'varchar' })
   public escrowAddress: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   public resultsUrl: string;
 
-  @Column({ type: 'boolean' })
+  @Column({ type: 'boolean', nullable: true })
   public checkPassed: boolean;
 
   @Column({ type: 'int' })
