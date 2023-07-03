@@ -74,9 +74,15 @@ export class ManifestDto {
   mode: JobMode;
 }
 
-export class FinalResult {
+export class FortuneFinalResult {
   exchangeAddress: string;
   workerAddress: string;
   solution: string;
 }
 
+export class ImageLabelBinaryFinalResult {
+  url: string;
+  final_answer: string;
+  correct: string[];
+  wrong: string[];
+}

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
-import { FinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
+import { FortuneFinalResult, ImageLabelBinaryFinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
 import {
   ChainId,
   EscrowClient,
@@ -29,6 +29,7 @@ import {
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
   MOCK_JOB_LAUNCHER_FEE,
+  MOCK_LABEL,
   MOCK_RECORDING_ORACLE_FEE,
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
@@ -50,6 +51,19 @@ describe('WebhookService', () => {
     address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
+
+  const fundAmountInWei = ethers.utils.parseUnits(
+    '10', // ETH
+    'ether',
+  );
+
+  const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+    .add(MOCK_RECORDING_ORACLE_FEE)
+    .add(MOCK_REPUTATION_ORACLE_FEE);
+  const totalFee = BigNumber.from(fundAmountInWei)
+    .mul(totalFeePercentage)
+    .div(100);
+  const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -165,7 +179,17 @@ describe('WebhookService', () => {
     });
   });
 
-  describe('processPendingWebhook', () => {
+  describe('call processPendingWebhook on job request type fortune', () => {
+    const manifest: ManifestDto = {
+      requestType: JobRequestType.FORTUNE, // fortune job type
+      submissionsRequired: 10,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fee: totalFee.toString(),
+      fundAmount: totalAmount.toString(),
+      mode: JobMode.DESCRIPTIVE,
+    };
+    
     const webhookEntity: Partial<WebhookIncomingEntity> = {
       id: 1,
       chainId: ChainId.LOCALHOST,
@@ -174,7 +198,7 @@ describe('WebhookService', () => {
       waitUntil: new Date(),
     };
 
-    const intermediateResults: FinalResult[] = [
+    const intermediateResults: FortuneFinalResult[] = [
       {
         exchangeAddress: 'string',
         workerAddress: 'string',
@@ -183,30 +207,6 @@ describe('WebhookService', () => {
     ];
 
     it('should process a pending webhook and return true', async () => {
-      const manifestUrl = MOCK_FILE_URL;
-
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10', // ETH
-        'ether',
-      );
-      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-        .add(MOCK_RECORDING_ORACLE_FEE)
-        .add(MOCK_REPUTATION_ORACLE_FEE);
-      const totalFee = BigNumber.from(fundAmountInWei)
-        .mul(totalFeePercentage)
-        .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-
-      const manifest: ManifestDto = {
-        requestType: JobRequestType.FORTUNE,
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
-        mode: JobMode.DESCRIPTIVE,
-      };
-
       const uploadFilesSpy = jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValueOnce([
@@ -227,13 +227,10 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
-        .mockResolvedValueOnce(manifestUrl);
+        .mockResolvedValueOnce(MOCK_FILE_URL);
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
-      jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
       jest
         .spyOn(webhookService, 'finalizeFortuneResults')
         .mockResolvedValueOnce(intermediateResults);
@@ -242,10 +239,6 @@ describe('WebhookService', () => {
         webhookEntity as WebhookIncomingEntity,
       );
 
-      expect(webhookService.getIntermediateResults).toHaveBeenCalledWith(
-        webhookEntity.chainId,
-        webhookEntity.escrowAddress,
-      );
       expect(webhookService.finalizeFortuneResults).toHaveBeenCalledWith(
         intermediateResults,
       );
@@ -287,9 +280,6 @@ describe('WebhookService', () => {
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
         .mockRejectedValueOnce(new Error());
-      jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValueOnce(intermediateResults);
 
       const result = await webhookService.processPendingWebhook(
         webhookEntity as WebhookIncomingEntity,
@@ -349,7 +339,174 @@ describe('WebhookService', () => {
     });
   });
 
+  describe('call processPendingWebhook on job request type image label binary', () => {
+    const manifest: ManifestDto = {
+      dataUrl: MOCK_FILE_URL,
+      labels: [MOCK_LABEL],
+      requestType: JobRequestType.IMAGE_LABEL_BINARY, // image label binary job type
+      submissionsRequired: 1,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      requesterAccuracyTarget: 10,
+      fee: totalFee.toString(),
+      fundAmount: totalAmount.toString(),
+      mode: JobMode.BATCH,
+    };
+    
+    const webhookEntity: Partial<WebhookIncomingEntity> = {
+      id: 1,
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      status: WebhookStatus.PENDING,
+      waitUntil: new Date(),
+    };
+
+    const intermediateResults: ImageLabelBinaryFinalResult[] = [
+      {
+        final_answer: "", 
+        url: MOCK_FILE_URL, 
+        wrong: [],
+        correct: [MOCK_ADDRESS], 
+      }
+    ];
+
+    it('should process a pending webhook and return true', async () => {
+      const uploadFilesSpy = jest
+        .spyOn(StorageClient.prototype, 'uploadFiles')
+        .mockResolvedValueOnce([
+          { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+        ]);
+
+      const storeResultsSpy = jest
+        .spyOn(EscrowClient.prototype, 'storeResults')
+        .mockResolvedValueOnce(undefined);
+
+      const updateOneSpy = jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
+
+      const bulkPayOutSpy = jest
+        .spyOn(EscrowClient.prototype, 'bulkPayOut')
+        .mockResolvedValueOnce(undefined);
+
+      jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockResolvedValueOnce(MOCK_FILE_URL);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(manifest);
+
+      const result = await webhookService.processPendingWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
+
+      expect(uploadFilesSpy).toHaveBeenCalledWith(
+        [intermediateResults],
+        webhookService.bucket,
+      );
+      expect(storeResultsSpy).toHaveBeenCalledWith(
+        webhookEntity.escrowAddress,
+        MOCK_FILE_URL,
+        MOCK_FILE_HASH,
+      );
+      expect(updateOneSpy).toHaveBeenCalledWith(
+        { id: webhookEntity.id },
+        {
+          resultsUrl: MOCK_FILE_URL,
+          checkPassed: expect.any(Boolean),
+          status: WebhookStatus.PAID,
+          retriesCount: 0,
+        },
+      );
+      expect(bulkPayOutSpy).toHaveBeenCalledWith(
+        webhookEntity.escrowAddress,
+        expect.any(Array),
+        expect.any(Array),
+        MOCK_FILE_URL,
+        MOCK_FILE_HASH,
+      );
+      expect(result).toBe(true);
+    });
+
+    it('should process a pending webhook, update status to FAILED, and return false if retries count exceeds threshold', async () => {
+      webhookEntity.retriesCount = RETRIES_COUNT_THRESHOLD;
+
+      const updateOneMock = jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(undefined as any);
+
+      jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockRejectedValueOnce(new Error());
+
+      const result = await webhookService.processPendingWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
+
+      expect(EscrowClient.prototype.getManifestUrl).toHaveBeenCalledWith(
+        webhookEntity.escrowAddress,
+      );
+      expect(updateOneMock).toHaveBeenCalledWith(
+        { id: webhookEntity.id },
+        { status: WebhookStatus.FAILED },
+      );
+      expect(result).toBe(false);
+    });
+
+    it.only('should process a pending webhook, update retries count and waitUntil date, and return false if an error occurs', async () => {
+      webhookEntity.retriesCount = 1;
+      const updateOneSpy = jest
+        .spyOn(webhookRepository, 'updateOne')
+        .mockResolvedValueOnce(undefined as any);
+
+      jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockRejectedValueOnce(
+          new Error(ErrorManifest.ManifestUrlDoesNotExist),
+        );
+
+      const result = await webhookService.processPendingWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
+
+      expect(updateOneSpy).toHaveBeenCalledWith(
+        { id: webhookEntity.id },
+        {
+          retriesCount: (webhookEntity.retriesCount as number) + 1,
+          waitUntil: expect.any(Date),
+        },
+      );
+      expect(result).toBe(false);
+    });
+
+    it('should throw an error if no intermediate results are found', async () => {
+      jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockResolvedValueOnce(MOCK_FILE_URL);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce({} as any)
+        .mockRejectedValueOnce(
+          new Error(ErrorResults.NoIntermediateResultsFound),
+        );
+
+      const result = await webhookService.processPendingWebhook(
+        webhookEntity as WebhookIncomingEntity,
+      );
+      expect(result).toBe(false);
+    });
+  });
+
   describe('processPaidWebhook', () => {
+    const manifest: ManifestDto = {
+      requestType: JobRequestType.FORTUNE,
+      submissionsRequired: 10,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fee: totalFee.toString(),
+      fundAmount: totalAmount.toString(),
+      mode: JobMode.DESCRIPTIVE,
+    };
+
     const webhookEntity: Partial<WebhookIncomingEntity> = {
       id: 1,
       chainId: ChainId.LOCALHOST,
@@ -360,7 +517,7 @@ describe('WebhookService', () => {
 
     it('should process a paid webhook and return true', async () => {
       const finalResultsUrl = MOCK_FILE_URL;
-      const finalResults: FinalResult[] = [
+      const finalResults: FortuneFinalResult[] = [
         {
           exchangeAddress: 'string',
           workerAddress: 'string',
@@ -382,6 +539,12 @@ describe('WebhookService', () => {
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(finalResults);
       jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockResolvedValueOnce(MOCK_FILE_URL);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(manifest);
+      jest
         .spyOn(EscrowClient.prototype, 'getRecordingOracleAddress')
         .mockResolvedValueOnce('recording-oracle-address');
 
@@ -394,6 +557,9 @@ describe('WebhookService', () => {
       );
       expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
         finalResultsUrl,
+      );
+      expect(EscrowClient.prototype.getManifestUrl).toHaveBeenCalledWith(
+        webhookEntity.escrowAddress,
       );
       expect(increaseReputationSpy).toHaveBeenCalledWith(
         expect.any(Number),
@@ -412,7 +578,7 @@ describe('WebhookService', () => {
 
     it('should process a paid webhook, decrease reputation, and return true if checkPassed is false', async () => {
       const finalResultsUrl = MOCK_FILE_URL;
-      const finalResults: FinalResult[] = [
+      const finalResults: FortuneFinalResult[] = [
         {
           exchangeAddress: 'string',
           workerAddress: 'string',
@@ -438,6 +604,12 @@ describe('WebhookService', () => {
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(finalResults);
+      jest
+        .spyOn(EscrowClient.prototype, 'getManifestUrl')
+        .mockResolvedValueOnce(MOCK_FILE_URL);
+      jest
+        .spyOn(StorageClient, 'downloadFileFromUrl')
+        .mockResolvedValueOnce(manifest);
       jest
         .spyOn(EscrowClient.prototype, 'getRecordingOracleAddress')
         .mockResolvedValueOnce('recording-oracle-address');
