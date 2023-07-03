@@ -35,7 +35,7 @@ export class WebhookRepository {
       throw new NotFoundException(ErrorWebhook.NotFound);
     }
 
-    Object.assign(WebhookIncomingEntity, dto);
+    Object.assign(webhookIncomingEntity, dto);
     return webhookIncomingEntity.save();
   }
 
