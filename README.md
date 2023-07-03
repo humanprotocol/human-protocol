@@ -4,8 +4,10 @@
 | | | | |
 | --- | --- | --- | --- |
 | [![Lint Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml) | [![Protocol Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml) | [![Python SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml) | [![Node.js SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml) |
-| [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) | [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml) |  |
+| [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) | [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml) | [![Faucet Server Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml) |
+| [![Meta Code Verify Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml) |  |  |  |
 | [![Core NPM Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml) | [![Python SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml) | [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml) | [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) |
+| [![Contract Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml/badge.svg?event=workflow_dispatch)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml) |  |  |  |
 
 
 ## All work on-chain
@@ -41,13 +43,17 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 ├── packages
 │   ├── apps
 │   │   ├── escrow-dashboard                 # A UI that queries The Graph for escrow data
+│   │   ├── faucet-server                    # Faucet server
+│   │   ├── fortune                          # Fortune application
+│   │   ├── job-launcher                     # Job launcher server, and UI
+│   │   ├── meta-code-verify                 # Browser extensions to verify code
+│   │   │                                      running in the browser against a
+│   │   │                                      published manifest
 │   ├── core                                 # EVM compatible smart contracts for HUMAN
 │   ├── examples
 │   │   ├── cvat                             # An open source annotation tool for labeling video and images
 │   │   ├── fortune                          # An example application that combines all the core
 │   │   │                                      components of HUMAN
-│   │   ├── launcher                         # A reference implementation of a Job Launcher
-│   │   ├── oracles                          # Reference implementations for Recording and Reputation oracles
 │   ├── sdk
 │   │   ├── python
 │   │   │   ├── human-protocol-sdk           # Python SDK to interact with Human Protocol
@@ -58,11 +64,11 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 
 ### How To Use This Repo
 
-If you would like to join the HUMAN network as an operator please see the [examples](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples) folder.  Users may participate as any of the following roles:
+If you would like to join the HUMAN network as an operator please see the [apps](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps) folder.  Users may participate as any of the following roles:
 
-* [Job Launcher Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples/launcher)
-* [Recording Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples/oracles/recording)
-* Exchange Oracle Operator
+* [Job Launcher Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/job-launcher)
+* [Exchange Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/fortune/exchange-oracle)
+* [Recording Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/fortune/recording-oracle)
 
 #### Building New Applications for HUMAN
 
