@@ -6,7 +6,6 @@ export const ConfigNames = {
   PORT: 'PORT',
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
-  PASSWORD_SECRET: 'PASSWORD_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
   JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
@@ -24,11 +23,6 @@ export const ConfigNames = {
   S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
   S3_USE_SSL: 'S3_USE_SSL',
-  STRIPE_SECRET_KEY: 'STRIPE_SECRET_KEY',
-  STRIPE_API_VERSION: 'STRIPE_API_VERSION',
-  STRIPE_APP_NAME: 'STRIPE_APP_NAME',
-  STRIPE_APP_VERSION: 'STRIPE_APP_VERSION',
-  STRIPE_APP_INFO_URL: 'STRIPE_APP_INFO_URL',
 };
 
 export const envValidator = Joi.object({
@@ -38,13 +32,12 @@ export const envValidator = Joi.object({
   PORT: Joi.string().default(5000),
   FE_URL: Joi.string().default('http://localhost:3001'),
   SESSION_SECRET: Joi.string().default('session_key'),
-  PASSWORD_SECRET: Joi.string().default('$2b$10$EICgM2wYixoJisgqckU9gu'),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
-  POSTGRES_DB: Joi.string().default('job-launcher'),
+  POSTGRES_DB: Joi.string().default('reputation-oracle'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SYNC: Joi.string().default(false),
   // Web3
