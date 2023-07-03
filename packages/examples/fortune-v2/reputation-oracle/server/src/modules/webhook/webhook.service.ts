@@ -9,7 +9,7 @@ import {
   StorageParams,
 } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { FinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
+import { FortuneFinalResult, ImageLabelBinaryFinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
 import {
   ErrorManifest,
   ErrorResults,
@@ -121,11 +121,12 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      let finalResults: FinalResult[] = [];
+      let finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[] = [];
+
       if (manifest.requestType === JobRequestType.FORTUNE) {
-        finalResults = await this.finalizeFortuneResults(intermediateResults);
+        finalResults = await this.finalizeFortuneResults(intermediateResults as FortuneFinalResult[]);
       } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        // TODO: Implement CVAT job processing
+        finalResults = intermediateResults as ImageLabelBinaryFinalResult[];
       }
 
       const [{ url, hash }] = await this.storageClient.uploadFiles(
@@ -149,11 +150,8 @@ export class WebhookService {
         },
       );
 
-      const recipients = finalResults.map((item) => item.workerAddress);
-
-      const amounts = new Array(recipients.length).fill(
-        BigNumber.from(manifest.fundAmount).div(recipients.length),
-      );
+      const recipients = this.getRecipients(finalResults, manifest.requestType);
+      const amounts = this.calculatePayoutAmounts(manifest.fundAmount, recipients.length);
 
       await escrowClient.bulkPayOut(
         webhookEntity.escrowAddress,
@@ -198,13 +196,13 @@ export class WebhookService {
    * Get the oracle intermediate results at the escrow address.
    * @param chainId - Chain id.
    * @param escrowAddress - Escrow address for which results will be obtained.
-   * @returns {Promise<FinalResult[]>} - Return an array of intermediate results.
+   * @returns {Promise<any>} - Return an array of intermediate results.
    * @throws {Error} - An error object if an error occurred.
    */
   public async getIntermediateResults(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<FinalResult[]> {
+  ): Promise<FortuneFinalResult[] | ImageLabelBinaryFinalResult[]> {
     const signer = this.web3Service.getSigner(chainId);
 
     const clientParams = await InitClient.getParams(signer);
@@ -213,7 +211,7 @@ export class WebhookService {
     const intermediateResultsUrl = await escrowClient.getResultsUrl(
       escrowAddress,
     );
-    const intermediateResults: FinalResult[] =
+    const intermediateResults =
       await StorageClient.downloadFileFromUrl(intermediateResultsUrl).catch(
         () => [],
       );
@@ -230,15 +228,42 @@ export class WebhookService {
   }
 
   /**
+   * Calculates the payout amounts for the recipients.
+   * @param totalAmount - The total amount to be distributed.
+   * @param recipientCount - The number of recipients.
+   * @returns {BigNumber[]} - Returns an array of payout amounts.
+   */
+  public calculatePayoutAmounts(totalAmount: string, recipientCount: number): BigNumber[] {
+    const payoutAmount = BigNumber.from(totalAmount).div(recipientCount);
+    return new Array(recipientCount).fill(payoutAmount);
+  }
+
+  /**
+   * Retrieves the recipients based on the final results and request type.
+   * @param finalResults - The final results.
+   * @param requestType - The request type.
+   * @returns {string[]} - Returns an array of recipient addresses.
+   */
+  public getRecipients(finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[], requestType: JobRequestType): string[] {
+    if (requestType === JobRequestType.FORTUNE) {
+      return finalResults.map((item) => (item as FortuneFinalResult).workerAddress);
+    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      return finalResults.flatMap((item) => (item as ImageLabelBinaryFinalResult).correct);
+    }
+
+    return []
+  }
+
+  /**
    * Validate intermediate fortune results for curses and uniqueness and return their final version.
    * @param results - Intermediate results to be validated and finalized.
-   * @returns {Promise<FinalResult[]>} - Return an array of final results.
+   * @returns {Promise<FortuneFinalResult[]>} - Return an array of fortune final results.
    * @throws {Error} - An error object if an error occurred.
    */
   public async finalizeFortuneResults(
-    results: FinalResult[],
-  ): Promise<FinalResult[]> {
-    const finalResults: FinalResult[] = results.filter(
+    results: FortuneFinalResult[],
+  ): Promise<FortuneFinalResult[]> {
+    const finalResults: FortuneFinalResult[] = results.filter(
       (item) =>
         !checkCurseWords(item.solution) ||
         !results.some((result) => result.solution === item.solution),
@@ -273,7 +298,7 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      const finalResults: FinalResult[] =
+      const finalResults =
         await StorageClient.downloadFileFromUrl(finalResultsUrl).catch(
           () => [],
         );
@@ -286,15 +311,33 @@ export class WebhookService {
         throw new Error(ErrorResults.NoResultsHaveBeenVerified);
       }
 
-      await Promise.all(
-        finalResults.map(async (result) => {
-          await this.reputationService.increaseReputation(
-            clientParams.network.chainId,
-            result.workerAddress,
-            ReputationEntityType.WORKER,
-          );
-        }),
+      const manifestUrl = await escrowClient.getManifestUrl(
+        webhookEntity.escrowAddress,
       );
+
+      if (!manifestUrl) {
+        this.logger.log(
+          ErrorManifest.ManifestUrlDoesNotExist,
+          WebhookService.name,
+        );
+        throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
+      }
+
+      const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(
+        manifestUrl,
+      );
+
+      if (manifest.requestType === JobRequestType.FORTUNE) {
+        await Promise.all(
+          finalResults.map(async (result: FortuneFinalResult) => {
+            await this.reputationService.increaseReputation(
+              clientParams.network.chainId,
+              result.workerAddress,
+              ReputationEntityType.WORKER,
+            );
+          }),
+        );
+      }
 
       const recordingOracleAddress =
         await escrowClient.getRecordingOracleAddress(
