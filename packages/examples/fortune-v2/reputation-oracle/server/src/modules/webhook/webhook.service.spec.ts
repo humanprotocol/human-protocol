@@ -52,6 +52,19 @@ describe('WebhookService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
+  const fundAmountInWei = ethers.utils.parseUnits(
+    '10', // ETH
+    'ether',
+  );
+
+  const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+    .add(MOCK_RECORDING_ORACLE_FEE)
+    .add(MOCK_REPUTATION_ORACLE_FEE);
+  const totalFee = BigNumber.from(fundAmountInWei)
+    .mul(totalFeePercentage)
+    .div(100);
+  const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string, defaultValue?: any) => {
@@ -167,20 +180,6 @@ describe('WebhookService', () => {
   });
 
   describe('call processPendingWebhook on job request type fortune', () => {
-    const manifestUrl = MOCK_FILE_URL;
-
-    const fundAmountInWei = ethers.utils.parseUnits(
-      '10', // ETH
-      'ether',
-    );
-    const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-      .add(MOCK_RECORDING_ORACLE_FEE)
-      .add(MOCK_REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-
     const manifest: ManifestDto = {
       requestType: JobRequestType.FORTUNE, // fortune job type
       submissionsRequired: 10,
@@ -228,7 +227,7 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
-        .mockResolvedValueOnce(manifestUrl);
+        .mockResolvedValueOnce(MOCK_FILE_URL);
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
@@ -341,20 +340,6 @@ describe('WebhookService', () => {
   });
 
   describe('call processPendingWebhook on job request type image label binary', () => {
-    const manifestUrl = MOCK_FILE_URL;
-
-    const fundAmountInWei = ethers.utils.parseUnits(
-      '10', // ETH
-      'ether',
-    );
-    const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-      .add(MOCK_RECORDING_ORACLE_FEE)
-      .add(MOCK_REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-
     const manifest: ManifestDto = {
       dataUrl: MOCK_FILE_URL,
       labels: [MOCK_LABEL],
@@ -405,7 +390,7 @@ describe('WebhookService', () => {
 
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
-        .mockResolvedValueOnce(manifestUrl);
+        .mockResolvedValueOnce(MOCK_FILE_URL);
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
@@ -512,20 +497,6 @@ describe('WebhookService', () => {
   });
 
   describe('processPaidWebhook', () => {
-    const manifestUrl = MOCK_FILE_URL;
-
-    const fundAmountInWei = ethers.utils.parseUnits(
-      '10', // ETH
-      'ether',
-    );
-    const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-      .add(MOCK_RECORDING_ORACLE_FEE)
-      .add(MOCK_REPUTATION_ORACLE_FEE);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-
     const manifest: ManifestDto = {
       requestType: JobRequestType.FORTUNE,
       submissionsRequired: 10,
@@ -569,7 +540,7 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(finalResults);
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
-        .mockResolvedValueOnce(manifestUrl);
+        .mockResolvedValueOnce(MOCK_FILE_URL);
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
@@ -635,7 +606,7 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(finalResults);
       jest
         .spyOn(EscrowClient.prototype, 'getManifestUrl')
-        .mockResolvedValueOnce(manifestUrl);
+        .mockResolvedValueOnce(MOCK_FILE_URL);
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
