@@ -3157,7 +3157,7 @@
     lodash "4.17.21"
     uuid "9.0.0"
 
-"@nestjs/core@^9.0.0", "@nestjs/core@^9.4.3":
+"@nestjs/core@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-9.4.3.tgz#7d6d3417e18c0a598684b87c955e4caac4f56dd4"
   integrity sha512-Qi63+wi55Jh4sDyaj5Hhx2jOpKqT386aeo+VOKsxnd+Ql9VvkO/FjmuwBGUyzkJt29ENYc+P0Sx/k5LtstNpPQ==
@@ -3187,12 +3187,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/passport/-/passport-10.0.0.tgz#92d36d4b8796b373da3f4d1a055db03cb246b127"
   integrity sha512-IlKKc6M7JOe+4dBbW6gZsXBSD05ZYgwfGf3GJhgCmUGYVqffpDdALQSS6JftnExrE+12rACoEmHkzYwKAGVK0Q==
 
-"@nestjs/passport@^9.0.3":
-  version "9.0.3"
-  resolved "https://registry.yarnpkg.com/@nestjs/passport/-/passport-9.0.3.tgz#4df0e6de3176e04a5770cb432e58f129c8e49f9e"
-  integrity sha512-HplSJaimEAz1IOZEu+pdJHHJhQyBOPAYWXYHfAPQvRqWtw4FJF1VXl1Qtk9dcXQX1eKytDtH+qBzNQc19GWNEg==
-
-"@nestjs/platform-express@^9.0.0", "@nestjs/platform-express@^9.4.3":
+"@nestjs/platform-express@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-9.4.3.tgz#f61b75686bdfce566be3b54fa7bb20a4d87ed619"
   integrity sha512-FpdczWoRSC0zz2dNL9u2AQLXKXRVtq4HgHklAhbL59X0uy+mcxhlSThG7DHzDMkoSnuuHY8ojDVf7mDxk+GtCw==
@@ -3211,15 +3206,7 @@
     cron "2.3.1"
     uuid "9.0.0"
 
-"@nestjs/schedule@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/schedule/-/schedule-3.0.1.tgz#a736e982bf935ca12e07aebe2a3aaafd611639da"
-  integrity sha512-4CAFu4rE/QPYnz/icRg3GiuLmY1bXopG8bWTJ9d7bXzaHBaPKIjGvZ20wsK8P+MncrVCkmK0iYhQrNj0cwX9+A==
-  dependencies:
-    cron "2.3.1"
-    uuid "9.0.0"
-
-"@nestjs/schematics@^9.0.0", "@nestjs/schematics@^9.0.4", "@nestjs/schematics@^9.2.0":
+"@nestjs/schematics@^9.0.4", "@nestjs/schematics@^9.2.0":
   version "9.2.0"
   resolved "https://registry.yarnpkg.com/@nestjs/schematics/-/schematics-9.2.0.tgz#f840054b5ae4b0b4e70aa9f72c09c3cf388f2512"
   integrity sha512-wHpNJDPzM6XtZUOB3gW0J6mkFCSJilzCM3XrHI1o0C8vZmFE1snbmkIXNyoi1eV0Nxh1BMymcgz5vIMJgQtTqw==
@@ -3228,17 +3215,6 @@
     "@angular-devkit/schematics" "16.0.1"
     jsonc-parser "3.2.0"
     pluralize "8.0.0"
-
-"@nestjs/swagger@^7.0.4":
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.0.6.tgz#5f6108cefb25ecc409ad34804d142186da9f3fc6"
-  integrity sha512-srSOYRD0oCV5kzgClAXqCYeJmxZtp1kGefNGjhBQObNan/B69vvrSkjJFDceP4s3y7OYl3Klu2nepcmAl4vFrA==
-  dependencies:
-    "@nestjs/mapped-types" "2.0.2"
-    js-yaml "4.1.0"
-    lodash "4.17.21"
-    path-to-regexp "3.2.0"
-    swagger-ui-dist "5.1.0"
 
 "@nestjs/swagger@^7.0.4", "@nestjs/swagger@^7.0.6":
   version "7.0.11"
@@ -3259,15 +3235,7 @@
     boxen "5.1.2"
     check-disk-space "3.4.0"
 
-"@nestjs/terminus@^9.2.2":
-  version "9.2.2"
-  resolved "https://registry.yarnpkg.com/@nestjs/terminus/-/terminus-9.2.2.tgz#88c78061307eaf19308b1f6a6055aa6c33750195"
-  integrity sha512-AWUA8XLcgxWUjUFYHDqi42M7CZn2e+DEWxP+MqNAbMzz4ybB5jGcFK5Fy8qwaNBoWg6KMF1JiXOOygGXgk9ydg==
-  dependencies:
-    boxen "5.1.2"
-    check-disk-space "3.4.0"
-
-"@nestjs/testing@^9.0.0", "@nestjs/testing@^9.4.3":
+"@nestjs/testing@^9.4.3":
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-9.4.3.tgz#53ffbabdd38f500b145c30f2fbb76dedad393d79"
   integrity sha512-LDT8Ai2eKnTzvnPaJwWOK03qTaFap5uHHsJCv6dL0uKWk6hyF9jms8DjyVaGsaujCaXDG8izl1mDEER0OmxaZA==
@@ -3278,13 +3246,6 @@
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/@nestjs/typeorm/-/typeorm-10.0.0.tgz#78e20d3413d59dd3dfee03260c904f0f4040b4e1"
   integrity sha512-WQU4HCDTz4UavsFzvGUKDHqi0MO5K47yFoPXdmh+Z/hCNO7SHCMmV9jLiLukM8n5nKUqJ3jDqiljkWBcZPdCtA==
-  dependencies:
-    uuid "9.0.0"
-
-"@nestjs/typeorm@^9.0.1":
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/typeorm/-/typeorm-9.0.1.tgz#f78bfc00e71731ea860288e4a03830107daf3d9c"
-  integrity sha512-A2BgLIPsMtmMI0bPKEf4bmzgFPsnvHqNBx3KkvaJ7hJrBQy0OqYOb+Rr06ifblKWDWS2tUPNrAFQbZjtk3PI+g==
   dependencies:
     uuid "9.0.0"
 
@@ -5166,6 +5127,11 @@
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.1.tgz#98586dc36aee8dacc98cc396dbca8d0429647aa6"
   integrity sha512-rFT3ak0/2trgvp4yYZo5iKFEPsET7vKydKF+VRCxlQ9bpheehyAJH89dAkaLEq/j/RZXJIqcgsmPJKUP1Z28HA==
 
+"@types/uuid@^9.0.2":
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.2.tgz#ede1d1b1e451548d44919dc226253e32a6952c4b"
+  integrity sha512-kNnC1GFBLuhImSnV7w4njQkUiJi0ZXUycu1rUaouPqiKlXkh77JKgdRnTAp1x5eBwcIwbtI+3otwzuIDEuDoxQ==
+
 "@types/validator@^13.7.10":
   version "13.7.17"
   resolved "https://registry.yarnpkg.com/@types/validator/-/validator-13.7.17.tgz#0a6d1510395065171e3378a4afc587a3aefa7cc1"
@@ -5204,7 +5170,7 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@types/zxcvbn@4.4.1", "@types/zxcvbn@^4.4.1":
+"@types/zxcvbn@4.4.1":
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/@types/zxcvbn/-/zxcvbn-4.4.1.tgz#46e42cbdcee681b22181478feaf4af2bc4c1abd2"
   integrity sha512-3NoqvZC2W5gAC5DZbTpCeJ251vGQmgcWIHQJGq2J240HY6ErQ9aWKkwfoKJlHLx+A83WPNTZ9+3cd2ILxbvr1w==
@@ -7743,11 +7709,6 @@ chardet@^0.7.0:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/charenc/-/charenc-0.0.2.tgz#c0a1d2f3a7092e03774bfa83f14c0fc5790a8667"
   integrity sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==
-
-check-disk-space@3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/check-disk-space/-/check-disk-space-3.3.1.tgz#10c4c8706fdd16d3e5c3572a16aa95efd0b4d40b"
-  integrity sha512-iOrT8yCZjSnyNZ43476FE2rnssvgw5hnuwOM0hm8Nj1qa0v4ieUUEbCyxxsEliaoDUb/75yCOL71zkDiDBLbMQ==
 
 check-disk-space@3.4.0:
   version "3.4.0"
@@ -11780,6 +11741,11 @@ helmet@^6.0.1:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/helmet/-/helmet-6.2.0.tgz#c29d62014be4c70b8ef092c9c5e54c8c26b8e16e"
   integrity sha512-DWlwuXLLqbrIOltR6tFQXShj/+7Cyp0gLi6uAb8qMdFh/YBBFbKSgQ6nbXmScYd8emMctuthmgIa7tUfo9Rtyg==
+
+helmet@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/helmet/-/helmet-7.0.0.tgz#ac3011ba82fa2467f58075afa58a49427ba6212d"
+  integrity sha512-MsIgYmdBh460ZZ8cJC81q4XJknjG567wzEmv46WOBblDb6TUd3z8/GhgmsM9pn8g2B80tAJ4m5/d3Bi1KrSUBQ==
 
 help-me@^4.0.1:
   version "4.2.0"
