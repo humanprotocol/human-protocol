@@ -95,7 +95,7 @@ def retrieve_annotations() -> None:
                     session, project.id, ProjectStatuses.recorded.value
                 )
 
-        logger.info(f"{LOG_MODULE}[track_completed_projects] Finishing cron job")
+        logger.info(f"{LOG_MODULE} Finishing cron job")
 
     except Exception as error:
-        logger.error(f"{LOG_MODULE}[track_completed_projects] {error}")
+        logger.error(f"{LOG_MODULE} {error}")
