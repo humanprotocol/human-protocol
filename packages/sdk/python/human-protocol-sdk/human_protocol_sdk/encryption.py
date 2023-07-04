@@ -9,7 +9,18 @@ from pgpy.errors import PGPError
 
 
 class Encryption:
+    """
+    A class that provides encryption and decryption functionality using PGP (Pretty Good Privacy).
+    """
+
     def __init__(self, private_key_armored, passphrase=None):
+        """
+        Initializes an Encryption instance.
+
+        Args:
+            private_key_armored (str): Armored representation of the private key
+            passphrase (str, optional): Passphrase to unlock the private key. Defaults to None.
+        """
         try:
             self.private_key, _ = PGPKey.from_blob(private_key_armored)
         except PGPError as e:
@@ -27,6 +38,16 @@ class Encryption:
                 raise ValueError("Private key locked. Passphrase needed")
 
     def sign_and_encrypt(self, message, public_keys):
+        """
+        Signs and encrypts a message using the private key and recipient's public keys.
+
+        Args:
+            message (str): Message to sign and encrypt
+            public_keys (list[str]): List of armored public keys of the recipients
+
+        Returns:
+            str: Armored and signed/encrypted message
+        """
         pgp_message = PGPMessage.new(message)
         if not self.private_key.is_unlocked:
             try:
@@ -48,6 +69,16 @@ class Encryption:
         return pgp_message.__str__()
 
     def decrypt(self, message, public_key=None):
+        """
+        Decrypts a message using the private key.
+
+        Args:
+            message (str): Armored message to decrypt
+            public_key (str, optional): Armored public key used for signature verification. Defaults to None.
+
+        Returns:
+            str: Decrypted message
+        """
         pgp_message = PGPMessage.from_blob(message)
         decrypted_message = ""
         try:
@@ -76,6 +107,15 @@ class Encryption:
             raise ValueError("Failed to decrypt message: {}".format(str(e)))
 
     def sign(self, message):
+        """
+        Signs a message using the private key.
+
+        Args:
+            message (str): Message to sign
+
+        Returns:
+            str: Armored and signed message
+        """
         message = PGPMessage.new(message, cleartext=True)
         if not self.private_key.is_unlocked:
             try:
@@ -89,8 +129,45 @@ class Encryption:
 
 
 class EncryptionUtils:
+    """
+    A utility class that provides additional encryption-related functionalities.
+    """
+
+    @staticmethod
+    def encrypt(message, public_keys):
+        """
+        Encrypts a message using the recipient's public keys.
+
+        Args:
+            message (str): Message to encrypt
+            public_keys (list[str]): List of armored public keys of the recipients
+
+        Returns:
+            str: Armored and encrypted message
+        """
+        pgp_message = PGPMessage.new(message)
+        cipher = SymmetricKeyAlgorithm.AES256
+        sessionkey = cipher.gen_key()
+
+        for public_key in public_keys:
+            recipient_key, _ = PGPKey.from_blob(public_key)
+            pgp_message = recipient_key.encrypt(pgp_message, sessionkey)
+
+        del sessionkey
+        return pgp_message.__str__()
+
     @staticmethod
     def verify(message, public_key):
+        """
+        Verifies the signature of a message using the corresponding public key.
+
+        Args:
+            message (str): Armored message to verify
+            public_key (str): Armored public key
+
+        Returns:
+            bool: True if the signature is valid, False otherwise
+        """
         try:
             signed_message = (
                 PGPMessage().from_blob(message) if isinstance(message, str) else message
@@ -103,6 +180,15 @@ class EncryptionUtils:
 
     @staticmethod
     def get_signed_data(message):
+        """
+        Extracts the signed data from an armored message.
+
+        Args:
+            message (str): Armored message
+
+        Returns:
+            str: Extracted signed data
+        """
         try:
             signed_message = (
                 PGPMessage().from_blob(message) if isinstance(message, str) else message
@@ -110,16 +196,3 @@ class EncryptionUtils:
             return signed_message.message.__str__()
         except PGPError as e:
             return False
-
-    @staticmethod
-    def encrypt(message, public_keys):
-        pgp_message = PGPMessage.new(message)
-        cipher = SymmetricKeyAlgorithm.AES256
-        sessionkey = cipher.gen_key()
-
-        for public_key in public_keys:
-            recipient_key, _ = PGPKey.from_blob(public_key)
-            pgp_message = recipient_key.encrypt(pgp_message, sessionkey)
-
-        del sessionkey
-        return pgp_message.__str__()
