@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_HOST=0.0.0.0
+      - POSTGRES_USER=operator
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=reputation-oracle
+      - POSTGRES_PORT=5432
+      - POSTGRES_SYNC=false
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./db:/var/lib/postgresql/data
