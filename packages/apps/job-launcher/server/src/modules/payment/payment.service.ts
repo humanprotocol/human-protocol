@@ -63,7 +63,7 @@ export class PaymentService {
 
       return customer.id;
     } catch (e) {
-      this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
+      this.logger.error(e);
       throw new BadRequestException(ErrorPayment.CustomerNotCreated);
     }
   }
@@ -91,7 +91,7 @@ export class PaymentService {
         clientSecret: paymentIntent.client_secret,
       };
     } catch (e) {
-      this.logger.log(ErrorPayment.IntentNotCreated, PaymentService.name);
+      this.logger.error(e);
       throw new BadRequestException(ErrorPayment.IntentNotCreated);
     }
   }
@@ -125,6 +125,7 @@ export class PaymentService {
 
       return true;
     } catch (e) {
+      this.logger.error(e);
       throw new Error(e);
     }
   }
@@ -188,6 +189,7 @@ export class PaymentService {
 
       return true;
     } catch (e) {
+      this.logger.error(e);
       throw new Error(e);
     }
   }
@@ -223,7 +225,12 @@ export class PaymentService {
   public async getPayment(
     paymentId: string,
   ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
-    return this.stripe.paymentIntents.retrieve(paymentId);
+    try {
+      return this.stripe.paymentIntents.retrieve(paymentId);
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error(e);
+    }
   }
 
   public async getUserBalance(userId: number): Promise<BigNumber> {

@@ -68,6 +68,7 @@ export class JobRepository {
     try {
       return this.jobEntityRepository.create(dto).save();
     } catch (e) {
+      this.logger.error(e);
       return;
     }
   }

@@ -102,6 +102,7 @@ export class JobService {
       .mul(totalFeePercentage)
       .div(100);
     const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
@@ -236,7 +237,7 @@ export class JobService {
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     try {
-     const signer = this.web3Service.getSigner(jobEntity.chainId);
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
 
       const clientParams = await InitClient.getParams(signer);
 
@@ -284,7 +285,7 @@ export class JobService {
 
       return jobEntity;
     } catch (e) {
-      this.logger.log(ErrorEscrow.NotLaunched, JobService.name);
+      this.logger.error(e);
       throw new Error(ErrorEscrow.NotLaunched);
     }
   }
@@ -293,24 +294,20 @@ export class JobService {
     encryptedManifest: any,
     bucket: string,
   ): Promise<SaveManifestDto> {
-    try {
-      const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-        [encryptedManifest],
-        bucket,
-      );
+    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
+      [encryptedManifest],
+      bucket,
+    );
 
-      if (!uploadedFiles[0]) {
-        this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-        throw new BadGatewayException(ErrorBucket.UnableSaveFile);
-      }
-
-      const { key, url, hash } = uploadedFiles[0];
-      const manifestUrl = url;
-
-      return { manifestUrl, manifestHash: hash };
-    } catch (e) {
-      throw new Error(e.message);
+    if (!uploadedFiles[0]) {
+      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
+      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
     }
+
+    const { key, url, hash } = uploadedFiles[0];
+    const manifestUrl = url;
+
+    return { manifestUrl, manifestHash: hash };
   }
 
   public async getManifest(manifestUrl: string): Promise<ManifestDto> {
@@ -329,14 +326,20 @@ export class JobService {
     webhookUrl: string,
     webhookData: SendWebhookDto,
   ): Promise<boolean> {
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData),
-    );
+    try {
+      const { data } = await firstValueFrom(
+        await this.httpService.post(webhookUrl, webhookData),
+      );
 
-    if (!data) {
-      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
+      if (!data) {
+        this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
+        throw new NotFoundException(ErrorJob.WebhookWasNotSent);
+      }
+
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      throw new Error(e)
     }
-
-    return true;
   }
 }

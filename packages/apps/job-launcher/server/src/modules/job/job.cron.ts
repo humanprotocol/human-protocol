@@ -5,9 +5,9 @@ import { LessThanOrEqual, Repository } from 'typeorm';
 import { SortDirection } from '../../common/enums/collection';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { JobStatus } from '../../common/enums/job';
-import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
 import { JobService } from './job.service';
+import { ErrorJob } from 'src/common/constants/errors';
 
 @Injectable()
 export class JobCron {
@@ -15,7 +15,6 @@ export class JobCron {
 
   constructor(
     private readonly jobService: JobService,
-    private readonly paymentService: PaymentService,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,
   ) {}
@@ -39,6 +38,7 @@ export class JobCron {
 
       await this.jobService.launchJob(jobEntity);
     } catch (e) {
+      this.logger.error(e);
       return;
     }
   }
