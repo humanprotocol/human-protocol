@@ -37,11 +37,17 @@ class PolygonMumbaiConfig:
 
 
 class CronConfig:
-    process_incoming_webhooks_int = int(
-        os.environ.get("PROCESS_INCOMING_WEBHOOKS_INT", 3000)
+    process_job_launcher_webhooks_int = int(
+        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT", 3000)
     )
-    process_incoming_webhooks_chunk_size = os.environ.get(
-        "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
+    process_job_launcher_webhooks_chunk_size = os.environ.get(
+        "PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE", 5
+    )
+    process_recording_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT", 3000)
+    )
+    process_recording_oracle_webhooks_chunk_size = os.environ.get(
+        "PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
     )
     track_completed_projects_int = int(
         os.environ.get("TRACK_COMPLETED_PROJECTS_INT", 3000)
