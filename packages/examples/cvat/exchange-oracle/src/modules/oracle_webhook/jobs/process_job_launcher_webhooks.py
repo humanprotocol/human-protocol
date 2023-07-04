@@ -6,15 +6,14 @@ from src.config import CronConfig
 from src.modules.cvat.job_flows import job_creation_process, revert_job_creation
 from src.modules.chain.escrow import get_escrow_manifest, validate_escrow
 
-from src.modules.oracle_webhook.model import Webhook, OracleWebhookStatuses
-
+from src.modules.oracle_webhook.constants import OracleWebhookTypes
 import src.modules.oracle_webhook.service as db_service
 
 
-LOG_MODULE = "[cron][webhook][process_incoming]"
+LOG_MODULE = "[cron][webhook][process_job_launcher_webhooks]"
 
 
-def process_incoming_webhooks() -> None:
+def process_job_launcher_webhooks() -> None:
     """
     Process incoming webhooks in a pending state:
       * Creates a job on CVAT
@@ -25,7 +24,9 @@ def process_incoming_webhooks() -> None:
         logger.info(f"{LOG_MODULE} Starting cron job")
         with SessionLocal.begin() as session:
             webhooks = db_service.get_pending_webhooks(
-                session, CronConfig.process_incoming_webhooks_chunk_size
+                session,
+                OracleWebhookTypes.job_launcher.value,
+                CronConfig.process_job_launcher_webhooks_chunk_size,
             )
             for webhook in webhooks:
                 try:
@@ -37,9 +38,7 @@ def process_incoming_webhooks() -> None:
                     job_creation_process(
                         webhook.escrow_address, webhook.chain_id, manifest
                     )
-                    db_service.update_webhook_status(
-                        session, webhook.id, OracleWebhookStatuses.completed.value
-                    )
+                    db_service.handle_webhook_success(session, webhook.id)
                 except Exception as e:
                     logger.error(
                         f"Webhook: {webhook.id} failed during execution. Error {e}"
