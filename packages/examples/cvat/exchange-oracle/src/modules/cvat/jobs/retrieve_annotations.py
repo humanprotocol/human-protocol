@@ -8,10 +8,14 @@ from src.config import CronConfig, StorageConfig
 from src.modules.cvat.constants import ProjectStatuses
 from src.modules.cvat.handlers.annotation import get_annotations_handler
 
+from src.modules.oracle_webhook.constants import OracleWebhookTypes
+from src.modules.oracle_webhook.helpers import prepare_signature
+
 from src.modules.chain.escrow import store_results
 
 import src.modules.cvat.api_calls as cvat_api
 import src.modules.cvat.service as cvat_db_service
+import src.modules.oracle_webhook.service as oracle_db_service
 
 
 LOG_MODULE = "[cron][cvat][retrieve_annotations]"
@@ -24,7 +28,7 @@ def retrieve_annotations() -> None:
     1. Retrieves annotations from projects with "completed" status
     2. Postprocesses them
     3. Stores annotations in s3 bucket
-    4. Sends a webhook to recording oracle
+    4. Prepares a webhook to recording oracle
     """
     try:
         logger.info(f"{LOG_MODULE} Starting cron job")
@@ -77,6 +81,14 @@ def retrieve_annotations() -> None:
                     project.escrow_address,
                     f"{StorageConfig.bucket_url()}{files[0]}",
                     files[0],
+                )
+
+                oracle_db_service.create_webhook(
+                    session,
+                    project.escrow_address,
+                    project.chain_id,
+                    OracleWebhookTypes.recording_oracle.value,
+                    prepare_signature(project.escrow_address, project.chain_id),
                 )
 
                 cvat_db_service.update_project_status(
