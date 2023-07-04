@@ -9,6 +9,7 @@ from test.human_protocol_sdk.utils.encryption import (
     encrypted_message,
     passphrase,
     signed_message,
+    encrypted_unsigned_message,
 )
 
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
@@ -44,12 +45,20 @@ class TestEncryption(unittest.TestCase):
 
     def test_encrypt(self):
         encryption = Encryption(private_key)
-        encrypted_message = encryption.encrypt(message, [public_key2, public_key3])
+        encrypted_message = encryption.sign_and_encrypt(
+            message, [public_key2, public_key3]
+        )
         self.assertIsInstance(encrypted_message, str)
 
     def test_encrypt_with_locked_private_key(self):
         encryption = Encryption(private_key3, passphrase)
-        encrypted_message = encryption.encrypt(message, [public_key, public_key2])
+        encrypted_message = encryption.sign_and_encrypt(
+            message, [public_key, public_key2]
+        )
+        self.assertIsInstance(encrypted_message, str)
+
+    def test_encrypt_unsigned_message(self):
+        encrypted_message = EncryptionUtils.encrypt(message, [public_key2, public_key3])
         self.assertIsInstance(encrypted_message, str)
 
     def test_decrypt(self):
@@ -78,6 +87,12 @@ class TestEncryption(unittest.TestCase):
             f"Failed to decrypt message: Could not find signature with this public key",
             str(cm.exception),
         )
+
+    def test_decrypt_unsigned_message(self):
+        encryption = Encryption(private_key3, passphrase)
+        decrypted_message = encryption.decrypt(encrypted_unsigned_message)
+        self.assertIsInstance(decrypted_message, str)
+        self.assertEqual(decrypted_message, message)
 
     def test_sign(self):
         encryption = Encryption(private_key)

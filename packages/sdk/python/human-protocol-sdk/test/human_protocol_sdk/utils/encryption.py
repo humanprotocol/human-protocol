@@ -105,6 +105,17 @@ YrAwSaqozm1nV9nBJn45R+30jTY8MhuNrQz99qq6RO+MyY9Gq59N+30GesuGUKk=
 =1Iid
 -----END PGP MESSAGE-----"""
 
+encrypted_unsigned_message = """-----BEGIN PGP MESSAGE-----
+
+wV4D23LqIVwYYycSAQdAoj3eL6jiD68KXvs45FDac0q9uPwELizaDJdIIwiU2Dgw
+6CU2rxneWi5czu+LEbkXKRaqJzdhSHwAjQEPm9An9Wp8TVKcQqfj/ZaF3ujcbSwd
+wV4Dh8BoKHkyM3YSAQdAn95YV9myvgJooZe5R6+lIKnLK8foaiCUecrhe7NGG3Uw
+8aj139wxLYF/+MzWz+ZTrLo30mB2ApL/2gxaEHC03lM4B6a/0NzWdwFI7F/+7vsi
+0kIBfslaoCllS1WXg99MFX5qvQpB/+3VIM/UAjPY2TXs8a2kh4q2hAnfwqoS1fcX
+oN2/VVw9U2JMGpXx00Kv3DWNTv4=
+=XzPZ
+-----END PGP MESSAGE-----"""
+
 signed_message = """-----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA256
 

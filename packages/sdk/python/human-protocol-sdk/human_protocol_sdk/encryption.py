@@ -26,7 +26,7 @@ class Encryption:
             else:
                 raise ValueError("Private key locked. Passphrase needed")
 
-    def encrypt(self, message, public_keys):
+    def sign_and_encrypt(self, message, public_keys):
         pgp_message = PGPMessage.new(message)
         if not self.private_key.is_unlocked:
             try:
@@ -110,3 +110,16 @@ class EncryptionUtils:
             return signed_message.message.__str__()
         except PGPError as e:
             return False
+
+    @staticmethod
+    def encrypt(message, public_keys):
+        pgp_message = PGPMessage.new(message)
+        cipher = SymmetricKeyAlgorithm.AES256
+        sessionkey = cipher.gen_key()
+
+        for public_key in public_keys:
+            recipient_key, _ = PGPKey.from_blob(public_key)
+            pgp_message = recipient_key.encrypt(pgp_message, sessionkey)
+
+        del sessionkey
+        return pgp_message.__str__()
