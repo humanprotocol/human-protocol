@@ -236,58 +236,53 @@ export class JobService {
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
-    try {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-      const clientParams = await InitClient.getParams(signer);
+    const clientParams = await InitClient.getParams(signer);
 
-      const escrowClient = new EscrowClient(clientParams);
+    const escrowClient = new EscrowClient(clientParams);
 
-      const escrowConfig = {
-        recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
-        reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
-        recordingOracleFee: BigNumber.from(
-          this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-        ),
-        reputationOracleFee: BigNumber.from(
-          this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-        ),
-        manifestUrl: jobEntity.manifestUrl,
-        manifestHash: jobEntity.manifestHash,
-      };
+    const escrowConfig = {
+      recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
+      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+      recordingOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
+      ),
+      reputationOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      manifestUrl: jobEntity.manifestUrl,
+      manifestHash: jobEntity.manifestHash,
+    };
 
-      const escrowAddress = await escrowClient.createAndSetupEscrow(
-        clientParams.network.hmtAddress,
-        [],
-        escrowConfig,
-      );
+    const escrowAddress = await escrowClient.createAndSetupEscrow(
+      clientParams.network.hmtAddress,
+      [],
+      escrowConfig,
+    );
 
-      if (!escrowAddress) {
-        this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-        throw new NotFoundException(ErrorEscrow.NotCreated);
-      }
-
-      jobEntity.escrowAddress = escrowAddress;
-      jobEntity.status = JobStatus.LAUNCHED;
-      await jobEntity.save();
-
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-      if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        this.sendWebhook(
-          this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
-          {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-          },
-        );
-      }
-
-      return jobEntity;
-    } catch (e) {
-      this.logger.error(e);
-      throw new Error(ErrorEscrow.NotLaunched);
+    if (!escrowAddress) {
+      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
+      throw new NotFoundException(ErrorEscrow.NotCreated);
     }
+
+    jobEntity.escrowAddress = escrowAddress;
+    jobEntity.status = JobStatus.LAUNCHED;
+    await jobEntity.save();
+
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
+
+    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      this.sendWebhook(
+        this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
+        {
+          escrowAddress: jobEntity.escrowAddress,
+          chainId: jobEntity.chainId,
+        },
+      );
+    }
+
+    return jobEntity;
   }
 
   public async saveManifest(
@@ -326,20 +321,15 @@ export class JobService {
     webhookUrl: string,
     webhookData: SendWebhookDto,
   ): Promise<boolean> {
-    try {
-      const { data } = await firstValueFrom(
-        await this.httpService.post(webhookUrl, webhookData),
-      );
+    const { data } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, webhookData),
+    );
 
-      if (!data) {
-        this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
-        throw new NotFoundException(ErrorJob.WebhookWasNotSent);
-      }
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      throw new Error(e)
+    if (!data) {
+      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
+      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
     }
+
+    return true;
   }
 }

@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ConflictException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -51,147 +52,132 @@ export class PaymentService {
   }
 
   public async createCustomer(email: string): Promise<string> {
-    try {
-      const customer = await this.stripe.customers.create({
-        email,
-      });
+    const customer = await this.stripe.customers.create({
+      email,
+    });
 
-      if (!customer) {
-        this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
-        throw new NotFoundException(ErrorPayment.CustomerNotCreated);
-      }
-
-      return customer.id;
-    } catch (e) {
-      this.logger.error(e);
-      throw new BadRequestException(ErrorPayment.CustomerNotCreated);
+    if (!customer) {
+      this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.CustomerNotCreated);
     }
+
+    return customer.id;
   }
 
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
   ) {
-    try {
-      const { amount, currency } = dto;
+    const { amount, currency } = dto;
 
-      const params: Stripe.PaymentIntentCreateParams = {
-        payment_method_types: [PaymentFiatMethodType.CARD],
-        amount: amount * 100,
-        currency: currency,
-      };
+    const params: Stripe.PaymentIntentCreateParams = {
+      payment_method_types: [PaymentFiatMethodType.CARD],
+      amount: amount * 100,
+      currency: currency,
+    };
 
-      params.confirm = true;
-      params.customer = customerId;
-      params.payment_method_options = {};
+    params.confirm = true;
+    params.customer = customerId;
+    params.payment_method_options = {};
 
-      const paymentIntent = await this.stripe.paymentIntents.create(params);
+    const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-      return {
-        clientSecret: paymentIntent.client_secret,
-      };
-    } catch (e) {
-      this.logger.error(e);
-      throw new BadRequestException(ErrorPayment.IntentNotCreated);
-    }
+    return {
+      clientSecret: paymentIntent.client_secret,
+    };
   }
 
   public async confirmFiatPayment(
     userId: number,
     dto: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    try {
-      const paymentData = await this.getPayment(dto.paymentId);
+    const paymentData = await this.getPayment(dto.paymentId);
 
-      if (!paymentData) {
-        this.logger.log(ErrorPayment.NotFound, PaymentService.name);
-        throw new NotFoundException(ErrorPayment.NotFound);
-      }
-
-      if (
-        !paymentData ||
-        paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-      ) {
-        this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-        throw new BadRequestException(ErrorPayment.NotSuccess);
-      }
-
-      await this.savePayment(
-        userId,
-        PaymentSource.FIAT,
-        PaymentType.DEPOSIT,
-        BigNumber.from(paymentData.amount),
-      );
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      throw new Error(e);
+    if (!paymentData) {
+      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.NotFound);
     }
+
+    if (
+      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
+    ) {
+      this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.NotSuccess);
+    }
+
+    await this.savePayment(
+      userId,
+      PaymentSource.FIAT,
+      PaymentType.DEPOSIT,
+      BigNumber.from(paymentData.amount),
+    );
+
+    return true;
   }
 
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
   ) {
-    try {
-      const provider = new providers.JsonRpcProvider(
-        Object.values(networkMap).find(
-          (item) => item.network.chainId === dto.chainId,
-        )?.rpcUrl,
-      );
+    const provider = new providers.JsonRpcProvider(
+      Object.values(networkMap).find(
+        (item) => item.network.chainId === dto.chainId,
+      )?.rpcUrl,
+    );
 
-      const transaction = await provider.getTransactionReceipt(
-        dto.transactionHash,
-      );
+    const transaction = await provider.getTransactionReceipt(
+      dto.transactionHash,
+    );
 
-      if (!transaction) {
-        this.logger.error(ErrorPayment.TransactionNotFoundByHash);
-        throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
-      }
-
-      if (!transaction.logs[0] || !transaction.logs[0].data) {
-        this.logger.error(ErrorPayment.InvalidTransactionData);
-        throw new NotFoundException(ErrorPayment.InvalidTransactionData);
-      }
-
-      if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
-        this.logger.error(
-          `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
-        );
-        throw new NotFoundException(
-          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
-        );
-      }
-
-      const amount = BigInt(transaction.logs[0].data).toString();
-
-      const paymentEntity = await this.paymentRepository.findOne({
-        transactionHash: transaction.transactionHash,
-      });
-
-      if (paymentEntity) {
-        this.logger.log(
-          ErrorPayment.TransactionHashAlreadyExists,
-          PaymentRepository.name,
-        );
-        throw new BadRequestException(
-          ErrorPayment.TransactionHashAlreadyExists,
-        );
-      }
-
-      await this.savePayment(
-        userId,
-        PaymentSource.CRYPTO,
-        PaymentType.DEPOSIT,
-        BigNumber.from(amount),
-      );
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      throw new Error(e);
+    if (!transaction) {
+      this.logger.error(ErrorPayment.TransactionNotFoundByHash);
+      throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
     }
+
+    if (!transaction.logs[0] || !transaction.logs[0].data) {
+      this.logger.error(ErrorPayment.InvalidTransactionData);
+      throw new NotFoundException(ErrorPayment.InvalidTransactionData);
+    }
+
+    if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
+      this.logger.error(
+        `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
+      );
+      throw new NotFoundException(
+        ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+      );
+    }
+
+    const amount = BigInt(transaction.logs[0].data).toString();
+
+    const paymentEntity = await this.paymentRepository.findOne({
+      transactionHash: transaction.transactionHash,
+    });
+
+    if (paymentEntity) {
+      this.logger.log(
+        ErrorPayment.TransactionHashAlreadyExists,
+        PaymentRepository.name,
+      );
+      throw new BadRequestException(
+        ErrorPayment.TransactionHashAlreadyExists,
+      );
+    }
+
+    await this.savePayment(
+      userId,
+      PaymentSource.CRYPTO,
+      PaymentType.DEPOSIT,
+      BigNumber.from(amount),
+    );
+
+    return true;
+  }
+
+  public async getPayment(
+    paymentId: string,
+  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
+    return this.stripe.paymentIntents.retrieve(paymentId);
   }
 
   public async savePayment(
@@ -220,17 +206,6 @@ export class PaymentService {
     }
 
     return true;
-  }
-
-  public async getPayment(
-    paymentId: string,
-  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
-    try {
-      return this.stripe.paymentIntents.retrieve(paymentId);
-    } catch (e) {
-      this.logger.error(e);
-      throw new Error(e);
-    }
   }
 
   public async getUserBalance(userId: number): Promise<BigNumber> {

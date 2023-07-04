@@ -214,7 +214,7 @@ describe('JobService', () => {
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
-      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined);
+      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
       const userBalance = ethers.utils.parseUnits('15', 'ether'); // 10 ETH
       jest
