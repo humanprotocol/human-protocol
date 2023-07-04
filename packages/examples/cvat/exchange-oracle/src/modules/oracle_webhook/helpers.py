@@ -1,7 +1,7 @@
 from typing import Dict
 
 from src.constants import Networks
-from src.modules.chain.web3 import sign_message, recover_signer
+from src.modules.chain.web3 import sign_message
 
 
 def prepare_recording_oracle_webhook_body(
