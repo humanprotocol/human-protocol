@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: 60c33707b2dc
+Revision ID: af5450f1b6e7
 Revises: 
-Create Date: 2023-06-29 13:40:04.052820
+Create Date: 2023-06-30 14:39:29.317255
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlalchemy_utils
 
 
 # revision identifiers, used by Alembic.
-revision = "60c33707b2dc"
+revision = "af5450f1b6e7"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -71,7 +71,7 @@ def upgrade() -> None:
             nullable=True,
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("escrow_address"),
+        sa.UniqueConstraint("escrow_address", "type", name="_escrow_address_type_uc"),
     )
     op.create_index(op.f("ix_webhooks_id"), "webhooks", ["id"], unique=False)
     op.create_index(
