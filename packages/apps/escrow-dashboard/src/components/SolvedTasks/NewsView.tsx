@@ -9,7 +9,11 @@ export const NewsView = () => {
 
   return (
     <CardContainer sxProps={{ padding: 0 }}>
-      <CardActionArea href={data?.link ?? ''} target="_blank">
+      <CardActionArea
+        href={data?.link ?? ''}
+        target="_blank"
+        sx={{ height: '100%' }}
+      >
         <Box
           sx={{
             padding: '24px',
@@ -17,6 +21,7 @@ export const NewsView = () => {
             flexDirection: { xs: 'row', md: 'column' },
             justifyContent: 'space-between',
             height: '100%',
+            boxSizing: 'border-box',
           }}
         >
           <Box
