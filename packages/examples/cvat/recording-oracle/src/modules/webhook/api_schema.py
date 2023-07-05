@@ -4,7 +4,7 @@ from src.constants import Networks
 from src.modules.chain.escrow import validate_address
 
 
-class ExchangeOracleWebhook(BaseModel):
+class OracleWebhook(BaseModel):
     escrow_address: str
     chain_id: Networks
 
@@ -22,5 +22,5 @@ class ExchangeOracleWebhook(BaseModel):
         }
 
 
-class ExchangeOracleWebhookResponse(BaseModel):
+class OracleWebhookResponse(BaseModel):
     id: str

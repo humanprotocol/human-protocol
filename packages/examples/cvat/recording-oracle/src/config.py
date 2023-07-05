@@ -37,11 +37,17 @@ class PolygonMumbaiConfig:
 
 
 class CronConfig:
-    process_incoming_webhooks_int = int(
-        os.environ.get("PROCESS_INCOMING_WEBHOOKS_INT", 3000)
+    process_exchange_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000)
     )
-    process_incoming_webhooks_chunk_size = os.environ.get(
-        "PROCESS_INCOMING_WEBHOOKS_CHUNK_SIZE", 5
+    process_exchange_oracle_webhooks_chunk_size = os.environ.get(
+        "PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
+    )
+    process_reputation_oracle_webhooks_int = int(
+        os.environ.get("PROCESS_REPUTATION_ORACLE_WEBHOOKS_INT", 3000)
+    )
+    process_reputation_oracle_webhooks_chunk_size = os.environ.get(
+        "PROCESS_REPUTATION_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
     )
 
 
@@ -57,6 +63,8 @@ class Config:
     port = int(os.environ.get("PORT", 8000))
     environment = os.environ.get("ENVIRONMENT", "development")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT", 1))
+    webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES", 5))
+    webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED", 5))
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_mumbai = PolygonMumbaiConfig

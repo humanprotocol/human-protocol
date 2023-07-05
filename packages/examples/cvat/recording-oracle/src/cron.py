@@ -1,11 +1,14 @@
-from typing import Callable
-
 from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.config import Config
 
-from src.modules.webhook.process_pending import process_incoming_webhooks
+from src.modules.webhook.jobs.process_exchange_oracle_webhooks import (
+    process_exchange_oracle_webhooks,
+)
+from src.modules.webhook.jobs.process_reputation_oracle_webhooks import (
+    process_reputation_oracle_webhooks,
+)
 
 
 def setup_cron_jobs(app: FastAPI):
@@ -13,8 +16,13 @@ def setup_cron_jobs(app: FastAPI):
     def cron_record():
         scheduler = BackgroundScheduler()
         scheduler.add_job(
-            process_incoming_webhooks,
+            process_exchange_oracle_webhooks,
             "interval",
-            seconds=Config.cron_config.process_incoming_webhooks_int,
+            seconds=Config.cron_config.process_exchange_oracle_webhooks_int,
+        )
+        scheduler.add_job(
+            process_reputation_oracle_webhooks,
+            "interval",
+            seconds=Config.cron_config.process_reputation_oracle_webhooks_int,
         )
         scheduler.start()
