@@ -136,36 +136,6 @@ export class SendWebhookDto {
   public chainId: number;
 }
 
-export class ManifestDto {
-  dataUrl?: string;
-  labels?: string[];
-
-  @IsNumber()
-  @IsPositive()
-  submissionsRequired: number;
-
-  requesterTitle?: string;
-
-  @IsString()
-  requesterDescription: string;
-
-  @IsNumber()
-  @IsPositive()
-  requesterAccuracyTarget?: number;
-
-  @IsString()
-  fee: string;
-
-  @IsString()
-  fundAmount: string;
-
-  @IsEnum(JobRequestType)
-  requestType: JobRequestType;
-
-  @IsEnum(JobMode)
-  mode: JobMode;
-}
-
 export class FortuneManifestDto {
   @IsNumber()
   @IsPositive()

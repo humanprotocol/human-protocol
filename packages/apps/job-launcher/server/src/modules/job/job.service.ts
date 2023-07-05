@@ -33,7 +33,6 @@ import {
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
-  ManifestDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
