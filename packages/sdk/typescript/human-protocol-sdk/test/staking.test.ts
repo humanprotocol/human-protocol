@@ -1,38 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ethers, BigNumber } from 'ethers';
-import { StakingClient } from '../src/staking';
-import {
-  FAKE_AMOUNT,
-  FAKE_BLOCK_NUMBER,
-  FAKE_NEGATIVE_AMOUNT,
-  FAKE_NETWORK,
-  FAKE_TRANSACTION_CONFIRMATIONS,
-  FAKE_TRANSACTION_HASH,
-} from './utils/constants';
+import { BigNumber, Signer, ethers } from 'ethers';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { ChainId } from '../src/enums';
 import {
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidSlasherAddressProvided,
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
+  ErrorProviderDoesNotExist,
+  ErrorUnsupportedChainID,
 } from '../src/error';
-import { InitClient } from '../src/init';
 import { IAllocation, IReward, IStaker } from '../src/interfaces';
+import { StakingClient } from '../src/staking';
+import {
+  DEFAULT_GAS_PAYER_PRIVKEY,
+  FAKE_AMOUNT,
+  FAKE_BLOCK_NUMBER,
+  FAKE_NEGATIVE_AMOUNT,
+  FAKE_TRANSACTION_CONFIRMATIONS,
+  FAKE_TRANSACTION_HASH,
+} from './utils/constants';
 
 vi.mock('../src/init');
 
 describe('StakingClient', () => {
   const provider = new ethers.providers.JsonRpcProvider();
   let stakingClient: any,
+    mockProvider: any,
     mockSigner: any,
     mockStakingContract: any,
     mockEscrowFactoryContract: any,
     mockTokenContract: any;
 
   beforeEach(async () => {
+    mockProvider = {
+      ...provider,
+      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+    };
     mockSigner = {
       ...provider.getSigner(),
+      provider: {
+        ...mockProvider,
+      },
       getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
     };
 
@@ -49,7 +59,7 @@ describe('StakingClient', () => {
       getListOfStakers: vi.fn(),
       getAllocation: vi.fn(),
       rewardPool: vi.fn().mockResolvedValueOnce(ethers.constants.AddressZero),
-      address: FAKE_NETWORK.stakingAddress,
+      address: ethers.constants.AddressZero,
     };
 
     mockEscrowFactoryContract = {
@@ -61,14 +71,7 @@ describe('StakingClient', () => {
       approve: vi.fn(),
     };
 
-    const getClientParamsMock = InitClient.getParams as jest.Mock;
-    getClientParamsMock.mockResolvedValue({
-      signerOrProvider: mockSigner,
-      network: FAKE_NETWORK,
-    });
-
-    stakingClient = new StakingClient(await InitClient.getParams(mockSigner));
-
+    stakingClient = await StakingClient.build(mockSigner);
     stakingClient.stakingContract = mockStakingContract;
     stakingClient.tokenContract = mockTokenContract;
     stakingClient.escrowFactoryContract = mockEscrowFactoryContract;
@@ -76,6 +79,42 @@ describe('StakingClient', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('build', () => {
+    test('should create a new instance of StakingClient with a Signer', async () => {
+      const stakingClient = await StakingClient.build(mockSigner as Signer);
+
+      expect(stakingClient).toBeInstanceOf(StakingClient);
+    });
+
+    test('should create a new instance of StakingClient with a Provider', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      const stakingClient = await StakingClient.build(provider);
+
+      expect(stakingClient).toBeInstanceOf(StakingClient);
+    });
+
+    test('should throw an error if Signer provider does not exist', async () => {
+      const signer = new ethers.Wallet(DEFAULT_GAS_PAYER_PRIVKEY);
+
+      await expect(StakingClient.build(signer)).rejects.toThrow(
+        ErrorProviderDoesNotExist
+      );
+    });
+
+    test('should throw an error if the chain ID is unsupported', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      vi.spyOn(provider, 'getNetwork').mockResolvedValue({
+        chainId: 1337,
+      } as any);
+
+      await expect(StakingClient.build(provider)).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
   });
 
   describe('approveStake', () => {
