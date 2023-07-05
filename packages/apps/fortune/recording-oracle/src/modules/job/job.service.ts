@@ -1,9 +1,15 @@
 import { HttpService } from "@nestjs/axios";
 import { Inject, Injectable } from "@nestjs/common";
-import { EscrowClient, EscrowStatus, InitClient, StorageClient } from "@human-protocol/sdk";
+import {
+  EscrowClient,
+  EscrowStatus,
+  InitClient,
+  // KVStoreClient,
+  StorageClient,
+} from "@human-protocol/sdk";
 import { ethers } from "ethers";
 
-import { storageConfigKey, StorageConfigType } from "@/common/config";
+import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
 import { JobSolutionRequestDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
 
@@ -12,6 +18,8 @@ export class JobService {
   constructor(
     @Inject(storageConfigKey)
     private storageConfig: StorageConfigType,
+    @Inject(serverConfigKey)
+    private serverConfig: ServerConfigType,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly httpService: HttpService,
@@ -19,7 +27,10 @@ export class JobService {
 
   async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
-    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
+    const clientParams = await InitClient.getParams(signer);
+
+    const escrowClient = new EscrowClient(clientParams);
+    // const kvstoreClient = new KVStoreClient(clientParams);
 
     // Validate if recording oracle address is valid
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
@@ -36,13 +47,13 @@ export class JobService {
 
     // Validate if the escrow has the correct manifest
     const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { fortunesRequired, reputationOracleUrl } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
+    const { fortunesRequired } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
       string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 
-    if (!fortunesRequired || !reputationOracleUrl) {
+    if (!fortunesRequired) {
       throw new Error("Manifest does not contain the required data");
     }
 
@@ -85,9 +96,16 @@ export class JobService {
     // Save solution URL/HASH on-chain
     await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
 
+    // TODO: Uncomment this to read reputation oracle URL from KVStore
+    // const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
+    // const reputationOracleURL = (await kvstoreClient.get(reputationOracleAddress, "url")) as string;
+
+    // TODO: Remove this when KVStore is used
+    const reputationOracleURL = this.serverConfig.reputationOracleURL;
+
     // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
     if (newJobSolutions.length === fortunesRequired) {
-      await this.httpService.post(`${reputationOracleUrl.replace(/\/+$/, "")}/send-fortunes`, newJobSolutions);
+      await this.httpService.post(`${reputationOracleURL.replace(/\/+$/, "")}/send-fortunes`, newJobSolutions);
       return "The requested job is completed.";
     }
 

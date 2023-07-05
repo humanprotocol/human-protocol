@@ -78,6 +78,11 @@ describe("JobController", () => {
             bucket: "TEST_BUCKET",
           })),
         ),
+        ConfigModule.forFeature(
+          registerAs("server", () => ({
+            reputationOracleURL: "REPUTATION_ORACLE_URL",
+          })),
+        ),
       ],
       providers: [
         JobService,
@@ -148,7 +153,7 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
+          return { fortunesRequired: 2 };
         }
 
         return [];
@@ -169,7 +174,7 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
+          return { fortunesRequired: 2 };
         }
 
         return [SOLUTION];
@@ -197,7 +202,7 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2, reputationOracleUrl: "REPUTATION_ORACLE_URL" };
+          return { fortunesRequired: 2 };
         }
 
         return [oldSolution];
