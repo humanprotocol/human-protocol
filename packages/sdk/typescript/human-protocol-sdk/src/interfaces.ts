@@ -1,11 +1,5 @@
-import { BigNumber, Signer } from 'ethers';
-import { Provider } from '@ethersproject/abstract-provider';
-import { EscrowStatus, NetworkData } from './types';
-
-export interface IClientParams {
-  signerOrProvider: Signer | Provider;
-  network: NetworkData;
-}
+import { BigNumber } from 'ethers';
+import { EscrowStatus } from './types';
 
 export interface IAllocation {
   escrowAddress: string;

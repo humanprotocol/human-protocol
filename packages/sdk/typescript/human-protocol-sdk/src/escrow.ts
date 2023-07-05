@@ -1,20 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Provider } from '@ethersproject/abstract-provider';
+import { Network } from '@ethersproject/networks';
 import {
-  HMToken__factory,
-  HMToken,
   Escrow,
   EscrowFactory,
   EscrowFactory__factory,
   Escrow__factory,
+  HMToken,
+  HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
-import { Provider } from '@ethersproject/abstract-provider';
+import { DEFAULT_TX_ID, NETWORKS } from './constants';
+import { requiresSigner } from './decorators';
+import { ChainId } from './enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
   ErrorHashIsEmptyString,
+  ErrorProviderDoesNotExist,
+  ErrorUnsupportedChainID,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidRecordingOracleAddressProvided,
@@ -29,15 +35,13 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from './error';
-import { IClientParams, IEscrowConfig, IEscrowsFilter } from './interfaces';
-import { gqlFetch, isValidUrl, throwError } from './utils';
-import { DEFAULT_TX_ID } from './constants';
+import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import {
   RAW_LAUNCHED_ESCROWS_FILTERED_QUERY,
   RAW_LAUNCHED_ESCROWS_QUERY,
 } from './queries';
 import { EscrowStatus, NetworkData } from './types';
-import { requiresSigner } from './decorators';
+import { gqlFetch, isValidUrl, throwError } from './utils';
 
 export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
@@ -46,18 +50,48 @@ export class EscrowClient {
   public network: NetworkData;
 
   /**
-   * **Escrow constructor**
+   * **EscrowClient constructor**
    *
-   *   * @param {IClientParams} clientParams - Init client parameters
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {NetworkData} network - The network information required to connect to the KVStore contract
    */
-  constructor(readonly clientParams: IClientParams) {
-    this.network = clientParams.network;
-
+  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      clientParams.network.factoryAddress,
-      clientParams.signerOrProvider
+      network.factoryAddress,
+      signerOrProvider
     );
-    this.signerOrProvider = clientParams.signerOrProvider;
+    this.network = network;
+    this.signerOrProvider = signerOrProvider;
+  }
+
+  /**
+   * Creates an instance of EscrowClient from a Signer or Provider.
+   *
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @returns {Promise<EscrowClient>} - An instance of EscrowClient
+   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   */
+  public static async build(signerOrProvider: Signer | Provider) {
+    let network: Network;
+    if (Signer.isSigner(signerOrProvider)) {
+      if (!signerOrProvider.provider) {
+        throw ErrorProviderDoesNotExist;
+      }
+
+      network = await signerOrProvider.provider.getNetwork();
+    } else {
+      network = await signerOrProvider.getNetwork();
+    }
+
+    const chainId: ChainId = network.chainId;
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    return new EscrowClient(signerOrProvider, networkData);
   }
 
   /**
