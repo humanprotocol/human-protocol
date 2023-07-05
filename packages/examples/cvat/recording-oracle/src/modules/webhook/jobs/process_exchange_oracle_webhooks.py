@@ -1,48 +1,48 @@
 import logging
-from sqlalchemy import update
+
+from human_protocol_sdk.storage import StorageClient, Credentials
 
 from src.db import SessionLocal
 from src.config import CronConfig, StorageConfig
 
-from src.modules.chain.escrow import (
-    validate_escrow,
-    get_escrow_job_type,
-    get_intermediate_results,
-)
-from human_protocol_sdk.storage import StorageClient, Credentials
 from src.modules.webhook.process_intermediate_results import (
     process_intermediate_results,
 )
 
-from .model import Webhook, WebhookStatuses
-from .service import get_pending_webhooks
+from src.modules.webhook.constants import OracleWebhookTypes
+from src.modules.webhook.helpers import prepare_signature
+
+import src.modules.webhook.service as db_service
+import src.modules.chain.escrow as escrow
 
 
-LOG_MODULE = "[cron][webhook][process_incoming]"
+LOG_MODULE = "[cron][webhook][process_exchange_oracle_webhooks]"
 
 
-def process_incoming_webhooks() -> None:
+def process_exchange_oracle_webhooks() -> None:
     """
-    Process incoming webhooks in a pending state:
+    Process exchange oracle webhooks in a pending state:
       * Retrieves raw results from s3 bucket
       * Evaluates them and store final annotations in s3 bucket
-      * Sends a webhook to Reputation Oracle
+      * Prepares a webhook for reputation oracle
     """
     try:
         logger = logging.getLogger("app")
         logger.info(f"{LOG_MODULE} Starting cron job")
         with SessionLocal.begin() as session:
-            webhooks = get_pending_webhooks(
-                session, CronConfig.process_incoming_webhooks_chunk_size
+            webhooks = db_service.get_pending_webhooks(
+                session,
+                OracleWebhookTypes.exchange_oracle.value,
+                CronConfig.process_exchange_oracle_webhooks_chunk_size,
             )
             for webhook in webhooks:
                 try:
-                    validate_escrow(webhook.chain_id, webhook.escrow_address)
-                    job_type = get_escrow_job_type(
+                    escrow.validate_escrow(webhook.chain_id, webhook.escrow_address)
+                    job_type = escrow.get_escrow_job_type(
                         webhook.chain_id, webhook.escrow_address
                     )
 
-                    intermediate_results = get_intermediate_results(
+                    intermediate_results = escrow.get_intermediate_results(
                         webhook.chain_id, webhook.escrow_address
                     )
                     final_results = process_intermediate_results(
@@ -60,22 +60,28 @@ def process_incoming_webhooks() -> None:
                     files = storage_client.upload_files(
                         [final_results], StorageConfig.results_bucket_name
                     )
-                    upd = (
-                        update(Webhook)
-                        .where(Webhook.id == webhook.id)
-                        .values(status=WebhookStatuses.completed)
+
+                    escrow.store_results(
+                        webhook.chain_id,
+                        webhook.escrow_address,
+                        f"{StorageConfig.bucket_url()}{files[0]}",
+                        files[0],
                     )
-                    session.execute(upd)
+
+                    db_service.create_webhook(
+                        session,
+                        webhook.escrow_address,
+                        webhook.chain_id,
+                        OracleWebhookTypes.reputation_oracle.value,
+                        prepare_signature(webhook.escrow_address, webhook.chain_id),
+                    )
+
+                    db_service.handle_webhook_success(session, webhook.id)
                 except Exception as e:
                     logger.error(
                         f"Webhook: {webhook.id} failed during execution. Error {e}"
                     )
-                    upd = (
-                        update(Webhook)
-                        .where(Webhook.id == webhook.id)
-                        .values(status=WebhookStatuses.failed)
-                    )
-                    session.execute(upd)
+                    db_service.handle_webhook_fail(session, webhook.id)
 
         logger.info(f"{LOG_MODULE} Finishing cron job")
         return None

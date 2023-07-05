@@ -17,6 +17,7 @@ APScheduler = "^3.10.1"
 pytest = "^7.4.0"
 human-protocol-sdk = "^1.1.5"
 alembic = "^1.11.1"
+httpx = "^0.24.1"
 
 
 [tool.poetry.group.dev.dependencies]

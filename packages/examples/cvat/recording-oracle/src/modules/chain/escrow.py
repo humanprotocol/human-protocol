@@ -57,7 +57,7 @@ def get_intermediate_results_url(chain_id: int, escrow_address: str) -> str:
     escrow_client = EscrowClient(web3)
 
     # Method yet to be released
-    intermediate_storage_url = escrow_client.get_intermediate_results_url(
+    intermediate_results_url = escrow_client.get_intermediate_results_url(
         escrow_address
     )
 
@@ -70,3 +70,15 @@ def get_intermediate_results(chain_id: int, escrow_address: str):
         StorageClient.download_file_from_url(intermediate_results_url).decode("utf-8")
     )
     return intermediate_results
+
+
+def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)
+
+    escrow_client.store_results(escrow_address, url, hash)
+
+
+def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)

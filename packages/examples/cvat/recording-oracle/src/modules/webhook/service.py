@@ -1,18 +1,25 @@
 import datetime
 import uuid
 
-from sqlalchemy.sql import select, update
+from typing import List
+
+from sqlalchemy import select, update, case
 from sqlalchemy.orm import Session
-from src.modules.webhook.constants import WebhookStatuses, WebhookTypes
+from src.modules.webhook.constants import OracleWebhookStatuses, OracleWebhookTypes
 from src.modules.webhook.model import Webhook
-from src.modules.webhook.api_schema import ExchangeOracleWebhook
+
+from src.config import Config
 
 
 def create_webhook(
-    session: Session, exchange_oracle_webhook: ExchangeOracleWebhook, signature: str
-):
+    session: Session,
+    escrow_address: str,
+    chain_id: int,
+    type: OracleWebhookTypes,
+    signature: str,
+) -> id:
     """
-    Create a webhook received from Exchange Oracle. Only one webhook per escrow will be stored.
+    Creates a webhook in a database
     """
     existing_webhook_query = select(Webhook).where(Webhook.signature == signature)
     existing_webhook = session.execute(existing_webhook_query).scalars().first()
@@ -22,10 +29,10 @@ def create_webhook(
         webhook = Webhook(
             id=webhook_id,
             signature=signature,
-            escrow_address=exchange_oracle_webhook.escrow_address,
-            chain_id=exchange_oracle_webhook.chain_id,
-            type=WebhookTypes.exchange_oracle_webhook.value,
-            status=WebhookStatuses.pending.value,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=type,
+            status=OracleWebhookStatuses.pending.value,
         )
 
         session.add(webhook)
@@ -34,12 +41,14 @@ def create_webhook(
     return existing_webhook.id
 
 
-def get_pending_webhooks(session: Session, limit: int):
+def get_pending_webhooks(
+    session: Session, type: OracleWebhookTypes, limit: int
+) -> List[Webhook]:
     webhooks = (
         session.query(Webhook)
         .where(
-            Webhook.type == WebhookTypes.exchange_oracle_webhook,
-            Webhook.status == WebhookStatuses.pending,
+            Webhook.type == type,
+            Webhook.status == OracleWebhookStatuses.pending.value,
             Webhook.wait_until <= datetime.datetime.now(),
         )
         .limit(limit)
@@ -48,9 +57,39 @@ def get_pending_webhooks(session: Session, limit: int):
     return webhooks
 
 
-def update_webhook_status(session: Session, id: id, status: WebhookStatuses):
-    if status not in WebhookStatuses.__members__.values():
+def update_webhook_status(
+    session: Session, webhook_id: id, status: OracleWebhookStatuses
+) -> None:
+    if status not in OracleWebhookStatuses.__members__.values():
         raise ValueError(f"{status} is not available")
-    upd = update(Webhook).where(Webhook.id == id).values(status=status)
+    upd = update(Webhook).where(Webhook.id == webhook_id).values(status=status)
+    session.execute(upd)
 
+
+def handle_webhook_success(session: Session, webhook_id: id) -> None:
+    upd = (
+        update(Webhook)
+        .where(Webhook.id == webhook_id)
+        .values(attempts=Webhook.attempts + 1, status=OracleWebhookStatuses.completed)
+    )
+    session.execute(upd)
+
+
+def handle_webhook_fail(session: Session, webhook_id: id) -> None:
+    upd = (
+        update(Webhook)
+        .where(Webhook.id == webhook_id)
+        .values(
+            attempts=Webhook.attempts + 1,
+            status=case(
+                (
+                    Webhook.attempts + 1 >= Config.webhook_max_retries,
+                    OracleWebhookStatuses.failed.value,
+                ),
+                else_=OracleWebhookStatuses.pending.value,
+            ),
+            wait_until=Webhook.wait_until
+            + datetime.timedelta(minutes=Config.webhook_delay_if_failed),
+        )
+    )
     session.execute(upd)
