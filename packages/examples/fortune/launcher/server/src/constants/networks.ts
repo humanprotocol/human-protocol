@@ -10,6 +10,8 @@ export enum ChainId {
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
   SKALE = 1273227453,
+  OKTC_TESTNET = 65,
+  OKC = 66,
 }
 
 export interface IEscrowNetwork {
@@ -94,4 +96,18 @@ export const ESCROW_NETWORKS: {
   //   factoryAddress: '0x319070b49C8d1cC015915D1E7Eb5fd8e22833885',
   //   hmtAddress: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
   // },
+  [ChainId.OKTC_TESTNET]: {
+    chainId: ChainId.OKTC_TESTNET,
+    title: 'OKTC_TESNET',
+    rpcUrl: 'https://exchaintestrpc.okex.org',
+    factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+    hmtAddress: '0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95',
+  },
+  [ChainId.OKC]: {
+    chainId: ChainId.OKC,
+    title: 'OKC',
+    rpcUrl: 'https://exchainrpc.okex.org',
+    factoryAddress: 'TODO',
+    hmtAddress: 'TODO',
+  },
 };

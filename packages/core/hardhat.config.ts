@@ -144,6 +144,20 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    oktcTestnet: {
+      chainId: 65,
+      timeout: 2000000,
+      url: 'https://exchaintestrpc.okex.org',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    okc: {
+      chainId: 66,
+      timeout: 2000000,
+      url: 'https://exchainrpc.okex.org/',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -178,6 +192,8 @@ const config: HardhatUserConfig = {
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
       skale: process.env.SKALE_API_KEY || '',
+      oktcTestnet: 'OKLINK',
+      okc: 'OKLINK',
     },
     customChains: [
       {
@@ -186,6 +202,24 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: process.env.SKALE_BROWSER_API_URL || '',
           browserURL: process.env.SKALE_BROWSER_URL || '',
+        },
+      },
+      {
+        network: 'oktcTestnet',
+        chainId: 65,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/explorer/v1/contract/verify/async/api/okctest',
+          browserURL: 'https://www.oklink.com/oktc-test',
+        },
+      },
+      {
+        network: 'okc',
+        chainId: 66,
+        urls: {
+          apiURL:
+            'https://www.oklink.com/api/explorer/v1/contract/verify/async/api',
+          browserURL: 'https://www.oklink.com/',
         },
       },
     ],

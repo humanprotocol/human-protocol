@@ -12,8 +12,9 @@ import {
   bsc,
   bscTestnet,
   skaleHumanProtocol,
+  okc,
 } from 'wagmi/chains';
-import { fortune } from './chains';
+import { fortune, oktcTestnet } from './chains';
 
 // 1. Get projectID at https://cloud.walletconnect.com
 if (!import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID) {
@@ -34,6 +35,8 @@ const chains = [
   polygonMumbai,
   bscTestnet,
   fortune,
+  oktcTestnet,
+  okc,
 ];
 
 const { provider } = configureChains(chains, [w3mProvider({ projectId })]);

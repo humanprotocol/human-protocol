@@ -9,6 +9,8 @@ export enum ChainId {
   MOONBEAM = 1284,
   LOCALHOST = 1338,
   SKALE = 1273227453,
+  OKTC_TESTNET = 65,
+  OKC = 66,
 }
 
 export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
@@ -23,7 +25,7 @@ export const SUPPORTED_CHAIN_IDS_PRODUCTION = [
 
 export const SUPPORTED_CHAIN_IDS =
   import.meta.env.MODE === 'development'
-    ? [ChainId.GOERLI, ChainId.LOCALHOST]
+    ? [ChainId.GOERLI, ChainId.LOCALHOST, ChainId.OKTC_TESTNET]
     : SUPPORTED_CHAIN_IDS_PRODUCTION;
 
 export interface IEscrowNetwork {
@@ -86,6 +88,24 @@ export const ESCROW_NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1',
     factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
+  },
+  [ChainId.OKTC_TESTNET]: {
+    chainId: ChainId.OKTC_TESTNET,
+    title: 'OKTC_TESNET',
+    scanUrl: 'https://www.oklink.com/oktc-test',
+    rpcUrl: 'https://exchaintestrpc.okex.org',
+    subgraphUrl: '',
+    factoryAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+    hmtAddress: '0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95',
+  },
+  [ChainId.OKC]: {
+    chainId: ChainId.OKC,
+    title: 'OKC',
+    scanUrl: 'https://www.oklink.com/',
+    rpcUrl: 'https://exchainrpc.okex.org',
+    subgraphUrl: '',
+    factoryAddress: 'TODO',
+    hmtAddress: 'TODO',
   },
   // [ChainId.SKALE]: {
   //   chainId: ChainId.SKALE,

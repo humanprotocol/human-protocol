@@ -8,6 +8,8 @@ export enum ChainId {
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
   LOCALHOST = 1338,
+  OKTC_TESTNET = 65,
+  OKC = 66,
 }
 
 export interface IReputationNetwork {
@@ -66,5 +68,15 @@ export const REPUTATION_NETWORKS: {
     chainId: ChainId.MOONBASE_ALPHA,
     title: 'Moonbase Alpha',
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+  },
+  [ChainId.OKTC_TESTNET]: {
+    chainId: ChainId.OKTC_TESTNET,
+    title: 'OKTC_TESNET',
+    rpcUrl: 'https://exchaintestrpc.okex.org',
+  },
+  [ChainId.OKC]: {
+    chainId: ChainId.OKC,
+    title: 'OKC',
+    rpcUrl: 'https://exchainrpc.okex.org',
   },
 };

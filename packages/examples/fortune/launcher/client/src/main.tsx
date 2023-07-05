@@ -15,6 +15,7 @@ import {
   bsc,
   bscTestnet,
   skaleHumanProtocol,
+  okc,
 } from 'wagmi/chains';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
@@ -46,6 +47,31 @@ const fortune: Chain = {
   },
 };
 
+const oktcTestnet = {
+  id: 65,
+  name: 'OKTC',
+  network: 'oktc',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'OKT',
+    symbol: 'OKT',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://exchaintestrpc.okex.org'],
+    },
+    public: {
+      http: ['https://exchaintestrpc.okex.org'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'oklink',
+      url: 'https://www.oklink.com/oktc-test',
+    },
+  },
+};
+
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
@@ -57,6 +83,8 @@ const { chains, provider, webSocketProvider } = configureChains(
     polygonMumbai,
     bsc,
     bscTestnet,
+    oktcTestnet,
+    okc,
     fortune,
   ],
   [publicProvider()]
