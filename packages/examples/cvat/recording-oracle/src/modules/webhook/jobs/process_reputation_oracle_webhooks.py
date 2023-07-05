@@ -4,6 +4,7 @@ import logging
 from src.db import SessionLocal
 from src.config import CronConfig
 
+from src.modules.chain.escrow import get_reputation_oracle_address
 from src.modules.chain.kvstore import get_reputation_oracle_url
 
 from src.modules.webhook.constants import OracleWebhookTypes
@@ -32,13 +33,18 @@ def process_reputation_oracle_webhooks() -> None:
             )
             for webhook in webhooks:
                 try:
-                    webhook_url = get_reputation_oracle_url(
+                    reputation_oracle_address = get_reputation_oracle_address(
                         webhook.chain_id, webhook.escrow_address
                     )
+                    webhook_url = get_reputation_oracle_url(
+                        webhook.chain_id, reputation_oracle_address
+                    )
+
                     headers = {"human-signature": webhook.signature}
                     body = prepare_reputation_oracle_webhook_body(
                         webhook.escrow_address, webhook.chain_id
                     )
+
                     with httpx.Client() as client:
                         response = client.post(webhook_url, headers=headers, json=body)
                         response.raise_for_status()
