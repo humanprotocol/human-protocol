@@ -4,6 +4,7 @@ import time
 from typing import Tuple, Optional
 
 import requests
+from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt
 
@@ -205,7 +206,7 @@ def get_data_from_subgraph(url: str, query: str):
         )
 
 
-def handle_transaction(w3, tx_name, tx, exception):
+def handle_transaction(w3: Web3, tx_name, tx, exception):
     """Executes the transaction and waits for the receipt.
 
     Args:
@@ -223,6 +224,10 @@ def handle_transaction(w3, tx_name, tx, exception):
     """
     if not w3.eth.default_account:
         raise exception("You must add an account to Web3 instance")
+    if not w3.middleware_onion.get("construct_sign_and_send_raw_middleware"):
+        raise exception(
+            "You must add construct_sign_and_send_raw_middleware middleware to Web3 instance"
+        )
     try:
         tx_hash = tx.transact()
         return w3.eth.wait_for_transaction_receipt(tx_hash)

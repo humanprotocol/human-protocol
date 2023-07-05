@@ -16,7 +16,7 @@ pip install human-protocol-sdk
 
 Before creating an escrow, you need to stake HMT tokens to become a valid entity on Human Protocol.
 
-`StakingClient` requires `Web3` instance to be initialized, and to be passed as a constructor argument. Set the `default_account` of `Web3` instance with the private key, so that it can be used for on-chain calls.
+`StakingClient` requires `Web3` instance to be initialized, and to be passed as a constructor argument. Set the `default_account` of `Web3` instance with the private key, so that it can be used for on-chain calls. Also, please don't forget to add `construct_sign_and_send_raw_middleware` middleware with name `construct_sign_and_send_raw_middleware`, because some providers do not support `eth_SendTransaction`.
 
 ```python
 from eth_typing import URI
@@ -25,6 +25,10 @@ from web3.providers.auto import load_provider_from_uri
 
 w3 = Web3(load_provider_from_uri(URI("JSON_RPC_URL")))
 gas_payer = w3.eth.account.from_key(priv_key)
+w3.middleware_onion.add(
+    construct_sign_and_send_raw_middleware(gas_payer),
+    'construct_sign_and_send_raw_middleware'
+)
 w3.eth.default_account = gas_payer.address
 ```
 
