@@ -136,15 +136,57 @@ export class SendWebhookDto {
   public chainId: number;
 }
 
-export class ManifestDto {
-  dataUrl?: string;
-  labels?: string[];
+export class FortuneManifestDto {
+  @IsNumber()
+  @IsPositive()
   submissionsRequired: number;
-  requesterTitle?: string;
+  
+  @IsString()
+  requesterTitle: string;
+
+  @IsString()
   requesterDescription: string;
-  requesterAccuracyTarget?: number;
+
+  @IsString()
   fee: string;
+
+  @IsString()
   fundAmount: string;
+
+  @IsEnum(JobRequestType)
   requestType: JobRequestType;
+
+  @IsEnum(JobMode)
+  mode: JobMode;
+}
+
+export class ImageLabelBinaryManifestDto {
+  @IsString()
+  dataUrl: string;
+  
+  @IsArray()
+  labels: string[];
+
+  @IsNumber()
+  @IsPositive()
+  submissionsRequired: number;
+
+  @IsString()
+  requesterDescription: string;
+
+  @IsNumber()
+  @IsPositive()
+  requesterAccuracyTarget: number;
+
+  @IsString()
+  fee: string;
+
+  @IsString()
+  fundAmount: string;
+
+  @IsEnum(JobRequestType)
+  requestType: JobRequestType;
+
+  @IsEnum(JobMode)
   mode: JobMode;
 }

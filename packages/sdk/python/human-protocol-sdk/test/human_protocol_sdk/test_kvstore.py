@@ -19,7 +19,8 @@ class KVStoreTestCase(unittest.TestCase):
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
         self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer)
+            construct_sign_and_send_raw_middleware(self.gas_payer),
+            "construct_sign_and_send_raw_middleware",
         )
         self.w3.eth.default_account = self.gas_payer.address
 

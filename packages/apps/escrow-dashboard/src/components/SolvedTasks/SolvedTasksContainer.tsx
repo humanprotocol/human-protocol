@@ -4,7 +4,6 @@ import { FC } from 'react';
 import { ViewTitle } from '../ViewTitle';
 import { NewsView } from './NewsView';
 import { SolvedTasksView } from './SolvedTasksView';
-import newsSvg from 'src/assets/news.png';
 import tasksSvg from 'src/assets/tasks.svg';
 
 export const SolvedTasksContainer: FC = () => {
@@ -19,12 +18,7 @@ export const SolvedTasksContainer: FC = () => {
             <SolvedTasksView />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <NewsView
-              title="HUMAN APP: Task limits"
-              content="Part of the Protocol's growth being implemented in the interests of the community as a whole."
-              link="https://humanprotocol.org/blog/community-announcement-task-limits"
-              image={newsSvg}
-            />
+            <NewsView />
           </Grid>
         </Grid>
       </Box>

@@ -24,7 +24,7 @@ import {
   ErrorEscrow,
   ErrorJob,
 } from '../../common/constants/errors';
-import { JobFortuneDto, ManifestDto, SaveManifestDto } from './job.dto';
+import { FortuneManifestDto, ImageLabelBinaryManifestDto, JobFortuneDto, SaveManifestDto } from './job.dto';
 import { JobEntity } from './job.entity';
 import {
   MOCK_ADDRESS,
@@ -283,9 +283,8 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue({
-        dataUrl: MOCK_FILE_URL,
+      
+      const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
@@ -293,7 +292,9 @@ describe('JobService', () => {
         fundAmount: fundAmount.toString(),
         requestType: JobRequestType.FORTUNE,
         mode: JobMode.DESCRIPTIVE,
-      });
+      }
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -324,6 +325,74 @@ describe('JobService', () => {
       expect(jobService.getManifest).toHaveBeenCalledWith(
         jobEntity.manifestUrl,
       );
+    });
+
+    it('should throw an error if the manifest does not exist', async () => {
+      const chainId: ChainId = 80001;
+      const networkData = NETWORKS[chainId];
+
+      jest.spyOn(InitClient, 'getParams').mockResolvedValue({
+        signerOrProvider: mockSigner,
+        network: networkData as NetworkData,
+      });
+
+      jest
+        .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
+        .mockResolvedValue(MOCK_ADDRESS);
+
+      jest
+        .spyOn(jobService, 'getManifest')
+        .mockResolvedValue(null!);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      expect(
+        jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
+    });
+
+    it('should throw an error if the manifest validation failed', async () => {
+      const chainId: ChainId = 80001;
+      const networkData = NETWORKS[chainId];
+
+      jest.spyOn(InitClient, 'getParams').mockResolvedValue({
+        signerOrProvider: mockSigner,
+        network: networkData as NetworkData,
+      });
+
+      jest
+        .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
+        .mockResolvedValue(MOCK_ADDRESS);
+
+        const invalidManifest: Partial<FortuneManifestDto> = {
+          submissionsRequired: 10,
+          requesterTitle: MOCK_REQUESTER_TITLE,
+          requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+          requestType: JobRequestType.FORTUNE,
+          mode: JobMode.DESCRIPTIVE,
+        }
+  
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(invalidManifest as FortuneManifestDto);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      expect(
+        jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
     });
 
     it('should handle error during job launch', async () => {
@@ -401,16 +470,58 @@ describe('JobService', () => {
         .mul(totalFeePercentage)
         .div(100);
 
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue({
+      const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
+        labels: ['label1'],
+        requesterAccuracyTarget: 1,
         submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
         fundAmount: fundAmount.toString(),
-        requestType: JobRequestType.FORTUNE,
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
         mode: JobMode.DESCRIPTIVE,
+      }
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+    });
+
+    it('should throw an error if the manifest validation failed', async () => {
+      const chainId: ChainId = 80001;
+      const networkData = NETWORKS[chainId];
+
+      jest.spyOn(InitClient, 'getParams').mockResolvedValue({
+        signerOrProvider: mockSigner,
+        network: networkData as NetworkData,
       });
+
+      jest
+        .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
+        .mockResolvedValue(MOCK_ADDRESS);
+
+        const invalidManifest: Partial<ImageLabelBinaryManifestDto> = {
+          dataUrl: MOCK_FILE_URL,
+          labels: ['label1'],
+          requesterAccuracyTarget: 1,
+          submissionsRequired: 10,
+          requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+          requestType: JobRequestType.IMAGE_LABEL_BINARY,
+          mode: JobMode.DESCRIPTIVE,
+        }
+  
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(invalidManifest as ImageLabelBinaryManifestDto);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      expect(
+        jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
     });
 
     it('should handle error during job launch', async () => {
@@ -501,7 +612,7 @@ describe('JobService', () => {
         .mul(totalFeePercentage)
         .div(100);
 
-      const manifest: ManifestDto = {
+      const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,

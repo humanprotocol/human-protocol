@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { validate } from 'class-validator';
 import {
   BadGatewayException,
   BadRequestException,
@@ -6,6 +7,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Wallet, providers, BigNumber } from 'ethers';
@@ -27,9 +29,10 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneManifestDto,
+  ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
-  ManifestDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -108,7 +111,7 @@ export class JobService {
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
-    const manifestData: ManifestDto = {
+    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
@@ -189,7 +192,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotEnoughFunds);
     }
 
-    const manifestData: ManifestDto = {
+    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
       dataUrl,
       submissionsRequired: annotationsPerImage,
       labels,
@@ -272,15 +275,17 @@ export class JobService {
 
     const manifest = await this.getManifest(jobEntity.manifestUrl);
 
-    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      this.sendWebhook(
-        this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
-        {
-          escrowAddress: jobEntity.escrowAddress,
-          chainId: jobEntity.chainId,
-        },
-      );
-    }
+      await this.validateManifest(manifest);
+
+      if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+        this.sendWebhook(
+          this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
+          {
+            escrowAddress: jobEntity.escrowAddress,
+            chainId: jobEntity.chainId,
+          },
+        );
+      }
 
     return jobEntity;
   }
@@ -305,8 +310,21 @@ export class JobService {
     return { manifestUrl, manifestHash: hash };
   }
 
-  public async getManifest(manifestUrl: string): Promise<ManifestDto> {
-    const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(
+  private async validateManifest(manifest: FortuneManifestDto | ImageLabelBinaryManifestDto): Promise<boolean> {
+    const dtoCheck = new FortuneManifestDto();
+    Object.assign(dtoCheck, manifest);
+
+    const validationErrors: ValidationError[] = await validate(dtoCheck)
+    if (validationErrors.length > 0) {
+      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
+      throw new NotFoundException(ErrorJob.ManifestValidationFailed);
+    }
+
+    return true;
+  }
+
+  public async getManifest(manifestUrl: string): Promise<FortuneManifestDto | ImageLabelBinaryManifestDto> {
+    const manifest = await StorageClient.downloadFileFromUrl(
       manifestUrl,
     );
 
