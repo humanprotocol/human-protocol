@@ -261,7 +261,7 @@ describe('JobService', () => {
       escrowClient = new EscrowClient(await InitClient.getParams(mockSigner));
     });
 
-    it.only('should launch a job successfully', async () => {
+    it('should launch a job successfully', async () => {
       const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
