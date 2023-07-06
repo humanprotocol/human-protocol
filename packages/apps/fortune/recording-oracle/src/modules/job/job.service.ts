@@ -1,6 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { Inject, Injectable } from "@nestjs/common";
-import { EscrowClient, EscrowStatus, InitClient, StorageClient } from "@human-protocol/sdk";
+import { EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
 import { ethers } from "ethers";
 
 import { storageConfigKey, StorageConfigType } from "@/common/config";
@@ -19,7 +19,7 @@ export class JobService {
 
   async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
-    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
+    const escrowClient = await EscrowClient.build(signer);
 
     // Validate if recording oracle address is valid
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
