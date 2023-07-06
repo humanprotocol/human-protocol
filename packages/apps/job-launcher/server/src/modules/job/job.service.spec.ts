@@ -116,8 +116,6 @@ describe('JobService', () => {
 
   describe('createFortuneJob', () => {
     it('should create a fortune job successfully', async () => {
-      const fundAmount = 1; // ETH
-
       jest
         .spyOn(StorageClient.prototype, 'uploadFiles')
         .mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]);
@@ -128,7 +126,7 @@ describe('JobService', () => {
         fortunesRequired: MOCK_FORTUNES_REQUIRED,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
+        fundAmount: 10,
       };
 
       const userBalance = ethers.utils.parseUnits('15', 'ether'); // 15 ETH
@@ -137,7 +135,6 @@ describe('JobService', () => {
         dto.fundAmount.toString(),
         'ether',
       );
-
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
@@ -241,7 +238,7 @@ describe('JobService', () => {
 
   describe('launchJob with Fortune type', () => {
     const provider = new ethers.providers.JsonRpcProvider();
-    let escrowClient: any, mockSigner: any;
+    let escrowClient: any, mockSigner: any, mockTokenContract: any;
 
     beforeEach(async () => {
       mockSigner = {
@@ -257,6 +254,11 @@ describe('JobService', () => {
         signerOrProvider: mockSigner,
         network: networkData as NetworkData,
       });
+
+      // Mock HMToken__factory.connect to return the mock HMToken
+      mockTokenContract = {
+        transfer: jest.fn(),
+      };
 
       escrowClient = new EscrowClient(await InitClient.getParams(mockSigner));
     });
@@ -274,9 +276,8 @@ describe('JobService', () => {
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
         
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -285,13 +286,14 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
       
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: fundAmount.toString(),
+        fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
         mode: JobMode.DESCRIPTIVE,
       }
@@ -303,13 +305,10 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: MOCK_ADDRESS,
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
-      };
-
-      // Mock HMToken__factory.connect to return the mock HMToken
-      const mockTokenContract: any = {
-        transfer: jest.fn(),
       };
 
       jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
@@ -333,12 +332,68 @@ describe('JobService', () => {
           manifestHash: mockJobEntity.manifestHash,
         },
       );
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, jobEntity.fundAmount);
       expect(jobEntity.escrowAddress).toBe(MOCK_ADDRESS);
       expect(jobEntity.status).toBe(JobStatus.LAUNCHED);
       expect(jobEntity.save).toHaveBeenCalled();
       expect(jobService.getManifest).toHaveBeenCalledWith(
         jobEntity.manifestUrl,
       );
+    });
+
+    it('should throw an unpredictable gas limit error if transfer failed', async () => {
+      const chainId: ChainId = 80001;
+      const networkData = NETWORKS[chainId];
+
+      jest.spyOn(InitClient, 'getParams').mockResolvedValue({
+        signerOrProvider: mockSigner,
+        network: networkData as NetworkData,
+      });
+
+      jest
+        .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
+        .mockResolvedValue(MOCK_ADDRESS);
+
+      const fundAmountInWei = ethers.utils.parseUnits(
+        '10',
+        'ether',
+      );
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
+        requestType: JobRequestType.FORTUNE,
+        mode: JobMode.DESCRIPTIVE,
+      }
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+    
+      jest.spyOn(mockTokenContract, 'transfer').mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      expect(
+        jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow(new Error(`Unpredictable gas limit: ${ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT}`));
     });
 
     it('should throw an error if the manifest does not exist', async () => {
@@ -472,9 +527,8 @@ describe('JobService', () => {
         .spyOn(EscrowClient.prototype, 'createAndSetupEscrow')
         .mockResolvedValue(MOCK_ADDRESS);
 
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -483,6 +537,7 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
@@ -491,7 +546,7 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: fundAmount.toString(),
+        fundAmount: totalAmount.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
         mode: JobMode.DESCRIPTIVE,
       }
@@ -614,9 +669,8 @@ describe('JobService', () => {
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -625,13 +679,14 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: (10).toString(),
+        fundAmount: totalAmount.toString(),
         mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };

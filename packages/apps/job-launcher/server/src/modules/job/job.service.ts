@@ -270,10 +270,6 @@ export class JobService {
         throw new NotFoundException(ErrorEscrow.NotCreated);
       }
 
-      jobEntity.escrowAddress = escrowAddress;
-      jobEntity.status = JobStatus.LAUNCHED;
-      await jobEntity.save();
-
       const manifest = await this.getManifest(jobEntity.manifestUrl);
 
       await this.validateManifest(manifest);
@@ -283,6 +279,10 @@ export class JobService {
         signer
       );
       await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
+
+      jobEntity.escrowAddress = escrowAddress;
+      jobEntity.status = JobStatus.LAUNCHED;
+      await jobEntity.save();
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         this.sendWebhook(
@@ -296,7 +296,12 @@ export class JobService {
 
       return jobEntity;
     } catch (e) {
-      this.logger.log(ErrorEscrow.NotLaunched, JobService.name);
+      this.logger.log(ErrorEscrow.NotLaunched, JobService.name, e.message);
+
+      if (e.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+        throw new Error(`Unpredictable gas limit: ${e.message}`);
+      }
+
       throw new Error(ErrorEscrow.NotLaunched);
     }
   }
