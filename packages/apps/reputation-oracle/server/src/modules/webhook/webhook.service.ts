@@ -3,13 +3,17 @@ import { ConfigService } from '@nestjs/config';
 import {
   ChainId,
   EscrowClient,
-  InitClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
 } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { FortuneFinalResult, ImageLabelBinaryFinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
+import {
+  FortuneFinalResult,
+  ImageLabelBinaryFinalResult,
+  ManifestDto,
+  WebhookIncomingDto,
+} from './webhook.dto';
 import {
   ErrorManifest,
   ErrorResults,
@@ -97,8 +101,7 @@ export class WebhookService {
   ): Promise<boolean> {
     const signer = this.web3Service.getSigner(webhookEntity.chainId);
 
-    const clientParams = await InitClient.getParams(signer);
-    const escrowClient = new EscrowClient(clientParams);
+    const escrowClient = await EscrowClient.build(signer);
 
     try {
       const manifestUrl = await escrowClient.getManifestUrl(
@@ -121,10 +124,13 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      let finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[] = [];
+      let finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[] =
+        [];
 
       if (manifest.requestType === JobRequestType.FORTUNE) {
-        finalResults = await this.finalizeFortuneResults(intermediateResults as FortuneFinalResult[]);
+        finalResults = await this.finalizeFortuneResults(
+          intermediateResults as FortuneFinalResult[],
+        );
       } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         finalResults = intermediateResults as ImageLabelBinaryFinalResult[];
       }
@@ -151,7 +157,10 @@ export class WebhookService {
       );
 
       const recipients = this.getRecipients(finalResults, manifest.requestType);
-      const amounts = this.calculatePayoutAmounts(manifest.fundAmount, recipients.length);
+      const amounts = this.calculatePayoutAmounts(
+        manifest.fundAmount,
+        recipients.length,
+      );
 
       await escrowClient.bulkPayOut(
         webhookEntity.escrowAddress,
@@ -205,16 +214,14 @@ export class WebhookService {
   ): Promise<FortuneFinalResult[] | ImageLabelBinaryFinalResult[]> {
     const signer = this.web3Service.getSigner(chainId);
 
-    const clientParams = await InitClient.getParams(signer);
-    const escrowClient = new EscrowClient(clientParams);
+    const escrowClient = await EscrowClient.build(signer);
 
     const intermediateResultsUrl = await escrowClient.getResultsUrl(
       escrowAddress,
     );
-    const intermediateResults =
-      await StorageClient.downloadFileFromUrl(intermediateResultsUrl).catch(
-        () => [],
-      );
+    const intermediateResults = await StorageClient.downloadFileFromUrl(
+      intermediateResultsUrl,
+    ).catch(() => []);
 
     if (intermediateResults.length === 0) {
       this.logger.log(
@@ -233,7 +240,10 @@ export class WebhookService {
    * @param recipientCount - The number of recipients.
    * @returns {BigNumber[]} - Returns an array of payout amounts.
    */
-  public calculatePayoutAmounts(totalAmount: string, recipientCount: number): BigNumber[] {
+  public calculatePayoutAmounts(
+    totalAmount: string,
+    recipientCount: number,
+  ): BigNumber[] {
     const payoutAmount = BigNumber.from(totalAmount).div(recipientCount);
     return new Array(recipientCount).fill(payoutAmount);
   }
@@ -244,14 +254,21 @@ export class WebhookService {
    * @param requestType - The request type.
    * @returns {string[]} - Returns an array of recipient addresses.
    */
-  public getRecipients(finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[], requestType: JobRequestType): string[] {
+  public getRecipients(
+    finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[],
+    requestType: JobRequestType,
+  ): string[] {
     if (requestType === JobRequestType.FORTUNE) {
-      return finalResults.map((item) => (item as FortuneFinalResult).workerAddress);
+      return finalResults.map(
+        (item) => (item as FortuneFinalResult).workerAddress,
+      );
     } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      return finalResults.flatMap((item) => (item as ImageLabelBinaryFinalResult).correct);
+      return finalResults.flatMap(
+        (item) => (item as ImageLabelBinaryFinalResult).correct,
+      );
     }
 
-    return []
+    return [];
   }
 
   /**
@@ -290,18 +307,16 @@ export class WebhookService {
     webhookEntity: WebhookIncomingEntity,
   ): Promise<boolean> {
     const signer = this.web3Service.getSigner(webhookEntity.chainId);
-    const clientParams = await InitClient.getParams(signer);
-    const escrowClient = new EscrowClient(clientParams);
+    const escrowClient = await EscrowClient.build(signer);
 
     try {
       const finalResultsUrl = await escrowClient.getResultsUrl(
         webhookEntity.escrowAddress,
       );
 
-      const finalResults =
-        await StorageClient.downloadFileFromUrl(finalResultsUrl).catch(
-          () => [],
-        );
+      const finalResults = await StorageClient.downloadFileFromUrl(
+        finalResultsUrl,
+      ).catch(() => []);
 
       if (finalResults.length === 0) {
         this.logger.log(
@@ -331,7 +346,7 @@ export class WebhookService {
         await Promise.all(
           finalResults.map(async (result: FortuneFinalResult) => {
             await this.reputationService.increaseReputation(
-              clientParams.network.chainId,
+              webhookEntity.chainId,
               result.workerAddress,
               ReputationEntityType.WORKER,
             );
@@ -346,13 +361,13 @@ export class WebhookService {
 
       if (webhookEntity.checkPassed) {
         this.reputationService.increaseReputation(
-          clientParams.network.chainId,
+          webhookEntity.chainId,
           recordingOracleAddress,
           ReputationEntityType.RECORDING_ORACLE,
         );
       } else {
         this.reputationService.decreaseReputation(
-          clientParams.network.chainId,
+          webhookEntity.chainId,
           recordingOracleAddress,
           ReputationEntityType.RECORDING_ORACLE,
         );
