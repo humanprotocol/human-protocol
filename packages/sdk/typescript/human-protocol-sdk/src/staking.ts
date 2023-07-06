@@ -42,7 +42,7 @@ export class StakingClient {
    * **StakingClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the KVStore contract
+   * @param {NetworkData} network - The network information required to connect to the Staking contract
    */
   constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.stakingContract = Staking__factory.connect(

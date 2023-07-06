@@ -53,7 +53,7 @@ export class EscrowClient {
    * **EscrowClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
-   * @param {NetworkData} network - The network information required to connect to the KVStore contract
+   * @param {NetworkData} network - The network information required to connect to the Escrow contract
    */
   constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.escrowFactoryContract = EscrowFactory__factory.connect(
