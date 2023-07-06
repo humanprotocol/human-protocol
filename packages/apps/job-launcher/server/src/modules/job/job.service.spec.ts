@@ -42,6 +42,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
+
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -423,10 +424,10 @@ describe('JobService', () => {
     it('should throw an error if the manifest file fails to upload', async () => {
       const encryptedManifest = { data: 'encrypted data' };
 
-      (StorageClient as any).mockImplementation(() => ({
-        uploadFiles: jest.fn().mockResolvedValueOnce([]),
-      }));
-
+      /*
+        Temporary solution just to make tests pass.
+      */
+      (jobService.storageClient.uploadFiles as any).mockResolvedValueOnce([]);
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
       ).rejects.toThrowError(
@@ -437,9 +438,11 @@ describe('JobService', () => {
     it('should rethrow any other errors encountered', async () => {
       const encryptedManifest = { data: 'encrypted data' };
       const errorMessage = 'Something went wrong';
-      (StorageClient as any).mockImplementation(() => ({
-        uploadFiles: jest.fn().mockRejectedValueOnce(new Error(errorMessage)),
-      }));
+
+      /*
+        Temporary solution just to make tests pass.
+      */
+      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(new Error(errorMessage));
 
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
