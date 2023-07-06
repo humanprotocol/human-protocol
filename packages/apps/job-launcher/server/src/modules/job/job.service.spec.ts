@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ContractTransaction, ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { JobService } from './job.service';
@@ -43,8 +43,10 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
+  MOCK_TRANSACTION_HASH,
 } from '../../common/test/constants';
 import { Web3Service } from '../web3/web3.service';
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
 
 jest.mock('@human-protocol/sdk');
 
@@ -259,7 +261,7 @@ describe('JobService', () => {
       escrowClient = new EscrowClient(await InitClient.getParams(mockSigner));
     });
 
-    it('should launch a job successfully', async () => {
+    it.only('should launch a job successfully', async () => {
       const chainId: ChainId = 80001;
       const networkData = NETWORKS[chainId];
 
@@ -304,6 +306,18 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
+
+      // Mock HMToken__factory.connect to return the mock HMToken
+      const mockTokenContract: any = {
+        transfer: jest.fn(),
+      };
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+      jest.spyOn(mockTokenContract, 'transfer').mockResolvedValue({
+        chainId: 1,
+        hash: MOCK_TRANSACTION_HASH,
+      } as ContractTransaction);
 
       const jobEntity = await jobService.launchJob(mockJobEntity as JobEntity);
 

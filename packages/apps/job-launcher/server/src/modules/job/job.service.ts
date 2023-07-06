@@ -10,7 +10,7 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Wallet, providers, BigNumber } from 'ethers';
+import { BigNumber } from 'ethers';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
@@ -41,6 +41,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
 
 @Injectable()
 export class JobService {
@@ -276,6 +277,12 @@ export class JobService {
       const manifest = await this.getManifest(jobEntity.manifestUrl);
 
       await this.validateManifest(manifest);
+
+      const tokenContract: HMToken = HMToken__factory.connect(
+        clientParams.network.hmtAddress,
+        signer
+      );
+      await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         this.sendWebhook(
