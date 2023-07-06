@@ -38,13 +38,9 @@ jest.mock("ethers", () => ({
 
 jest.mock("@human-protocol/sdk", () => ({
   ...jest.requireActual("@human-protocol/sdk"),
-  EscrowClient: jest.fn().mockImplementation(() => ({
-    getRecordingOracleAddress: jest.fn(),
-    getStatus: jest.fn(),
-    getManifestUrl: jest.fn(),
-    getIntermediateResultsUrl: jest.fn(),
-    storeResults: jest.fn(),
-  })),
+  EscrowClient: {
+    build: jest.fn(),
+  },
   StorageClient: jest.fn().mockImplementation(() => ({
     uploadFiles: jest.fn().mockResolvedValue([{ url: "UPLOADED_URL", hash: "UPLOADED_HASH" }]),
   })),
@@ -102,7 +98,7 @@ describe("JobController", () => {
   describe("processJobSolution", () => {
     it("should throw an error if the recording oracle address is invalid", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue("RECORDING_ORACLE_ADDRESS"),
       }));
 
@@ -113,7 +109,7 @@ describe("JobController", () => {
 
     it("should throw an error if the escrow is not in pending status", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
       }));
@@ -123,7 +119,7 @@ describe("JobController", () => {
 
     it("should throw an error if the manifest is missing required data", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest.fn(),
@@ -138,7 +134,7 @@ describe("JobController", () => {
 
     it("should record new solution", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
@@ -159,7 +155,7 @@ describe("JobController", () => {
 
     it("should revert if solution already exists", async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
@@ -187,7 +183,7 @@ describe("JobController", () => {
       const newSolution = { exchangeAddress: "EXCHANGE_ADDRESS", workerAddress: "WORKER_ADDRESS", solution: "Good" };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
         getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),

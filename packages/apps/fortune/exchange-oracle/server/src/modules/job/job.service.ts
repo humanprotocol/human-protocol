@@ -1,7 +1,6 @@
 import {
   EscrowClient,
   EscrowStatus,
-  InitClient,
   KVStoreClient,
   KVStoreKeys,
   StorageClient,
@@ -29,7 +28,7 @@ export class JobService {
     escrowAddress: string,
   ): Promise<JobDetailsDto> {
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
+    const escrowClient = await EscrowClient.build(signer);
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
     const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
@@ -50,7 +49,7 @@ export class JobService {
     workerAddress: string,
   ): Promise<string[]> {
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
+    const escrowClient = await EscrowClient.build(signer);
     const escrows = await escrowClient.getEscrowsFiltered({
       status: EscrowStatus.Pending,
     });
@@ -67,11 +66,11 @@ export class JobService {
     solution: string,
   ): Promise<boolean> {
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = new EscrowClient(await InitClient.getParams(signer));
+    const escrowClient = await EscrowClient.build(signer);
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       escrowAddress,
     );
-    const kvstore = new KVStoreClient(await InitClient.getParams(signer));
+    const kvstore = await KVStoreClient.build(signer);
     const recordingOracleURL = await kvstore.get(
       recordingOracleAddress,
       KVStoreKeys.webhook_url,

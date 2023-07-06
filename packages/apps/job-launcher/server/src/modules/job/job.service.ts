@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ethers } from 'ethers';
 import { validate } from 'class-validator';
 import {
@@ -10,7 +11,7 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Wallet, providers, BigNumber } from 'ethers';
+import { BigNumber } from 'ethers';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
@@ -21,8 +22,9 @@ import {
   ErrorJob,
 } from '../../common/constants/errors';
 import {
+  ChainId,
   EscrowClient,
-  InitClient,
+  NETWORKS,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -62,13 +64,14 @@ export class JobService {
       secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
     };
 
-    let useSSL = this.configService.get<string>(ConfigNames.S3_USE_SSL) === "true";
+    const useSSL =
+      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
     this.storageParams = {
       endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
       port: 9000,
       useSSL,
     };
-    
+
     this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
 
     this.storageClient = new StorageClient(
@@ -172,13 +175,17 @@ export class JobService {
       'ether',
     );
 
-    const jobLauncherFee = BigNumber.from(this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!);
-    const recordingOracleFee = BigNumber.from(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!);
-    const reputationOracleFee = BigNumber.from(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
+    const jobLauncherFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
+    );
+    const recordingOracleFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
+    );
+    const reputationOracleFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+    );
 
-    const totalFeePercentage = BigNumber.from(
-      jobLauncherFee,
-    )
+    const totalFeePercentage = BigNumber.from(jobLauncherFee)
       .add(recordingOracleFee)
       .add(reputationOracleFee);
     const totalFee = BigNumber.from(fundAmountInWei)
@@ -239,15 +246,17 @@ export class JobService {
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     try {
-     const signer = this.web3Service.getSigner(jobEntity.chainId);
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-      const clientParams = await InitClient.getParams(signer);
-
-      const escrowClient = new EscrowClient(clientParams);
+      const escrowClient = await EscrowClient.build(signer);
 
       const escrowConfig = {
-        recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
-        reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+        recordingOracle: this.configService.get<string>(
+          ConfigNames.RECORDING_ORACLE_ADDRESS,
+        )!,
+        reputationOracle: this.configService.get<string>(
+          ConfigNames.REPUTATION_ORACLE_ADDRESS,
+        )!,
         recordingOracleFee: BigNumber.from(
           this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
         ),
@@ -259,7 +268,7 @@ export class JobService {
       };
 
       const escrowAddress = await escrowClient.createAndSetupEscrow(
-        clientParams.network.hmtAddress,
+        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
         [],
         escrowConfig,
       );
@@ -279,7 +288,9 @@ export class JobService {
 
       if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         this.sendWebhook(
-          this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL)!,
+          this.configService.get<string>(
+            ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+          )!,
           {
             escrowAddress: jobEntity.escrowAddress,
             chainId: jobEntity.chainId,
@@ -309,7 +320,7 @@ export class JobService {
         throw new BadGatewayException(ErrorBucket.UnableSaveFile);
       }
 
-      const { key, url, hash } = uploadedFiles[0];
+      const { url, hash } = uploadedFiles[0];
       const manifestUrl = url;
 
       return { manifestUrl, manifestHash: hash };
@@ -318,23 +329,29 @@ export class JobService {
     }
   }
 
-  private async validateManifest(manifest: FortuneManifestDto | ImageLabelBinaryManifestDto): Promise<boolean> {
+  private async validateManifest(
+    manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
+  ): Promise<boolean> {
     const dtoCheck = new FortuneManifestDto();
     Object.assign(dtoCheck, manifest);
 
-    const validationErrors: ValidationError[] = await validate(dtoCheck)
+    const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
+      this.logger.log(
+        ErrorJob.ManifestValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 
     return true;
   }
 
-  public async getManifest(manifestUrl: string): Promise<FortuneManifestDto | ImageLabelBinaryManifestDto> {
-    const manifest = await StorageClient.downloadFileFromUrl(
-      manifestUrl,
-    );
+  public async getManifest(
+    manifestUrl: string,
+  ): Promise<FortuneManifestDto | ImageLabelBinaryManifestDto> {
+    const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!manifest) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
