@@ -34,6 +34,11 @@ describe("JobController", () => {
             bucket: "TEST_BUCKET",
           })),
         ),
+        ConfigModule.forFeature(
+          registerAs("server", () => ({
+            reputationOracleURL: "REPUTATION_ORACLE_URL",
+          })),
+        ),
       ],
       providers: [
         JobService,

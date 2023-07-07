@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Provider } from '@ethersproject/abstract-provider';
+import { Network } from '@ethersproject/networks';
 import {
-  Staking__factory,
-  HMToken__factory,
-  HMToken,
-  Staking,
-  RewardPool__factory,
-  RewardPool,
   EscrowFactory,
   EscrowFactory__factory,
+  HMToken,
+  HMToken__factory,
+  RewardPool,
+  RewardPool__factory,
+  Staking,
+  Staking__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, ethers, Signer } from 'ethers';
-import { NetworkData } from './types';
-import { IAllocation, IClientParams, IReward, IStaker } from './interfaces';
+import { BigNumber, Signer, ethers } from 'ethers';
+import { NETWORKS } from './constants';
+import { requiresSigner } from './decorators';
+import { ChainId } from './enums';
 import {
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorInvalidEscrowAddressProvided,
@@ -20,11 +22,14 @@ import {
   ErrorInvalidStakerAddressProvided,
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
+  ErrorProviderDoesNotExist,
   ErrorStakingGetStakers,
+  ErrorUnsupportedChainID,
 } from './error';
-import { gqlFetch, throwError } from './utils';
+import { IAllocation, IReward, IStaker } from './interfaces';
 import { RAW_REWARDS_QUERY } from './queries';
-import { requiresSigner } from './decorators';
+import { NetworkData } from './types';
+import { gqlFetch, throwError } from './utils';
 
 export class StakingClient {
   public signerOrProvider: Signer | Provider;
@@ -34,28 +39,59 @@ export class StakingClient {
   public escrowFactoryContract: EscrowFactory;
 
   /**
-   * **Staking constructor**
+   * **StakingClient constructor**
    *
-   * @param {IClientParams} clientParams - Init client parameters
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {NetworkData} network - The network information required to connect to the Staking contract
    */
-  constructor(readonly clientParams: IClientParams) {
-    this.signerOrProvider = clientParams.signerOrProvider;
-    this.network = clientParams.network;
-
+  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.stakingContract = Staking__factory.connect(
-      this.network.stakingAddress,
-      this.signerOrProvider
+      network.stakingAddress,
+      signerOrProvider
     );
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      this.network.factoryAddress,
-      this.signerOrProvider
+      network.factoryAddress,
+      signerOrProvider
     );
 
     this.tokenContract = HMToken__factory.connect(
-      this.network.hmtAddress,
-      this.signerOrProvider
+      network.hmtAddress,
+      signerOrProvider
     );
+
+    this.signerOrProvider = signerOrProvider;
+    this.network = network;
+  }
+
+  /**
+   * Creates an instance of StakingClient from a Signer or Provider.
+   *
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @returns {Promise<StakingClient>} - An instance of StakingClient
+   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   */
+  public static async build(signerOrProvider: Signer | Provider) {
+    let network: Network;
+    if (Signer.isSigner(signerOrProvider)) {
+      if (!signerOrProvider.provider) {
+        throw ErrorProviderDoesNotExist;
+      }
+
+      network = await signerOrProvider.provider.getNetwork();
+    } else {
+      network = await signerOrProvider.getNetwork();
+    }
+
+    const chainId: ChainId = network.chainId;
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    return new StakingClient(signerOrProvider, networkData);
   }
 
   /**
