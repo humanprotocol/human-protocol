@@ -44,13 +44,16 @@ export class Encryption {
   }
 
   /**
-   * Encrypts a message using the specified public keys.
+   * Signs and encrypts a message using the specified public keys.
    *
    * @param {string} message - The message to encrypt.
    * @param {string[]} publicKeys - The public keys in armored format.
    * @returns {Promise<string>} - The encrypted message.
    */
-  public async encrypt(message: string, publicKeys: string[]): Promise<string> {
+  public async signAndEncrypt(
+    message: string,
+    publicKeys: string[]
+  ): Promise<string> {
     const plaintext = message;
 
     const pgpPublicKeys = await Promise.all(
@@ -190,5 +193,31 @@ export class EncryptionUtils {
       publicKey,
       revocationCertificate,
     };
+  }
+
+  /**
+   * Encrypts a message using the specified public keys.
+   *
+   * @param {string} message - The message to encrypt.
+   * @param {string[]} publicKeys - The public keys in armored format.
+   * @returns {Promise<string>} - The encrypted message.
+   */
+  public static async encrypt(
+    message: string,
+    publicKeys: string[]
+  ): Promise<string> {
+    const plaintext = message;
+
+    const pgpPublicKeys = await Promise.all(
+      publicKeys.map((armoredKey) => openpgp.readKey({ armoredKey }))
+    );
+
+    const pgpMessage = await openpgp.createMessage({ text: plaintext });
+    const encrypted = await openpgp.encrypt({
+      message: pgpMessage,
+      encryptionKeys: pgpPublicKeys,
+    });
+
+    return encrypted as string;
   }
 }

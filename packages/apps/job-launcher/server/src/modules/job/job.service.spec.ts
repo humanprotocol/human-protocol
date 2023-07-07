@@ -1,10 +1,10 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, NETWORKS, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { BigNumber, ethers } from 'ethers';
+import { ContractTransaction, BigNumber, ethers } from 'ethers';
 import {
   ErrorBucket,
   ErrorEscrow,
@@ -29,6 +29,7 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
+  MOCK_TRANSACTION_HASH,
 } from '../../common/test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -42,6 +43,7 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -128,7 +130,7 @@ describe('JobService', () => {
         fortunesRequired: MOCK_FORTUNES_REQUIRED,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
+        fundAmount: 10,
       };
 
       const userBalance = ethers.utils.parseUnits('15', 'ether'); // 15 ETH
@@ -137,7 +139,6 @@ describe('JobService', () => {
         dto.fundAmount.toString(),
         'ether',
       );
-
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
@@ -235,12 +236,14 @@ describe('JobService', () => {
   });
 
   describe('launchJob with Fortune type', () => {
+    const mockTokenContract: any = {
+      transfer: jest.fn(),
+    };
+
     it('should launch a job successfully', async () => {
       const chainId: ChainId = 80001;
-
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 1 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -249,13 +252,14 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: fundAmount.toString(),
+        fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
         mode: JobMode.DESCRIPTIVE,
       };
@@ -267,12 +271,22 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: MOCK_ADDRESS,
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
 
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+      jest.spyOn(mockTokenContract, 'transfer').mockResolvedValue({
+        chainId: 1,
+        hash: MOCK_TRANSACTION_HASH,
+      } as ContractTransaction);
+
       const jobEntity = await jobService.launchJob(mockJobEntity as JobEntity);
 
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, jobEntity.fundAmount);
       expect(jobEntity.escrowAddress).toBe(MOCK_ADDRESS);
       expect(jobEntity.status).toBe(JobStatus.LAUNCHED);
       expect(jobEntity.save).toHaveBeenCalled();
@@ -281,8 +295,53 @@ describe('JobService', () => {
       );
     });
 
+    it('should throw an unpredictable gas limit error if transfer failed', async () => {
+      const fundAmountInWei = ethers.utils.parseUnits(
+        '10',
+        'ether',
+      );
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
+        requestType: JobRequestType.FORTUNE,
+        mode: JobMode.DESCRIPTIVE,
+      }
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+    
+      jest.spyOn(mockTokenContract, 'transfer').mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      expect(
+        jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT));
+    });
+
     it('should throw an error if the manifest does not exist', async () => {
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue(null!);
+      jest
+        .spyOn(jobService, 'getManifest')
+        .mockResolvedValue(null!);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -349,9 +408,8 @@ describe('JobService', () => {
 
   describe('launchJob with CVAT type', () => {
     it('should launch a job successfully', async () => {
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -360,6 +418,7 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
@@ -368,7 +427,7 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: fundAmount.toString(),
+        fundAmount: totalAmount.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
         mode: JobMode.DESCRIPTIVE,
       };
@@ -452,9 +511,8 @@ describe('JobService', () => {
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
-      const fundAmount = ethers.utils.parseUnits('10', 'ether'); // 10 ETH
       const fundAmountInWei = ethers.utils.parseUnits(
-        fundAmount.toString(),
+        '10',
         'ether',
       );
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
@@ -463,13 +521,14 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: (10).toString(),
+        fundAmount: totalAmount.toString(),
         mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };

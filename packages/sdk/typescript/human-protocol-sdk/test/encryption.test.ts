@@ -1,6 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect, beforeAll } from 'vitest';
 import { Encryption, EncryptionUtils } from '../src/encryption';
+import {
+  ENCRYPTEDMESSAGE,
+  KEYPAIR1,
+  KEYPAIR2,
+  KEYPAIR3,
+  MESSAGE,
+  SIGNEDENCRYPTEDLOCKEDMESSAGE,
+  SIGNEDENCRYPTEDMESSAGE,
+  SIGNEDMESSAGE,
+} from './utils/constants';
 
 describe('EncryptionUtils', async () => {
   describe('generateKeyPair', () => {
@@ -52,65 +62,16 @@ describe('EncryptionUtils', async () => {
     });
   });
 
-  let signedMessage: string;
-  let signerPublicKey: string;
-  let userPublicKey: string;
-
-  beforeAll(async () => {
-    signedMessage =
-      '-----BEGIN PGP SIGNED MESSAGE-----\n' +
-      'Hash: SHA512\n' +
-      '\n' +
-      'Human Protocol\n' +
-      '-----BEGIN PGP SIGNATURE-----\n' +
-      '\n' +
-      'wnUEARYKACcFAmSVeIAJEFtLusO+9mQgFiEEn4tNyZomd4BYaFQXW0u6w772\n' +
-      'ZCAAAJ/DAPwIsyrSMyOAjGefYg/MR8caWnKzQdjqhjUx0+X+M1A2cQEA4Ziz\n' +
-      'OhJTPuZ66Ut6Pkp17qrh7tereT9fds4naLemLAE=\n' +
-      '=n5sb\n' +
-      '-----END PGP SIGNATURE-----\n';
-
-    signerPublicKey =
-      '-----BEGIN PGP PUBLIC KEY BLOCK-----\n' +
-      '\n' +
-      'xjMEZJV4gBYJKwYBBAHaRw8BAQdAzRO0m3WPL+H9ysiVasovPvbgGMYmfT3r\n' +
-      '2k53Duvn9VrNFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSVeIAE\n' +
-      'CwkHCAkQW0u6w772ZCADFQgKBBYAAgECGQECGwMCHgEWIQSfi03JmiZ3gFho\n' +
-      'VBdbS7rDvvZkIAAARqcA/RXPchnuKBCZxxMHVHU7HSZ/Td9Jz1nBeZWVpJnx\n' +
-      '4BPlAQDgwRBpy26EDODUkYkLbBMC/1E+7XdcsV2gdNPPW9iuDc44BGSVeIAS\n' +
-      'CisGAQQBl1UBBQEBB0Ck4kWIOrF0Wy0DEMM7vlcPh0+duwcVjUUJN8bRUD2m\n' +
-      'CwMBCAfCeAQYFggAKgUCZJV4gAkQW0u6w772ZCACGwwWIQSfi03JmiZ3gFho\n' +
-      'VBdbS7rDvvZkIAAA77YBAPJAy+pcV+Qo8Ds+kzlLb82Nzfn0c3/+fVoFHskr\n' +
-      'yBJ1AQCPjmDeJc4rLFII6KE03Q0tj7AswVfNYDNod72KO8CfCw==\n' +
-      '=Cgsp\n' +
-      '-----END PGP PUBLIC KEY BLOCK-----\n';
-
-    userPublicKey =
-      '-----BEGIN PGP PUBLIC KEY BLOCK-----\n' +
-      '\n' +
-      'xjMEZJV4gBYJKwYBBAHaRw8BAQdAG/Ar95oib9CTqdZxHYutivbnJBDeuUin\n' +
-      'xbuFuS3mbrzNFEh1bWFuIDxodW1hbkBobXQuYWk+wowEEBYKAD4FAmSVeIAE\n' +
-      'CwkHCAkQSHjmQMIT8FoDFQgKBBYAAgECGQECGwMCHgEWIQTY1Bojzq38LJct\n' +
-      'LyRIeOZAwhPwWgAADjABAO42MWQvAo6EFZMTc4hhp2W8vOBc0UEobFAYqMqu\n' +
-      '0Y94AQCD66dKLkJRsK7TCYTHvzLCF6XgT6BTgidrH2FtmqQBBc44BGSVeIAS\n' +
-      'CisGAQQBl1UBBQEBB0Cop9TrzXNlGUTktvcr3nT67dCXtPbnKopHHXMFLfIx\n' +
-      'FAMBCAfCeAQYFggAKgUCZJV4gAkQSHjmQMIT8FoCGwwWIQTY1Bojzq38LJct\n' +
-      'LyRIeOZAwhPwWgAATqsBAJ34mlCeR9a7T0Cgr+H47q4Tc/f3Tak+MPmwU6Uy\n' +
-      'WlSKAP9QI/pMRhlaHQrpcTOZwIpqafg+K402Yx4ckdva9aZZCQ==\n' +
-      '=nZAt\n' +
-      '-----END PGP PUBLIC KEY BLOCK-----\n';
-  });
-
   describe('verify', () => {
     test('should verify a signed message', async () => {
       expect(
-        await EncryptionUtils.verify(signedMessage, signerPublicKey)
+        await EncryptionUtils.verify(SIGNEDMESSAGE, KEYPAIR1.publicKey)
       ).toBeTruthy();
     });
 
     test('should fail when verifying with a different public key', async () => {
       expect(
-        await EncryptionUtils.verify(signedMessage, userPublicKey)
+        await EncryptionUtils.verify(SIGNEDMESSAGE, KEYPAIR2.publicKey)
       ).toBeFalsy();
     });
 
@@ -127,15 +88,15 @@ describe('EncryptionUtils', async () => {
       const invalidSignedMessage = 'Invalid Signed Message';
 
       await expect(
-        EncryptionUtils.verify(invalidSignedMessage, signerPublicKey)
+        EncryptionUtils.verify(invalidSignedMessage, KEYPAIR1.publicKey)
       ).rejects.toThrowError('Misformed armored text');
     });
   });
 
   describe('getSignedData', () => {
     test('should get the text from a signed message', async () => {
-      const message = await EncryptionUtils.getSignedData(signedMessage);
-      expect(message).toBe('Human Protocol');
+      const message = await EncryptionUtils.getSignedData(SIGNEDMESSAGE);
+      expect(message).toBe(MESSAGE);
     });
 
     test('should throw an error when an invalid signed message is provided', async () => {
@@ -146,24 +107,50 @@ describe('EncryptionUtils', async () => {
       ).rejects.toThrowError('Misformed armored text');
     });
   });
+
+  describe('encrypt', () => {
+    test('should encrypt a message', async () => {
+      const encryptedMessage = await EncryptionUtils.encrypt(MESSAGE, [
+        KEYPAIR1.publicKey,
+      ]);
+
+      const expectedMessageHeader = '-----BEGIN PGP MESSAGE-----\n';
+      const expectedMessageFooter = '-----END PGP MESSAGE-----\n';
+
+      expect(encryptedMessage.includes(expectedMessageHeader)).toBeTruthy();
+      expect(encryptedMessage.includes(expectedMessageFooter)).toBeTruthy();
+    });
+
+    test('should throw an error when an invalid public key is provided', async () => {
+      const invalidPublicKey = 'Invalid Public Key';
+
+      await expect(
+        EncryptionUtils.encrypt(MESSAGE, [invalidPublicKey])
+      ).rejects.toThrowError('Misformed armored text');
+    });
+
+    test('should throw an error when no public keys are provided', async () => {
+      await expect(EncryptionUtils.encrypt(MESSAGE, [])).rejects.toThrowError(
+        'Error encrypting message: No keys, passwords, or session key provided.'
+      );
+    });
+  });
 });
 
 describe('Encryption', async () => {
-  let keyPair1: any;
-  let keyPair2: any;
-  let keyPair3: any;
-
-  beforeAll(async () => {
-    keyPair1 = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
-    keyPair2 = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
-    keyPair3 = await EncryptionUtils.generateKeyPair('Human', 'human@hmt.ai');
-  });
-
   describe('build', () => {
     test('should build correctly', async () => {
       const encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
+        KEYPAIR1.privateKey,
+        KEYPAIR1.passphrase
+      );
+      expect(encryption).toBeInstanceOf(Encryption);
+    });
+
+    test('should build correctly with passphrase', async () => {
+      const encryption = await Encryption.build(
+        KEYPAIR3.privateKey,
+        KEYPAIR3.passphrase
       );
       expect(encryption).toBeInstanceOf(Encryption);
     });
@@ -177,15 +164,29 @@ describe('Encryption', async () => {
     });
   });
 
-  describe('encrypt', () => {
-    test('should encrypt a message', async () => {
+  describe('signAndEncrypt', () => {
+    test('should sign and encrypt a message', async () => {
+      const encryption = await Encryption.build(KEYPAIR1.privateKey);
+      const encryptedMessage = await encryption.signAndEncrypt(MESSAGE, [
+        KEYPAIR2.publicKey,
+        KEYPAIR3.publicKey,
+      ]);
+
+      const expectedMessageHeader = '-----BEGIN PGP MESSAGE-----\n';
+      const expectedMessageFooter = '-----END PGP MESSAGE-----\n';
+
+      expect(encryptedMessage.includes(expectedMessageHeader)).toBeTruthy();
+      expect(encryptedMessage.includes(expectedMessageFooter)).toBeTruthy();
+    });
+
+    test('should sign and encrypt a message using locked private key', async () => {
       const encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
+        KEYPAIR3.privateKey,
+        KEYPAIR3.passphrase
       );
-      const encryptedMessage = await encryption.encrypt('Human Protocol', [
-        keyPair2.publicKey,
-        keyPair3.publicKey,
+      const encryptedMessage = await encryption.signAndEncrypt(MESSAGE, [
+        KEYPAIR2.publicKey,
+        KEYPAIR1.publicKey,
       ]);
 
       const expectedMessageHeader = '-----BEGIN PGP MESSAGE-----\n';
@@ -197,25 +198,23 @@ describe('Encryption', async () => {
 
     test('should throw an error when an invalid public key is provided', async () => {
       const encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
+        KEYPAIR1.privateKey,
+        KEYPAIR1.passphrase
       );
       const invalidPublicKey = 'Invalid Public Key';
 
       await expect(
-        encryption.encrypt('Human Protocol', [invalidPublicKey])
+        encryption.signAndEncrypt(MESSAGE, [invalidPublicKey])
       ).rejects.toThrowError('Misformed armored text');
     });
 
     test('should throw an error when no public keys are provided', async () => {
       const encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
+        KEYPAIR1.privateKey,
+        KEYPAIR1.passphrase
       );
 
-      await expect(
-        encryption.encrypt('Human Protocol', [])
-      ).rejects.toThrowError(
+      await expect(encryption.signAndEncrypt(MESSAGE, [])).rejects.toThrowError(
         'Error encrypting message: No keys, passwords, or session key provided.'
       );
     });
@@ -223,46 +222,45 @@ describe('Encryption', async () => {
 
   describe('decrypt', () => {
     let encryption: Encryption;
-    let encryptedMessage: string;
     beforeAll(async () => {
-      encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
-      );
-      encryptedMessage = await encryption.encrypt('Human Protocol', [
-        keyPair2.publicKey,
-        keyPair3.publicKey,
-      ]);
+      encryption = await Encryption.build(KEYPAIR1.privateKey);
     });
 
-    test('should decrypt a message', async () => {
-      const encryption2 = await Encryption.build(
-        keyPair2.privateKey,
-        keyPair2.passphrase
-      );
+    test('should decrypt and verify a message', async () => {
+      const encryption2 = await Encryption.build(KEYPAIR2.privateKey);
       const decryptedMessage = await encryption2.decrypt(
-        encryptedMessage,
-        keyPair1.publicKey
+        SIGNEDENCRYPTEDMESSAGE,
+        KEYPAIR1.publicKey
       );
 
-      expect(decryptedMessage).toBe('Human Protocol');
+      expect(decryptedMessage).toBe(MESSAGE);
 
       const encryption3 = await Encryption.build(
-        keyPair3.privateKey,
-        keyPair3.passphrase
+        KEYPAIR3.privateKey,
+        KEYPAIR3.passphrase
       );
       const decryptedMessage2 = await encryption3.decrypt(
-        encryptedMessage,
-        keyPair1.publicKey
+        SIGNEDENCRYPTEDMESSAGE,
+        KEYPAIR1.publicKey
       );
-      expect(decryptedMessage2).toBe('Human Protocol');
+      expect(decryptedMessage2).toBe(MESSAGE);
+    });
+
+    test('should decrypt and verify a message encrypted with a locked private key', async () => {
+      const encryption2 = await Encryption.build(KEYPAIR2.privateKey);
+      const decryptedMessage = await encryption2.decrypt(
+        SIGNEDENCRYPTEDLOCKEDMESSAGE,
+        KEYPAIR3.publicKey
+      );
+
+      expect(decryptedMessage).toBe(MESSAGE);
     });
 
     test('should throw an error when no encrypted message is provided', async () => {
       const encryptedMessage = '';
 
       await expect(
-        encryption.decrypt(encryptedMessage, keyPair1.publicKey)
+        encryption.decrypt(encryptedMessage, KEYPAIR1.publicKey)
       ).rejects.toThrowError(
         'readMessage: must pass options object containing `armoredMessage` or `binaryMessage`'
       );
@@ -270,26 +268,46 @@ describe('Encryption', async () => {
 
     test('should throw an error when an invalid public key is provided for signature verification', async () => {
       await expect(
-        encryption.decrypt(encryptedMessage, 'Invalid Public Key')
+        encryption.decrypt(SIGNEDENCRYPTEDMESSAGE, 'Invalid Public Key')
       ).rejects.toThrowError('Misformed armored text');
+    });
+
+    test('should decrypt an unsigned message', async () => {
+      const encryption2 = await Encryption.build(
+        KEYPAIR2.privateKey,
+        KEYPAIR2.passphrase
+      );
+      const decryptedMessage = await encryption2.decrypt(ENCRYPTEDMESSAGE);
+
+      expect(decryptedMessage).toBe(MESSAGE);
+    });
+
+    test('should fail when decrypting and verifying an unsigned message', async () => {
+      const encryption2 = await Encryption.build(
+        KEYPAIR2.privateKey,
+        KEYPAIR2.passphrase
+      );
+
+      await expect(
+        encryption2.decrypt(ENCRYPTEDMESSAGE, KEYPAIR1.publicKey)
+      ).rejects.toThrowError('Error decrypting message: Message is not signed');
     });
   });
 
   describe('sign', () => {
-    test('should encrypt a message', async () => {
+    test('should sign a message', async () => {
       const encryption = await Encryption.build(
-        keyPair1.privateKey,
-        keyPair1.passphrase
+        KEYPAIR1.privateKey,
+        KEYPAIR1.passphrase
       );
-      const signedMessage = await encryption.sign('Human Protocol');
+      const signedMessage = await encryption.sign(MESSAGE);
 
       const expectedMessageHeader = '-----BEGIN PGP SIGNED MESSAGE-----\n';
-      const expectedMessage = 'Human Protocol';
       const expectedSignatureHeader = '-----BEGIN PGP SIGNATURE-----\n';
       const expectedSignatureFooter = '-----END PGP SIGNATURE-----\n';
 
       expect(signedMessage.includes(expectedMessageHeader)).toBeTruthy();
-      expect(signedMessage.includes(expectedMessage)).toBeTruthy();
+      expect(signedMessage.includes(MESSAGE)).toBeTruthy();
       expect(signedMessage.includes(expectedSignatureHeader)).toBeTruthy();
       expect(signedMessage.includes(expectedSignatureFooter)).toBeTruthy();
     });

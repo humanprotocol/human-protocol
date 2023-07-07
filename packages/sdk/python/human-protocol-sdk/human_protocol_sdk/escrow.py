@@ -15,7 +15,7 @@ from human_protocol_sdk.utils import (
     handle_transaction,
 )
 from validators import url as URL
-from web3 import Web3
+from web3 import Web3, contract
 from web3.middleware import geth_poa_middleware
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
@@ -161,7 +161,7 @@ class EscrowClient:
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
 
-    def create_escrow(self, token_address: str, trusted_handlers: List[str]):
+    def create_escrow(self, token_address: str, trusted_handlers: List[str]) -> str:
         """
         Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
 
@@ -199,7 +199,7 @@ class EscrowClient:
             None,
         ).args.escrow
 
-    def setup(self, escrow_address: str, escrow_config: EscrowConfig):
+    def setup(self, escrow_address: str, escrow_config: EscrowConfig) -> None:
         """
         Sets up the parameters of the escrow.
 
@@ -236,7 +236,7 @@ class EscrowClient:
         token_address: str,
         trusted_handlers: List[str],
         escrow_config: EscrowConfig,
-    ):
+    ) -> str:
         """
         Creates and sets up an escrow.
 
@@ -257,7 +257,7 @@ class EscrowClient:
 
         return escrow_address
 
-    def fund(self, escrow_address: str, amount: Decimal):
+    def fund(self, escrow_address: str, amount: Decimal) -> None:
         """
         Adds funds to the escrow.
 
@@ -289,7 +289,7 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def store_results(self, escrow_address: str, url: str, hash: str):
+    def store_results(self, escrow_address: str, url: str, hash: str) -> None:
         """Stores the results url.
 
         Args:
@@ -320,7 +320,7 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def complete(self, escrow_address: str):
+    def complete(self, escrow_address: str) -> None:
         """Sets the status of an escrow to completed.
 
         Args:
@@ -351,7 +351,7 @@ class EscrowClient:
         final_results_url: str,
         final_results_hash: str,
         txId: Decimal,
-    ):
+    ) -> None:
         """Pays out the amounts specified to the workers and sets the URL of the final results file.
 
         Args:
@@ -402,7 +402,7 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def cancel(self, escrow_address: str):
+    def cancel(self, escrow_address: str) -> None:
         """Cancels the specified escrow and sends the balance to the canceler.
 
         Args:
@@ -425,7 +425,7 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def abort(self, escrow_address: str):
+    def abort(self, escrow_address: str) -> None:
         """Cancels the specified escrow, sends the balance to the canceler and selfdestructs the escrow contract.
 
         Args:
@@ -448,12 +448,15 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def add_trusted_handlers(self, escrow_address: str, handlers: List[str]):
+    def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
         """Adds an array of addresses to the trusted handlers list.
 
         Args:
             escrow_address (str): Address of the escrow
             handlers (List[str]): Array of trusted handler addresses
+
+        Returns:
+            None
 
         Raises:
             EscrowClientError: If an error occurs while checking the parameters
@@ -473,7 +476,7 @@ class EscrowClient:
             EscrowClientError,
         )
 
-    def get_balance(self, escrow_address: str):
+    def get_balance(self, escrow_address: str) -> Decimal:
         """Gets the balance for a specified escrow address.
 
         Args:
@@ -491,7 +494,7 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
-    def get_manifest_url(self, escrow_address: str):
+    def get_manifest_url(self, escrow_address: str) -> str:
         """Gets the manifest file URL.
 
         Args:
@@ -509,7 +512,7 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
 
-    def get_results_url(self, escrow_address: str):
+    def get_results_url(self, escrow_address: str) -> str:
         """Gets the results file URL.
 
         Args:
@@ -529,7 +532,7 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.finalResultsUrl().call()
         )
 
-    def get_intermediate_results_url(self, escrow_address: str):
+    def get_intermediate_results_url(self, escrow_address: str) -> str:
         """Gets the intermediate results file URL.
 
         Args:
@@ -551,7 +554,7 @@ class EscrowClient:
             .call()
         )
 
-    def get_token_address(self, escrow_address: str):
+    def get_token_address(self, escrow_address: str) -> str:
         """Gets the address of the token used to fund the escrow.
 
         Args:
@@ -569,7 +572,7 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.token().call()
 
-    def get_status(self, escrow_address: str):
+    def get_status(self, escrow_address: str) -> Status:
         """Gets the current status of the escrow.
 
         Args:
@@ -589,7 +592,7 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.status().call()
         )
 
-    def get_launched_escrows(self, requester_address: str):
+    def get_launched_escrows(self, requester_address: str) -> List[str]:
         """Get escrows addresses created by a job requester.
 
         Args:
@@ -617,7 +620,7 @@ class EscrowClient:
 
         return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
 
-    def get_escrows_filtered(self, filter: EscrowFilter):
+    def get_escrows_filtered(self, filter: EscrowFilter) -> List[str]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         Args:
@@ -650,7 +653,7 @@ class EscrowClient:
 
         return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
 
-    def get_recording_oracle_address(self, escrow_address: str):
+    def get_recording_oracle_address(self, escrow_address: str) -> str:
         """Gets the recording oracle address of the escrow.
 
         Args:
@@ -670,7 +673,7 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.recordingOracle().call()
         )
 
-    def get_reputation_oracle_address(self, escrow_address: str):
+    def get_reputation_oracle_address(self, escrow_address: str) -> str:
         """Gets the reputation oracle address of the escrow.
 
         Args:
@@ -692,7 +695,7 @@ class EscrowClient:
             .call()
         )
 
-    def _get_escrow_contract(self, address: str):
+    def _get_escrow_contract(self, address: str) -> contract:
         """Returns the escrow contract instance.
 
         Args:
