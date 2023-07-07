@@ -1,33 +1,69 @@
+import { Provider } from '@ethersproject/abstract-provider';
+import { Network } from '@ethersproject/networks';
 import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
 import { Signer, ethers } from 'ethers';
-import { Provider } from '@ethersproject/abstract-provider';
+import { NETWORKS } from './constants';
+import { requiresSigner } from './decorators';
+import { ChainId } from './enums';
 import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
+  ErrorProviderDoesNotExist,
   ErrorSigner,
+  ErrorUnsupportedChainID,
 } from './error';
-import { IClientParams } from './interfaces';
-import { requiresSigner } from './decorators';
+import { NetworkData } from './types';
 
 export class KVStoreClient {
   private contract: KVStore;
   private signerOrProvider: Signer | Provider;
 
   /**
-   * **KVStore constructor**
+   * **KVStoreClient constructor**
    *
-   *   * @param {IClientParams} clientParams - Init client parameters
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {NetworkData} network - The network information required to connect to the KVStore contract
    */
-  constructor(readonly clientParams: IClientParams) {
+  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.contract = KVStore__factory.connect(
-      clientParams.network.kvstoreAddress,
-      clientParams.signerOrProvider
+      network.factoryAddress,
+      signerOrProvider
     );
-    this.signerOrProvider = clientParams.signerOrProvider;
+    this.signerOrProvider = signerOrProvider;
+  }
+
+  /**
+   * Creates an instance of KVStoreClient from a Signer or Provider.
+   *
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @returns {Promise<KVStoreClient>} - An instance of KVStoreClient
+   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   */
+  public static async build(signerOrProvider: Signer | Provider) {
+    let network: Network;
+    if (Signer.isSigner(signerOrProvider)) {
+      if (!signerOrProvider.provider) {
+        throw ErrorProviderDoesNotExist;
+      }
+
+      network = await signerOrProvider.provider.getNetwork();
+    } else {
+      network = await signerOrProvider.getNetwork();
+    }
+
+    const chainId: ChainId = network.chainId;
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    return new KVStoreClient(signerOrProvider, networkData);
   }
 
   /**

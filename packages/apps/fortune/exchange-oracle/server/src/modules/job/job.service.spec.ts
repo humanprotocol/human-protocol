@@ -11,8 +11,12 @@ import {
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
-  EscrowClient: jest.fn(),
-  KVStoreClient: jest.fn(),
+  EscrowClient: {
+    build: jest.fn(),
+  },
+  KVStoreClient: {
+    build: jest.fn(),
+  },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
   },
@@ -70,7 +74,7 @@ describe('JobService', () => {
         fortunesRequested: 5,
         fundAmount: 100,
       };
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
           .mockResolvedValue('https://example.com/manifest.json'),
@@ -92,7 +96,7 @@ describe('JobService', () => {
 
     it('should fail if the escrow address is invalid', async () => {
       const escrowAddress = 'invalid_address';
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
           .mockRejectedValue(new Error('Invalid address')),
@@ -105,7 +109,7 @@ describe('JobService', () => {
     });
 
     it('should fail if the file does not exist', async () => {
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
           .mockResolvedValue('https://example.com/manifest.json'),
@@ -123,7 +127,7 @@ describe('JobService', () => {
 
   describe('getPendingJobs', () => {
     it('should return an array of pending jobs', async () => {
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getEscrowsFiltered: jest
           .fn()
           .mockResolvedValue([
@@ -142,7 +146,7 @@ describe('JobService', () => {
     });
 
     it('should return an array of pending jobs removing jobs already submitted by worker', async () => {
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getEscrowsFiltered: jest
           .fn()
           .mockResolvedValue([
@@ -162,7 +166,7 @@ describe('JobService', () => {
     });
 
     it('should return an empty array if there are no pending jobs', async () => {
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getEscrowsFiltered: jest.fn().mockResolvedValue([]),
       }));
 
@@ -179,12 +183,12 @@ describe('JobService', () => {
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient as any).mockImplementation(() => ({
+      (KVStoreClient.build as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue(recordingOracleURLMock),
       }));
 
@@ -212,7 +216,7 @@ describe('JobService', () => {
     it('should fail if the escrow address is invalid', async () => {
       const escrowAddress = 'invalid_address';
       const solution = 'job-solution';
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
           .mockRejectedValue(new Error('Invalid address')),
@@ -227,12 +231,12 @@ describe('JobService', () => {
     it('should fail if recording oracle url is empty', async () => {
       const solution = 'job-solution';
 
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient as any).mockImplementation(() => ({
+      (KVStoreClient.build as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue(''),
       }));
 
@@ -245,12 +249,12 @@ describe('JobService', () => {
     it('should fail if user has already submitted a solution', async () => {
       const solution = 'job-solution';
 
-      (EscrowClient as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient as any).mockImplementation(() => ({
+      (KVStoreClient.build as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue('https://example.com/recordingoracle'),
       }));
 
