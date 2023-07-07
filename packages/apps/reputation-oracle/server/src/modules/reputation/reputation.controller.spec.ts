@@ -5,7 +5,7 @@ import { ReputationController } from './reputation.controller';
 import { ReputationService } from './reputation.service';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
-import { ReputationScore } from '../../common/enums';
+import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
@@ -58,7 +58,7 @@ describe('ReputationController', () => {
         {
           chainId: CHAIN_ID,
           address: OPERATOR_ADDRESS,
-          reputation: ReputationScore.LOW,
+          reputation: ReputationLevel.LOW,
         },
       ];
 
@@ -67,8 +67,8 @@ describe('ReputationController', () => {
         .mockResolvedValueOnce(reputations as ReputationEntity[]);
 
       jest
-        .spyOn(reputationService, 'getReputationScore')
-        .mockReturnValueOnce(ReputationScore.LOW);
+        .spyOn(reputationService, 'getReputationLevel')
+        .mockReturnValueOnce(ReputationLevel.LOW);
 
       expect(
         await reputationController.getReputations({ chainId: CHAIN_ID }),
@@ -87,8 +87,8 @@ describe('ReputationController', () => {
         .mockResolvedValueOnce(reputation as any as ReputationEntity);
 
       jest
-        .spyOn(reputationService, 'getReputationScore')
-        .mockReturnValueOnce(ReputationScore.LOW);
+        .spyOn(reputationService, 'getReputationLevel')
+        .mockReturnValueOnce(ReputationLevel.LOW);
 
       expect(
         await reputationController.getReputation(
@@ -99,7 +99,7 @@ describe('ReputationController', () => {
             chainId: CHAIN_ID,
           },
         ),
-      ).toBe(ReputationScore.LOW);
+      ).toBe(ReputationLevel.LOW);
     });
   });
 });

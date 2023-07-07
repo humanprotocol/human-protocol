@@ -6,7 +6,7 @@ import { ReputationEntity } from './reputation.entity';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
-import { ReputationEntityType, ReputationScore } from '../../common/enums';
+import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 
@@ -130,21 +130,21 @@ describe('ReputationService', () => {
     });
   });
 
-  describe('getReputationScore', () => {
+  describe('getReputationLevel', () => {
     it('should return LOW if reputation points are less than 300', () => {
-      expect(reputationService.getReputationScore(299)).toBe(
-        ReputationScore.LOW,
+      expect(reputationService.getReputationLevel(299)).toBe(
+        ReputationLevel.LOW,
       );
     });
     it('should return MEDIUM if reputation points are less than 700', () => {
-      expect(reputationService.getReputationScore(699)).toBe(
-        ReputationScore.MEDIUM,
+      expect(reputationService.getReputationLevel(699)).toBe(
+        ReputationLevel.MEDIUM,
       );
     });
 
     it('should return HIGH if reputation points are greater than 700', () => {
-      expect(reputationService.getReputationScore(701)).toBe(
-        ReputationScore.HIGH,
+      expect(reputationService.getReputationLevel(701)).toBe(
+        ReputationLevel.HIGH,
       );
     });
   });

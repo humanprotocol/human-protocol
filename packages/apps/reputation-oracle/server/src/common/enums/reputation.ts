@@ -6,7 +6,7 @@ export enum ReputationEntityType {
   REPUTATION_ORACLE = 'REPUTATION_ORACLE',
 }
 
-export enum ReputationScore {
+export enum ReputationLevel {
   LOW = 'Low',
   MEDIUM = 'Medium',
   HIGH = 'High',

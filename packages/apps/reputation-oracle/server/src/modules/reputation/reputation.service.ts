@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
 import { ConfigNames } from '../../common/config';
-import { ReputationEntityType, ReputationScore } from '../../common/enums';
+import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 
@@ -16,7 +16,7 @@ export class ReputationService {
     private readonly configService: ConfigService,
   ) {}
 
-  public getReputationScore(reputationPoints: number): ReputationScore {
+  public getReputationLevel(reputationPoints: number): ReputationLevel {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const reputationLevelLow = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_LOW,
@@ -27,14 +27,14 @@ export class ReputationService {
     )!;
 
     if (reputationPoints <= reputationLevelLow) {
-      return ReputationScore.LOW;
+      return ReputationLevel.LOW;
     }
 
     if (reputationPoints >= reputationLevelHigh) {
-      return ReputationScore.HIGH;
+      return ReputationLevel.HIGH;
     }
 
-    return ReputationScore.MEDIUM;
+    return ReputationLevel.MEDIUM;
   }
 
   public async increaseReputation(
