@@ -6,7 +6,7 @@ import { ReputationEntity } from './reputation.entity';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
-import { ReputationEntityType } from '../../common/enums';
+import { ReputationEntityType, ReputationScore } from '../../common/enums';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,
@@ -110,6 +110,72 @@ describe('ReputationService', () => {
       expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
       expect(reputationEntity.reputationPoints).toBe(0);
       expect(reputationEntity.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getReputationScore', () => {
+    it('should return LOW if reputation points are less than 300', () => {
+      expect(reputationService.getReputationScore(299)).toBe(
+        ReputationScore.LOW,
+      );
+    });
+    it('should return MEDIUM if reputation points are less than 700', () => {
+      expect(reputationService.getReputationScore(699)).toBe(
+        ReputationScore.MEDIUM,
+      );
+    });
+
+    it('should return HIGH if reputation points are greater than 700', () => {
+      expect(reputationService.getReputationScore(701)).toBe(
+        ReputationScore.HIGH,
+      );
+    });
+  });
+
+  describe('getReputation', () => {
+    const chainId = ChainId.LOCALHOST;
+    const address = MOCK_ADDRESS;
+
+    it('should return reputation entity', async () => {
+      const reputationEntity: Partial<ReputationEntity> = {
+        chainId,
+        address,
+        reputationPoints: 1,
+      };
+
+      jest
+        .spyOn(reputationRepository, 'findOne')
+        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
+
+      const result = await reputationService.getReputation(chainId, address);
+
+      expect(reputationRepository.findOne).toHaveBeenCalledWith({
+        chainId,
+        address,
+      });
+      expect(result).toEqual(reputationEntity);
+    });
+  });
+
+  describe('getAllReputations', () => {
+    const chainId = ChainId.LOCALHOST;
+    const address = MOCK_ADDRESS;
+
+    it('should return all reputations', async () => {
+      const reputationEntity: Partial<ReputationEntity> = {
+        chainId,
+        address,
+        reputationPoints: 1,
+      };
+
+      jest
+        .spyOn(reputationRepository, 'find')
+        .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
+
+      const result = await reputationService.getAllReputations();
+
+      expect(reputationRepository.find).toHaveBeenCalled();
+      expect(result).toEqual([reputationEntity]);
     });
   });
 });
