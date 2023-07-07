@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
+import { ConfigNames } from '../../common/config';
 import { ReputationEntityType, ReputationScore } from '../../common/enums';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
@@ -9,18 +11,30 @@ import { ReputationRepository } from './reputation.repository';
 export class ReputationService {
   private readonly logger = new Logger(ReputationService.name);
 
-  constructor(private readonly reputationRepository: ReputationRepository) {}
+  constructor(
+    private readonly reputationRepository: ReputationRepository,
+    private readonly configService: ConfigService,
+  ) {}
 
   public getReputationScore(reputationPoints: number): ReputationScore {
-    if (reputationPoints <= 299) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const reputationLevelLow = this.configService.get<number>(
+      ConfigNames.REPUTATION_LEVEL_LOW,
+    )!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const reputationLevelHigh = this.configService.get<number>(
+      ConfigNames.REPUTATION_LEVEL_HIGH,
+    )!;
+
+    if (reputationPoints <= reputationLevelLow) {
       return ReputationScore.LOW;
     }
 
-    if (reputationPoints <= 699) {
-      return ReputationScore.MEDIUM;
+    if (reputationPoints >= reputationLevelHigh) {
+      return ReputationScore.HIGH;
     }
 
-    return ReputationScore.HIGH;
+    return ReputationScore.MEDIUM;
   }
 
   public async increaseReputation(

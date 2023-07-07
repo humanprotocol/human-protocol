@@ -7,12 +7,25 @@ import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { ReputationEntityType, ReputationScore } from '../../common/enums';
+import { ConfigService } from '@nestjs/config';
+import { ConfigNames } from '../../common/config';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,
     reputationRepository: ReputationRepository;
 
   beforeEach(async () => {
+    const mockConfigService: Partial<ConfigService> = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case ConfigNames.REPUTATION_LEVEL_LOW:
+            return 300;
+          case ConfigNames.REPUTATION_LEVEL_HIGH:
+            return 700;
+        }
+      }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         ReputationService,
@@ -23,6 +36,10 @@ describe('ReputationService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

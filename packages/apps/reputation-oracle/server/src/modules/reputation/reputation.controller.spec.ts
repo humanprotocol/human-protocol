@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { ReputationController } from './reputation.controller';
@@ -5,6 +6,7 @@ import { ReputationService } from './reputation.service';
 import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationScore } from '../../common/enums';
+import { ConfigNames } from '../../common/config';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -14,6 +16,17 @@ describe('ReputationController', () => {
   let reputationService: ReputationService;
 
   beforeAll(async () => {
+    const mockConfigService: Partial<ConfigService> = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case ConfigNames.REPUTATION_LEVEL_LOW:
+            return 300;
+          case ConfigNames.REPUTATION_LEVEL_LOW:
+            return 700;
+        }
+      }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         ReputationService,
@@ -23,6 +36,10 @@ describe('ReputationController', () => {
             find: jest.fn(),
             findOne: jest.fn(),
           },
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
