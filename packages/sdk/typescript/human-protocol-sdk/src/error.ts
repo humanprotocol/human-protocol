@@ -141,14 +141,12 @@ export const ErrorHMTokenAmountNotApproved = new Error('Amount not approved');
 /**
  * @constant {Error} - Init provider does not exists.
  */
-export const ErrorInitProviderDoesNotExist = new Error(
-  'Provider does not exist'
-);
+export const ErrorProviderDoesNotExist = new Error('Provider does not exist');
 
 /**
  * @constant {Error} - Init with unsupported chain ID.
  */
-export const ErrorInitUnsupportedChainID = new Error('Unsupported chain ID');
+export const ErrorUnsupportedChainID = new Error('Unsupported chain ID');
 
 /**
  * @constant {Error} - Sending a transaction requires a signer.

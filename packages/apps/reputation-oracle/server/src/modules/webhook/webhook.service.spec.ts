@@ -5,13 +5,16 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
-import { FortuneFinalResult, ImageLabelBinaryFinalResult, ManifestDto, WebhookIncomingDto } from './webhook.dto';
+import {
+  FortuneFinalResult,
+  ImageLabelBinaryFinalResult,
+  ManifestDto,
+  WebhookIncomingDto,
+} from './webhook.dto';
 import {
   ChainId,
   EscrowClient,
-  InitClient,
   NETWORKS,
-  NetworkData,
   StorageClient,
 } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
@@ -67,7 +70,7 @@ describe('WebhookService', () => {
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string, defaultValue?: any) => {
+      get: jest.fn((key: string) => {
         switch (key) {
           case 'S3_ENDPOINT':
             return '127.0.0.1';
@@ -117,15 +120,6 @@ describe('WebhookService', () => {
       ...provider.getSigner(),
       getAddress: jest.fn().mockReturnValue(ethers.constants.AddressZero),
     };
-
-    const chainId: ChainId = 80001;
-    const networkData = NETWORKS[chainId];
-
-    const getClientParamsMock = InitClient.getParams as jest.Mock;
-    getClientParamsMock.mockResolvedValue({
-      signerOrProvider: mockSigner,
-      network: networkData as NetworkData,
-    });
   });
 
   describe('createIncomingWebhook', () => {
@@ -189,7 +183,7 @@ describe('WebhookService', () => {
       fundAmount: totalAmount.toString(),
       mode: JobMode.DESCRIPTIVE,
     };
-    
+
     const webhookEntity: Partial<WebhookIncomingEntity> = {
       id: 1,
       chainId: ChainId.LOCALHOST,
@@ -351,7 +345,7 @@ describe('WebhookService', () => {
       fundAmount: totalAmount.toString(),
       mode: JobMode.BATCH,
     };
-    
+
     const webhookEntity: Partial<WebhookIncomingEntity> = {
       id: 1,
       chainId: ChainId.LOCALHOST,
@@ -362,11 +356,11 @@ describe('WebhookService', () => {
 
     const intermediateResults: ImageLabelBinaryFinalResult[] = [
       {
-        final_answer: "", 
-        url: MOCK_FILE_URL, 
+        final_answer: '',
+        url: MOCK_FILE_URL,
         wrong: [],
-        correct: [MOCK_ADDRESS], 
-      }
+        correct: [MOCK_ADDRESS],
+      },
     ];
 
     it('should process a pending webhook and return true', async () => {
