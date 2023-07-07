@@ -90,11 +90,14 @@ class StakingClient:
             abi=reward_pool_interface["abi"],
         )
 
-    def approve_stake(self, amount: Decimal):
+    def approve_stake(self, amount: Decimal) -> None:
         """Approves HMT token for Staking.
 
         Args:
             amount (Decimal): Amount to approve
+
+        Returns:
+            None
 
         Validations:
             - Amount must be greater than 0
@@ -112,11 +115,14 @@ class StakingClient:
             StakingClientError,
         )
 
-    def stake(self, amount: Decimal):
+    def stake(self, amount: Decimal) -> None:
         """Stakes HMT token.
 
         Args:
             amount (Decimal): Amount to stake
+
+        Returns:
+            None
 
         Validations:
             - Amount must be greater than 0
@@ -134,12 +140,15 @@ class StakingClient:
             StakingClientError,
         )
 
-    def allocate(self, escrow_address: str, amount: Decimal):
+    def allocate(self, escrow_address: str, amount: Decimal) -> None:
         """Allocates HMT token to the escrow.
 
         Args:
             escrow_address (str): Address of the escrow
             amount (Decimal): Amount to allocate
+
+        Returns:
+            None
 
         Validations:
             - Amount must be greater than 0
@@ -160,11 +169,14 @@ class StakingClient:
             StakingClientError,
         )
 
-    def close_allocation(self, escrow_address: str):
+    def close_allocation(self, escrow_address: str) -> None:
         """Closes allocated HMT token from the escrow.
 
         Args:
             escrow_address (str): Address of the escrow
+
+        Returns:
+            None
 
         Validations:
             - Escrow address must be valid
@@ -181,11 +193,14 @@ class StakingClient:
             StakingClientError,
         )
 
-    def unstake(self, amount: Decimal):
+    def unstake(self, amount: Decimal) -> None:
         """Unstakes HMT token.
 
         Args:
             amount (Decimal): Amount to unstake
+
+        Returns:
+            None
 
         Validations:
             - Amount must be greater than 0
@@ -202,8 +217,11 @@ class StakingClient:
             StakingClientError,
         )
 
-    def withdraw(self):
+    def withdraw(self) -> None:
         """Withdraws HMT token.
+
+        Returns:
+            None
 
         Validations:
             - There must be unstaked tokens which is unlocked (on-chain)
@@ -216,7 +234,9 @@ class StakingClient:
             StakingClientError,
         )
 
-    def slash(self, slasher: str, staker: str, escrow_address: str, amount: Decimal):
+    def slash(
+        self, slasher: str, staker: str, escrow_address: str, amount: Decimal
+    ) -> None:
         """Slashes HMT token.
 
         Args:
@@ -224,6 +244,9 @@ class StakingClient:
             staker (str): Address of the staker
             escrow_address (str): Address of the escrow
             amount (Decimal): Amount to slash
+
+        Returns:
+            None
 
         Validations:
             - Amount must be greater than 0
@@ -246,11 +269,14 @@ class StakingClient:
             StakingClientError,
         )
 
-    def distribute_reward(self, escrow_address: str):
+    def distribute_reward(self, escrow_address: str) -> None:
         """Pays out rewards to the slashers for the specified escrow address.
 
         Args:
             escrow_address (str): Address of the escrow
+
+        Returns:
+            None
 
         Validations:
             - Escrow address must be valid

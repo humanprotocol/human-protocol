@@ -14,6 +14,7 @@ cryptography = "*"
 minio = "*"
 validators = "*"
 web3 = "==5.24.0"
+pgpy = "*"
 
 [requires]
 python_version = "3.10"
