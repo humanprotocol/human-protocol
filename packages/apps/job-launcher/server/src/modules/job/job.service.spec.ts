@@ -212,7 +212,7 @@ describe('JobService', () => {
       };
 
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
-      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined);
+      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
       const userBalance = ethers.utils.parseUnits('15', 'ether'); // 10 ETH
       jest
@@ -335,7 +335,7 @@ describe('JobService', () => {
 
       expect(
         jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow(new Error(`Unpredictable gas limit: ${ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT}`));
+      ).rejects.toThrow(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT));
     });
 
     it('should throw an error if the manifest does not exist', async () => {

@@ -109,6 +109,7 @@ export class JobService {
       .mul(totalFeePercentage)
       .div(100);
     const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+
     if (userBalance.lte(totalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
@@ -246,27 +247,22 @@ export class JobService {
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
-    try {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-      const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer);
 
-      const escrowConfig = {
-        recordingOracle: this.configService.get<string>(
-          ConfigNames.RECORDING_ORACLE_ADDRESS,
-        )!,
-        reputationOracle: this.configService.get<string>(
-          ConfigNames.REPUTATION_ORACLE_ADDRESS,
-        )!,
-        recordingOracleFee: BigNumber.from(
-          this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-        ),
-        reputationOracleFee: BigNumber.from(
-          this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-        ),
-        manifestUrl: jobEntity.manifestUrl,
-        manifestHash: jobEntity.manifestHash,
-      };
+    const escrowConfig = {
+      recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
+      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+      recordingOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
+      ),
+      reputationOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      manifestUrl: jobEntity.manifestUrl,
+      manifestHash: jobEntity.manifestHash,
+    };
 
       const escrowAddress = await escrowClient.createAndSetupEscrow(
         NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
@@ -274,10 +270,10 @@ export class JobService {
         escrowConfig,
       );
 
-      if (!escrowAddress) {
-        this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-        throw new NotFoundException(ErrorEscrow.NotCreated);
-      }
+    if (!escrowAddress) {
+      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
+      throw new NotFoundException(ErrorEscrow.NotCreated);
+    }
 
       const manifest = await this.getManifest(jobEntity.manifestUrl);
 
@@ -305,40 +301,27 @@ export class JobService {
         );
       }
 
-      return jobEntity;
-    } catch (e) {
-      this.logger.log(ErrorEscrow.NotLaunched, JobService.name, e.message);
-
-      if (e.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
-        throw new Error(`Unpredictable gas limit: ${e.message}`);
-      }
-
-      throw new Error(ErrorEscrow.NotLaunched);
-    }
+    return jobEntity;
   }
 
   public async saveManifest(
     encryptedManifest: any,
     bucket: string,
   ): Promise<SaveManifestDto> {
-    try {
-      const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-        [encryptedManifest],
-        bucket,
-      );
+    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
+      [encryptedManifest],
+      bucket,
+    );
 
-      if (!uploadedFiles[0]) {
-        this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-        throw new BadGatewayException(ErrorBucket.UnableSaveFile);
-      }
+    if (!uploadedFiles[0]) {
+      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
+      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
+    }
 
       const { url, hash } = uploadedFiles[0];
       const manifestUrl = url;
 
-      return { manifestUrl, manifestHash: hash };
-    } catch (e) {
-      throw new Error(e.message);
-    }
+    return { manifestUrl, manifestHash: hash };
   }
 
   private async validateManifest(
@@ -381,6 +364,7 @@ export class JobService {
     );
 
     if (!data) {
+      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
       throw new NotFoundException(ErrorJob.WebhookWasNotSent);
     }
 

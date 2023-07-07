@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { COINGECKO_API_URL } from '../../common/constants';
 import { Currency, TokenId } from '../../common/enums/payment';

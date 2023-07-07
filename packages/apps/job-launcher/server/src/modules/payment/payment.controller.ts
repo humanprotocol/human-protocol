@@ -61,6 +61,10 @@ export class PaymentController {
   @UseGuards(RolesGuard)
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
-    return this.currencyService.getRate(data.token, data.currency);
+    try {
+      return this.currencyService.getRate(data.token, data.currency);
+    } catch (e) {
+      throw new Error(e)
+    }
   }
 }

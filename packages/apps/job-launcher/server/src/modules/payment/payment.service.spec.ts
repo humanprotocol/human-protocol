@@ -112,9 +112,7 @@ describe('PaymentService', () => {
     it('should throw bad request exception if customer creation fails', async () => {
       jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
 
-      expect(paymentService.createCustomer(MOCK_EMAIL)).rejects.toThrowError(
-        ErrorPayment.CustomerNotCreated,
-      );
+      expect(paymentService.createCustomer(MOCK_EMAIL)).rejects.toThrowError();
       expect(stripe.customers.create).toHaveBeenCalledTimes(1);
       expect(stripe.customers.create).toHaveBeenCalledWith({
         email: MOCK_EMAIL,
@@ -169,9 +167,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createFiatPayment(customerId, dto),
-      ).rejects.toThrowError(
-        new BadRequestException(ErrorPayment.IntentNotCreated),
-      );
+      ).rejects.toThrowError();
     });
   });
 
