@@ -122,7 +122,7 @@ class StorageClient:
             raise e
 
     @staticmethod
-    def download_file_from_url(url):
+    def download_file_from_url(url: str) -> bytes:
         """
         Downloads a file from the specified URL.
 
@@ -146,7 +146,7 @@ class StorageClient:
         except Exception as e:
             raise StorageClientError(str(e))
 
-    def download_files(self, files: List[str], bucket: str) -> List:
+    def download_files(self, files: List[str], bucket: str) -> List[bytes]:
         """
         Downloads a list of files from the specified S3-compatible bucket.
 

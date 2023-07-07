@@ -1,3 +1,4 @@
+from typing import Optional, List
 from pgpy import PGPKey, PGPMessage, PGPUID
 from pgpy.constants import (
     SymmetricKeyAlgorithm,
@@ -13,7 +14,7 @@ class Encryption:
     A class that provides encryption and decryption functionality using PGP (Pretty Good Privacy).
     """
 
-    def __init__(self, private_key_armored, passphrase=None):
+    def __init__(self, private_key_armored: str, passphrase: Optional[str] = None):
         """
         Initializes an Encryption instance.
 
@@ -37,7 +38,7 @@ class Encryption:
             else:
                 raise ValueError("Private key locked. Passphrase needed")
 
-    def sign_and_encrypt(self, message, public_keys):
+    def sign_and_encrypt(self, message: str, public_keys: List[str]) -> str:
         """
         Signs and encrypts a message using the private key and recipient's public keys.
 
@@ -68,7 +69,7 @@ class Encryption:
         del sessionkey
         return pgp_message.__str__()
 
-    def decrypt(self, message, public_key=None):
+    def decrypt(self, message: str, public_key: Optional[str] = None) -> str:
         """
         Decrypts a message using the private key.
 
@@ -106,7 +107,7 @@ class Encryption:
                 )
             raise ValueError("Failed to decrypt message: {}".format(str(e)))
 
-    def sign(self, message):
+    def sign(self, message: str) -> str:
         """
         Signs a message using the private key.
 
@@ -134,7 +135,7 @@ class EncryptionUtils:
     """
 
     @staticmethod
-    def encrypt(message, public_keys):
+    def encrypt(message: str, public_keys: List[str]) -> str:
         """
         Encrypts a message using the recipient's public keys.
 
@@ -157,7 +158,7 @@ class EncryptionUtils:
         return pgp_message.__str__()
 
     @staticmethod
-    def verify(message, public_key):
+    def verify(message: str, public_key: str) -> bool:
         """
         Verifies the signature of a message using the corresponding public key.
 
@@ -179,9 +180,9 @@ class EncryptionUtils:
             return False
 
     @staticmethod
-    def get_signed_data(message):
+    def get_signed_data(message: str) -> str:
         """
-        Extracts the signed data from an armored message.
+        Extracts the signed data from an armored signed message.
 
         Args:
             message (str): Armored message

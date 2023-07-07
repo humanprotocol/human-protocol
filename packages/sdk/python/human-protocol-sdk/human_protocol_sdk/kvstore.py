@@ -54,7 +54,7 @@ class KVStoreClient:
             address=self.network["kvstore_address"], abi=kvstore_interface["abi"]
         )
 
-    def set(self, key: str, value: str):
+    def set(self, key: str, value: str) -> None:
         """
         Sets the value of a key-value pair in the contract.
 
@@ -76,7 +76,7 @@ class KVStoreClient:
             KVStoreClientError,
         )
 
-    def set_bulk(self, keys: List[str], values: List[str]):
+    def set_bulk(self, keys: List[str], values: List[str]) -> None:
         """
         Sets multiple key-value pairs in the contract.
 
@@ -102,7 +102,7 @@ class KVStoreClient:
             KVStoreClientError,
         )
 
-    def get(self, address: str, key: str):
+    def get(self, address: str, key: str) -> str:
         """Gets the value of a key-value pair in the contract.
 
         Args:
@@ -110,7 +110,7 @@ class KVStoreClient:
             key (str): The key of the key-value pair to get
 
         Returns:
-            The value of the key-value pair if it exists
+            value (str): The value of the key-value pair if it exists
         """
 
         if not key:
