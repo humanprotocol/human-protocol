@@ -50,7 +50,7 @@ def sign_message(chain_id: Networks, message) -> str:
     return signed_message.signature.hex()
 
 
-def recover_signer(chain_id: Networks, message: str, signature: str) -> str:
+def recover_signer(chain_id: Networks, message, signature: str) -> str:
     w3 = get_web3(chain_id)
     message_hash = encode_defunct(text=str(message))
     signer = w3.eth.account.recover_message(message_hash, signature=signature)

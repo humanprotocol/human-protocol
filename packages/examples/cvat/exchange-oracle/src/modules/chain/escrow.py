@@ -39,3 +39,14 @@ def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> No
     escrow_client = EscrowClient(web3)
 
     escrow_client.store_results(escrow_address, url, hash)
+
+
+def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)
+
+    # TODO: Replace it with escrow_client.get_job_launcher_address(escrow_address) when this will be released
+    contract = escrow_client._get_escrow_contract(escrow_address)
+    job_launcher_address = contract.functions.launcher().call()
+
+    return job_launcher_address
