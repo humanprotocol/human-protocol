@@ -260,16 +260,18 @@ describe('PaymentService', () => {
   });
 
   describe('createCryptoPayment', () => {
+    const mockTokenContract: any = {
+      symbol: jest.fn(),
+    };
+    
     it('should create a crypto payment successfully', async () => {
-      const mockTokenContract: any = {
-        symbol: jest.fn(),
-      };
-
       const userId = 1;
       const dto = {
         chainId: 1,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
+
+      const token = 'hmt';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
@@ -301,7 +303,7 @@ describe('PaymentService', () => {
 
       jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
 
-      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue('HMT');
+      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
 
       jest.spyOn(paymentRepository, 'findOne').mockResolvedValue(null);
 
@@ -322,6 +324,50 @@ describe('PaymentService', () => {
         MOCK_TRANSACTION_HASH
       );
       expect(result).toBe(true);
+    });
+
+    it('should throw a conflict exception if an unsupported token is used', async () => {
+      const userId = 1;
+      const dto = {
+        chainId: 1,
+        transactionHash: MOCK_TRANSACTION_HASH,
+      };
+
+      const unsupportedToken = 'doge';
+
+      const transactionReceipt: Partial<TransactionReceipt> = {
+        logs: [
+          {
+            data: '100',
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: MOCK_ADDRESS,
+            topics: [],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
+          },
+        ],
+        transactionHash: MOCK_TRANSACTION_HASH,
+        confirmations: TX_CONFIRMATION_TRESHOLD,
+      };
+
+      const jsonRpcProviderMock = {
+        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt as TransactionReceipt),
+      };
+
+      jest
+        .spyOn(ethers.providers, 'JsonRpcProvider')
+        .mockReturnValue(jsonRpcProviderMock as any);
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(unsupportedToken);
+
+      await expect(
+        paymentService.createCryptoPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
@@ -416,6 +462,8 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
+      const token = 'hmt';
+
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
@@ -441,6 +489,10 @@ describe('PaymentService', () => {
       jest
         .spyOn(ethers.providers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
 
       jest.spyOn(paymentRepository, 'findOne').mockResolvedValue({} as any);
 

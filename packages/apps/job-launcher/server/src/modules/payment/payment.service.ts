@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, providers } from 'ethers';
+import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import { CurrencyService } from './currency.service';
@@ -159,7 +159,7 @@ export class PaymentService {
       );
     }
 
-    const amount = BigNumber.from(transaction.logs[0].data).toString();
+    const amount = BigNumber.from(transaction.logs[0].data);
     const tokenAddress = transaction.logs[0].address;
 
     const signer = this.web3Service.getSigner(dto.chainId);
@@ -249,9 +249,12 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-
+    
     paymentEntities.forEach((payment) => {
-      const amount = BigNumber.from(payment.amount).mul(payment.rate);
+      const fixedAmount = FixedNumber.from(ethers.utils.formatUnits(payment.amount, 18));
+      const rate = FixedNumber.from(payment.rate);
+
+      const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
 
       if (payment.type === PaymentType.WITHDRAWAL) {
         finalAmount = finalAmount.sub(amount);
@@ -259,7 +262,7 @@ export class PaymentService {
         finalAmount = finalAmount.add(amount);
       }
     });
-
+    
     return finalAmount;
   }
 }

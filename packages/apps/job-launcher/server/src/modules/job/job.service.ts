@@ -45,6 +45,7 @@ import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
 import { CurrencyService } from '../payment/currency.service';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class JobService {
@@ -149,7 +150,7 @@ export class JobService {
     }
 
     const rate = await this.currencyService.getRate(
-      TokenId.HMT,
+      CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
     );
 
@@ -243,7 +244,7 @@ export class JobService {
     }
 
     const rate = await this.currencyService.getRate(
-      TokenId.HMT,
+      CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
     );
 
