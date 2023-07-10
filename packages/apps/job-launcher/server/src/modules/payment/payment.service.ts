@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -26,6 +27,10 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
+import { NETWORKS } from '@human-protocol/sdk';
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { Web3Service } from '../web3/web3.service';
+import { CoingeckoTokenId } from 'src/common/constants/payment';
 
 @Injectable()
 export class PaymentService {
@@ -33,6 +38,7 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(
+    private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
     private configService: ConfigService,
@@ -116,11 +122,18 @@ export class PaymentService {
         throw new BadRequestException(ErrorPayment.NotSuccess);
       }
 
+      const rate = 1 / await this.currencyService.getRate(
+        Currency.USD,
+        paymentData.currency,
+      );
+
       await this.savePayment(
         userId,
         PaymentSource.FIAT,
+        paymentData.currency.toLowerCase(),
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
+        rate
       );
 
       return true;
@@ -133,83 +146,104 @@ export class PaymentService {
     userId: number,
     dto: PaymentCryptoCreateDto,
   ) {
-    try {
-      const provider = new providers.JsonRpcProvider(
-        Object.values(networkMap).find(
-          (item) => item.network.chainId === dto.chainId,
-        )?.rpcUrl,
-      );
+    const provider = new providers.JsonRpcProvider(
+      Object.values(networkMap).find(
+        (item) => item.network.chainId === dto.chainId,
+      )?.rpcUrl,
+    );
 
-      const transaction = await provider.getTransactionReceipt(
-        dto.transactionHash,
-      );
+    const transaction = await provider.getTransactionReceipt(
+      dto.transactionHash,
+    );
 
-      if (!transaction) {
-        this.logger.error(ErrorPayment.TransactionNotFoundByHash);
-        throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
-      }
-
-      if (!transaction.logs[0] || !transaction.logs[0].data) {
-        this.logger.error(ErrorPayment.InvalidTransactionData);
-        throw new NotFoundException(ErrorPayment.InvalidTransactionData);
-      }
-
-      if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
-        this.logger.error(
-          `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
-        );
-        throw new NotFoundException(
-          ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
-        );
-      }
-
-      const amount = BigInt(transaction.logs[0].data).toString();
-
-      const paymentEntity = await this.paymentRepository.findOne({
-        transactionHash: transaction.transactionHash,
-      });
-
-      if (paymentEntity) {
-        this.logger.log(
-          ErrorPayment.TransactionHashAlreadyExists,
-          PaymentRepository.name,
-        );
-        throw new BadRequestException(
-          ErrorPayment.TransactionHashAlreadyExists,
-        );
-      }
-
-      await this.savePayment(
-        userId,
-        PaymentSource.CRYPTO,
-        PaymentType.DEPOSIT,
-        BigNumber.from(amount),
-      );
-
-      return true;
-    } catch (e) {
-      throw new Error(e);
+    if (!transaction) {
+      this.logger.error(ErrorPayment.TransactionNotFoundByHash);
+      throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
     }
+
+    if (!transaction.logs[0] || !transaction.logs[0].data) {
+      this.logger.error(ErrorPayment.InvalidTransactionData);
+      throw new NotFoundException(ErrorPayment.InvalidTransactionData);
+    }
+
+    if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
+      this.logger.error(
+        `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
+      );
+      throw new NotFoundException(
+        ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
+      );
+    }
+
+    const amount = BigNumber.from(BigInt(transaction.logs[0].data).toString());
+    const tokenAddress = transaction.logs[0].address;
+
+    const signer = this.web3Service.getSigner(dto.chainId);
+    const tokenContract: HMToken = HMToken__factory.connect(
+      tokenAddress,
+      signer
+    );
+    const tokenId = await tokenContract.symbol();
+
+    if (!CoingeckoTokenId[tokenId]) {
+      this.logger.log(
+        ErrorPayment.UnsupportedToken,
+        PaymentRepository.name,
+      );
+      throw new ConflictException(
+        ErrorPayment.UnsupportedToken,
+      );
+    }
+
+    const paymentEntity = await this.paymentRepository.findOne({
+      transactionHash: transaction.transactionHash,
+    });
+
+    if (paymentEntity) {
+      this.logger.log(
+        ErrorPayment.TransactionHashAlreadyExists,
+        PaymentRepository.name,
+      );
+      throw new BadRequestException(
+        ErrorPayment.TransactionHashAlreadyExists,
+      );
+    }
+
+    const rate = await this.currencyService.getRate(
+      CoingeckoTokenId[tokenId],
+      Currency.USD,
+    );
+
+    await this.savePayment(
+      userId,
+      PaymentSource.FIAT,
+      TokenId.HMT,
+      PaymentType.DEPOSIT,
+      amount,
+      rate,
+      transaction.transactionHash
+    );
+
+    return true;
   }
 
   public async savePayment(
     userId: number,
     source: PaymentSource,
+    currency: string,
     type: PaymentType,
     amount: BigNumber,
+    rate: number,
+    transactionHash?: string
   ): Promise<boolean> {
-    const rate = await this.currencyService.getRate(
-      TokenId.HUMAN_PROTOCOL,
-      Currency.USD,
-    );
-
     const paymentEntity = await this.paymentRepository.create({
       userId,
       amount: amount.toString(),
-      currency: Currency.USD,
+      currency,
       source,
       rate,
       type,
+      transactionHash
     });
 
     if (!paymentEntity) {
@@ -232,10 +266,12 @@ export class PaymentService {
     let finalAmount = BigNumber.from(0);
 
     paymentEntities.forEach((payment) => {
+      const amount = BigNumber.from(payment.amount).mul(payment.rate);
+
       if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount = finalAmount.sub(payment.amount);
+        finalAmount = finalAmount.sub(amount);
       } else {
-        finalAmount = finalAmount.add(payment.amount);
+        finalAmount = finalAmount.add(amount);
       }
     });
 
