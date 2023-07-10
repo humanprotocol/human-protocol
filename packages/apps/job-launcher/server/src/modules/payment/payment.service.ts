@@ -27,10 +27,9 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
-import { NETWORKS } from '@human-protocol/sdk';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
-import { CoingeckoTokenId } from 'src/common/constants/payment';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class PaymentService {
@@ -216,7 +215,7 @@ export class PaymentService {
 
     await this.savePayment(
       userId,
-      PaymentSource.FIAT,
+      PaymentSource.CRYPTO,
       TokenId.HMT,
       PaymentType.DEPOSIT,
       amount,

@@ -28,7 +28,7 @@ describe('CurrencyService', () => {
 
   describe('getRate', () => {
     it('should get the rate for a given token ID and currency', async () => {
-      const tokenId = TokenId.HUMAN_PROTOCOL;
+      const tokenId = TokenId.HMT;
       const currency = Currency.USD;
       const rate = 1.5;
 
@@ -50,7 +50,7 @@ describe('CurrencyService', () => {
     });
 
     it('should throw NotFoundException if the rate is not found', async () => {
-      const tokenId = TokenId.HUMAN_PROTOCOL;
+      const tokenId = TokenId.HMT;
       const currency = Currency.USD;
 
       const response = {

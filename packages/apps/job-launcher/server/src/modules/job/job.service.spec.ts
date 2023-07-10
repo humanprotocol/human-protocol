@@ -11,7 +11,7 @@ import {
   ErrorJob,
 } from '../../common/constants/errors';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -43,7 +43,8 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -108,6 +109,7 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -158,8 +160,10 @@ describe('JobService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.BALANCE,
+        TokenId.HMT,
         PaymentType.WITHDRAWAL,
         BigNumber.from(totalAmount),
+        {}
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
