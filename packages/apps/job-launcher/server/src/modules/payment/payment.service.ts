@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -56,70 +56,58 @@ export class PaymentService {
   }
 
   public async createCustomer(email: string): Promise<string> {
-    try {
-      const customer = await this.stripe.customers.create({
-        email,
-      });
+    const customer = await this.stripe.customers.create({
+      email,
+    });
 
-      if (!customer) {
-        this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
-        throw new NotFoundException(ErrorPayment.CustomerNotCreated);
-      }
-
-      return customer.id;
-    } catch (e) {
+    if (!customer) {
       this.logger.log(ErrorPayment.CustomerNotCreated, PaymentService.name);
-      throw new BadRequestException(ErrorPayment.CustomerNotCreated);
+      throw new NotFoundException(ErrorPayment.CustomerNotCreated);
     }
+
+    return customer.id;
   }
 
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
   ) {
-    try {
-      const { amount, currency } = dto;
+    const { amount, currency } = dto;
 
-      const params: Stripe.PaymentIntentCreateParams = {
-        payment_method_types: [PaymentFiatMethodType.CARD],
-        amount: amount * 100,
-        currency: currency,
-      };
+    const params: Stripe.PaymentIntentCreateParams = {
+      payment_method_types: [PaymentFiatMethodType.CARD],
+      amount: amount * 100,
+      currency: currency,
+    };
 
-      params.confirm = true;
-      params.customer = customerId;
-      params.payment_method_options = {};
+    params.confirm = true;
+    params.customer = customerId;
+    params.payment_method_options = {};
 
-      const paymentIntent = await this.stripe.paymentIntents.create(params);
+    const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-      return {
-        clientSecret: paymentIntent.client_secret,
-      };
-    } catch (e) {
-      this.logger.log(ErrorPayment.IntentNotCreated, PaymentService.name);
-      throw new BadRequestException(ErrorPayment.IntentNotCreated);
-    }
+    return {
+      clientSecret: paymentIntent.client_secret,
+    };
   }
 
   public async confirmFiatPayment(
     userId: number,
     dto: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    try {
-      const paymentData = await this.getPayment(dto.paymentId);
+    const paymentData = await this.getPayment(dto.paymentId);
 
-      if (!paymentData) {
-        this.logger.log(ErrorPayment.NotFound, PaymentService.name);
-        throw new NotFoundException(ErrorPayment.NotFound);
-      }
+    if (!paymentData) {
+      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.NotFound);
+    }
 
-      if (
-        !paymentData ||
-        paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-      ) {
-        this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-        throw new BadRequestException(ErrorPayment.NotSuccess);
-      }
+    if (
+      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
+    ) {
+      this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.NotSuccess);
+    }
 
       const rate = 1 / await this.currencyService.getRate(
         Currency.USD,
@@ -135,10 +123,7 @@ export class PaymentService {
         rate
       );
 
-      return true;
-    } catch (e) {
-      throw new Error(e);
-    }
+    return true;
   }
 
   public async createCryptoPayment(
@@ -224,6 +209,13 @@ export class PaymentService {
     );
 
     return true;
+    return true;
+  }
+
+  public async getPayment(
+    paymentId: string,
+  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
+    return this.stripe.paymentIntents.retrieve(paymentId);
   }
 
   public async savePayment(
@@ -251,12 +243,6 @@ export class PaymentService {
     }
 
     return true;
-  }
-
-  public async getPayment(
-    paymentId: string,
-  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
-    return this.stripe.paymentIntents.retrieve(paymentId);
   }
 
   public async getUserBalance(userId: number): Promise<BigNumber> {
