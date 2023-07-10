@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import { useSelector } from 'react-redux';
 
 import { AppState, useAppDispatch } from '..';
@@ -7,18 +8,18 @@ import {
   fetchEscrowStatsAsync,
 } from './reducer';
 import { EscrowData } from './types';
-
-import { ChainId, SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
+import { SUPPORTED_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const usePollEventsData = () => {
   const dispatch = useAppDispatch();
+  const { range } = useSelector((state: AppState) => state.escrow);
 
   useSlowRefreshEffect(() => {
-    dispatch(fetchEscrowEventsAsync());
+    dispatch(fetchEscrowEventsAsync(range));
     dispatch(fetchEscrowStatsAsync());
     dispatch(fetchEscrowAmountsAsync());
-  }, [dispatch]);
+  }, [dispatch, range]);
 };
 
 export const useChainId = () => {
@@ -28,7 +29,7 @@ export const useChainId = () => {
 
 export const useEscrowDataByChainID = (): EscrowData => {
   const { escrow, token } = useSelector((state: AppState) => state);
-  const { amounts, stats, events, chainId } = escrow;
+  const { amounts, stats, events, chainId, range } = escrow;
 
   if (chainId === ChainId.ALL) {
     const escrowData: EscrowData = {
@@ -78,7 +79,7 @@ export const useEscrowDataByChainID = (): EscrowData => {
 
     escrowData.lastMonthEvents = escrowData.lastMonthEvents
       .sort((x, y) => Number(y.timestamp) - Number(x.timestamp))
-      .slice(0, 30)
+      .slice(0, range)
       .reverse();
 
     return escrowData;

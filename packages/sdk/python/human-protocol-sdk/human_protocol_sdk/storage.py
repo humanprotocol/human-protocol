@@ -115,12 +115,14 @@ class StorageClient:
                     secure=secure,
                 )  # authenticated access
             )
+            self.endpoint = endpoint_url
+            self.secure = secure
         except Exception as e:
             LOG.error(f"Connection with S3 failed because of: {e}")
             raise e
 
     @staticmethod
-    def download_file_from_url(url):
+    def download_file_from_url(url: str) -> bytes:
         """
         Downloads a file from the specified URL.
 
@@ -144,7 +146,7 @@ class StorageClient:
         except Exception as e:
             raise StorageClientError(str(e))
 
-    def download_files(self, files: List[str], bucket: str) -> List:
+    def download_files(self, files: List[str], bucket: str) -> List[bytes]:
         """
         Downloads a list of files from the specified S3-compatible bucket.
 
@@ -196,8 +198,11 @@ class StorageClient:
                 raise e
 
             data = artifact.encode("utf-8")
-            data_sha = hashlib.sha1(data).hexdigest()
-            key = f"s3{data_sha}.json"
+            hash = hashlib.sha1(data).hexdigest()
+            key = f"s3{hash}.json"
+            url = (
+                f"{'https' if self.secure else 'http'}://{self.endpoint}/{bucket}/{key}"
+            )
             file_exist = None
 
             try:
@@ -205,7 +210,6 @@ class StorageClient:
                 file_exist = self.client.stat_object(
                     bucket_name=bucket, object_name=key
                 )
-                result_files.append(key)
             except Exception as e:
                 if e.code == "NoSuchKey":
                     # file does not exist in bucket, so upload it
@@ -225,10 +229,11 @@ class StorageClient:
                         data=io.BytesIO(data),
                         length=len(data),
                     )
-                    result_files.append(key)
                     LOG.debug(f"Uploaded to S3, key: {key}")
                 except Exception as e:
                     raise StorageClientError(str(e))
+
+            result_files.append({"key": key, "url": url, "hash": hash})
 
         return result_files
 

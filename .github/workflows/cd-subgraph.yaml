@@ -63,9 +63,6 @@ jobs:
           if [[ ${{ needs.contracts-check.outputs.contracts_updated}} == 'true' && "${{ github.event.inputs.subgraph-name }}" != "${{ matrix.network.graph }}" ]]; then
             echo "stop=true" >> $GITHUB_OUTPUT
           fi
-      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
-        with:
-          node-version: 18.15
       - run: yarn --ignore-scripts
         if: ${{steps.continue_check.outputs.stop != 'true'}}
         name: Install dependencies

@@ -1,3 +1,6 @@
+setup:
+	pipenv install --dev
+
 clean-package:
 	rm -rf build artifacts dist *.egg-info .eggs
 

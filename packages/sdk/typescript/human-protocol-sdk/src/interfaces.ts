@@ -1,11 +1,5 @@
-import { BigNumber, Signer } from 'ethers';
-import { Provider } from '@ethersproject/abstract-provider';
-import { NetworkData } from './types';
-
-export interface IClientParams {
-  signerOrProvider: Signer | Provider;
-  network: NetworkData;
-}
+import { BigNumber } from 'ethers';
+import { EscrowStatus } from './types';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -29,9 +23,9 @@ export interface IStaker {
 }
 
 export interface IEscrowsFilter {
-  address: string;
+  address?: string;
   role?: number;
-  status?: number;
+  status?: EscrowStatus;
   from?: Date;
   to?: Date;
 }
@@ -42,9 +36,12 @@ export interface IEscrowConfig {
   recordingOracleFee: BigNumber;
   reputationOracleFee: BigNumber;
   manifestUrl: string;
-  hash: string;
+  manifestHash: string;
 }
 
-export interface ILauncherEscrowsResult {
-  id: string;
+export interface IKeyPair {
+  privateKey: string;
+  publicKey: string;
+  passphrase: string;
+  revocationCertificate?: string;
 }

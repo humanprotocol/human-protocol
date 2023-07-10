@@ -24,7 +24,8 @@ class EscrowTestCase(unittest.TestCase):
         # Set default gas payer
         self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
         self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer)
+            construct_sign_and_send_raw_middleware(self.gas_payer),
+            "construct_sign_and_send_raw_middleware",
         )
         self.w3.eth.default_account = self.gas_payer.address
 
@@ -1517,6 +1518,57 @@ class EscrowTestCase(unittest.TestCase):
         self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.get_results_url("0x1234567890123456789012345678901234567890")
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
+    def test_get_intermediate_results_url(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.intermediateResultsUrl = MagicMock()
+        mock_contract.functions.intermediateResultsUrl.return_value.call.return_value = (
+            "mock_value"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_intermediate_results_url(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.intermediateResultsUrl.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
+    def test_get_intermediate_results_url_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_intermediate_results_url("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_intermediate_results_url_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+        mock_contract = MagicMock()
+        mock_contract.functions.intermediateResultsUrl = MagicMock()
+        mock_contract.functions.intermediateResultsUrl.return_value.call.return_value = (
+            "mock_value"
+        )
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = escrowClient.get_intermediate_results_url(escrow_address)
+
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.intermediateResultsUrl.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
+    def test_get_intermediate_results_url_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_intermediate_results_url(
+                "0x1234567890123456789012345678901234567890"
+            )
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )

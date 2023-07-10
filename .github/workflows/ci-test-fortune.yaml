@@ -3,8 +3,13 @@ name: Fortune check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/typescript/human-protocol-sdk/**'
+      - 'packages/examples/fortune/**'
   workflow_dispatch:
 
 jobs:
@@ -13,9 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
-        with:
-          node-version: 18.15
       - run: npm install --global yarn && yarn
         name: Install dependencies
       - run: yarn build

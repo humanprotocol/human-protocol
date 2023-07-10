@@ -61,7 +61,7 @@ To use the deployed (hosted) example all you need is a metmask wallet with the F
 
 To configure Metamask for the deployed playground example:
 
-1. Go to [job launcher ](https://job-launcher-client.vercel.app/) and check the available networks in the network dropdown. Choose one of the networks and then go to https://chainlist.org/?testnets=true and search for it and click on "Add to metamask" (we suggest to use Mumbai). You can skip this step if you already have the network configured on your metamask wallet.
+1. Go to [job launcher ](https://job-launcher.humanprotocol.org/) and check the available networks in the network dropdown. Choose one of the networks and then go to https://chainlist.org/?testnets=true and search for it and click on "Add to metamask" (we suggest to use Mumbai). You can skip this step if you already have the network configured on your metamask wallet.
 
 2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2).
 
@@ -71,7 +71,7 @@ To configure Metamask for the deployed playground example:
 
 In Metamask, using your Job Requester account:
 1. You need to have HMT tokens in the network you want to create the job. ([Faucet](https://dashboard.humanprotocol.org/))
-2. Navigate to [Job Launcher](https://job-launcher-client.vercel.app/) to access the Job Launcher.
+2. Navigate to [Job Launcher](https://job-launcher.humanprotocol.org/) to access the Job Launcher.
 3. Click on Crypto and connect your metamask wallet. Ensure that you are connected to desired network in Metamask.
 4. Fill the job request form and click on "Fund and Request Job" (in fortunes requested choose 2).
 5. Wait until the job is created and you should see your escrow address.
@@ -81,7 +81,7 @@ The job creation is now complete!
 ### Creating a Job using Fiat for deployed Playground
 
 In Metamask, using your Job Requester account:
-1. Navigate to [Job Launcher](https://job-launcher-client.vercel.app/) to access the Job Launcher.
+1. Navigate to [Job Launcher](https://job-launcher.humanprotocol.org/) to access the Job Launcher.
 3. Click on Fiat.
 4. Fill the job request form and click on "Fund and Request Job" (in fortunes requested choose 2). Use `4242424242424242` as the card number, any number as CVC and a future date as expiration date.
 5. Wait until the job is created and you should see your escrow address.
@@ -90,17 +90,17 @@ The job creation is now complete!
 
 ### Viewing Jobs
 
-The job has now been created and is available for exchanges to pick up. To view the job status navigate to the [Exchange Oracle](https://exchange-oracle.vercel.app/) and paste the Escrow contract address. The status should be 'Pending'. Jobs in a pending status are picked up by the exchange and forwarded to workers.
+The job has now been created and is available for exchanges to pick up. To view the job status navigate to the [Exchange Oracle](https://exchange.humanprotocol.org/) and paste the Escrow contract address. The status should be 'Pending'. Jobs in a pending status are picked up by the exchange and forwarded to workers.
 
 ### Fulfilling a job
 
 To fulfil this job we require answers (fortunes in our case) from 2 workers.
 
-1. In your Metamask wallet switch to the Worker 1 account that you created above. Navigate to the [Exchange Oracle](https://exchange-oracle.vercel.app/) and enter a fortune prediction (any text).
+1. In your Metamask wallet switch to the Worker 1 account that you created above. Navigate to the [Exchange Oracle](https://exchange.humanprotocol.org/) and enter a fortune prediction (any text).
 
 2. Now switch to Worker 2 and enter a fortune prediction (it should be different from Worker 1).
 
-We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to the [Exchange Oracle](https://exchange-oracle.vercel.app/)
+We have now provided 2 predictions from 2 Workers. Lets check the status of the job again by navigating to the [Exchange Oracle](https://exchange.humanprotocol.org/)
 
 You should see account balance for Worker 1 and 2 has increased by the relevant amount.
 

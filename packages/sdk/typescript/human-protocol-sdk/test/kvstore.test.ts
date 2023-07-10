@@ -1,41 +1,47 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, test, expect, vi, beforeEach, beforeAll } from 'vitest';
-import { Signer, ethers } from 'ethers';
-import KVStoreClient from '../src/kvstore';
+import { ethers } from 'ethers';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { NETWORKS } from '../src/constants';
+import { ChainId } from '../src/enums';
 import {
   ErrorInvalidAddress,
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
+  ErrorProviderDoesNotExist,
   ErrorSigner,
+  ErrorUnsupportedChainID,
 } from '../src/error';
-import InitClient from '../src/init';
-import { ChainId } from '../src/enums';
-import { NETWORKS } from '../src/constants';
+import { KVStoreClient } from '../src/kvstore';
 import { NetworkData } from '../src/types';
+import { DEFAULT_GAS_PAYER_PRIVKEY } from './utils/constants';
 
 vi.mock('../src/init');
 
 describe('KVStoreClient', () => {
-  let provider: ethers.providers.JsonRpcProvider;
-  let signer: Signer;
-  let network: NetworkData | undefined;
-  let kvStoreClient: any;
-  let mockKVStoreContract: any;
-  let mockGetClientParams: any;
+  let mockProvider: any,
+    mockSigner: any,
+    network: NetworkData | undefined,
+    kvStoreClient: any,
+    mockKVStoreContract: any;
 
   beforeAll(async () => {
-    provider = new ethers.providers.JsonRpcProvider();
-    signer = provider.getSigner();
+    const provider = new ethers.providers.JsonRpcProvider();
+    mockProvider = {
+      ...provider,
+      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+    };
+    mockSigner = {
+      ...provider.getSigner(),
+      provider: {
+        ...mockProvider,
+      },
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
     network = NETWORKS[ChainId.LOCALHOST];
-    mockGetClientParams = InitClient.getParams as jest.Mock;
   });
 
   beforeEach(async () => {
-    mockGetClientParams.mockResolvedValue({
-      signerOrProvider: signer,
-      network,
-    });
-    kvStoreClient = new KVStoreClient(await InitClient.getParams(signer));
+    kvStoreClient = await KVStoreClient.build(mockSigner);
     mockKVStoreContract = {
       ...kvStoreClient.contract,
       set: vi.fn(),
@@ -44,6 +50,42 @@ describe('KVStoreClient', () => {
       address: network?.kvstoreAddress,
     };
     kvStoreClient.contract = mockKVStoreContract;
+  });
+
+  describe('build', () => {
+    test('should create a new instance of KVStoreClient with a Signer', async () => {
+      const kvStoreClient = await KVStoreClient.build(mockSigner);
+
+      expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
+    });
+
+    test('should create a new instance of KVStoreClient with a Provider', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      const kvStoreClient = await KVStoreClient.build(provider);
+
+      expect(kvStoreClient).toBeInstanceOf(KVStoreClient);
+    });
+
+    test('should throw an error if Signer provider does not exist', async () => {
+      const signer = new ethers.Wallet(DEFAULT_GAS_PAYER_PRIVKEY);
+
+      await expect(KVStoreClient.build(signer)).rejects.toThrow(
+        ErrorProviderDoesNotExist
+      );
+    });
+
+    test('should throw an error if the chain ID is unsupported', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      vi.spyOn(provider, 'getNetwork').mockResolvedValue({
+        chainId: 1337,
+      } as any);
+
+      await expect(KVStoreClient.build(provider)).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
   });
 
   describe('set', () => {
@@ -62,11 +104,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error when attempting to set a value without signer', async () => {
-      mockGetClientParams.mockResolvedValue({
-        signerOrProvider: provider,
-        network,
-      });
-      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
+      kvStoreClient = await KVStoreClient.build(mockProvider);
 
       await expect(kvStoreClient.set('key1', 'value1')).rejects.toThrow(
         ErrorSigner
@@ -118,11 +156,7 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error when attempting to set values without signer', async () => {
-      mockGetClientParams.mockResolvedValue({
-        provider,
-        network,
-      });
-      kvStoreClient = new KVStoreClient(await InitClient.getParams(provider));
+      kvStoreClient = await KVStoreClient.build(mockProvider);
 
       await expect(
         kvStoreClient.setBulk(['key1', 'key2'], ['value1', 'value2'])

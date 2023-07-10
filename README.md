@@ -3,11 +3,12 @@
 
 | | | | |
 | --- | --- | --- | --- |
-| [![Lint Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml) | [![Protocol Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml) | [![Python SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml) | [![Python Base Models Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-basemodels.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-basemodels.yaml) |
-| [![Node.js SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml) | [![Node.js Base Models Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-basemodels.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-basemodels.yaml) | [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) |
-| [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml) |  |  |  |
-| [![Core NPM Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml) | [![Python SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml) | [![Python Base Models Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-basemodels.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-basemodels.yaml) | [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml) |
-| [![Node.js Base Models Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-basemodels.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-basemodels.yaml) | [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) |  |  |
+| [![Lint Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml) | [![Protocol Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml) | [![Python SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml) | [![Node.js SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml) |
+| [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) | [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml) | [![Faucet Server Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml) |
+| [![Meta Code Verify Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml) |  |  |  |
+| [![Core NPM Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml) | [![Python SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml) | [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml) | [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) |
+| [![Contract Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml/badge.svg?event=workflow_dispatch)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml) |  |  |  |
+
 
 ## All work on-chain
 
@@ -42,32 +43,32 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 ├── packages
 │   ├── apps
 │   │   ├── escrow-dashboard                 # A UI that queries The Graph for escrow data
+│   │   ├── faucet-server                    # Faucet server
+│   │   ├── fortune                          # Fortune application
+│   │   ├── job-launcher                     # Job launcher server, and UI
+│   │   ├── meta-code-verify                 # Browser extensions to verify code
+│   │   │                                      running in the browser against a
+│   │   │                                      published manifest
 │   ├── core                                 # EVM compatible smart contracts for HUMAN
 │   ├── examples
 │   │   ├── cvat                             # An open source annotation tool for labeling video and images
 │   │   ├── fortune                          # An example application that combines all the core
 │   │   │                                      components of HUMAN
-│   │   ├── launcher                         # A reference implementation of a Job Launcher
-│   │   ├── oracles                          # Reference implementations for Recording and Reputation oracles
 │   ├── sdk
-│   │   ├── json-schema                      # JSON schema for basemodels,
-│   │   │                                      which is auto-generated from pydantic models
 │   │   ├── python
-│   │   │   ├── human-protocol-basemodels    # Python library for basemodels
 │   │   │   ├── human-protocol-sdk           # Python SDK to interact with Human Protocol
 │   │   ├── typescript
-│   │   │   ├── human-protocol-basemodels    # Node.js library for basemodels
 │   │   │   ├── human-protocol-sdk           # Node.js SDK to interact with Human Protocol
 │   │   │   ├── subgraph                     # Human Protocol Subgraph
 ```
 
 ### How To Use This Repo
 
-If you would like to join the HUMAN network as an operator please see the [examples](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples) folder.  Users may participate as any of the following roles:
+If you would like to join the HUMAN network as an operator please see the [apps](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps) folder.  Users may participate as any of the following roles:
 
-* [Job Launcher Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples/launcher)
-* [Recording Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/examples/oracles/recording)
-* Exchange Oracle Operator
+* [Job Launcher Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/job-launcher)
+* [Exchange Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/fortune/exchange-oracle)
+* [Recording Oracle Operator](https://github.com/humanprotocol/human-protocol/tree/main/packages/apps/fortune/recording-oracle)
 
 #### Building New Applications for HUMAN
 
@@ -76,3 +77,8 @@ If you are a developer and would like to build on top of HUMAN please see [examp
 #### Usage and Installation
 
 Navigate to the folder that you would like to install and follow the instructions in the README file
+
+## LEGAL NOTICE
+
+The Protocol is an open-source, blockchain-based network that organizes, evaluates, and compensates human labor (the “Protocol”).  Your use of the Protocol is entirely at your own risk. The Protocol is available on an “as is” basis without warranties of any kind, either express or implied, including, but not limited to, warranties of merchantability, title, fitness for a particular purpose and non-infringement. You assume all risks associated with using the Protocol, and digital assets   and   decentralized   systems   generally,   including   but   not
+limited to, that: (a) digital assets are highly volatile; (b) using digital assets is inherently risky due to both features of such assets and the potential unauthorized acts of third parties; (c) you may not have ready access to digital assets; and (d) you may lose some or all of your tokens or other digital assets. You agree that you will have no recourse against anyone else for any losses due to the use of the Protocol. For example, these losses may arise from or relate to: (i) incorrect   information;   (ii)   software   or   network   failures;  (iii) corrupted digital wallet files; (iv) unauthorized access; (v) errors, mistakes, or inaccuracies; or (vi) third-party activities. The Protocol does not collect any personal data, and your interaction with the Protocol will solely be through your public digital wallet address. Any personal or other data that you may make available in connection with the Protocol may not be private or secure.

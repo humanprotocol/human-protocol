@@ -1,4 +1,5 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { createAsyncThunk, createReducer, isAnyOf } from '@reduxjs/toolkit';
 import {
   UnknownAsyncThunkFulfilledAction,
@@ -8,15 +9,12 @@ import {
 import BigNumberJS from 'bignumber.js';
 import { Contract, ethers, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
-
 import { AppState } from '..';
 import { TokenStats } from './types';
-
 import {
-  ChainId,
   SUPPORTED_CHAIN_IDS,
-  ESCROW_NETWORKS,
   HM_TOKEN_DECIMALS,
+  RPC_URLS,
 } from 'src/constants';
 import { RAW_TOKEN_STATS_QUERY } from 'src/queries';
 import { gqlFetch } from 'src/utils/gqlFetch';
@@ -54,7 +52,7 @@ export const fetchTokenStatsAsync = createAsyncThunk<
         return;
       }
       const stats = await gqlFetch(
-        ESCROW_NETWORKS[chainId]?.subgraphUrl!,
+        NETWORKS[chainId]?.subgraphUrl!,
         RAW_TOKEN_STATS_QUERY
       )
         .then((res) => res.json())
@@ -72,10 +70,17 @@ export const fetchTokenStatsAsync = createAsyncThunk<
             holders: Number(holders),
             totalSupply: '0',
           };
-        });
+        })
+        .catch((err) => ({
+          totalApprovalEventCount: 0,
+          totalTransferEventCount: 0,
+          totalValueTransfered: 0,
+          holders: 0,
+          totalSupply: '0',
+        }));
 
-      const rpcUrl = ESCROW_NETWORKS[chainId]?.rpcUrl!;
-      const hmtAddress = ESCROW_NETWORKS[chainId]?.hmtAddress!;
+      const rpcUrl = RPC_URLS[chainId]!;
+      const hmtAddress = NETWORKS[chainId]?.hmtAddress!;
       const provider = new providers.JsonRpcProvider(rpcUrl);
       const contract = new Contract(hmtAddress, HMTokenABI, provider);
       const totalSupplyBN = await contract.totalSupply();

@@ -1,20 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Provider } from '@ethersproject/abstract-provider';
+import { Network } from '@ethersproject/networks';
 import {
-  HMToken__factory,
-  HMToken,
   Escrow,
   EscrowFactory,
   EscrowFactory__factory,
   Escrow__factory,
+  HMToken,
+  HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
-import { Provider } from '@ethersproject/abstract-provider';
+import { DEFAULT_TX_ID, NETWORKS } from './constants';
+import { requiresSigner } from './decorators';
+import { ChainId } from './enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
   ErrorAmountsCannotBeEmptyArray,
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
   ErrorHashIsEmptyString,
+  ErrorProviderDoesNotExist,
+  ErrorUnsupportedChainID,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
   ErrorInvalidRecordingOracleAddressProvided,
@@ -29,40 +35,63 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
 } from './error';
-import {
-  IClientParams,
-  IEscrowConfig,
-  IEscrowsFilter,
-  ILauncherEscrowsResult,
-} from './interfaces';
-import { gqlFetch, isValidUrl, throwError } from './utils';
-import { DEFAULT_TX_ID } from './constants';
+import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import {
   RAW_LAUNCHED_ESCROWS_FILTERED_QUERY,
   RAW_LAUNCHED_ESCROWS_QUERY,
 } from './queries';
 import { EscrowStatus, NetworkData } from './types';
-import { requiresSigner } from './decorators';
+import { gqlFetch, isValidUrl, throwError } from './utils';
 
-export default class EscrowClient {
+export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
   private escrowContract?: Escrow;
   private signerOrProvider: Signer | Provider;
   public network: NetworkData;
 
   /**
-   * **Escrow constructor**
+   * **EscrowClient constructor**
    *
-   *   * @param {IClientParams} clientParams - Init client parameters
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {NetworkData} network - The network information required to connect to the Escrow contract
    */
-  constructor(readonly clientParams: IClientParams) {
-    this.network = clientParams.network;
-
+  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      clientParams.network.factoryAddress,
-      clientParams.signerOrProvider
+      network.factoryAddress,
+      signerOrProvider
     );
-    this.signerOrProvider = clientParams.signerOrProvider;
+    this.network = network;
+    this.signerOrProvider = signerOrProvider;
+  }
+
+  /**
+   * Creates an instance of EscrowClient from a Signer or Provider.
+   *
+   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @returns {Promise<EscrowClient>} - An instance of EscrowClient
+   * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
+   * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
+   */
+  public static async build(signerOrProvider: Signer | Provider) {
+    let network: Network;
+    if (Signer.isSigner(signerOrProvider)) {
+      if (!signerOrProvider.provider) {
+        throw ErrorProviderDoesNotExist;
+      }
+
+      network = await signerOrProvider.provider.getNetwork();
+    } else {
+      network = await signerOrProvider.getNetwork();
+    }
+
+    const chainId: ChainId = network.chainId;
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    return new EscrowClient(signerOrProvider, networkData);
   }
 
   /**
@@ -129,7 +158,7 @@ export default class EscrowClient {
       recordingOracleFee,
       reputationOracleFee,
       manifestUrl,
-      hash,
+      manifestHash,
     } = escrowConfig;
 
     if (!ethers.utils.isAddress(recordingOracle)) {
@@ -160,7 +189,7 @@ export default class EscrowClient {
       throw ErrorInvalidUrl;
     }
 
-    if (!hash) {
+    if (!manifestHash) {
       throw ErrorHashIsEmptyString;
     }
 
@@ -174,16 +203,16 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       await this.escrowContract.setup(
-        recordingOracle,
         reputationOracle,
-        recordingOracleFee,
+        recordingOracle,
         reputationOracleFee,
+        recordingOracleFee,
         manifestUrl,
-        hash
+        manifestHash
       );
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -213,7 +242,7 @@ export default class EscrowClient {
       await this.setup(escrowAddress, escrowConfig);
 
       return escrowAddress;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -256,7 +285,7 @@ export default class EscrowClient {
       await tokenContract.transfer(escrowAddress, amount);
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -305,7 +334,7 @@ export default class EscrowClient {
       await this.escrowContract.storeResults(url, hash);
 
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -334,7 +363,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.complete();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -421,7 +450,7 @@ export default class EscrowClient {
         DEFAULT_TX_ID
       );
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -450,7 +479,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.cancel();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -479,7 +508,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.abort();
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -522,7 +551,7 @@ export default class EscrowClient {
       );
       await this.escrowContract.addTrustedHandlers(trustedHandlers);
       return;
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -549,7 +578,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.getBalance();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -576,7 +605,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.manifestUrl();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -603,6 +632,33 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.finalResultsUrl();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the intermediate results file URL.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.intermediateResultsUrl();
     } catch (e: any) {
       return throwError(e);
     }
@@ -630,7 +686,7 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.token();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
@@ -657,21 +713,19 @@ export default class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.status();
-    } catch (e: any) {
+    } catch (e) {
       return throwError(e);
     }
   }
 
   /**
-   * Returns the current status of the escrow.
+   * Returns the escrow addresses created by a job requester.
    *
    * @param {IEscrowsFilter} requesterAddress - Address of the requester.
-   * @returns {Promise<void>}
+   * @returns {Promise<string[]>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getLaunchedEscrows(
-    requesterAddress: string
-  ): Promise<ILauncherEscrowsResult[]> {
+  async getLaunchedEscrows(requesterAddress: string): Promise<string[]> {
     if (!ethers.utils.isAddress(requesterAddress)) {
       throw ErrorInvalidAddress;
     }
@@ -679,51 +733,39 @@ export default class EscrowClient {
     try {
       const { data } = await gqlFetch(
         this.network.subgraphUrl,
-        RAW_LAUNCHED_ESCROWS_QUERY(),
-        {
-          address: requesterAddress,
-        }
+        RAW_LAUNCHED_ESCROWS_QUERY(requesterAddress)
       );
 
-      return data;
+      return data.data.launchedEscrows.map((escrow: any) => escrow.id);
     } catch (e: any) {
       return throwError(e);
     }
   }
 
   /**
-   * Returns the escrows addresses created by a job requester.
+   * Returns the escrow addresses based on a specified filter.
    *
-   * @param {string} escrowAddress - Address of the escrow.
-   * @param {IEscrowsFilter} filer - Filter parameters.
-   * @returns {Promise<void>}
+   * @param {IEscrowsFilter} filter - Filter parameters.
+   * @returns {Promise<string[]>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getEscrowsFiltered(
-    escrowAddress: string,
-    filter: IEscrowsFilter
-  ): Promise<ILauncherEscrowsResult[]> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+  async getEscrowsFiltered(filter: IEscrowsFilter): Promise<string[]> {
+    if (filter?.address && !ethers.utils.isAddress(filter?.address)) {
       throw ErrorInvalidAddress;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
     }
 
     try {
       const { data } = await gqlFetch(
         this.network.subgraphUrl,
-        RAW_LAUNCHED_ESCROWS_FILTERED_QUERY(),
-        {
-          address: filter.address,
-          status: filter.status,
-          from: filter.from,
-          tro: filter.to,
-        }
+        RAW_LAUNCHED_ESCROWS_FILTERED_QUERY(
+          filter.address,
+          filter.status,
+          filter.from,
+          filter.to
+        )
       );
 
-      return data;
+      return data.data.launchedEscrows.map((escrow: any) => escrow.id);
     } catch (e: any) {
       return throwError(e);
     }

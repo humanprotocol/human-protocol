@@ -18,15 +18,16 @@
     "faucet-server:lint": "yarn workspace @human-protocol/faucet-server lint",
     "fortune:test": "yarn workspace @human-protocol/fortune test",
     "fortune:lint": "yarn workspace @human-protocol/fortune lint",
+    "fortune-v3:test": "yarn workspace @human-protocol/fortune-v3 test",
+    "fortune-v3:lint": "yarn workspace @human-protocol/fortune-v3 lint",
     "sdk:test": "yarn workspace @human-protocol/sdk test",
     "sdk:lint": "yarn workspace @human-protocol/sdk lint",
-    "basemodels:test": "yarn workspace @human-protocol/basemodels test",
-    "basemodels:lint": "yarn workspace @human-protocol/basemodels lint",
     "meta-code-verify:test": "yarn workspace @human-protocol/meta-code-verify test",
     "meta-code-verify:lint": "yarn workspace @human-protocol/meta-code-verify lint",
-    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:sdk:test npm:basemodels:test npm:faucet-server:test npm:meta-code-verify:test",
-    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:sdk:lint npm:basemodels:lint npm:faucet-server:lint npm:meta-code-verify:lint",
-    "prepare": "husky install"
+    "test": "concurrently npm:core:test npm:subgraph:test npm:escrow-dashboard:test npm:fortune:test npm:fortune-v3:test npm:sdk:test npm:faucet-server:test npm:meta-code-verify:test",
+    "lint": "concurrently npm:core:lint npm:subgraph:lint npm:escrow-dashboard:lint npm:fortune:lint npm:fortune-v3:lint npm:sdk:lint npm:faucet-server:lint npm:meta-code-verify:lint",
+    "prepare": "husky install",
+    "postinstall": "yarn workspace @human-protocol/sdk build"
   },
   "workspaces": {
     "packages": [
@@ -66,6 +67,10 @@
     "mocha": "^10.0.0",
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
-    "qrcode": "^1.5.0"
+    "qrcode": "^1.5.0",
+    "fast-xml-parser": "4.2.2"
+  },
+  "dependencies": {
+    "ejs": "^3.1.8"
   }
 }

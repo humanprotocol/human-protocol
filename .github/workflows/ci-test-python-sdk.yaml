@@ -3,8 +3,12 @@ name: Python SDK check
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
+    paths:
+      - 'packages/core/**'
+      - '!packages/core/mx/**'
+      - 'packages/sdk/python/human-protocol-sdk/**'
   workflow_dispatch:
 
 jobs:
@@ -13,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3 #Temporal until this gets fixed https://github.com/NomicFoundation/hardhat/issues/3877
-        with:
-          node-version: 18.15
       - name: Install Node
         run: yarn --ignore-scripts
       - run: yarn build
@@ -24,7 +25,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:
-          python-version: "3.10"
+          python-version: '3.10'
       - name: Install pipenv
         run: pip install pipenv
       - name: Python test

@@ -1,4 +1,5 @@
 import EscrowFactoryABI from '@human-protocol/core/abis/EscrowFactory.json';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import {
   createAction,
   createAsyncThunk,
@@ -12,11 +13,9 @@ import {
 } from '@reduxjs/toolkit/dist/matchers';
 import { Contract, providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
-
 import { AppState } from '..';
 import { EscrowEventDayData, EscrowStats } from './types';
-
-import { ChainId, SUPPORTED_CHAIN_IDS, ESCROW_NETWORKS } from 'src/constants';
+import { RPC_URLS, SUPPORTED_CHAIN_IDS } from 'src/constants';
 import rinkebyEscrowAmount from 'src/history-data/rinkeby_EscrowAmount.json';
 import rinkebyEscrowEvents from 'src/history-data/rinkeby_EscrowEvents.json';
 import rinkebyEscrowStats from 'src/history-data/rinkeby_EscrowStats.json';
@@ -38,6 +37,7 @@ type EscrowState = {
   statsLoaded: boolean;
   amounts: EscrowAmountsType;
   amountsLoaded: boolean;
+  range: number;
 };
 
 const initialState: EscrowState = {
@@ -49,13 +49,14 @@ const initialState: EscrowState = {
   statsLoaded: false,
   amounts: {},
   amountsLoaded: false,
+  range: 30,
 };
 
 export const fetchEscrowEventsAsync = createAsyncThunk<
   EscrowEventsType,
-  void,
+  number,
   { state: AppState }
->('escrow/fetchEscrowEventsAsync', async () => {
+>('escrow/fetchEscrowEventsAsync', async (days: number) => {
   let escrowEvents: EscrowEventsType = {};
   await Promise.all(
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
@@ -63,17 +64,14 @@ export const fetchEscrowEventsAsync = createAsyncThunk<
         escrowEvents[chainId] = rinkebyEscrowEvents as any;
       } else {
         let eventDayDatas = await getEventDayData(
-          ESCROW_NETWORKS[chainId]?.subgraphUrl!,
-          30
+          NETWORKS[chainId]?.subgraphUrl!,
+          days
         );
 
-        if (
-          ESCROW_NETWORKS[chainId]?.oldSubgraphUrl &&
-          eventDayDatas.length < 30
-        ) {
+        if (NETWORKS[chainId]?.oldSubgraphUrl && eventDayDatas.length < days) {
           const oldData = await getEventDayData(
-            ESCROW_NETWORKS[chainId]?.oldSubgraphUrl!,
-            30 - eventDayDatas.length
+            NETWORKS[chainId]?.oldSubgraphUrl!,
+            days - eventDayDatas.length
           );
           eventDayDatas = eventDayDatas.concat(oldData);
         }
@@ -105,7 +103,8 @@ const getEventDayData = async (subgraphUrl: string, count: number) => {
           Number(d.dailyPendingEvents),
         dailyEscrowAmounts: Number(d.dailyEscrowAmounts),
       }))
-    );
+    )
+    .catch((err) => []);
 };
 
 export const fetchEscrowStatsAsync = createAsyncThunk<
@@ -119,12 +118,10 @@ export const fetchEscrowStatsAsync = createAsyncThunk<
       if (chainId === ChainId.RINKEBY) {
         escrowStats[chainId] = rinkebyEscrowStats;
       } else {
-        const stats = await getEscrowStats(
-          ESCROW_NETWORKS[chainId]?.subgraphUrl!
-        );
-        if (ESCROW_NETWORKS[chainId]?.oldSubgraphUrl) {
+        const stats = await getEscrowStats(NETWORKS[chainId]?.subgraphUrl!);
+        if (NETWORKS[chainId]?.oldSubgraphUrl) {
           const oldStats = await getEscrowStats(
-            ESCROW_NETWORKS[chainId]?.oldSubgraphUrl!
+            NETWORKS[chainId]?.oldSubgraphUrl!
           );
           stats.bulkTransferEventCount += oldStats.bulkTransferEventCount;
           stats.intermediateStorageEventCount +=
@@ -167,7 +164,13 @@ const getEscrowStats = async (subgraphUrl: string) => {
           Number(pendingEventCount) +
           Number(bulkTransferEventCount),
       };
-    });
+    })
+    .catch((err) => ({
+      intermediateStorageEventCount: 0,
+      pendingEventCount: 0,
+      bulkTransferEventCount: 0,
+      totalEventCount: 0,
+    }));
 };
 
 export const fetchEscrowAmountsAsync = createAsyncThunk<
@@ -180,15 +183,14 @@ export const fetchEscrowAmountsAsync = createAsyncThunk<
     SUPPORTED_CHAIN_IDS.map(async (chainId) => {
       if (chainId === ChainId.RINKEBY) {
         escrowAmounts[chainId] = rinkebyEscrowAmount;
-      } else {
-        const rpcUrl = ESCROW_NETWORKS[chainId]?.rpcUrl!;
-        const factoryAddress = ESCROW_NETWORKS[chainId]?.factoryAddress!;
-        const provider = new providers.JsonRpcProvider(rpcUrl);
+      } else if (RPC_URLS[chainId]) {
+        const factoryAddress = NETWORKS[chainId]?.factoryAddress!;
+        const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]);
         let contract = new Contract(factoryAddress, EscrowFactoryABI, provider);
         let escrowAmount = Number(await contract.counter());
-        if (ESCROW_NETWORKS[chainId]?.oldFactoryAddress) {
+        if (NETWORKS[chainId]?.oldFactoryAddress) {
           contract = new Contract(
-            ESCROW_NETWORKS[chainId]?.oldFactoryAddress!,
+            NETWORKS[chainId]?.oldFactoryAddress!,
             EscrowFactoryABI,
             provider
           );
@@ -203,6 +205,8 @@ export const fetchEscrowAmountsAsync = createAsyncThunk<
 });
 
 export const setChainId = createAction<ChainId>('escrow/setChainId');
+
+export const setRange = createAction<number>('escrow/setRange');
 
 type UnknownAsyncThunkFulfilledOrPendingAction =
   | UnknownAsyncThunkFulfilledAction
@@ -223,6 +227,9 @@ const serializeLoadingKey = (
 export default createReducer(initialState, (builder) => {
   builder.addCase(setChainId, (state, action) => {
     state.chainId = action.payload;
+  });
+  builder.addCase(setRange, (state, action) => {
+    state.range = action.payload;
   });
   builder.addCase(fetchEscrowEventsAsync.fulfilled, (state, action) => {
     state.events = action.payload;

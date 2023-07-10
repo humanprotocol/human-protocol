@@ -11,10 +11,10 @@ setuptools-pipfile = "*"
 
 [packages]
 cryptography = "*"
-hmt-basemodels = "==0.1.18"
 minio = "*"
 validators = "*"
 web3 = "==5.24.0"
+pgpy = "*"
 
 [requires]
 python_version = "3.10"

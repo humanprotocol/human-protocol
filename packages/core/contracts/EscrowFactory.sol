@@ -62,10 +62,6 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         return lastEscrow;
     }
 
-    function isChild(address _child) public view returns (bool) {
-        return escrowCounters[_child] == counter;
-    }
-
     function hasEscrow(address _address) public view returns (bool) {
         return escrowCounters[_address] != 0;
     }
