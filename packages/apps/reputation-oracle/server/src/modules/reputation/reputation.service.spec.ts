@@ -6,13 +6,26 @@ import { ReputationEntity } from './reputation.entity';
 import { MOCK_ADDRESS } from '../../../test/constants';
 import { WebhookRepository } from '../webhook/webhook.repository';
 import { createMock } from '@golevelup/ts-jest';
-import { ReputationEntityType } from '../../common/enums';
+import { ReputationEntityType, ReputationLevel } from '../../common/enums';
+import { ConfigService } from '@nestjs/config';
+import { ConfigNames } from '../../common/config';
 
 describe('ReputationService', () => {
   let reputationService: ReputationService,
     reputationRepository: ReputationRepository;
 
   beforeEach(async () => {
+    const mockConfigService: Partial<ConfigService> = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case ConfigNames.REPUTATION_LEVEL_LOW:
+            return 300;
+          case ConfigNames.REPUTATION_LEVEL_HIGH:
+            return 700;
+        }
+      }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         ReputationService,
@@ -23,6 +36,10 @@ describe('ReputationService', () => {
         {
           provide: WebhookRepository,
           useValue: createMock<WebhookRepository>(),
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
@@ -110,6 +127,72 @@ describe('ReputationService', () => {
       expect(reputationRepository.findOne).toHaveBeenCalledWith({ address });
       expect(reputationEntity.reputationPoints).toBe(0);
       expect(reputationEntity.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getReputationLevel', () => {
+    it('should return LOW if reputation points are less than 300', () => {
+      expect(reputationService.getReputationLevel(299)).toBe(
+        ReputationLevel.LOW,
+      );
+    });
+    it('should return MEDIUM if reputation points are less than 700', () => {
+      expect(reputationService.getReputationLevel(699)).toBe(
+        ReputationLevel.MEDIUM,
+      );
+    });
+
+    it('should return HIGH if reputation points are greater than 700', () => {
+      expect(reputationService.getReputationLevel(701)).toBe(
+        ReputationLevel.HIGH,
+      );
+    });
+  });
+
+  describe('getReputation', () => {
+    const chainId = ChainId.LOCALHOST;
+    const address = MOCK_ADDRESS;
+
+    it('should return reputation entity', async () => {
+      const reputationEntity: Partial<ReputationEntity> = {
+        chainId,
+        address,
+        reputationPoints: 1,
+      };
+
+      jest
+        .spyOn(reputationRepository, 'findOne')
+        .mockResolvedValueOnce(reputationEntity as ReputationEntity);
+
+      const result = await reputationService.getReputation(chainId, address);
+
+      expect(reputationRepository.findOne).toHaveBeenCalledWith({
+        chainId,
+        address,
+      });
+      expect(result).toEqual(reputationEntity);
+    });
+  });
+
+  describe('getAllReputations', () => {
+    const chainId = ChainId.LOCALHOST;
+    const address = MOCK_ADDRESS;
+
+    it('should return all reputations', async () => {
+      const reputationEntity: Partial<ReputationEntity> = {
+        chainId,
+        address,
+        reputationPoints: 1,
+      };
+
+      jest
+        .spyOn(reputationRepository, 'find')
+        .mockResolvedValueOnce([reputationEntity as ReputationEntity]);
+
+      const result = await reputationService.getAllReputations();
+
+      expect(reputationRepository.find).toHaveBeenCalled();
+      expect(result).toEqual([reputationEntity]);
     });
   });
 });

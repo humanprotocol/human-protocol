@@ -5,3 +5,9 @@ export enum ReputationEntityType {
   RECORDING_ORACLE = 'RECORDING_ORACLE',
   REPUTATION_ORACLE = 'REPUTATION_ORACLE',
 }
+
+export enum ReputationLevel {
+  LOW = 'Low',
+  MEDIUM = 'Medium',
+  HIGH = 'High',
+}
