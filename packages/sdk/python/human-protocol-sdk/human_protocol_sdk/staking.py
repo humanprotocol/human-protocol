@@ -306,7 +306,7 @@ class StakingClient:
 
         return [
             {
-                "staker": stakers[i],
+                "address": stakers[i],
                 "tokens_staked": staker_info[i][0],
                 "tokens_allocated": staker_info[i][1],
                 "tokens_locked": staker_info[i][2],
@@ -344,6 +344,7 @@ class StakingClient:
             return None
 
         return {
+            "address": staker_address,
             "tokens_staked": tokens_staked,
             "tokens_allocated": tokens_allocated,
             "tokens_locked": tokens_locked,

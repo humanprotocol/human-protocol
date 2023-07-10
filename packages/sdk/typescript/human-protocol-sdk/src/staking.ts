@@ -26,7 +26,7 @@ import {
   ErrorStakingGetStakers,
   ErrorUnsupportedChainID,
 } from './error';
-import { IAllocation, IReward, IStaker } from './interfaces';
+import { IAllocation, IReward, IStakerWithAddress } from './interfaces';
 import { RAW_REWARDS_QUERY } from './queries';
 import { NetworkData } from './types';
 import { gqlFetch, throwError } from './utils';
@@ -337,7 +337,7 @@ export class StakingClient {
    * @returns {Promise<IStaker>} - Return staking information of the specified address
    * @throws {Error} - An error object if an error occurred, result otherwise
    */
-  public async getStaker(staker: string): Promise<IStaker> {
+  public async getStaker(staker: string): Promise<IStakerWithAddress> {
     if (!ethers.utils.isAddress(staker)) {
       throw ErrorInvalidStakerAddressProvided;
     }
@@ -355,6 +355,7 @@ export class StakingClient {
         .sub(tokensLocked);
 
       return {
+        address: staker,
         tokensStaked,
         tokensAllocated,
         tokensLocked,
@@ -372,7 +373,7 @@ export class StakingClient {
    * @returns {Promise<IStakerInfo>} - Return an array with all stakers information
    * @throws {Error} - An error object if an error occurred, results otherwise
    */
-  public async getAllStakers(): Promise<IStaker[]> {
+  public async getAllStakers(): Promise<IStakerWithAddress[]> {
     try {
       const result = await this.stakingContract.getListOfStakers();
 
@@ -380,7 +381,7 @@ export class StakingClient {
         throw ErrorStakingGetStakers;
       }
 
-      return result[1].map((staker: any) => {
+      return result[1].map((staker: any, index: number) => {
         const tokensStaked = BigNumber.from(staker.tokensStaked),
           tokensAllocated = BigNumber.from(staker.tokensAllocated),
           tokensLocked = BigNumber.from(staker.tokensLocked),
@@ -391,6 +392,7 @@ export class StakingClient {
           .sub(tokensLocked);
 
         return {
+          address: result[0][index],
           tokensStaked,
           tokensAllocated,
           tokensLocked,

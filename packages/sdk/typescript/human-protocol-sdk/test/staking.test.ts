@@ -532,7 +532,7 @@ describe('StakingClient', () => {
       mockStakingContract.getStaker.mockResolvedValueOnce(mockStaker);
 
       const result = await stakingClient.getStaker(stakerAddress);
-      expect(result).toEqual(mockStaker);
+      expect(result).toEqual({ ...mockStaker, address: stakerAddress });
       expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
       expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
     });
@@ -571,7 +571,10 @@ describe('StakingClient', () => {
 
       const stakers = await stakingClient.getAllStakers();
 
-      expect(stakers).toEqual([mockStaker, mockStaker]);
+      expect(stakers).toEqual([
+        { ...mockStaker, address: stakerAddress },
+        { ...mockStaker, address: stakerAddress },
+      ]);
       expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
     });
 

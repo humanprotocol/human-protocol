@@ -22,6 +22,10 @@ export interface IStaker {
   tokensAvailable: BigNumber;
 }
 
+export interface IStakerWithAddress extends IStaker {
+  address: string;
+}
+
 export interface IEscrowsFilter {
   address?: string;
   role?: number;
