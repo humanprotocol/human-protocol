@@ -159,7 +159,7 @@ export class PaymentService {
       );
     }
 
-    const amount = BigNumber.from(BigInt(transaction.logs[0].data).toString());
+    const amount = BigNumber.from(transaction.logs[0].data).toString();
     const tokenAddress = transaction.logs[0].address;
 
     const signer = this.web3Service.getSigner(dto.chainId);
