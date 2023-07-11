@@ -72,7 +72,9 @@ export class UserService {
   }
 
   public createPasswordHash(password: string): string {
-    const passwordSecret = this.configService.get<string>(ConfigNames.PASSWORD_SECRET)!;
+    const passwordSecret = this.configService.get<string>(
+      ConfigNames.PASSWORD_SECRET,
+    )!;
     return bcrypt.hashSync(password, passwordSecret);
   }
 

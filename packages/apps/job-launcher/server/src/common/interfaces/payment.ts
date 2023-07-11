@@ -1,3 +1,3 @@
 interface ICoingeckoTokenId {
-    [key: string]: string;
+  [key: string]: string;
 }
