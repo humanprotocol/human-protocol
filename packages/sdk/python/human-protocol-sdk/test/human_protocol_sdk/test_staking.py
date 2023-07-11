@@ -287,7 +287,7 @@ class StakingTestCase(unittest.TestCase):
         mock_function.assert_called_once()
 
         self.assertEqual(len(all_stakers_info), 2)
-        self.assertEqual(all_stakers_info[0]["address"].lower(), "staker1")
+        self.assertEqual(all_stakers_info[0]["staker"].lower(), "staker1")
         self.assertEqual(all_stakers_info[0]["tokens_staked"], 1)
         self.assertEqual(all_stakers_info[0]["tokens_allocated"], 2)
         self.assertEqual(all_stakers_info[0]["tokens_locked"], 3)
@@ -315,7 +315,7 @@ class StakingTestCase(unittest.TestCase):
 
         mock_function.assert_called_once_with(staker_address)
 
-        self.assertEqual(staker_info["address"], staker_address)
+        self.assertEqual(staker_info["staker"], staker_address)
         self.assertEqual(staker_info["tokens_staked"], 1)
         self.assertEqual(staker_info["tokens_allocated"], 2)
         self.assertEqual(staker_info["tokens_locked"], 3)
@@ -330,7 +330,7 @@ class StakingTestCase(unittest.TestCase):
 
         mock_function.assert_called_once_with(self.w3.eth.default_account)
 
-        self.assertEqual(staker_info["address"], self.w3.eth.default_account)
+        self.assertEqual(staker_info["staker"], self.w3.eth.default_account)
         self.assertEqual(staker_info["tokens_staked"], 1)
         self.assertEqual(staker_info["tokens_allocated"], 2)
         self.assertEqual(staker_info["tokens_locked"], 3)

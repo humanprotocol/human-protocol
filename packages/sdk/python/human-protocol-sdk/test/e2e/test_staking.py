@@ -502,28 +502,26 @@ class StakingTestCase(unittest.TestCase):
 
         self.assertEqual(len(all_stakers_info), 4)
         self.assertEqual(
-            all_stakers_info[0]["address"].lower(),
+            all_stakers_info[0]["staker"].lower(),
             "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266".lower(),
         )
         self.assertEqual(
-            all_stakers_info[1]["address"].lower(),
+            all_stakers_info[1]["staker"].lower(),
             "0x70997970C51812dc3A010C7d01b50e0d17dc79C8".lower(),
         )
         self.assertEqual(
-            all_stakers_info[2]["address"].lower(),
+            all_stakers_info[2]["staker"].lower(),
             "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC".lower(),
         )
         self.assertEqual(
-            all_stakers_info[3]["address"].lower(),
+            all_stakers_info[3]["staker"].lower(),
             "0x90F79bf6EB2c4f870365E785982E1f101E93b906".lower(),
         )
 
     def test_get_staker_info(self):
         all_stakers_info = self.staking_client.get_all_stakers_info()
 
-        staker_info = self.staking_client.get_staker_info(
-            all_stakers_info[1]["address"]
-        )
+        staker_info = self.staking_client.get_staker_info(all_stakers_info[1]["staker"])
 
         self.assertEqual(
             all_stakers_info[1]["tokens_staked"], staker_info["tokens_staked"]
