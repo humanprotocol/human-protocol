@@ -355,7 +355,7 @@ export class StakingClient {
         .sub(tokensLocked);
 
       return {
-        address: staker,
+        staker,
         tokensStaked,
         tokensAllocated,
         tokensLocked,
@@ -392,7 +392,7 @@ export class StakingClient {
           .sub(tokensLocked);
 
         return {
-          address: result[0][index],
+          staker: result[0][index],
           tokensStaked,
           tokensAllocated,
           tokensLocked,

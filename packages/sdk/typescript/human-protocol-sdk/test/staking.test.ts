@@ -522,7 +522,7 @@ describe('StakingClient', () => {
     const invalidAddress = 'InvalidAddress';
 
     test('should return staker information', async () => {
-      const mockStaker: Omit<IStaker, 'address'> = {
+      const mockStaker: Omit<IStaker, 'staker'> = {
         tokensStaked: ethers.utils.parseEther('100'),
         tokensAllocated: ethers.utils.parseEther('50'),
         tokensLocked: ethers.utils.parseEther('25'),
@@ -532,7 +532,7 @@ describe('StakingClient', () => {
       mockStakingContract.getStaker.mockResolvedValueOnce(mockStaker);
 
       const result = await stakingClient.getStaker(stakerAddress);
-      expect(result).toEqual({ ...mockStaker, address: stakerAddress });
+      expect(result).toEqual({ ...mockStaker, staker: stakerAddress });
       expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
       expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
     });
@@ -554,7 +554,7 @@ describe('StakingClient', () => {
   });
 
   describe('getAllStakers()', () => {
-    const mockStaker: Omit<IStaker, 'address'> = {
+    const mockStaker: Omit<IStaker, 'staker'> = {
       tokensStaked: ethers.utils.parseEther('100'),
       tokensAllocated: ethers.utils.parseEther('50'),
       tokensLocked: ethers.utils.parseEther('25'),
@@ -572,8 +572,8 @@ describe('StakingClient', () => {
       const stakers = await stakingClient.getAllStakers();
 
       expect(stakers).toEqual([
-        { ...mockStaker, address: stakerAddress },
-        { ...mockStaker, address: stakerAddress },
+        { ...mockStaker, staker: stakerAddress },
+        { ...mockStaker, staker: stakerAddress },
       ]);
       expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
     });

@@ -15,7 +15,7 @@ export interface IReward {
 }
 
 export interface IStaker {
-  address: string;
+  staker: string;
   tokensStaked: BigNumber;
   tokensAllocated: BigNumber;
   tokensLocked: BigNumber;
