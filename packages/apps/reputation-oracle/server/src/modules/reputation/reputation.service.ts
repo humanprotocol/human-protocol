@@ -1,14 +1,41 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ReputationRepository } from './reputation.repository';
+import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
-import { ReputationEntityType } from '../../common/enums';
+import { ConfigNames } from '../../common/config';
+import { ReputationEntityType, ReputationLevel } from '../../common/enums';
+import { ReputationEntity } from './reputation.entity';
+import { ReputationRepository } from './reputation.repository';
 
 @Injectable()
 export class ReputationService {
   private readonly logger = new Logger(ReputationService.name);
 
-  constructor(private readonly reputationRepository: ReputationRepository) {}
+  constructor(
+    private readonly reputationRepository: ReputationRepository,
+    private readonly configService: ConfigService,
+  ) {}
+
+  public getReputationLevel(reputationPoints: number): ReputationLevel {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const reputationLevelLow = this.configService.get<number>(
+      ConfigNames.REPUTATION_LEVEL_LOW,
+    )!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const reputationLevelHigh = this.configService.get<number>(
+      ConfigNames.REPUTATION_LEVEL_HIGH,
+    )!;
+
+    if (reputationPoints <= reputationLevelLow) {
+      return ReputationLevel.LOW;
+    }
+
+    if (reputationPoints >= reputationLevelHigh) {
+      return ReputationLevel.HIGH;
+    }
+
+    return ReputationLevel.MEDIUM;
+  }
 
   public async increaseReputation(
     chainId: ChainId,
@@ -68,5 +95,25 @@ export class ReputationService {
     reputationEntity.save();
 
     return;
+  }
+
+  public async getReputation(
+    chainId: ChainId,
+    address: string,
+  ): Promise<ReputationEntity> {
+    const reputationEntity = await this.reputationRepository.findOne({
+      address,
+      chainId,
+    });
+
+    return reputationEntity;
+  }
+
+  public async getAllReputations(
+    chainId?: ChainId,
+  ): Promise<Array<ReputationEntity>> {
+    return await this.reputationRepository.find({
+      chainId,
+    });
   }
 }
