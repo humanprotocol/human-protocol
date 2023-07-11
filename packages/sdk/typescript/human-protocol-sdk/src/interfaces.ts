@@ -15,15 +15,12 @@ export interface IReward {
 }
 
 export interface IStaker {
+  address: string;
   tokensStaked: BigNumber;
   tokensAllocated: BigNumber;
   tokensLocked: BigNumber;
   tokensLockedUntil: BigNumber;
   tokensAvailable: BigNumber;
-}
-
-export interface IStakerWithAddress extends IStaker {
-  address: string;
 }
 
 export interface IEscrowsFilter {

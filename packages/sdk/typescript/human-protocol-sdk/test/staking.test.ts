@@ -522,7 +522,7 @@ describe('StakingClient', () => {
     const invalidAddress = 'InvalidAddress';
 
     test('should return staker information', async () => {
-      const mockStaker: IStaker = {
+      const mockStaker: Omit<IStaker, 'address'> = {
         tokensStaked: ethers.utils.parseEther('100'),
         tokensAllocated: ethers.utils.parseEther('50'),
         tokensLocked: ethers.utils.parseEther('25'),
@@ -554,7 +554,7 @@ describe('StakingClient', () => {
   });
 
   describe('getAllStakers()', () => {
-    const mockStaker: IStaker = {
+    const mockStaker: Omit<IStaker, 'address'> = {
       tokensStaked: ethers.utils.parseEther('100'),
       tokensAllocated: ethers.utils.parseEther('50'),
       tokensLocked: ethers.utils.parseEther('25'),

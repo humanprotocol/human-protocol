@@ -26,7 +26,7 @@ import {
   ErrorStakingGetStakers,
   ErrorUnsupportedChainID,
 } from './error';
-import { IAllocation, IReward, IStakerWithAddress } from './interfaces';
+import { IAllocation, IReward, IStaker } from './interfaces';
 import { RAW_REWARDS_QUERY } from './queries';
 import { NetworkData } from './types';
 import { gqlFetch, throwError } from './utils';
@@ -337,7 +337,7 @@ export class StakingClient {
    * @returns {Promise<IStaker>} - Return staking information of the specified address
    * @throws {Error} - An error object if an error occurred, result otherwise
    */
-  public async getStaker(staker: string): Promise<IStakerWithAddress> {
+  public async getStaker(staker: string): Promise<IStaker> {
     if (!ethers.utils.isAddress(staker)) {
       throw ErrorInvalidStakerAddressProvided;
     }
@@ -370,10 +370,10 @@ export class StakingClient {
   /**
    * **Returns the staking information about all stakers of the protocol.*
    *
-   * @returns {Promise<IStakerInfo>} - Return an array with all stakers information
+   * @returns {Promise<IStaker[]>} - Return an array with all stakers information
    * @throws {Error} - An error object if an error occurred, results otherwise
    */
-  public async getAllStakers(): Promise<IStakerWithAddress[]> {
+  public async getAllStakers(): Promise<IStaker[]> {
     try {
       const result = await this.stakingContract.getListOfStakers();
 
