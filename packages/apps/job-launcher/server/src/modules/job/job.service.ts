@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ethers } from 'ethers';
+import { FixedNumber, ethers } from 'ethers';
 import { validate } from 'class-validator';
 import {
   BadGatewayException,
@@ -25,6 +25,7 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
+  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -103,6 +104,11 @@ export class JobService {
       'ether',
     );
 
+    const rate = await this.currencyService.getRate(
+      CoingeckoTokenId[TokenId.HMT],
+      Currency.USD,
+    );
+
     const totalFeePercentage = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
     )
@@ -113,7 +119,10 @@ export class JobService {
       .div(100);
     const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
-    if (userBalance.lte(totalAmount)) {
+    const fixedAmount = FixedNumber.from(ethers.utils.formatUnits(totalAmount, 18));
+    const fixedRate = FixedNumber.from(rate.toString());
+
+    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -148,11 +157,6 @@ export class JobService {
       this.logger.log(ErrorJob.NotCreated, JobService.name);
       throw new NotFoundException(ErrorJob.NotCreated);
     }
-
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
-      Currency.USD,
-    );
 
     await this.paymentService.savePayment(
       userId,
@@ -197,6 +201,11 @@ export class JobService {
       this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
     );
 
+    const rate = await this.currencyService.getRate(
+      CoingeckoTokenId[TokenId.HMT],
+      Currency.USD,
+    );
+
     const totalFeePercentage = BigNumber.from(jobLauncherFee)
       .add(recordingOracleFee)
       .add(reputationOracleFee);
@@ -205,9 +214,12 @@ export class JobService {
       .div(100);
     const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
-    if (userBalance.lte(totalAmount)) {
+    const fixedAmount = FixedNumber.from(ethers.utils.formatUnits(totalAmount, 18));
+    const fixedRate = FixedNumber.from(rate.toString());
+
+    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new NotFoundException(ErrorJob.NotEnoughFunds);
+      throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
     const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
@@ -242,11 +254,6 @@ export class JobService {
       this.logger.log(ErrorJob.NotCreated, JobService.name);
       throw new NotFoundException(ErrorJob.NotCreated);
     }
-
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
-      Currency.USD,
-    );
 
     await this.paymentService.savePayment(
       userId,

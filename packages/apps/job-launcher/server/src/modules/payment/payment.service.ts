@@ -167,7 +167,7 @@ export class PaymentService {
       tokenAddress,
       signer
     );
-    const tokenId = await tokenContract.symbol();
+    const tokenId = (await tokenContract.symbol()).toLowerCase();
 
     if (!CoingeckoTokenId[tokenId]) {
       this.logger.log(
@@ -208,7 +208,6 @@ export class PaymentService {
       transaction.transactionHash
     );
 
-    return true;
     return true;
   }
 

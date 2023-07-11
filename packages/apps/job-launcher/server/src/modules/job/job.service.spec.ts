@@ -66,6 +66,7 @@ describe('JobService', () => {
   let jobService: JobService;
   let jobRepository: JobRepository;
   let paymentService: PaymentService;
+  let currencyService: CurrencyService;
 
   const signerMock = {
     address: '0x1234567890123456789012345678901234567892',
@@ -117,6 +118,7 @@ describe('JobService', () => {
       ],
     }).compile();
 
+    currencyService = moduleRef.get(CurrencyService);
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
     paymentService = moduleRef.get(PaymentService);
@@ -124,7 +126,7 @@ describe('JobService', () => {
 
   describe('createFortuneJob', () => {
     it('should create a fortune job successfully', async () => {
-      const fundAmount = 1; // ETH
+      const rate = 0.5;
 
       const userId = 1;
       const dto = {
@@ -149,6 +151,8 @@ describe('JobService', () => {
         .div(100);
       const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
+      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
+
       jest
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
@@ -163,7 +167,7 @@ describe('JobService', () => {
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
         BigNumber.from(totalAmount),
-        {}
+        rate
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
@@ -179,6 +183,7 @@ describe('JobService', () => {
 
     it('should throw an exception for insufficient user balance', async () => {
       const fundAmount = 10; // ETH
+      const rate = 0.5;
 
       const saveManifestDto: SaveManifestDto = {
         manifestUrl: MOCK_FILE_URL,
@@ -186,6 +191,7 @@ describe('JobService', () => {
       };
 
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
+      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
       const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
       jest
@@ -209,6 +215,7 @@ describe('JobService', () => {
 
     it('should throw an exception if job entity creation fails', async () => {
       const fundAmount = 1; // ETH
+      const rate = 0.5;
 
       const saveManifestDto: SaveManifestDto = {
         manifestUrl: MOCK_FILE_URL,
@@ -217,6 +224,7 @@ describe('JobService', () => {
 
       jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
+      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
       const userBalance = ethers.utils.parseUnits('15', 'ether'); // 10 ETH
       jest
