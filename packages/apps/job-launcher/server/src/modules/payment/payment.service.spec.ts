@@ -40,7 +40,7 @@ describe('PaymentService', () => {
   let httpService: HttpService;
 
   const signerMock = {
-    address: '0x1234567890123456789012345678901234567892',
+    address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
@@ -81,7 +81,7 @@ describe('PaymentService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
-      exports: [CurrencyService]
+      exports: [CurrencyService],
     }).compile();
 
     paymentService = moduleRef.get<PaymentService>(PaymentService);
@@ -197,7 +197,7 @@ describe('PaymentService', () => {
       const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
         status: 'succeeded',
         amount: 100,
-        currency: 'USD'
+        currency: 'USD',
       };
 
       jest
@@ -218,7 +218,7 @@ describe('PaymentService', () => {
         Currency.USD,
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
-        1 / rate
+        1 / rate,
       );
       expect(result).toBe(true);
     });
@@ -263,7 +263,7 @@ describe('PaymentService', () => {
     const mockTokenContract: any = {
       symbol: jest.fn(),
     };
-    
+
     it('should create a crypto payment successfully', async () => {
       const userId = 1;
       const dto = {
@@ -282,7 +282,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -301,7 +305,9 @@ describe('PaymentService', () => {
         .spyOn(ethers.providers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
 
       jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
 
@@ -321,12 +327,67 @@ describe('PaymentService', () => {
         PaymentType.DEPOSIT,
         BigNumber.from('100'),
         {},
-        MOCK_TRANSACTION_HASH
+        MOCK_TRANSACTION_HASH,
       );
       expect(result).toBe(true);
     });
 
     it('should throw a conflict exception if an unsupported token is used', async () => {
+      const userId = 1;
+      const dto = {
+        chainId: 1,
+        transactionHash: MOCK_TRANSACTION_HASH,
+      };
+
+      const token = 'hmt';
+      const invalidRecipient = '0x123'
+
+      const transactionReceipt: Partial<TransactionReceipt> = {
+        logs: [
+          {
+            data: '100',
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: MOCK_ADDRESS,
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              invalidRecipient,
+            ],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
+          },
+        ],
+        transactionHash: MOCK_TRANSACTION_HASH,
+        confirmations: TX_CONFIRMATION_TRESHOLD,
+      };
+
+      const jsonRpcProviderMock = {
+        getTransactionReceipt: jest
+          .fn()
+          .mockResolvedValue(transactionReceipt as TransactionReceipt),
+      };
+
+      jest
+        .spyOn(ethers.providers, 'JsonRpcProvider')
+        .mockReturnValue(jsonRpcProviderMock as any);
+
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
+
+      jest
+        .spyOn(mockTokenContract, 'symbol')
+        .mockResolvedValue(token);
+
+      await expect(
+        paymentService.createCryptoPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.InvalidRecipient);
+    });
+
+    it('should throw a conflict exception if an invalid recepient', async () => {
       const userId = 1;
       const dto = {
         chainId: 1,
@@ -344,7 +405,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -354,16 +419,22 @@ describe('PaymentService', () => {
       };
 
       const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt as TransactionReceipt),
+        getTransactionReceipt: jest
+          .fn()
+          .mockResolvedValue(transactionReceipt as TransactionReceipt),
       };
 
       jest
         .spyOn(ethers.providers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
 
-      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(unsupportedToken);
+      jest
+        .spyOn(mockTokenContract, 'symbol')
+        .mockResolvedValue(unsupportedToken);
 
       await expect(
         paymentService.createCryptoPayment(userId, dto),
@@ -431,7 +502,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -473,7 +548,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -490,7 +569,9 @@ describe('PaymentService', () => {
         .spyOn(ethers.providers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
 
       jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
 
