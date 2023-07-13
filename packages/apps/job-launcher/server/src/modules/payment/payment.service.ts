@@ -27,6 +27,7 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
+import { IClientSecret, IResponseBool } from 'src/common/interfaces';
 
 @Injectable()
 export class PaymentService {
@@ -67,7 +68,7 @@ export class PaymentService {
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
-  ) {
+  ): Promise<IClientSecret> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
@@ -82,6 +83,11 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
+    if (!paymentIntent.client_secret) {
+      this.logger.log(ErrorPayment.ClientSecretDoesNotExist, PaymentService.name);
+      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
     return {
       clientSecret: paymentIntent.client_secret,
     };
@@ -90,7 +96,7 @@ export class PaymentService {
   public async confirmFiatPayment(
     userId: number,
     dto: PaymentFiatConfirmDto,
-  ): Promise<boolean> {
+  ): Promise<IResponseBool> {
     const paymentData = await this.getPayment(dto.paymentId);
 
     if (!paymentData) {
@@ -112,13 +118,15 @@ export class PaymentService {
       BigNumber.from(paymentData.amount),
     );
 
-    return true;
+    return {
+      response: true
+    }
   }
 
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
-  ) {
+  ): Promise<IResponseBool> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.network.chainId === dto.chainId,
@@ -171,7 +179,9 @@ export class PaymentService {
       BigNumber.from(amount),
     );
 
-    return true;
+    return {
+      response: true
+    }
   }
 
   public async getPayment(
@@ -186,7 +196,7 @@ export class PaymentService {
     type: PaymentType,
     amount: BigNumber,
   ): Promise<boolean> {
-    const rate = await this.currencyService.getRate(
+    const { rate } = await this.currencyService.getRate(
       TokenId.HUMAN_PROTOCOL,
       Currency.USD,
     );

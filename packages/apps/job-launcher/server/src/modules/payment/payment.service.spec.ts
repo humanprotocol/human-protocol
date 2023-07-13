@@ -199,7 +199,7 @@ describe('PaymentService', () => {
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
       );
-      expect(result).toBe(true);
+      expect(result).toStrictEqual({ response: true });
     });
 
     it('should throw a bad request exception if the payment is not successful', async () => {
@@ -289,7 +289,7 @@ describe('PaymentService', () => {
         PaymentType.DEPOSIT,
         BigNumber.from('100'),
       );
-      expect(result).toBe(true);
+      expect(result).toStrictEqual({ response: true });
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {

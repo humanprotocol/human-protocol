@@ -68,7 +68,7 @@ export class VerifyEmailDto {
   public token: string;
 }
 
-export class AuthDto {
+export class AuthCreateDto {
   public user: UserEntity;
   public refreshToken: string;
   public refreshTokenExpiresAt: number;
@@ -78,11 +78,4 @@ export class AuthDto {
 export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;
-}
-
-export interface IJwt {
-  accessToken: string;
-  accessTokenExpiresAt: number;
-  refreshToken: string;
-  refreshTokenExpiresAt: number;
 }

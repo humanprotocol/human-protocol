@@ -17,7 +17,6 @@ import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import {
   ForgotPasswordDto,
-  IJwt,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
@@ -27,6 +26,8 @@ import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
+import { IJwt } from '../../common/interfaces/auth';
+import { IResponseBool } from 'src/common/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -139,7 +140,7 @@ export class AuthService {
     this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<void> {
+  public async restorePassword(data: RestorePasswordDto): Promise<IResponseBool> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,
@@ -156,6 +157,10 @@ export class AuthService {
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
     await tokenEntity.remove();
+
+    return {
+      response: true
+    }
   }
 
   public async emailVerification(

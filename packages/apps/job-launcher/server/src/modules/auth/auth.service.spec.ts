@@ -10,7 +10,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { IJwt, SignInDto } from './auth.dto';
+import { SignInDto } from './auth.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserCreateDto } from '../user/user.dto';
 import { TokenEntity, TokenType } from './token.entity';
@@ -19,6 +19,7 @@ import { UserStatus } from '../../common/enums/user';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import { MOCK_EXPIRES_IN } from '../../common/test/constants';
+import { IJwt } from '../../common/interfaces/auth';
 
 jest.mock('@human-protocol/sdk');
 

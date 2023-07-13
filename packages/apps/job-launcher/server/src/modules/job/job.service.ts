@@ -44,6 +44,7 @@ import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { IId } from 'src/common/interfaces';
 
 @Injectable()
 export class JobService {
@@ -84,7 +85,7 @@ export class JobService {
   public async createFortuneJob(
     userId: number,
     dto: JobFortuneDto,
-  ): Promise<number> {
+  ): Promise<IId> {
     const {
       chainId,
       fortunesRequired,
@@ -156,10 +157,12 @@ export class JobService {
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
-    return jobEntity.id;
+    return {
+      id: jobEntity.id
+    }
   }
 
-  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
+  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<IId> {
     const {
       chainId,
       dataUrl,
@@ -243,7 +246,9 @@ export class JobService {
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
-    return jobEntity.id;
+    return {
+      id: jobEntity.id
+    }
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {

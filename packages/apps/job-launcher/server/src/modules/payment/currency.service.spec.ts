@@ -46,7 +46,7 @@ describe('CurrencyService', () => {
       expect(httpService.get).toHaveBeenCalledWith(
         `${COINGECKO_API_URL}?ids=${tokenId}&vs_currencies=${currency}`,
       );
-      expect(result).toBe(rate);
+      expect(result).toStrictEqual({ rate });
     });
 
     it('should throw NotFoundException if the rate is not found', async () => {
