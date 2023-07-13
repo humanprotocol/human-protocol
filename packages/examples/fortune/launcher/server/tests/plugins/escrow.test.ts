@@ -22,7 +22,7 @@ describe('Escrow tests', async () => {
   const web3JobRequester = web3.createWeb3(network, jobRequesterPrivKey);
 
   beforeAll(async () => {
-    await stake(web3Client, network);
+    await stake(web3Client, network, jobRequester);
   });
 
   test('Should not have balance', async () => {
@@ -87,7 +87,8 @@ describe('Escrow tests', async () => {
       EscrowAbi as [],
       escrowAddress
     );
-    expect(await escrowContract.methods.launcher().call()).eq(
+    expect(await escrowContract.methods.launcher().call()).eq(jobRequester);
+    expect(await escrowContract.methods.escrowFactory().call()).eq(
       network.factoryAddress
     );
   });
@@ -128,7 +129,7 @@ describe('Escrow tests', async () => {
       escrowAddress
     );
     const url = 'http://test.com';
-    await escrow.setupEscrow(web3Client, escrowAddress, url, 3);
+    await escrow.setupEscrow(web3Client, escrowAddress, url, jobRequester);
     expect(await escrowContract.methods.manifestUrl().call()).eq(url);
   });
 
