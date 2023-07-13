@@ -13,13 +13,19 @@ def get_web3(chain_id: Networks):
         case Config.polygon_mainnet.chain_id:
             w3 = Web3(HTTPProvider(Config.polygon_mainnet.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_mainnet.private_key)
-            w3.middleware_onion.add(construct_sign_and_send_raw_middleware(gas_payer))
+            w3.middleware_onion.add(
+                construct_sign_and_send_raw_middleware(gas_payer),
+                "construct_sign_and_send_raw_middleware",
+            )
             w3.eth.default_account = gas_payer.address
             return w3
         case Config.polygon_mumbai.chain_id:
             w3 = Web3(HTTPProvider(Config.polygon_mumbai.rpc_api))
             gas_payer = w3.eth.account.from_key(Config.polygon_mumbai.private_key)
-            w3.middleware_onion.add(construct_sign_and_send_raw_middleware(gas_payer))
+            w3.middleware_onion.add(
+                construct_sign_and_send_raw_middleware(gas_payer),
+                "construct_sign_and_send_raw_middleware",
+            )
             w3.eth.default_account = gas_payer.address
             return w3
         case _:
@@ -50,3 +56,9 @@ def recover_signer(chain_id: Networks, message: str, signature: str) -> str:
     signer = w3.eth.account.recover_message(message_hash, signature=signature)
 
     return signer
+
+
+def validate_address(escrow_address: str) -> str:
+    if not Web3.isAddress(escrow_address):
+        raise ValueError(f"{escrow_address} is not a correct Web3 address")
+    return Web3.toChecksumAddress(escrow_address)

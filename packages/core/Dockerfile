@@ -1,9 +1,12 @@
-FROM node:lts-hydrogen
+FROM node:lts-alpine
 
-COPY . /app
-WORKDIR /app
+RUN apk add git
+
+RUN git clone https://github.com/humanprotocol/human-protocol.git
+
+WORKDIR /human-protocol
 
 EXPOSE 8545
 
-RUN yarn workspace @human-protocol/core install
+RUN yarn workspace @human-protocol/core install --ignore-scripts
 CMD yarn workspace @human-protocol/core local

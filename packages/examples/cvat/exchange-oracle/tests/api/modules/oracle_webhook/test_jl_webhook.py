@@ -122,7 +122,6 @@ def test_incoming_webhook_400(client: TestClient) -> None:
             headers={"human-signature": "mocked signature"},
             json=data,
         )
-        print(response.json())
         assert response.status_code == 400
         assert response.json() == {"message": "Escrow doesn't have funds"}
 
@@ -148,7 +147,6 @@ def test_incoming_webhook_400(client: TestClient) -> None:
             headers={"human-signature": "mocked signature"},
             json=data,
         )
-        print(response.json())
         assert response.status_code == 400
         assert response.json() == {
             "message": "Escrow is not in a Pending state. Current state: Complete"

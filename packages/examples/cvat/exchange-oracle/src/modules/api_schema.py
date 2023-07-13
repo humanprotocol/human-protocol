@@ -2,7 +2,7 @@ from pydantic import BaseModel, validator
 from typing import Optional
 
 from src.constants import Networks
-from src.modules.chain.escrow import validate_address
+from src.modules.chain.web3 import validate_address
 
 
 class CvatWebhook(BaseModel):

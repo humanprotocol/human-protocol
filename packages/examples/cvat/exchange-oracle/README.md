@@ -61,5 +61,5 @@ Available at `/docs` route
 To run tests
 ```
 docker-compose -f docker-compose.test.yml up -d
-pytest
+./bin/start_test.sh
 ```
