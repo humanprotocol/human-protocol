@@ -3,11 +3,3 @@ export interface IBase {
   createdAt: Date;
   updatedAt: Date;
 }
-
-export interface IResponseBool {
-  response: boolean;
-}
-
-export interface IId {
-  id: number
-}

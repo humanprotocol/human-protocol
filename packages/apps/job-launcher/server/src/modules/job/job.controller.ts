@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards';
 import { JobCvatDto, JobFortuneDto } from './job.dto';
 import { JobService } from './job.service';
-import { IId } from 'src/common/interfaces';
+import { IJobId } from '../../common/interfaces';
 
 @ApiBearerAuth()
 @ApiTags('Job')
@@ -16,7 +16,7 @@ export class JobController {
   public async createFortuneJob(
     @Request() req: any,
     @Body() data: JobFortuneDto,
-  ): Promise<IId> {
+  ): Promise<IJobId> {
     return this.jobService.createFortuneJob(req.user?.id, data);
   }
 
@@ -25,7 +25,7 @@ export class JobController {
   public async createCvatJob(
     @Request() req: any,
     @Body() data: JobCvatDto,
-  ): Promise<IId> {
+  ): Promise<IJobId> {
     return this.jobService.createCvatJob(req.user?.id, data);
   }
 }

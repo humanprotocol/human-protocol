@@ -7,7 +7,6 @@ import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { JobStatus } from '../../common/enums/job';
 import { JobEntity } from './job.entity';
 import { JobService } from './job.service';
-import { ErrorJob } from 'src/common/constants/errors';
 
 @Injectable()
 export class JobCron {

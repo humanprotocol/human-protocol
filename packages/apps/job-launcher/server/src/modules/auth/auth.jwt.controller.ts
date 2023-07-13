@@ -22,7 +22,6 @@ import { Public } from '../../common/decorators';
 import { ApiTags } from '@nestjs/swagger';
 import { UserCreateDto } from '../user/user.dto';
 import { IJwt } from '../../common/interfaces/auth';
-import { IResponseBool } from 'src/common/interfaces';
 
 @Public()
 @ApiTags('Auth')
@@ -69,7 +68,7 @@ export class AuthJwtController {
 
   @Post('/restore-password')
   @HttpCode(204)
-  public restorePassword(@Body() data: RestorePasswordDto): Promise<IResponseBool> {
+  public restorePassword(@Body() data: RestorePasswordDto): Promise<boolean> {
     return this.authService.restorePassword(data);
   }
 

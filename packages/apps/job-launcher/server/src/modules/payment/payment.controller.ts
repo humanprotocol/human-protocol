@@ -18,7 +18,7 @@ import {
   PaymentFiatCreateDto,
 } from './payment.dto';
 import { CurrencyService } from './currency.service';
-import { IClientSecret, IPairRate, IResponseBool } from 'src/common/interfaces';
+import { IClientSecret } from '../../common/interfaces';
 
 @ApiBearerAuth()
 @ApiTags('Payment')
@@ -46,7 +46,7 @@ export class PaymentController {
   public async confirmFiatPayment(
     @Request() req: any,
     @Body() data: PaymentFiatConfirmDto,
-  ): Promise<IResponseBool> {
+  ): Promise<boolean> {
     return this.paymentService.confirmFiatPayment(req.user?.id, data);
   }
 
@@ -55,17 +55,17 @@ export class PaymentController {
   public async createCryptoPayment(
     @Request() req: any,
     @Body() data: PaymentCryptoCreateDto,
-  ): Promise<IResponseBool> {
+  ): Promise<boolean> {
     return this.paymentService.createCryptoPayment(req.user?.id, data);
   }
 
   @UseGuards(RolesGuard)
   @Get('/rates')
-  public async getRate(@Query() data: GetRateDto): Promise<IPairRate> {
+  public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {
       return this.currencyService.getRate(data.token, data.currency);
     } catch (e) {
-      throw new Error(e)
+      throw new Error(e);
     }
   }
 }

@@ -3,7 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ConflictException
+  ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -27,7 +27,7 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
-import { IClientSecret, IResponseBool } from 'src/common/interfaces';
+import { IClientSecret } from '../../common/interfaces';
 
 @Injectable()
 export class PaymentService {
@@ -42,10 +42,17 @@ export class PaymentService {
     this.stripe = new Stripe(
       this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
       {
-        apiVersion: this.configService.get<any>(ConfigNames.STRIPE_API_VERSION)!,
+        apiVersion: this.configService.get<any>(
+          ConfigNames.STRIPE_API_VERSION,
+        )!,
         appInfo: {
-          name: this.configService.get<string>(ConfigNames.STRIPE_APP_NAME, 'Fortune')!,
-          version: this.configService.get<string>(ConfigNames.STRIPE_APP_VERSION)!,
+          name: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_NAME,
+            'Fortune',
+          )!,
+          version: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_VERSION,
+          )!,
           url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
         },
       },
@@ -84,7 +91,10 @@ export class PaymentService {
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
     if (!paymentIntent.client_secret) {
-      this.logger.log(ErrorPayment.ClientSecretDoesNotExist, PaymentService.name);
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
       throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
@@ -96,7 +106,7 @@ export class PaymentService {
   public async confirmFiatPayment(
     userId: number,
     dto: PaymentFiatConfirmDto,
-  ): Promise<IResponseBool> {
+  ): Promise<boolean> {
     const paymentData = await this.getPayment(dto.paymentId);
 
     if (!paymentData) {
@@ -104,9 +114,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    if (
-      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-    ) {
+    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
@@ -118,15 +126,13 @@ export class PaymentService {
       BigNumber.from(paymentData.amount),
     );
 
-    return {
-      response: true
-    }
+    return true;
   }
 
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
-  ): Promise<IResponseBool> {
+  ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.network.chainId === dto.chainId,
@@ -167,9 +173,7 @@ export class PaymentService {
         ErrorPayment.TransactionHashAlreadyExists,
         PaymentRepository.name,
       );
-      throw new BadRequestException(
-        ErrorPayment.TransactionHashAlreadyExists,
-      );
+      throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
     }
 
     await this.savePayment(
@@ -179,9 +183,7 @@ export class PaymentService {
       BigNumber.from(amount),
     );
 
-    return {
-      response: true
-    }
+    return true;
   }
 
   public async getPayment(
@@ -196,7 +198,7 @@ export class PaymentService {
     type: PaymentType,
     amount: BigNumber,
   ): Promise<boolean> {
-    const { rate } = await this.currencyService.getRate(
+    const rate = await this.currencyService.getRate(
       TokenId.HUMAN_PROTOCOL,
       Currency.USD,
     );

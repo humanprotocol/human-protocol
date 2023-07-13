@@ -27,7 +27,6 @@ import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
 import { IJwt } from '../../common/interfaces/auth';
-import { IResponseBool } from 'src/common/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -101,8 +100,12 @@ export class AuthService {
     const refreshToken = v4();
     const date = new Date();
 
-    const accessTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN)!;
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN)!;
+    const accessTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
+    )!;
+    const refreshTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+    )!;
 
     await this.authRepository.create({
       user: userEntity,
@@ -140,7 +143,7 @@ export class AuthService {
     this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<IResponseBool> {
+  public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,
@@ -158,9 +161,7 @@ export class AuthService {
 
     await tokenEntity.remove();
 
-    return {
-      response: true
-    }
+    return true;
   }
 
   public async emailVerification(
