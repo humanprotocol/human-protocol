@@ -3,6 +3,13 @@ import { NS } from '../../common/constants';
 
 export class addAuthTable1677867985970 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<any> {
+    await queryRunner.query(`
+          CREATE TYPE ${NS}.auth_status_enum AS ENUM (
+            'ACTIVE',
+            'EXPIRED'
+          );
+        `);
+
     const table = new Table({
       name: `${NS}.auth`,
       columns: [
@@ -27,6 +34,10 @@ export class addAuthTable1677867985970 implements MigrationInterface {
           name: 'ip',
           type: 'varchar',
           default: "'0.0.0.0'",
+        },
+        {
+          name: 'status',
+          type: `${NS}.auth_status_enum`,
         },
         {
           name: 'created_at',

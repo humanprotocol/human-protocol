@@ -6,7 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -19,6 +19,7 @@ import { UserStatus } from '../../common/enums/user';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import { MOCK_EXPIRES_IN } from '../../common/test/constants';
+import { AuthStatus } from '../../common/enums/auth';
 
 jest.mock('@human-protocol/sdk');
 
@@ -175,21 +176,19 @@ describe('AuthService', () => {
   });
 
   describe('logout', () => {
-    it('should delete the authentication entities based on the given condition', async () => {
-      const where = { id: 1 };
+    it('should update the authentication entities based on the given condition', async () => {
+      const where = { userId: 1 };
 
-      const deleteResult: Partial<DeleteResult> = {
-        affected: 1,
-      };
+      const updateResult: Partial<UpdateResult> = {};
 
       jest
-        .spyOn(authRepository, 'delete')
-        .mockResolvedValue(deleteResult as DeleteResult);
+        .spyOn(authRepository, 'update')
+        .mockResolvedValue(updateResult as UpdateResult);
 
       const result = await authService.logout(where);
 
-      expect(authRepository.delete).toHaveBeenCalledWith(where);
-      expect(result).toBe(deleteResult);
+      expect(authRepository.update).toHaveBeenCalledWith({ ...where, status: AuthStatus.ACTIVE }, { status: AuthStatus.EXPIRED });
+      expect(result).toBe(undefined);
     });
   });
 
@@ -321,6 +320,10 @@ describe('AuthService', () => {
         refreshTokenExpiresAt,
       };
 
+      jest
+        .spyOn(authService, 'logout')
+        .mockResolvedValue(undefined);
+
       jest.spyOn(jwtService, 'sign').mockReturnValue('access_token');
 
       const result = await authService.auth(
@@ -333,6 +336,9 @@ describe('AuthService', () => {
         refreshToken,
         refreshTokenExpiresAt,
         ip: '127.0.0.1',
+      });
+      expect(authService.logout).toHaveBeenCalledWith({
+        userId: userEntity.id
       });
       expect(authRepository.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(jwt);
