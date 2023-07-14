@@ -209,7 +209,6 @@ export class PaymentService {
     );
 
     return true;
-    return true;
   }
 
   public async getPayment(
