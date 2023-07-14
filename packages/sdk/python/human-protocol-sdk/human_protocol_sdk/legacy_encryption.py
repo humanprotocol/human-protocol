@@ -146,7 +146,7 @@ class Encryption:
             raise DecryptionError("wrong ecies header")
 
         #  1) generate shared-secret = kdf( ecdhAgree(myPrivKey, msg[1:65]) )
-        shared = data[1: 1 + self.PUBLIC_KEY_LEN]
+        shared = data[1 : 1 + self.PUBLIC_KEY_LEN]
 
         try:
             key_material = self._process_key_exchange(
@@ -163,12 +163,11 @@ class Encryption:
         key_enc, key_mac = key[:k_len], key[k_len:]
 
         key_mac = hashlib.sha256(key_mac).digest()
-        tag = data[-self.KEY_LEN:]
+        tag = data[-self.KEY_LEN :]
 
         # 2) Verify tag
         expected_tag = self._hmac_sha256(
-            key_mac, data[1 + self.PUBLIC_KEY_LEN: -
-                          self.KEY_LEN] + shared_mac_data
+            key_mac, data[1 + self.PUBLIC_KEY_LEN : -self.KEY_LEN] + shared_mac_data
         )
 
         # Whether same tag byte
@@ -180,10 +179,10 @@ class Encryption:
         block_size = algo.block_size // 8
 
         data_start = 1 + self.PUBLIC_KEY_LEN
-        data_slice = data[data_start: data_start + block_size]
+        data_slice = data[data_start : data_start + block_size]
 
         cipher_context = Cipher(algo, self.MODE(data_slice)).decryptor()
-        ciphertext = data[data_start + block_size: -self.KEY_LEN]
+        ciphertext = data[data_start + block_size : -self.KEY_LEN]
 
         return cipher_context.update(ciphertext) + cipher_context.finalize()
 
@@ -216,8 +215,7 @@ class Encryption:
                 that they derive the same key material
         """ ""
         private_key_int = int(t.cast(int, private_key))
-        ec_private_key = ec.derive_private_key(
-            private_key_int, self.ELLIPTIC_CURVE)
+        ec_private_key = ec.derive_private_key(private_key_int, self.ELLIPTIC_CURVE)
 
         public_key_bytes = b"\x04" + public_key.to_bytes()
 

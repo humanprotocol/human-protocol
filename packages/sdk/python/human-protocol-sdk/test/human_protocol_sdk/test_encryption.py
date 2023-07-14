@@ -10,7 +10,7 @@ from test.human_protocol_sdk.utils.encryption import (
     passphrase,
     signed_message,
     encrypted_unsigned_message,
-    message
+    message,
 )
 
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
@@ -28,8 +28,7 @@ class TestEncryption(unittest.TestCase):
     def test_locked_private_key(self):
         with self.assertRaises(ValueError) as cm:
             Encryption(private_key3)
-        self.assertEqual(
-            f"Private key locked. Passphrase needed", str(cm.exception))
+        self.assertEqual(f"Private key locked. Passphrase needed", str(cm.exception))
 
     def test_locked_private_key_with_wrong_passphrase(self):
         with self.assertRaises(PGPDecryptionError) as cm:
@@ -41,8 +40,7 @@ class TestEncryption(unittest.TestCase):
 
         with self.assertRaises(ValueError) as cm:
             Encryption(invalid_private_key)
-        self.assertEqual(f"Expected: ASCII-armored PGP data",
-                         str(cm.exception))
+        self.assertEqual(f"Expected: ASCII-armored PGP data", str(cm.exception))
 
     def test_encrypt(self):
         encryption = Encryption(private_key)
@@ -59,8 +57,7 @@ class TestEncryption(unittest.TestCase):
         self.assertIsInstance(encrypted_message, str)
 
     def test_encrypt_unsigned_message(self):
-        encrypted_message = EncryptionUtils.encrypt(
-            message, [public_key2, public_key3])
+        encrypted_message = EncryptionUtils.encrypt(message, [public_key2, public_key3])
         self.assertIsInstance(encrypted_message, str)
 
     def test_decrypt(self):
@@ -113,15 +110,13 @@ class TestEncryption(unittest.TestCase):
     def test_verify_invalid_signature(self):
         with self.assertRaises(ValueError) as cm:
             EncryptionUtils.verify(message, public_key)
-        self.assertEqual(f"Expected: ASCII-armored PGP data",
-                         str(cm.exception))
+        self.assertEqual(f"Expected: ASCII-armored PGP data", str(cm.exception))
 
     def test_verify_invalid_public_key(self):
         invalid_public_key = """invalid_public_key"""
         with self.assertRaises(ValueError) as cm:
             EncryptionUtils.verify(signed_message, invalid_public_key)
-        self.assertEqual(f"Expected: ASCII-armored PGP data",
-                         str(cm.exception))
+        self.assertEqual(f"Expected: ASCII-armored PGP data", str(cm.exception))
 
     def test_get_signed_data(self):
         result = EncryptionUtils.get_signed_data(signed_message)
@@ -130,5 +125,4 @@ class TestEncryption(unittest.TestCase):
     def test_get_signed_data_invalid_message(self):
         with self.assertRaises(ValueError) as cm:
             EncryptionUtils.get_signed_data("Invalid message")
-        self.assertEqual(f"Expected: ASCII-armored PGP data",
-                         str(cm.exception))
+        self.assertEqual(f"Expected: ASCII-armored PGP data", str(cm.exception))
