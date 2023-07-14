@@ -41,7 +41,7 @@ export const createFiatPayment: FastifyPluginAsync = async (server) => {
       const { stripe } = server;
       try {
         return JSON.stringify({ publishableKey: stripe.publishableKey });
-      } catch (e) {
+      } catch (e: any) {
         return reply.status(400).send(e.message);
       }
     }
@@ -76,7 +76,7 @@ export const createFiatPayment: FastifyPluginAsync = async (server) => {
             fiatData?.paymentMethodOptions as Stripe.PaymentIntentCreateParams.PaymentMethodOptions
           )
         );
-      } catch (e) {
+      } catch (e: any) {
         return reply.status(400).send(e.message);
       }
     }
