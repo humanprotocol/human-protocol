@@ -19,7 +19,15 @@ export class ManifestService {
 
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
 
+    if (!manifestUrl) {
+      throw new Error('Manifest URL not found');
+    }
+
     const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
+
+    if (!manifest) {
+      throw new Error('Manifest not found');
+    }
 
     return manifest;
   }

@@ -29,7 +29,7 @@ describe('ManifestService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         ManifestService,
@@ -68,6 +68,32 @@ describe('ManifestService', () => {
       );
 
       expect(manifest).toEqual(MOCK_MANIFEST);
+    });
+
+    it('should throw error when manifest url is not found', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValueOnce(undefined),
+      }));
+
+      await expect(
+        manifestService.getManifest(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow('Manifest URL not found');
+    });
+
+    it('should throw error when manifest is not found', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
+      }));
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await expect(
+        manifestService.getManifest(ChainId.LOCALHOST, MOCK_ADDRESS),
+      ).rejects.toThrow('Manifest not found');
     });
   });
 });
