@@ -24,7 +24,7 @@ import { envValidator } from './common/config';
       envFilePath: process.env.NODE_ENV
         ? `.env.${process.env.NODE_ENV as string}`
         : '.env',
-        validationSchema: envValidator,
+      validationSchema: envValidator,
     }),
     DatabaseModule,
     HealthModule,
