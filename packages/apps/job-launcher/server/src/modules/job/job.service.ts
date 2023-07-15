@@ -149,18 +149,13 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
-      Currency.USD,
-    );
-
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
       totalAmount,
-      rate
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -243,18 +238,13 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
-      Currency.USD,
-    );
-
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
       totalAmount,
-      rate
     );
     
     jobEntity.status = JobStatus.PAID;

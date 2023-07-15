@@ -197,7 +197,7 @@ describe('PaymentService', () => {
       const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
         status: 'succeeded',
         amount: 100,
-        currency: 'USD'
+        currency: Currency.EUR
       };
 
       jest
@@ -216,9 +216,9 @@ describe('PaymentService', () => {
         userId,
         PaymentSource.FIAT,
         Currency.USD,
+        Currency.EUR,
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
-        1 / rate
       );
       expect(result).toBe(true);
     });
@@ -317,10 +317,10 @@ describe('PaymentService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.CRYPTO,
+        Currency.USD,
         TokenId.HMT,
         PaymentType.DEPOSIT,
         BigNumber.from('100'),
-        {},
         MOCK_TRANSACTION_HASH
       );
       expect(result).toBe(true);

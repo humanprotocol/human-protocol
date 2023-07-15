@@ -11,7 +11,7 @@ import {
   ErrorJob,
 } from '../../common/constants/errors';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -160,10 +160,10 @@ describe('JobService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.BALANCE,
+        Currency.USD,
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
         BigNumber.from(totalAmount),
-        {}
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
