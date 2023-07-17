@@ -27,10 +27,6 @@ export class AuthRepository {
       where,
       ...options,
     });
-    console.log({
-      where,
-      ...options,
-    });
 
     return authEntity;
   }

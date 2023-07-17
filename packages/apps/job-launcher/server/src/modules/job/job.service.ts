@@ -38,12 +38,14 @@ import {
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class JobService {
@@ -57,6 +59,7 @@ export class JobService {
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
     public readonly paymentService: PaymentService,
+    private readonly currencyService: CurrencyService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
   ) {
@@ -148,8 +151,10 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      totalAmount,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -234,10 +239,12 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      totalAmount,
     );
-
+    
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 

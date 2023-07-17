@@ -58,6 +58,7 @@ export enum ErrorPayment {
   TransactionNotFoundByHash = 'Transaction not found by hash',
   InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
+  UnsupportedToken = 'Unsupported token',
 }
 
 /**

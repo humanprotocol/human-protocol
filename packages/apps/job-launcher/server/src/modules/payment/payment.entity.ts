@@ -22,11 +22,8 @@ export class PaymentEntity extends BaseEntity {
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   public rate: number;
 
-  @Column({
-    type: 'enum',
-    enum: Currency,
-  })
-  public currency: Currency;
+  @Column({ type: 'varchar' })
+  public currency: string;
 
   @Column({
     type: 'enum',
