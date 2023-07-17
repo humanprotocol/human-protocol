@@ -168,7 +168,6 @@ describe('JobService', () => {
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
         BigNumber.from(totalAmount),
-        rate
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
