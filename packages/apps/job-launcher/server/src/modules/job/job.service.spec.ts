@@ -15,8 +15,8 @@ import {
   ErrorEscrow,
   ErrorJob,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -275,7 +275,6 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -331,8 +330,7 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
-      };
+      }
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
 
@@ -386,7 +384,6 @@ describe('JobService', () => {
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest
@@ -449,7 +446,6 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -463,7 +459,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest
@@ -548,7 +543,6 @@ describe('JobService', () => {
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
-        mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };
 

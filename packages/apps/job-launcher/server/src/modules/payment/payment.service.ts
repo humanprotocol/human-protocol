@@ -4,9 +4,11 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ConflictException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
+import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
@@ -40,6 +42,7 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(
+    private readonly web3Service: Web3Service,
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
@@ -223,11 +226,16 @@ export class PaymentService {
     source: PaymentSource,
     currencyFrom: string,
     currencyTo: string,
+    currencyFrom: string,
+    currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
     transactionHash?: string
+    transactionHash?: string
   ): Promise<boolean> {
     const rate = await this.currencyService.getRate(
+      currencyFrom,
+      currencyTo,
       currencyFrom,
       currencyTo,
     );
@@ -254,7 +262,7 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-
+    
     paymentEntities.forEach((payment) => {
       const fixedAmount = FixedNumber.from(
         ethers.utils.formatUnits(payment.amount, 18),
@@ -265,11 +273,13 @@ export class PaymentService {
 
       if (payment.type === PaymentType.WITHDRAWAL) {
         finalAmount = finalAmount.sub(amount);
+        finalAmount = finalAmount.sub(amount);
       } else {
+        finalAmount = finalAmount.add(amount);
         finalAmount = finalAmount.add(amount);
       }
     });
-
+    
     return finalAmount;
   }
 }
