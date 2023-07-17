@@ -64,7 +64,7 @@ export class PaymentController {
     try {
       return this.currencyService.getRate(data.token, data.currency);
     } catch (e) {
-      throw new Error(e)
+      throw new Error(e);
     }
   }
 }

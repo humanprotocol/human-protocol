@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -27,7 +27,10 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 
@@ -45,10 +48,17 @@ export class PaymentService {
     this.stripe = new Stripe(
       this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
       {
-        apiVersion: this.configService.get<any>(ConfigNames.STRIPE_API_VERSION)!,
+        apiVersion: this.configService.get<any>(
+          ConfigNames.STRIPE_API_VERSION,
+        )!,
         appInfo: {
-          name: this.configService.get<string>(ConfigNames.STRIPE_APP_NAME, 'Fortune')!,
-          version: this.configService.get<string>(ConfigNames.STRIPE_APP_VERSION)!,
+          name: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_NAME,
+            'Fortune',
+          )!,
+          version: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_VERSION,
+          )!,
           url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
         },
       },
@@ -102,26 +112,19 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    if (
-      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-    ) {
+    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
 
-      const rate = 1 / await this.currencyService.getRate(
-        Currency.USD,
-        paymentData.currency,
-      );
-
-      await this.savePayment(
-        userId,
-        PaymentSource.FIAT,
-        paymentData.currency.toLowerCase(),
-        PaymentType.DEPOSIT,
-        BigNumber.from(paymentData.amount),
-        rate
-      );
+    await this.savePayment(
+      userId,
+      PaymentSource.FIAT,
+      Currency.USD,
+      paymentData.currency.toLowerCase(),
+      PaymentType.DEPOSIT,
+      BigNumber.from(paymentData.amount)
+    );
 
     return true;
   }
@@ -159,24 +162,29 @@ export class PaymentService {
       );
     }
 
+    const signer = this.web3Service.getSigner(dto.chainId);
+
+    const recepientAddress = transaction.logs[0].topics.some(
+      (topic) =>
+        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
+    );
+    if (!recepientAddress) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const amount = BigNumber.from(transaction.logs[0].data);
     const tokenAddress = transaction.logs[0].address;
 
-    const signer = this.web3Service.getSigner(dto.chainId);
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
-      signer
+      signer,
     );
     const tokenId = (await tokenContract.symbol()).toLowerCase();
 
     if (!CoingeckoTokenId[tokenId]) {
-      this.logger.log(
-        ErrorPayment.UnsupportedToken,
-        PaymentRepository.name,
-      );
-      throw new ConflictException(
-        ErrorPayment.UnsupportedToken,
-      );
+      this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
+      throw new ConflictException(ErrorPayment.UnsupportedToken);
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
@@ -188,23 +196,16 @@ export class PaymentService {
         ErrorPayment.TransactionHashAlreadyExists,
         PaymentRepository.name,
       );
-      throw new BadRequestException(
-        ErrorPayment.TransactionHashAlreadyExists,
-      );
+      throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
     }
-
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[tokenId],
-      Currency.USD,
-    );
 
     await this.savePayment(
       userId,
       PaymentSource.CRYPTO,
+      Currency.USD,
       TokenId.HMT,
       PaymentType.DEPOSIT,
       amount,
-      rate,
       transaction.transactionHash
     );
 
@@ -220,20 +221,25 @@ export class PaymentService {
   public async savePayment(
     userId: number,
     source: PaymentSource,
-    currency: string,
+    currencyFrom: string,
+    currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
-    rate: number,
     transactionHash?: string
   ): Promise<boolean> {
+    const rate = await this.currencyService.getRate(
+      currencyFrom,
+      currencyTo,
+    );
+
     const paymentEntity = await this.paymentRepository.create({
       userId,
       amount: amount.toString(),
-      currency,
+      currency: currencyTo,
       source,
       rate,
       type,
-      transactionHash
+      transactionHash,
     });
 
     if (!paymentEntity) {
@@ -248,9 +254,11 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-    
+
     paymentEntities.forEach((payment) => {
-      const fixedAmount = FixedNumber.from(ethers.utils.formatUnits(payment.amount, 18));
+      const fixedAmount = FixedNumber.from(
+        ethers.utils.formatUnits(payment.amount, 18),
+      );
       const rate = FixedNumber.from(payment.rate);
 
       const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
@@ -261,7 +269,7 @@ export class PaymentService {
         finalAmount = finalAmount.add(amount);
       }
     });
-    
+
     return finalAmount;
   }
 }

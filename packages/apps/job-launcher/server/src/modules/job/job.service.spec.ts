@@ -1,5 +1,10 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, NETWORKS, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  EscrowClient,
+  NETWORKS,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,7 +16,7 @@ import {
   ErrorJob,
 } from '../../common/constants/errors';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -165,10 +170,10 @@ describe('JobService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.BALANCE,
+        Currency.USD,
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
         totalAmount,
-        rate
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
@@ -493,7 +498,9 @@ describe('JobService', () => {
       /*
         Temporary solution just to make tests pass.
       */
-      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(new Error(errorMessage));
+      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(
+        new Error(errorMessage),
+      );
 
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
@@ -571,10 +578,7 @@ describe('JobService', () => {
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);

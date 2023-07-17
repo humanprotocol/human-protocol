@@ -79,7 +79,7 @@ describe('PaymentService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
-      exports: [CurrencyService]
+      exports: [CurrencyService],
     }).compile();
   
     paymentService = moduleRef.get<PaymentService>(PaymentService);
@@ -208,7 +208,7 @@ describe('PaymentService', () => {
       const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
         status: 'succeeded',
         amount: 100,
-        currency: 'USD'
+        currency: Currency.EUR
       };
 
       jest
@@ -227,9 +227,9 @@ describe('PaymentService', () => {
         userId,
         PaymentSource.FIAT,
         Currency.USD,
+        Currency.EUR,
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
-        1 / rate
       );
       expect(result).toBe(true);
     });
@@ -295,7 +295,7 @@ describe('PaymentService', () => {
       const paymentData = {
         status: 'succeeded',
         amount: 100,
-        currency: 'USD'
+        currency: Currency.EUR
       };
   
       getPaymentMock.mockResolvedValue(paymentData);
@@ -309,9 +309,9 @@ describe('PaymentService', () => {
         userId,
         PaymentSource.FIAT,
         Currency.USD,
+        Currency.EUR,
         PaymentType.DEPOSIT,
         BigNumber.from(paymentData.amount),
-        1 / rate
       );
       expect(result).toBe(true);
     });
@@ -394,7 +394,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -417,10 +421,10 @@ describe('PaymentService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.CRYPTO,
+        Currency.USD,
         TokenId.HMT,
         PaymentType.DEPOSIT,
         BigNumber.from('100'),
-        {},
         MOCK_TRANSACTION_HASH
       );
       expect(result).toBe(true);
@@ -444,7 +448,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -511,7 +519,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },
@@ -547,7 +559,11 @@ describe('PaymentService', () => {
             transactionIndex: 123,
             removed: false,
             address: MOCK_ADDRESS,
-            topics: [],
+            topics: [
+              '0x123',
+              '0x0000000000000000000000000123',
+              MOCK_ADDRESS,
+            ],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
           },

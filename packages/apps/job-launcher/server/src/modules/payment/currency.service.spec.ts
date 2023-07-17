@@ -6,6 +6,7 @@ import { Currency, TokenId } from '../../common/enums/payment';
 import { COINGECKO_API_URL } from '../../common/constants';
 import { ErrorCurrency } from '../../common/constants/errors';
 import { of } from 'rxjs';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 describe('CurrencyService', () => {
   let currencyService: CurrencyService;
@@ -34,17 +35,17 @@ describe('CurrencyService', () => {
 
       const response = {
         data: {
-          [tokenId]: {
+          [CoingeckoTokenId[tokenId]]: {
             [currency]: rate,
           },
         },
       };
 
       jest.spyOn(httpService, 'get').mockReturnValueOnce(of(response as any));
-      const result = await currencyService.getRate(tokenId, currency);
+      const result = await currencyService.getRate(currency, tokenId);
 
       expect(httpService.get).toHaveBeenCalledWith(
-        `${COINGECKO_API_URL}?ids=${tokenId}&vs_currencies=${currency}`,
+        `${COINGECKO_API_URL}?ids=${CoingeckoTokenId[tokenId]}&vs_currencies=${currency}`,
       );
       expect(result).toBe(rate);
     });
@@ -59,7 +60,7 @@ describe('CurrencyService', () => {
 
       jest.spyOn(httpService, 'get').mockReturnValueOnce(of(response as any));
 
-      await expect(currencyService.getRate(tokenId, currency)).rejects.toThrow(
+      await expect(currencyService.getRate(currency, tokenId)).rejects.toThrow(
         ErrorCurrency.PairNotFound,
       );
     });
