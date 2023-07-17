@@ -109,19 +109,14 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
 
-      const rate = 1 / await this.currencyService.getRate(
-        Currency.USD,
-        paymentData.currency,
-      );
-
-      await this.savePayment(
-        userId,
-        PaymentSource.FIAT,
-        paymentData.currency.toLowerCase(),
-        PaymentType.DEPOSIT,
-        BigNumber.from(paymentData.amount),
-        rate
-      );
+    await this.savePayment(
+      userId,
+      PaymentSource.FIAT,
+      Currency.USD,
+      paymentData.currency.toLowerCase(),
+      PaymentType.DEPOSIT,
+      BigNumber.from(paymentData.amount)
+    );
 
     return true;
   }
@@ -193,18 +188,13 @@ export class PaymentService {
       );
     }
 
-    const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[tokenId],
-      Currency.USD,
-    );
-
     await this.savePayment(
       userId,
       PaymentSource.CRYPTO,
+      Currency.USD,
       TokenId.HMT,
       PaymentType.DEPOSIT,
       amount,
-      rate,
       transaction.transactionHash
     );
 
@@ -220,16 +210,21 @@ export class PaymentService {
   public async savePayment(
     userId: number,
     source: PaymentSource,
-    currency: string,
+    currencyFrom: string,
+    currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
-    rate: number,
     transactionHash?: string
   ): Promise<boolean> {
+    const rate = await this.currencyService.getRate(
+      currencyFrom,
+      currencyTo,
+    );
+
     const paymentEntity = await this.paymentRepository.create({
       userId,
       amount: amount.toString(),
-      currency,
+      currency: currencyTo,
       source,
       rate,
       type,

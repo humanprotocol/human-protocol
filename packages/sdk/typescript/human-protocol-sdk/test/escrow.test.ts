@@ -82,6 +82,7 @@ describe('EscrowClient', () => {
       getLaunchedEscrows: vi.fn(),
       getEscrowsFiltered: vi.fn(),
       address: ethers.constants.AddressZero,
+      canceler: vi.fn(),
       recordingOracle: vi.fn(),
       reputationOracle: vi.fn(),
       intermediateResultsUrl: vi.fn(),
@@ -1527,6 +1528,59 @@ describe('EscrowClient', () => {
     });
 
     test('should throw an error if getReputationOracleAddress fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.reputationOracle.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getReputationOracleAddress(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.reputationOracle
+      ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getJobLauncherAddress', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getJobLauncherAddress(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getJobLauncherAddress(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully get the job launcher address', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.canceler.mockReturnValue(
+        ethers.constants.AddressZero
+      );
+
+      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
+        escrowAddress
+      );
+
+      expect(jobLauncherAddress).toEqual(ethers.constants.AddressZero);
+      expect(escrowClient.escrowContract.canceler).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getJobLauncherAddress fails', async () => {
       const escrowAddress = ethers.constants.AddressZero;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
