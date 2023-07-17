@@ -125,10 +125,9 @@ export class JobService {
     const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
     const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(totalAmount, 18),
+      ethers.utils.formatUnits(fundAmountInWei, 18),
     );
     const fixedRate = FixedNumber.from(rate.toString());
 
@@ -142,7 +141,7 @@ export class JobService {
       requesterTitle,
       requesterDescription,
       fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -157,7 +156,7 @@ export class JobService {
       manifestUrl,
       manifestHash,
       fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -173,7 +172,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      totalAmount,
+      fundAmountInWei,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -200,14 +199,12 @@ export class JobService {
       'ether',
     );
 
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    );
-    const recordingOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-    );
     const reputationOracleFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+    );
+
+    const recordingOracleFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
     );
 
     const rate = await this.currencyService.getRate(
@@ -215,16 +212,14 @@ export class JobService {
       Currency.USD,
     );
 
-    const totalFeePercentage = BigNumber.from(jobLauncherFee)
-      .add(recordingOracleFee)
-      .add(reputationOracleFee);
+    const totalFeePercentage = BigNumber.from(reputationOracleFee)
+      .add(recordingOracleFee);
     const totalFee = BigNumber.from(fundAmountInWei)
       .mul(totalFeePercentage)
       .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
     const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(totalAmount, 18),
+      ethers.utils.formatUnits(fundAmountInWei, 18),
     );
     const fixedRate = FixedNumber.from(rate.toString());
 
@@ -240,7 +235,7 @@ export class JobService {
       requesterDescription,
       requesterAccuracyTarget,
       fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -255,7 +250,7 @@ export class JobService {
       manifestUrl,
       manifestHash,
       fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -271,7 +266,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      totalAmount,
+      fundAmountInWei,
     );
     
     jobEntity.status = JobStatus.PAID;

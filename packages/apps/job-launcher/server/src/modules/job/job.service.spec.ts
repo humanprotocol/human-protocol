@@ -154,7 +154,6 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
@@ -172,7 +171,7 @@ describe('JobService', () => {
         Currency.USD,
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
-        BigNumber.from(totalAmount),
+        BigNumber.from(fundAmountInWei),
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
@@ -180,7 +179,7 @@ describe('JobService', () => {
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -266,14 +265,13 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -285,7 +283,7 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: MOCK_ADDRESS,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -321,14 +319,13 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       }
 
@@ -435,7 +432,6 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
@@ -444,7 +440,7 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
       };
 
@@ -535,14 +531,13 @@ describe('JobService', () => {
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       };
 
