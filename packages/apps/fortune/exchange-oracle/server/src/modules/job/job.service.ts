@@ -3,7 +3,6 @@ import {
   EscrowStatus,
   KVStoreClient,
   KVStoreKeys,
-  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, Logger } from '@nestjs/common';
@@ -29,8 +28,23 @@ export class JobService {
   ): Promise<JobDetailsDto> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
+    const reputationOracleAddress =
+      await escrowClient.getReputationOracleAddress(escrowAddress);
+    const kvstore = await KVStoreClient.build(signer);
+    const reputationOracleURL = await kvstore.get(
+      reputationOracleAddress,
+      KVStoreKeys.webhook_url,
+    );
+
+    if (!reputationOracleURL)
+      throw new Error('Unable to get Reputation Oracle URL');
+
+    const manifest = await this.httpService.axiosRef
+      .get<any>(
+        reputationOracleURL +
+          `/manifest?chainId=${chainId}&escrowAddress=${escrowAddress}`,
+      )
+      .then((res) => res.data);
 
     return {
       escrowAddress,
