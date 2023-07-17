@@ -4,11 +4,9 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ConflictException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
@@ -42,7 +40,6 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(
-    private readonly web3Service: Web3Service,
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
@@ -226,16 +223,11 @@ export class PaymentService {
     source: PaymentSource,
     currencyFrom: string,
     currencyTo: string,
-    currencyFrom: string,
-    currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
     transactionHash?: string
-    transactionHash?: string
   ): Promise<boolean> {
     const rate = await this.currencyService.getRate(
-      currencyFrom,
-      currencyTo,
       currencyFrom,
       currencyTo,
     );
