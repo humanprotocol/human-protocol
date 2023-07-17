@@ -1,18 +1,15 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
-  EscrowClient,
-  NETWORKS,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ContractTransaction, BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
 } from '../../common/constants/errors';
 import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
@@ -34,7 +31,6 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_TRANSACTION_HASH,
 } from '../../common/test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -42,7 +38,6 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryManifestDto,
   JobFortuneDto,
-  SaveManifestDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -388,7 +383,12 @@ describe('JobService', () => {
   describe('launchJob with CVAT type', () => {
     let getManifestMock: any;
 
+    const mockTokenContract: any = {
+      transfer: jest.fn(),
+    };
+
     beforeEach(() => {
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
       getManifestMock = jest.spyOn(jobService, 'getManifest');
     });
   
@@ -459,52 +459,6 @@ describe('JobService', () => {
       await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
-    });
-  });
-
-  describe('saveManifest', () => {
-    it('should save the manifest and return the manifest URL and hash', async () => {
-      const encryptedManifest = { data: 'encrypted data' };
-
-      const result = await jobService.saveManifest(
-        encryptedManifest,
-        MOCK_BUCKET_NAME,
-      );
-
-      expect(result).toEqual({
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      });
-    });
-
-    it('should throw an error if the manifest file fails to upload', async () => {
-      const encryptedManifest = { data: 'encrypted data' };
-
-      /*
-        Temporary solution just to make tests pass.
-      */
-      (jobService.storageClient.uploadFiles as any).mockResolvedValueOnce([]);
-      await expect(
-        jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
-    });
-
-    it('should rethrow any other errors encountered', async () => {
-      const encryptedManifest = { data: 'encrypted data' };
-      const errorMessage = 'Something went wrong';
-
-      /*
-        Temporary solution just to make tests pass.
-      */
-      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(
-        new Error(errorMessage),
-      );
-
-      await expect(
-        jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
-      ).rejects.toThrowError(new Error(errorMessage));
     });
   });
 
@@ -615,4 +569,58 @@ describe('JobService', () => {
       );
     });
   });
+
+  describe('getManifest', () => {
+    let downloadFileFromUrlMock: any;
+
+    beforeEach(() => {
+      downloadFileFromUrlMock = jest.spyOn(StorageClient, 'downloadFileFromUrl');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
+    it('should download and return the manifest', async () => {
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+  
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fee: totalFee.toString(),
+        fundAmount: totalAmount.toString(),
+        mode: JobMode.DESCRIPTIVE,
+        requestType: JobRequestType.FORTUNE,
+      };
+  
+      downloadFileFromUrlMock.mockReturnValue(manifest);
+  
+      const result = await jobService.getManifest(MOCK_FILE_URL);
+  
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(manifest);
+    });
+  
+    it('should throw a NotFoundException if the manifest is not found', async () => {
+      downloadFileFromUrlMock.mockResolvedValue(null);
+  
+      await expect(jobService.getManifest(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ManifestNotFound),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+  });
+  
 });
