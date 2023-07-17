@@ -33,7 +33,7 @@ export class JobService {
     const kvstore = await KVStoreClient.build(signer);
     const reputationOracleURL = await kvstore.get(
       reputationOracleAddress,
-      KVStoreKeys.webhook_url,
+      KVStoreKeys.url,
     );
 
     if (!reputationOracleURL)
