@@ -315,6 +315,7 @@ class StakingTestCase(unittest.TestCase):
 
         mock_function.assert_called_once_with(staker_address)
 
+        self.assertEqual(staker_info["staker"], staker_address)
         self.assertEqual(staker_info["tokens_staked"], 1)
         self.assertEqual(staker_info["tokens_allocated"], 2)
         self.assertEqual(staker_info["tokens_locked"], 3)
@@ -329,6 +330,7 @@ class StakingTestCase(unittest.TestCase):
 
         mock_function.assert_called_once_with(self.w3.eth.default_account)
 
+        self.assertEqual(staker_info["staker"], self.w3.eth.default_account)
         self.assertEqual(staker_info["tokens_staked"], 1)
         self.assertEqual(staker_info["tokens_allocated"], 2)
         self.assertEqual(staker_info["tokens_locked"], 3)

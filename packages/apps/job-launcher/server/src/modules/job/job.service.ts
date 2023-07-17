@@ -334,16 +334,15 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = new FortuneManifestDto();
+    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
+      ? new FortuneManifestDto()
+      : new ImageLabelBinaryManifestDto();
+
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(
-        ErrorJob.ManifestValidationFailed,
-        JobService.name,
-        validationErrors,
-      );
+      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 

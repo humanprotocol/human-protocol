@@ -10,12 +10,11 @@ from test.human_protocol_sdk.utils.encryption import (
     passphrase,
     signed_message,
     encrypted_unsigned_message,
+    message,
 )
 
 from human_protocol_sdk.encryption import Encryption, EncryptionUtils
 from pgpy.errors import PGPDecryptionError
-
-message = "Test message"
 
 
 class TestEncryption(unittest.TestCase):
