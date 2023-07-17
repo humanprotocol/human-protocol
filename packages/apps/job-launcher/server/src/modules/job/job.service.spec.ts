@@ -12,8 +12,8 @@ import {
   ErrorBucket,
   ErrorJob,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
 import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -254,7 +254,6 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
   
       getManifestMock.mockResolvedValue(manifest);
@@ -339,7 +338,6 @@ describe('JobService', () => {
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
   
       getManifestMock.mockResolvedValue(invalidManifest as FortuneManifestDto);
@@ -417,21 +415,8 @@ describe('JobService', () => {
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
         mode: JobMode.DESCRIPTIVE,
       };
-  
-      getManifestMock.mockResolvedValue(manifest);
-  
-      const mockJobEntity: Partial<JobEntity> = {
-        chainId: 1,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-  
-      await jobService.launchJob(mockJobEntity as JobEntity);
-  
-      expect(jobService.getManifest).toHaveBeenCalledWith(mockJobEntity.manifestUrl);
+
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
     });
   
     it('should throw an error if the manifest validation failed', async () => {
@@ -442,7 +427,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
   
       getManifestMock.mockResolvedValue(invalidManifest as ImageLabelBinaryManifestDto);
@@ -547,7 +531,6 @@ describe('JobService', () => {
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
-        mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };
 

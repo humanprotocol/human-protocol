@@ -28,6 +28,29 @@ describe('CurrencyService', () => {
   });
 
   describe('getRate', () => {
+    it('should get the rate for a given usd to other fiat currency and reverse it', async () => {
+      const currency = Currency.USD;
+      const otherCurrency = Currency.EUR;
+      const rate = 0.9;
+      const reversedRate = 1.1111111111111112;
+
+      const response = {
+        data: {
+          [currency]: {
+            [otherCurrency]: rate,
+          },
+        },
+      };
+
+      jest.spyOn(httpService, 'get').mockReturnValueOnce(of(response as any));
+      const result = await currencyService.getRate(currency, otherCurrency);
+
+      expect(httpService.get).toHaveBeenCalledWith(
+        `${COINGECKO_API_URL}?ids=${currency}&vs_currencies=${otherCurrency}`,
+      );
+      expect(result).toBe(reversedRate);
+    });
+
     it('should get the rate for a given token ID and currency', async () => {
       const tokenId = TokenId.HMT;
       const currency = Currency.USD;

@@ -711,7 +711,27 @@ class EscrowClient:
         if not Web3.isAddress(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
-        return self._get_escrow_contract(escrow_address).functions.canceler().call()
+        return self._get_escrow_contract(escrow_address).functions.launcher().call()
+
+    def get_factory_address(self, escrow_address: str) -> str:
+        """Gets the escrow factory address of the escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Escrow factory address
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.isAddress(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address).functions.escrowFactory().call()
+        )
 
     def _get_escrow_contract(self, address: str) -> contract:
         """Returns the escrow contract instance.

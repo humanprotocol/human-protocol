@@ -10,9 +10,9 @@ Escrow contract represents the entire life cycle of the job on Human Protocol. E
 
 On the other hand, it can be cancelled anytime.
 
-- `constructor(token, canceler, duration, trustedHandlers)`
+- `constructor(token, launcher, canceler, duration, trustedHandlers)`
 
-  Create a new escrow with ERC20 token for payments, canceler who receives the money back when the job is cancelled, job duration before expiry, and extra trusted handlers that act like super admin of the escrow. Initial escrow status is `Launched`.
+  Create a new escrow with ERC20 token for payments, launcher who initiated the call to escrow factory, canceler who receives the money back when the job is cancelled, job duration before expiry, and extra trusted handlers that act like super admin of the escrow. Initial escrow status is `Launched`.
 
 - `setup(reputationOracle, recordingOracle, reputationOracleFeePercentage, recordingOracleFeePercentage, url, hash)`
 

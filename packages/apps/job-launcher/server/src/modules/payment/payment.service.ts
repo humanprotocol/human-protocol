@@ -254,7 +254,7 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-
+    
     paymentEntities.forEach((payment) => {
       const fixedAmount = FixedNumber.from(
         ethers.utils.formatUnits(payment.amount, 18),
@@ -265,11 +265,13 @@ export class PaymentService {
 
       if (payment.type === PaymentType.WITHDRAWAL) {
         finalAmount = finalAmount.sub(amount);
+        finalAmount = finalAmount.sub(amount);
       } else {
+        finalAmount = finalAmount.add(amount);
         finalAmount = finalAmount.add(amount);
       }
     });
-
+    
     return finalAmount;
   }
 }
