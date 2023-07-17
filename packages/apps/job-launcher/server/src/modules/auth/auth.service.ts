@@ -100,8 +100,12 @@ export class AuthService {
     const refreshToken = v4();
     const date = new Date();
 
-    const accessTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN)!;
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN)!;
+    const accessTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
+    )!;
+    const refreshTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+    )!;
 
     await this.authRepository.create({
       user: userEntity,
