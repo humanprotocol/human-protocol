@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BigNumber } from 'ethers';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -124,7 +124,6 @@ export class JobService {
       requesterDescription,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -213,7 +212,6 @@ export class JobService {
       requesterAccuracyTarget,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.BATCH,
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
