@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import Stripe from 'stripe';
-import { BadRequestException } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
@@ -28,6 +27,7 @@ import {
 } from '../../common/test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
@@ -36,12 +36,10 @@ describe('PaymentService', () => {
   let paymentService: PaymentService;
   let paymentRepository: PaymentRepository;
   let currencyService: CurrencyService;
-  let configService: ConfigService;
-  let httpService: HttpService;
 
   const signerMock = {
-    address: '0x1234567890123456789012345678901234567892',
-    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+    address: MOCK_ADDRESS,
+    getNetwork: jest.fn().mockResolvedValue({ chainId: ChainId.LOCALHOST }),
   };
 
   beforeEach(async () => {
@@ -49,7 +47,7 @@ describe('PaymentService', () => {
       get: jest.fn((key: string, defaultValue?: any) => {
         switch (key) {
           case 'STRIPE_SECRET_KEY':
-            return 'test-secrete';
+            return 'test-secret';
           case 'STRIPE_API_VERSION':
             return '2022-11-15';
           case 'NAME':
@@ -63,7 +61,7 @@ describe('PaymentService', () => {
         }
       }),
     };
-
+  
     const moduleRef = await Test.createTestingModule({
       providers: [
         PaymentService,
@@ -83,79 +81,94 @@ describe('PaymentService', () => {
       ],
       exports: [CurrencyService]
     }).compile();
-
+  
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     paymentRepository = moduleRef.get(PaymentRepository);
     currencyService = moduleRef.get(CurrencyService);
-    configService = moduleRef.get(ConfigService);
-    httpService = moduleRef.get(HttpService);
-
+  
+    const stripeCustomersCreateMock = jest.fn();
+    const stripePaymentIntentsCreateMock = jest.fn();
+  
     stripe = {
       customers: {
-        create: jest.fn(),
+        create: stripeCustomersCreateMock,
       },
       paymentIntents: {
-        create: jest.fn(),
+        create: stripePaymentIntentsCreateMock,
       },
     } as any;
-
-    paymentService['stripe'] = stripe as Stripe;
+  
+    paymentService['stripe'] = stripe;
+  
+    jest.spyOn(stripe.customers, 'create').mockImplementation(stripeCustomersCreateMock);
+    jest.spyOn(stripe.paymentIntents, 'create').mockImplementation(stripePaymentIntentsCreateMock);
   });
 
   describe('createCustomer', () => {
+    let createCustomerMock: any;
+
+    beforeEach(() => {
+      createCustomerMock = jest.spyOn(stripe.customers, 'create');
+    });
+
+    afterEach(() => {
+      expect(createCustomerMock).toHaveBeenCalledTimes(1);
+      expect(createCustomerMock).toHaveBeenCalledWith({
+        email: MOCK_EMAIL,
+      });
+      createCustomerMock.mockRestore();
+    });
+
     it('should create a customer', async () => {
       const stripeApiResponse = {
         id: MOCK_CUSTOMER_ID,
         email: MOCK_EMAIL,
       };
 
-      jest
-        .spyOn(stripe.customers, 'create')
-        .mockResolvedValue(
+      createCustomerMock.mockResolvedValue(
           stripeApiResponse as Stripe.Response<Stripe.Customer>,
         );
 
       const result = await paymentService.createCustomer(MOCK_EMAIL);
 
       expect(result).toBe(MOCK_CUSTOMER_ID);
-      expect(stripe.customers.create).toHaveBeenCalledTimes(1);
-      expect(stripe.customers.create).toHaveBeenCalledWith({
-        email: MOCK_EMAIL,
-      });
     });
 
     it('should throw bad request exception if customer creation fails', async () => {
-      jest.spyOn(stripe.customers, 'create').mockRejectedValue(new Error());
+      createCustomerMock.mockRejectedValue(new Error());
 
       expect(paymentService.createCustomer(MOCK_EMAIL)).rejects.toThrowError();
-      expect(stripe.customers.create).toHaveBeenCalledTimes(1);
-      expect(stripe.customers.create).toHaveBeenCalledWith({
-        email: MOCK_EMAIL,
-      });
     });
   });
 
   describe('createFiatPayment', () => {
+    let createPaymentIntentMock: any;
+  
+    beforeEach(() => {
+      createPaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'create');
+    });
+  
+    afterEach(() => {
+      expect(createPaymentIntentMock).toHaveBeenCalledTimes(1);
+      createPaymentIntentMock.mockRestore();
+    });
+  
     it('should create a fiat payment successfully', async () => {
       const customerId = MOCK_CUSTOMER_ID;
       const dto = {
         amount: 100,
         currency: Currency.USD,
       };
-
-      const paymentIntent: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
+  
+      const paymentIntent = {
         client_secret: 'clientSecret123',
       };
-
-      jest
-        .spyOn(stripe.paymentIntents, 'create')
-        .mockResolvedValue(
-          paymentIntent as Stripe.Response<Stripe.PaymentIntent>,
-        );
-
+  
+      createPaymentIntentMock.mockResolvedValue(paymentIntent);
+  
       const result = await paymentService.createFiatPayment(customerId, dto);
-
-      expect(stripe.paymentIntents.create).toHaveBeenCalledWith({
+  
+      expect(createPaymentIntentMock).toHaveBeenCalledWith({
         payment_method_types: [PaymentFiatMethodType.CARD],
         amount: dto.amount * 100,
         currency: dto.currency,
@@ -167,19 +180,17 @@ describe('PaymentService', () => {
         clientSecret: paymentIntent.client_secret,
       });
     });
-
+  
     it('should throw a bad request exception if the payment intent creation fails', async () => {
       const customerId = MOCK_CUSTOMER_ID;
-
+  
       const dto = {
         amount: 100,
         currency: Currency.USD,
       };
-
-      jest
-        .spyOn(stripe.paymentIntents, 'create')
-        .mockRejectedValue(new Error());
-
+  
+      createPaymentIntentMock.mockRejectedValue(new Error());
+  
       await expect(
         paymentService.createFiatPayment(customerId, dto),
       ).rejects.toThrowError();
@@ -259,20 +270,121 @@ describe('PaymentService', () => {
     });
   });
 
+  describe('confirmFiatPayment', () => {
+    let getPaymentMock: any,
+        savePaymentMock: any,
+        getRateMock: any;
+
+    beforeEach(() => {
+      getPaymentMock = jest.spyOn(paymentService, 'getPayment');
+      savePaymentMock = jest.spyOn(paymentService, 'savePayment');
+      getRateMock = jest.spyOn(currencyService, 'getRate');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
+    it('should confirm a fiat payment successfully', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+      const rate = 1.5;
+  
+      const paymentData = {
+        status: 'succeeded',
+        amount: 100,
+        currency: 'USD'
+      };
+  
+      getPaymentMock.mockResolvedValue(paymentData);
+      savePaymentMock.mockResolvedValue(true);
+      getRateMock.mockResolvedValue(rate);
+  
+      const result = await paymentService.confirmFiatPayment(userId, dto);
+  
+      expect(paymentService.getPayment).toHaveBeenCalledWith(dto.paymentId);
+      expect(paymentService.savePayment).toHaveBeenCalledWith(
+        userId,
+        PaymentSource.FIAT,
+        Currency.USD,
+        PaymentType.DEPOSIT,
+        BigNumber.from(paymentData.amount),
+        1 / rate
+      );
+      expect(result).toBe(true);
+    });
+  
+    it('should throw a bad request exception if the payment is not successful', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+  
+      const paymentData = {
+        status: 'canceled',
+        amount: 100,
+      };
+  
+      getPaymentMock.mockResolvedValue(paymentData);
+  
+      await expect(
+        paymentService.confirmFiatPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+    });
+  
+    it('should return false if the payment is not found', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+  
+      getPaymentMock.mockResolvedValue(null);
+  
+      await expect(
+        paymentService.confirmFiatPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.NotFound);
+    });
+  });
+
   describe('createCryptoPayment', () => {
+    let jsonRpcProviderMock: any,
+        findOneMock: any,
+        savePaymentMock: any;
+
     const mockTokenContract: any = {
       symbol: jest.fn(),
     };
-    
+  
+    beforeEach(() => {
+      jsonRpcProviderMock = {
+        getTransactionReceipt: jest.fn(),
+      };
+  
+      jest
+        .spyOn(ethers.providers, 'JsonRpcProvider')
+        .mockReturnValue(jsonRpcProviderMock as any);
+  
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest.spyOn(mockTokenContract, 'symbol');
+      findOneMock = jest.spyOn(paymentRepository, 'findOne');
+      savePaymentMock = jest.spyOn(paymentService, 'savePayment');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
     it('should create a crypto payment successfully', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
+  
       const token = 'hmt';
-
+  
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
@@ -290,27 +402,15 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest
-          .fn()
-          .mockResolvedValue(transactionReceipt as TransactionReceipt),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-
-      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
-
-      jest.spyOn(paymentRepository, 'findOne').mockResolvedValue(null);
-
-      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(transactionReceipt);
+  
+      mockTokenContract.symbol.mockResolvedValue(token);
+      findOneMock.mockResolvedValue(null);
+      savePaymentMock.mockResolvedValue(true);
+  
       const result = await paymentService.createCryptoPayment(userId, dto);
-
+  
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
         transactionHash: dto.transactionHash,
       });
@@ -325,16 +425,16 @@ describe('PaymentService', () => {
       );
       expect(result).toBe(true);
     });
-
+  
     it('should throw a conflict exception if an unsupported token is used', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
+  
       const unsupportedToken = 'doge';
-
+  
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
@@ -352,76 +452,56 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt as TransactionReceipt),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-
-      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(unsupportedToken);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(transactionReceipt);
+  
+      mockTokenContract.symbol.mockResolvedValue(unsupportedToken);
+  
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
     });
-
+  
     it('should throw a not found exception if the transaction is not found by hash', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(null),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(null);
+  
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.TransactionNotFoundByHash);
     });
-
+  
     it('should throw a not found exception if the transaction data is invalid', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
+  
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [],
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(transactionReceipt);
+  
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.InvalidTransactionData);
     });
-
+  
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
+  
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
@@ -439,31 +519,25 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
         confirmations: TX_CONFIRMATION_TRESHOLD - 1,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(transactionReceipt);
+  
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(
         ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
       );
     });
-
+  
     it('should throw a bad request exception if the payment with the same transaction hash already exists', async () => {
       const userId = 1;
       const dto = {
-        chainId: 1,
+        chainId: ChainId.LOCALHOST,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
-
+  
       const token = 'hmt';
-
+  
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
@@ -481,21 +555,13 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
-
-      const jsonRpcProviderMock = {
-        getTransactionReceipt: jest.fn().mockResolvedValue(transactionReceipt),
-      };
-
-      jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
-        .mockReturnValue(jsonRpcProviderMock as any);
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-
-      jest.spyOn(mockTokenContract, 'symbol').mockResolvedValue(token);
-
-      jest.spyOn(paymentRepository, 'findOne').mockResolvedValue({} as any);
-
+  
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(transactionReceipt);
+  
+      mockTokenContract.symbol.mockResolvedValue(token);
+  
+      findOneMock.mockResolvedValue({} as any);
+  
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.TransactionHashAlreadyExists);
