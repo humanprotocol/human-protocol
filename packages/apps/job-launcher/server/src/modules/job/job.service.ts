@@ -205,7 +205,7 @@ export class JobService {
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 18),
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
       ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
 
