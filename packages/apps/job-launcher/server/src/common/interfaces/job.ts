@@ -13,7 +13,3 @@ export interface IJob extends IBase {
   retriesCount?: number;
   waitUntil: Date;
 }
-
-export interface IJobId {
-  id: number;
-}

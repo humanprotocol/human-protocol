@@ -18,7 +18,6 @@ import {
   PaymentFiatCreateDto,
 } from './payment.dto';
 import { CurrencyService } from './currency.service';
-import { IClientSecret } from '../../common/interfaces';
 
 @ApiBearerAuth()
 @ApiTags('Payment')
@@ -34,7 +33,7 @@ export class PaymentController {
   public async createFiatPayment(
     @Request() req: any,
     @Body() data: PaymentFiatCreateDto,
-  ): Promise<IClientSecret> {
+  ): Promise<string> {
     return this.paymentService.createFiatPayment(
       req.user?.stripeCustomerId,
       data,

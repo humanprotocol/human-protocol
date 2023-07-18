@@ -75,7 +75,7 @@ export class PaymentService {
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
-  ): Promise<IClientSecret> {
+  ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
@@ -98,9 +98,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
-    return {
-      clientSecret: paymentIntent.client_secret,
-    };
+    return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(

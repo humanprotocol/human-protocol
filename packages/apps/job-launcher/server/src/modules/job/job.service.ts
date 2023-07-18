@@ -47,7 +47,6 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { IJobId } from '../../common/interfaces';
 
 @Injectable()
 export class JobService {
@@ -88,7 +87,7 @@ export class JobService {
   public async createFortuneJob(
     userId: number,
     dto: JobFortuneDto,
-  ): Promise<IJobId> {
+  ): Promise<number> {
     const {
       chainId,
       fortunesRequired,
@@ -160,12 +159,10 @@ export class JobService {
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
-    return {
-      id: jobEntity.id,
-    };
+    return jobEntity.id;
   }
 
-  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<IJobId> {
+  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
     const {
       chainId,
       dataUrl,
@@ -249,9 +246,7 @@ export class JobService {
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
-    return {
-      id: jobEntity.id,
-    };
+    return jobEntity.id;
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
