@@ -4,8 +4,8 @@ import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
 import { ConfigNames } from '../../common/config';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
-import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
+import { IReputation } from '../../common/interfaces';
 
 @Injectable()
 export class ReputationService {
@@ -17,11 +17,10 @@ export class ReputationService {
   ) {}
 
   public getReputationLevel(reputationPoints: number): ReputationLevel {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const reputationLevelLow = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_LOW,
     )!;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     const reputationLevelHigh = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_HIGH,
     )!;
@@ -100,20 +99,34 @@ export class ReputationService {
   public async getReputation(
     chainId: ChainId,
     address: string,
-  ): Promise<ReputationEntity> {
+  ): Promise<IReputation> {
     const reputationEntity = await this.reputationRepository.findOne({
       address,
       chainId,
     });
 
-    return reputationEntity;
+    return {
+      chainId: reputationEntity.chainId,
+      address: reputationEntity.address,
+      reputation: this.getReputationLevel(
+        reputationEntity.reputationPoints,
+      ),
+    }
   }
 
   public async getAllReputations(
     chainId?: ChainId,
-  ): Promise<Array<ReputationEntity>> {
-    return await this.reputationRepository.find({
+  ): Promise<IReputation[]> {
+    const reputations = await this.reputationRepository.find({
       chainId,
     });
+
+    return reputations.map((reputation) => ({
+      chainId: reputation.chainId,
+      address: reputation.address,
+      reputation: this.getReputationLevel(
+        reputation.reputationPoints,
+      ),
+    }));
   }
 }

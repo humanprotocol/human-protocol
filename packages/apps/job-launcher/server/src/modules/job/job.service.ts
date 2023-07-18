@@ -117,22 +117,17 @@ export class JobService {
       Currency.USD,
     );
 
-    const totalFeePercentage = BigNumber.from(
+    const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .add(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!)
-      .add(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+    ).div(100).mul(fundAmountInWei);
 
-    const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(totalAmount, 18),
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
-    const fixedRate = FixedNumber.from(rate.toString());
 
-    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -141,8 +136,7 @@ export class JobService {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -156,8 +150,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fee: jobLauncherFee.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -173,7 +167,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      totalAmount,
+      usdTotalAmount,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -200,35 +194,22 @@ export class JobService {
       'ether',
     );
 
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    );
-    const recordingOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-    );
-    const reputationOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-    );
-
     const rate = await this.currencyService.getRate(
       CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
     );
 
-    const totalFeePercentage = BigNumber.from(jobLauncherFee)
-      .add(recordingOracleFee)
-      .add(reputationOracleFee);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+    const jobLauncherFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
+    ).div(100).mul(fundAmountInWei);
 
-    const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(totalAmount, 18),
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
-    const fixedRate = FixedNumber.from(rate.toString());
 
-    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -239,8 +220,7 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -254,8 +234,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fee: jobLauncherFee.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -271,7 +251,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      totalAmount,
+      usdTotalAmount,
     );
     
     jobEntity.status = JobStatus.PAID;

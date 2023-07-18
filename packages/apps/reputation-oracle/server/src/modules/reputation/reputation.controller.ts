@@ -1,14 +1,13 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
-import { ReputationLevel } from '../../common/enums';
 import { ReputationService } from './reputation.service';
-import { ChainId } from '@human-protocol/sdk';
 import {
   ReputationGetAllQueryDto,
   ReputationGetParamsDto,
   ReputationGetQueryDto,
 } from './reputation.dto';
+import { IReputation } from '../../common/interfaces';
 
 @Public()
 @ApiTags('Reputation')
@@ -19,35 +18,22 @@ export class ReputationController {
   @Get()
   public async getReputations(
     @Query() query: ReputationGetAllQueryDto,
-  ): Promise<
-    Array<{ chainId: ChainId; address: string; reputation: ReputationLevel }>
-  > {
+  ): Promise<IReputation[]> {
     const { chainId } = query;
-    const reputations = await this.reputationService.getAllReputations(chainId);
-
-    return reputations.map((reputation) => ({
-      chainId: reputation.chainId,
-      address: reputation.address,
-      reputation: this.reputationService.getReputationLevel(
-        reputation.reputationPoints,
-      ),
-    }));
+    return this.reputationService.getAllReputations(chainId);
   }
 
-  @Get(':address')
+  @Get('/:address')
   public async getReputation(
     @Param() params: ReputationGetParamsDto,
     @Query() query: ReputationGetQueryDto,
-  ): Promise<ReputationLevel> {
+  ): Promise<IReputation> {
     const { chainId } = query;
     const { address } = params;
 
-    const reputation = await this.reputationService.getReputation(
+    return this.reputationService.getReputation(
       chainId,
       address,
-    );
-    return this.reputationService.getReputationLevel(
-      reputation.reputationPoints,
     );
   }
 }
