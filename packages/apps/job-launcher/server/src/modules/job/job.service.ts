@@ -257,8 +257,12 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
-      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+      recordingOracle: this.configService.get<string>(
+        ConfigNames.RECORDING_ORACLE_ADDRESS,
+      )!,
+      reputationOracle: this.configService.get<string>(
+        ConfigNames.REPUTATION_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
@@ -269,42 +273,42 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
-      const escrowAddress = await escrowClient.createAndSetupEscrow(
-        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        [],
-        escrowConfig,
-      );
+    const escrowAddress = await escrowClient.createAndSetupEscrow(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      [],
+      escrowConfig,
+    );
 
     if (!escrowAddress) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
 
-      await this.validateManifest(manifest);
+    await this.validateManifest(manifest);
 
-      const tokenContract: HMToken = HMToken__factory.connect(
-        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        signer
+    const tokenContract: HMToken = HMToken__factory.connect(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      signer,
+    );
+    await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
+
+    jobEntity.escrowAddress = escrowAddress;
+    jobEntity.status = JobStatus.LAUNCHED;
+    await jobEntity.save();
+
+    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      this.sendWebhook(
+        this.configService.get<string>(
+          ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+        )!,
+        {
+          escrowAddress: jobEntity.escrowAddress,
+          chainId: jobEntity.chainId,
+        },
       );
-      await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
-
-      jobEntity.escrowAddress = escrowAddress;
-      jobEntity.status = JobStatus.LAUNCHED;
-      await jobEntity.save();
-
-      if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-          },
-        );
-      }
+    }
 
     return jobEntity;
   }
@@ -323,8 +327,8 @@ export class JobService {
       throw new BadGatewayException(ErrorBucket.UnableSaveFile);
     }
 
-      const { url, hash } = uploadedFiles[0];
-      const manifestUrl = url;
+    const { url, hash } = uploadedFiles[0];
+    const manifestUrl = url;
 
     return { manifestUrl, manifestHash: hash };
   }

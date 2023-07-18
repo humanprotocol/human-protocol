@@ -17,7 +17,7 @@ import { Web3Module } from '../web3/web3.module';
     ConfigModule,
     HttpModule,
     PaymentModule,
-    Web3Module
+    Web3Module,
   ],
   controllers: [JobController],
   providers: [Logger, JobService, JobRepository, JobCron],

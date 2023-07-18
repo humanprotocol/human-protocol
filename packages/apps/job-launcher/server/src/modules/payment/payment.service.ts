@@ -45,10 +45,17 @@ export class PaymentService {
     this.stripe = new Stripe(
       this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
       {
-        apiVersion: this.configService.get<any>(ConfigNames.STRIPE_API_VERSION)!,
+        apiVersion: this.configService.get<any>(
+          ConfigNames.STRIPE_API_VERSION,
+        )!,
         appInfo: {
-          name: this.configService.get<string>(ConfigNames.STRIPE_APP_NAME, 'Fortune')!,
-          version: this.configService.get<string>(ConfigNames.STRIPE_APP_VERSION)!,
+          name: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_NAME,
+            'Fortune',
+          )!,
+          version: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_VERSION,
+          )!,
           url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
         },
       },
@@ -71,7 +78,7 @@ export class PaymentService {
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
-  ) {
+  ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
@@ -86,9 +93,15 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    return {
-      clientSecret: paymentIntent.client_secret,
-    };
+    if (!paymentIntent.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
+      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(
@@ -102,9 +115,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    if (
-      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-    ) {
+    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
@@ -124,7 +135,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
-  ) {
+  ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.network.chainId === dto.chainId,
@@ -183,9 +194,7 @@ export class PaymentService {
         ErrorPayment.TransactionHashAlreadyExists,
         PaymentRepository.name,
       );
-      throw new BadRequestException(
-        ErrorPayment.TransactionHashAlreadyExists,
-      );
+      throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
     }
 
     await this.savePayment(

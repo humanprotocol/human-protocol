@@ -1,5 +1,9 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, NETWORKS, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  EscrowClient,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -246,10 +250,7 @@ describe('JobService', () => {
 
     it('should launch a job successfully', async () => {
       const chainId: ChainId = 80001;
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
@@ -257,7 +258,7 @@ describe('JobService', () => {
         .mul(totalFeePercentage)
         .div(100);
       const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-      
+
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
@@ -280,7 +281,9 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
 
       jest.spyOn(mockTokenContract, 'transfer').mockResolvedValue({
         chainId: 1,
@@ -289,7 +292,10 @@ describe('JobService', () => {
 
       const jobEntity = await jobService.launchJob(mockJobEntity as JobEntity);
 
-      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, jobEntity.fundAmount);
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        jobEntity.fundAmount,
+      );
       expect(jobEntity.escrowAddress).toBe(MOCK_ADDRESS);
       expect(jobEntity.status).toBe(JobStatus.LAUNCHED);
       expect(jobEntity.save).toHaveBeenCalled();
@@ -299,10 +305,7 @@ describe('JobService', () => {
     });
 
     it('should throw an unpredictable gas limit error if transfer failed', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
@@ -310,7 +313,7 @@ describe('JobService', () => {
         .mul(totalFeePercentage)
         .div(100);
       const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-      
+
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
@@ -322,9 +325,18 @@ describe('JobService', () => {
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-    
-      jest.spyOn(mockTokenContract, 'transfer').mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
+
+      jest
+        .spyOn(mockTokenContract, 'transfer')
+        .mockRejectedValue(
+          Object.assign(
+            new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
+            { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT },
+          ),
+        );
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -335,15 +347,13 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT));
+      expect(jobService.launchJob(mockJobEntity as JobEntity)).rejects.toThrow(
+        new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
+      );
     });
 
     it('should throw an error if the manifest does not exist', async () => {
-      jest
-        .spyOn(jobService, 'getManifest')
-        .mockResolvedValue(null!);
+      jest.spyOn(jobService, 'getManifest').mockResolvedValue(null!);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -409,10 +419,7 @@ describe('JobService', () => {
 
   describe('launchJob with CVAT type', () => {
     it('should launch a job successfully', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
@@ -500,7 +507,9 @@ describe('JobService', () => {
       /*
         Temporary solution just to make tests pass.
       */
-      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(new Error(errorMessage));
+      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(
+        new Error(errorMessage),
+      );
 
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
@@ -510,10 +519,7 @@ describe('JobService', () => {
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);

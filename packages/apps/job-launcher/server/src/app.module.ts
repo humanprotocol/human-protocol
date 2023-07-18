@@ -43,7 +43,7 @@ import { envValidator } from './common/config';
     UserModule,
     JobModule,
     PaymentModule,
-    Web3Module
+    Web3Module,
   ],
   controllers: [AppController],
 })

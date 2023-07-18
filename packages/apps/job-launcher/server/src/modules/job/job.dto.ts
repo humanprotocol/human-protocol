@@ -139,7 +139,7 @@ export class FortuneManifestDto {
   @IsNumber()
   @IsPositive()
   submissionsRequired: number;
-  
+
   @IsString()
   requesterTitle: string;
 
@@ -159,7 +159,7 @@ export class FortuneManifestDto {
 export class ImageLabelBinaryManifestDto {
   @IsString()
   dataUrl: string;
-  
+
   @IsArray()
   labels: string[];
 

@@ -9,7 +9,7 @@ import {
   UpdateResult,
 } from 'typeorm';
 import { AuthEntity } from './auth.entity';
-import { AuthDto, AuthUpdateDto } from './auth.dto';
+import { AuthCreateDto, AuthUpdateDto } from './auth.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -52,7 +52,7 @@ export class AuthRepository {
     });
   }
 
-  public async create(dto: AuthDto): Promise<AuthEntity> {
+  public async create(dto: AuthCreateDto): Promise<AuthEntity> {
     return this.authEntityRepository.create(dto).save();
   }
 
