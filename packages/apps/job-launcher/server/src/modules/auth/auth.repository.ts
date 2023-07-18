@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   FindOptionsWhere,
@@ -6,9 +6,10 @@ import {
   FindOneOptions,
   Repository,
   DeleteResult,
+  UpdateResult,
 } from 'typeorm';
 import { AuthEntity } from './auth.entity';
-import { AuthDto } from './auth.dto';
+import { AuthDto, AuthUpdateDto } from './auth.dto';
 
 @Injectable()
 export class AuthRepository {
@@ -18,6 +19,13 @@ export class AuthRepository {
     @InjectRepository(AuthEntity)
     private readonly authEntityRepository: Repository<AuthEntity>,
   ) {}
+
+  public async update(
+    where: FindOptionsWhere<AuthEntity>,
+    dto: Partial<AuthUpdateDto>,
+  ): Promise<UpdateResult> {
+    return this.authEntityRepository.update(where, dto);
+  }
 
   public async findOne(
     where: FindOptionsWhere<AuthEntity>,
