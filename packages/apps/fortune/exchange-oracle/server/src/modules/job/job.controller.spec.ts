@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
@@ -14,11 +15,20 @@ describe('JobController', () => {
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
 
+  const reputationOracleURL = 'https://example.com/reputationoracle';
+  const configServiceMock = {
+    get: jest.fn().mockReturnValue(reputationOracleURL),
+  };
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [JobController],
       providers: [
         JobService,
+        {
+          provide: ConfigService,
+          useValue: configServiceMock,
+        },
         {
           provide: Web3Service,
           useValue: {

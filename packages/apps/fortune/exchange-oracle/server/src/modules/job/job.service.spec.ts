@@ -1,4 +1,5 @@
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { Web3Service } from '../web3/web3.service';
@@ -23,6 +24,7 @@ jest.mock('axios', () => ({
 }));
 
 describe('JobService', () => {
+  let configService: ConfigService;
   let jobService: JobService;
   let web3Service: Web3Service;
   let httpService: HttpService;
@@ -36,6 +38,11 @@ describe('JobService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
+  const reputationOracleURL = 'https://example.com/reputationoracle';
+  const configServiceMock = {
+    get: jest.fn().mockReturnValue(reputationOracleURL),
+  };
+
   const httpServicePostMock = jest
     .fn()
     .mockReturnValue(of({ status: 200, data: {} }));
@@ -44,6 +51,10 @@ describe('JobService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
+        {
+          provide: ConfigService,
+          useValue: configServiceMock,
+        },
         {
           provide: Web3Service,
           useValue: {
@@ -62,6 +73,7 @@ describe('JobService', () => {
       ],
     }).compile();
 
+    configService = moduleRef.get<ConfigService>(ConfigService);
     jobService = moduleRef.get<JobService>(JobService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
@@ -76,17 +88,6 @@ describe('JobService', () => {
         fundAmount: 100,
       };
 
-      const reputationOracleURLMock = 'https://example.com/reputationoracle';
-
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getReputationOracleAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
-      }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(reputationOracleURLMock),
-      }));
-
       httpService.axiosRef.get = jest.fn().mockResolvedValue({
         status: 200,
         data: { ...manifest, fortunesRequired: manifest.fortunesRequested },
@@ -99,37 +100,14 @@ describe('JobService', () => {
         chainId,
         manifest,
       });
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
-    });
-
-    it('should fail if the escrow address is invalid', async () => {
-      const escrowAddress = 'invalid_address';
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getReputationOracleAddress: jest
-          .fn()
-          .mockRejectedValue(new Error('Invalid address')),
-      }));
-
-      await expect(
-        jobService.getDetails(chainId, escrowAddress),
-      ).rejects.toThrow('Invalid address');
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
     it('should fail if reputation oracle url is empty', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getReputationOracleAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
-      }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(''),
-      }));
+      configService.get = jest.fn().mockReturnValue('');
 
       await expect(
         jobService.getDetails(chainId, escrowAddress),
       ).rejects.toThrow('Unable to get Reputation Oracle URL');
-      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
 
