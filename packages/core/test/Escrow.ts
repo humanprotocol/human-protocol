@@ -32,6 +32,7 @@ async function deployEscrow() {
   const Escrow = await ethers.getContractFactory('Escrow');
   escrow = await Escrow.deploy(
     token.address,
+    await launcher.getAddress(),
     await owner.getAddress(),
     100,
     await Promise.all(
@@ -98,6 +99,11 @@ describe('Escrow', function () {
 
     it('Should set the right contract creator', async () => {
       const result = await escrow.launcher();
+      expect(result).to.equal(await launcher.getAddress());
+    });
+
+    it('Should set the right escrow factory contract', async () => {
+      const result = await escrow.escrowFactory();
       expect(result).to.equal(await owner.getAddress());
     });
 
