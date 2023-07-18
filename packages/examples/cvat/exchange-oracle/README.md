@@ -60,10 +60,5 @@ Available at `/docs` route
 
 To run tests
 ```
-docker-compose -f docker-compose.test.yml up --attach test
-```
-
-or
-```
-./bin/start_test.sh
+docker-compose -f docker-compose.test.yml up --attach test --exit-code-from test
 ```
