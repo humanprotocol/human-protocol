@@ -121,12 +121,13 @@ export class JobService {
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
     ).div(100).mul(fundAmountInWei);
 
-    const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(fundAmountInWei, 18),
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 18),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
-    const fixedRate = FixedNumber.from(rate.toString());
 
-    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -166,7 +167,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      fundAmountInWei.add(jobLauncherFee),
+      usdTotalAmount,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -202,12 +203,13 @@ export class JobService {
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
     ).div(100).mul(fundAmountInWei);
 
-    const fixedAmount = FixedNumber.from(
-      ethers.utils.formatUnits(fundAmountInWei, 18),
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 18),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
-    const fixedRate = FixedNumber.from(rate.toString());
 
-    if (userBalance.lte(BigNumber.from(fixedAmount.mulUnsafe(fixedRate)))) {
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -249,7 +251,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      fundAmountInWei.add(jobLauncherFee),
+      usdTotalAmount,
     );
     
     jobEntity.status = JobStatus.PAID;
