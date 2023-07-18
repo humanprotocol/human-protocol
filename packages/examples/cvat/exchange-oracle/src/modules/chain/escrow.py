@@ -9,12 +9,6 @@ from human_protocol_sdk.storage import StorageClient
 from src.modules.chain.web3 import get_web3
 
 
-def validate_address(escrow_address: str) -> str:
-    if not Web3.isAddress(escrow_address):
-        raise ValueError(f"{escrow_address} is not a correct Web3 address")
-    return Web3.toChecksumAddress(escrow_address)
-
-
 def validate_escrow(chain_id: int, escrow_address: str) -> None:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)
