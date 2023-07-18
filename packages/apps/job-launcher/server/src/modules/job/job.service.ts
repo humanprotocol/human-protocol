@@ -117,14 +117,9 @@ export class JobService {
       Currency.USD,
     );
 
-    const totalFeePercentage = BigNumber.from(
+    const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .add(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!)
-      .add(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
+    ).div(100).mul(fundAmountInWei);
 
     const fixedAmount = FixedNumber.from(
       ethers.utils.formatUnits(fundAmountInWei, 18),
@@ -140,7 +135,6 @@ export class JobService {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
-      fee: totalFee.toString(),
       fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.FORTUNE,
     };
@@ -155,7 +149,7 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
+      fee: jobLauncherFee.toString(),
       fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
@@ -172,7 +166,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      fundAmountInWei,
+      fundAmountInWei.add(jobLauncherFee),
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -199,24 +193,14 @@ export class JobService {
       'ether',
     );
 
-    const reputationOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-    );
-
-    const recordingOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-    );
-
     const rate = await this.currencyService.getRate(
       CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
     );
 
-    const totalFeePercentage = BigNumber.from(reputationOracleFee)
-      .add(recordingOracleFee);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
+    const jobLauncherFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
+    ).div(100).mul(fundAmountInWei);
 
     const fixedAmount = FixedNumber.from(
       ethers.utils.formatUnits(fundAmountInWei, 18),
@@ -234,7 +218,6 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      fee: totalFee.toString(),
       fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
@@ -249,7 +232,7 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
+      fee: jobLauncherFee.toString(),
       fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
@@ -266,7 +249,7 @@ export class JobService {
       Currency.USD,
       TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      fundAmountInWei,
+      fundAmountInWei.add(jobLauncherFee),
     );
     
     jobEntity.status = JobStatus.PAID;

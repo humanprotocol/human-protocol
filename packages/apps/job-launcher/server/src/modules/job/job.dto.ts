@@ -147,9 +147,6 @@ export class FortuneManifestDto {
   requesterDescription: string;
 
   @IsString()
-  fee: string;
-
-  @IsString()
   fundAmount: string;
 
   @IsEnum(JobRequestType)
@@ -173,9 +170,6 @@ export class ImageLabelBinaryManifestDto {
   @IsNumber()
   @IsPositive()
   requesterAccuracyTarget: number;
-
-  @IsString()
-  fee: string;
 
   @IsString()
   fundAmount: string;
