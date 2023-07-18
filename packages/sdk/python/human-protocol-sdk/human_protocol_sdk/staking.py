@@ -344,6 +344,7 @@ class StakingClient:
             return None
 
         return {
+            "staker": staker_address,
             "tokens_staked": tokens_staked,
             "tokens_allocated": tokens_allocated,
             "tokens_locked": tokens_locked,

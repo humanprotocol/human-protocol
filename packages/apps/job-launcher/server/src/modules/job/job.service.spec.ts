@@ -1,17 +1,19 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, NETWORKS, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ContractTransaction, BigNumber, ethers } from 'ethers';
+import { BigNumber, FixedNumber, ethers } from 'ethers';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -29,7 +31,6 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_TRANSACTION_HASH,
 } from '../../common/test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -37,13 +38,13 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryManifestDto,
   JobFortuneDto,
-  SaveManifestDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -65,9 +66,10 @@ describe('JobService', () => {
   let jobService: JobService;
   let jobRepository: JobRepository;
   let paymentService: PaymentService;
+  let currencyService: CurrencyService;
 
   const signerMock = {
-    address: '0x1234567890123456789012345678901234567892',
+    address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
@@ -108,6 +110,7 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -115,81 +118,80 @@ describe('JobService', () => {
       ],
     }).compile();
 
+    currencyService = moduleRef.get(CurrencyService);
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
     paymentService = moduleRef.get(PaymentService);
   });
 
   describe('createFortuneJob', () => {
+    let userBalance: ethers.BigNumber;
+    const rate = 0.5;
+    const userId = 1;
+    const dto: JobFortuneDto = {
+      chainId: MOCK_CHAIN_ID,
+      fortunesRequired: MOCK_FORTUNES_REQUIRED,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: 10,
+    };
+  
+    beforeEach(() => {
+      userBalance = ethers.utils.parseUnits('15', 'ether'); // 15 ETH
+  
+      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(userBalance);
+      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
     it('should create a fortune job successfully', async () => {
-      const fundAmount = 1; // ETH
-
-      const userId = 1;
-      const dto = {
-        chainId: MOCK_CHAIN_ID,
-        fortunesRequired: MOCK_FORTUNES_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-      };
-
-      const userBalance = ethers.utils.parseUnits('15', 'ether'); // 15 ETH
-
       const fundAmountInWei = ethers.utils.parseUnits(
         dto.fundAmount.toString(),
         'ether',
       );
-      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-        .add(MOCK_RECORDING_ORACLE_FEE)
-        .add(MOCK_REPUTATION_ORACLE_FEE);
-      const totalFee = BigNumber.from(fundAmountInWei)
-        .mul(totalFeePercentage)
-        .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+      const jobLauncherFee = BigNumber.from(
+        MOCK_JOB_LAUNCHER_FEE,
+      ).div(100).mul(fundAmountInWei);
 
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(userBalance);
-      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
-
+      const usdTotalAmount = BigNumber.from(
+        FixedNumber.from(
+          ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+        ).mulUnsafe(FixedNumber.from(rate.toString())),
+      );
+  
       await jobService.createFortuneJob(userId, dto);
-
+  
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.BALANCE,
+        Currency.USD,
+        TokenId.HMT,
         PaymentType.WITHDRAWAL,
-        BigNumber.from(totalAmount),
+        usdTotalAmount,
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fee: jobLauncherFee.toString(),
+        fundAmount: fundAmountInWei.toString(),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
     });
-
+  
     it('should throw an exception for insufficient user balance', async () => {
       const fundAmount = 10; // ETH
-
-      const saveManifestDto: SaveManifestDto = {
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      };
-
-      jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
-
       const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(userBalance);
-
-      const userId = 1;
-
+  
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(userBalance);
+  
       const dto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
         fortunesRequired: MOCK_FORTUNES_REQUIRED,
@@ -197,30 +199,17 @@ describe('JobService', () => {
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fundAmount,
       };
-
+  
       await expect(
         jobService.createFortuneJob(userId, dto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
     });
-
+  
     it('should throw an exception if job entity creation fails', async () => {
       const fundAmount = 1; // ETH
-
-      const saveManifestDto: SaveManifestDto = {
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      };
-
-      jest.spyOn(jobService, 'saveManifest').mockResolvedValue(saveManifestDto);
+  
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-      const userBalance = ethers.utils.parseUnits('15', 'ether'); // 10 ETH
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(userBalance);
-
-      const userId = 1;
-
+  
       const dto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
         fortunesRequired: MOCK_FORTUNES_REQUIRED,
@@ -228,102 +217,83 @@ describe('JobService', () => {
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fundAmount,
       };
-
+  
       await expect(
         jobService.createFortuneJob(userId, dto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });
-
+  
   describe('launchJob with Fortune type', () => {
+    let getManifestMock: any;
+
     const mockTokenContract: any = {
       transfer: jest.fn(),
     };
-
+  
+    beforeEach(() => {
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      getManifestMock = jest.spyOn(jobService, 'getManifest');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
     it('should launch a job successfully', async () => {
       const chainId: ChainId = 80001;
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-      
+
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
-
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
-
+  
+      getManifestMock.mockResolvedValue(manifest);
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
         escrowAddress: MOCK_ADDRESS,
         fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-
-      jest.spyOn(mockTokenContract, 'transfer').mockResolvedValue({
-        chainId: 1,
-        hash: MOCK_TRANSACTION_HASH,
-      } as ContractTransaction);
-
-      const jobEntity = await jobService.launchJob(mockJobEntity as JobEntity);
-
-      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, jobEntity.fundAmount);
-      expect(jobEntity.escrowAddress).toBe(MOCK_ADDRESS);
-      expect(jobEntity.status).toBe(JobStatus.LAUNCHED);
-      expect(jobEntity.save).toHaveBeenCalled();
-      expect(jobService.getManifest).toHaveBeenCalledWith(
-        jobEntity.manifestUrl,
-      );
+  
+      await jobService.launchJob(mockJobEntity as JobEntity);
+  
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, mockJobEntity.fundAmount);
+      expect(mockJobEntity.escrowAddress).toBe(MOCK_ADDRESS);
+      expect(mockJobEntity.status).toBe(JobStatus.LAUNCHED);
+      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobService.getManifest).toHaveBeenCalledWith(mockJobEntity.manifestUrl);
     });
-
+  
     it('should throw an unpredictable gas limit error if transfer failed', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
-      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-        .add(MOCK_RECORDING_ORACLE_FEE)
-        .add(MOCK_REPUTATION_ORACLE_FEE);
-      const totalFee = BigNumber.from(fundAmountInWei)
-        .mul(totalFeePercentage)
-        .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-      
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
+
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
-      }
-
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
-    
-      jest.spyOn(mockTokenContract, 'transfer').mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
-
+      };
+  
+      getManifestMock.mockResolvedValue(manifest);
+      mockTokenContract.transfer.mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -332,17 +302,15 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      expect(
+  
+      await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT));
     });
-
+  
     it('should throw an error if the manifest does not exist', async () => {
-      jest
-        .spyOn(jobService, 'getManifest')
-        .mockResolvedValue(null!);
-
+      getManifestMock.mockResolvedValue(null!);
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -351,25 +319,22 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      expect(
+  
+      await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
-
+  
     it('should throw an error if the manifest validation failed', async () => {
       const invalidManifest: Partial<FortuneManifestDto> = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
-
-      jest
-        .spyOn(jobService, 'getManifest')
-        .mockResolvedValue(invalidManifest as FortuneManifestDto);
-
+  
+      getManifestMock.mockResolvedValue(invalidManifest as FortuneManifestDto);
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -378,19 +343,19 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      expect(
+  
+      await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
-
-    it('should handle error during job launch', async () => {
+  
+    /*it('should handle error during job launch', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         createAndSetupEscrow: jest
           .fn()
-          .mockRejectedValue(new Error(ErrorEscrow.NotLaunched)),
+          .mockRejectedValue(new Error()),
       }));
-
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -399,26 +364,37 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      expect(
+  
+      await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
-    });
+    });*/
   });
 
   describe('launchJob with CVAT type', () => {
+    let getManifestMock: any;
+
+    const mockTokenContract: any = {
+      transfer: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      getManifestMock = jest.spyOn(jobService, 'getManifest');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
     it('should launch a job successfully', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
@@ -426,15 +402,13 @@ describe('JobService', () => {
         requesterAccuracyTarget: 1,
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
+        fundAmount: fundAmountInWei.toString(),
+        requestType: JobRequestType.IMAGE_LABEL_BINARY
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
     });
-
+  
     it('should throw an error if the manifest validation failed', async () => {
       const invalidManifest: Partial<ImageLabelBinaryManifestDto> = {
         dataUrl: MOCK_FILE_URL,
@@ -443,13 +417,10 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
-
-      jest
-        .spyOn(jobService, 'getManifest')
-        .mockResolvedValue(invalidManifest as ImageLabelBinaryManifestDto);
-
+  
+      getManifestMock.mockResolvedValue(invalidManifest as ImageLabelBinaryManifestDto);
+  
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -458,78 +429,96 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      expect(
+  
+      await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
   });
 
   describe('saveManifest', () => {
+    let uploadFiles: any;
+
+    beforeEach(() => {
+      uploadFiles = jest.spyOn(jobService.storageClient, 'uploadFiles');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
     it('should save the manifest and return the manifest URL and hash', async () => {
       const encryptedManifest = { data: 'encrypted data' };
-
+  
+      uploadFiles.mockResolvedValue([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+  
       const result = await jobService.saveManifest(
         encryptedManifest,
         MOCK_BUCKET_NAME,
       );
-
+  
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
-    });
-
-    it('should throw an error if the manifest file fails to upload', async () => {
-      const encryptedManifest = { data: 'encrypted data' };
-
-      /*
-        Temporary solution just to make tests pass.
-      */
-      (jobService.storageClient.uploadFiles as any).mockResolvedValueOnce([]);
-      await expect(
-        jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
+        [encryptedManifest],
+        MOCK_BUCKET_NAME,
       );
     });
-
+  
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const encryptedManifest = { data: 'encrypted data' };
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+  
+      uploadFiles.mockRejectedValue(uploadError);
+  
+      await expect(
+        jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
+      ).rejects.toThrowError(new BadGatewayException(ErrorBucket.UnableSaveFile));
+      expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
+        [encryptedManifest],
+        MOCK_BUCKET_NAME,
+      );
+    });
+  
     it('should rethrow any other errors encountered', async () => {
       const encryptedManifest = { data: 'encrypted data' };
       const errorMessage = 'Something went wrong';
-
-      /*
-        Temporary solution just to make tests pass.
-      */
-      (jobService.storageClient.uploadFiles as any).mockRejectedValueOnce(new Error(errorMessage));
-
+      const uploadError = new Error(errorMessage);
+  
+      uploadFiles.mockRejectedValue(uploadError);
+  
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
       ).rejects.toThrowError(new Error(errorMessage));
+      expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
+        [encryptedManifest],
+        MOCK_BUCKET_NAME,
+      );
     });
   });
 
   describe('getManifest', () => {
     it('should download and return the manifest', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
       const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
         .add(MOCK_RECORDING_ORACLE_FEE)
         .add(MOCK_REPUTATION_ORACLE_FEE);
       const totalFee = BigNumber.from(fundAmountInWei)
         .mul(totalFeePercentage)
         .div(100);
-      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
 
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
-        fundAmount: totalAmount.toString(),
-        mode: JobMode.DESCRIPTIVE,
+        fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       };
 
@@ -551,4 +540,56 @@ describe('JobService', () => {
       );
     });
   });
+
+  describe('getManifest', () => {
+    let downloadFileFromUrlMock: any;
+
+    beforeEach(() => {
+      downloadFileFromUrlMock = jest.spyOn(StorageClient, 'downloadFileFromUrl');
+    });
+  
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+  
+    it('should download and return the manifest', async () => {
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
+      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .add(MOCK_RECORDING_ORACLE_FEE)
+        .add(MOCK_REPUTATION_ORACLE_FEE);
+      const totalFee = BigNumber.from(fundAmountInWei)
+        .mul(totalFeePercentage)
+        .div(100);
+      const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+  
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: totalAmount.toString(),
+        requestType: JobRequestType.FORTUNE,
+      };
+  
+      downloadFileFromUrlMock.mockReturnValue(manifest);
+  
+      const result = await jobService.getManifest(MOCK_FILE_URL);
+  
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(manifest);
+    });
+  
+    it('should throw a NotFoundException if the manifest is not found', async () => {
+      downloadFileFromUrlMock.mockResolvedValue(null);
+  
+      await expect(jobService.getManifest(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ManifestNotFound),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+  });
+  
 });

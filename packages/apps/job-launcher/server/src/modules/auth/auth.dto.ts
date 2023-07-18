@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, Matches, IsString } from 'class-validator';
+import { IsEmail, Matches, IsString, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { IsConfirm, IsPassword } from '../../common/validators';
 import { UserEntity } from '../user/user.entity';
 import { TokenType } from '../auth/token.entity';
+import { AuthStatus } from 'src/common/enums/auth';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -68,21 +69,20 @@ export class VerifyEmailDto {
   public token: string;
 }
 
-export class AuthDto {
+export class AuthCreateDto {
   public user: UserEntity;
   public refreshToken: string;
   public refreshTokenExpiresAt: number;
   public ip: string;
+  public status: AuthStatus
+}
+
+export class AuthUpdateDto {
+  @IsEnum(AuthStatus)
+  public status: AuthStatus;
 }
 
 export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;
-}
-
-export interface IJwt {
-  accessToken: string;
-  accessTokenExpiresAt: number;
-  refreshToken: string;
-  refreshTokenExpiresAt: number;
 }

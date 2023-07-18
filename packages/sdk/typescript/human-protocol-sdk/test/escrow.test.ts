@@ -82,9 +82,12 @@ describe('EscrowClient', () => {
       getLaunchedEscrows: vi.fn(),
       getEscrowsFiltered: vi.fn(),
       address: ethers.constants.AddressZero,
+      canceler: vi.fn(),
       recordingOracle: vi.fn(),
       reputationOracle: vi.fn(),
       intermediateResultsUrl: vi.fn(),
+      launcher: vi.fn(),
+      escrowFactory: vi.fn(),
     };
 
     mockEscrowFactoryContract = {
@@ -1541,6 +1544,106 @@ describe('EscrowClient', () => {
       expect(
         escrowClient.escrowContract.reputationOracle
       ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getJobLauncherAddress', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getJobLauncherAddress(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getJobLauncherAddress(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully get the job launcher address', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.launcher.mockReturnValue(
+        ethers.constants.AddressZero
+      );
+
+      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
+        escrowAddress
+      );
+
+      expect(jobLauncherAddress).toEqual(ethers.constants.AddressZero);
+      expect(escrowClient.escrowContract.launcher).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getJobLauncherAddress fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.launcher.mockRejectedValueOnce(new Error());
+
+      await expect(
+        escrowClient.getJobLauncherAddress(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.launcher).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getFactoryAddress', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getFactoryAddress(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getFactoryAddress(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully get the escrow factory address', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.escrowFactory.mockReturnValue(
+        ethers.constants.AddressZero
+      );
+
+      const escrowFactoryAddress = await escrowClient.getFactoryAddress(
+        escrowAddress
+      );
+
+      expect(escrowFactoryAddress).toEqual(ethers.constants.AddressZero);
+      expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getFactoryAddress fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.escrowFactory.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getFactoryAddress(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();
     });
   });
 });

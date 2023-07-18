@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ethers } from 'ethers';
+import { FixedNumber, ethers } from 'ethers';
 import { validate } from 'class-validator';
 import {
   BadGatewayException,
@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BigNumber } from 'ethers';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -25,6 +25,7 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
+  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -38,12 +39,22 @@ import {
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import {
+  Currency,
+  PaymentSource,
+  PaymentType,
+  TokenId,
+} from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class JobService {
@@ -57,6 +68,7 @@ export class JobService {
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
     public readonly paymentService: PaymentService,
+    private readonly currencyService: CurrencyService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
   ) {
@@ -100,17 +112,22 @@ export class JobService {
       'ether',
     );
 
-    const totalFeePercentage = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .add(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!)
-      .add(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
+    const rate = await this.currencyService.getRate(
+      CoingeckoTokenId[TokenId.HMT],
+      Currency.USD,
+    );
 
-    if (userBalance.lte(totalAmount)) {
+    const jobLauncherFee = BigNumber.from(
+      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
+    ).div(100).mul(fundAmountInWei);
+
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
+    );
+
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -119,9 +136,7 @@ export class JobService {
       submissionsRequired: fortunesRequired,
       requesterTitle,
       requesterDescription,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -135,8 +150,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fee: jobLauncherFee.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -149,8 +164,10 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      usdTotalAmount,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -177,27 +194,24 @@ export class JobService {
       'ether',
     );
 
+    const rate = await this.currencyService.getRate(
+      CoingeckoTokenId[TokenId.HMT],
+      Currency.USD,
+    );
+
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    );
-    const recordingOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-    );
-    const reputationOracleFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+    ).div(100).mul(fundAmountInWei);
+
+    const usdTotalAmount = BigNumber.from(
+      FixedNumber.from(
+        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+      ).mulUnsafe(FixedNumber.from(rate.toString())),
     );
 
-    const totalFeePercentage = BigNumber.from(jobLauncherFee)
-      .add(recordingOracleFee)
-      .add(reputationOracleFee);
-    const totalFee = BigNumber.from(fundAmountInWei)
-      .mul(totalFeePercentage)
-      .div(100);
-    const totalAmount = BigNumber.from(fundAmountInWei).add(totalFee);
-
-    if (userBalance.lte(totalAmount)) {
+    if (userBalance.lt(usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new NotFoundException(ErrorJob.NotEnoughFunds);
+      throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
     const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
@@ -206,9 +220,7 @@ export class JobService {
       labels,
       requesterDescription,
       requesterAccuracyTarget,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
-      mode: JobMode.BATCH,
+      fundAmount: fundAmountInWei.toString(),
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -222,8 +234,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: totalFee.toString(),
-      fundAmount: totalAmount.toString(),
+      fee: jobLauncherFee.toString(),
+      fundAmount: fundAmountInWei.toString(),
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -236,10 +248,12 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      usdTotalAmount,
     );
-
+    
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
@@ -252,8 +266,12 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!,
-      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+      recordingOracle: this.configService.get<string>(
+        ConfigNames.RECORDING_ORACLE_ADDRESS,
+      )!,
+      reputationOracle: this.configService.get<string>(
+        ConfigNames.REPUTATION_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
@@ -264,42 +282,42 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
-      const escrowAddress = await escrowClient.createAndSetupEscrow(
-        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        [],
-        escrowConfig,
-      );
+    const escrowAddress = await escrowClient.createAndSetupEscrow(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      [],
+      escrowConfig,
+    );
 
     if (!escrowAddress) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
 
-      await this.validateManifest(manifest);
+    await this.validateManifest(manifest);
 
-      const tokenContract: HMToken = HMToken__factory.connect(
-        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        signer
+    const tokenContract: HMToken = HMToken__factory.connect(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      signer,
+    );
+    await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
+
+    jobEntity.escrowAddress = escrowAddress;
+    jobEntity.status = JobStatus.LAUNCHED;
+    await jobEntity.save();
+
+    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      this.sendWebhook(
+        this.configService.get<string>(
+          ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+        )!,
+        {
+          escrowAddress: jobEntity.escrowAddress,
+          chainId: jobEntity.chainId,
+        },
       );
-      await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
-
-      jobEntity.escrowAddress = escrowAddress;
-      jobEntity.status = JobStatus.LAUNCHED;
-      await jobEntity.save();
-
-      if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-          },
-        );
-      }
+    }
 
     return jobEntity;
   }
@@ -318,8 +336,8 @@ export class JobService {
       throw new BadGatewayException(ErrorBucket.UnableSaveFile);
     }
 
-      const { url, hash } = uploadedFiles[0];
-      const manifestUrl = url;
+    const { url, hash } = uploadedFiles[0];
+    const manifestUrl = url;
 
     return { manifestUrl, manifestHash: hash };
   }
@@ -327,16 +345,15 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = new FortuneManifestDto();
+    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
+      ? new FortuneManifestDto()
+      : new ImageLabelBinaryManifestDto();
+
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(
-        ErrorJob.ManifestValidationFailed,
-        JobService.name,
-        validationErrors,
-      );
+      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 

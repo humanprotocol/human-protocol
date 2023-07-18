@@ -33,7 +33,7 @@ export class PaymentController {
   public async createFiatPayment(
     @Request() req: any,
     @Body() data: PaymentFiatCreateDto,
-  ): Promise<any> {
+  ): Promise<string> {
     return this.paymentService.createFiatPayment(
       req.user?.stripeCustomerId,
       data,
@@ -64,7 +64,7 @@ export class PaymentController {
     try {
       return this.currencyService.getRate(data.token, data.currency);
     } catch (e) {
-      throw new Error(e)
+      throw new Error(e);
     }
   }
 }

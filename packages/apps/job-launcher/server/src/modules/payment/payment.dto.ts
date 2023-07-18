@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
 import {
-  CoingeckoId,
   Currency,
   PaymentSource,
   PaymentType,
@@ -43,7 +42,7 @@ export class PaymentCryptoCreateDto {
 export class PaymentCreateDto {
   public transactionHash?: string;
   public amount?: string;
-  public currency?: Currency;
+  public currency?: string;
   public source?: PaymentSource;
   public userId?: number;
   public rate?: number;
@@ -51,10 +50,8 @@ export class PaymentCreateDto {
 }
 
 export class GetRateDto {
-  @ApiProperty({
-    enum: CoingeckoId,
-  })
-  @IsEnum(CoingeckoId)
+  @ApiProperty()
+  @IsString()
   public token: TokenId;
 
   @ApiProperty({

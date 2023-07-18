@@ -17,11 +17,11 @@ import {
   ResendEmailVerificationDto,
   RestorePasswordDto,
   VerifyEmailDto,
-  IJwt,
 } from './auth.dto';
 import { Public } from '../../common/decorators';
 import { ApiTags } from '@nestjs/swagger';
 import { UserCreateDto } from '../user/user.dto';
+import { IJwt } from '../../common/interfaces/auth';
 
 @Public()
 @ApiTags('Auth')
@@ -68,7 +68,7 @@ export class AuthJwtController {
 
   @Post('/restore-password')
   @HttpCode(204)
-  public restorePassword(@Body() data: RestorePasswordDto): Promise<void> {
+  public restorePassword(@Body() data: RestorePasswordDto): Promise<boolean> {
     return this.authService.restorePassword(data);
   }
 

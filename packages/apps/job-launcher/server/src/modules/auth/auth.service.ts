@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { DeleteResult, FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsWhere } from 'typeorm';
 import { v4 } from 'uuid';
 
 import { UserEntity } from '../user/user.entity';
@@ -17,7 +17,6 @@ import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import {
   ForgotPasswordDto,
-  IJwt,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
@@ -27,6 +26,8 @@ import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
+import { AuthStatus } from '../../common/enums/auth';
+import { IJwt } from '../../common/interfaces/auth';
 
 @Injectable()
 export class AuthService {
@@ -70,8 +71,9 @@ export class AuthService {
 
   public async logout(
     where: FindOptionsWhere<AuthEntity>,
-  ): Promise<DeleteResult> {
-    return this.authRepository.delete(where);
+  ): Promise<void> {
+    await this.authRepository.update({ ...where, status: AuthStatus.ACTIVE }, { status: AuthStatus.EXPIRED });
+    return;
   }
 
   public async refresh(
@@ -100,14 +102,21 @@ export class AuthService {
     const refreshToken = v4();
     const date = new Date();
 
-    const accessTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN)!;
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN)!;
+    const accessTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
+    )!;
+    const refreshTokenExpiresIn = ~~this.configService.get<number>(
+      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+    )!;
 
+    await this.logout({ userId: userEntity.id });
+    
     await this.authRepository.create({
       user: userEntity,
       refreshToken,
       refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
       ip,
+      status: AuthStatus.ACTIVE
     });
 
     return {
@@ -139,7 +148,7 @@ export class AuthService {
     this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<void> {
+  public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,
@@ -156,6 +165,8 @@ export class AuthService {
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
     await tokenEntity.remove();
+
+    return true;
   }
 
   public async emailVerification(

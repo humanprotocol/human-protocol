@@ -355,6 +355,7 @@ export class StakingClient {
         .sub(tokensLocked);
 
       return {
+        staker,
         tokensStaked,
         tokensAllocated,
         tokensLocked,
@@ -369,7 +370,7 @@ export class StakingClient {
   /**
    * **Returns the staking information about all stakers of the protocol.*
    *
-   * @returns {Promise<IStakerInfo>} - Return an array with all stakers information
+   * @returns {Promise<IStaker[]>} - Return an array with all stakers information
    * @throws {Error} - An error object if an error occurred, results otherwise
    */
   public async getAllStakers(): Promise<IStaker[]> {
@@ -380,7 +381,7 @@ export class StakingClient {
         throw ErrorStakingGetStakers;
       }
 
-      return result[1].map((staker: any) => {
+      return result[1].map((staker: any, index: number) => {
         const tokensStaked = BigNumber.from(staker.tokensStaked),
           tokensAllocated = BigNumber.from(staker.tokensAllocated),
           tokensLocked = BigNumber.from(staker.tokensLocked),
@@ -391,6 +392,7 @@ export class StakingClient {
           .sub(tokensLocked);
 
         return {
+          staker: result[0][index],
           tokensStaked,
           tokensAllocated,
           tokensLocked,

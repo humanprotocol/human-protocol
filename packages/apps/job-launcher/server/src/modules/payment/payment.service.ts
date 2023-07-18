@@ -1,13 +1,13 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
-  ConflictException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, providers } from 'ethers';
+import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import { CurrencyService } from './currency.service';
@@ -27,6 +27,12 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import { Web3Service } from '../web3/web3.service';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class PaymentService {
@@ -34,6 +40,7 @@ export class PaymentService {
   private stripe: Stripe;
 
   constructor(
+    private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
     private readonly currencyService: CurrencyService,
     private configService: ConfigService,
@@ -41,10 +48,17 @@ export class PaymentService {
     this.stripe = new Stripe(
       this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
       {
-        apiVersion: this.configService.get<any>(ConfigNames.STRIPE_API_VERSION)!,
+        apiVersion: this.configService.get<any>(
+          ConfigNames.STRIPE_API_VERSION,
+        )!,
         appInfo: {
-          name: this.configService.get<string>(ConfigNames.STRIPE_APP_NAME, 'Fortune')!,
-          version: this.configService.get<string>(ConfigNames.STRIPE_APP_VERSION)!,
+          name: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_NAME,
+            'Fortune',
+          )!,
+          version: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_VERSION,
+          )!,
           url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
         },
       },
@@ -67,7 +81,7 @@ export class PaymentService {
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
-  ) {
+  ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
@@ -82,9 +96,15 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    return {
-      clientSecret: paymentIntent.client_secret,
-    };
+    if (!paymentIntent.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
+      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(
@@ -98,9 +118,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    if (
-      paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED
-    ) {
+    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
@@ -108,8 +126,10 @@ export class PaymentService {
     await this.savePayment(
       userId,
       PaymentSource.FIAT,
+      Currency.USD,
+      paymentData.currency.toLowerCase(),
       PaymentType.DEPOSIT,
-      BigNumber.from(paymentData.amount),
+      BigNumber.from(paymentData.amount)
     );
 
     return true;
@@ -118,7 +138,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
-  ) {
+  ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.network.chainId === dto.chainId,
@@ -148,7 +168,30 @@ export class PaymentService {
       );
     }
 
-    const amount = BigInt(transaction.logs[0].data).toString();
+    const signer = this.web3Service.getSigner(dto.chainId);
+
+    const recepientAddress = transaction.logs[0].topics.some(
+      (topic) =>
+        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
+    );
+    if (!recepientAddress) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
+    const amount = BigNumber.from(transaction.logs[0].data);
+    const tokenAddress = transaction.logs[0].address;
+
+    const tokenContract: HMToken = HMToken__factory.connect(
+      tokenAddress,
+      signer,
+    );
+    const tokenId = (await tokenContract.symbol()).toLowerCase();
+
+    if (!CoingeckoTokenId[tokenId]) {
+      this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
+      throw new ConflictException(ErrorPayment.UnsupportedToken);
+    }
 
     const paymentEntity = await this.paymentRepository.findOne({
       transactionHash: transaction.transactionHash,
@@ -159,16 +202,17 @@ export class PaymentService {
         ErrorPayment.TransactionHashAlreadyExists,
         PaymentRepository.name,
       );
-      throw new BadRequestException(
-        ErrorPayment.TransactionHashAlreadyExists,
-      );
+      throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
     }
 
     await this.savePayment(
       userId,
       PaymentSource.CRYPTO,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.DEPOSIT,
-      BigNumber.from(amount),
+      amount,
+      transaction.transactionHash
     );
 
     return true;
@@ -183,21 +227,25 @@ export class PaymentService {
   public async savePayment(
     userId: number,
     source: PaymentSource,
+    currencyFrom: string,
+    currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
+    transactionHash?: string
   ): Promise<boolean> {
     const rate = await this.currencyService.getRate(
-      TokenId.HUMAN_PROTOCOL,
-      Currency.USD,
+      currencyFrom,
+      currencyTo,
     );
 
     const paymentEntity = await this.paymentRepository.create({
       userId,
       amount: amount.toString(),
-      currency: Currency.USD,
+      currency: currencyTo,
       source,
       rate,
       type,
+      transactionHash,
     });
 
     if (!paymentEntity) {
@@ -212,15 +260,22 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-
+    
     paymentEntities.forEach((payment) => {
+      const fixedAmount = FixedNumber.from(
+        ethers.utils.formatUnits(payment.amount, 18),
+      );
+      const rate = FixedNumber.from(payment.rate);
+
+      const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
+
       if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount = finalAmount.sub(payment.amount);
+        finalAmount = finalAmount.sub(amount);
       } else {
-        finalAmount = finalAmount.add(payment.amount);
+        finalAmount = finalAmount.add(amount);
       }
     });
-
+    
     return finalAmount;
   }
 }
