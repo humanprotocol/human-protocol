@@ -39,7 +39,12 @@ class Escrow {
   private exOracleUrl = process.env.EX_ORACLE_URL as string;
   private recOracleFee = Number(process.env.REC_ORACLE_PERCENTAGE_FEE);
   private repOracleFee = Number(process.env.REP_ORACLE_PERCENTAGE_FEE);
-  async setupEscrow(web3: Web3, escrowAddress: string, url: string) {
+  async setupEscrow(
+    web3: Web3,
+    escrowAddress: string,
+    url: string,
+    jobRequester: string
+  ) {
     const escrowContract = new web3.eth.Contract(
       EscrowAbi as [],
       escrowAddress
@@ -53,7 +58,7 @@ class Escrow {
         url,
         url
       )
-      .estimateGas({ from: web3.eth.defaultAccount });
+      .estimateGas({ from: jobRequester });
     const gasPrice = await web3.eth.getGasPrice();
     await escrowContract.methods
       .setup(
@@ -64,7 +69,7 @@ class Escrow {
         url,
         url
       )
-      .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+      .send({ from: jobRequester, gas, gasPrice });
   }
 
   async checkApproved(
@@ -112,12 +117,12 @@ class Escrow {
       factoryAddress
     );
     const gas = await escrowFactory.methods
-      .createEscrow(token, [jobRequester])
-      .estimateGas({ from: web3.eth.defaultAccount });
+      .createEscrow(token, [])
+      .estimateGas({ from: jobRequester });
     const gasPrice = await web3.eth.getGasPrice();
     const result = await escrowFactory.methods
-      .createEscrow(token, [jobRequester])
-      .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+      .createEscrow(token, [])
+      .send({ from: jobRequester, gas, gasPrice });
     return result.events.Launched.returnValues.escrow;
   }
 

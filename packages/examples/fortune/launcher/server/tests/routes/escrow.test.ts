@@ -22,7 +22,7 @@ describe('Escrow route tests', async () => {
   beforeAll(async () => {
     const spy = vi.spyOn(s3, 'uploadManifest');
     spy.mockImplementation(async () => 'fileUrl');
-    await stake(web3Client, network);
+    await stake(web3Client, network, jobRequester);
   });
 
   test('Should not allow to create an escrow because of allowance or balance', async () => {
