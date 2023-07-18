@@ -127,3 +127,5 @@ ZTeUAP9rqMnCmh+PzRchFPf8D36+t+zSTiqkxvK7bsvy1c+W+AEAyQBBVzO8H4VI
 p5SrHKMJLP9O6O6lO2+rabiRK8qLwQQ=
 =yacT
 -----END PGP SIGNATURE-----"""
+
+message = "Test message"

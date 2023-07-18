@@ -38,6 +38,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
     address public recordingOracle;
     address public launcher;
     address payable public canceler;
+    address public escrowFactory;
 
     uint8 public reputationOracleFeePercentage;
     uint8 public recordingOracleFeePercentage;
@@ -58,6 +59,7 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     constructor(
         address _token,
+        address _launcher,
         address payable _canceler,
         uint256 _duration,
         address[] memory _handlers
@@ -68,11 +70,12 @@ contract Escrow is IEscrow, ReentrancyGuard {
         token = _token;
         status = EscrowStatuses.Launched;
         duration = _duration.add(block.timestamp); // solhint-disable-line not-rely-on-time
-        launcher = msg.sender;
+        launcher = _launcher;
         canceler = _canceler;
+        escrowFactory = msg.sender;
+        areTrustedHandlers[_launcher] = true;
         areTrustedHandlers[_canceler] = true;
-        areTrustedHandlers[msg.sender] = true;
-        addTrustedHandlers(_handlers);
+        _addTrustedHandlers(_handlers);
     }
 
     function getBalance() public view returns (uint256) {
@@ -88,6 +91,10 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function addTrustedHandlers(
         address[] memory _handlers
     ) public override trusted {
+        _addTrustedHandlers(_handlers);
+    }
+
+    function _addTrustedHandlers(address[] memory _handlers) internal {
         for (uint256 i = 0; i < _handlers.length; i++) {
             require(_handlers[i] != address(0), ERROR_ZERO_ADDRESS);
             areTrustedHandlers[_handlers[i]] = true;

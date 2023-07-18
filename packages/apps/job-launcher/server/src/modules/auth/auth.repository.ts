@@ -6,6 +6,7 @@ import {
   FindOneOptions,
   Repository,
   DeleteResult,
+  UpdateResult,
 } from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { AuthCreateDto } from './auth.dto';
@@ -19,15 +20,18 @@ export class AuthRepository {
     private readonly authEntityRepository: Repository<AuthEntity>,
   ) {}
 
+  public async update(
+    where: FindOptionsWhere<AuthEntity>,
+    dto: Partial<AuthUpdateDto>,
+  ): Promise<UpdateResult> {
+    return this.authEntityRepository.update(where, dto);
+  }
+
   public async findOne(
     where: FindOptionsWhere<AuthEntity>,
     options?: FindOneOptions<AuthEntity>,
   ): Promise<AuthEntity | null> {
     const authEntity = await this.authEntityRepository.findOne({
-      where,
-      ...options,
-    });
-    console.log({
       where,
       ...options,
     });

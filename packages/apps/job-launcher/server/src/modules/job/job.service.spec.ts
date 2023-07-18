@@ -14,8 +14,8 @@ import {
   ErrorEscrow,
   ErrorJob,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -47,10 +47,8 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -115,6 +113,7 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
@@ -165,6 +164,8 @@ describe('JobService', () => {
       expect(paymentService.savePayment).toHaveBeenCalledWith(
         userId,
         PaymentSource.BALANCE,
+        Currency.USD,
+        TokenId.HMT,
         PaymentType.WITHDRAWAL,
         BigNumber.from(totalAmount),
       );
@@ -265,7 +266,6 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -321,8 +321,7 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
-      };
+      }
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
 
@@ -376,7 +375,6 @@ describe('JobService', () => {
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.FORTUNE,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest
@@ -439,7 +437,6 @@ describe('JobService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -453,7 +450,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
-        mode: JobMode.DESCRIPTIVE,
       };
 
       jest
@@ -538,7 +534,6 @@ describe('JobService', () => {
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
-        mode: JobMode.DESCRIPTIVE,
         requestType: JobRequestType.FORTUNE,
       };
 

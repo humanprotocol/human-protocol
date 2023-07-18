@@ -51,6 +51,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
         Escrow escrow = new Escrow(
             token,
+            msg.sender,
             payable(msg.sender),
             STANDARD_DURATION,
             trustedHandlers

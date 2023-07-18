@@ -44,7 +44,7 @@ export enum Currency {
 }
 
 export enum TokenId {
-  HUMAN_PROTOCOL = 'human-protocol',
+  HMT = 'hmt',
 }
 
 export enum PaymentSource {
@@ -66,8 +66,4 @@ export enum PaymentType {
 export enum PaymentStatus {
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
-}
-
-export enum CoingeckoId {
-  hmt = 'human-protocol',
 }

@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
-import { JobMode, JobRequestType } from '../../common/enums';
+import { JobRequestType } from '../../common/enums';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -71,7 +71,6 @@ export class ManifestDto {
   fee: string;
   fundAmount: string;
   requestType: JobRequestType;
-  mode: JobMode;
 }
 
 export class FortuneFinalResult {

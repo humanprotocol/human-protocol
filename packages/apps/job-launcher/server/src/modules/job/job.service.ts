@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BigNumber } from 'ethers';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -38,15 +38,14 @@ import {
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
-import { PaymentSource, PaymentType } from '../../common/enums/payment';
+import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import { CurrencyService } from '../payment/currency.service';
+import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class JobService {
@@ -60,6 +59,7 @@ export class JobService {
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
     public readonly paymentService: PaymentService,
+    private readonly currencyService: CurrencyService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
   ) {
@@ -124,7 +124,6 @@ export class JobService {
       requesterDescription,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
       requestType: JobRequestType.FORTUNE,
     };
 
@@ -152,8 +151,10 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      totalAmount,
     );
 
     jobEntity.status = JobStatus.PAID;
@@ -211,7 +212,6 @@ export class JobService {
       requesterAccuracyTarget,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.BATCH,
       requestType: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -239,10 +239,12 @@ export class JobService {
     await this.paymentService.savePayment(
       userId,
       PaymentSource.BALANCE,
+      Currency.USD,
+      TokenId.HMT,
       PaymentType.WITHDRAWAL,
-      BigNumber.from(totalAmount),
+      totalAmount,
     );
-
+    
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
@@ -334,16 +336,15 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = new FortuneManifestDto();
+    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
+      ? new FortuneManifestDto()
+      : new ImageLabelBinaryManifestDto();
+
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(
-        ErrorJob.ManifestValidationFailed,
-        JobService.name,
-        validationErrors,
-      );
+      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 
