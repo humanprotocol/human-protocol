@@ -1,3 +1,3 @@
 export const CoingeckoTokenId: ICoingeckoTokenId = {
-    'hmt': 'human-protocol',
-}
+  hmt: 'human-protocol',
+};

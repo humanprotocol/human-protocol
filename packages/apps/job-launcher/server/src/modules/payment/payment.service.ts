@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -27,7 +27,10 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { networkMap } from '../../common/constants/network';
 import { ConfigNames } from '../../common/config';
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 
@@ -165,24 +168,29 @@ export class PaymentService {
       );
     }
 
+    const signer = this.web3Service.getSigner(dto.chainId);
+
+    const recepientAddress = transaction.logs[0].topics.some(
+      (topic) =>
+        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
+    );
+    if (!recepientAddress) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const amount = BigNumber.from(transaction.logs[0].data);
     const tokenAddress = transaction.logs[0].address;
 
-    const signer = this.web3Service.getSigner(dto.chainId);
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
-      signer
+      signer,
     );
     const tokenId = (await tokenContract.symbol()).toLowerCase();
 
     if (!CoingeckoTokenId[tokenId]) {
-      this.logger.log(
-        ErrorPayment.UnsupportedToken,
-        PaymentRepository.name,
-      );
-      throw new ConflictException(
-        ErrorPayment.UnsupportedToken,
-      );
+      this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
+      throw new ConflictException(ErrorPayment.UnsupportedToken);
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
@@ -237,7 +245,7 @@ export class PaymentService {
       source,
       rate,
       type,
-      transactionHash
+      transactionHash,
     });
 
     if (!paymentEntity) {
@@ -254,7 +262,9 @@ export class PaymentService {
     let finalAmount = BigNumber.from(0);
     
     paymentEntities.forEach((payment) => {
-      const fixedAmount = FixedNumber.from(ethers.utils.formatUnits(payment.amount, 18));
+      const fixedAmount = FixedNumber.from(
+        ethers.utils.formatUnits(payment.amount, 18),
+      );
       const rate = FixedNumber.from(payment.rate);
 
       const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
