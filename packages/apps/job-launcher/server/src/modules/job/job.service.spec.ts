@@ -8,7 +8,7 @@ import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ContractTransaction, BigNumber, ethers } from 'ethers';
+import { ContractTransaction, BigNumber, ethers, FixedNumber } from 'ethers';
 import {
   ErrorBucket,
   ErrorEscrow,
@@ -147,7 +147,15 @@ describe('JobService', () => {
         dto.fundAmount.toString(),
         'ether',
       );
-      const totalFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE).div(100).mul(fundAmountInWei);
+      const jobLauncherFee = BigNumber.from(
+        MOCK_JOB_LAUNCHER_FEE,
+      ).div(100).mul(fundAmountInWei);
+
+      const usdTotalAmount = BigNumber.from(
+        FixedNumber.from(
+          ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+        ).mulUnsafe(FixedNumber.from(rate.toString())),
+      );
 
       jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
@@ -165,14 +173,14 @@ describe('JobService', () => {
         Currency.USD,
         TokenId.HMT,
         PaymentType.WITHDRAWAL,
-        BigNumber.from(fundAmountInWei),
+        usdTotalAmount,
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee: totalFee.toString(),
+        fee: jobLauncherFee.toString(),
         fundAmount: fundAmountInWei.toString(),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
