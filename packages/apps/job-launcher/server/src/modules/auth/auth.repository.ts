@@ -9,7 +9,7 @@ import {
   UpdateResult,
 } from 'typeorm';
 import { AuthEntity } from './auth.entity';
-import { AuthCreateDto } from './auth.dto';
+import { AuthCreateDto, AuthUpdateDto } from './auth.dto';
 
 @Injectable()
 export class AuthRepository {
