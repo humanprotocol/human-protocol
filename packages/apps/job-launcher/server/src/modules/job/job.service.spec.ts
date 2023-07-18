@@ -148,12 +148,7 @@ describe('JobService', () => {
         dto.fundAmount.toString(),
         'ether',
       );
-      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-        .add(MOCK_RECORDING_ORACLE_FEE)
-        .add(MOCK_REPUTATION_ORACLE_FEE);
-      const totalFee = BigNumber.from(fundAmountInWei)
-        .mul(totalFeePercentage)
-        .div(100);
+      const totalFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE).div(100).mul(fundAmountInWei);
 
       jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
@@ -270,7 +265,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
         fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       };
@@ -324,7 +318,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
         fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       }
@@ -439,7 +432,6 @@ describe('JobService', () => {
         requesterAccuracyTarget: 1,
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
         fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
       };
@@ -536,7 +528,6 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fee: totalFee.toString(),
         fundAmount: fundAmountInWei.toString(),
         requestType: JobRequestType.FORTUNE,
       };
