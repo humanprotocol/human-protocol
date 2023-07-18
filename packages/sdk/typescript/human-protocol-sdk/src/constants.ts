@@ -242,5 +242,4 @@ export const KVStoreKeys = {
   webhook_url: 'webhook_url',
   fee: 'fee',
   public_key: 'public_key',
-  url: 'url',
 };
