@@ -163,9 +163,7 @@ describe('PaymentService', () => {
         customer: customerId,
         payment_method_options: {},
       });
-      expect(result).toEqual({
-        clientSecret: paymentIntent.client_secret,
-      });
+      expect(result).toEqual(paymentIntent.client_secret);
     });
 
     it('should throw a bad request exception if the payment intent creation fails', async () => {

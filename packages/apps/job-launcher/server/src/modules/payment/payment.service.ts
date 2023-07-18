@@ -81,7 +81,7 @@ export class PaymentService {
   public async createFiatPayment(
     customerId: string,
     dto: PaymentFiatCreateDto,
-  ) {
+  ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
@@ -96,9 +96,15 @@ export class PaymentService {
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
-    return {
-      clientSecret: paymentIntent.client_secret,
-    };
+    if (!paymentIntent.client_secret) {
+      this.logger.log(
+        ErrorPayment.ClientSecretDoesNotExist,
+        PaymentService.name,
+      );
+      throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
+    }
+
+    return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(
@@ -132,7 +138,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
-  ) {
+  ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.network.chainId === dto.chainId,

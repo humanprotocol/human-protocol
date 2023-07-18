@@ -2,7 +2,6 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
   EscrowClient,
-  NETWORKS,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
