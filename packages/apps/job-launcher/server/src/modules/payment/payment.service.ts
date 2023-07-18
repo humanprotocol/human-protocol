@@ -271,9 +271,7 @@ export class PaymentService {
 
       if (payment.type === PaymentType.WITHDRAWAL) {
         finalAmount = finalAmount.sub(amount);
-        finalAmount = finalAmount.sub(amount);
       } else {
-        finalAmount = finalAmount.add(amount);
         finalAmount = finalAmount.add(amount);
       }
     });
