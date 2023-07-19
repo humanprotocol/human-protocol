@@ -1,7 +1,12 @@
 import unittest
 from unittest.mock import patch
 
-from src.modules.chain.escrow import validate_escrow, get_escrow_manifest, store_results
+from src.modules.chain.escrow import (
+    validate_escrow,
+    get_escrow_manifest,
+    store_results,
+    get_job_launcher_address,
+)
 from tests.utils.setup_escrow import (
     create_escrow,
     fund_escrow,
@@ -135,3 +140,29 @@ class ServiceIntegrationTest(unittest.TestCase):
             with self.assertRaises(EscrowClientError) as error:
                 store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_URL, "")
         self.assertEqual(f"Invalid empty hash", str(error.exception))
+
+    def test_get_job_launcher_address(self):
+        escrow_address = create_escrow(self.w3)
+        with patch("src.modules.chain.escrow.get_web3") as mock_function:
+            mock_function.return_value = self.w3
+            job_launcher_address = get_job_launcher_address(
+                self.w3.eth.chain_id, escrow_address
+            )
+            self.assertIsInstance(job_launcher_address, str)
+            self.assertIsNotNone(job_launcher_address)
+
+    def test_get_job_launcher_address_invalid_address(self):
+        with patch("src.modules.chain.escrow.get_web3") as mock_function:
+            mock_function.return_value = self.w3
+            with self.assertRaises(EscrowClientError) as error:
+                get_job_launcher_address(self.w3.eth.chain_id, "invalid_address")
+        self.assertEqual(
+            f"Invalid escrow address: invalid_address", str(error.exception)
+        )
+
+    def test_get_job_launcher_address_invalid_chain_id(self):
+        with self.assertRaises(ValueError) as error:
+            get_job_launcher_address(1, "0x1234567890123456789012345678901234567890")
+        self.assertEqual(
+            f"1 is not in available list of networks.", str(error.exception)
+        )

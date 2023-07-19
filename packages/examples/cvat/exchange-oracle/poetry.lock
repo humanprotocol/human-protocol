@@ -1262,13 +1262,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "human-protocol-sdk"
-version = "1.1.6"
+version = "1.1.7"
 description = "A python library to launch escrow contracts to the HUMAN network."
 optional = false
 python-versions = "*"
 files = [
-    {file = "human-protocol-sdk-1.1.6.tar.gz", hash = "sha256:b917a40a68ae856f0d1bc588e63342c102e004927da05abdc6b1a259dc68d0a0"},
-    {file = "human_protocol_sdk-1.1.6-py3-none-any.whl", hash = "sha256:f4e6c685c95992708c9c6a0037c4a1b24ee825d22a6dc1864159fccf12dd2472"},
+    {file = "human-protocol-sdk-1.1.7.tar.gz", hash = "sha256:ac4430f973c220ec535b6bd31eb09b7cd675adb53d5329c6c65af9b6ed0de091"},
+    {file = "human_protocol_sdk-1.1.7-py3-none-any.whl", hash = "sha256:cf526949a29b1b1c15c282e93a96d4ce1efc4827e483f1b280fec4f156d6e999"},
 ]
 
 [package.dependencies]
@@ -2760,4 +2760,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e6f8945e8e4fe9e331c39a9745a49ed0a78a4a1a7859acd539a963ec7e62ddc6"
+content-hash = "62a47e0b5556031a5a6abbf9fda9702602b0aba68111478c286e74504246f41a"
