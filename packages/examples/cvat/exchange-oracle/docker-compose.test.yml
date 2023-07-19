@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14.4
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: 'test'
+      POSTGRES_USER: 'test'
+      POSTGRES_DB: 'exchange_oracle_test'
+      PGDATA: '/var/lib/postgresql/data/pgdata'
+    networks:
+      - test-network
+
+  blockchain-node:
+    build: 
+      context: ./
+      dockerfile: blockchain-node.Dockerfile
+    healthcheck:
+      # Using a magic nubmer of 28 here because this is a block number when blockchain-node container is ready to use
+      test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://blockchain-node:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 28 ]; then exit 0; else exit 1; fi
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    networks:
+      - test-network
+
+  test:
+    build:
+      context: ./
+      dockerfile: test.Dockerfile
+    environment:
+      SQLALCHEMY_SILENCE_UBER_WARNING: 1
+      ENVIRONMENT: 'test'
+      PG_PORT: 5432
+      PG_HOST: 'postgres'
+      PG_USER: 'test'
+      PG_PASSWORD: 'test'
+      PG_DB: 'exchange_oracle_test'
+      WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
+    depends_on:
+      postgres:
+        condition: service_started
+      blockchain-node:
+        condition: service_healthy
+    networks:
+      - test-network
+    tty: true
+  
+networks:
+  test-network:
+    driver: bridge
