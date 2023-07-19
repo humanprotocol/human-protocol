@@ -23,3 +23,4 @@ export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_CUSTOMER_ID = 'customer123';
 export const MOCK_PAYMENT_ID = 'payment123';
 export const MOCK_EXPIRES_IN = 1787260813820;
+export const MOCK_UID = 'mocked-uuid';

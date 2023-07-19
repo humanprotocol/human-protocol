@@ -25,7 +25,6 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
-  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
