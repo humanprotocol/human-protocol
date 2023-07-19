@@ -88,6 +88,8 @@ describe('EscrowClient', () => {
       intermediateResultsUrl: vi.fn(),
       launcher: vi.fn(),
       escrowFactory: vi.fn(),
+      reputationOracleFeePercentage: vi.fn(),
+      recordingOracleFeePercentage: vi.fn(),
     };
 
     mockEscrowFactoryContract = {
@@ -1644,6 +1646,118 @@ describe('EscrowClient', () => {
       ).rejects.toThrow();
 
       expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getReputationOracleFeePercentage', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getReputationOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getReputationOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getReputationOracleFeePercentage', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const feePercentage = 10;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      console.log(escrowClient.escrowContract);
+      escrowClient.escrowContract.reputationOracleFeePercentage.mockReturnValue(
+        feePercentage
+      );
+
+      const reputationOracleFeePercentage =
+        await escrowClient.getReputationOracleFeePercentage(escrowAddress);
+
+      expect(reputationOracleFeePercentage).toEqual(feePercentage);
+      expect(
+        escrowClient.escrowContract.reputationOracleFeePercentage
+      ).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getRecordingOracleFeePercentage fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.recordingOracleFeePercentage.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getRecordingOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.recordingOracleFeePercentage
+      ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getRecordingOracleFeePercentage', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getRecordingOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getRecordingOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getRecordingOracleFeePercentage', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const feePercentage = 10;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      console.log(escrowClient.escrowContract);
+      escrowClient.escrowContract.recordingOracleFeePercentage.mockReturnValue(
+        feePercentage
+      );
+
+      const recordingOracleFeePercentage =
+        await escrowClient.getRecordingOracleFeePercentage(escrowAddress);
+
+      expect(recordingOracleFeePercentage).toEqual(feePercentage);
+      expect(
+        escrowClient.escrowContract.recordingOracleFeePercentage
+      ).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getRecordingOracleFeePercentage fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.recordingOracleFeePercentage.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getRecordingOracleFeePercentage(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.recordingOracleFeePercentage
+      ).toHaveBeenCalledWith();
     });
   });
 });

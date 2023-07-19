@@ -587,7 +587,7 @@ export class EscrowClient {
    * Returns the manifest file URL.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   async getManifestUrl(escrowAddress: string): Promise<string> {
@@ -614,7 +614,7 @@ export class EscrowClient {
    * Returns the results file URL.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   async getResultsUrl(escrowAddress: string): Promise<string> {
@@ -641,7 +641,7 @@ export class EscrowClient {
    * Returns the intermediate results file URL.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
@@ -668,7 +668,7 @@ export class EscrowClient {
    * Returns the value for a specified key and address
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   async getTokenAddress(escrowAddress: string): Promise<string> {
@@ -695,7 +695,7 @@ export class EscrowClient {
    * Returns the current status of the escrow.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<EscrowStatus>}
    * @throws {Error} - An error object if an error occurred.
    */
   async getStatus(escrowAddress: string): Promise<EscrowStatus> {
@@ -875,6 +875,64 @@ export class EscrowClient {
       );
       return this.escrowContract.escrowFactory();
     } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the reputation oracle fee percentage.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<number>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getReputationOracleFeePercentage(
+    escrowAddress: string
+  ): Promise<number> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.reputationOracleFeePercentage();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the recording oracle fee percentage.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<number>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getRecordingOracleFeePercentage(
+    escrowAddress: string
+  ): Promise<number> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.recordingOracleFeePercentage();
+    } catch (e) {
       return throwError(e);
     }
   }

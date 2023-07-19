@@ -29,6 +29,7 @@ import { ConfigNames } from '../../common/config';
 import { WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
+import { IPayoutResult } from 'src/common/interfaces';
 
 @Injectable()
 export class WebhookService {
@@ -155,12 +156,25 @@ export class WebhookService {
           retriesCount: 0,
         },
       );
+      
+      const recipients = [
+        ...this.getRecipients(finalResults, manifest.requestType),
+        await escrowClient.getReputationOracleAddress(webhookEntity.escrowAddress),
+        await escrowClient.getRecordingOracleAddress(webhookEntity.escrowAddress)
+      ];
 
-      const recipients = this.getRecipients(finalResults, manifest.requestType);
-      const amounts = this.calculatePayoutAmounts(
-        manifest.fundAmount,
+      const { 
+        workersPayoutAmounts,
+        reputationOracleFeeAmount,
+        recordingOracleFeeAmount
+      } = this.calculatePayoutAmounts(
+        BigNumber.from(manifest.fundAmount),
         recipients.length,
+        await escrowClient.getReputationOracleFeePercentage(webhookEntity.escrowAddress),
+        await escrowClient.getRecordingOracleFeePercentage(webhookEntity.escrowAddress)
       );
+      
+      const amounts = [...workersPayoutAmounts, reputationOracleFeeAmount, recordingOracleFeeAmount];
 
       await escrowClient.bulkPayOut(
         webhookEntity.escrowAddress,
@@ -238,15 +252,34 @@ export class WebhookService {
    * Calculates the payout amounts for the recipients.
    * @param totalAmount - The total amount to be distributed.
    * @param recipientCount - The number of recipients.
-   * @returns {BigNumber[]} - Returns an array of payout amounts.
+   * @param reputationOracleFeePercentage - Specifies the percentage of a fee that the reputation oracle charges from worker
+   * @param recordingOracleFeePercentage - Specifies the percentage of a fee that the recording oracle charges from worker
+   * @returns {IPayoutResult} - Return an object of payout amounts.
    */
   public calculatePayoutAmounts(
-    totalAmount: string,
+    totalAmount: BigNumber,
     recipientCount: number,
-  ): BigNumber[] {
-    const payoutAmount = BigNumber.from(totalAmount).div(recipientCount);
-    return new Array(recipientCount).fill(payoutAmount);
+    reputationOracleFeePercentage: number,
+    recordingnOracleFeePercentage: number,
+  ): IPayoutResult {
+    // Calculate the total fee amount to be deducted from the totalAmount for all workers.
+    const reputationOracleFeeAmount = totalAmount.mul(reputationOracleFeePercentage).div(100);
+    const recordingOracleFeeAmount = totalAmount.mul(recordingnOracleFeePercentage).div(100);
+    const totalFeeAmount = reputationOracleFeeAmount.add(recordingOracleFeeAmount);
+    
+    // Calculate the payout amount for each worker after deducting the fee.
+    const payoutAmountAfterFee = totalAmount.sub(totalFeeAmount).div(recipientCount);
+
+    // Create an array with payout amounts for each worker after fee deduction.
+    const workersPayoutAmounts: BigNumber[] = new Array(recipientCount).fill(payoutAmountAfterFee);
+
+    return {
+      workersPayoutAmounts,
+      reputationOracleFeeAmount,
+      recordingOracleFeeAmount
+    };
   }
+
 
   /**
    * Retrieves the recipients based on the final results and request type.
