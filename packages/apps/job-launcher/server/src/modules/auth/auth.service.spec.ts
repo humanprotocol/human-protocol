@@ -126,7 +126,7 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException if user credentials are invalid', async () => {
       getByCredentialsMock.mockResolvedValue(undefined);
   
-      await expect(authService.signin(signInDto, ip)).rejects.toThrow(
+      await expect(authService.signin(signInDto, MOCK_IP)).rejects.toThrow(
         ErrorAuth.InvalidEmailOrPassword,
       );
   

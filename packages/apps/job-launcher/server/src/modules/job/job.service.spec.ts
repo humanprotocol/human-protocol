@@ -1,6 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
+  EscrowClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -359,9 +360,7 @@ describe('JobService', () => {
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
-  
-    /*it('should handle error during job launch', async () => {
-  
+
     it('should handle error during job launch', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         createAndSetupEscrow: jest
@@ -381,7 +380,7 @@ describe('JobService', () => {
       await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
-    });*/
+    });
   });
 
   describe('launchJob with CVAT type', () => {

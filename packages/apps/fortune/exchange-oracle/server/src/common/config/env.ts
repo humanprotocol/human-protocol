@@ -4,6 +4,7 @@ export const ConfigNames = {
   HOST: 'HOST',
   PORT: 'PORT',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
+  REPUTATION_ORACLE_URL: 'REPUTATION_ORACLE_URL',
 };
 
 export const envValidator = Joi.object({
