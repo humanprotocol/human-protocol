@@ -5,7 +5,7 @@ from src.modules.api_schema import OracleWebhook, OracleWebhookResponse, CvatWeb
 from src.db import SessionLocal
 
 from src.modules.chain.escrow import validate_escrow
-from src.validators.signature import validate_signature, validate_cvat_signature
+from src.validators.signature import validate_webhook_signature, validate_cvat_signature
 
 from src.modules.cvat.handlers.webhook import cvat_webhook_handler
 from src.modules.oracle_webhook.service import create_webhook
@@ -18,12 +18,13 @@ router = APIRouter()
     "/job-launcher",
     description="Consumes a webhook from a job launcher",
 )
-def job_launcher_webhook(
+async def job_launcher_webhook(
     webhook: OracleWebhook,
+    request: Request,
     human_signature: Union[str, None] = Header(default=None),
 ):
     try:
-        validate_signature(human_signature)
+        await validate_webhook_signature(request, human_signature, webhook)
         validate_escrow(webhook.chain_id, webhook.escrow_address)
 
         with SessionLocal.begin() as session:

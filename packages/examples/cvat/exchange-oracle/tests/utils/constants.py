@@ -16,3 +16,10 @@ DEFAULT_URL = "https://storage.googleapis.com/fortune-manifests/manifest.json"
 DEFAULT_HASH = "test"
 
 SIGNATURE = "0x63fde9fec5d1924c8837bae8f19c632291725fb94bb03fb3e8d89bf6de17f52014e402e5769d27989a73e889c9aa35c7ace790d2b239d8e1d9d07046ae2d44f51c"
+
+WEBHOOK_MESSAGE = {
+    "escrow_address": "0xFE776895f6b00AA53969b20119a4777Ed920676a",
+    "chain_id": 80001,
+}
+
+WEBHOOK_MESSAGE_SIGNED = "0x653242fc57766948d0e84c8466b1d52ce701a20fc6b08b5c1bee361aa8c480a61470db594dccb5724345712a216c35aa14be7d435faaa596a7ffba7f476887bb1b"

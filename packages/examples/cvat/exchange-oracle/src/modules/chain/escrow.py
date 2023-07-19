@@ -39,3 +39,12 @@ def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> No
     escrow_client = EscrowClient(web3)
 
     escrow_client.store_results(escrow_address, url, hash)
+
+
+def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
+    web3 = get_web3(chain_id)
+    escrow_client = EscrowClient(web3)
+
+    job_launcher_address = escrow_client.get_job_launcher_address(escrow_address)
+
+    return job_launcher_address
