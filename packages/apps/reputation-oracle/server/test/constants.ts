@@ -1,4 +1,4 @@
-import { JobMode, JobRequestType } from '../src/common/enums';
+import { JobRequestType } from '../src/common/enums';
 import { IFortuneManifest } from '../src/common/interfaces/manifest';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
@@ -18,5 +18,4 @@ export const MOCK_MANIFEST: IFortuneManifest = {
   fee: '20',
   fundAmount: '8',
   requestType: JobRequestType.FORTUNE,
-  mode: JobMode.DESCRIPTIVE,
 };
