@@ -1,19 +1,47 @@
-import { Box, Button, Link } from '@mui/material';
+import { Alert, Box, Button, Link } from '@mui/material';
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { SignInForm } from '../../components/Auth/SignInForm';
 import { SignUpForm } from '../../components/Auth/SignUpForm';
 import { HomeStyledTab, HomeStyledTabs } from '../../components/Tabs';
-import { useAppSelector } from '../../state';
+import * as authService from '../../services/auth';
+import { useAppDispatch, useAppSelector } from '../../state';
+import { signIn } from '../../state/auth/reducer';
+import { SignInRequest, SignUpRequest } from '../../types';
 
 export default function Home() {
+  const dispatch = useAppDispatch();
   const [tabValue, setTabValue] = useState(0);
   const [mode, setMode] = useState<string>();
+  const [alertMsg, setAlertMsg] = useState('');
   const { isAuthed } = useAppSelector((state) => state.auth);
 
   if (isAuthed) {
     return <Navigate to="/dashboard" />;
   }
+
+  const handleSignIn = async (body: SignInRequest) => {
+    try {
+      const data = await authService.signIn({
+        email: body.email,
+        password: body.password,
+      });
+      dispatch(signIn(data));
+    } catch (err: any) {
+      console.log(err);
+      setAlertMsg(err?.response?.data?.message);
+    }
+  };
+
+  const handleSignUp = async (body: SignUpRequest) => {
+    try {
+      await authService.signUp(body);
+      setTabValue(0);
+      setMode('sign_in');
+    } catch (err: any) {
+      setAlertMsg(err?.message);
+    }
+  };
 
   return (
     <Box
@@ -50,11 +78,21 @@ export default function Home() {
           borderTopLeftRadius: tabValue === 0 ? '0px' : '20px',
           borderTopRightRadius: tabValue === 1 ? '0px' : '20px',
         }}
+        py={8}
       >
+        {alertMsg && alertMsg.length && (
+          <Alert
+            severity="error"
+            onClose={() => setAlertMsg('')}
+            sx={{ mb: 2, maxWidth: '303px', width: '100%' }}
+          >
+            {alertMsg}
+          </Alert>
+        )}
         {tabValue === 0 && (
           <>
             {mode === 'sign_in' ? (
-              <SignInForm />
+              <SignInForm onSignIn={handleSignIn} />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button
@@ -81,7 +119,7 @@ export default function Home() {
         {tabValue === 1 && (
           <>
             {mode === 'sign_up' ? (
-              <SignUpForm />
+              <SignUpForm onSignUp={handleSignUp} />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button

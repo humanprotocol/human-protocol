@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../../assets/fund-crypto.png';
 import fundFiatImg from '../../../assets/fund-fiat.png';
@@ -10,6 +11,7 @@ import WalletModal from '../../WalletModal';
 export const FundingMethod = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const { isConnected } = useAccount();
+  const navigate = useNavigate();
   const { changePayMethod, goToNextStep } = useCreateJobPageUI();
 
   const handleClickCrypto = () => {
@@ -119,7 +121,7 @@ export const FundingMethod = () => {
                 <Button
                   variant="outlined"
                   sx={{ minWidth: '200px' }}
-                  href="/profile/top-up"
+                  onClick={() => navigate('/profile/top-up')}
                 >
                   Top up your account
                 </Button>

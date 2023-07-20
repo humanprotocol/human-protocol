@@ -13,7 +13,7 @@ export default function DefaultLayout() {
       <Box
         sx={{
           px: { sm: 4, md: 8, xl: 30 },
-          pt: { xs: 12, sm: 16, xl: 27 },
+          py: { xs: 12, sm: 16, xl: 27 },
         }}
       >
         <Grid container>

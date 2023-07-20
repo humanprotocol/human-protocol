@@ -1,24 +1,20 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import {
-  Alert,
-  AlertTitle,
   Box,
   Button,
   FormHelperText,
-  Link,
+  Link as MuiLink,
   TextField,
 } from '@mui/material';
 import { useFormik } from 'formik';
 import React, { useRef, useState } from 'react';
-// import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Password } from './Password';
 import { LoginValidationSchema } from './schema';
 
-export const SignInForm = () => {
-  //   const dispatch = useDispatch();
+export const SignInForm = ({ onSignIn }) => {
   const captchaRef = useRef(null);
   const [hcaptchaToken, setHcaptchaToken] = useState('');
-  const [alertMsg, setAlertMsg] = useState('');
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -26,45 +22,7 @@ export const SignInForm = () => {
       token: '',
     },
     validationSchema: LoginValidationSchema,
-    onSubmit: (values, { setSubmitting }) => {
-      console.log(values, setSubmitting);
-      //   setSubmitting(true);
-      //   dispatch(startGlobalLoading());
-      //   signIn({ ...values, hcaptchaToken })
-      //     .then((res) => {
-      //       if (res) {
-      //         const { user } = res;
-      //         dispatch({
-      //           type: 'AUTH_SUCCESS',
-      //           payload: res,
-      //         });
-      //         dispatch({
-      //           type: 'AUTH_SIGN_IN',
-      //           payload: user.isEmailVerified,
-      //         });
-      //         setHcaptchaToken('');
-      //         setSubmitting(false);
-      //         if (user.isEmailVerified)
-      //           history.push({ pathname: Routes.Workspace.path });
-      //         else
-      //           history.push({
-      //             pathname: Routes.Register.path,
-      //             search: `?step=verify_email`,
-      //           });
-      //       } else {
-      //         setHcaptchaToken('');
-      //         setSubmitting(false);
-      //         captchaRef.current.resetCaptcha();
-      //       }
-      //     })
-      //     .catch((err) => {
-      //       setAlertMsg(err.message);
-      //       setHcaptchaToken('');
-      //       setSubmitting(false);
-      //       captchaRef.current.resetCaptcha();
-      //     })
-      //     .finally(() => dispatch(finishGlobalLoading()));
-    },
+    onSubmit: (values) => onSignIn(values),
   });
 
   const handleVerificationToken = (token) => {
@@ -73,13 +31,7 @@ export const SignInForm = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: '392px', mx: 'auto' }}>
-      {alertMsg && alertMsg.length && (
-        <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ mb: 2 }}>
-          <AlertTitle>Login failed!</AlertTitle>
-          {alertMsg}
-        </Alert>
-      )}
+    <Box sx={{ maxWidth: '303px', mx: 'auto' }}>
       <form
         style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
         name="form"
@@ -113,8 +65,8 @@ export const SignInForm = () => {
             helperText={formik.errors.password}
           />
           <Link
-            href="/forgot-password"
-            sx={{
+            to="/forgot-password"
+            style={{
               fontSize: '13px',
               textAlign: 'right',
               width: '100%',
@@ -149,13 +101,13 @@ export const SignInForm = () => {
         >
           Sign in to Job Launcher
         </Button>
-        <Link
+        <MuiLink
           href="https://humanprotocol.org/app/terms-and-conditions"
           target="_blank"
           sx={{ fontSize: '12px', textAlign: 'center' }}
         >
           Terms & conditions
-        </Link>
+        </MuiLink>
       </form>
     </Box>
   );

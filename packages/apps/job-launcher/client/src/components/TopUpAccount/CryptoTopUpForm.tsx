@@ -102,7 +102,10 @@ export const CryptoTopUpForm = () => {
         >
           Top up account
         </Button>
-        <Link href="https://humanprotocol.org" target="_blank">
+        <Link
+          href="https://humanprotocol.org/app/terms-and-conditions"
+          target="_blank"
+        >
           <Typography variant="caption" mt={4} component="p">
             Terms & conditions
           </Typography>

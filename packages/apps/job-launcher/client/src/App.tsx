@@ -11,6 +11,8 @@ import JobList from './pages/Job/JobList';
 import TopUpAccount from './pages/Profile/TopUpAccount';
 import ResetPassword from './pages/ResetPassword';
 
+import './index.css';
+
 export default function App() {
   return (
     <BrowserRouter>

@@ -1,6 +1,5 @@
 import {
   Box,
-  Link,
   Paper,
   Table,
   TableBody,
@@ -12,6 +11,7 @@ import {
   TableSortLabel,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Data {
   address: string;
@@ -313,8 +313,8 @@ export const JobsTable = () => {
                 </TableCell>
                 <TableCell align="right">
                   <Link
-                    sx={{ fontWeight: 600, textDecoration: 'underline' }}
-                    href="/jobs/details/1"
+                    style={{ fontWeight: 600, textDecoration: 'underline' }}
+                    to="/jobs/details/1"
                   >
                     Details
                   </Link>

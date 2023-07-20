@@ -4,7 +4,6 @@ import {
   Breadcrumbs,
   Button,
   IconButton,
-  Link,
   Menu,
   MenuProps,
   Toolbar,
@@ -12,7 +11,10 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { MouseEvent, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import * as authServices from '../../services/auth';
+import { useAppDispatch, useAppSelector } from '../../state';
+import { signOut } from '../../state/auth/reducer';
 import { AccountCircleFilledIcon } from '../Icons/AccountCircleFilledIcon';
 import { BellFilledIcon } from '../Icons/BellFilledIcon';
 import { CardIcon } from '../Icons/CardIcon';
@@ -45,6 +47,9 @@ const ProfileMenu = styled((props: MenuProps) => (
 
 export const AuthHeader = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { email, refreshToken } = useAppSelector((state) => state.auth);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -56,6 +61,13 @@ export const AuthHeader = () => {
   };
 
   const segements = pathname.split('/').filter((s) => s);
+
+  const handleLogOut = async () => {
+    if (refreshToken) {
+      await authServices.signOut(refreshToken);
+      dispatch(signOut());
+    }
+  };
 
   return (
     <AppBar
@@ -79,7 +91,11 @@ export const AuthHeader = () => {
           ))}
         </Breadcrumbs>
         <Box sx={{ ml: 'auto' }}>
-          <Button variant="contained" sx={{ mr: 1 }} href="/jobs/create">
+          <Button
+            variant="contained"
+            sx={{ mr: 1 }}
+            onClick={() => navigate('/jobs/create')}
+          >
             + Create a Job
           </Button>
           <IconButton>
@@ -107,11 +123,11 @@ export const AuthHeader = () => {
           >
             <AccountCircleFilledIcon sx={{ fontSize: '48px' }} />
             <Box>
-              <Typography variant="body1" lineHeight={1.5}>
+              {/* <Typography variant="body1" lineHeight={1.5}>
                 Tony Wen
-              </Typography>
+              </Typography> */}
               <Typography variant="body2" color="text.secondary">
-                tony@hmt.ai
+                {email}
               </Typography>
             </Box>
           </Box>
@@ -144,41 +160,41 @@ export const AuthHeader = () => {
             }}
           >
             <Link
-              sx={{
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '32px',
                 cursor: 'pointer',
               }}
-              href="/profile/top-up"
+              to="/profile/top-up"
             >
               <CardIcon /> Top up account
             </Link>
             <Link
-              sx={{
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '32px',
                 cursor: 'pointer',
               }}
-              href="/profile/transactions"
+              to="/profile/transactions"
             >
               <TransactionsIcon /> My transactions
             </Link>
             <Link
-              sx={{
+              style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '32px',
                 cursor: 'pointer',
               }}
-              href="/profile/settings"
+              to="/profile/settings"
             >
               <SettingsIcon /> Settings
             </Link>
           </Box>
           <Box sx={{ padding: '8px 16px' }}>
-            <Button variant="contained" fullWidth>
+            <Button variant="contained" fullWidth onClick={handleLogOut}>
               Log out
             </Button>
           </Box>

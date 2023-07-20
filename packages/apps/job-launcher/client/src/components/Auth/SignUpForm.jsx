@@ -1,41 +1,27 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  Button,
-  FormHelperText,
-  Link,
-  TextField,
-} from '@mui/material';
+import { Box, Button, FormHelperText, Link, TextField } from '@mui/material';
 import { Formik } from 'formik';
-import React, { useRef, useState } from 'react';
-// import { useDispatch } from 'react-redux';
+import React, { useRef } from 'react';
 import { Password } from './Password';
 import { RegisterValidationSchema } from './schema';
 
-export const SignUpForm = () => {
-  //   const dispatch = useDispatch();
+export const SignUpForm = ({ onSignUp }) => {
   const captchaRef = useRef(null);
-  const [alertMsg, setAlertMsg] = useState('');
 
-  const handleRegister = () => {};
+  const handleRegister = async ({ email, password, confirm }) => {
+    const body = { email, password, confirm };
+    onSignUp(body);
+  };
 
   const initialValues = {
     email: '',
     password: '',
-    repeatPassword: '',
+    confirm: '',
     hcaptchaToken: '',
   };
 
   return (
-    <Box sx={{ maxWidth: '392px', mx: 'auto' }}>
-      {alertMsg && alertMsg.length && (
-        <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ mb: 2 }}>
-          <AlertTitle>Login failed!</AlertTitle>
-          {alertMsg}
-        </Alert>
-      )}
+    <Box sx={{ maxWidth: '303px', mx: 'auto' }}>
       <Formik
         initialValues={initialValues}
         validationSchema={RegisterValidationSchema}
@@ -74,13 +60,13 @@ export const SignUpForm = () => {
               helperText={errors.password}
             />
             <Password
-              onChange={(e) => setFieldValue('repeatPassword', e.target.value)}
+              onChange={(e) => setFieldValue('confirm', e.target.value)}
               onBlur={handleBlur}
-              name="repeatPassword"
-              value={values.repeatPassword}
+              name="confirm"
+              value={values.confirm}
               placeholder="Confirm password"
-              error={touched.repeatPassword && errors.repeatPassword}
-              helperText={errors.repeatPassword}
+              error={touched.confirm && errors.confirm}
+              helperText={errors.confirm}
             />
             <Box
               sx={{

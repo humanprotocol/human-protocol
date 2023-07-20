@@ -10,7 +10,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 
 import CreditCardFilledIcon from '../assets/CreditCardFilled.svg';
 import logoImg from '../assets/logo.svg';
@@ -47,36 +47,35 @@ export default function AuthLayout() {
           <Collapse in={show}>
             <ListItem sx={{ pl: 9, py: 0 }}>
               <List disablePadding>
-                <ListItem disablePadding>
-                  <ListItemButton href="/jobs/launched">
-                    Launched
-                  </ListItemButton>
+                <ListItem>
+                  <Link to="/jobs/launched">Launched</Link>
                 </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton href="/jobs/pending">Pending</ListItemButton>
+                <ListItem>
+                  <Link to="/jobs/pending">Pending</Link>
                 </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton href="/jobs/completed">
-                    Completed
-                  </ListItemButton>
+                <ListItem>
+                  <Link to="/jobs/completed">Completed</Link>
                 </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton href="/jobs/cancelled">
-                    Cancelled
-                  </ListItemButton>
+                <ListItem>
+                  <Link to="/jobs/cancelled">Cancelled</Link>
                 </ListItem>
-                <ListItem disablePadding>
-                  <ListItemButton href="/jobs/failed">Failed</ListItemButton>
+                <ListItem>
+                  <Link to="/jobs/failed">Failed</Link>
                 </ListItem>
               </List>
             </ListItem>
           </Collapse>
           <ListItem>
-            <ListItemButton href="/jobs/create">
-              <ListItemIcon>
-                <img src={PlusIcon} alt="Add New Job" />
-              </ListItemIcon>
-              <ListItemText primary="Add New Job" />
+            <ListItemButton>
+              <Link
+                to="/jobs/create"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <ListItemIcon>
+                  <img src={PlusIcon} alt="Add New Job" />
+                </ListItemIcon>
+                <ListItemText primary="Add New Job" />
+              </Link>
             </ListItemButton>
           </ListItem>
         </List>

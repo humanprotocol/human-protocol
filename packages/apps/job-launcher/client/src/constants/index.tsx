@@ -62,3 +62,10 @@ export const ERROR_MESSAGES = {
     'The app is not available in your location. Please refer to our T&Cs',
   tcRequired: 'The terms and conditions should be accepted',
 };
+
+export const LOCAL_STORAGE_KEYS = {
+  accessToken: 'HUMAN_JOB_LAUNCHER_ACCESS_TOKEN',
+  refreshToken: 'HUMAN_JOB_LAUNCHER_REFRESH_TOKEN',
+  accessTokenExpiresAt: 'HUMAN_JOB_LAUNCHER_ACCESS_TOKEN_EXPIRES_AT',
+  refreshTokenExpiresAt: 'HUMAN_JOB_LAUNCHER_REFRESH_TOKEN_EXPIRES_AT',
+};

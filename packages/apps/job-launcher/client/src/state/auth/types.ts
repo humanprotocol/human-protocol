@@ -1,6 +1,8 @@
 export type AuthState = {
   isAuthed: boolean;
-  user: any;
-  token: string | null;
-  refreshToken: string | null;
+  email?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpiresAt?: number;
+  refreshTokenExpiresAt?: number;
 };

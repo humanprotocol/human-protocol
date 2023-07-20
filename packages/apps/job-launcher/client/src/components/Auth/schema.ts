@@ -21,11 +21,9 @@ export const RegisterValidationSchema = Yup.object().shape({
     )
     .min(8, ERROR_MESSAGES.invalidPasswordLength)
     .max(255, ERROR_MESSAGES.invalidPasswordMaxLength),
-  repeatPassword: Yup.string()
+  confirm: Yup.string()
     .required(ERROR_MESSAGES.requirePassword)
     .oneOf([Yup.ref('password'), ''], ERROR_MESSAGES.notConfirmedPassword),
-  name: Yup.string().required(ERROR_MESSAGES.requireUserName),
-  country: Yup.string().required(ERROR_MESSAGES.requireCountry),
   hcaptchaToken: Yup.string().required(ERROR_MESSAGES.captchaPassRequired),
 });
 

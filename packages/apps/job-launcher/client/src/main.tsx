@@ -24,9 +24,12 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App';
+import { LOCAL_STORAGE_KEYS } from './constants';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
+import { signIn } from './state/auth/reducer';
 import theme from './theme';
+import { isJwtExpired } from './utils/jwt';
 
 window.Buffer = window.Buffer || Buffer;
 
@@ -93,7 +96,33 @@ const client = createClient({
 });
 
 const publishableKey = import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY ?? '';
-loadStripe(publishableKey).then((stripePromise) =>
+loadStripe(publishableKey).then((stripePromise) => {
+  const accessToken = localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken);
+  const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.refreshToken);
+  const accessTokenExpiresAt = localStorage.getItem(
+    LOCAL_STORAGE_KEYS.accessTokenExpiresAt
+  );
+  const refreshTokenExpiresAt = localStorage.getItem(
+    LOCAL_STORAGE_KEYS.refreshTokenExpiresAt
+  );
+
+  if (
+    accessToken &&
+    refreshToken &&
+    accessTokenExpiresAt &&
+    refreshTokenExpiresAt &&
+    !isJwtExpired(accessToken)
+  ) {
+    store.dispatch(
+      signIn({
+        accessToken,
+        refreshToken,
+        accessTokenExpiresAt,
+        refreshTokenExpiresAt,
+      })
+    );
+  }
+
   root.render(
     <React.StrictMode>
       <WagmiConfig client={client}>
@@ -107,8 +136,8 @@ loadStripe(publishableKey).then((stripePromise) =>
         </Provider>
       </WagmiConfig>
     </React.StrictMode>
-  )
-);
+  );
+});
 
 const root = createRoot(document.getElementById('root') as HTMLElement);
 

@@ -75,7 +75,10 @@ export const FiatTopUpForm = () => {
           </Button>
         </Grid>
         <Grid item xs={12}>
-          <Link href="https://humanprotocol.org" target="_blank">
+          <Link
+            href="https://humanprotocol.org/app/terms-and-conditions"
+            target="_blank"
+          >
             <Typography variant="caption" component="p" textAlign="center">
               Terms & conditions
             </Typography>
