@@ -81,6 +81,7 @@ export class addAuthTable1677867985970 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.dropTable(`${NS}.auth`);
+    await queryRunner.query(`DROP TYPE ${NS}.auth_status_enum;`);
     await queryRunner.query('DROP FUNCTION delete_expired_auth();');
   }
 }
