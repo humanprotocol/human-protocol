@@ -5,7 +5,7 @@ import uuid
 from hashlib import sha256
 from sqlalchemy.sql import select
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CvatConfig
 from src.modules.cvat.model import Project, Task, Job
 

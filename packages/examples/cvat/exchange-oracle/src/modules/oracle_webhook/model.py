@@ -1,13 +1,13 @@
 # pylint: disable=too-few-public-methods
 from sqlalchemy import Column, String, DateTime, Enum, Integer, UniqueConstraint
 from sqlalchemy.sql import func
-
+from sqlalchemy.event import listens_for
 
 from src.modules.oracle_webhook.constants import (
     OracleWebhookTypes,
     OracleWebhookStatuses,
 )
-from src.db import Base
+from src.database import Base
 from src.constants import Networks
 
 
@@ -17,6 +17,7 @@ class Webhook(Base):
     signature = Column(String, unique=True, index=True, nullable=False)
     escrow_address = Column(String(42), nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
+    s3_url = Column(String)
     type = Column(String, Enum(OracleWebhookTypes), nullable=False)
     status = Column(
         String,
@@ -33,3 +34,14 @@ class Webhook(Base):
 
     def __repr__(self):
         return f"Webhook. id={self.id}"
+
+
+@listens_for(Webhook, "before_insert")
+def validate_type_and_s3_url_on_insert(mapper, connection, target):
+    if (
+        target.type == OracleWebhookTypes.recording_oracle.value
+        and target.s3_url is None
+    ):
+        raise ValueError(
+            f"Cannot create a webhook with type {OracleWebhookTypes.recording_oracle.value} and s3_url set to None."
+        )

@@ -10,7 +10,7 @@ from src.modules.cvat.constants import (
     JobStatuses,
     JobTypes,
 )
-from src.db import Base
+from src.database import Base
 
 
 class Project(Base):

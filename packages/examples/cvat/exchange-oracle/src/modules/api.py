@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Header, Request
 from typing import Union
 
 from src.modules.api_schema import OracleWebhook, OracleWebhookResponse, CvatWebhook
-from src.db import SessionLocal
+from src.database import SessionLocal
 
 from src.modules.chain.escrow import validate_escrow
 from src.validators.signature import validate_webhook_signature, validate_cvat_signature

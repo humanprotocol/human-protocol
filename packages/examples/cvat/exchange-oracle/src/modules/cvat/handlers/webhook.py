@@ -1,4 +1,4 @@
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.modules.cvat.constants import EventTypes
 
 import src.modules.cvat.service as cvat_service
