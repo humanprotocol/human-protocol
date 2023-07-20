@@ -51,13 +51,16 @@ export enum ErrorPayment {
   NotFound = 'Payment not found',
   NotSuccess = 'Unsuccessful payment',
   IntentNotCreated = 'Payment intent not created',
+  ClientSecretDoesNotExist = 'Payment intent was not created',
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',
-  TransactionHashAlreadyExists = 'transaction hash already exists',
+  TransactionHashAlreadyExists = 'Transaction hash already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
   InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
+  UnsupportedToken = 'Unsupported token',
+  InvalidRecipient = 'Invalid recipient',
 }
 
 /**

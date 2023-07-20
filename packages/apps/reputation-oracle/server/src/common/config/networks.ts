@@ -1,4 +1,4 @@
-import { ChainId } from "@human-protocol/sdk";
+import { ChainId } from '@human-protocol/sdk';
 
 export interface NetworkDto {
   chainId: ChainId;

@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { UserEntity } from './user.entity';
-import { UserCreateDto, UserDto, UserUpdateDto } from './user.dto';
+import { UserDto, UserUpdateDto } from './user.dto';
 import { ErrorUser } from '../../common/constants/errors';
 
 @Injectable()

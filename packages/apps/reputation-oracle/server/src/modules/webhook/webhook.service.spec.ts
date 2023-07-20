@@ -25,7 +25,7 @@ import {
   ErrorResults,
   ErrorWebhook,
 } from '../../common/constants/errors';
-import { JobMode, JobRequestType } from '../../common/enums';
+import { JobRequestType } from '../../common/enums';
 import {
   MOCK_ADDRESS,
   MOCK_FILE_HASH,
@@ -181,7 +181,6 @@ describe('WebhookService', () => {
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
     };
 
     const webhookEntity: Partial<WebhookIncomingEntity> = {
@@ -343,7 +342,6 @@ describe('WebhookService', () => {
       requesterAccuracyTarget: 10,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.BATCH,
     };
 
     const webhookEntity: Partial<WebhookIncomingEntity> = {
@@ -498,7 +496,6 @@ describe('WebhookService', () => {
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fee: totalFee.toString(),
       fundAmount: totalAmount.toString(),
-      mode: JobMode.DESCRIPTIVE,
     };
 
     const webhookEntity: Partial<WebhookIncomingEntity> = {

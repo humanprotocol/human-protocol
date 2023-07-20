@@ -4,7 +4,11 @@ import HMTokenAbi from '@human-protocol/core/abis/HMToken.json' assert { type: '
 import StakingAbi from '@human-protocol/core/abis/Staking.json' assert { type: 'json' };
 import { IEscrowNetwork } from '../src/constants/networks.js';
 
-export const stake = async (web3: Web3, network: IEscrowNetwork) => {
+export const stake = async (
+  web3: Web3,
+  network: IEscrowNetwork,
+  from = web3.eth.defaultAccount
+) => {
   const escrowFactoryContract = new web3.eth.Contract(
     EscrowFactoryAbi as [],
     network.factoryAddress
@@ -12,7 +16,7 @@ export const stake = async (web3: Web3, network: IEscrowNetwork) => {
   const stakingAddress = await escrowFactoryContract.methods.staking().call();
   const stakeAmount = web3.utils.toWei('10', 'ether');
 
-  await approve(web3, network, stakingAddress, stakeAmount);
+  await approve(web3, network, stakingAddress, stakeAmount, from);
 
   const stakingContract = new web3.eth.Contract(
     StakingAbi as [],
@@ -20,17 +24,18 @@ export const stake = async (web3: Web3, network: IEscrowNetwork) => {
   );
   const gas = await stakingContract.methods
     .stake(stakeAmount)
-    .estimateGas({ from: web3.eth.defaultAccount });
+    .estimateGas({ from });
   const gasPrice = await web3.eth.getGasPrice();
   await stakingContract.methods
     .stake(stakeAmount)
-    .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+    .send({ from, gas, gasPrice });
 };
 export const approve = async (
   web3: Web3,
   network: IEscrowNetwork,
   to: string,
-  amount: string
+  amount: string,
+  from = web3.eth.defaultAccount
 ) => {
   const hmtContract = new web3.eth.Contract(
     HMTokenAbi as [],
@@ -38,11 +43,9 @@ export const approve = async (
   );
   const gas = await hmtContract.methods
     .approve(to, amount)
-    .estimateGas({ from: web3.eth.defaultAccount });
+    .estimateGas({ from });
   const gasPrice = await web3.eth.getGasPrice();
-  await hmtContract.methods
-    .approve(to, amount)
-    .send({ from: web3.eth.defaultAccount, gas, gasPrice });
+  await hmtContract.methods.approve(to, amount).send({ from, gas, gasPrice });
 };
 
 export const decreaseApproval = async (

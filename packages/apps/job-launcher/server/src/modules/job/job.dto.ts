@@ -6,11 +6,10 @@ import {
   IsPositive,
   IsString,
   IsUrl,
-  Matches,
   IsDate,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobMode, JobRequestType, JobStatus } from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -140,7 +139,7 @@ export class FortuneManifestDto {
   @IsNumber()
   @IsPositive()
   submissionsRequired: number;
-  
+
   @IsString()
   requesterTitle: string;
 
@@ -148,22 +147,16 @@ export class FortuneManifestDto {
   requesterDescription: string;
 
   @IsString()
-  fee: string;
-
-  @IsString()
   fundAmount: string;
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
-
-  @IsEnum(JobMode)
-  mode: JobMode;
 }
 
 export class ImageLabelBinaryManifestDto {
   @IsString()
   dataUrl: string;
-  
+
   @IsArray()
   labels: string[];
 
@@ -179,14 +172,8 @@ export class ImageLabelBinaryManifestDto {
   requesterAccuracyTarget: number;
 
   @IsString()
-  fee: string;
-
-  @IsString()
   fundAmount: string;
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
-
-  @IsEnum(JobMode)
-  mode: JobMode;
 }

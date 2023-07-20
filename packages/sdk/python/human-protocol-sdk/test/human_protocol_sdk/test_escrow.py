@@ -1890,6 +1890,108 @@ class EscrowTestCase(unittest.TestCase):
             "Escrow address is not provided by the factory", str(cm.exception)
         )
 
+    def test_get_job_launcher_address(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.launcher = MagicMock()
+        mock_contract.functions.launcher.return_value.call.return_value = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_job_launcher_address(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.launcher.assert_called_once_with()
+        self.assertEqual(result, "0x1234567890123456789012345678901234567890")
+
+    def test_get_job_launcher_address_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_job_launcher_address("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_job_launcher_address_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+        mock_contract = MagicMock()
+        mock_contract.functions.launcher = MagicMock()
+        mock_contract.functions.launcher.return_value.call.return_value = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = escrowClient.get_job_launcher_address(escrow_address)
+
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.launcher.assert_called_once_with()
+        self.assertEqual(result, "0x1234567890123456789012345678901234567890")
+
+    def test_get_job_launcher_address_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_job_launcher_address(
+                "0x1234567890123456789012345678901234567890"
+            )
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
+    def test_get_factory_address(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.escrowFactory = MagicMock()
+        mock_contract.functions.escrowFactory.return_value.call.return_value = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_factory_address(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.escrowFactory.assert_called_once_with()
+        self.assertEqual(result, "0x1234567890123456789012345678901234567890")
+
+    def test_get_factory_address_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_factory_address("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
+
+    def test_get_factory_address_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        escrowClient = EscrowClient(w3)
+        mock_contract = MagicMock()
+        mock_contract.functions.escrowFactory = MagicMock()
+        mock_contract.functions.escrowFactory.return_value.call.return_value = (
+            "0x1234567890123456789012345678901234567890"
+        )
+        escrowClient._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = escrowClient.get_factory_address(escrow_address)
+
+        escrowClient._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.escrowFactory.assert_called_once_with()
+        self.assertEqual(result, "0x1234567890123456789012345678901234567890")
+
+    def test_get_factory_address_invalid_escrow(self):
+        self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_factory_address(
+                "0x1234567890123456789012345678901234567890"
+            )
+        self.assertEqual(
+            "Escrow address is not provided by the factory", str(cm.exception)
+        )
+
 
 if __name__ == "__main__":
     unittest.main(exit=True)
