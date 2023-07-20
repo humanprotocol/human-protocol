@@ -1,7 +1,7 @@
 import httpx
 import logging
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CronConfig
 
 from src.modules.chain.escrow import get_reputation_oracle_address

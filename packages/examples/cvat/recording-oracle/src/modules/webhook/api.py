@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Header, Request
 from typing import Union
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.modules.chain.escrow import validate_escrow
 from src.modules.webhook.api_schema import (
     OracleWebhook,

@@ -3,7 +3,7 @@ from typing import Generator
 import pytest
 from fastapi.testclient import TestClient
 
-from src.db import Base, engine
+from src.database import Base, engine
 from src import app
 
 
