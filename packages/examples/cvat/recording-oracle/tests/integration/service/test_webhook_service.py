@@ -2,7 +2,7 @@ import unittest
 import uuid
 
 from pydantic import ValidationError
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.constants import Networks
 from src.modules.webhook.constants import (
     OracleWebhookTypes,

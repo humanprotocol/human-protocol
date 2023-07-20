@@ -2,7 +2,7 @@ import logging
 
 from human_protocol_sdk.storage import StorageClient, Credentials
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CronConfig, StorageConfig
 
 from src.modules.webhook.process_intermediate_results import (

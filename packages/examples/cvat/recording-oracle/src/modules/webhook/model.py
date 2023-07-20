@@ -7,7 +7,7 @@ from src.modules.webhook.constants import (
     OracleWebhookTypes,
     OracleWebhookStatuses,
 )
-from src.db import Base
+from src.database import Base
 from src.constants import Networks
 
 
