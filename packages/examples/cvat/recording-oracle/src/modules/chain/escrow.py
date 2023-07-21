@@ -52,26 +52,6 @@ def validate_escrow(chain_id: int, escrow_address: str):
         raise ValueError(f"Oracle doesn't support job type {job_type}")
 
 
-def get_intermediate_results_url(chain_id: int, escrow_address: str) -> str:
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
-
-    # Method yet to be released
-    intermediate_results_url = escrow_client.get_intermediate_results_url(
-        escrow_address
-    )
-
-    return intermediate_results_url
-
-
-def get_intermediate_results(chain_id: int, escrow_address: str):
-    intermediate_results_url = get_intermediate_results_url(chain_id, escrow_address)
-    intermediate_results = json.loads(
-        StorageClient.download_file_from_url(intermediate_results_url).decode("utf-8")
-    )
-    return intermediate_results
-
-
 def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)

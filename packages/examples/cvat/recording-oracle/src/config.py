@@ -38,7 +38,7 @@ class PolygonMumbaiConfig:
 
 class CronConfig:
     process_exchange_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000)
+        os.environ.get("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 30)
     )
     process_exchange_oracle_webhooks_chunk_size = os.environ.get(
         "PROCESS_EXCHANGE_ORACLE_WEBHOOKS_CHUNK_SIZE", 5
