@@ -70,7 +70,7 @@ def process_exchange_oracle_webhooks() -> None:
                         session,
                         webhook.escrow_address,
                         webhook.chain_id,
-                        webhook.s3_url,
+                        f"{StorageConfig.bucket_url()}{files[0]['key']}",
                         OracleWebhookTypes.reputation_oracle.value,
                         prepare_signature(webhook.escrow_address, webhook.chain_id),
                     )
