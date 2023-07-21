@@ -1,7 +1,7 @@
 import httpx
 import logging
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CronConfig
 
 from src.modules.chain.kvstore import get_recording_oracle_url
@@ -37,7 +37,7 @@ def process_recording_oracle_webhooks() -> None:
                     )
                     headers = {"human-signature": webhook.signature}
                     body = prepare_recording_oracle_webhook_body(
-                        webhook.escrow_address, webhook.chain_id
+                        webhook.escrow_address, webhook.chain_id, webhook.s3_url
                     )
                     with httpx.Client() as client:
                         response = client.post(webhook_url, headers=headers, json=body)

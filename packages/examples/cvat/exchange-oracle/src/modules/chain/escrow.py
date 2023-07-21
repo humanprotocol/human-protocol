@@ -34,13 +34,6 @@ def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
     )
 
 
-def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
-
-    escrow_client.store_results(escrow_address, url, hash)
-
-
 def get_job_launcher_address(chain_id: int, escrow_address: str) -> str:
     web3 = get_web3(chain_id)
     escrow_client = EscrowClient(web3)

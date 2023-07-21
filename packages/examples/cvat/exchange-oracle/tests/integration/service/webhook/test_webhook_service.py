@@ -2,7 +2,7 @@ import unittest
 import uuid
 
 from pydantic import ValidationError
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.constants import Networks
 from src.modules.oracle_webhook.constants import (
     OracleWebhookTypes,
@@ -87,6 +87,20 @@ class ServiceIntegrationTest(unittest.TestCase):
         with self.assertRaises(IntegrityError):
             self.session.commit()
 
+    def test_create_recoracle_webhook_none_s3_url(self):
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        chain_id = Networks.polygon_mainnet.value
+
+        webhook_service.create_webhook(
+            self.session,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            type=OracleWebhookTypes.recording_oracle.value,
+            signature=None,
+        )
+        with self.assertRaises(ValueError):
+            self.session.commit()
+
     def test_get_pending_webhooks(self):
         chain_id = Networks.polygon_mainnet.value
 
@@ -124,6 +138,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             signature="signature4",
             escrow_address="0x1234567890123456789012345678901234567892",
             chain_id=chain_id,
+            s3_url="https://some-dummy-url.com/1.json",
             type=OracleWebhookTypes.recording_oracle.value,
             status=OracleWebhookStatuses.pending.value,
         )

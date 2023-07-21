@@ -4,7 +4,6 @@ from unittest.mock import patch
 from src.modules.chain.escrow import (
     validate_escrow,
     get_escrow_manifest,
-    store_results,
     get_job_launcher_address,
 )
 from tests.utils.setup_escrow import (
@@ -109,37 +108,6 @@ class ServiceIntegrationTest(unittest.TestCase):
                 with self.assertRaises(StorageClientError) as error:
                     get_escrow_manifest(self.w3.eth.chain_id, escrow_address)
         self.assertEqual(f"Invalid URL: invalid_url", str(error.exception))
-
-    def test_store_results(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.modules.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            results = store_results(
-                self.w3.eth.chain_id, escrow_address, DEFAULT_URL, DEFAULT_HASH
-            )
-            self.assertIsNone(results)
-            intermediate_results_url = get_intermediate_results_url(
-                self.w3, escrow_address
-            )
-            self.assertEqual(intermediate_results_url, DEFAULT_URL)
-
-    def test_store_results_invalid_url(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.modules.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                store_results(
-                    self.w3.eth.chain_id, escrow_address, "invalid_url", DEFAULT_HASH
-                )
-        self.assertEqual(f"Invalid URL: invalid_url", str(error.exception))
-
-    def test_store_results_invalid_hash(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.modules.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                store_results(self.w3.eth.chain_id, escrow_address, DEFAULT_URL, "")
-        self.assertEqual(f"Invalid empty hash", str(error.exception))
 
     def test_get_job_launcher_address(self):
         escrow_address = create_escrow(self.w3)
