@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
   postgres:
@@ -9,7 +9,7 @@ services:
       - POSTGRES_USER=operator
       - POSTGRES_PASSWORD=qwerty
       - POSTGRES_DB=job-launcher
-      - POSTGRES_PORT=5435
+      - POSTGRES_PORT=5432
       - POSTGRES_SYNC=false
     logging:
       options:

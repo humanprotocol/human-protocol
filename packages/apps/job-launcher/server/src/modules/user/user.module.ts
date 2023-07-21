@@ -5,11 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
 import { UserController } from './user.controller';
-import { AuthEntity } from '../auth/auth.entity';
 import { UserRepository } from './user.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, AuthEntity]), ConfigModule],
+  imports: [TypeOrmModule.forFeature([UserEntity]), ConfigModule],
   controllers: [UserController],
   providers: [Logger, UserService, UserRepository],
   exports: [UserService],

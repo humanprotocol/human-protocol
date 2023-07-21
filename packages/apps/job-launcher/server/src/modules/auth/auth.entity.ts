@@ -17,10 +17,7 @@ export class AuthEntity extends BaseEntity {
   public id: number;
 
   @Column({ type: 'varchar' })
-  public refreshToken: string;
-
-  @Column({ type: 'bigint' })
-  public refreshTokenExpiresAt: number;
+  public tokenId: string;
 
   @Column({
     type: 'enum',
@@ -29,15 +26,9 @@ export class AuthEntity extends BaseEntity {
   public status: AuthStatus;
 
   @JoinColumn()
-  @OneToOne((_type) => UserEntity)
+  @OneToOne(() => UserEntity)
   public user: UserEntity;
 
   @Column({ type: 'int' })
   public userId: number;
-
-  @Column({
-    type: 'varchar',
-    select: false,
-  })
-  public ip: string;
 }

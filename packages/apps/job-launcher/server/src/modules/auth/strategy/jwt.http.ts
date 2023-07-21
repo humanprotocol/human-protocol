@@ -8,34 +8,46 @@ import {
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../../user/user.entity';
-import { UserService } from '../../user/user.service';
 import { UserStatus } from '../../../common/enums/user';
+import { ConfigNames } from 'src/common/config';
+import { AuthService } from '../auth.service';
+import { AuthStatus } from 'src/common/enums/auth';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET', 'secretkey'),
+      secretOrKey: configService.get<string>(
+        ConfigNames.JWT_SECRET,
+        'secretkey',
+      ),
     });
   }
 
-  public async validate(payload: { email: string }): Promise<UserEntity> {
-    const email = payload.email.toLowerCase();
-    const userEntity = await this.userService.getByEmail(email);
+  public async validate(payload: {
+    tokenId: string;
+    email: string;
+  }): Promise<UserEntity> {
+    const tokenId = payload.tokenId.toLowerCase();
+    const authEntity = await this.authService.getByTokenId(tokenId);
 
-    if (!userEntity) {
+    if (!authEntity?.user) {
       throw new NotFoundException('User not found');
     }
 
-    if (userEntity.status !== UserStatus.ACTIVE) {
+    if (authEntity?.user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('User not active');
     }
 
-    return userEntity;
+    if (authEntity.status !== AuthStatus.ACTIVE) {
+      throw new UnauthorizedException('Token expired');
+    }
+
+    return authEntity?.user;
   }
 }

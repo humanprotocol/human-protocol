@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, Matches, IsString, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsEmail, IsString, Matches, IsEnum } from 'class-validator';
 import { IsConfirm, IsPassword } from '../../common/validators';
-import { UserEntity } from '../user/user.entity';
 import { TokenType } from '../auth/token.entity';
+import { UserEntity } from '../user/user.entity';
 import { AuthStatus } from 'src/common/enums/auth';
 
 export class ForgotPasswordDto {
@@ -24,12 +24,6 @@ export class SignInDto {
   public password: string;
 }
 
-export class LogoutDto {
-  @ApiProperty()
-  @IsString()
-  public refreshToken: string;
-}
-
 export class ValidatePasswordDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/, {
     message:
@@ -42,12 +36,6 @@ export class ValidatePasswordDto {
   @ApiProperty()
   @IsConfirm()
   public confirm: string;
-}
-
-export class RefreshDto {
-  @ApiProperty()
-  @IsString()
-  public refreshToken: string;
 }
 
 export class ResendEmailVerificationDto {
@@ -71,10 +59,8 @@ export class VerifyEmailDto {
 
 export class AuthCreateDto {
   public user: UserEntity;
-  public refreshToken: string;
-  public refreshTokenExpiresAt: number;
-  public ip: string;
-  public status: AuthStatus
+  public tokenId: string;
+  public status: AuthStatus;
 }
 
 export class AuthUpdateDto {

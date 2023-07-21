@@ -3,25 +3,26 @@ import {
   ClassSerializerInterceptor,
   Controller,
   HttpCode,
-  Ip,
   Post,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 
-import { AuthService } from './auth.service';
+import { ApiTags } from '@nestjs/swagger';
+import { Public } from '../../common/decorators';
+import { IJwt } from '../../common/interfaces/auth';
+import { UserCreateDto } from '../user/user.dto';
 import {
   ForgotPasswordDto,
-  SignInDto,
-  LogoutDto,
-  RefreshDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
+  SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
-import { Public } from '../../common/decorators';
-import { ApiTags } from '@nestjs/swagger';
-import { UserCreateDto } from '../user/user.dto';
-import { IJwt } from '../../common/interfaces/auth';
+import { AuthService } from './auth.service';
+import { RequestWithUser } from 'src/common/types';
+import { JwtAuthGuard } from 'src/common/guards';
 
 @Public()
 @ApiTags('Auth')
@@ -31,33 +32,29 @@ export class AuthJwtController {
 
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)
-  public async signup(
-    @Body() data: UserCreateDto,
-    @Ip() ip: string,
-  ): Promise<IJwt> {
+  public async signup(@Body() data: UserCreateDto): Promise<IJwt> {
     const userEntity = await this.authService.signup(data);
-    return this.authService.auth(userEntity, ip);
+    return await this.authService.auth(userEntity);
   }
 
   @Post('/signin')
   @HttpCode(200)
-  public signin(@Body() data: SignInDto, @Ip() ip: string): Promise<IJwt> {
-    return this.authService.signin(data, ip);
+  public signin(@Body() data: SignInDto): Promise<IJwt> {
+    return this.authService.signin(data);
   }
 
-  @Post('/logout')
-  @HttpCode(204)
-  public async logout(@Body() data: LogoutDto): Promise<void> {
-    await this.authService.logout(data);
-  }
-
+  @UseGuards(JwtAuthGuard)
   @Post('/refresh')
   @HttpCode(200)
-  async refreshToken(
-    @Body() data: RefreshDto,
-    @Ip() ip: string,
-  ): Promise<IJwt> {
-    return this.authService.refresh(data, ip);
+  async refreshToken(@Req() request: RequestWithUser): Promise<IJwt> {
+    return this.authService.auth(request.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  @HttpCode(204)
+  public async logout(@Req() request: RequestWithUser): Promise<void> {
+    await this.authService.logout(request.user);
   }
 
   @Post('/forgot-password')
@@ -74,11 +71,8 @@ export class AuthJwtController {
 
   @Post('/email-verification')
   @HttpCode(200)
-  public emailVerification(
-    @Body() data: VerifyEmailDto,
-    @Ip() ip: string,
-  ): Promise<IJwt> {
-    return this.authService.emailVerification(data, ip);
+  public emailVerification(@Body() data: VerifyEmailDto): Promise<IJwt> {
+    return this.authService.emailVerification(data);
   }
 
   @Post('/resend-email-verification')

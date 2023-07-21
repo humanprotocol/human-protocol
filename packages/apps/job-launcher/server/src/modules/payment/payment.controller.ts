@@ -1,23 +1,14 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from '../../common/guards';
 
-import { PaymentService } from './payment.service';
+import { CurrencyService } from './currency.service';
 import {
   GetRateDto,
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
 } from './payment.dto';
-import { CurrencyService } from './currency.service';
+import { PaymentService } from './payment.service';
 
 @ApiBearerAuth()
 @ApiTags('Payment')
@@ -28,7 +19,6 @@ export class PaymentController {
     private readonly currencyService: CurrencyService,
   ) {}
 
-  @UseGuards(RolesGuard)
   @Post('/fiat')
   public async createFiatPayment(
     @Request() req: any,
@@ -40,7 +30,6 @@ export class PaymentController {
     );
   }
 
-  @UseGuards(RolesGuard)
   @Post('/fiat/confirm-payment')
   public async confirmFiatPayment(
     @Request() req: any,
@@ -49,7 +38,6 @@ export class PaymentController {
     return this.paymentService.confirmFiatPayment(req.user?.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Post('/crypto')
   public async createCryptoPayment(
     @Request() req: any,
@@ -58,7 +46,6 @@ export class PaymentController {
     return this.paymentService.createCryptoPayment(req.user?.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {

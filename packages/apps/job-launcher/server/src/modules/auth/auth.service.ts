@@ -5,16 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { FindOptionsWhere } from 'typeorm';
 import { v4 } from 'uuid';
 
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { AuthEntity } from './auth.entity';
-import { TokenType } from './token.entity';
+import { IJwt } from 'src/common/interfaces';
+import { ErrorAuth } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
+import { UserEntity } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import {
   ForgotPasswordDto,
   ResendEmailVerificationDto,
@@ -22,12 +20,11 @@ import {
   SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
+import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
-import { ErrorAuth } from '../../common/constants/errors';
-import { ConfigNames } from '../../common/config';
-import { AuthStatus } from '../../common/enums/auth';
-import { IJwt } from '../../common/interfaces/auth';
+import { AuthStatus } from 'src/common/enums/auth';
+import { AuthEntity } from './auth.entity';
 
 @Injectable()
 export class AuthService {
@@ -36,12 +33,11 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    private readonly configService: ConfigService,
     private readonly tokenRepository: TokenRepository,
     private readonly authRepository: AuthRepository,
   ) {}
 
-  public async signin(data: SignInDto, ip: string): Promise<IJwt> {
+  public async signin(data: SignInDto): Promise<IJwt> {
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -51,7 +47,7 @@ export class AuthService {
       throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
     }
 
-    return this.auth(userEntity, ip);
+    return this.auth(userEntity);
   }
 
   public async signup(data: UserCreateDto): Promise<UserEntity> {
@@ -69,65 +65,33 @@ export class AuthService {
     return userEntity;
   }
 
-  public async logout(
-    where: FindOptionsWhere<AuthEntity>,
-  ): Promise<void> {
-    await this.authRepository.update({ ...where, status: AuthStatus.ACTIVE }, { status: AuthStatus.EXPIRED });
+  public async logout(user: UserEntity): Promise<void> {
+    await this.authRepository.update(
+      { userId: user.id, status: AuthStatus.ACTIVE },
+      { status: AuthStatus.EXPIRED },
+    );
     return;
   }
 
-  public async refresh(
-    where: FindOptionsWhere<AuthEntity>,
-    ip: string,
-  ): Promise<IJwt> {
-    const authEntity = await this.authRepository.findOne(where, {
-      relations: ['user'],
-    });
+  public async auth(userEntity: UserEntity): Promise<IJwt> {
+    const tokenId = v4();
 
-    if (
-      !authEntity ||
-      authEntity.refreshTokenExpiresAt < new Date().getTime()
-    ) {
-      throw new UnauthorizedException(ErrorAuth.RefreshTokenHasExpired);
-    }
-
-    if (authEntity.user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
-    }
-
-    return this.auth(authEntity.user, ip);
-  }
-
-  public async auth(userEntity: UserEntity, ip: string): Promise<IJwt> {
-    const refreshToken = v4();
-    const date = new Date();
-
-    const accessTokenExpiresIn = ~~this.configService.get<number>(
-      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-    )!;
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(
-      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
-    )!;
-
-    await this.logout({ userId: userEntity.id });
-    
     await this.authRepository.create({
       user: userEntity,
-      refreshToken,
-      refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
-      ip,
-      status: AuthStatus.ACTIVE
+      tokenId,
+      status: AuthStatus.ACTIVE,
     });
 
     return {
-      accessToken: this.jwtService.sign(
-        { email: userEntity.email },
-        { expiresIn: accessTokenExpiresIn },
-      ),
-      refreshToken: refreshToken,
-      accessTokenExpiresAt: date.getTime() + accessTokenExpiresIn * 1000,
-      refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
+      accessToken: this.jwtService.sign({
+        tokenId: tokenId,
+        email: userEntity.email,
+      }),
     };
+  }
+
+  public async getByTokenId(tokenId: string): Promise<AuthEntity | null> {
+    return this.authRepository.findOne({ tokenId });
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
@@ -169,10 +133,7 @@ export class AuthService {
     return true;
   }
 
-  public async emailVerification(
-    data: VerifyEmailDto,
-    ip: string,
-  ): Promise<IJwt> {
+  public async emailVerification(data: VerifyEmailDto): Promise<IJwt> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.EMAIL,
@@ -186,7 +147,7 @@ export class AuthService {
 
     await tokenEntity.remove();
 
-    return this.auth(tokenEntity.user, ip);
+    return this.auth(tokenEntity.user);
   }
 
   public async resendEmailVerification(
