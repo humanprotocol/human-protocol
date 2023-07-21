@@ -62,7 +62,7 @@ def process_exchange_oracle_webhooks() -> None:
                     escrow.store_results(
                         webhook.chain_id,
                         webhook.escrow_address,
-                        f"{StorageConfig.bucket_url()}{files[0]}",
+                        f"{StorageConfig.bucket_url()}{files[0]['key']}",
                         files[0],
                     )
 
@@ -70,6 +70,7 @@ def process_exchange_oracle_webhooks() -> None:
                         session,
                         webhook.escrow_address,
                         webhook.chain_id,
+                        webhook.s3_url,
                         OracleWebhookTypes.reputation_oracle.value,
                         prepare_signature(webhook.escrow_address, webhook.chain_id),
                     )
