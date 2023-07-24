@@ -275,7 +275,7 @@ export class PaymentService {
         finalAmount = finalAmount.add(amount);
       }
     });
-    
+
     return finalAmount;
   }
 }

@@ -6,7 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { UserRepository } from '../user/user.repository';
 import { JwtService } from '@nestjs/jwt';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -19,6 +19,7 @@ import { AuthStatus } from '../../common/enums/auth';
 import { IJwt } from '../../common/interfaces/auth';
 import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
+import { PaymentService } from '../payment/payment.service';
 
 
 jest.mock('@human-protocol/sdk');
@@ -65,6 +66,7 @@ describe('AuthService', () => {
         { provide: UserRepository, useValue: createMock<UserRepository>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        { provide: PaymentService, useValue: createMock<PaymentService>() },
       ],
     }).compile();
 
