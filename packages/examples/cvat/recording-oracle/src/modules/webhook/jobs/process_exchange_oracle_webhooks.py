@@ -10,7 +10,7 @@ from src.modules.webhook.process_intermediate_results import (
 )
 
 from src.modules.webhook.constants import OracleWebhookTypes
-from src.modules.webhook.helpers import prepare_signature
+from src.modules.webhook.helpers import prepare_signature, get_intermediate_results
 
 import src.modules.webhook.service as db_service
 import src.modules.chain.escrow as escrow
@@ -42,9 +42,7 @@ def process_exchange_oracle_webhooks() -> None:
                         webhook.chain_id, webhook.escrow_address
                     )
 
-                    intermediate_results = escrow.get_intermediate_results(
-                        webhook.chain_id, webhook.escrow_address
-                    )
+                    intermediate_results = get_intermediate_results(webhook.s3_url)
                     final_results = process_intermediate_results(
                         intermediate_results, job_type
                     )
@@ -64,7 +62,7 @@ def process_exchange_oracle_webhooks() -> None:
                     escrow.store_results(
                         webhook.chain_id,
                         webhook.escrow_address,
-                        f"{StorageConfig.bucket_url()}{files[0]}",
+                        f"{StorageConfig.bucket_url()}{files[0]['key']}",
                         files[0],
                     )
 
@@ -72,6 +70,7 @@ def process_exchange_oracle_webhooks() -> None:
                         session,
                         webhook.escrow_address,
                         webhook.chain_id,
+                        f"{StorageConfig.bucket_url()}{files[0]['key']}",
                         OracleWebhookTypes.reputation_oracle.value,
                         prepare_signature(webhook.escrow_address, webhook.chain_id),
                     )

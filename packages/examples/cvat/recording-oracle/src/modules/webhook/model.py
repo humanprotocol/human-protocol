@@ -17,6 +17,7 @@ class Webhook(Base):
     signature = Column(String, unique=True, index=True, nullable=False)
     escrow_address = Column(String(42), nullable=False)
     chain_id = Column(Integer, Enum(Networks), nullable=False)
+    s3_url = Column(String(255), nullable=False)
     type = Column(String, Enum(OracleWebhookTypes), nullable=False)
     status = Column(
         String,

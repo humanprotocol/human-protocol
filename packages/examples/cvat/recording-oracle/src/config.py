@@ -58,6 +58,12 @@ class StorageConfig:
     secret_key = os.environ.get("SECRET_KEY", "")
     results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
 
+    @classmethod
+    def bucket_url(cls):
+        return (
+            f"https://{StorageConfig.results_bucket_name}.{StorageConfig.endpoint_url}/"
+        )
+
 
 class Config:
     port = int(os.environ.get("PORT", 8000))

@@ -34,6 +34,7 @@ async def exchange_oracle_webhook(
                 session,
                 webhook.escrow_address,
                 webhook.chain_id,
+                webhook.s3_url,
                 OracleWebhookTypes.exchange_oracle.value,
                 human_signature,
             )
