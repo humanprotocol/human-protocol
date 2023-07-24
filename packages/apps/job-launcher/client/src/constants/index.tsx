@@ -1,7 +1,3 @@
-import { ChainId } from '@human-protocol/sdk';
-import { CHAIN_ICONS } from '../components/Icons/chains';
-import { DollarSignIcon } from '../components/Icons/DollarSignIcon';
-
 export const JOB_STATUS = [
   'launched',
   'pending',
@@ -10,32 +6,7 @@ export const JOB_STATUS = [
   'failed',
 ];
 
-export const SUPPORTED_CHAIN_IDS = [
-  ChainId.MAINNET,
-  ChainId.RINKEBY,
-  ChainId.GOERLI,
-  ChainId.BSC_MAINNET,
-  ChainId.BSC_TESTNET,
-  ChainId.POLYGON,
-  ChainId.POLYGON_MUMBAI,
-  ChainId.SKALE,
-  ChainId.MOONBEAM,
-  ChainId.MOONBASE_ALPHA,
-  ChainId.AVALANCHE_TESTNET,
-  ChainId.AVALANCHE,
-];
-
-export const SUPPORTED_TOKENS = [
-  {
-    symbol: 'HMT',
-    address: '0x106538cc16f938776c7c180186975bca23875287',
-    icon: CHAIN_ICONS[ChainId.ALL],
-  },
-  { symbol: 'ETH', address: '0x', icon: CHAIN_ICONS[ChainId.MAINNET] },
-  { symbol: 'MATIC', address: '0x', icon: CHAIN_ICONS[ChainId.POLYGON] },
-  { symbol: 'BNB', address: '0x', icon: CHAIN_ICONS[ChainId.BSC_MAINNET] },
-  { symbol: 'USDC', address: '0x', icon: <DollarSignIcon /> },
-];
+export const SUPPORTED_TOKEN_SYMBOLS = ['HMT'];
 
 export const ERROR_MESSAGES = {
   weakPassword:

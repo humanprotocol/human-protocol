@@ -17,15 +17,109 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import React from 'react';
+import axios from 'axios';
+import React, { useState } from 'react';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import * as jobService from '../../../services/job';
+import * as paymentService from '../../../services/payment';
+import { JobType } from '../../../types';
 
-export const FiatPayForm = () => {
+export const FiatPayForm = ({
+  onStart,
+  onFinish,
+  onError,
+}: {
+  onStart: () => void;
+  onFinish: () => void;
+  onError: (err: any) => void;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { goToNextStep } = useCreateJobPageUI();
+  const { jobRequest } = useCreateJobPageUI();
 
-  console.log(stripe, elements);
+  const [paymentData, setPaymentData] = useState({
+    amount: '',
+    name: '',
+  });
+
+  const handlePaymentDataFormFieldChange = (
+    fieldName: string,
+    fieldValue: any
+  ) => {
+    setPaymentData({ ...paymentData, [fieldName]: fieldValue });
+  };
+
+  const handlePay = async () => {
+    if (!stripe || !elements) {
+      // Stripe.js has not yet loaded.
+      // Make sure to disable form submission until Stripe.js has loaded.
+      console.error('Stripe.js has not yet loaded.');
+      return;
+    }
+
+    try {
+      // get client secret
+      const clientSecret = await paymentService.createFiatPayment({
+        amount: Number(paymentData.amount),
+        currency: 'usd',
+      });
+
+      const cardNumber = elements.getElement(CardNumberElement);
+      const cardExpiry = elements.getElement(CardExpiryElement);
+      const cardCvc = elements.getElement(CardCvcElement);
+      if (!cardNumber || !cardExpiry || !cardCvc) {
+        return;
+      }
+
+      // stripe payment
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardNumber,
+            billing_details: {
+              name: paymentData.name,
+            },
+          },
+        });
+      if (stripeError) {
+        onError(stripeError);
+        return;
+      }
+
+      // confirm payment
+      const success = await paymentService.confirmFiatPayment(paymentIntent.id);
+
+      if (!success) {
+        onError({ message: 'Payment confirmation error' });
+        return;
+      }
+
+      // get fund amoutn in HMT, TODO: use rates api endpoint
+      const currentPrice = (
+        await axios.get(
+          `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=usd`
+        )
+      ).data['human-protocol']['usd'];
+      const tokenAmount = Number(paymentData.amount) / currentPrice;
+
+      // create job
+      const { jobType, chainId, fortuneRequest, annotationRequest } =
+        jobRequest;
+      if (jobType === JobType.Fortune && fortuneRequest) {
+        await jobService.createFortuneJob(chainId, fortuneRequest, tokenAmount);
+      } else if (jobType === JobType.Annotation && annotationRequest) {
+        await jobService.createAnnotationJob(
+          chainId,
+          annotationRequest,
+          tokenAmount
+        );
+      }
+      onFinish();
+    } catch (err) {
+      console.error(err);
+      onError(err);
+    }
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -63,6 +157,10 @@ export const FiatPayForm = () => {
                 fullWidth
                 variant="outlined"
                 placeholder="Name on Card"
+                value={paymentData.name}
+                onChange={(e) =>
+                  handlePaymentDataFormFieldChange('name', e.target.value)
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -95,6 +193,10 @@ export const FiatPayForm = () => {
                   fullWidth
                   placeholder="Amount USD"
                   variant="outlined"
+                  value={paymentData.amount}
+                  onChange={(e) =>
+                    handlePaymentDataFormFieldChange('amount', e.target.value)
+                  }
                 />
               </FormControl>
             </Grid>
@@ -188,7 +290,7 @@ export const FiatPayForm = () => {
           variant="contained"
           sx={{ width: '400px' }}
           size="large"
-          onClick={() => goToNextStep?.()}
+          onClick={handlePay}
         >
           Pay now
         </Button>

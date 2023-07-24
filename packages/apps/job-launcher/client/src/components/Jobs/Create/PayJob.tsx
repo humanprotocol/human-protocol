@@ -1,15 +1,30 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { StyledTabs, StyledTab } from '../../../components/Tabs';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { PayMethod } from '../../../types';
 import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
+import { LaunchJobProgress } from './LaunchJobProgress';
 
 export const PayJob = () => {
-  const { payMethod, changePayMethod } = useCreateJobPageUI();
+  const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
+  const [isPaying, setIsPaying] = useState(false);
 
-  return (
+  const handleStart = () => {
+    setIsPaying(true);
+  };
+
+  const handleFinish = () => {
+    setIsPaying(false);
+    goToNextStep?.();
+  };
+
+  const handleError = (err: any) => {
+    console.log(err);
+  };
+
+  return !isPaying ? (
     <Box
       sx={{
         mx: 'auto',
@@ -52,9 +67,23 @@ export const PayJob = () => {
           pb: 5,
         }}
       >
-        {payMethod === PayMethod.Crypto && <CryptoPayForm />}
-        {payMethod === PayMethod.Fiat && <FiatPayForm />}
+        {payMethod === PayMethod.Crypto && (
+          <CryptoPayForm
+            onStart={handleStart}
+            onFinish={handleFinish}
+            onError={handleError}
+          />
+        )}
+        {payMethod === PayMethod.Fiat && (
+          <FiatPayForm
+            onStart={handleStart}
+            onFinish={handleFinish}
+            onError={handleError}
+          />
+        )}
       </Box>
     </Box>
+  ) : (
+    <LaunchJobProgress />
   );
 };

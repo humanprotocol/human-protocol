@@ -2,12 +2,14 @@ import {
   Box,
   Collapse,
   Drawer,
+  Link as MuiLink,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
@@ -15,7 +17,9 @@ import { Link, Outlet } from 'react-router-dom';
 import CreditCardFilledIcon from '../assets/CreditCardFilled.svg';
 import logoImg from '../assets/logo.svg';
 import PlusIcon from '../assets/Plus.svg';
+import { AuthFooter } from '../components/Footer/AuthFooter';
 import { AuthHeader } from '../components/Headers/AuthHeader';
+import { HumanSocialLinks } from '../components/HumanSocialLinks';
 
 const drawerWidth = 256;
 
@@ -80,6 +84,31 @@ export default function AuthLayout() {
           </ListItem>
         </List>
       </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 5,
+        }}
+      >
+        <MuiLink
+          href="https://humanprotocol.org/app/terms-and-conditions"
+          target="_blank"
+          sx={{ mb: 4 }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            Terms and conditions
+          </Typography>
+        </MuiLink>
+        <HumanSocialLinks direction="row" spacing={2} mb={3} />
+        <MuiLink href="https://humanprotocol.org" target="_blank">
+          <Typography variant="caption" color="text.secondary">
+            Humanprotocol.org
+          </Typography>
+        </MuiLink>
+      </Box>
     </Box>
   );
 
@@ -117,6 +146,7 @@ export default function AuthLayout() {
         <Box sx={{ pt: 11, pb: 2 }}>
           <Outlet />
         </Box>
+        <AuthFooter />
       </Box>
     </Box>
   );

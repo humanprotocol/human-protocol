@@ -8,7 +8,7 @@ import {
   SelectProps,
 } from '@mui/material';
 import { FC } from 'react';
-import { SUPPORTED_CHAIN_IDS } from '../../constants';
+import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { CHAIN_ICONS } from '../Icons/chains';
 
 interface NetworkSelectProps extends SelectProps {

@@ -18,11 +18,38 @@ export type SignUpResponse = {
   refreshTokenExpiresAt: number;
 };
 
+export type CryptoPaymentRequest = {
+  chainId: number;
+  transactionHash: string;
+};
+
+export type FiatPaymentRequest = {
+  amount: number;
+  currency: string;
+};
+
+export type CreateFortuneJobRequest = {
+  chainId: number;
+  fortunesRequired: number;
+  requesterTitle: string;
+  requesterDescription: string;
+  fundAmount: number;
+};
+
+export type CreateAnnotationJobRequest = {
+  chainId: number;
+  dataUrl: string;
+  annotationsPerImage: number;
+  labels: string[];
+  requesterDescription: string;
+  requesterAccuracyTarget: number;
+  fundAmount: number;
+};
+
 export enum CreateJobStep {
   FundingMethod,
   CreateJob,
   PayJob,
-  Launching,
   Launch,
 }
 
@@ -36,7 +63,24 @@ export enum JobType {
   Annotation,
 }
 
+export type FortuneRequest = {
+  title: string;
+  fortunesRequested: number;
+  description: string;
+};
+
+export type AnnotationRequest = {
+  labels: string[];
+  description: string;
+  dataUrl: string;
+  annotationsPerImage: number;
+  accuracyTarget: number;
+  rewardToWorkers: number;
+};
+
 export type JobRequest = {
   jobType: JobType;
   chainId: ChainId;
+  fortuneRequest?: FortuneRequest;
+  annotationRequest?: AnnotationRequest;
 };

@@ -64,9 +64,9 @@ const theme = createTheme({
           color: '#320a8d',
           borderColor: '#320a8d',
         },
-        icon: {
-          color: '#320a8d !important',
-        },
+        // icon: {
+        //   color: '#320a8d !important',
+        // },
       },
     },
     MuiButton: {

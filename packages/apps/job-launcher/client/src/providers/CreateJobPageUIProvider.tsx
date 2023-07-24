@@ -7,8 +7,8 @@ export type CreateJobPageUIType = {
   payMethod: PayMethod;
   jobRequest: JobRequest;
   changePayMethod?: (method: PayMethod) => void;
-  changeJobType?: (jobType: JobType) => void;
-  changeNetwork?: (chainId: ChainId) => void;
+  updateJobRequest?: (jobRequest: JobRequest) => void;
+  goToPrevStep?: () => void;
   goToNextStep?: () => void;
 };
 
@@ -41,26 +41,27 @@ export const CreateJobPageUIProvider = ({
     chainId: ChainId.MAINNET,
   });
 
+  const goToPrevStep = () => {
+    setStep((prev) => prev - 1);
+  };
+
   const goToNextStep = () => {
     setStep((prev) => prev + 1);
   };
 
   const changePayMethod = (method: PayMethod) => setPayMethod(method);
 
-  const changeJobType = (jobType: JobType) =>
-    setJobRequest((prev) => ({ ...prev, jobType }));
-
-  const changeNetwork = (chainId: ChainId) =>
-    setJobRequest((prev) => ({ ...prev, chainId }));
+  const updateJobRequest = (newJobRequest: JobRequest) =>
+    setJobRequest(newJobRequest);
 
   const value = {
     step,
     payMethod,
     jobRequest,
+    goToPrevStep,
     goToNextStep,
     changePayMethod,
-    changeJobType,
-    changeNetwork,
+    updateJobRequest,
   };
 
   return (

@@ -1,3 +1,4 @@
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import {
   Alert,
   Box,
@@ -9,12 +10,50 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { ethers } from 'ethers';
 import React, { useState } from 'react';
+import { useAccount, useChainId, useSigner } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
+import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../constants/addresses';
+import * as paymentService from '../../services/payment';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const CryptoTopUpForm = () => {
-  const [isSuccess, setIsSuccess] = useState(false);
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const [tokenAddress, setTokenAddress] = useState<string>();
+  const [amount, setAmount] = useState<string>();
+  const [isSuccess, setIsSuccess] = useState(true);
+  const { data: signer } = useSigner();
+
+  const handleTopUpAccount = async () => {
+    if (!signer || !tokenAddress || !amount) return;
+
+    try {
+      // send HMT token to operator and retrieve transaction hash
+      const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
+      const tokenAmount = ethers.utils.parseUnits(amount, 18);
+
+      const tx = await contract.transfer(
+        JOB_LAUNCHER_OPERATOR_ADDRESS,
+        tokenAmount
+      );
+
+      await tx.wait();
+
+      const transactionHash = tx.hash;
+
+      // create crypto payment record
+      await paymentService.createCryptoPayment({
+        chainId,
+        transactionHash,
+      });
+      setIsSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setIsSuccess(false);
+    }
+  };
 
   return isSuccess ? (
     <TopUpSuccess />
@@ -32,12 +71,26 @@ export const CryptoTopUpForm = () => {
               gap: '30px',
             }}
           >
-            <Alert variant="outlined" severity="success">
-              Your wallet is connected
-            </Alert>
-            <TokenSelect />
+            {isConnected ? (
+              <Alert variant="outlined" severity="success">
+                Your wallet is connected
+              </Alert>
+            ) : (
+              <Alert variant="outlined" severity="error">
+                Please connect your wallet
+              </Alert>
+            )}
+            <TokenSelect
+              chainId={chainId}
+              value={tokenAddress}
+              onChange={(e) => setTokenAddress(e.target.value as string)}
+            />
             <FormControl fullWidth>
-              <TextField placeholder="Amount" />
+              <TextField
+                placeholder="Amount"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
             </FormControl>
           </Box>
         </Grid>
@@ -98,7 +151,7 @@ export const CryptoTopUpForm = () => {
           variant="contained"
           sx={{ width: '400px' }}
           size="large"
-          onClick={() => setIsSuccess(true)}
+          onClick={handleTopUpAccount}
         >
           Top up account
         </Button>

@@ -25,3 +25,7 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.AVALANCHE_TESTNET]: <AvalancheIcon />,
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
 };
+
+export const TOKEN_ICONS: Record<string, ReactElement> = {
+  HMT: <HumanIcon />,
+};

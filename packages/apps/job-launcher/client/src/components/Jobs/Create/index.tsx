@@ -4,7 +4,6 @@ import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { CreateJobStep } from '../../../types';
 import { CreateJob } from './CreateJob';
 import { FundingMethod } from './FundingMethod';
-import { LaunchJobProgress } from './LaunchJobProgress';
 import { LaunchSuccess } from './LaunchSuccess';
 import { PayJob } from './PayJob';
 
@@ -16,8 +15,7 @@ export const CreateJobView = () => {
       {step === CreateJobStep.FundingMethod && <FundingMethod />}
       {step === CreateJobStep.CreateJob && <CreateJob />}
       {step === CreateJobStep.PayJob && <PayJob />}
-      {step === CreateJobStep.Launching && <LaunchJobProgress />}
-      {step >= CreateJobStep.Launch && <LaunchSuccess />}
+      {step === CreateJobStep.Launch && <LaunchSuccess />}
     </Box>
   );
 };

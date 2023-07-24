@@ -8,7 +8,7 @@ import { AnnotationJobRequestForm } from './AnnotationJobRequestForm';
 import { FortuneJobRequestForm } from './FortuneJobRequestForm';
 
 export const CreateJob = () => {
-  const { jobRequest, changeJobType, changeNetwork } = useCreateJobPageUI();
+  const { jobRequest, updateJobRequest } = useCreateJobPageUI();
 
   return (
     <Box
@@ -41,7 +41,12 @@ export const CreateJob = () => {
               },
             }}
             value={jobRequest.jobType}
-            onChange={(e) => changeJobType?.(e.target.value as JobType)}
+            onChange={(e) =>
+              updateJobRequest?.({
+                ...jobRequest,
+                jobType: e.target.value as JobType,
+              })
+            }
           >
             <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
             <MenuItem value={JobType.Annotation}>Annotation</MenuItem>
@@ -50,7 +55,12 @@ export const CreateJob = () => {
         <NetworkSelect
           label="Choose Network"
           value={jobRequest.chainId}
-          onChange={(e) => changeNetwork?.(e.target.value as ChainId)}
+          onChange={(e) =>
+            updateJobRequest?.({
+              ...jobRequest,
+              chainId: e.target.value as ChainId,
+            })
+          }
         />
       </Box>
       {jobRequest.jobType === JobType.Fortune && <FortuneJobRequestForm />}

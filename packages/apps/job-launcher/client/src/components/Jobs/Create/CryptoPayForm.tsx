@@ -1,3 +1,4 @@
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import {
   Alert,
   Box,
@@ -11,12 +12,72 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import { ethers } from 'ethers';
+import React, { useState } from 'react';
+import { useAccount, useSigner } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
+import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import * as jobService from '../../../services/job';
+import * as paymentService from '../../../services/payment';
+import { JobType } from '../../../types';
 
-export const CryptoPayForm = () => {
-  const { goToNextStep } = useCreateJobPageUI();
+export const CryptoPayForm = ({
+  onStart,
+  onFinish,
+  onError,
+}: {
+  onStart: () => void;
+  onFinish: () => void;
+  onError: (err: any) => void;
+}) => {
+  const { isConnected } = useAccount();
+  const { jobRequest } = useCreateJobPageUI();
+  const [tokenAddress, setTokenAddress] = useState<string>();
+  const [amount, setAmount] = useState<string>();
+  const { data: signer } = useSigner();
+
+  const handlePay = async () => {
+    if (signer && tokenAddress && amount) {
+      onStart();
+      try {
+        // send HMT token to operator and retrieve transaction hash
+        const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
+        const tokenAmount = ethers.utils.parseUnits(amount, 18);
+
+        const tx = await contract.transfer(
+          JOB_LAUNCHER_OPERATOR_ADDRESS,
+          tokenAmount
+        );
+
+        await tx.wait();
+
+        const transactionHash = tx.hash;
+
+        // create crypto payment record
+        await paymentService.createCryptoPayment({
+          chainId: jobRequest.chainId,
+          transactionHash,
+        });
+
+        // create job
+        const { jobType, chainId, fortuneRequest, annotationRequest } =
+          jobRequest;
+        if (jobType === JobType.Fortune && fortuneRequest) {
+          await jobService.createFortuneJob(chainId, fortuneRequest, amount);
+        } else if (jobType === JobType.Annotation && annotationRequest) {
+          await jobService.createAnnotationJob(
+            chainId,
+            annotationRequest,
+            amount
+          );
+        }
+        onFinish();
+      } catch (err) {
+        onError(err);
+      }
+    }
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -44,12 +105,26 @@ export const CryptoPayForm = () => {
                 label="I want to pay with my account balance"
               />
             </Box>
-            <Alert variant="outlined" severity="success">
-              Your wallet is connected
-            </Alert>
-            <TokenSelect />
+            {isConnected ? (
+              <Alert variant="outlined" severity="success">
+                Your wallet is connected
+              </Alert>
+            ) : (
+              <Alert variant="outlined" severity="error">
+                Please connect your wallet
+              </Alert>
+            )}
+            <TokenSelect
+              chainId={jobRequest.chainId}
+              value={tokenAddress}
+              onChange={(e) => setTokenAddress(e.target.value as string)}
+            />
             <FormControl fullWidth>
-              <TextField placeholder="Amount" />
+              <TextField
+                value={amount}
+                onChange={(e) => setAmount(e.target.value as string)}
+                placeholder="Amount"
+              />
             </FormControl>
           </Box>
         </Grid>
@@ -134,7 +209,8 @@ export const CryptoPayForm = () => {
           variant="contained"
           sx={{ width: '400px' }}
           size="large"
-          onClick={() => goToNextStep?.()}
+          onClick={handlePay}
+          disabled={!isConnected || !tokenAddress || !amount}
         >
           Pay now
         </Button>

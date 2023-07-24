@@ -1,8 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { CheckFilledIcon } from '../../../components/Icons/CheckFilledIcon';
-import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 
 const ProgressText = styled(Typography)({
   display: 'flex',
@@ -18,14 +17,6 @@ const CheckedIcon = styled(CheckFilledIcon)({
 });
 
 export const LaunchJobProgress = () => {
-  const { goToNextStep } = useCreateJobPageUI();
-
-  useEffect(() => {
-    setTimeout(() => {
-      goToNextStep?.();
-    }, 3000);
-  }, []);
-
   return (
     <Box
       sx={{
