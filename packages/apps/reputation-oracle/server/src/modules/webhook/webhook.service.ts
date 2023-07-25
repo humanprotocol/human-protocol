@@ -48,10 +48,18 @@ export class WebhookService {
       secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
     };
 
+    const useSSL =
+      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
     this.storageParams = {
       endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
       port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL: Boolean(this.configService.get<boolean>(ConfigNames.S3_USE_SSL)!),
+      useSSL,
+    };
+
+    this.storageParams = {
+      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
+      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
+      useSSL,
     };
 
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
@@ -134,13 +142,13 @@ export class WebhookService {
       } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
         finalResults = intermediateResults as ImageLabelBinaryFinalResult[];
       }
-
+      
       const [{ url, hash }] = await this.storageClient.uploadFiles(
         [finalResults],
         this.bucket,
       );
 
-      await escrowClient.storeResults(webhookEntity.escrowAddress, url, hash);
+      //await escrowClient.storeResults(webhookEntity.escrowAddress, url, hash);
 
       const checkPassed = intermediateResults.length <= finalResults.length;
 
@@ -216,9 +224,10 @@ export class WebhookService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const intermediateResultsUrl = await escrowClient.getResultsUrl(
+    const intermediateResultsUrl = await escrowClient.getIntermediateResultsUrl(
       escrowAddress,
     );
+
     const intermediateResults = await StorageClient.downloadFileFromUrl(
       intermediateResultsUrl,
     ).catch(() => []);

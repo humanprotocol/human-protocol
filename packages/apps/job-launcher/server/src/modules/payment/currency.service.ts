@@ -13,13 +13,12 @@ export class CurrencyService {
   public async getRate(from: string, to: string): Promise<number> {
     let reversed = false;
     
-
     if (Object.values(TokenId).includes(to as TokenId)) {
       [from, to] = [CoingeckoTokenId[to], from]
     } else {
       reversed = true;
     }
-    
+
     const { data } = await firstValueFrom(
       this.httpService.get(
         `${COINGECKO_API_URL}?ids=${from}&vs_currencies=${to}`,
