@@ -4,7 +4,7 @@ import uuid
 from sqlalchemy import update, case
 from sqlalchemy.sql import select
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from src.modules.oracle_webhook.constants import (
     OracleWebhookTypes,
@@ -21,9 +21,10 @@ def create_webhook(
     chain_id: int,
     type: OracleWebhookTypes,
     signature: str,
+    s3_url: Optional[str] = None,
 ) -> id:
     """
-    Create a webhook received from Job Launcher. Only one webhook per escrow will be stored.
+    Creates a webhook in a database
     """
     existing_webhook_query = select(Webhook).where(Webhook.signature == signature)
     existing_webhook = session.execute(existing_webhook_query).scalars().first()
@@ -35,6 +36,7 @@ def create_webhook(
             signature=signature,
             escrow_address=escrow_address,
             chain_id=chain_id,
+            s3_url=s3_url,
             type=type,
             status=OracleWebhookStatuses.pending.value,
         )

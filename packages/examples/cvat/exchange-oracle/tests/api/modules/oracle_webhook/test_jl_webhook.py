@@ -11,7 +11,6 @@ from tests.utils.constants import (
 
 
 def test_incoming_webhook_200(client: TestClient) -> None:
-
     with patch("src.modules.api.SessionLocal.begin") as mock_session_local, patch(
         "src.modules.api.create_webhook"
     ) as mock_create_webhook, patch(

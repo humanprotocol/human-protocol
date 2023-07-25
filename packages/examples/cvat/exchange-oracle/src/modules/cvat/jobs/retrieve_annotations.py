@@ -2,7 +2,7 @@ import logging
 
 from human_protocol_sdk.storage import StorageClient, Credentials
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CronConfig, StorageConfig
 
 from src.modules.cvat.constants import ProjectStatuses
@@ -10,8 +10,6 @@ from src.modules.cvat.handlers.annotation import get_annotations_handler
 
 from src.modules.oracle_webhook.constants import OracleWebhookTypes
 from src.modules.oracle_webhook.helpers import prepare_signature
-
-from src.modules.chain.escrow import store_results
 
 import src.modules.cvat.api_calls as cvat_api
 import src.modules.cvat.service as cvat_db_service
@@ -76,19 +74,17 @@ def retrieve_annotations() -> None:
                     [annotations], StorageConfig.results_bucket_name
                 )
 
-                store_results(
-                    project.chain_id,
-                    project.escrow_address,
-                    f"{StorageConfig.bucket_url()}{files[0]}",
-                    files[0],
-                )
-
                 oracle_db_service.create_webhook(
                     session,
                     project.escrow_address,
                     project.chain_id,
                     OracleWebhookTypes.recording_oracle.value,
-                    prepare_signature(project.escrow_address, project.chain_id),
+                    prepare_signature(
+                        project.escrow_address,
+                        project.chain_id,
+                        f"{StorageConfig.bucket_url()}{files[0]['key']}",
+                    ),
+                    f"{StorageConfig.bucket_url()}{files[0]['key']}",
                 )
 
                 cvat_db_service.update_project_status(

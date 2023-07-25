@@ -1,6 +1,6 @@
 import logging
 
-from src.db import SessionLocal
+from src.database import SessionLocal
 from src.config import CronConfig
 
 from src.modules.cvat.job_flows import job_creation_process, revert_job_creation

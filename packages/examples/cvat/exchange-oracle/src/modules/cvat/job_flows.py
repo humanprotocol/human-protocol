@@ -1,4 +1,4 @@
-from src.db import SessionLocal
+from src.database import SessionLocal
 
 from src.modules.cvat.helpers import parse_manifest, compose_bucket_url
 
