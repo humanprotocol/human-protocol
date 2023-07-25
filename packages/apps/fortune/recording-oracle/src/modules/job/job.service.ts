@@ -99,20 +99,14 @@ export class JobService {
     const reputationOracleURL = this.serverConfig.reputationOracleURL;
 
     // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
-    if (newJobSolutions.length > submissionsRequired) {
-      try {
-      const { data } = await firstValueFrom(
-        this.httpService.post(`${reputationOracleURL}/webhook`, {
-          chainId: jobSolution.chainId,
-          escrowAddress: jobSolution.escrowAddress
-        })
-      )
+    if (newJobSolutions.length === submissionsRequired) {
+      await this.httpService.post(`${reputationOracleURL}/webhook`, {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress
+      })
 
       return "The requested job is completed.";
-      } catch (e: any) {
-        console.log(e)
-      }
-    } else if (newJobSolutions.length === submissionsRequired) {
+    } else if (newJobSolutions.length > submissionsRequired) {
       throw new ConflictException("All solutions have already been sent.");
     }
 
