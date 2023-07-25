@@ -30,7 +30,7 @@ export class KVStoreClient {
    */
   constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
     this.contract = KVStore__factory.connect(
-      network.factoryAddress,
+      network.kvstoreAddress,
       signerOrProvider
     );
     this.signerOrProvider = signerOrProvider;
