@@ -148,8 +148,6 @@ export class WebhookService {
         this.bucket,
       );
 
-      //await escrowClient.storeResults(webhookEntity.escrowAddress, url, hash);
-
       const checkPassed = intermediateResults.length <= finalResults.length;
 
       await this.webhookRepository.updateOne(
