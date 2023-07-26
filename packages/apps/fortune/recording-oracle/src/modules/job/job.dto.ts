@@ -30,3 +30,7 @@ export class JobSolutionRequestDto {
   @IsString()
   public solution: string;
 }
+
+export enum JobRequestType {
+  FORTUNE = 'FORTUNE',
+}

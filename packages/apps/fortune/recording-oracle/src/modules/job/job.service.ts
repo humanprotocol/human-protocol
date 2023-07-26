@@ -4,9 +4,8 @@ import { EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
 import { ethers } from "ethers";
 
 import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
-import { JobSolutionRequestDto } from "./job.dto";
+import { JobRequestType, JobSolutionRequestDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
-import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class JobService {
@@ -39,14 +38,18 @@ export class JobService {
 
     // Validate if the escrow has the correct manifest
     const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { submissionsRequired } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
+    const { submissionsRequired, requestType } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
       string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 
-    if (!submissionsRequired) {
+    if (!submissionsRequired && !requestType) {
       throw new BadRequestException("Manifest does not contain the required data");
+    }
+
+    if (requestType !== JobRequestType.FORTUNE) {
+      throw new ConflictException("Manifest contains an invalid job type");
     }
 
     // Initialize Storage Client
