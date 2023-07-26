@@ -7,6 +7,7 @@ import { of } from "rxjs";
 import { JobService } from "./job.service";
 import { Web3Service } from "../web3/web3.service";
 import { JobRequestType } from "./job.dto";
+import { ErrorJob } from "@/common/constants/errors";
 
 const OPERATOR_ADDRESS = "TEST_OPERATOR_ADDRESS";
 
@@ -109,7 +110,7 @@ describe("JobController", () => {
       }));
 
       expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        "Escrow Recording Oracle address mismatches the current one",
+        ErrorJob.AddressMismatches,
       );
     });
 
@@ -120,7 +121,7 @@ describe("JobController", () => {
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
       }));
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError("Escrow is not in the Pending status");
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidStatus);
     });
 
     it("should throw an error if the manifest is missing required data", async () => {
@@ -133,9 +134,7 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue({});
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        "Manifest does not contain the required data",
-      );
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidManifest);
     });
 
     it("should throw an error if the manifest contains an invalid job type", async () => {
@@ -156,9 +155,7 @@ describe("JobController", () => {
         return [SOLUTION];
       });
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        "Manifest contains an invalid job type",
-      );
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidJobType,);
     });
 
     it("should record new solution", async () => {
@@ -200,7 +197,7 @@ describe("JobController", () => {
         return [SOLUTION];
       });
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError("Solution already exists");
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.SolutionAlreadyExists);
     });
 
     it("should call reputation oracle url when all solutions are submitted.", async () => {
