@@ -1,4 +1,4 @@
-import { BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { ethereum } from '@graphprotocol/graph-ts';
 import { Launched } from '../../../generated/EscrowFactory/EscrowFactory';
 import { EventDayData } from '../../../generated/schema';
 import {
@@ -6,13 +6,12 @@ import {
   Pending,
   BulkTransfer,
 } from '../../../generated/templates/Escrow/Escrow';
-
-const ZERO_BI = BigInt.fromI32(0);
+import { ZERO_BI, ONE_BI, ONE_DAY } from './number';
 
 function getEventDayData(event: ethereum.Event): EventDayData {
   const timestamp = event.block.timestamp.toI32();
-  const dayID = timestamp / 86400;
-  const dayStartTimestamp = dayID * 86400;
+  const dayID = timestamp / ONE_DAY;
+  const dayStartTimestamp = dayID * ONE_DAY;
 
   let eventDayData = EventDayData.load(dayID.toString());
   if (eventDayData === null) {
@@ -31,7 +30,8 @@ export function updateIntermediateStorageEventDayData(
 ): EventDayData {
   const eventDayData = getEventDayData(event);
 
-  eventDayData.dailyIntermediateStorageEvents += BigInt.fromI32(1);
+  eventDayData.dailyIntermediateStorageEvents =
+    eventDayData.dailyIntermediateStorageEvents.plus(ONE_BI);
   eventDayData.save();
 
   return eventDayData;
@@ -40,7 +40,8 @@ export function updateIntermediateStorageEventDayData(
 export function updatePendingEventDayData(event: Pending): EventDayData {
   const eventDayData = getEventDayData(event);
 
-  eventDayData.dailyPendingEvents += BigInt.fromI32(1);
+  eventDayData.dailyPendingEvents =
+    eventDayData.dailyPendingEvents.plus(ONE_BI);
   eventDayData.save();
 
   return eventDayData;
@@ -51,7 +52,8 @@ export function updateBulkTransferEventDayData(
 ): EventDayData {
   const eventDayData = getEventDayData(event);
 
-  eventDayData.dailyBulkTransferEvents += BigInt.fromI32(1);
+  eventDayData.dailyBulkTransferEvents =
+    eventDayData.dailyBulkTransferEvents.plus(ONE_BI);
   eventDayData.save();
 
   return eventDayData;
@@ -60,7 +62,8 @@ export function updateBulkTransferEventDayData(
 export function updateEscrowAmountDayData(event: Launched): EventDayData {
   const eventDayData = getEventDayData(event);
 
-  eventDayData.dailyEscrowAmounts += BigInt.fromI32(1);
+  eventDayData.dailyEscrowAmounts =
+    eventDayData.dailyEscrowAmounts.plus(ONE_BI);
   eventDayData.save();
 
   return eventDayData;

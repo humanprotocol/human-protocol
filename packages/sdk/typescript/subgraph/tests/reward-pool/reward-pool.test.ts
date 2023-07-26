@@ -1,11 +1,21 @@
 import { BigInt } from '@graphprotocol/graph-ts';
-import { describe, test, assert, clearStore } from 'matchstick-as/assembly';
+import {
+  describe,
+  test,
+  assert,
+  clearStore,
+  afterAll,
+} from 'matchstick-as/assembly';
 
 import { handleRewardAdded } from '../../src/mapping/RewardPool';
 import { createRewardAddedEvent } from './fixtures';
 
 describe('RewardPool', () => {
-  test('Should properly index StakeAllocated events', () => {
+  afterAll(() => {
+    clearStore();
+  });
+
+  test('Should properly index RewardAddedEvent events', () => {
     const data1 = createRewardAddedEvent(
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC7',
       '0xD979105297fB0eee83F7433fC09279cb5B94fFC5',
@@ -35,48 +45,42 @@ describe('RewardPool', () => {
     assert.fieldEquals(
       'RewardAddedEvent',
       id1,
-      'timestamp',
-      data1.block.timestamp.toString()
-    );
-    assert.fieldEquals(
-      'RewardAddedEvent',
-      id1,
       'block',
       data1.block.number.toString()
     );
     assert.fieldEquals(
       'RewardAddedEvent',
       id1,
-      'transaction',
-      data1.transaction.hash.toHexString()
+      'timestamp',
+      data1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'RewardAddedEvent',
+      id1,
+      'txHash',
+      data1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'RewardAddedEvent',
+      id1,
+      'escrowAddress',
+      data1.params.escrowAddress.toHex()
     );
     assert.fieldEquals(
       'RewardAddedEvent',
       id1,
       'staker',
-      data1.params.staker.toHexString()
+      data1.params.staker.toHex()
     );
     assert.fieldEquals(
       'RewardAddedEvent',
       id1,
       'slasher',
-      data1.params.slasher.toHexString()
+      data1.params.slasher.toHex()
     );
     assert.fieldEquals('RewardAddedEvent', id1, 'amount', '30');
-    assert.fieldEquals(
-      'RewardAddedEvent',
-      id1,
-      'escrow',
-      data1.params.escrowAddress.toHexString()
-    );
 
     // Data 2
-    assert.fieldEquals(
-      'RewardAddedEvent',
-      id2,
-      'timestamp',
-      data2.block.timestamp.toString()
-    );
     assert.fieldEquals(
       'RewardAddedEvent',
       id2,
@@ -86,44 +90,38 @@ describe('RewardPool', () => {
     assert.fieldEquals(
       'RewardAddedEvent',
       id2,
-      'transaction',
-      data2.transaction.hash.toHexString()
+      'timestamp',
+      data2.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'RewardAddedEvent',
+      id2,
+      'txHash',
+      data2.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'RewardAddedEvent',
+      id2,
+      'escrowAddress',
+      data2.params.escrowAddress.toHex()
     );
     assert.fieldEquals(
       'RewardAddedEvent',
       id2,
       'staker',
-      data2.params.staker.toHexString()
+      data2.params.staker.toHex()
     );
     assert.fieldEquals(
       'RewardAddedEvent',
       id2,
       'slasher',
-      data2.params.slasher.toHexString()
+      data2.params.slasher.toHex()
     );
     assert.fieldEquals('RewardAddedEvent', id2, 'amount', '50');
-    assert.fieldEquals(
-      'RewardAddedEvent',
-      id2,
-      'escrow',
-      data2.params.escrowAddress.toHexString()
-    );
 
     // Leader
-    assert.fieldEquals(
-      'Leader',
-      data1.params.slasher.toHexString(),
-      'reward',
-      '30'
-    );
+    assert.fieldEquals('Leader', data1.params.slasher.toHex(), 'reward', '30');
 
-    assert.fieldEquals(
-      'Leader',
-      data2.params.slasher.toHexString(),
-      'reward',
-      '50'
-    );
-
-    clearStore();
+    assert.fieldEquals('Leader', data2.params.slasher.toHex(), 'reward', '50');
   });
 });

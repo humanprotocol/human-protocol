@@ -6,12 +6,17 @@ import {
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
 import {
-  BulkTransferEvent,
+  BulkPayoutEvent,
+  CancelledStatusEvent,
+  CompletedStatusEvent,
+  Escrow,
   EscrowStatistics,
-  ISEvent,
-  LaunchedEscrow,
-  Payment,
-  PEvent,
+  PaidStatusEvent,
+  PartialStatusEvent,
+  Payout,
+  PendingStatusEvent,
+  SetupEvent,
+  StoreResultsEvent,
   Worker,
 } from '../../generated/schema';
 import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
@@ -20,19 +25,31 @@ import {
   updatePendingEventDayData,
   updateBulkTransferEventDayData,
 } from './utils/dayUpdates';
+import { ZERO_BI, ONE_BI } from './utils/number';
+import { toEventId } from './utils/event';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 
-export function constructStatsEntity(): EscrowStatistics {
+function constructStatsEntity(): EscrowStatistics {
   const entity = new EscrowStatistics(STATISTICS_ENTITY_ID);
 
-  entity.intermediateStorageEventCount = BigInt.fromI32(0);
-  entity.pendingEventCount = BigInt.fromI32(0);
-  entity.bulkTransferEventCount = BigInt.fromI32(0);
-  entity.totalEventCount = BigInt.fromI32(0);
-  entity.totalEscrowCount = BigInt.fromI32(0);
+  entity.intermediateStorageEventCount = ZERO_BI;
+  entity.pendingEventCount = ZERO_BI;
+  entity.bulkTransferEventCount = ZERO_BI;
+  entity.totalEventCount = ZERO_BI;
+  entity.totalEscrowCount = ZERO_BI;
 
   return entity;
+}
+
+export function createOrLoadEscrowStatistics(): EscrowStatistics {
+  let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
+
+  if (!statsEntity) {
+    statsEntity = constructStatsEntity();
+  }
+
+  return statsEntity;
 }
 
 export function createOrLoadWorker(address: Address): Worker {
@@ -40,165 +57,168 @@ export function createOrLoadWorker(address: Address): Worker {
 
   if (!worker) {
     worker = new Worker(address.toHex());
-
     worker.address = address;
-    worker.amountReceived = BigInt.fromI32(0);
-    worker.amountJobsSolved = BigInt.fromI32(0);
-    worker.amountJobsSolvedPaid = BigInt.fromI32(0);
+    worker.totalAmountReceived = ZERO_BI;
+    worker.payoutCount = ZERO_BI;
   }
 
   return worker;
 }
 
-export function handleIntermediateStorage(event: IntermediateStorage): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
-
-  const entity = new ISEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.timestamp = event.block.timestamp;
-  entity.sender = event.transaction.from;
-  entity._url = event.params._url;
-  entity._hash = event.params._hash;
-
-  let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
-
-  if (!statsEntity) {
-    statsEntity = constructStatsEntity();
-  }
-  statsEntity.intermediateStorageEventCount =
-    statsEntity.intermediateStorageEventCount.plus(BigInt.fromI32(1));
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
-    BigInt.fromI32(1)
-  );
-  entity.count = statsEntity.intermediateStorageEventCount;
-
-  statsEntity.save();
-  entity.save();
-
-  const worker = createOrLoadWorker(event.transaction.from);
-  worker.amountJobsSolved = worker.amountJobsSolved.plus(BigInt.fromI32(1));
-  worker.save();
-
-  updateIntermediateStorageEventDayData(event);
-}
-
 export function handlePending(event: Pending): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+  // Create SetupEvent entity
+  const setupEventEntity = new SetupEvent(toEventId(event));
+  setupEventEntity.block = event.block.number;
+  setupEventEntity.timestamp = event.block.timestamp;
+  setupEventEntity.txHash = event.transaction.hash;
+  setupEventEntity.escrowAddress = event.address;
+  setupEventEntity.sender = event.transaction.from;
+  setupEventEntity.save();
 
-  const entity = new PEvent(id);
+  // Create PendingStatusEvent entity
+  const statusEventEntity = new PendingStatusEvent(toEventId(event));
+  statusEventEntity.block = event.block.number;
+  statusEventEntity.timestamp = event.block.timestamp;
+  statusEventEntity.txHash = event.transaction.hash;
+  statusEventEntity.escrowAddress = event.address;
+  statusEventEntity.sender = event.transaction.from;
+  statusEventEntity.save();
 
-  // Entity fields can be set based on event parameters
-  entity._url = event.params.manifest;
-  entity._hash = event.params.hash;
-  entity.timestamp = event.block.timestamp;
+  // Updates escrow statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.pendingEventCount = statsEntity.pendingEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
 
-  let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
-
-  if (!statsEntity) {
-    statsEntity = constructStatsEntity();
-  }
-
-  statsEntity.pendingEventCount = statsEntity.pendingEventCount.plus(
-    BigInt.fromI32(1)
-  );
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
-    BigInt.fromI32(1)
-  );
-
-  entity.count = statsEntity.pendingEventCount;
-
-  entity.save();
   statsEntity.save();
 
+  // Update event day data
   updatePendingEventDayData(event);
 
   // Update escrow entity
-  const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.manifestUrl = event.params.manifest;
+    escrowEntity.manifestHash = event.params.hash;
     escrowEntity.status = 'Pending';
     escrowEntity.save();
   }
 }
 
-export function handleBulkTransfer(event: BulkTransfer): void {
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+export function handleIntermediateStorage(event: IntermediateStorage): void {
+  // Create StoreResultsEvent entity
+  const eventEntity = new StoreResultsEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.escrowAddress = event.address;
+  eventEntity.sender = event.transaction.from;
+  eventEntity.intermediateResultsUrl = event.params._url;
+  eventEntity.save();
 
-  const entity = new BulkTransferEvent(id);
-
-  entity.escrow = event.address;
-  entity.bulkCount = BigInt.fromI32(event.params._recipients.length);
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-  entity.txId = event.params._txId;
-
-  const amountPaid = event.params._amounts.reduce(
-    (a, b) => a.plus(b),
-    BigInt.fromI32(0)
-  );
-  entity.amountPaid = amountPaid;
-
-  let statsEntity = EscrowStatistics.load(STATISTICS_ENTITY_ID);
-
-  if (!statsEntity) {
-    statsEntity = constructStatsEntity();
-  }
-  statsEntity.bulkTransferEventCount = statsEntity.bulkTransferEventCount.plus(
-    BigInt.fromI32(1)
-  );
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
-    BigInt.fromI32(1)
-  );
-  entity.count = statsEntity.bulkTransferEventCount;
-
+  // Updates escrow statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.intermediateStorageEventCount =
+    statsEntity.intermediateStorageEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
   statsEntity.save();
-  entity.save();
 
+  // Update event day data
+  updateIntermediateStorageEventDayData(event);
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
+  if (escrowEntity) {
+    escrowEntity.intermediateResultsUrl = event.params._url;
+    escrowEntity.save();
+  }
+}
+
+export function handleBulkTransfer(event: BulkTransfer): void {
+  // Create BulkPayoutEvent entity
+  const eventEntity = new BulkPayoutEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.escrowAddress = event.address;
+  eventEntity.sender = event.transaction.from;
+  eventEntity.bulkPayoutTxId = event.params._txId;
+  eventEntity.bulkCount = BigInt.fromI32(event.params._recipients.length);
+  eventEntity.save();
+
+  // Update escrow statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.bulkTransferEventCount =
+    statsEntity.bulkTransferEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+
+  // Update event day data
   updateBulkTransferEventDayData(event);
 
   // Update escrow entity
-  const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = event.params._isPartial ? 'Partially Paid' : 'Paid';
-    escrowEntity.amountPayout = amountPaid.plus(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      escrowEntity.amountPayout! || BigInt.fromI32(0)
+    const totalAmountPaid = event.params._amounts.reduce(
+      (a, b) => a.plus(b),
+      ZERO_BI
     );
+    escrowEntity.amountPaid = escrowEntity.amountPaid.plus(totalAmountPaid);
+    escrowEntity.balance = escrowEntity.balance.minus(totalAmountPaid);
     escrowEntity.save();
   }
+
+  if (event.params._isPartial) {
+    const statusEventEntity = new PartialStatusEvent(toEventId(event));
+    statusEventEntity.block = event.block.number;
+    statusEventEntity.timestamp = event.block.timestamp;
+    statusEventEntity.txHash = event.transaction.hash;
+    statusEventEntity.escrowAddress = event.address;
+    statusEventEntity.sender = event.transaction.from;
+    statusEventEntity.save();
+  } else {
+    const statusEventEntity = new PaidStatusEvent(toEventId(event));
+    statusEventEntity.block = event.block.number;
+    statusEventEntity.timestamp = event.block.timestamp;
+    statusEventEntity.txHash = event.transaction.hash;
+    statusEventEntity.escrowAddress = event.address;
+    statusEventEntity.sender = event.transaction.from;
+    statusEventEntity.save();
+  }
+
+  // Update workers, and create payout entities
   for (let i = 0; i < event.params._recipients.length; i++) {
     const worker = createOrLoadWorker(event.params._recipients[i]);
-    worker.amountReceived = worker.amountJobsSolvedPaid.plus(
+    worker.totalAmountReceived = worker.totalAmountReceived.plus(
       event.params._amounts[i]
     );
-    worker.amountJobsSolvedPaid = worker.amountJobsSolvedPaid.plus(
-      BigInt.fromI32(1)
-    );
+    worker.payoutCount = worker.payoutCount.plus(ONE_BI);
     worker.save();
-    const id = `${event.transaction.hash.toHex()}-${event.params._recipients[
+
+    const payoutId = `${event.transaction.hash.toHex()}-${event.params._recipients[
       i
     ].toHex()}-${i}`;
-    const payment = new Payment(id);
-    payment.address = event.params._recipients[i];
+    const payment = new Payout(payoutId);
+    payment.escrowAddress = event.address;
+    payment.bulkPayoutTxId = event.params._txId;
+    payment.recipient = event.params._recipients[i];
     payment.amount = event.params._amounts[i];
     payment.save();
   }
 }
 
 export function handleCancelled(event: Cancelled): void {
-  const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
+  // Create CancelledStatusEvent entity
+  const eventEntity = new CancelledStatusEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.escrowAddress = event.address;
+  eventEntity.sender = event.transaction.from;
+  eventEntity.save();
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Cancelled';
     escrowEntity.save();
@@ -206,7 +226,17 @@ export function handleCancelled(event: Cancelled): void {
 }
 
 export function handleCompleted(event: Completed): void {
-  const escrowEntity = LaunchedEscrow.load(dataSource.address().toHex());
+  // Create CompletedStatusEvent entity
+  const eventEntity = new CompletedStatusEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.escrowAddress = event.address;
+  eventEntity.sender = event.transaction.from;
+  eventEntity.save();
+
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
     escrowEntity.status = 'Completed';
     escrowEntity.save();

@@ -5,36 +5,21 @@ import {
   IntermediateStorage,
   Pending,
   BulkTransfer,
+  Cancelled,
+  Completed,
 } from '../../generated/templates/Escrow/Escrow';
 
-export function createISEvent(
+export function createPendingEvent(
   sender: Address,
-  url: string,
+  manifest: string,
   hash: string
-): IntermediateStorage {
-  const newIntermediateStorageEvent = changetype<IntermediateStorage>(
-    newMockEvent()
-  );
-  newIntermediateStorageEvent.parameters = [];
-  newIntermediateStorageEvent.transaction.from = sender;
-  const urlParam = new ethereum.EventParam(
-    '_url',
-    ethereum.Value.fromString(url)
-  );
-  const hashParam = new ethereum.EventParam(
-    '_hash',
-    ethereum.Value.fromString(hash)
-  );
-
-  newIntermediateStorageEvent.parameters.push(urlParam);
-  newIntermediateStorageEvent.parameters.push(hashParam);
-
-  return newIntermediateStorageEvent;
-}
-
-export function createPendingEvent(manifest: string, hash: string): Pending {
+): Pending {
   const newPendingEvent = changetype<Pending>(newMockEvent());
+
+  newPendingEvent.transaction.from = sender;
+
   newPendingEvent.parameters = [];
+
   const manifestParam = new ethereum.EventParam(
     'manifest',
     ethereum.Value.fromString(manifest)
@@ -50,7 +35,36 @@ export function createPendingEvent(manifest: string, hash: string): Pending {
   return newPendingEvent;
 }
 
+export function createISEvent(
+  sender: Address,
+  url: string,
+  hash: string
+): IntermediateStorage {
+  const newIntermediateStorageEvent = changetype<IntermediateStorage>(
+    newMockEvent()
+  );
+
+  newIntermediateStorageEvent.transaction.from = sender;
+
+  newIntermediateStorageEvent.parameters = [];
+
+  const urlParam = new ethereum.EventParam(
+    '_url',
+    ethereum.Value.fromString(url)
+  );
+  const hashParam = new ethereum.EventParam(
+    '_hash',
+    ethereum.Value.fromString(hash)
+  );
+
+  newIntermediateStorageEvent.parameters.push(urlParam);
+  newIntermediateStorageEvent.parameters.push(hashParam);
+
+  return newIntermediateStorageEvent;
+}
+
 export function createBulkTransferEvent(
+  sender: Address,
   txId: i32,
   recipients: Address[],
   amounts: i32[],
@@ -58,8 +72,12 @@ export function createBulkTransferEvent(
   timestamp: BigInt
 ): BulkTransfer {
   const newBTEvent = changetype<BulkTransfer>(newMockEvent());
-  newBTEvent.parameters = [];
+
   newBTEvent.block.timestamp = timestamp;
+  newBTEvent.transaction.from = sender;
+
+  newBTEvent.parameters = [];
+
   const txIdParam = new ethereum.EventParam(
     '_txId',
     ethereum.Value.fromI32(txId)
@@ -83,4 +101,24 @@ export function createBulkTransferEvent(
   newBTEvent.parameters.push(isPartialParam);
 
   return newBTEvent;
+}
+
+export function createCancelledEvent(sender: Address): Cancelled {
+  const newCancelledEvent = changetype<Cancelled>(newMockEvent());
+
+  newCancelledEvent.transaction.from = sender;
+
+  newCancelledEvent.parameters = [];
+
+  return newCancelledEvent;
+}
+
+export function createCompletedEvent(sender: Address): Completed {
+  const newCompletedEvent = changetype<Completed>(newMockEvent());
+
+  newCompletedEvent.transaction.from = sender;
+
+  newCompletedEvent.parameters = [];
+
+  return newCompletedEvent;
 }
