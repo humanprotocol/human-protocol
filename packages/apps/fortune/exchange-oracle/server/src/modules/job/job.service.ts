@@ -5,7 +5,7 @@ import {
   KVStoreKeys,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
@@ -34,7 +34,7 @@ export class JobService {
     );
 
     if (!reputationOracleURL)
-      throw new Error('Unable to get Reputation Oracle URL');
+      throw new NotFoundException('Unable to get Reputation Oracle URL');
 
     const manifest = await this.httpService.axiosRef
       .get<any>(
@@ -81,33 +81,34 @@ export class JobService {
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       escrowAddress,
     );
+
     const kvstore = await KVStoreClient.build(signer);
-    const recordingOracleURL = await kvstore.get(
+    const recordingOracleWebhookUrl = await kvstore.get(
       recordingOracleAddress,
       KVStoreKeys.webhook_url,
     );
 
-    if (!recordingOracleURL)
-      throw new Error('Unable to get Recording Oracle URL');
+    if (!recordingOracleWebhookUrl)
+      throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
     if (
       this.storage[escrowAddress] &&
       this.storage[escrowAddress].includes(workerAddress)
     )
-      throw new Error('User has already submitted a solution');
+      throw new BadRequestException('User has already submitted a solution');
 
     if (!this.storage[escrowAddress]) {
       this.storage[escrowAddress] = [];
     }
     this.storage[escrowAddress].push(workerAddress);
 
-    await this.httpService.post(recordingOracleURL + '/job/solve', {
+    await this.httpService.post(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
       chainId: chainId,
       exchangeAddress: signer.address,
       workerAddress: workerAddress,
       solution: solution,
-    });
+    })
 
     return true;
   }
