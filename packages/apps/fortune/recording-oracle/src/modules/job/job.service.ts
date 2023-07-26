@@ -6,7 +6,6 @@ import { ethers } from "ethers";
 import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
 import { JobSolutionRequestDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
-import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class JobService {
@@ -66,8 +65,7 @@ export class JobService {
     let existingJobSolutionsURL;
     try {
       existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
-    } catch(e) {
-      console.log(e)
+    } catch (e) {
       throw new BadRequestException("Error while getting intermediate results url from escrow contract");
     }
 
@@ -102,8 +100,8 @@ export class JobService {
     if (newJobSolutions.length === submissionsRequired) {
       await this.httpService.post(`${reputationOracleURL}/webhook`, {
         chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress
-      })
+        escrowAddress: jobSolution.escrowAddress,
+      });
 
       return "The requested job is completed.";
     } else if (newJobSolutions.length > submissionsRequired) {
