@@ -50,8 +50,10 @@ export class PaymentCreateDto {
 }
 
 export class GetRateDto {
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({
+    enum: TokenId,
+  })
+  @IsEnum(TokenId)
   public token: TokenId;
 
   @ApiProperty({

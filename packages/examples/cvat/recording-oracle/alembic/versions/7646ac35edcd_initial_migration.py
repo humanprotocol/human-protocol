@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column("signature", sa.String(), nullable=False),
         sa.Column("escrow_address", sa.String(length=42), nullable=False),
         sa.Column("chain_id", sa.Integer(), nullable=False),
+        sa.Column("s3_url", sa.String(length=255), nullable=False),
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("status", sa.String(), server_default="pending", nullable=True),
         sa.Column("attempts", sa.Integer(), server_default="0", nullable=True),

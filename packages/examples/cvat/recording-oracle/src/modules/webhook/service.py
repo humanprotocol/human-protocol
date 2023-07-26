@@ -15,6 +15,7 @@ def create_webhook(
     session: Session,
     escrow_address: str,
     chain_id: int,
+    s3_url: str,
     type: OracleWebhookTypes,
     signature: str,
 ) -> id:
@@ -31,6 +32,7 @@ def create_webhook(
             signature=signature,
             escrow_address=escrow_address,
             chain_id=chain_id,
+            s3_url=s3_url,
             type=type,
             status=OracleWebhookStatuses.pending.value,
         )

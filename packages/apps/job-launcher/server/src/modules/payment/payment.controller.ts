@@ -49,7 +49,7 @@ export class PaymentController {
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {
-      return this.currencyService.getRate(data.token, data.currency);
+      return this.currencyService.getRate(data.currency, data.token);
     } catch (e) {
       throw new Error(e);
     }

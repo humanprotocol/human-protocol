@@ -7,6 +7,7 @@ import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
+import { IReputation } from 'src/common/interfaces';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -50,11 +51,7 @@ describe('ReputationController', () => {
 
   describe('getReputations', () => {
     it('should call service for given chainId', async () => {
-      const reputations = [
-        { chainId: CHAIN_ID, address: OPERATOR_ADDRESS, reputationPoints: 1 },
-      ];
-
-      const result = [
+      const results = [
         {
           chainId: CHAIN_ID,
           address: OPERATOR_ADDRESS,
@@ -64,7 +61,7 @@ describe('ReputationController', () => {
 
       jest
         .spyOn(reputationService, 'getAllReputations')
-        .mockResolvedValueOnce(reputations as ReputationEntity[]);
+        .mockResolvedValueOnce(results as IReputation[]);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')
@@ -72,19 +69,17 @@ describe('ReputationController', () => {
 
       expect(
         await reputationController.getReputations({ chainId: CHAIN_ID }),
-      ).toEqual(result);
+      ).toEqual(results);
     });
   });
 
   describe('getReputation', () => {
     it('should call service', async () => {
-      const reputation = [
-        { chainId: CHAIN_ID, address: OPERATOR_ADDRESS, reputationPoints: 1 },
-      ];
+      const result = { chainId: CHAIN_ID, address: OPERATOR_ADDRESS, reputation: ReputationLevel.LOW }
 
       jest
         .spyOn(reputationService, 'getReputation')
-        .mockResolvedValueOnce(reputation as any as ReputationEntity);
+        .mockResolvedValueOnce(result as IReputation);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')
@@ -99,7 +94,7 @@ describe('ReputationController', () => {
             chainId: CHAIN_ID,
           },
         ),
-      ).toBe(ReputationLevel.LOW);
+      ).toBe(result);
     });
   });
 });

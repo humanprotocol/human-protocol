@@ -1,4 +1,4 @@
-import { JobMode, JobRequestType } from '../enums';
+import { JobRequestType } from '../enums';
 
 export interface IFortuneManifest {
   submissionsRequired: number;
@@ -7,7 +7,6 @@ export interface IFortuneManifest {
   fee: string;
   fundAmount: string;
   requestType: JobRequestType;
-  mode: JobMode;
 }
 
 export interface ICvatManifest {
@@ -19,7 +18,6 @@ export interface ICvatManifest {
   fee: string;
   fundAmount: string;
   requestType: JobRequestType;
-  mode: JobMode;
 }
 
 export type Manifest = IFortuneManifest | ICvatManifest;

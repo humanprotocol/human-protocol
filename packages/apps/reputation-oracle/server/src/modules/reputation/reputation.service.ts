@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChainId } from '@human-protocol/sdk';
 import { INITIAL_REPUTATION } from '../../common/constants';
@@ -6,6 +6,7 @@ import { ConfigNames } from '../../common/config';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { ReputationRepository } from './reputation.repository';
 import { IReputation } from '../../common/interfaces';
+import { ErrorReputation } from 'src/common/constants/errors';
 
 @Injectable()
 export class ReputationService {
@@ -104,6 +105,11 @@ export class ReputationService {
       address,
       chainId,
     });
+
+    if (!reputationEntity) {
+      this.logger.log(ErrorReputation.NotFound, ReputationService.name);
+      throw new NotFoundException(ErrorReputation.NotFound);
+    }
 
     return {
       chainId: reputationEntity.chainId,
