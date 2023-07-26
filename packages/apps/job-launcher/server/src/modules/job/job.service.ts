@@ -54,7 +54,6 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { CurrencyService } from '../payment/currency.service';
-import { CoingeckoTokenId } from '../../common/constants/payment';
 
 @Injectable()
 export class JobService {
@@ -81,7 +80,7 @@ export class JobService {
       this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
     this.storageParams = {
       endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: 9000,
+      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
       useSSL,
     };
 
@@ -113,8 +112,8 @@ export class JobService {
     );
 
     const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
+      TokenId.HMT
     );
 
     const jobLauncherFee = BigNumber.from(
@@ -195,8 +194,8 @@ export class JobService {
     );
 
     const rate = await this.currencyService.getRate(
-      CoingeckoTokenId[TokenId.HMT],
       Currency.USD,
+      TokenId.HMT
     );
 
     const jobLauncherFee = BigNumber.from(
