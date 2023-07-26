@@ -10,16 +10,30 @@ import {
 } from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
-// import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import authService from '../../services/auth';
 import { Password } from './Password';
 import { ResetPasswordValidationSchema } from './schema';
 
 export const ResetPasswordForm = () => {
-  //   const dispatch = useDispatch();
   const captchaRef = useRef(null);
   const [alertMsg, setAlertMsg] = useState('');
+  const navigate = useNavigate();
+  const token = new URLSearchParams(window.location.search).get('token');
 
-  const handleResetPassword = () => {};
+  const handleResetPassword = async ({ password, repeatPassword }) => {
+    try {
+      await authService.resetPassword({
+        password,
+        confirm: repeatPassword,
+        token,
+      });
+
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const initialValues = {
     password: '',

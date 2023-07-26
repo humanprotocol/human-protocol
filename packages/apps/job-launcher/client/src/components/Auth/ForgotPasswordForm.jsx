@@ -11,24 +11,72 @@ import {
 } from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
+import authService from '../../services/auth';
 import { ForgotPasswordValidationSchema } from './schema';
 
 export const ForgotPasswordForm = () => {
   const captchaRef = useRef(null);
   const [alertMsg, setAlertMsg] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  const handleForgotPassword = () => {};
+  const handleForgotPassword = async ({ email }) => {
+    try {
+      await authService.forgotPassword(email);
+      setIsSuccess(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const initialValues = {
     email: '',
     hcaptchaToken: '',
   };
 
-  return (
+  return isSuccess ? (
+    <Box sx={{ maxWidth: '368px', mx: 'auto', pt: 15 }}>
+      <Box>
+        <CheckFilledIcon />
+      </Box>
+      <Typography variant="h6" fontWeight={500} mt={4}>
+        Success!
+      </Typography>
+      <Typography variant="body2" mt={5}>
+        Please check your email box for the link to reset your password.
+      </Typography>
+      <Box mt={13}>
+        <Button
+          size="large"
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={() => navigate('/')}
+        >
+          Sign in
+        </Button>
+      </Box>
+      <Link
+        href="https://humanprotocol.org/app/terms-and-conditions"
+        target="_blank"
+        sx={{
+          fontSize: '12px',
+          textAlign: 'center',
+          display: 'block',
+          width: '100%',
+          mt: 3,
+        }}
+      >
+        Terms & conditions
+      </Link>
+    </Box>
+  ) : (
     <Box sx={{ maxWidth: '303px', mx: 'auto', py: 8 }}>
       {alertMsg && alertMsg.length && (
         <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ my: 2 }}>
-          <AlertTitle>Login failed!</AlertTitle>
+          <AlertTitle>Send email failed!</AlertTitle>
           {alertMsg}
         </Alert>
       )}

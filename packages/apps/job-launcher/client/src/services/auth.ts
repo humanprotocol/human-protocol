@@ -1,4 +1,9 @@
-import { SignInRequest, SignUpRequest, SignUpResponse } from '../types';
+import {
+  ResetPasswordRequest,
+  SignInRequest,
+  SignUpRequest,
+  SignUpResponse,
+} from '../types';
 import api from '../utils/api';
 
 export const signIn = async (body: SignInRequest) => {
@@ -19,4 +24,12 @@ export const signOut = async (refreshToken: string) => {
   return data;
 };
 
-export default { signIn, signUp };
+export const forgotPassword = async (email: string) => {
+  await api.post('/auth/forgot-password', { email });
+};
+
+export const resetPassword = async (body: ResetPasswordRequest) => {
+  await api.post('/auth/restore-password', body);
+};
+
+export default { signIn, signUp, forgotPassword, resetPassword };

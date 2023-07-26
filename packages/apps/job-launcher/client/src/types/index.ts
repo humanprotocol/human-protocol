@@ -18,6 +18,12 @@ export type SignUpResponse = {
   refreshTokenExpiresAt: number;
 };
 
+export type ResetPasswordRequest = {
+  password: string;
+  confirm: string;
+  token: string;
+};
+
 export type CryptoPaymentRequest = {
   chainId: number;
   transactionHash: string;

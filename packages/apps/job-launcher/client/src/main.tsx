@@ -27,7 +27,7 @@ import App from './App';
 import { LOCAL_STORAGE_KEYS } from './constants';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
-import { signIn } from './state/auth/reducer';
+import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
 import theme from './theme';
 import { isJwtExpired } from './utils/jwt';
 
@@ -99,11 +99,11 @@ const publishableKey = import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY ?? '';
 loadStripe(publishableKey).then((stripePromise) => {
   const accessToken = localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken);
   const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.refreshToken);
-  const accessTokenExpiresAt = localStorage.getItem(
-    LOCAL_STORAGE_KEYS.accessTokenExpiresAt
+  const accessTokenExpiresAt = Number(
+    localStorage.getItem(LOCAL_STORAGE_KEYS.accessTokenExpiresAt)
   );
-  const refreshTokenExpiresAt = localStorage.getItem(
-    LOCAL_STORAGE_KEYS.refreshTokenExpiresAt
+  const refreshTokenExpiresAt = Number(
+    localStorage.getItem(LOCAL_STORAGE_KEYS.refreshTokenExpiresAt)
   );
 
   if (
@@ -121,6 +121,7 @@ loadStripe(publishableKey).then((stripePromise) => {
         refreshTokenExpiresAt,
       })
     );
+    store.dispatch(fetchUserBalanceAsync());
   }
 
   root.render(

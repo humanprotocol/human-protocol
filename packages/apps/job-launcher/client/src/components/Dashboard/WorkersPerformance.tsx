@@ -1,6 +1,7 @@
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
+import { useAppSelector } from '../../state';
 
 const StyledBox = styled(Box)`
   border-radius: 8px;
@@ -10,9 +11,14 @@ const StyledBox = styled(Box)`
   padding-bottom: 15px;
   height: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 export const WorkersPerformance = () => {
+  const { workersPerformance } = useAppSelector((state) => state.dashboard);
+
   return (
     <Card sx={{ height: '100%', boxSizing: 'border-box' }}>
       <CardContent>
@@ -22,9 +28,20 @@ export const WorkersPerformance = () => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                8/10
-              </Typography>
+              {workersPerformance?.reputation ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {workersPerformance?.reputation}/10
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Reputation
               </Typography>
@@ -32,9 +49,20 @@ export const WorkersPerformance = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                48h
-              </Typography>
+              {workersPerformance?.timeToComplete ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {workersPerformance?.timeToComplete}h
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Time to complete
               </Typography>
@@ -42,9 +70,20 @@ export const WorkersPerformance = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                8/10
-              </Typography>
+              {workersPerformance?.completionAccuracy ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {workersPerformance?.completionAccuracy}/10
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Accuracy of completion
               </Typography>

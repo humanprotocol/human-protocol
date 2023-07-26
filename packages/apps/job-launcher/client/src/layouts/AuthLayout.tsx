@@ -37,7 +37,9 @@ export default function AuthLayout() {
     >
       <Box>
         <Toolbar>
-          <img src={logoImg} alt="HUMAN App" style={{ width: 192 }} />
+          <Link to="/">
+            <img src={logoImg} alt="HUMAN App" style={{ width: 192 }} />
+          </Link>
         </Toolbar>
         <List>
           <ListItem>

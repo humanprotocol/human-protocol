@@ -1,5 +1,6 @@
-import { Box, Card, Typography, useTheme } from '@mui/material';
+import { Box, Button, Card, Typography, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -7,6 +8,7 @@ import {
   Tooltip,
   XAxis,
 } from 'recharts';
+import { useAppSelector } from '../../state';
 
 const JOBS_DATA = [
   { date: '2022-07-31', value: 2181348 },
@@ -95,6 +97,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const JobsGraph = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { data } = useAppSelector((state) => state.jobs);
 
   return (
     <Card sx={{ height: '100%', boxSizing: 'border-box', padding: '60px' }}>
@@ -102,37 +106,59 @@ export const JobsGraph = () => {
         Jobs Graph
       </Typography>
 
-      <Box sx={{ width: 400, height: 300, mx: 'auto' }}>
-        <ResponsiveContainer>
-          <RechartsBarChart
-            data={JOBS_DATA}
-            margin={{ top: 30, left: 4, right: 4 }}
+      {data.length > 0 ? (
+        <Box sx={{ width: 400, height: 300, mx: 'auto' }}>
+          <ResponsiveContainer>
+            <RechartsBarChart
+              data={JOBS_DATA}
+              margin={{ top: 30, left: 4, right: 4 }}
+            >
+              <XAxis
+                dataKey="date"
+                type="category"
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+                ticks={[
+                  JOBS_DATA[0].date,
+                  JOBS_DATA[JOBS_DATA.length - 1].date,
+                ]}
+                tick={{
+                  fill: '#320A8D',
+                  fontSize: '12px',
+                  fontFamily: 'Inter',
+                }}
+                tickFormatter={(value: any) => dayjs(value).format('MMM D')}
+                tickMargin={12}
+                padding={{ left: 10, right: 10 }}
+              />
+              <Tooltip
+                cursor={{ fill: '#dadef0' }}
+                content={<CustomTooltip />}
+              />
+              <Bar
+                dataKey="value"
+                fill={theme.palette.primary.main}
+                barSize={16}
+              />
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', alignItems: 'center', py: 8 }}>
+          <Typography variant="h5" sx={{ flex: 1 }}>
+            No data to show at the moment, data will be available once job are
+            created
+          </Typography>
+          <Button
+            variant="contained"
+            sx={{ ml: 4 }}
+            onClick={() => navigate('/jobs/create')}
           >
-            <XAxis
-              dataKey="date"
-              type="category"
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-              ticks={[JOBS_DATA[0].date, JOBS_DATA[JOBS_DATA.length - 1].date]}
-              tick={{
-                fill: '#320A8D',
-                fontSize: '12px',
-                fontFamily: 'Inter',
-              }}
-              tickFormatter={(value: any) => dayjs(value).format('MMM D')}
-              tickMargin={12}
-              padding={{ left: 10, right: 10 }}
-            />
-            <Tooltip cursor={{ fill: '#dadef0' }} content={<CustomTooltip />} />
-            <Bar
-              dataKey="value"
-              fill={theme.palette.primary.main}
-              barSize={16}
-            />
-          </RechartsBarChart>
-        </ResponsiveContainer>
-      </Box>
+            + Create a job
+          </Button>
+        </Box>
+      )}
     </Card>
   );
 };

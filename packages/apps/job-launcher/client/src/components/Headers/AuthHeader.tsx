@@ -49,7 +49,7 @@ export const AuthHeader = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { email, refreshToken } = useAppSelector((state) => state.auth);
+  const { user, refreshToken } = useAppSelector((state) => state.auth);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -126,9 +126,7 @@ export const AuthHeader = () => {
               {/* <Typography variant="body1" lineHeight={1.5}>
                 Tony Wen
               </Typography> */}
-              <Typography variant="body2" color="text.secondary">
-                {email}
-              </Typography>
+              <Typography variant="body1">{user?.email}</Typography>
             </Box>
           </Box>
           <Box
@@ -146,7 +144,8 @@ export const AuthHeader = () => {
                 Balance
               </Typography>
               <Typography variant="body1" lineHeight={1.5}>
-                100 USD
+                {user?.balance?.amount || 0}{' '}
+                {user?.balance?.currency?.toUpperCase()}
               </Typography>
             </Box>
           </Box>

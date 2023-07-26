@@ -1,6 +1,7 @@
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
+import { useAppSelector } from '../../state';
 
 const StyledBox = styled(Box)`
   border-radius: 8px;
@@ -10,9 +11,14 @@ const StyledBox = styled(Box)`
   padding-bottom: 18px;
   height: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 export const LiquidityData = () => {
+  const { liquidity } = useAppSelector((state) => state.dashboard);
+
   return (
     <Card>
       <CardContent>
@@ -22,9 +28,20 @@ export const LiquidityData = () => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                48h
-              </Typography>
+              {liquidity?.avgTimeToComplete ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {liquidity?.avgTimeToComplete}h
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Average time to complete a job
               </Typography>
@@ -32,9 +49,20 @@ export const LiquidityData = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                8/10
-              </Typography>
+              {liquidity?.performanceAccuracy ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {liquidity?.performanceAccuracy}/10
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Performance Accuracy
               </Typography>
@@ -50,13 +78,24 @@ export const LiquidityData = () => {
                 padding: '28px',
                 paddingTop: '14px',
                 paddingBottom: '18px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
             >
-              <Typography color="success.main">5 MINIMUM</Typography>
-              <Typography color="warning.main">10 AVERAGE</Typography>
-              <Typography color="error.main" sx={{ mb: 1 }}>
-                15 MAXIMUM
-              </Typography>
+              {liquidity?.jobCostRange ? (
+                <Box sx={{ mb: 1 }}>
+                  <Typography color="success.main">5 MINIMUM</Typography>
+                  <Typography color="warning.main">10 AVERAGE</Typography>
+                  <Typography color="error.main">15 MAXIMUM</Typography>
+                </Box>
+              ) : (
+                <Box sx={{ mb: 1 }}>
+                  <Typography color="#CBCFE6 ">- MINIMUM</Typography>
+                  <Typography color="#CBCFE6">- AVERAGE</Typography>
+                  <Typography color="#CBCFE6">- MAXIMUM</Typography>
+                </Box>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Job cost range
               </Typography>
@@ -64,9 +103,20 @@ export const LiquidityData = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StyledBox>
-              <Typography variant="h4" fontWeight={600} mb={4}>
-                30,456
-              </Typography>
+              {liquidity?.totalJobs ? (
+                <Typography variant="h4" fontWeight={600} mb={4}>
+                  {liquidity?.totalJobs}
+                </Typography>
+              ) : (
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
+                  ---
+                </Typography>
+              )}
               <Typography fontSize={10} fontWeight={500} lineHeight="14px">
                 Jobs
               </Typography>
