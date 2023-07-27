@@ -154,7 +154,6 @@ type BulkPayoutEvent @entity {
   sender: Bytes! # address
   bulkPayoutTxId: BigInt!
   bulkCount: BigInt!
-  # finalResultsUrl: String! # string
 }
 
 type PendingStatusEvent @entity {
@@ -302,15 +301,6 @@ type RewardAddedEvent @entity {
 #                   Statistics                   #
 ##################################################
 
-type EscrowStatistics @entity {
-  id: ID!
-  intermediateStorageEventCount: BigInt!
-  pendingEventCount: BigInt!
-  bulkTransferEventCount: BigInt!
-  totalEventCount: BigInt!
-  totalEscrowCount: BigInt!
-}
-
 type HMTokenStatistics @entity {
   id: ID!
   totalTransferEventCount: BigInt!
@@ -321,12 +311,34 @@ type HMTokenStatistics @entity {
   holders: BigInt!
 }
 
+type EscrowStatistics @entity {
+  id: ID!
+  fundEventCount: BigInt!
+  setupEventCount: BigInt!
+  storeResultsEventCount: BigInt!
+  bulkPayoutEventCount: BigInt!
+  pendingStatusEventCount: BigInt!
+  cancelledStatusEventCount: BigInt!
+  partialStatusEventCount: BigInt!
+  paidStatusEventCount: BigInt!
+  completedStatusEventCount: BigInt!
+  totalEventCount: BigInt!
+  totalEscrowCount: BigInt!
+}
+
 type EventDayData @entity {
   id: ID!
   timestamp: Int!
-  dailyBulkTransferEvents: BigInt!
-  dailyIntermediateStorageEvents: BigInt!
-  dailyPendingEvents: BigInt!
+  dailyFundEventCount: BigInt!
+  dailySetupEventCount: BigInt!
+  dailyStoreResultsEventCount: BigInt!
+  dailyBulkPayoutEventCount: BigInt!
+  dailyPendingStatusEventCount: BigInt!
+  dailyCancelledStatusEventCount: BigInt!
+  dailyPartialStatusEventCount: BigInt!
+  dailyPaidStatusEventCount: BigInt!
+  dailyCompletedStatusEventCount: BigInt!
+  dailyTotalEventCount: BigInt!
   dailyEscrowAmounts: BigInt!
 }
 

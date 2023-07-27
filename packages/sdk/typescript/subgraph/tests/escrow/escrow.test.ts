@@ -496,7 +496,7 @@ describe('Escrow', () => {
       clearStore();
     });
 
-    test('Should properly calculate Pending event in statistics', () => {
+    test('Should properly calculate setup & pending in statistics', () => {
       const newPending1 = createPendingEvent(
         operatorAddress,
         'test.com',
@@ -514,24 +514,42 @@ describe('Escrow', () => {
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'pendingEventCount',
+        'setupEventCount',
         '2'
       );
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'intermediateStorageEventCount',
-        '0'
+        'pendingStatusEventCount',
+        '2'
       );
+
+      [
+        'fundEventCount',
+        'storeResultsEventCount',
+        'bulkPayoutEventCount',
+        'cancelledStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'bulkTransferEventCount',
-        '0'
+        'totalEventCount',
+        '4'
       );
     });
 
-    test('Should properly calculate IntermediateStorage event in statistics', () => {
+    test('Should properly calculate StoreResults event in statistics', () => {
       const newIS = createISEvent(workerAddress, 'test.com', 'is_hash_1');
       const newIS1 = createISEvent(workerAddress, 'test.com', 'is_hash_1');
 
@@ -541,24 +559,37 @@ describe('Escrow', () => {
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'pendingEventCount',
-        '0'
-      );
-      assert.fieldEquals(
-        'EscrowStatistics',
-        STATISTICS_ENTITY_ID,
-        'intermediateStorageEventCount',
+        'storeResultsEventCount',
         '2'
       );
+
+      [
+        'fundEventCount',
+        'setupEventCount',
+        'bulkPayoutEventCount',
+        'pendingStatusEventCount',
+        'cancelledStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'bulkTransferEventCount',
-        '0'
+        'totalEventCount',
+        '2'
       );
     });
 
-    test('Should properly calculate BulkTransfser event in statistics', () => {
+    test('Should properly calculate bulkPayout, partialStatus, paidStatus event in statistics', () => {
       handleBulkTransfer(
         createBulkTransferEvent(
           operatorAddress,
@@ -571,7 +602,7 @@ describe('Escrow', () => {
             workerAddress,
           ],
           [1, 1, 1, 1, 1],
-          false,
+          true,
           BigInt.fromI32(11)
         )
       );
@@ -589,19 +620,122 @@ describe('Escrow', () => {
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'pendingEventCount',
-        '0'
+        'bulkPayoutEventCount',
+        '2'
       );
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'intermediateStorageEventCount',
-        '0'
+        'partialStatusEventCount',
+        '1'
       );
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
-        'bulkTransferEventCount',
+        'paidStatusEventCount',
+        '1'
+      );
+
+      [
+        'fundEventCount',
+        'setupEventCount',
+        'storeResultsEventCount',
+        'pendingStatusEventCount',
+        'cancelledStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'totalEventCount',
+        '4'
+      );
+    });
+
+    test('Should properly calculate cancelled event in statstics', () => {
+      const newCancelled1 = createCancelledEvent(operatorAddress);
+      const newCancelled2 = createCancelledEvent(operatorAddress);
+
+      handleCancelled(newCancelled1);
+      handleCancelled(newCancelled2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'cancelledStatusEventCount',
+        '2'
+      );
+
+      [
+        'fundEventCount',
+        'setupEventCount',
+        'storeResultsEventCount',
+        'bulkPayoutEventCount',
+        'pendingStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'totalEventCount',
+        '2'
+      );
+    });
+
+    test('Should properly calculate completed event in statstics', () => {
+      const newCompleted1 = createCompletedEvent(operatorAddress);
+      const newCompleted2 = createCompletedEvent(operatorAddress);
+
+      handleCompleted(newCompleted1);
+      handleCompleted(newCompleted2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'completedStatusEventCount',
+        '2'
+      );
+
+      [
+        'fundEventCount',
+        'setupEventCount',
+        'storeResultsEventCount',
+        'bulkPayoutEventCount',
+        'pendingStatusEventCount',
+        'cancelledStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'totalEventCount',
         '2'
       );
     });

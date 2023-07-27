@@ -18,6 +18,8 @@ import {
 } from '../../generated/schema';
 import { toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
+import { createOrLoadEscrowStatistics } from './Escrow';
+import { getEventDayData } from './utils/dayUpdates';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
 
@@ -108,6 +110,20 @@ export function handleTransfer(event: Transfer): void {
     fundEventEntity.sender = event.params._from;
     fundEventEntity.amount = event.params._value;
     fundEventEntity.save();
+
+    // Update escrow statistics
+    const statsEntity = createOrLoadEscrowStatistics();
+    statsEntity.fundEventCount = statsEntity.fundEventCount.plus(ONE_BI);
+    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+    statsEntity.save();
+
+    // Update event day data
+    const eventDayData = getEventDayData(event);
+    eventDayData.dailyFundEventCount =
+      eventDayData.dailyFundEventCount.plus(ONE_BI);
+    eventDayData.dailyTotalEventCount =
+      eventDayData.dailyTotalEventCount.plus(ONE_BI);
+    eventDayData.save();
 
     // Update escrow balance, and totalFundedAmount
     escrow.balance = escrow.balance.plus(event.params._value);

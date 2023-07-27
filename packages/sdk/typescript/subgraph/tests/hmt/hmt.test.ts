@@ -11,6 +11,7 @@ import {
 } from 'matchstick-as/assembly';
 
 import { Escrow } from '../../generated/schema';
+import { STATISTICS_ENTITY_ID } from '../../src/mapping/Escrow';
 import {
   HMT_STATISTICS_ENTITY_ID,
   handleTransfer,
@@ -442,6 +443,71 @@ describe('HMToken', () => {
         'HMTokenStatistics',
         HMT_STATISTICS_ENTITY_ID,
         'totalBulkApprovalEventCount',
+        '2'
+      );
+    });
+
+    test('Should properly calculate FundEvent in statistics, when sending to escrow', () => {
+      const escrow = new Escrow(escrowAddress.toHex());
+      escrow.address = escrowAddress;
+      escrow.token = Address.zero();
+      escrow.factoryAddress = Address.zero();
+      escrow.launcher = Address.zero();
+      escrow.count = ZERO_BI;
+      escrow.balance = BigInt.fromI32(100);
+      escrow.totalFundedAmount = BigInt.fromI32(100);
+      escrow.amountPaid = ZERO_BI;
+      escrow.status = 'Launched';
+
+      escrow.save();
+
+      const transfer1 = createTransferEvent(
+        operatorAddressString,
+        escrowAddressString,
+        1,
+        BigInt.fromI32(10)
+      );
+
+      handleTransfer(transfer1);
+
+      const transfer2 = createTransferEvent(
+        operatorAddressString,
+        escrowAddressString,
+        1,
+        BigInt.fromI32(20)
+      );
+
+      handleTransfer(transfer2);
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'fundEventCount',
+        '2'
+      );
+
+      [
+        'setupEventCount',
+        'storeResultsEventCount',
+        'bulkPayoutEventCount',
+        'pendingStatusEventCount',
+        'cancelledStatusEventCount',
+        'partialStatusEventCount',
+        'paidStatusEventCount',
+        'completedStatusEventCount',
+      ].forEach((field) => {
+        assert.fieldEquals(
+          'EscrowStatistics',
+          STATISTICS_ENTITY_ID,
+          field,
+          '0'
+        );
+      });
+
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'totalEventCount',
         '2'
       );
     });

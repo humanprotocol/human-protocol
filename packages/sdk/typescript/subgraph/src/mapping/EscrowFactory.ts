@@ -3,7 +3,7 @@ import { Escrow } from '../../generated/schema';
 import { Escrow as EscrowTemplate } from '../../generated/templates';
 import { createOrLoadEscrowStatistics } from './Escrow';
 import { createOrLoadLeader } from './Staking';
-import { updateEscrowAmountDayData } from './utils/dayUpdates';
+import { getEventDayData } from './utils/dayUpdates';
 import { ONE_BI, ZERO_BI } from './utils/number';
 
 export function handleLaunched(event: Launched): void {
@@ -33,7 +33,10 @@ export function handleLaunched(event: Launched): void {
   EscrowTemplate.create(event.params.escrow);
 
   // Update escrow amount day data
-  updateEscrowAmountDayData(event);
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyEscrowAmounts =
+    eventDayData.dailyEscrowAmounts.plus(ONE_BI);
+  eventDayData.save();
 
   // Increase amount of jobs launched by leader
   const leader = createOrLoadLeader(event.transaction.from);

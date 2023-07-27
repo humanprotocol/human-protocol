@@ -20,22 +20,24 @@ import {
   Worker,
 } from '../../generated/schema';
 import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts';
-import {
-  updateIntermediateStorageEventDayData,
-  updatePendingEventDayData,
-  updateBulkTransferEventDayData,
-} from './utils/dayUpdates';
 import { ZERO_BI, ONE_BI } from './utils/number';
 import { toEventId } from './utils/event';
+import { getEventDayData } from './utils/dayUpdates';
 
 export const STATISTICS_ENTITY_ID = 'escrow-statistics-id';
 
 function constructStatsEntity(): EscrowStatistics {
   const entity = new EscrowStatistics(STATISTICS_ENTITY_ID);
 
-  entity.intermediateStorageEventCount = ZERO_BI;
-  entity.pendingEventCount = ZERO_BI;
-  entity.bulkTransferEventCount = ZERO_BI;
+  entity.fundEventCount = ZERO_BI;
+  entity.setupEventCount = ZERO_BI;
+  entity.storeResultsEventCount = ZERO_BI;
+  entity.bulkPayoutEventCount = ZERO_BI;
+  entity.pendingStatusEventCount = ZERO_BI;
+  entity.cancelledStatusEventCount = ZERO_BI;
+  entity.partialStatusEventCount = ZERO_BI;
+  entity.paidStatusEventCount = ZERO_BI;
+  entity.completedStatusEventCount = ZERO_BI;
   entity.totalEventCount = ZERO_BI;
   entity.totalEscrowCount = ZERO_BI;
 
@@ -86,13 +88,23 @@ export function handlePending(event: Pending): void {
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.pendingEventCount = statsEntity.pendingEventCount.plus(ONE_BI);
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-
+  statsEntity.setupEventCount = statsEntity.setupEventCount.plus(ONE_BI);
+  statsEntity.pendingStatusEventCount =
+    statsEntity.pendingStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(
+    ONE_BI.plus(ONE_BI)
+  );
   statsEntity.save();
 
   // Update event day data
-  updatePendingEventDayData(event);
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailySetupEventCount =
+    eventDayData.dailySetupEventCount.plus(ONE_BI);
+  eventDayData.dailyPendingStatusEventCount =
+    eventDayData.dailyPendingStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount = eventDayData.dailyTotalEventCount.plus(
+    ONE_BI.plus(ONE_BI)
+  );
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
@@ -117,13 +129,18 @@ export function handleIntermediateStorage(event: IntermediateStorage): void {
 
   // Updates escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.intermediateStorageEventCount =
-    statsEntity.intermediateStorageEventCount.plus(ONE_BI);
+  statsEntity.storeResultsEventCount =
+    statsEntity.storeResultsEventCount.plus(ONE_BI);
   statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
   statsEntity.save();
 
   // Update event day data
-  updateIntermediateStorageEventDayData(event);
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyStoreResultsEventCount =
+    eventDayData.dailyStoreResultsEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
@@ -147,13 +164,16 @@ export function handleBulkTransfer(event: BulkTransfer): void {
 
   // Update escrow statistics
   const statsEntity = createOrLoadEscrowStatistics();
-  statsEntity.bulkTransferEventCount =
-    statsEntity.bulkTransferEventCount.plus(ONE_BI);
+  statsEntity.bulkPayoutEventCount =
+    statsEntity.bulkPayoutEventCount.plus(ONE_BI);
   statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-  statsEntity.save();
 
   // Update event day data
-  updateBulkTransferEventDayData(event);
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyBulkPayoutEventCount =
+    eventDayData.dailyBulkPayoutEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
@@ -176,6 +196,15 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     statusEventEntity.escrowAddress = event.address;
     statusEventEntity.sender = event.transaction.from;
     statusEventEntity.save();
+
+    statsEntity.partialStatusEventCount =
+      statsEntity.partialStatusEventCount.plus(ONE_BI);
+    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+
+    eventDayData.dailyPartialStatusEventCount =
+      eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
+    eventDayData.dailyTotalEventCount =
+      eventDayData.dailyTotalEventCount.plus(ONE_BI);
   } else {
     const statusEventEntity = new PaidStatusEvent(toEventId(event));
     statusEventEntity.block = event.block.number;
@@ -184,6 +213,15 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     statusEventEntity.escrowAddress = event.address;
     statusEventEntity.sender = event.transaction.from;
     statusEventEntity.save();
+
+    statsEntity.paidStatusEventCount =
+      statsEntity.paidStatusEventCount.plus(ONE_BI);
+    statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+
+    eventDayData.dailyPaidStatusEventCount =
+      eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
+    eventDayData.dailyTotalEventCount =
+      eventDayData.dailyTotalEventCount.plus(ONE_BI);
   }
 
   // Update workers, and create payout entities
@@ -205,6 +243,10 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     payment.amount = event.params._amounts[i];
     payment.save();
   }
+
+  // Save statistics, and event day data
+  statsEntity.save();
+  eventDayData.save();
 }
 
 export function handleCancelled(event: Cancelled): void {
@@ -216,6 +258,21 @@ export function handleCancelled(event: Cancelled): void {
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
   eventEntity.save();
+
+  // Update statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.cancelledStatusEventCount =
+    statsEntity.cancelledStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+
+  // Update event day data
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyCancelledStatusEventCount =
+    eventDayData.dailyCancelledStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
@@ -234,6 +291,21 @@ export function handleCompleted(event: Completed): void {
   eventEntity.escrowAddress = event.address;
   eventEntity.sender = event.transaction.from;
   eventEntity.save();
+
+  // Update statistics
+  const statsEntity = createOrLoadEscrowStatistics();
+  statsEntity.completedStatusEventCount =
+    statsEntity.completedStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  statsEntity.save();
+
+  // Update event day data
+  const eventDayData = getEventDayData(event);
+  eventDayData.dailyCompletedStatusEventCount =
+    eventDayData.dailyCompletedStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  eventDayData.save();
 
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
