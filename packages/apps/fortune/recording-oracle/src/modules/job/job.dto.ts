@@ -31,6 +31,7 @@ export class JobSolutionRequestDto {
   public solution: string;
 }
 
-export enum JobRequestType {
-  FORTUNE = "FORTUNE",
+export class SendWebhookDto {
+  public escrowAddress: string;
+  public chainId: number;
 }
