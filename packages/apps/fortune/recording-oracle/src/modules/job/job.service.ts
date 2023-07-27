@@ -114,8 +114,8 @@ export class JobService {
     if (newJobSolutions.length === submissionsRequired) {
       await this.httpService.post(`${reputationOracleURL}/webhook`, {
         chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress
-      })
+        escrowAddress: jobSolution.escrowAddress,
+      });
 
       return "The requested job is completed.";
     } else if (newJobSolutions.length > submissionsRequired) {
