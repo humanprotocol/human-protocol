@@ -6,11 +6,13 @@ import { of } from "rxjs";
 
 import { JobService } from "./job.service";
 import { Web3Service } from "../web3/web3.service";
+import { JobRequestType } from "./job.dto";
+import { ErrorJob } from "../../common/constants/errors";
 
 const OPERATOR_ADDRESS = "TEST_OPERATOR_ADDRESS";
 
 const SOLUTION = {
-  escrowAddress: "ESCROW_ADDRESS",
+  escrowAddress: "0x0000000000000000000000000000000000000000",
   chainId: 1,
   exchangeAddress: "EXCHANGE_ADDRESS",
   workerAddress: "WORKER_ADDRESS",
@@ -107,9 +109,7 @@ describe("JobController", () => {
         getRecordingOracleAddress: jest.fn().mockResolvedValue("RECORDING_ORACLE_ADDRESS"),
       }));
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        "Escrow Recording Oracle address mismatches the current one",
-      );
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.AddressMismatches);
     });
 
     it("should throw an error if the escrow is not in pending status", async () => {
@@ -119,7 +119,7 @@ describe("JobController", () => {
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
       }));
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError("Escrow is not in the Pending status");
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidStatus);
     });
 
     it("should throw an error if the manifest is missing required data", async () => {
@@ -132,9 +132,28 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue({});
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        "Manifest does not contain the required data",
-      );
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidManifest);
+    });
+
+    it("should throw an error if the manifest contains an invalid job type", async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn().mockResolvedValue("MANIFEST_URL"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("RESULTS_URL"),
+        storeResults: jest.fn(),
+      }));
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
+        if (url === "MANIFEST_URL") {
+          return { submissionsRequired: 2, requestType: "InvalidJobType" };
+        }
+
+        return [SOLUTION];
+      });
+
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidJobType);
     });
 
     it("should record new solution", async () => {
@@ -149,7 +168,7 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2 };
+          return { submissionsRequired: 2, requestType: JobRequestType.FORTUNE };
         }
 
         return [];
@@ -170,22 +189,23 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2 };
+          return { submissionsRequired: 2, requestType: JobRequestType.FORTUNE };
         }
 
         return [SOLUTION];
       });
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError("Solution already exists");
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.SolutionAlreadyExists);
     });
 
     it("should call reputation oracle url when all solutions are submitted.", async () => {
+      const chainId = 1;
+      const escrowAddress = "0x0000000000000000000000000000000000000000";
       const oldSolution = {
-        exchangeAddress: "EXCHANGE_ADDRESS",
+        exchangeAddress: escrowAddress,
         workerAddress: "WORKER_ADDRESS",
         solution: "Old",
       };
-      const newSolution = { exchangeAddress: "EXCHANGE_ADDRESS", workerAddress: "WORKER_ADDRESS", solution: "Good" };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (EscrowClient.build as any).mockImplementation(() => ({
@@ -198,17 +218,14 @@ describe("JobController", () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockImplementation(async url => {
         if (url === "MANIFEST_URL") {
-          return { fortunesRequired: 2 };
+          return { submissionsRequired: 2, requestType: JobRequestType.FORTUNE };
         }
 
         return [oldSolution];
       });
 
       expect(await jobService.processJobSolution(SOLUTION)).toBe("The requested job is completed.");
-      expect(httpServicePostMock).toHaveBeenCalledWith("REPUTATION_ORACLE_URL/send-fortunes", [
-        oldSolution,
-        newSolution,
-      ]);
+      expect(httpServicePostMock).toHaveBeenCalledWith("REPUTATION_ORACLE_URL/webhook", { chainId, escrowAddress });
     });
   });
 });
