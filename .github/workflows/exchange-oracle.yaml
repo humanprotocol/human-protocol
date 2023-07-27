@@ -51,7 +51,7 @@ jobs:
         workflow_file_name: docker_build_and_deploy.yml
         ref: oracles
         wait_interval: 15
-        client_payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}", "trigger": "${{  github.event_name }}"}, "app": "exchange-oracle"'
+        client_payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}", "trigger": "${{  github.event_name }}", "app": "exchange-oracle"}'
         propagate_failure: true
         trigger_workflow: true
         wait_workflow: true
