@@ -55,12 +55,12 @@ jobs:
             - 'packages/examples/cvat/recording-oracle/**'
 
     - name: Set app
-        run: |
-          if [[ ${{ steps.changes.outputs.exchange }} == 'true' ]]; then
-            echo "app=exchange-oracle" >> $GITHUB_ENV
-          elif [[ ${{ steps.changes.outputs.recording }} == 'true' ]]; then
-            echo "app=recording-oracle" >> $GITHUB_ENV
-          fi
+      run: |
+        if [[ ${{ steps.changes.outputs.exchange }} == 'true' ]]; then
+          echo "app=exchange-oracle" >> $GITHUB_ENV
+        elif [[ ${{ steps.changes.outputs.recording }} == 'true' ]]; then
+          echo "app=recording-oracle" >> $GITHUB_ENV
+        fi
 
     - uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
