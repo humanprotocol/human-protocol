@@ -45,7 +45,7 @@ export class WebhookCron {
     try {
       const webhookEntity = await this.webhookRepository.findOne(
         {
-          status: WebhookStatus.PENDING,
+          status: WebhookStatus.PAID,
           retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
         },

@@ -1,14 +1,17 @@
 import { HttpService } from "@nestjs/axios";
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, Inject, Injectable, Logger } from "@nestjs/common";
 import { EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
 import { ethers } from "ethers";
 
 import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
-import { JobSolutionRequestDto } from "./job.dto";
+import { JobRequestType, JobSolutionRequestDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
+import { ErrorJob } from "../../common/constants/errors";
 
 @Injectable()
 export class JobService {
+  public readonly logger = new Logger(JobService.name);
+
   constructor(
     @Inject(storageConfigKey)
     private storageConfig: StorageConfigType,
@@ -27,25 +30,33 @@ export class JobService {
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
 
     if (ethers.utils.getAddress(recordingOracleAddress) !== (await signer.getAddress())) {
-      throw new Error("Escrow Recording Oracle address mismatches the current one");
+      this.logger.log(ErrorJob.AddressMismatches, JobService.name);
+      throw new BadRequestException(ErrorJob.AddressMismatches);
     }
 
     // Validate if the escrow is in the correct state
     const escrowStatus = await escrowClient.getStatus(jobSolution.escrowAddress);
     if (escrowStatus !== EscrowStatus.Pending) {
-      throw new Error("Escrow is not in the Pending status");
+      this.logger.log(ErrorJob.InvalidStatus, JobService.name);
+      throw new BadRequestException(ErrorJob.InvalidStatus);
     }
 
     // Validate if the escrow has the correct manifest
     const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { fortunesRequired } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
+    const { submissionsRequired, requestType } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
       string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >;
 
-    if (!fortunesRequired) {
-      throw new Error("Manifest does not contain the required data");
+    if (!submissionsRequired && !requestType) {
+      this.logger.log(ErrorJob.InvalidManifest, JobService.name);
+      throw new BadRequestException(ErrorJob.InvalidManifest);
+    }
+
+    if (requestType !== JobRequestType.FORTUNE) {
+      this.logger.log(ErrorJob.InvalidJobType, JobService.name);
+      throw new BadRequestException(ErrorJob.InvalidJobType);
     }
 
     // Initialize Storage Client
@@ -62,14 +73,19 @@ export class JobService {
     );
     const bucket = this.storageConfig.bucket;
 
-    // Download existing solution if any
-    const existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
+    let existingJobSolutionsURL;
+    try {
+      existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
+    } catch (e) {
+      console.log(e);
+      this.logger.log(ErrorJob.NotFoundIntermediateResultsUrl, JobService.name);
+      throw new BadRequestException(ErrorJob.NotFoundIntermediateResultsUrl);
+    }
 
     const existingJobSolutions = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL).catch(() => []);
-
-    // Validate if the solution is unique
     if (existingJobSolutions.find(({ solution }: { solution: string }) => solution === jobSolution.solution)) {
-      throw new Error("Solution already exists");
+      this.logger.log(ErrorJob.SolutionAlreadyExists, JobService.name);
+      throw new BadRequestException(ErrorJob.SolutionAlreadyExists);
     }
 
     // Save new solution to S3
@@ -95,9 +111,16 @@ export class JobService {
     const reputationOracleURL = this.serverConfig.reputationOracleURL;
 
     // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
-    if (newJobSolutions.length === fortunesRequired) {
-      await this.httpService.post(`${reputationOracleURL.replace(/\/+$/, "")}/send-fortunes`, newJobSolutions);
+    if (newJobSolutions.length === submissionsRequired) {
+      await this.httpService.post(`${reputationOracleURL}/webhook`, {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress,
+      });
+
       return "The requested job is completed.";
+    } else if (newJobSolutions.length > submissionsRequired) {
+      this.logger.log(ErrorJob.AllSolutionsHaveAlreadyBeenSent, JobService.name);
+      throw new ConflictException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
     return "Solution is recorded.";
