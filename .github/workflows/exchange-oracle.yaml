@@ -5,12 +5,10 @@ on:
     branches: [ develop, master, oracles-cicd ]
     paths: 
       - 'packages/examples/cvat/exchange-oracle/**'
-      - 'packages/examples/cvat/recording-oracle/**'
   pull_request:
     branches: [ develop, master ]
     paths: 
       - 'packages/examples/cvat/exchange-oracle/**'
-      - 'packages/examples/cvat/recording-oracle/**'
   workflow_dispatch:
 
 permissions:
@@ -45,23 +43,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          exchange:
-            - 'packages/examples/cvat/exchange-oracle/**'
-          recording:
-            - 'packages/examples/cvat/recording-oracle/**'
-
-    - name: Set app
-      run: |
-        if [[ ${{ steps.changes.outputs.exchange }} == 'true' ]]; then
-          echo "app=exchange-oracle" >> $GITHUB_ENV
-        elif [[ ${{ steps.changes.outputs.recording }} == 'true' ]]; then
-          echo "app=recording-oracle" >> $GITHUB_ENV
-        fi
-
     - uses: convictional/trigger-workflow-and-wait@v1.6.5
       with:
         owner: humanprotocol
@@ -70,7 +51,7 @@ jobs:
         workflow_file_name: docker_build_and_deploy.yml
         ref: oracles
         wait_interval: 15
-        client_payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}", "trigger": "${{  github.event_name }}"}, "app": "${{ env.app }}"'
+        client_payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}", "trigger": "${{  github.event_name }}"}, "app": "exchange-oracle"'
         propagate_failure: true
         trigger_workflow: true
         wait_workflow: true
