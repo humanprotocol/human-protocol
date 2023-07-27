@@ -8,6 +8,7 @@ export enum ErrorJob {
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
   WebhookWasNotSent = 'Webhook was not sent',
+  ResultNotFound = 'Result not found',
 }
 
 /**
