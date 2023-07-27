@@ -32,5 +32,5 @@ export class JobSolutionRequestDto {
 }
 
 export enum JobRequestType {
-  FORTUNE = 'FORTUNE',
+  FORTUNE = "FORTUNE",
 }

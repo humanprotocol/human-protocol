@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
 import { JobRequestType, JobSolutionRequestDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
-import { ErrorJob } from "@/common/constants/errors";
+import { ErrorJob } from "../../common/constants/errors";
 
 @Injectable()
 export class JobService {
@@ -76,8 +76,8 @@ export class JobService {
     let existingJobSolutionsURL;
     try {
       existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
-    } catch(e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
       this.logger.log(ErrorJob.NotFoundIntermediateResultsUrl, JobService.name);
       throw new BadRequestException(ErrorJob.NotFoundIntermediateResultsUrl);
     }

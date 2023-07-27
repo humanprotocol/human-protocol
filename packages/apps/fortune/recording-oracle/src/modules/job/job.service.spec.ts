@@ -7,7 +7,7 @@ import { of } from "rxjs";
 import { JobService } from "./job.service";
 import { Web3Service } from "../web3/web3.service";
 import { JobRequestType } from "./job.dto";
-import { ErrorJob } from "@/common/constants/errors";
+import { ErrorJob } from "../../common/constants/errors";
 
 const OPERATOR_ADDRESS = "TEST_OPERATOR_ADDRESS";
 
@@ -109,9 +109,7 @@ describe("JobController", () => {
         getRecordingOracleAddress: jest.fn().mockResolvedValue("RECORDING_ORACLE_ADDRESS"),
       }));
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(
-        ErrorJob.AddressMismatches,
-      );
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.AddressMismatches);
     });
 
     it("should throw an error if the escrow is not in pending status", async () => {
@@ -155,7 +153,7 @@ describe("JobController", () => {
         return [SOLUTION];
       });
 
-      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidJobType,);
+      expect(jobService.processJobSolution(SOLUTION)).rejects.toThrowError(ErrorJob.InvalidJobType);
     });
 
     it("should record new solution", async () => {
@@ -208,7 +206,6 @@ describe("JobController", () => {
         workerAddress: "WORKER_ADDRESS",
         solution: "Old",
       };
-      const newSolution = { exchangeAddress: "EXCHANGE_ADDRESS", workerAddress: "WORKER_ADDRESS", solution: "Good" };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (EscrowClient.build as any).mockImplementation(() => ({
