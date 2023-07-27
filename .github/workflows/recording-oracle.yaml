@@ -2,7 +2,7 @@ name: Trigger docker build and deploy
 
 on:
   push:
-    branches: [ develop, master, oracles-cicd ]
+    branches: [ develop, master ]
     paths: 
       - 'packages/examples/cvat/recording-oracle/**'
   pull_request:
