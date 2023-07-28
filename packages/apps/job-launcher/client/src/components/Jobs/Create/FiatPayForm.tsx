@@ -17,11 +17,12 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import axios from 'axios';
 import React, { useState } from 'react';
+import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
+import { useAppSelector } from '../../../state';
 import { JobType } from '../../../types';
 
 export const FiatPayForm = ({
@@ -36,6 +37,8 @@ export const FiatPayForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const { jobRequest } = useCreateJobPageUI();
+  const rate = useTokenRate('hmt', 'usd');
+  const { user } = useAppSelector((state) => state.auth);
 
   const [paymentData, setPaymentData] = useState({
     amount: '',
@@ -94,13 +97,7 @@ export const FiatPayForm = ({
         return;
       }
 
-      // get fund amoutn in HMT, TODO: use rates api endpoint
-      const currentPrice = (
-        await axios.get(
-          `https://api.coingecko.com/api/v3/simple/price?ids=human-protocol&vs_currencies=usd`
-        )
-      ).data['human-protocol']['usd'];
-      const tokenAmount = Number(paymentData.amount) / currentPrice;
+      const tokenAmount = Number(paymentData.amount) / rate;
 
       // create job
       const { jobType, chainId, fortuneRequest, annotationRequest } =
@@ -223,7 +220,10 @@ export const FiatPayForm = ({
               }}
             >
               <Typography>Account Balance</Typography>
-              <Typography color="text.secondary">100 USD</Typography>
+              <Typography color="text.secondary">
+                {user?.balance?.amount ?? '0'}{' '}
+                {user?.balance?.currency?.toUpperCase() ?? 'USD'}
+              </Typography>
             </Box>
             <Box
               sx={{

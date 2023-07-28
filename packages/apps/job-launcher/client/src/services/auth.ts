@@ -31,5 +31,3 @@ export const forgotPassword = async (email: string) => {
 export const resetPassword = async (body: ResetPasswordRequest) => {
   await api.post('/auth/restore-password', body);
 };
-
-export default { signIn, signUp, forgotPassword, resetPassword };

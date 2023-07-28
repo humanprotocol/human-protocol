@@ -20,6 +20,7 @@ import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
+import { useAppSelector } from '../../../state';
 import { JobType } from '../../../types';
 
 export const CryptoPayForm = ({
@@ -36,6 +37,7 @@ export const CryptoPayForm = ({
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<string>();
   const { data: signer } = useSigner();
+  const { user } = useAppSelector((state) => state.auth);
 
   const handlePay = async () => {
     if (signer && tokenAddress && amount) {
@@ -142,7 +144,10 @@ export const CryptoPayForm = ({
               }}
             >
               <Typography>Account Balance</Typography>
-              <Typography color="text.secondary">100 USD</Typography>
+              <Typography color="text.secondary">
+                {user?.balance?.amount ?? '0'}{' '}
+                {user?.balance?.currency?.toUpperCase() ?? 'USD'}
+              </Typography>
             </Box>
             <Box
               sx={{

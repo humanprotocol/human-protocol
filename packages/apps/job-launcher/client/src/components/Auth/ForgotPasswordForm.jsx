@@ -13,7 +13,7 @@ import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
-import authService from '../../services/auth';
+import * as authService from '../../services/auth';
 import { ForgotPasswordValidationSchema } from './schema';
 
 export const ForgotPasswordForm = () => {

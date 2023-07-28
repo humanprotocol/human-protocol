@@ -11,10 +11,12 @@ import {
   Typography,
 } from '@mui/material';
 import { ethers } from 'ethers';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAccount, useChainId, useSigner } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
 import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../constants/addresses';
+import { TOP_UP_FEE } from '../../constants/payment';
+import { useTokenRate } from '../../hooks/useTokenRate';
 import * as paymentService from '../../services/payment';
 import { TopUpSuccess } from './TopUpSuccess';
 
@@ -23,8 +25,18 @@ export const CryptoTopUpForm = () => {
   const chainId = useChainId();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<string>();
-  const [isSuccess, setIsSuccess] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
   const { data: signer } = useSigner();
+  const rate = useTokenRate('hmt', 'usd');
+
+  const totalAmount = useMemo(() => {
+    if (!amount) return 0;
+    return parseFloat(amount) * rate;
+  }, [amount, rate]);
+
+  const feeAmount = useMemo(() => {
+    return (totalAmount * TOP_UP_FEE) / 100;
+  }, [totalAmount]);
 
   const handleTopUpAccount = async () => {
     if (!signer || !tokenAddress || !amount) return;
@@ -114,7 +126,9 @@ export const CryptoTopUpForm = () => {
                   alignItems="center"
                 >
                   <Typography color="text.secondary">HMT Price</Typography>
-                  <Typography color="text.secondary">0.15 USD</Typography>
+                  <Typography color="text.secondary">
+                    {rate.toFixed(2)} USD
+                  </Typography>
                 </Stack>
                 <Stack
                   direction="row"
@@ -122,7 +136,9 @@ export const CryptoTopUpForm = () => {
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Fees</Typography>
-                  <Typography color="text.secondary">(3.1%) 9.3 USD</Typography>
+                  <Typography color="text.secondary">
+                    ({TOP_UP_FEE}%) {feeAmount.toFixed(2)} USD
+                  </Typography>
                 </Stack>
               </Stack>
               <Stack
@@ -132,7 +148,9 @@ export const CryptoTopUpForm = () => {
                 sx={{ py: 2 }}
               >
                 <Typography>You receive</Typography>
-                <Typography>0 HMT</Typography>
+                <Typography>
+                  {(totalAmount - feeAmount).toFixed(2)} USD
+                </Typography>
               </Stack>
             </Box>
           </Box>
