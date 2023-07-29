@@ -1,19 +1,14 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { Wallet, providers } from "ethers";
-
-import { EthereumConfigType, ethereumConfigKey } from "@/common/config";
-import { networkMap } from "@/common/constants";
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Wallet, providers } from 'ethers';
+import { ConfigNames, networkMap } from '../../common/config';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
 
-  constructor(
-    @Inject(ethereumConfigKey)
-    private ethereumConfig: EthereumConfigType,
-  ) {
-    const privateKey = this.ethereumConfig.privateKey;
-
+  constructor(private readonly configService: ConfigService) {
+    const privateKey = this.configService.get(ConfigNames.WEB3_PRIVATE_KEY);
     for (const networkKey of Object.keys(networkMap)) {
       const network = networkMap[networkKey];
       const provider = new providers.JsonRpcProvider(network.rpcUrl);

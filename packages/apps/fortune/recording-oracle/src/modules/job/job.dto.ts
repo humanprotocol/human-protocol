@@ -35,3 +35,8 @@ export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
 }
+
+export class SaveSoulutionsDto {
+  public url: string;
+  public hash: string;
+}

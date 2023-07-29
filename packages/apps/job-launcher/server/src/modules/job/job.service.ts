@@ -307,7 +307,7 @@ export class JobService {
     await jobEntity.save();
 
     if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      this.sendWebhook(
+      await this.sendWebhook(
         this.configService.get<string>(
           ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
         )!,
