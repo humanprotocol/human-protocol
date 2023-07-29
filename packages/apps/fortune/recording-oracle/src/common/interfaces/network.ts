@@ -1,6 +1,6 @@
 export interface NetworkMapDto {
-    [key: string]: {
-        chainId: number;
-        rpcUrl: string;
-    };
+  [key: string]: {
+    chainId: number;
+    rpcUrl: string;
+  };
 }

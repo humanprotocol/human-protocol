@@ -16,9 +16,7 @@ import { envValidator } from "./common/config";
   ],
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      envFilePath: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV as string}` : ".env",
       validationSchema: envValidator,
     }),
     JobModule,

@@ -1,4 +1,4 @@
-import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { Test } from "@nestjs/testing";
 import { of } from "rxjs";
@@ -6,12 +6,17 @@ import { of } from "rxjs";
 import { JobController } from "./job.controller";
 import { JobService } from "./job.service";
 import { Web3Service } from "../web3/web3.service";
-import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_HOST, MOCK_PORT, MOCK_REPUTATION_ORACLE_WEBHOOK_URL, MOCK_WEB3_PRIVATE_KEY } from "../../../test/constants";
+import {
+  MOCK_ADDRESS,
+  MOCK_HOST,
+  MOCK_PORT,
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_WEB3_PRIVATE_KEY,
+} from "../../../test/constants";
 import { ChainId } from "@human-protocol/sdk";
-import { JobRequestType } from "@/common/enums/job";
 
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
+jest.mock("@human-protocol/sdk", () => ({
+  ...jest.requireActual("@human-protocol/sdk"),
   StorageClient: jest.fn().mockImplementation(() => ({})),
 }));
 
@@ -31,15 +36,15 @@ describe("JobController", () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'REPUTATION_ORACLE_WEBHOOK_URL':
+          case "REPUTATION_ORACLE_WEBHOOK_URL":
             return MOCK_REPUTATION_ORACLE_WEBHOOK_URL;
-          case 'HOST':
+          case "HOST":
             return MOCK_HOST;
-          case 'PORT':
+          case "PORT":
             return MOCK_PORT;
-          case 'WEB3_PRIVATE_KEY':
+          case "WEB3_PRIVATE_KEY":
             return MOCK_WEB3_PRIVATE_KEY;
-          default: 
+          default:
             return null;
         }
       }),

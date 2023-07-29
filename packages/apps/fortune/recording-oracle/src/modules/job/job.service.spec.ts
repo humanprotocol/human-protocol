@@ -1,37 +1,40 @@
-import { createMock } from '@golevelup/ts-jest';
-import { Test } from '@nestjs/testing';
-import { HttpService } from '@nestjs/axios';
-import { JobService } from './job.service';
-import { Web3Service } from '../web3/web3.service';
-import { ErrorJob } from '../../common/constants/errors';
-import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
-import { JobRequestType } from '../../common/enums/job';
-import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_HOST, MOCK_PORT, MOCK_REPUTATION_ORACLE_WEBHOOK_URL, MOCK_REQUESTER_DESCRIPTION, MOCK_REQUESTER_TITLE, MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants'
-import { ConfigService } from '@nestjs/config';
-import { IManifest, ISolution } from '@/common/interfaces/job';
+import { createMock } from "@golevelup/ts-jest";
+import { Test } from "@nestjs/testing";
+import { HttpService } from "@nestjs/axios";
+import { JobService } from "./job.service";
+import { Web3Service } from "../web3/web3.service";
+import { ErrorJob } from "../../common/constants/errors";
+import { ChainId, EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
+import { JobRequestType } from "../../common/enums/job";
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_HASH,
+  MOCK_FILE_KEY,
+  MOCK_FILE_URL,
+  MOCK_HOST,
+  MOCK_PORT,
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_REQUESTER_DESCRIPTION,
+  MOCK_REQUESTER_TITLE,
+  MOCK_WEB3_PRIVATE_KEY,
+} from "../../../test/constants";
+import { ConfigService } from "@nestjs/config";
+import { IManifest, ISolution } from "@/common/interfaces/job";
 
-
-
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
+jest.mock("@human-protocol/sdk", () => ({
+  ...jest.requireActual("@human-protocol/sdk"),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
       createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
-    uploadFiles: jest
-      .fn()
-      .mockResolvedValue([
-        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-      ]),
-    downloadFileFromUrl: jest.fn().mockResolvedValue(
-      {  submissionsRequired: 3, requestType: JobRequestType.FORTUNE }
-    )
+    uploadFiles: jest.fn().mockResolvedValue([{ key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }]),
+    downloadFileFromUrl: jest.fn().mockResolvedValue({ submissionsRequired: 3, requestType: JobRequestType.FORTUNE }),
   })),
 }));
 
-describe('JobService', () => {
+describe("JobService", () => {
   let jobService: JobService;
   let web3Service: Web3Service;
 
@@ -45,15 +48,15 @@ describe('JobService', () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'REPUTATION_ORACLE_WEBHOOK_URL':
+          case "REPUTATION_ORACLE_WEBHOOK_URL":
             return MOCK_REPUTATION_ORACLE_WEBHOOK_URL;
-          case 'HOST':
+          case "HOST":
             return MOCK_HOST;
-          case 'PORT':
+          case "PORT":
             return MOCK_PORT;
-          case 'WEB3_PRIVATE_KEY':
+          case "WEB3_PRIVATE_KEY":
             return MOCK_WEB3_PRIVATE_KEY;
-          default: 
+          default:
             return null;
         }
       }),
@@ -77,33 +80,33 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
-  describe('processJobSolution', () => {
+  describe("processJobSolution", () => {
     afterEach(() => {
       jest.restoreAllMocks();
     });
-    
-    it('should throw bad request exception when recording oracle address does not match', async () => {
-      const escrowClient = { 
-        getRecordingOracleAddress: jest.fn().mockResolvedValue('0x0000000000000000000000000000000000000001')
+
+    it("should throw bad request exception when recording oracle address does not match", async () => {
+      const escrowClient = {
+        getRecordingOracleAddress: jest.fn().mockResolvedValue("0x0000000000000000000000000000000000000001"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-      
+
       const jobSolution = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution',
-      }
+        solution: "Solution",
+      };
 
       await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.AddressMismatches);
     });
 
-
-    it('should throw bad request exception when escrow status is not pending', async () => {
-      const escrowClient = { 
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS), 
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Complete) };
+    it("should throw bad request exception when escrow status is not pending", async () => {
+      const escrowClient = {
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Complete),
+      };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
       const jobSolution = {
@@ -111,21 +114,21 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution',
-      }
+        solution: "Solution",
+      };
 
       await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.InvalidStatus);
     });
 
-    it('should throw bad request exception when manifest is invalid', async () => {
+    it("should throw bad request exception when manifest is invalid", async () => {
       const invalidManifest = {
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue(invalidManifest);
@@ -135,22 +138,22 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution',
-      }
+        solution: "Solution",
+      };
 
       await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.InvalidManifest);
     });
-  
-    it('should throw bad request exception when manifest contains an invalid job type', async () => {
+
+    it("should throw bad request exception when manifest contains an invalid job type", async () => {
       const invalidManifest = {
         submissionsRequired: 1,
-        requestType: 'InvalidType',
-      }
+        requestType: "InvalidType",
+      };
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue(invalidManifest);
@@ -160,80 +163,81 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution',
-      }
+        solution: "Solution",
+      };
 
       await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.InvalidJobType);
     });
 
-    it('should throw bad request exception when solution already exist', async () => {
-      const manifest: IManifest = {  
+    it("should throw bad request exception when solution already exist", async () => {
+      const manifest: IManifest = {
         submissionsRequired: 1,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
+        fundAmount: "10",
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue('http://example.com/results'),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("http://example.com/results"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const existingJobSolutions: ISolution[] = [{
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: "Solution 1"
-      }]
+      const existingJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: "Solution 1",
+        },
+      ];
 
-      StorageClient.downloadFileFromUrl = jest.fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(manifest).mockReturnValue(existingJobSolutions);
 
       const sameSolution = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 1',
-      }
+        solution: "Solution 1",
+      };
 
       await expect(jobService.processJobSolution(sameSolution)).rejects.toThrowError(ErrorJob.SolutionAlreadyExists);
     });
 
-    it('should throw bad request exception when all solutions have already been sent', async () => {
-      const manifest: IManifest = {  
+    it("should throw bad request exception when all solutions have already been sent", async () => {
+      const manifest: IManifest = {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
+        fundAmount: "10",
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue('http://example.com/results'),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("http://example.com/results"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const existingJobSolutions: ISolution[] = [{
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: "Solution 1"
-      }, {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: "Solution 2"
-      }]
+      const existingJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: "Solution 1",
+        },
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: "Solution 2",
+        },
+      ];
 
-      StorageClient.downloadFileFromUrl = jest.fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(manifest).mockReturnValue(existingJobSolutions);
 
       jobService.sendWebhook = jest.fn().mockRejectedValue(new Error());
 
@@ -242,129 +246,129 @@ describe('JobService', () => {
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 3',
-      }
+        solution: "Solution 3",
+      };
 
-      await expect(jobService.processJobSolution(newSolution)).rejects.toThrowError(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+      await expect(jobService.processJobSolution(newSolution)).rejects.toThrowError(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+      );
     });
 
-    it('should throw bad request exception when webhook was not sent', async () => {
-      const manifest: IManifest = {  
+    it("should throw bad request exception when webhook was not sent", async () => {
+      const manifest: IManifest = {
         submissionsRequired: 2,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
+        fundAmount: "10",
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue('http://example.com/results'),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue("http://example.com/results"),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const existingJobSolutions: ISolution[] = [{
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: "Solution 1"
-      }]
+      const existingJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: "Solution 1",
+        },
+      ];
 
-      StorageClient.downloadFileFromUrl = jest.fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(manifest).mockReturnValue(existingJobSolutions);
 
-      jest.spyOn(jobService, 'sendWebhook').mockRejectedValue(new Error(ErrorJob.WebhookWasNotSent));
+      jest.spyOn(jobService, "sendWebhook").mockRejectedValue(new Error(ErrorJob.WebhookWasNotSent));
 
       const newSolution = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 2',
-      }
+        solution: "Solution 2",
+      };
 
       await expect(jobService.processJobSolution(newSolution)).rejects.toThrowError(ErrorJob.WebhookWasNotSent);
     });
-  
-    it('should call send webhook method when solution is recorded', async () => {
+
+    it("should call send webhook method when solution is recorded", async () => {
       const escrowClient = {
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS), 
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(""),
         storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
       jobService.sendWebhook = jest.fn().mockResolvedValue(true);
 
-      const manifest: IManifest = {  
+      const manifest: IManifest = {
         submissionsRequired: 3,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
+        fundAmount: "10",
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
-      const existingJobSolutions: ISolution[] = [{
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: "Solution 1"
-      }]
+      const existingJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: "Solution 1",
+        },
+      ];
 
-      StorageClient.downloadFileFromUrl = jest.fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(manifest).mockReturnValue(existingJobSolutions);
 
       const jobSolution = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 2',
-      }
+        solution: "Solution 2",
+      };
 
       const result = await jobService.processJobSolution(jobSolution);
-      expect(result).toEqual('Solution is recorded.');
+      expect(result).toEqual("Solution is recorded.");
     });
 
-    it('should call send webhook method when solution is recorded', async () => {
+    it("should call send webhook method when solution is recorded", async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS), 
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
-        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
-        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        getManifestUrl: jest.fn().mockResolvedValue("http://example.com/manifest"),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(""),
         storeResults: jest.fn().mockResolvedValue(true),
       }));
 
       jobService.sendWebhook = jest.fn().mockResolvedValue(true);
 
-      const manifest: IManifest = {  
+      const manifest: IManifest = {
         submissionsRequired: 1,
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: '10',
+        fundAmount: "10",
         requestType: JobRequestType.FORTUNE,
-      }
+      };
 
-      const existingJobSolutions: ISolution[] = []
+      const existingJobSolutions: ISolution[] = [];
 
-      StorageClient.downloadFileFromUrl = jest.fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(manifest).mockReturnValue(existingJobSolutions);
 
       const jobSolution = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 1',
-      }
+        solution: "Solution 1",
+      };
 
       const result = await jobService.processJobSolution(jobSolution);
-      expect(result).toEqual('The requested job is completed.');
+      expect(result).toEqual("The requested job is completed.");
     });
   });
 });
