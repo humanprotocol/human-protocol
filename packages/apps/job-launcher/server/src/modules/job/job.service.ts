@@ -32,7 +32,9 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
@@ -390,7 +392,9 @@ export class JobService {
     return true;
   }
 
-  public async getResult(finalResultUrl: string): Promise<any> {
+  public async getResult(
+    finalResultUrl: string,
+  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
     const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
 
     if (!result) {
