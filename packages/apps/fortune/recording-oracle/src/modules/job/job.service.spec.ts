@@ -6,9 +6,9 @@ import { Web3Service } from '../web3/web3.service';
 import { ErrorJob } from '../../common/constants/errors';
 import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums/job';
-import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_HOST, MOCK_PORT, MOCK_REPUTATION_ORACLE_WEBHOOK_URL, MOCK_REQUESTER_DESCRIPTION, MOCK_REQUESTER_TITLE, MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants'
-import { ConfigService } from '@nestjs/config';
-import { IManifest, ISolution } from '@/common/interfaces/job';
+import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_REPUTATION_ORACLE_WEBHOOK_URL, MOCK_REQUESTER_DESCRIPTION, MOCK_REQUESTER_TITLE, MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL, MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants'
+import { ConfigModule, registerAs } from '@nestjs/config';
+import { IManifest, ISolution } from '../../common/interfaces/job';
 
 
 
@@ -33,7 +33,6 @@ jest.mock('@human-protocol/sdk', () => ({
 
 describe('JobService', () => {
   let jobService: JobService;
-  let web3Service: Web3Service;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -42,24 +41,24 @@ describe('JobService', () => {
   };
 
   beforeEach(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string) => {
-        switch (key) {
-          case 'REPUTATION_ORACLE_WEBHOOK_URL':
-            return MOCK_REPUTATION_ORACLE_WEBHOOK_URL;
-          case 'HOST':
-            return MOCK_HOST;
-          case 'PORT':
-            return MOCK_PORT;
-          case 'WEB3_PRIVATE_KEY':
-            return MOCK_WEB3_PRIVATE_KEY;
-          default: 
-            return null;
-        }
-      }),
-    };
-
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs("s3", () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs("server", () => ({
+            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+          })),
+        ),
+      ],
       providers: [
         JobService,
         {
@@ -69,12 +68,10 @@ describe('JobService', () => {
           },
         },
         { provide: HttpService, useValue: createMock<HttpService>() },
-        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
     jobService = moduleRef.get<JobService>(JobService);
-    web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
   describe('processJobSolution', () => {

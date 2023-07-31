@@ -3,39 +3,38 @@ import { BadGatewayException, BadRequestException, Inject, Injectable, Logger, N
 import { EscrowClient, EscrowStatus, StorageClient, StorageCredentials, StorageParams, UploadFile } from "@human-protocol/sdk";
 import { ethers } from "ethers";
 
-import { ConfigNames } from "@/common/config";
+import { ServerConfigType, S3ConfigType, serverConfigKey, s3ConfigKey } from "../../common/config";
 import { JobSolutionRequestDto, SaveSoulutionsDto, SendWebhookDto } from "./job.dto";
 import { Web3Service } from "../web3/web3.service";
 import { ErrorBucket, ErrorJob } from "../../common/constants/errors";
 import { firstValueFrom } from "rxjs";
 import { IManifest, ISolution } from "../../common/interfaces/job";
-import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
   public readonly storageClient: StorageClient;
   public readonly storageParams: StorageParams;
-  public readonly bucket: string;
 
   constructor(
+    @Inject(s3ConfigKey)
+    private s3Config: S3ConfigType,
+    @Inject(serverConfigKey)
+    private serverConfig: ServerConfigType,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly httpService: HttpService,
-    public readonly configService: ConfigService,
   ) {
     const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
-      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
+      accessKey: this.s3Config.accessKey,
+      secretKey: this.s3Config.secretKey,
     };
 
     this.storageParams = {
-      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL: this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true',
+      endPoint: this.s3Config.accessKey,
+      port: this.s3Config.port,
+      useSSL: this.s3Config.useSSL,
     };
-
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -67,7 +66,6 @@ export class JobService {
       throw new BadRequestException(ErrorJob.InvalidManifest);
     }
   
-    const bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;;
     // TODO: Develop a generic error handler for ethereum errors
     const existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
     const existingJobSolutions: ISolution[] = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL)
@@ -91,7 +89,7 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
   
-    const jobSolutionUploaded = await this.uploadJobSolutions(newJobSolutions, bucket);
+    const jobSolutionUploaded = await this.uploadJobSolutions(newJobSolutions, this.s3Config.bucket);
 
     if (!existingJobSolutionsURL) {
       await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
@@ -104,7 +102,7 @@ export class JobService {
     // TODO: Remove this when KVStore is used
     if (newJobSolutions.length === submissionsRequired) {
       await this.sendWebhook(
-        this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_WEBHOOK_URL)!, 
+        this.serverConfig.reputationOracleWebhookUrl, 
         { chainId: jobSolution.chainId, escrowAddress: jobSolution.escrowAddress }
       );
 

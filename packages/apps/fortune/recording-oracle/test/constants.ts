@@ -11,6 +11,12 @@ export const MOCK_FILE_URL = 'mockedFileUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_REPUTATION_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
+export const MOCK_S3_ENDPOINT = 'localhost'
+export const MOCK_S3_PORT = 9000
+export const MOCK_S3_ACCESS_KEY = 'access_key'
+export const MOCK_S3_SECRET_KEY = 'secret_key'
+export const MOCK_S3_BUCKET = 'solution'
+export const MOCK_S3_USE_SSL = false
 export const MOCK_MANIFEST: IManifest = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
