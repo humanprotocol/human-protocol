@@ -28,6 +28,7 @@ import { ErrorAuth } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
 import { AuthStatus } from '../../common/enums/auth';
 import { IJwt } from '../../common/interfaces/auth';
+import { SendGridService } from '../sendgrid/sendgrid.service';
 
 @Injectable()
 export class AuthService {
@@ -39,6 +40,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly tokenRepository: TokenRepository,
     private readonly authRepository: AuthRepository,
+    private readonly sendgridService: SendGridService,
   ) {}
 
   public async signin(data: SignInDto, ip: string): Promise<IJwt> {
@@ -64,15 +66,20 @@ export class AuthService {
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
-    // TODO: Add mail provider
+    this.sendgridService.send({
+      to: data.email,
+      subject: 'Verify your email',
+      text: `Verify your email: ${tokenEntity.uuid}`,
+    });
 
     return userEntity;
   }
 
-  public async logout(
-    where: FindOptionsWhere<AuthEntity>,
-  ): Promise<void> {
-    await this.authRepository.update({ ...where, status: AuthStatus.ACTIVE }, { status: AuthStatus.EXPIRED });
+  public async logout(where: FindOptionsWhere<AuthEntity>): Promise<void> {
+    await this.authRepository.update(
+      { ...where, status: AuthStatus.ACTIVE },
+      { status: AuthStatus.EXPIRED },
+    );
     return;
   }
 
@@ -110,13 +117,13 @@ export class AuthService {
     )!;
 
     await this.logout({ userId: userEntity.id });
-    
+
     await this.authRepository.create({
       user: userEntity,
       refreshToken,
       refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
       ip,
-      status: AuthStatus.ACTIVE
+      status: AuthStatus.ACTIVE,
     });
 
     return {
@@ -143,7 +150,11 @@ export class AuthService {
       user: userEntity,
     });
 
-    // Add mail provider
+    this.sendgridService.send({
+      to: data.email,
+      subject: 'Reset password',
+      text: `Reset password: ${tokenEntity.uuid}`,
+    });
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
@@ -160,7 +171,11 @@ export class AuthService {
 
     await this.userService.updatePassword(tokenEntity.user, data);
 
-    // Add mail provider
+    this.sendgridService.send({
+      to: tokenEntity.user.email,
+      subject: 'Password changed',
+      text: 'Password changed',
+    });
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
@@ -201,7 +216,11 @@ export class AuthService {
       user: userEntity,
     });
 
-    // Add mail provider
+    this.sendgridService.send({
+      to: data.email,
+      subject: 'Verify your email',
+      text: `Verify your email: ${tokenEntity.uuid}`,
+    });
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
   }

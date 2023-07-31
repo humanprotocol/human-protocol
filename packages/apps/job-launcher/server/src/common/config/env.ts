@@ -36,6 +36,7 @@ export const ConfigNames = {
   STRIPE_APP_NAME: 'STRIPE_APP_NAME',
   STRIPE_APP_VERSION: 'STRIPE_APP_VERSION',
   STRIPE_APP_INFO_URL: 'STRIPE_APP_INFO_URL',
+  SENDGRID_API_KEY: 'SENDGRID_API_KEY',
 };
 
 export const envValidator = Joi.object({
@@ -82,4 +83,6 @@ export const envValidator = Joi.object({
   STRIPE_APP_NAME: Joi.string().default('Fortune'),
   STRIPE_APP_VERSION: Joi.string().default('0.0.1'),
   STRIPE_APP_INFO_URL: Joi.string().default('https://hmt.ai'),
+  // SendGrid
+  SENDGRID_API_KEY: Joi.string().required(),
 });

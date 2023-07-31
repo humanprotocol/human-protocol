@@ -11,6 +11,7 @@ import { AuthEntity } from './auth.entity';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
+import { SendGridModule } from '../sendgrid/sendgrid.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AuthRepository } from './auth.repository';
       }),
     }),
     TypeOrmModule.forFeature([AuthEntity, TokenEntity]),
+    SendGridModule.forRoot({}),
   ],
   providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository],
   controllers: [AuthJwtController],
