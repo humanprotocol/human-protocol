@@ -9,17 +9,17 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
-import { ConfigNames } from './common/config';
+import { ConfigNames, ServerConfigType, serverConfigKey } from './common/config';
 import { GlobalExceptionsFilter } from './common/filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
   });
+  
+  const { feUrl, sessionSecret, host, port }: ServerConfigType = app.get(serverConfigKey);
 
-  const configService: ConfigService = app.get(ConfigService);
-
-  const baseUrl = configService.get<string>(ConfigNames.FE_URL)!;
+  console.log(feUrl, sessionSecret, host, port)
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalFilters(new GlobalExceptionsFilter());
@@ -32,9 +32,9 @@ async function bootstrap() {
             `http://localhost:3001`,
             `http://127.0.0.1:3001`,
             `http://0.0.0.0:3001`,
-            baseUrl,
+            feUrl,
           ]
-        : [baseUrl],
+        : [feUrl],
     credentials: true,
     exposedHeaders: ['Content-Disposition'],
   });
@@ -42,8 +42,6 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   app.use(cookieParser());
-
-  const sessionSecret = configService.get<string>(ConfigNames.SESSION_SECRET)!;
 
   app.use(
     session({
@@ -63,9 +61,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
-
-  const host = configService.get<string>(ConfigNames.HOST)!;
-  const port = configService.get<string>(ConfigNames.PORT)!;
 
   app.use(helmet());
 

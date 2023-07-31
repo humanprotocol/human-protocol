@@ -5,7 +5,7 @@ import { HttpValidationPipe } from "@/common/pipes";
 import { JobModule } from "@/modules/job/job.module";
 
 import { AppController } from "./app.controller";
-import { envValidator } from "./common/config";
+import { envValidator, s3Config, serverConfig, web3Config } from "./common/config";
 
 @Module({
   providers: [
@@ -20,6 +20,7 @@ import { envValidator } from "./common/config";
         ? `.env.${process.env.NODE_ENV as string}`
         : '.env',
       validationSchema: envValidator,
+      load: [serverConfig, s3Config, web3Config],
     }),
     JobModule,
   ],
