@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { JobModule } from './modules/job/job.module';
 import { ConfigModule } from '@nestjs/config';
 import { envValidator } from './common/config';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { envValidator } from './common/config';
         : '.env',
       validationSchema: envValidator,
     }),
+    DatabaseModule,
   ],
   controllers: [AppController],
 })
