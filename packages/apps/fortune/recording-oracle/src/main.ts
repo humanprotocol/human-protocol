@@ -19,9 +19,6 @@ async function bootstrap() {
   
   const { feUrl, sessionSecret, host, port }: ServerConfigType = app.get(serverConfigKey);
 
-  console.log(feUrl, sessionSecret, host, port)
-
-  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalFilters(new GlobalExceptionsFilter());
 
   app.enableCors({
