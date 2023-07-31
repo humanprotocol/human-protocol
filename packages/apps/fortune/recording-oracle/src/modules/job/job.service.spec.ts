@@ -137,6 +137,31 @@ describe('JobService', () => {
 
       await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.InvalidManifest);
     });
+  
+    it('should throw bad request exception when manifest contains an invalid job type', async () => {
+      const invalidManifest = {
+        submissionsRequired: 1,
+        requestType: 'InvalidType',
+      }
+
+      const escrowClient = {
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest.fn().mockResolvedValue('http://example.com/manifest'),
+      };
+      (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue(invalidManifest);
+
+      const jobSolution = {
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution',
+      }
+
+      await expect(jobService.processJobSolution(jobSolution)).rejects.toThrowError(ErrorJob.InvalidJobType);
+    });
 
     it('should throw bad request exception when solution already exist', async () => {
       const manifest: IManifest = {  
