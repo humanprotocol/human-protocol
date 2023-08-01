@@ -25,8 +25,7 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { networkMap } from '../../common/constants/network';
-import { ConfigNames } from '../../common/config';
+import { ConfigNames, networkMap } from '../../common/config';
 import {
   HMToken,
   HMToken__factory,
@@ -129,7 +128,7 @@ export class PaymentService {
       Currency.USD,
       paymentData.currency.toLowerCase(),
       PaymentType.DEPOSIT,
-      BigNumber.from(paymentData.amount)
+      BigNumber.from(paymentData.amount),
     );
 
     return true;
@@ -141,7 +140,7 @@ export class PaymentService {
   ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
-        (item) => item.network.chainId === dto.chainId,
+        (item) => item.chainId === dto.chainId,
       )?.rpcUrl,
     );
 
@@ -212,7 +211,7 @@ export class PaymentService {
       TokenId.HMT,
       PaymentType.DEPOSIT,
       amount,
-      transaction.transactionHash
+      transaction.transactionHash,
     );
 
     return true;
@@ -231,12 +230,9 @@ export class PaymentService {
     currencyTo: string,
     type: PaymentType,
     amount: BigNumber,
-    transactionHash?: string
+    transactionHash?: string,
   ): Promise<boolean> {
-    const rate = await this.currencyService.getRate(
-      currencyFrom,
-      currencyTo,
-    );
+    const rate = await this.currencyService.getRate(currencyFrom, currencyTo);
 
     const paymentEntity = await this.paymentRepository.create({
       userId,
@@ -260,7 +256,7 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-    
+
     paymentEntities.forEach((payment) => {
       const fixedAmount = FixedNumber.from(
         ethers.utils.formatUnits(payment.amount, 18),

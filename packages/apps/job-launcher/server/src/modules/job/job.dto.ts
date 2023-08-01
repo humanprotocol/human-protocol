@@ -47,20 +47,6 @@ export class JobFortuneDto {
   public fundAmount: number;
 }
 
-export class JobFortuneCreateDto extends JobFortuneDto {
-  @IsNumber()
-  public userId: number;
-
-  @IsString()
-  public manifestUrl: string;
-
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-
-  @IsDate()
-  public waitUntil: Date;
-}
-
 export class JobCvatDto {
   @ApiProperty({
     enum: ChainId,
@@ -93,20 +79,6 @@ export class JobCvatDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-}
-
-export class JobCvatCreateDto extends JobCvatDto {
-  @IsNumber()
-  public userId: number;
-
-  @IsString()
-  public manifestUrl: string;
-
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-
-  @IsDate()
-  public waitUntil: Date;
 }
 
 export class JobUpdateDto {

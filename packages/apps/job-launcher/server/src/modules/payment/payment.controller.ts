@@ -1,5 +1,14 @@
-import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/common/guards';
 
 import { CurrencyService } from './currency.service';
 import {
@@ -11,6 +20,7 @@ import {
 import { PaymentService } from './payment.service';
 
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
 @Controller('/payment')
 export class PaymentController {

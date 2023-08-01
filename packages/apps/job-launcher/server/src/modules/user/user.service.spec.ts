@@ -110,7 +110,7 @@ describe('UserService', () => {
         email: dto.email,
         password: 'hashedPassword',
         type: UserType.REQUESTER,
-        status: UserStatus.ACTIVE,
+        status: UserStatus.PENDING,
       });
       expect(result).toBe(createdUser);
     });
@@ -183,18 +183,20 @@ describe('UserService', () => {
     });
   });
 
-  describe('getBalance', () => {  
+  describe('getBalance', () => {
     it('should return the correct balance with currency for a user', async () => {
       const userId = 1;
       const expectedBalance: IUserBalance = {
         amount: 10, // ETH
-        currency: Currency.USD
-      }
+        currency: Currency.USD,
+      };
 
-      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
-  
+      jest
+        .spyOn(paymentService, 'getUserBalance')
+        .mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
+
       const balance = await userService.getBalance(userId);
-  
+
       expect(balance).toEqual(expectedBalance);
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });

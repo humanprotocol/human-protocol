@@ -9,9 +9,9 @@ import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../../user/user.entity';
 import { UserStatus } from '../../../common/enums/user';
-import { ConfigNames } from 'src/common/config';
+import { ConfigNames } from '../../../common/config';
 import { AuthService } from '../auth.service';
-import { AuthStatus } from 'src/common/enums/auth';
+import { AuthStatus } from '../../../common/enums/auth';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {

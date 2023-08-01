@@ -21,7 +21,7 @@ import {
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
-import { AuthStatus } from 'src/common/enums/auth';
+import { AuthStatus } from '../../common/enums/auth';
 import { AuthEntity } from './auth.entity';
 
 @Injectable()

@@ -5,12 +5,12 @@ import { IUserBalance } from '../../common/interfaces';
 import { JwtAuthGuard } from 'src/common/guards';
 
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('User')
 @Controller('/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get('/balance')
   public async getBalance(@Request() req: any): Promise<IUserBalance> {
     try {

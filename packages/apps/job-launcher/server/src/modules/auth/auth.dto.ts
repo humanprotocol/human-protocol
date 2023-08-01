@@ -4,7 +4,7 @@ import { IsEmail, IsString, Matches, IsEnum } from 'class-validator';
 import { IsConfirm, IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { AuthStatus } from 'src/common/enums/auth';
+import { AuthStatus } from '../../common/enums/auth';
 
 export class ForgotPasswordDto {
   @ApiProperty()
