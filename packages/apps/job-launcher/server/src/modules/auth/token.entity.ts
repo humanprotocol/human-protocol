@@ -28,7 +28,7 @@ export class TokenEntity extends BaseEntity implements IToken {
   public tokenType: TokenType;
 
   @JoinColumn()
-  @OneToOne((_type) => UserEntity)
+  @OneToOne(() => UserEntity)
   public user: UserEntity;
 
   @Column({ type: 'int' })

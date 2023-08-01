@@ -9,7 +9,6 @@ export const ConfigNames = {
   PASSWORD_SECRET: 'PASSWORD_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
-  DB_TYPE: 'DB_TYPE',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -28,7 +27,7 @@ export const ConfigNames = {
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
-  S3_BACKET: 'S3_BACKET',
+  S3_BUCKET: 'S3_BUCKET',
   S3_USE_SSL: 'S3_USE_SSL',
   STRIPE_SECRET_KEY: 'STRIPE_SECRET_KEY',
   STRIPE_API_VERSION: 'STRIPE_API_VERSION',
@@ -71,7 +70,7 @@ export const envValidator = Joi.object({
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
-  S3_BACKET: Joi.string().default('launcher'),
+  S3_BUCKET: Joi.string().default('launcher'),
   S3_USE_SSL: Joi.string().default(false),
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().default(

@@ -47,6 +47,10 @@ export class AuthService {
       throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
     }
 
+    if (userEntity.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException(ErrorAuth.UserNotActive);
+    }
+
     return this.auth(userEntity);
   }
 
@@ -74,16 +78,23 @@ export class AuthService {
   }
 
   public async auth(userEntity: UserEntity): Promise<IJwt> {
+    const auth = await this.authRepository.findOne({ userId: userEntity.id });
     const tokenId = v4();
-
-    await this.authRepository.create({
-      user: userEntity,
-      tokenId,
-      status: AuthStatus.ACTIVE,
-    });
+    if (!auth) {
+      await this.authRepository.create({
+        user: userEntity,
+        tokenId,
+        status: AuthStatus.ACTIVE,
+      });
+    } else {
+      await this.authRepository.update(
+        { id: auth.id },
+        { status: AuthStatus.ACTIVE, tokenId: tokenId },
+      );
+    }
 
     return {
-      accessToken: this.jwtService.sign({
+      accessToken: await this.jwtService.signAsync({
         tokenId: tokenId,
         email: userEntity.email,
       }),
@@ -91,7 +102,7 @@ export class AuthService {
   }
 
   public async getByTokenId(tokenId: string): Promise<AuthEntity | null> {
-    return this.authRepository.findOne({ tokenId });
+    return this.authRepository.findOne({ tokenId }, { relations: ['user'] });
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
@@ -133,7 +144,7 @@ export class AuthService {
     return true;
   }
 
-  public async emailVerification(data: VerifyEmailDto): Promise<IJwt> {
+  public async emailVerification(data: VerifyEmailDto): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.EMAIL,
@@ -143,11 +154,8 @@ export class AuthService {
       throw new NotFoundException('Token not found');
     }
 
-    await this.userService.activate(tokenEntity.user);
-
+    this.userService.activate(tokenEntity.user);
     await tokenEntity.remove();
-
-    return this.auth(tokenEntity.user);
   }
 
   public async resendEmailVerification(

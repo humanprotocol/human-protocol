@@ -84,7 +84,7 @@ export class JobService {
       useSSL,
     };
 
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
+    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -111,14 +111,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -193,14 +192,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -252,7 +250,7 @@ export class JobService {
       PaymentType.WITHDRAWAL,
       usdTotalAmount,
     );
-    
+
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
@@ -344,15 +342,20 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
-      ? new FortuneManifestDto()
-      : new ImageLabelBinaryManifestDto();
+    const dtoCheck =
+      manifest.requestType === JobRequestType.FORTUNE
+        ? new FortuneManifestDto()
+        : new ImageLabelBinaryManifestDto();
 
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
+      this.logger.log(
+        ErrorJob.ManifestValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { NS } from '../../common/constants';
@@ -7,6 +7,7 @@ import { IUser } from '../../common/interfaces';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
+import { TokenEntity } from '../auth/token.entity';
 
 @Entity({ schema: NS, name: 'user' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -28,6 +29,9 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
+
+  @OneToOne(() => TokenEntity)
+  public token: TokenEntity;
 
   @OneToMany(() => JobEntity, (job) => job.user)
   public jobs: JobEntity[];

@@ -39,12 +39,12 @@ export class UserService {
 
     await this.checkEmail(email, 0);
 
-    return this.userRepository.create({
+    return await this.userRepository.create({
       ...rest,
       email,
       password: this.createPasswordHash(password),
       type: UserType.REQUESTER,
-      status: UserStatus.ACTIVE,
+      status: UserStatus.PENDING,
     });
   }
 
@@ -105,7 +105,7 @@ export class UserService {
 
     return {
       amount: Number(ethers.utils.formatUnits(balance, 'ether')),
-      currency: Currency.USD
-    }
+      currency: Currency.USD,
+    };
   }
 }

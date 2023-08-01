@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { IJwt } from '../../common/interfaces/auth';
 import { UserCreateDto } from '../user/user.dto';
@@ -21,28 +21,29 @@ import {
   VerifyEmailDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
-import { RequestWithUser } from 'src/common/types';
 import { JwtAuthGuard } from 'src/common/guards';
+import { RequestWithUser } from 'src/common/types';
 
-@Public()
 @ApiTags('Auth')
 @Controller('/auth')
 export class AuthJwtController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)
-  public async signup(@Body() data: UserCreateDto): Promise<IJwt> {
-    const userEntity = await this.authService.signup(data);
-    return await this.authService.auth(userEntity);
+  public async signup(@Body() data: UserCreateDto): Promise<void> {
+    await this.authService.signup(data);
   }
 
+  @Public()
   @Post('/signin')
   @HttpCode(200)
   public signin(@Body() data: SignInDto): Promise<IJwt> {
     return this.authService.signin(data);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('/refresh')
   @HttpCode(200)
@@ -50,6 +51,7 @@ export class AuthJwtController {
     return this.authService.auth(request.user);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
   @HttpCode(204)
@@ -57,24 +59,28 @@ export class AuthJwtController {
     await this.authService.logout(request.user);
   }
 
+  @Public()
   @Post('/forgot-password')
   @HttpCode(204)
   public forgotPassword(@Body() data: ForgotPasswordDto): Promise<void> {
     return this.authService.forgotPassword(data);
   }
 
+  @Public()
   @Post('/restore-password')
   @HttpCode(204)
   public restorePassword(@Body() data: RestorePasswordDto): Promise<boolean> {
     return this.authService.restorePassword(data);
   }
 
+  @Public()
   @Post('/email-verification')
   @HttpCode(200)
-  public emailVerification(@Body() data: VerifyEmailDto): Promise<IJwt> {
-    return this.authService.emailVerification(data);
+  public async emailVerification(@Body() data: VerifyEmailDto): Promise<void> {
+    await this.authService.emailVerification(data);
   }
 
+  @Public()
   @Post('/resend-email-verification')
   @HttpCode(204)
   public resendEmailVerification(

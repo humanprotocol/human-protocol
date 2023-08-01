@@ -66,6 +66,7 @@ export class AuthCreateDto {
 export class AuthUpdateDto {
   @IsEnum(AuthStatus)
   public status: AuthStatus;
+  public tokenId: string;
 }
 
 export class TokenCreateDto {
