@@ -6,6 +6,9 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NS } from '../common/constants';
 
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
+import { AuthEntity } from 'src/modules/auth/auth.entity';
+import { TokenEntity } from 'src/modules/auth/token.entity';
+import { UserEntity } from 'src/modules/user/user.entity';
 
 @Module({
   imports: [
@@ -20,7 +23,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [],
+          entities: [AuthEntity, TokenEntity, UserEntity],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
