@@ -6,8 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { v4 } from 'uuid';
-
-import { IJwt } from 'src/common/interfaces';
 import { ErrorAuth } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
@@ -37,7 +35,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
   ) {}
 
-  public async signin(data: SignInDto): Promise<IJwt> {
+  public async signin(data: SignInDto): Promise<string> {
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -77,7 +75,7 @@ export class AuthService {
     return;
   }
 
-  public async auth(userEntity: UserEntity): Promise<IJwt> {
+  public async auth(userEntity: UserEntity): Promise<string> {
     const auth = await this.authRepository.findOne({ userId: userEntity.id });
     const tokenId = v4();
     if (!auth) {
@@ -93,12 +91,10 @@ export class AuthService {
       );
     }
 
-    return {
-      accessToken: await this.jwtService.signAsync({
-        tokenId: tokenId,
-        email: userEntity.email,
-      }),
-    };
+    return await this.jwtService.signAsync({
+      tokenId: tokenId,
+      email: userEntity.email,
+    });
   }
 
   public async getByTokenId(tokenId: string): Promise<AuthEntity | null> {

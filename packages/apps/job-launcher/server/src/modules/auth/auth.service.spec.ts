@@ -41,8 +41,6 @@ describe('AuthService', () => {
         switch (key) {
           case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
             return MOCK_EXPIRES_IN;
-          case 'JWT_REFRESH_TOKEN_EXPIRES_IN':
-            return MOCK_EXPIRES_IN;
         }
       }),
     };

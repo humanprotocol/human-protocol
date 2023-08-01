@@ -47,7 +47,6 @@ export const envValidator = Joi.object({
   // Auth
   JWT_SECRET: Joi.string().default('secrete'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
-  JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
