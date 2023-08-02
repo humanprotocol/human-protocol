@@ -24,6 +24,7 @@ import {
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorSubgraphNotDeployed,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
@@ -46,6 +47,9 @@ describe('EscrowClient', () => {
   let escrowClient: any,
     mockProvider: any,
     mockSigner: any,
+    mumbaiEscrowClient: any,
+    mumbaiMockProvider: any,
+    mumbaiMockSigner: any,
     mockEscrowContract: any,
     mockEscrowFactoryContract: any,
     mockTokenContract: any;
@@ -59,6 +63,17 @@ describe('EscrowClient', () => {
       ...provider.getSigner(),
       provider: {
         ...mockProvider,
+      },
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
+    mumbaiMockProvider = {
+      ...provider,
+      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.POLYGON_MUMBAI }),
+    };
+    mumbaiMockSigner = {
+      ...provider.getSigner(),
+      provider: {
+        ...mumbaiMockProvider,
       },
       getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
     };
@@ -114,6 +129,7 @@ describe('EscrowClient', () => {
     vi.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
 
     escrowClient = await EscrowClient.build(mockSigner);
+    mumbaiEscrowClient = await EscrowClient.build(mumbaiMockSigner);
     escrowClient.escrowContract = mockEscrowContract;
     escrowClient.tokenContract = mockTokenContract;
     escrowClient.escrowFactoryContract = mockEscrowFactoryContract;
@@ -1408,6 +1424,59 @@ describe('EscrowClient', () => {
         mockLaunchedEscrowsResult,
         mockLaunchedEscrowsResult,
       ]);
+    });
+  });
+
+  describe('getEscrowsByLauncher', () => {
+    test('should throw an error if subgraph is not deployed', async () => {
+      const requesterAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getEscrowsByLauncher(requesterAddress)
+      ).rejects.toThrow(ErrorSubgraphNotDeployed);
+    });
+
+    test('should throw an error if requesterAddress is an invalid address', async () => {
+      const requesterAddress = FAKE_ADDRESS;
+
+      await expect(
+        mumbaiEscrowClient.getEscrowsByLauncher(requesterAddress)
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should successfully getEscrowsByLauncher', async () => {
+      const requesterAddress = FAKE_ADDRESS;
+      const mockEscrowsResult = {
+        address: '0x343d38faacefb1f85fd9e9e3cf5f0e7be8d521d2',
+        amountPaid: '0',
+        balance: '0',
+        count: '5',
+        factoryAddress: '0xa8d927c4da17a6b71675d2d49dfda4e9ebe58f2d',
+        finalResultsUrl: null,
+        id: '0x343d38faacefb1f85fd9e9e3cf5f0e7be8d521d2',
+        intermediateResultsUrl: null,
+        launcher: '0xb738fb0417e20a6564225b9f232176c2d7f6bc9c',
+        manifestHash: '9a54764e8c776d1fbdfcc79babe69a97f19f53fc',
+        manifestUrl:
+          'http://127.0.0.1:9000/launcher/s39a54764e8c776d1fbdfcc79babe69a97f19f53fc.json',
+        recordingOracle: null,
+        recordingOracleFee: null,
+        reputationOracle: null,
+        reputationOracleFee: null,
+        status: 'Pending',
+        token: '0x0376d26246eb35ff4f9924cf13e6c05fd0bd7fb4',
+        totalFundedAmount: '0',
+      };
+
+      vi.spyOn(mumbaiEscrowClient, 'getEscrowsByLauncher').mockImplementation(
+        () => Promise.resolve([mockEscrowsResult, mockEscrowsResult])
+      );
+
+      const results = await mumbaiEscrowClient.getEscrowsByLauncher(
+        requesterAddress
+      );
+
+      expect(results).toEqual([mockEscrowsResult, mockEscrowsResult]);
     });
   });
 

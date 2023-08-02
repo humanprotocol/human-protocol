@@ -149,6 +149,8 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
+    v2SubgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
     oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
   },
   [ChainId.MOONBEAM]: {

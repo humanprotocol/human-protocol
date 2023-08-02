@@ -128,7 +128,32 @@ export type NetworkData = {
    */
   oldSubgraphUrl: string;
   /**
+   * V2 subgraph URL
+   */
+  v2SubgraphUrl?: string;
+  /**
    * Old Escrow Factory contract address
    */
   oldFactoryAddress: string;
+};
+
+export type SubgraphEscrow = {
+  id: string;
+  address: string;
+  amountPaid: string;
+  balance: string;
+  count: string;
+  factoryAddress: string;
+  finalResultsUrl: string;
+  intermediateResultsUrl: string;
+  launcher: string;
+  manifestHash: string;
+  manifestUrl: string;
+  recordingOracle: string;
+  recordingOracleFee: string;
+  reputationOracle: string;
+  reputationOracleFee: string;
+  status: string;
+  token: string;
+  totalFundedAmount: string;
 };

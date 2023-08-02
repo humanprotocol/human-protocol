@@ -316,3 +316,8 @@ export class InvalidEthereumAddressError extends Error {
     super(`Invalid ethereum address error: ${address}`);
   }
 }
+
+/**
+ * @constant {Error} - The subgraph is not deployed yet.
+ */
+export const ErrorSubgraphNotDeployed = new Error('Subgraph not deployed');

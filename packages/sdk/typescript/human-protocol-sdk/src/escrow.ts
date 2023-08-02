@@ -10,6 +10,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
+import request from 'graphql-request';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -31,6 +32,7 @@ import {
   ErrorListOfHandlersCannotBeEmpty,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
+  ErrorSubgraphNotDeployed,
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
@@ -40,8 +42,9 @@ import {
   RAW_LAUNCHED_ESCROWS_FILTERED_QUERY,
   RAW_LAUNCHED_ESCROWS_QUERY,
 } from './queries';
-import { EscrowStatus, NetworkData } from './types';
+import { EscrowStatus, NetworkData, SubgraphEscrow } from './types';
 import { gqlFetch, isValidUrl, throwError } from './utils';
+import { GET_ESCROWS_BY_LAUNCHER_QUERY } from './queries/escrow';
 
 export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
@@ -714,6 +717,37 @@ export class EscrowClient {
       );
       return this.escrowContract.status();
     } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the escrows created by a job launcher.
+   *
+   * @param {string} launcherAddress - Address of the launcher.
+   * @returns {Promise<SubgraphEscrow[]>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getEscrowsByLauncher(
+    launcherAddress: string
+  ): Promise<SubgraphEscrow[]> {
+    if (!this.network.v2SubgraphUrl) {
+      throw ErrorSubgraphNotDeployed;
+    }
+
+    if (!ethers.utils.isAddress(launcherAddress)) {
+      throw ErrorInvalidAddress;
+    }
+
+    try {
+      const { escrows } = await request<{ escrows: SubgraphEscrow[] }>(
+        this.network.v2SubgraphUrl,
+        GET_ESCROWS_BY_LAUNCHER_QUERY,
+        { launcherAddress }
+      );
+
+      return escrows;
+    } catch (e: any) {
       return throwError(e);
     }
   }
