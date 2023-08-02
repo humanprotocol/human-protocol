@@ -167,7 +167,7 @@ describe('JobService', () => {
     it('should solve a job', async () => {
       const solution = 'job-solution';
 
-      const recordingOracleURLMock = 'https://example.com/recordingoracle';
+      const recordingOracleWebhookUrlMock = 'https://example.com/recordingoracle/job/solve';
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getRecordingOracleAddress: jest
@@ -175,7 +175,7 @@ describe('JobService', () => {
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
       (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(recordingOracleURLMock),
+        get: jest.fn().mockResolvedValue(recordingOracleWebhookUrlMock),
       }));
 
       const result = await jobService.solveJob(
@@ -188,7 +188,7 @@ describe('JobService', () => {
       expect(result).toBe(true);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
-        recordingOracleURLMock + '/job/solve',
+        recordingOracleWebhookUrlMock,
         expect.objectContaining({
           escrowAddress,
           chainId,
@@ -228,7 +228,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
-      ).rejects.toThrow('Unable to get Recording Oracle URL');
+      ).rejects.toThrow('Unable to get Recording Oracle webhook URL');
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 

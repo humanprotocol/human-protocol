@@ -18,7 +18,6 @@ export class InitialMigration1690873167904 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropSchema(NS);
         await queryRunner.query(`ALTER TABLE "hmt"."auth" DROP CONSTRAINT "FK_373ead146f110f04dad60848154"`);
         await queryRunner.query(`ALTER TABLE "hmt"."token" DROP CONSTRAINT "FK_94f168faad896c0786646fa3d4a"`);
         await queryRunner.query(`DROP TABLE "hmt"."auth"`);
