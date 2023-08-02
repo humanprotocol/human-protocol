@@ -1,4 +1,4 @@
-import { NS } from 'src/common/constants';
+import { NS } from '../../common/constants';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialMigration1690813746809 implements MigrationInterface {
@@ -174,5 +174,6 @@ export class InitialMigration1690813746809 implements MigrationInterface {
     await queryRunner.query(`
             DROP TYPE "hmt"."payment_type_enum"
         `);
+    await queryRunner.dropSchema(NS);
   }
 }
