@@ -7,6 +7,7 @@ import {
   IsString,
   IsUrl,
   IsDate,
+  IsOptional,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
@@ -27,7 +28,8 @@ export class JobFortuneDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  @IsOptional()
+  public chainId?: ChainId;
 
   @ApiProperty()
   @IsNumber()
@@ -66,7 +68,8 @@ export class JobCvatDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  @IsOptional()
+  public chainId?: ChainId;
 
   @ApiProperty()
   @IsUrl()
