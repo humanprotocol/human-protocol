@@ -9,7 +9,7 @@ import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { TokenEntity } from '../auth/token.entity';
 
-@Entity({ schema: NS, name: 'user' })
+@Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
   @Exclude()
   @Column({ type: 'varchar', select: false })
@@ -17,9 +17,6 @@ export class UserEntity extends BaseEntity implements IUser {
 
   @Column({ type: 'varchar', nullable: true, unique: true })
   public email: string;
-
-  @Column({ type: 'varchar', nullable: true, unique: true })
-  public stripeCustomerId: string;
 
   @Column({ type: 'enum', enum: UserType })
   public type: UserType;

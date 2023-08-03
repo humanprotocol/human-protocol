@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
+import { RequestWithUser } from 'src/common/types';
 
 import { CurrencyService } from './currency.service';
 import {
@@ -31,21 +32,18 @@ export class PaymentController {
 
   @Post('/fiat')
   public async createFiatPayment(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatCreateDto,
   ): Promise<string> {
-    return this.paymentService.createFiatPayment(
-      req.user?.stripeCustomerId,
-      data,
-    );
+    return this.paymentService.createFiatPayment(req.user, data);
   }
 
   @Post('/fiat/confirm-payment')
   public async confirmFiatPayment(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    return this.paymentService.confirmFiatPayment(req.user?.id, data);
+    return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
 
   @Post('/crypto')

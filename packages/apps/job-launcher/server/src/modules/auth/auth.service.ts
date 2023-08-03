@@ -77,28 +77,33 @@ export class AuthService {
 
   public async auth(userEntity: UserEntity): Promise<string> {
     const auth = await this.authRepository.findOne({ userId: userEntity.id });
-    const tokenId = v4();
+    const refreshToken = v4();
     if (!auth) {
       await this.authRepository.create({
         user: userEntity,
-        tokenId,
+        refreshToken,
         status: AuthStatus.ACTIVE,
       });
     } else {
       await this.authRepository.update(
         { id: auth.id },
-        { status: AuthStatus.ACTIVE, tokenId: tokenId },
+        { status: AuthStatus.ACTIVE, refreshToken },
       );
     }
 
     return await this.jwtService.signAsync({
-      tokenId: tokenId,
+      refreshToken: refreshToken,
       email: userEntity.email,
     });
   }
 
-  public async getByTokenId(tokenId: string): Promise<AuthEntity | null> {
-    return this.authRepository.findOne({ tokenId }, { relations: ['user'] });
+  public async getByRefreshToken(
+    refreshToken: string,
+  ): Promise<AuthEntity | null> {
+    return this.authRepository.findOne(
+      { refreshToken },
+      { relations: ['user'] },
+    );
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {

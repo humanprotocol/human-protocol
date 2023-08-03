@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Generated,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -11,13 +12,13 @@ import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
 import { AuthStatus } from '../../common/enums/auth';
 
-@Entity({ schema: NS, name: 'auth' })
+@Entity({ schema: NS, name: 'auths' })
 export class AuthEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
   @Column({ type: 'varchar' })
-  public tokenId: string;
+  public refreshToken: string;
 
   @Column({
     type: 'enum',
