@@ -87,6 +87,7 @@ describe('PaymentService', () => {
 
     const stripeCustomersCreateMock = jest.fn();
     const stripePaymentIntentsCreateMock = jest.fn();
+    const stripePaymentIntentsRetrieveMock = jest.fn();
 
     stripe = {
       customers: {
@@ -94,6 +95,7 @@ describe('PaymentService', () => {
       },
       paymentIntents: {
         create: stripePaymentIntentsCreateMock,
+        retrieve: stripePaymentIntentsRetrieveMock
       },
     } as any;
 
@@ -105,6 +107,9 @@ describe('PaymentService', () => {
     jest
       .spyOn(stripe.paymentIntents, 'create')
       .mockImplementation(stripePaymentIntentsCreateMock);
+    jest
+      .spyOn(stripe.paymentIntents, 'retrieve')
+      .mockImplementation(stripePaymentIntentsRetrieveMock);
   });
 
   describe('createCustomer', () => {
@@ -157,7 +162,6 @@ describe('PaymentService', () => {
     });
 
     it('should create a fiat payment successfully', async () => {
-      const customerId = MOCK_CUSTOMER_ID;
       const dto = {
         amount: 100,
         currency: Currency.USD,
@@ -169,15 +173,14 @@ describe('PaymentService', () => {
 
       createPaymentIntentMock.mockResolvedValue(paymentIntent);
 
-      const result = await paymentService.createFiatPayment(customerId, dto);
+      // TODO: Remove this after resolve remove comments
+      const user = {}
+
+      const result = await paymentService.createFiatPayment(user as any, dto);
 
       expect(createPaymentIntentMock).toHaveBeenCalledWith({
-        payment_method_types: [PaymentFiatMethodType.CARD],
         amount: dto.amount * 100,
         currency: dto.currency,
-        confirm: true,
-        customer: customerId,
-        payment_method_options: {},
       });
       expect(result).toEqual(paymentIntent.client_secret);
     });
@@ -192,95 +195,22 @@ describe('PaymentService', () => {
 
       createPaymentIntentMock.mockRejectedValue(new Error());
 
+      // TODO: Remove this after resolve remove comments
+      const user = {}
+
       await expect(
-        paymentService.createFiatPayment(customerId, dto),
+        paymentService.createFiatPayment(user as any, dto),
       ).rejects.toThrowError();
     });
   });
 
   describe('confirmFiatPayment', () => {
-    let createPaymentMock: any;
-    
-    beforeEach(() => {
-      createPaymentMock = jest.spyOn(paymentRepository, 'create');
-      createPaymentMock.mockResolvedValue(true);
-    });
-
-    it('should confirm a fiat payment successfully', async () => {
-      const userId = 1;
-      const dto = {
-        paymentId: MOCK_PAYMENT_ID,
-      };
-      const rate = 1.5;
-
-      const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
-        status: 'succeeded',
-        amount: 100,
-        currency: Currency.EUR,
-      };
-
-      jest
-        .spyOn(paymentService, 'getPayment')
-        .mockResolvedValue(
-          paymentData as Stripe.Response<Stripe.PaymentIntent>,
-        );
-
-      const result = await paymentService.confirmFiatPayment(userId, dto);
-
-      expect(paymentService.getPayment).toHaveBeenCalledWith(dto.paymentId);
-      expect(paymentRepository.create).toHaveBeenCalledWith({
-        userId,
-        source: PaymentSource.FIAT,
-        currency: Currency.EUR,
-        type: PaymentType.DEPOSIT,
-        amount: paymentData.amount!.toString(),
-        rate: 0.5
-      });
-      expect(result).toBe(true);
-    });
-
-    it('should throw a bad request exception if the payment is not successful', async () => {
-      const userId = 1;
-      const dto = {
-        paymentId: MOCK_PAYMENT_ID,
-      };
-
-      const paymentData: Partial<Stripe.Response<Stripe.PaymentIntent>> = {
-        status: 'canceled',
-        amount: 100,
-      };
-
-      jest
-        .spyOn(paymentService, 'getPayment')
-        .mockResolvedValue(
-          paymentData as Stripe.Response<Stripe.PaymentIntent>,
-        );
-
-      await expect(
-        paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotSuccess);
-    });
-
-    it('should return false if the payment is not found', async () => {
-      const userId = 1;
-      const dto = {
-        paymentId: MOCK_PAYMENT_ID,
-      };
-
-      jest.spyOn(paymentService, 'getPayment').mockResolvedValue(null);
-
-      await expect(
-        paymentService.confirmFiatPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.NotFound);
-    });
-  });
-
-  describe('confirmFiatPayment', () => {
-    let getPaymentMock: any, createPaymentMock: any;
+    let createPaymentMock: any,
+        retrievePaymentIntentMock: any;
 
     beforeEach(() => {
-      getPaymentMock = jest.spyOn(paymentService, 'getPayment');
       createPaymentMock = jest.spyOn(paymentRepository, 'create');
+      retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
     });
 
     afterEach(() => {
@@ -300,12 +230,11 @@ describe('PaymentService', () => {
         currency: Currency.EUR,
       };
 
-      getPaymentMock.mockResolvedValue(paymentData);
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
       createPaymentMock.mockResolvedValue(true);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
-      expect(paymentService.getPayment).toHaveBeenCalledWith(dto.paymentId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
         source: PaymentSource.FIAT,
@@ -328,7 +257,7 @@ describe('PaymentService', () => {
         amount: 100,
       };
 
-      getPaymentMock.mockResolvedValue(paymentData);
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
@@ -341,7 +270,7 @@ describe('PaymentService', () => {
         paymentId: MOCK_PAYMENT_ID,
       };
 
-      getPaymentMock.mockResolvedValue(null);
+      retrievePaymentIntentMock.mockResolvedValue(null);
 
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
@@ -415,7 +344,7 @@ describe('PaymentService', () => {
       const result = await paymentService.createCryptoPayment(userId, dto);
 
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
-        transactionHash: dto.transactionHash,
+        transaction: dto.transactionHash,
       });
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
@@ -423,7 +352,9 @@ describe('PaymentService', () => {
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
         amount: '100',
-        rate: 0.5
+        rate: 0.5,
+        transaction: MOCK_TRANSACTION_HASH,
+        chainId: ChainId.LOCALHOST
       });
       expect(result).toBe(true);
     });

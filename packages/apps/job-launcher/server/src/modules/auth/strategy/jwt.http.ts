@@ -30,11 +30,11 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   }
 
   public async validate(payload: {
-    tokenId: string;
+    refreshToken: string;
     email: string;
   }): Promise<UserEntity> {
-    const tokenId = payload.tokenId.toLowerCase();
-    const authEntity = await this.authService.getByTokenId(tokenId);
+    const refreshToken = payload.refreshToken.toLowerCase();
+    const authEntity = await this.authService.getByRefreshToken(refreshToken);
 
     if (!authEntity?.user) {
       throw new NotFoundException('User not found');

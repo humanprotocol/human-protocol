@@ -59,14 +59,14 @@ export class VerifyEmailDto {
 
 export class AuthCreateDto {
   public user: UserEntity;
-  public tokenId: string;
+  public refreshToken: string;
   public status: AuthStatus;
 }
 
 export class AuthUpdateDto {
   @IsEnum(AuthStatus)
   public status: AuthStatus;
-  public tokenId: string;
+  public refreshToken: string;
 }
 
 export class TokenCreateDto {

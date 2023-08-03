@@ -257,11 +257,11 @@ describe('AuthService', () => {
       expect(updateAuthMock).not.toHaveBeenCalled();
       expect(createAuthMock).toHaveBeenCalledWith({
         user: userEntity,
-        tokenId: refreshToken,
+        refreshToken: refreshToken,
         status: AuthStatus.ACTIVE,
       });
       expect(jwtSignMock).toHaveBeenCalledWith({
-        tokenId: refreshToken,
+        refreshToken: refreshToken,
         email: userEntity.email,
       });
       expect(result).toEqual(accessToken);
@@ -277,11 +277,11 @@ describe('AuthService', () => {
       expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
       expect(updateAuthMock).toHaveBeenCalledWith(
         { id: authEntity.id },
-        { status: AuthStatus.ACTIVE, tokenId: refreshToken },
+        { status: AuthStatus.ACTIVE, refreshToken },
       );
       expect(createAuthMock).not.toHaveBeenCalled();
       expect(jwtSignMock).toHaveBeenCalledWith({
-        tokenId: refreshToken,
+        refreshToken: refreshToken,
         email: userEntity.email,
       });
       expect(result).toEqual(accessToken);

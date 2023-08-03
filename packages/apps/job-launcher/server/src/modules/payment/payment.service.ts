@@ -17,7 +17,6 @@ import {
 } from './payment.dto';
 import {
   Currency,
-  PaymentFiatMethodType,
   PaymentSource,
   PaymentStatus,
   PaymentType,
@@ -32,6 +31,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class PaymentService {
@@ -77,20 +77,15 @@ export class PaymentService {
   }
 
   public async createFiatPayment(
-    customerId: string,
+    user: UserEntity,
     dto: PaymentFiatCreateDto,
   ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
-      payment_method_types: [PaymentFiatMethodType.CARD],
       amount: amount * 100,
       currency: currency,
     };
-
-    params.confirm = true;
-    params.customer = customerId;
-    params.payment_method_options = {};
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
@@ -102,14 +97,18 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
+    //TODO: save payment intent in database
+
     return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(
     userId: number,
-    dto: PaymentFiatConfirmDto,
+    data: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    const paymentData = await this.getPayment(dto.paymentId);
+    const paymentData = await this.stripe.paymentIntents.retrieve(
+      data.paymentId,
+    );
 
     if (!paymentData) {
       this.logger.log(ErrorPayment.NotFound, PaymentService.name);
@@ -194,7 +193,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transactionHash: transaction.transactionHash,
+      transaction: transaction.transactionHash,
     });
 
     if (paymentEntity) {
@@ -213,17 +212,15 @@ export class PaymentService {
       type: PaymentType.DEPOSIT,
       amount: amount.toString(),
       currency: TokenId.HMT,
-      rate
+      rate,
+      chainId: dto.chainId,
+      transaction: dto.transactionHash
     })
 
     return true;
   }
 
-  public async getPayment(
-    paymentId: string,
-  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
-    return this.stripe.paymentIntents.retrieve(paymentId);
-  }
+  
 
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
