@@ -43,7 +43,7 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { CurrencyService } from '../payment/currency.service';
+import { PaymentRepository } from '../payment/payment.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -61,11 +61,16 @@ jest.mock('@human-protocol/sdk', () => ({
   })),
 }));
 
+jest.mock('../../common/utils', () => ({
+  getRate: jest.fn().mockImplementation(() => 0.5)
+}));
+
 describe('JobService', () => {
-  let jobService: JobService;
-  let jobRepository: JobRepository;
-  let paymentService: PaymentService;
-  let currencyService: CurrencyService;
+  let jobService: JobService,
+      jobRepository: JobRepository,
+      paymentRepository: PaymentRepository,
+      paymentService: PaymentService,
+      createPaymentMock: any;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -109,18 +114,19 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
-        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
+        { provide: PaymentRepository, useValue: createMock<PaymentRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
     }).compile();
 
-    currencyService = moduleRef.get(CurrencyService);
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
+    paymentRepository = moduleRef.get(PaymentRepository);
     paymentService = moduleRef.get(PaymentService);
+    createPaymentMock = jest.spyOn(paymentRepository, 'create');
   });
 
   describe('createFortuneJob', () => {
@@ -138,9 +144,7 @@ describe('JobService', () => {
 
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
-
-      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
-      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
+      createPaymentMock.mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -171,14 +175,14 @@ describe('JobService', () => {
       await jobService.createFortuneJob(userId, dto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
+      expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        PaymentSource.BALANCE,
-        Currency.USD,
-        TokenId.HMT,
-        PaymentType.WITHDRAWAL,
-        usdTotalAmount,
-      );
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: usdTotalAmount.toString(),
+        rate: 0.5
+      });
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         userId,
@@ -250,6 +254,8 @@ describe('JobService', () => {
         .spyOn(HMToken__factory, 'connect')
         .mockReturnValue(mockTokenContract);
       getManifestMock = jest.spyOn(jobService, 'getManifest');
+
+      createPaymentMock.mockResolvedValue(true);
     });
 
     afterEach(() => {

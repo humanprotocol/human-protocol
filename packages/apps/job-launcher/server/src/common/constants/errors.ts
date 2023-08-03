@@ -25,7 +25,7 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldnotBeRetreived = 'User balance could not be retrieved',
+  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
 }
 
 /**

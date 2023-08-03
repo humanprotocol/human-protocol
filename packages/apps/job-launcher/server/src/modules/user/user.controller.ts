@@ -31,10 +31,10 @@ export class UserController {
     } catch (e) {
       this.logger.log(
         e.message,
-        `${UserController.name} - ${ErrorUser.BalanceCouldnotBeRetreived}`,
+        `${UserController.name} - ${ErrorUser.BalanceCouldNotBeRetreived}`,
       );
       throw new UnprocessableEntityException(
-        ErrorUser.BalanceCouldnotBeRetreived,
+        ErrorUser.BalanceCouldNotBeRetreived,
       );
     }
   }
