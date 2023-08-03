@@ -5,6 +5,10 @@ from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.gql.escrow import (
+    get_escrows_by_launcher_query,
+    get_filtered_escrows_query,
+)
 from human_protocol_sdk.escrow import (
     EscrowClient,
     EscrowClientError,
@@ -1675,60 +1679,85 @@ class EscrowTestCase(unittest.TestCase):
         requester_address = "0x1234567890123456789012345678901234567890"
         mock_function = MagicMock()
         with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
+            mock_escrow_1 = (
+                {
+                    "id": "0x1234567890123456789012345678901234567891",
+                    "address": "0x1234567890123456789012345678901234567891",
+                    "amountPaid": "1000000000000000000",
+                    "balance": "1000000000000000000",
+                    "count": "1",
+                    "factoryAddress": "0x1234567890123456789012345678901234567890",
+                    "finalResultsUrl": "https://example.com",
+                    "intermediateResultsUrl": "https://example.com",
+                    "launcher": "0x1234567890123456789012345678901234567891",
+                    "manifestHash": "0x1234567890123456789012345678901234567891",
+                    "manifestUrl": "https://example.com",
+                    "recordingOracle": "0x1234567890123456789012345678901234567891",
+                    "recordingOracleFee": "1000000000000000000",
+                    "reputationOracle": "0x1234567890123456789012345678901234567891",
+                    "reputationOracleFee": "1000000000000000000",
+                    "status": "Pending",
+                    "token": "0x1234567890123456789012345678901234567891",
+                    "totalFundedAmount": "1000000000000000000",
+                },
+            )
+            mock_escrow_2 = (
+                {
+                    "id": "0x1234567890123456789012345678901234567892",
+                    "address": "0x1234567890123456789012345678901234567892",
+                    "amountPaid": "1000000000000000000",
+                    "balance": "1000000000000000000",
+                    "count": "1",
+                    "factoryAddress": "0x1234567890123456789012345678901234567890",
+                    "finalResultsUrl": "https://example.com",
+                    "intermediateResultsUrl": "https://example.com",
+                    "launcher": "0x1234567890123456789012345678901234567892",
+                    "manifestHash": "0x1234567890123456789012345678901234567892",
+                    "manifestUrl": "https://example.com",
+                    "recordingOracle": "0x1234567890123456789012345678901234567892",
+                    "recordingOracleFee": "1000000000000000000",
+                    "reputationOracle": "0x1234567890123456789012345678901234567892",
+                    "reputationOracleFee": "1000000000000000000",
+                    "status": "Pending",
+                    "token": "0x1234567890123456789012345678901234567892",
+                    "totalFundedAmount": "1000000000000000000",
+                },
+            )
+
             mock_function.return_value = {
-                "data": {
-                    "launchedEscrows": [
-                        {
-                            "id": "0x1234567890123456789012345678901234567891",
-                        },
-                        {
-                            "id": "0x1234567890123456789012345678901234567892",
-                        },
-                    ]
-                }
+                "data": {"escrows": [mock_escrow_1, mock_escrow_2]}
             }
-            launched_escrows = self.escrow.get_launched_escrows(requester_address)
+            escrows = self.escrow.get_launched_escrows(requester_address)
 
             mock_function.assert_called_once_with(
                 "subgraph_url",
-                """
-            {
-                launchedEscrows(
-                    where:{from:"0x1234567890123456789012345678901234567890"}
-                ) {
-                    id
-                }
-            }
-            """,
+                query=get_escrows_by_launcher_query,
+                params={"launcherAddress": requester_address},
             )
 
-            self.assertEqual(len(launched_escrows), 2)
-            self.assertEqual(
-                launched_escrows[0], "0x1234567890123456789012345678901234567891"
-            )
-            self.assertEqual(
-                launched_escrows[1], "0x1234567890123456789012345678901234567892"
-            )
+            self.assertEqual(len(escrows), 2)
+            self.assertEqual(escrows[0], mock_escrow_1)
+            self.assertEqual(escrows[1], mock_escrow_2)
 
     def test_escrow_filter_valid_params(self):
-        escrow_address = "0x1234567890123456789012345678901234567891"
+        launcher_address = "0x1234567890123456789012345678901234567891"
         date_from = datetime.fromtimestamp(1683811973)
         date_to = datetime.fromtimestamp(1683812007)
         escrow_filter = EscrowFilter(
-            address=escrow_address,
+            launcher_address=launcher_address,
             status=Status.Pending,
             date_from=date_from,
             date_to=date_to,
         )
 
-        self.assertEqual(escrow_filter.address, escrow_address)
+        self.assertEqual(escrow_filter.launcher_address, launcher_address)
         self.assertEqual(escrow_filter.status, Status.Pending)
         self.assertEqual(escrow_filter.date_from, date_from)
         self.assertEqual(escrow_filter.date_to, date_to)
 
     def test_escrow_filter_invalid_address(self):
         with self.assertRaises(EscrowClientError) as cm:
-            EscrowFilter(address="invalid_address")
+            EscrowFilter(launcher_address="invalid_address")
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_no_parameters(self):
@@ -1751,22 +1780,62 @@ class EscrowTestCase(unittest.TestCase):
 
     def test_get_filtered_escrows(self):
         filter = EscrowFilter(
-            address="0x1234567890123456789012345678901234567891",
+            launcher_address="0x1234567890123456789012345678901234567891",
             status=Status.Pending,
             date_from=datetime.fromtimestamp(1683811973),
             date_to=datetime.fromtimestamp(1683812007),
         )
         mock_function = MagicMock()
         with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
+            mock_escrow_1 = (
+                {
+                    "id": "0x1234567890123456789012345678901234567891",
+                    "address": "0x1234567890123456789012345678901234567891",
+                    "amountPaid": "1000000000000000000",
+                    "balance": "1000000000000000000",
+                    "count": "1",
+                    "factoryAddress": "0x1234567890123456789012345678901234567890",
+                    "finalResultsUrl": "https://example.com",
+                    "intermediateResultsUrl": "https://example.com",
+                    "launcher": "0x1234567890123456789012345678901234567891",
+                    "manifestHash": "0x1234567890123456789012345678901234567891",
+                    "manifestUrl": "https://example.com",
+                    "recordingOracle": "0x1234567890123456789012345678901234567891",
+                    "recordingOracleFee": "1000000000000000000",
+                    "reputationOracle": "0x1234567890123456789012345678901234567891",
+                    "reputationOracleFee": "1000000000000000000",
+                    "status": "Pending",
+                    "token": "0x1234567890123456789012345678901234567891",
+                    "totalFundedAmount": "1000000000000000000",
+                },
+            )
+            mock_escrow_2 = (
+                {
+                    "id": "0x1234567890123456789012345678901234567892",
+                    "address": "0x1234567890123456789012345678901234567892",
+                    "amountPaid": "1000000000000000000",
+                    "balance": "1000000000000000000",
+                    "count": "1",
+                    "factoryAddress": "0x1234567890123456789012345678901234567890",
+                    "finalResultsUrl": "https://example.com",
+                    "intermediateResultsUrl": "https://example.com",
+                    "launcher": "0x1234567890123456789012345678901234567892",
+                    "manifestHash": "0x1234567890123456789012345678901234567892",
+                    "manifestUrl": "https://example.com",
+                    "recordingOracle": "0x1234567890123456789012345678901234567892",
+                    "recordingOracleFee": "1000000000000000000",
+                    "reputationOracle": "0x1234567890123456789012345678901234567892",
+                    "reputationOracleFee": "1000000000000000000",
+                    "status": "Pending",
+                    "token": "0x1234567890123456789012345678901234567892",
+                    "totalFundedAmount": "1000000000000000000",
+                },
+            )
             mock_function.return_value = {
                 "data": {
-                    "launchedEscrows": [
-                        {
-                            "id": "0x1234567890123456789012345678901234567891",
-                        },
-                        {
-                            "id": "0x1234567890123456789012345678901234567892",
-                        },
+                    "escrows": [
+                        mock_escrow_1,
+                        mock_escrow_2,
                     ]
                 }
             }
@@ -1774,19 +1843,18 @@ class EscrowTestCase(unittest.TestCase):
 
             mock_function.assert_called_once_with(
                 "subgraph_url",
-                """
-            {
-                launchedEscrows(where:{from:"0x1234567890123456789012345678901234567891",status:"Pending",timestamp_gte:"1683811973",timestamp_lte:"1683812007",}
-                ) {
-                    id
-                }
-            }
-            """,
+                query=get_filtered_escrows_query,
+                params={
+                    "launcherAddress": "0x1234567890123456789012345678901234567891",
+                    "status": "Pending",
+                    "from": 1683811973,
+                    "to": 1683812007,
+                },
             )
 
             self.assertEqual(len(filtered), 2)
-            self.assertEqual(filtered[0], "0x1234567890123456789012345678901234567891")
-            self.assertEqual(filtered[1], "0x1234567890123456789012345678901234567892")
+            self.assertEqual(filtered[0], mock_escrow_1)
+            self.assertEqual(filtered[1], mock_escrow_2)
 
     def test_get_recording_oracle_address(self):
         mock_contract = MagicMock()

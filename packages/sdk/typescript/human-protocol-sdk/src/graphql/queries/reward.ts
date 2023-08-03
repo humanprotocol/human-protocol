@@ -12,7 +12,7 @@ const REWARD_ADDED_EVENT_FRAGMENT = gql`
 export const GET_REWARD_ADDED_EVENTS_QUERY = gql`
   query GetRewardAddedEvents($slasherAddress: String!) {
     rewardAddedEvents(where: { slasher: $slasherAddress }) {
-      ...EscrowFields
+      ...RewardAddedEventFields
     }
   }
   ${REWARD_ADDED_EVENT_FRAGMENT}

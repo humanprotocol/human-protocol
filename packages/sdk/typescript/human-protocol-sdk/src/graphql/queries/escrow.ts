@@ -36,8 +36,8 @@ export const GET_FILTERED_ESCROWS_QUERY = gql`
   query GetFilteredEscrows(
     $launcherAddress: String
     $status: EscrowStatus
-    $from: Date
-    $to: Date
+    $from: Int
+    $to: Int
   ) {
     escrows(
       where: {
