@@ -1,13 +1,15 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { Navigate, useParams } from 'react-router-dom';
-import { JobsTable } from '../../../components/Jobs/Table';
+import { JobTable } from '../../../components/Jobs/Table';
 import { NetworkSelect } from '../../../components/NetworkSelect';
 import { SearchField } from '../../../components/SearchField';
 import { JOB_STATUS } from '../../../constants';
+import { useAppSelector } from '../../../state';
 
 export default function JobList() {
   const params = useParams();
+  const { data } = useAppSelector((state) => state.jobs);
 
   if (!JOB_STATUS.includes(params.status!)) {
     return <Navigate to="/jobs/launched" />;
@@ -39,7 +41,7 @@ export default function JobList() {
           <SearchField />
         </Box>
       </Box>
-      <JobsTable />
+      <JobTable data={data} />
     </Box>
   );
 }

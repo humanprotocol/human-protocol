@@ -5,11 +5,14 @@ import { LiquidityData } from '../../components/Dashboard/LiquidityData';
 import { OracleReputation } from '../../components/Dashboard/OracleRepuptation';
 import { WorkersPerformance } from '../../components/Dashboard/WorkersPerformance';
 import { StatusToggleButtons } from '../../components/Jobs/StatusToggleButtons';
-import { JobsTable } from '../../components/Jobs/Table';
+import { JobTable } from '../../components/Jobs/Table';
 import { NetworkSelect } from '../../components/NetworkSelect';
 import { SearchField } from '../../components/SearchField';
+import { useAppSelector } from '../../state';
 
 export default function Dashboard() {
+  const { data } = useAppSelector((state) => state.jobs);
+
   return (
     <Box>
       <Box
@@ -59,8 +62,8 @@ export default function Dashboard() {
           <Typography variant="h4">Jobs</Typography>
           <StatusToggleButtons />
         </Box>
-        <JobsTable />
       </Box>
+      <JobTable data={data} />
     </Box>
   );
 }

@@ -1,8 +1,9 @@
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
+import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
 import { SearchField } from '../../../components/SearchField';
 import { Table } from '../../../components/Table';
 
@@ -146,8 +147,19 @@ export default function JobDetail() {
         </Typography>
         <Box sx={{ mt: 7 }}>
           <Table
-            headCells={[
-              { id: 'workerAddress', label: 'Worker Address' },
+            columns={[
+              {
+                id: 'workerAddress',
+                label: 'Worker Address',
+                render: ({ workerAddress }) => (
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {workerAddress}
+                    <IconButton color="primary" sx={{ ml: 3 }}>
+                      <CopyLinkIcon />
+                    </IconButton>
+                  </Box>
+                ),
+              },
               { id: 'fortune', label: 'Fortune' },
             ]}
             data={[

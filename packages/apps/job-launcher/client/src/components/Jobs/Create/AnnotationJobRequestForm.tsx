@@ -167,12 +167,16 @@ export const AnnotationJobRequestForm = () => {
                 alignItems: 'center',
               }}
             >
-              <Button variant="outlined" onClick={() => goToPrevStep?.()}>
+              <Button
+                variant="outlined"
+                onClick={() => goToPrevStep?.()}
+                sx={{ width: '200px' }}
+              >
                 Cancel
               </Button>
               <Button
                 variant="contained"
-                sx={{ ml: 2.5 }}
+                sx={{ ml: 2.5, width: '200px' }}
                 onClick={() => handleSubmit()}
                 disabled={!(isValid && dirty)}
               >

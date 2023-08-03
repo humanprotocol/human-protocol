@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Paper,
   Table as MuiTable,
   TableBody,
@@ -10,10 +9,8 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Typography,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -58,21 +55,22 @@ function stableSort<T>(
   return stabilizedThis.map((el) => el[0]);
 }
 
-interface HeadCell {
+interface TableColumn {
   id: string;
   label: string;
   sortable?: boolean;
+  render?: (data: any) => void;
 }
 
 interface EnhancedTableProps {
-  headCells: Array<HeadCell>;
+  columns: Array<TableColumn>;
   onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
   order: Order;
   orderBy?: string;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-  const { headCells, order, orderBy, onRequestSort } = props;
+  const { columns, order, orderBy, onRequestSort } = props;
   const createSortHandler =
     (property: string) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
@@ -81,22 +79,22 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((headCell) => (
+        {columns.map((column) => (
           <TableCell
-            key={headCell.id}
+            key={column.id}
             align="left"
-            sortDirection={orderBy === headCell.id ? order : false}
+            sortDirection={orderBy === column.id ? order : false}
           >
-            {headCell.sortable ? (
+            {column.sortable ? (
               <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
+                active={orderBy === column.id}
+                direction={orderBy === column.id ? order : 'asc'}
+                onClick={createSortHandler(column.id)}
               >
-                {headCell.label}
+                {column.label}
               </TableSortLabel>
             ) : (
-              headCell.label
+              column.label
             )}
           </TableCell>
         ))}
@@ -107,18 +105,19 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export const Table = ({
   data,
-  headCells,
+  columns,
   defaultOrderBy,
+  emptyCell,
 }: {
   data: any;
-  headCells: Array<HeadCell>;
+  columns: Array<TableColumn>;
   defaultOrderBy?: string;
+  emptyCell?: React.ReactNode;
 }) => {
   const [order, setOrder] = useState<Order>('asc');
   const [orderBy, setOrderBy] = useState<string | undefined>(defaultOrderBy);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const navigate = useNavigate();
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -171,7 +170,7 @@ export const Table = ({
           }}
         >
           <EnhancedTableHead
-            headCells={headCells}
+            columns={columns}
             order={order}
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
@@ -187,13 +186,13 @@ export const Table = ({
                     cursor: 'pointer',
                   }}
                 >
-                  {headCells.map((cell) => (
+                  {columns.map((column) => (
                     <TableCell
-                      key={cell.id}
+                      key={column.id}
                       align="left"
                       sx={{ fontWeight: 600 }}
                     >
-                      {row[cell.id]}
+                      {column.render ? column.render(row) : row[column.id]}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -208,18 +207,7 @@ export const Table = ({
             <TableBody>
               <TableRow style={{ height: 53 * 10 }}>
                 <TableCell align="center" colSpan={5}>
-                  <Typography variant="h5">
-                    There are no Jobs at the moment, click the button
-                    <br /> below to create a new Job
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    sx={{ mt: 3 }}
-                    onClick={() => navigate('/jobs/create')}
-                  >
-                    + Create a Job
-                  </Button>
+                  {emptyCell ? emptyCell : <></>}
                 </TableCell>
               </TableRow>
             </TableBody>

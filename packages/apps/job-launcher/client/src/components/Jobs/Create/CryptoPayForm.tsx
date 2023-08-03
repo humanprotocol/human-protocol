@@ -33,7 +33,7 @@ export const CryptoPayForm = ({
   onError: (err: any) => void;
 }) => {
   const { isConnected } = useAccount();
-  const { jobRequest } = useCreateJobPageUI();
+  const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<string>();
   const { data: signer } = useSigner();
@@ -209,16 +209,27 @@ export const CryptoPayForm = ({
           mt: 4,
         }}
       >
-        <Button
-          color="primary"
-          variant="contained"
-          sx={{ width: '400px' }}
-          size="large"
-          onClick={handlePay}
-          disabled={!isConnected || !tokenAddress || !amount}
-        >
-          Pay now
-        </Button>
+        <Box>
+          <Button
+            color="primary"
+            variant="contained"
+            sx={{ width: '240px' }}
+            size="large"
+            onClick={handlePay}
+            disabled={!isConnected || !tokenAddress || !amount}
+          >
+            Pay now
+          </Button>
+          <Button
+            color="primary"
+            variant="outlined"
+            sx={{ width: '240px', ml: 4 }}
+            size="large"
+            onClick={() => goToPrevStep?.()}
+          >
+            Cancel
+          </Button>
+        </Box>
         <Link
           href="https://humanprotocol.org/app/terms-and-conditions"
           target="_blank"

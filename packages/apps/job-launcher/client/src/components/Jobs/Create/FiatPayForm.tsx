@@ -36,7 +36,7 @@ export const FiatPayForm = ({
 }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { jobRequest } = useCreateJobPageUI();
+  const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const rate = useTokenRate('hmt', 'usd');
   const { user } = useAppSelector((state) => state.auth);
 
@@ -285,15 +285,26 @@ export const FiatPayForm = ({
           mt: 4,
         }}
       >
-        <Button
-          color="primary"
-          variant="contained"
-          sx={{ width: '400px' }}
-          size="large"
-          onClick={handlePay}
-        >
-          Pay now
-        </Button>
+        <Box>
+          <Button
+            color="primary"
+            variant="contained"
+            sx={{ width: '240px' }}
+            size="large"
+            onClick={handlePay}
+          >
+            Pay now
+          </Button>
+          <Button
+            color="primary"
+            variant="outlined"
+            sx={{ width: '240px', ml: 4 }}
+            size="large"
+            onClick={() => goToPrevStep?.()}
+          >
+            Cancel
+          </Button>
+        </Box>
         <Link
           href="https://humanprotocol.org/app/terms-and-conditions"
           target="_blank"
