@@ -18,6 +18,9 @@ export class UserEntity extends BaseEntity implements IUser {
   @Column({ type: 'varchar', nullable: true, unique: true })
   public email: string;
 
+  @Column('decimal', { default: 0 })
+  balance: number;
+
   @Column({ type: 'enum', enum: UserType })
   public type: UserType;
 

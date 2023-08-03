@@ -220,7 +220,6 @@ export class PaymentService {
     return true;
   }
 
-  
 
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
@@ -231,6 +230,7 @@ export class PaymentService {
       const fixedAmount = FixedNumber.from(
         ethers.utils.formatUnits(payment.amount, 18),
       );
+      
       const rate = FixedNumber.from(payment.rate);
 
       const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
