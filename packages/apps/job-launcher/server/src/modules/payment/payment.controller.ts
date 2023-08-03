@@ -10,7 +10,6 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
 
-import { CurrencyService } from './currency.service';
 import {
   GetRateDto,
   PaymentCryptoCreateDto,
@@ -18,6 +17,7 @@ import {
   PaymentFiatCreateDto,
 } from './payment.dto';
 import { PaymentService } from './payment.service';
+import { getRate } from '../../common/utils';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -26,7 +26,6 @@ import { PaymentService } from './payment.service';
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
-    private readonly currencyService: CurrencyService,
   ) {}
 
   @Post('/fiat')
@@ -59,7 +58,7 @@ export class PaymentController {
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {
-      return this.currencyService.getRate(data.currency, data.token);
+      return getRate(data.currency, data.token);
     } catch (e) {
       throw new Error(e);
     }

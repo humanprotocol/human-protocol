@@ -6,9 +6,8 @@ import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { createMock } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
-import { CurrencyService } from './currency.service';
 import { TransactionReceipt, Log } from '@ethersproject/abstract-provider';
 import {
   Currency,
@@ -31,11 +30,14 @@ import { ChainId } from '@human-protocol/sdk';
 
 jest.mock('@human-protocol/sdk');
 
+jest.mock('../../common/utils', () => ({
+  getRate: jest.fn().mockImplementation(() => 0.5)
+}));
+
 describe('PaymentService', () => {
   let stripe: Stripe;
   let paymentService: PaymentService;
   let paymentRepository: PaymentRepository;
-  let currencyService: CurrencyService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -75,16 +77,13 @@ describe('PaymentService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
-        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
       ],
-      exports: [CurrencyService],
     }).compile();
 
     paymentService = moduleRef.get<PaymentService>(PaymentService);
     paymentRepository = moduleRef.get(PaymentRepository);
-    currencyService = moduleRef.get(CurrencyService);
 
     const stripeCustomersCreateMock = jest.fn();
     const stripePaymentIntentsCreateMock = jest.fn();
@@ -200,6 +199,13 @@ describe('PaymentService', () => {
   });
 
   describe('confirmFiatPayment', () => {
+    let createPaymentMock: any;
+    
+    beforeEach(() => {
+      createPaymentMock = jest.spyOn(paymentRepository, 'create');
+      createPaymentMock.mockResolvedValue(true);
+    });
+
     it('should confirm a fiat payment successfully', async () => {
       const userId = 1;
       const dto = {
@@ -218,21 +224,18 @@ describe('PaymentService', () => {
         .mockResolvedValue(
           paymentData as Stripe.Response<Stripe.PaymentIntent>,
         );
-      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
-
-      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
       expect(paymentService.getPayment).toHaveBeenCalledWith(dto.paymentId);
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
+      expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        PaymentSource.FIAT,
-        Currency.USD,
-        Currency.EUR,
-        PaymentType.DEPOSIT,
-        BigNumber.from(paymentData.amount),
-      );
+        source: PaymentSource.FIAT,
+        currency: Currency.EUR,
+        type: PaymentType.DEPOSIT,
+        amount: paymentData.amount!.toString(),
+        rate: 0.5
+      });
       expect(result).toBe(true);
     });
 
@@ -273,12 +276,11 @@ describe('PaymentService', () => {
   });
 
   describe('confirmFiatPayment', () => {
-    let getPaymentMock: any, savePaymentMock: any, getRateMock: any;
+    let getPaymentMock: any, createPaymentMock: any;
 
     beforeEach(() => {
       getPaymentMock = jest.spyOn(paymentService, 'getPayment');
-      savePaymentMock = jest.spyOn(paymentService, 'savePayment');
-      getRateMock = jest.spyOn(currencyService, 'getRate');
+      createPaymentMock = jest.spyOn(paymentRepository, 'create');
     });
 
     afterEach(() => {
@@ -299,20 +301,19 @@ describe('PaymentService', () => {
       };
 
       getPaymentMock.mockResolvedValue(paymentData);
-      savePaymentMock.mockResolvedValue(true);
-      getRateMock.mockResolvedValue(rate);
+      createPaymentMock.mockResolvedValue(true);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
       expect(paymentService.getPayment).toHaveBeenCalledWith(dto.paymentId);
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
+      expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        PaymentSource.FIAT,
-        Currency.USD,
-        Currency.EUR,
-        PaymentType.DEPOSIT,
-        BigNumber.from(paymentData.amount),
-      );
+        source: PaymentSource.FIAT,
+        currency: Currency.EUR,
+        type: PaymentType.DEPOSIT,
+        amount: paymentData.amount.toString(),
+        rate: 0.5
+      });
       expect(result).toBe(true);
     });
 
@@ -349,7 +350,7 @@ describe('PaymentService', () => {
   });
 
   describe('createCryptoPayment', () => {
-    let jsonRpcProviderMock: any, findOneMock: any, savePaymentMock: any;
+    let jsonRpcProviderMock: any, findOneMock: any, createPaymentMock: any;
 
     const mockTokenContract: any = {
       symbol: jest.fn(),
@@ -369,7 +370,7 @@ describe('PaymentService', () => {
         .mockReturnValue(mockTokenContract);
       jest.spyOn(mockTokenContract, 'symbol');
       findOneMock = jest.spyOn(paymentRepository, 'findOne');
-      savePaymentMock = jest.spyOn(paymentService, 'savePayment');
+      createPaymentMock = jest.spyOn(paymentRepository, 'create');
     });
 
     afterEach(() => {
@@ -409,22 +410,21 @@ describe('PaymentService', () => {
 
       mockTokenContract.symbol.mockResolvedValue(token);
       findOneMock.mockResolvedValue(null);
-      savePaymentMock.mockResolvedValue(true);
+      createPaymentMock.mockResolvedValue(true);
 
       const result = await paymentService.createCryptoPayment(userId, dto);
 
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
         transactionHash: dto.transactionHash,
       });
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
+      expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        PaymentSource.CRYPTO,
-        Currency.USD,
-        TokenId.HMT,
-        PaymentType.DEPOSIT,
-        BigNumber.from('100'),
-        MOCK_TRANSACTION_HASH,
-      );
+        source: PaymentSource.CRYPTO,
+        type: PaymentType.DEPOSIT,
+        currency: TokenId.HMT,
+        amount: '100',
+        rate: 0.5
+      });
       expect(result).toBe(true);
     });
 
