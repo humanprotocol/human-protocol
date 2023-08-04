@@ -12,6 +12,7 @@ import { IUserBalance } from '../../common/interfaces';
 import { JwtAuthGuard } from 'src/common/guards';
 import { RequestWithUser } from 'src/common/types';
 import { ErrorUser } from 'src/common/constants/errors';
+import { Currency } from 'src/common/enums/payment';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -26,16 +27,9 @@ export class UserController {
   public async getBalance(
     @Request() req: RequestWithUser,
   ): Promise<IUserBalance> {
-    try {
-      return this.userService.getBalance(req.user.id);
-    } catch (e) {
-      this.logger.log(
-        e.message,
-        `${UserController.name} - ${ErrorUser.BalanceCouldNotBeRetreived}`,
-      );
-      throw new UnprocessableEntityException(
-        ErrorUser.BalanceCouldNotBeRetreived,
-      );
-    }
+    return {
+      amount: req.user.balance,
+      currency: Currency.USD,
+    };
   }
 }

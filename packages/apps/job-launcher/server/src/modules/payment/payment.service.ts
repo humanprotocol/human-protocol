@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
+import { BigNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -126,7 +126,7 @@ export class PaymentService {
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: BigNumber.from(paymentData.amount).toString(),
+      amount: paymentData.amount,
       currency: paymentData.currency.toLowerCase(),
       rate
     })
@@ -178,7 +178,7 @@ export class PaymentService {
       throw new ConflictException(ErrorPayment.InvalidRecipient);
     }
 
-    const amount = BigNumber.from(transaction.logs[0].data);
+    const amount = ethers.utils.formatUnits(BigNumber.from(transaction.logs[0].data), 'ether');
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
@@ -210,7 +210,7 @@ export class PaymentService {
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount: amount.toString(),
+      amount: 1,
       currency: TokenId.HMT,
       rate,
       chainId: dto.chainId,
@@ -218,30 +218,5 @@ export class PaymentService {
     })
 
     return true;
-  }
-
-
-  public async getUserBalance(userId: number): Promise<BigNumber> {
-    const paymentEntities = await this.paymentRepository.find({ userId });
-
-    let finalAmount = BigNumber.from(0);
-
-    paymentEntities.forEach((payment) => {
-      const fixedAmount = FixedNumber.from(
-        ethers.utils.formatUnits(payment.amount, 18),
-      );
-      
-      const rate = FixedNumber.from(payment.rate);
-
-      const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
-
-      if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount = finalAmount.sub(amount);
-      } else {
-        finalAmount = finalAmount.add(amount);
-      }
-    });
-
-    return finalAmount;
   }
 }

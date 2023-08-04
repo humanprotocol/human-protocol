@@ -44,6 +44,7 @@ import { JobService } from './job.service';
 
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { PaymentRepository } from '../payment/payment.repository';
+import { UserEntity } from '../user/user.entity';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -140,10 +141,7 @@ describe('JobService', () => {
       fundAmount: 10,
     };
 
-    let getUserBalanceMock: any;
-
     beforeEach(() => {
-      getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
     });
 
@@ -152,9 +150,6 @@ describe('JobService', () => {
     });
 
     it('should create a fortune job successfully', async () => {
-      const userBalance = ethers.utils.parseUnits('15', 'ether');
-      getUserBalanceMock.mockResolvedValue(userBalance);
-
       const fundAmountInWei = ethers.utils.parseUnits(
         dto.fundAmount.toString(),
         'ether',
@@ -172,9 +167,12 @@ describe('JobService', () => {
         ).mulUnsafe(FixedNumber.from(rate.toString())),
       );
 
-      await jobService.createFortuneJob(userId, dto);
+      const userEntity: Partial<UserEntity> = {
+        id: 123, 
+        balance: 15
+      }
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      await jobService.createFortuneJob(userEntity as UserEntity, dto);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
         source: PaymentSource.BALANCE,
@@ -197,13 +195,6 @@ describe('JobService', () => {
 
     it('should throw an exception for insufficient user balance', async () => {
       const fundAmount = 10; // ETH
-      const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
-
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(userBalance);
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
 
       const dto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
@@ -213,17 +204,18 @@ describe('JobService', () => {
         fundAmount,
       };
 
+      const userEntity: Partial<UserEntity> = {
+        id: 123, 
+        balance: 1
+      }
+
       await expect(
-        jobService.createFortuneJob(userId, dto),
+        jobService.createFortuneJob(userEntity as UserEntity, dto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
     });
 
     it('should throw an exception if job entity creation fails', async () => {
       const fundAmount = 1; // ETH
-
-      const userBalance = ethers.utils.parseUnits('10', 'ether');
-
-      getUserBalanceMock.mockResolvedValue(userBalance);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -235,8 +227,13 @@ describe('JobService', () => {
         fundAmount,
       };
 
+      const userEntity: Partial<UserEntity> = {
+        id: 123, 
+        balance: 10
+      }
+
       await expect(
-        jobService.createFortuneJob(userId, dto),
+        jobService.createFortuneJob(userEntity as UserEntity, dto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });

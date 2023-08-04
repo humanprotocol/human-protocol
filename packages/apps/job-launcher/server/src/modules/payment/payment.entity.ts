@@ -17,8 +17,8 @@ export class PaymentEntity extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   public chainId: number;
 
-  @Column({ type: 'varchar' })
-  public amount: string;
+  @Column({ type: 'decimal' })
+  public amount: number;
 
   @Column({ type: 'decimal', precision: 5, scale: 2 })
   public rate: number;

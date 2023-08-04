@@ -99,13 +99,4 @@ export class UserService {
       throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
     }
   }
-
-  public async getBalance(userId: number): Promise<IUserBalance> {
-    const balance = await this.paymentService.getUserBalance(userId);
-
-    return {
-      amount: Number(ethers.utils.formatUnits(balance, 'ether')),
-      currency: Currency.USD,
-    };
-  }
 }

@@ -4,6 +4,7 @@ import { TokenId } from "../enums/payment";
 import { COINGECKO_API_URL } from "../constants";
 import { NotFoundException } from "@nestjs/common";
 import { ErrorCurrency } from "../constants/errors";
+import { HttpService } from "@nestjs/axios";
 
 export async function getRate(from: string, to: string): Promise<number> {
     let reversed = false;
@@ -14,8 +15,9 @@ export async function getRate(from: string, to: string): Promise<number> {
       reversed = true;
     }
 
+    const httpService = new HttpService()
     const { data } = await firstValueFrom(
-      this.httpService.get(
+      httpService.get(
         `${COINGECKO_API_URL}?ids=${from}&vs_currencies=${to}`,
       ),
     ) as any;
