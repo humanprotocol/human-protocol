@@ -25,14 +25,15 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
-  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
@@ -111,14 +112,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -193,14 +193,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -252,7 +251,7 @@ export class JobService {
       PaymentType.WITHDRAWAL,
       usdTotalAmount,
     );
-    
+
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
@@ -344,15 +343,20 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
-      ? new FortuneManifestDto()
-      : new ImageLabelBinaryManifestDto();
+    const dtoCheck =
+      manifest.requestType === JobRequestType.FORTUNE
+        ? new FortuneManifestDto()
+        : new ImageLabelBinaryManifestDto();
 
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
+      this.logger.log(
+        ErrorJob.ManifestValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 
@@ -385,5 +389,42 @@ export class JobService {
     }
 
     return true;
+  }
+
+  public async getResult(
+    finalResultUrl: string,
+  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+
+    if (!result) {
+      throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
+    const fortuneDtoCheck = new FortuneFinalResultDto();
+    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+
+    Object.assign(fortuneDtoCheck, result);
+    Object.assign(imageLabelBinaryDtoCheck, result);
+
+    const fortuneValidationErrors: ValidationError[] = await validate(
+      fortuneDtoCheck,
+    );
+    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
+      imageLabelBinaryDtoCheck,
+    );
+    if (
+      fortuneValidationErrors.length > 0 &&
+      imageLabelBinaryValidationErrors.length > 0
+    ) {
+      this.logger.log(
+        ErrorJob.ResultValidationFailed,
+        JobService.name,
+        fortuneValidationErrors,
+        imageLabelBinaryValidationErrors,
+      );
+      throw new NotFoundException(ErrorJob.ResultValidationFailed);
+    }
+
+    return result;
   }
 }
