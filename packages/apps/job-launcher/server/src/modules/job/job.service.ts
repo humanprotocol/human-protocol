@@ -25,7 +25,6 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
-  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -399,6 +398,31 @@ export class JobService {
 
     if (!result) {
       throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
+    const fortuneDtoCheck = new FortuneFinalResultDto();
+    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+
+    Object.assign(fortuneDtoCheck, result);
+    Object.assign(imageLabelBinaryDtoCheck, result);
+
+    const fortuneValidationErrors: ValidationError[] = await validate(
+      fortuneDtoCheck,
+    );
+    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
+      imageLabelBinaryDtoCheck,
+    );
+    if (
+      fortuneValidationErrors.length > 0 &&
+      imageLabelBinaryValidationErrors.length > 0
+    ) {
+      this.logger.log(
+        ErrorJob.ResultValidationFailed,
+        JobService.name,
+        fortuneValidationErrors,
+        imageLabelBinaryValidationErrors,
+      );
+      throw new NotFoundException(ErrorJob.ResultValidationFailed);
     }
 
     return result;

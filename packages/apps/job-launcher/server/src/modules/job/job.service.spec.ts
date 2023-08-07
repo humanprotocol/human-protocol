@@ -664,5 +664,20 @@ describe('JobService', () => {
         MOCK_FILE_URL,
       );
     });
+
+    it('should throw a NotFoundException if the result is not valid', async () => {
+      downloadFileFromUrlMock.mockResolvedValue({
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solutionNotFortune: 'good',
+      });
+
+      await expect(jobService.getResult(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ResultValidationFailed),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
   });
 });
