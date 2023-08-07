@@ -38,7 +38,6 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'exchange_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      POLYGON_MUMBAI_PRIVATE_KEY: "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
 
     depends_on:
       postgres:
