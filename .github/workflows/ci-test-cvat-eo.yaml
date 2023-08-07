@@ -3,7 +3,7 @@ name: CVAT Exchange Oracle Tests
 on:
   push:
     paths:
-      - 'packages/examples/cvat/exchange_oracle/**'
+      - 'packages/examples/cvat/exchange-oracle/**'
 
 jobs:
   cvat-exo-test:
