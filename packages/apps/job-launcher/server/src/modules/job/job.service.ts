@@ -55,6 +55,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { CurrencyService } from '../payment/currency.service';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 @Injectable()
 export class JobService {
@@ -71,6 +72,7 @@ export class JobService {
     private readonly currencyService: CurrencyService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
+    private readonly routingProtocolService: RoutingProtocolService,
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
@@ -145,7 +147,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
@@ -228,7 +230,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
