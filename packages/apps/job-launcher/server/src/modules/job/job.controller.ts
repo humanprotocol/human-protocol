@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RolesGuard } from '../../common/guards';
 import { JobCvatDto, JobFortuneDto } from './job.dto';
@@ -26,5 +33,11 @@ export class JobController {
     @Body() data: JobCvatDto,
   ): Promise<number> {
     return this.jobService.createCvatJob(req.user?.id, data);
+  }
+
+  @UseGuards(RolesGuard)
+  @Get('/result')
+  public async getResult(@Request() req: any): Promise<any> {
+    return this.jobService.getResult(req.user?.id);
   }
 }
