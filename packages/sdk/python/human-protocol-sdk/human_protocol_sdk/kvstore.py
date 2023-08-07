@@ -115,7 +115,7 @@ class KVStoreClient:
 
         if not key:
             raise KVStoreClientError("Key can not be empty")
-        if not Web3.isAddress(address):
+        if not Web3.is_address(address):
             raise KVStoreClientError(f"Invalid address: {address}")
         result = self.kvstore_contract.functions.get(address, key).call()
         return result
