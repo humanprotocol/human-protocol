@@ -48,6 +48,7 @@ import { JobService } from './job.service';
 
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { CurrencyService } from '../payment/currency.service';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -70,6 +71,7 @@ describe('JobService', () => {
   let jobRepository: JobRepository;
   let paymentService: PaymentService;
   let currencyService: CurrencyService;
+  let routingProtocolService: RoutingProtocolService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -118,6 +120,10 @@ describe('JobService', () => {
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: RoutingProtocolService,
+          useValue: createMock<RoutingProtocolService>(),
+        },
       ],
     }).compile();
 
@@ -125,6 +131,7 @@ describe('JobService', () => {
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
     paymentService = moduleRef.get(PaymentService);
+    routingProtocolService = moduleRef.get(RoutingProtocolService);
   });
 
   describe('createFortuneJob', () => {
@@ -183,6 +190,54 @@ describe('JobService', () => {
       );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        fee: jobLauncherFee.toString(),
+        fundAmount: fundAmountInWei.toString(),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
+    it('should create a fortune job successfully on network selected from round robin logic', async () => {
+      const userBalance = ethers.utils.parseUnits('15', 'ether');
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const fundAmountInWei = ethers.utils.parseUnits(
+        dto.fundAmount.toString(),
+        'ether',
+      );
+      const jobLauncherFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .div(100)
+        .mul(fundAmountInWei);
+
+      const usdTotalAmount = BigNumber.from(
+        FixedNumber.from(
+          ethers.utils.formatUnits(
+            fundAmountInWei.add(jobLauncherFee),
+            'ether',
+          ),
+        ).mulUnsafe(FixedNumber.from(rate.toString())),
+      );
+
+      jest
+        .spyOn(routingProtocolService, 'selectNetwork')
+        .mockReturnValue(ChainId.MOONBEAM);
+
+      await jobService.createFortuneJob(userId, { ...dto, chainId: undefined });
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentService.savePayment).toHaveBeenCalledWith(
+        userId,
+        PaymentSource.BALANCE,
+        Currency.USD,
+        TokenId.HMT,
+        PaymentType.WITHDRAWAL,
+        usdTotalAmount,
+      );
+      expect(jobRepository.create).toHaveBeenCalledWith({
+        chainId: ChainId.MOONBEAM,
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
