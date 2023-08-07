@@ -13,7 +13,8 @@ setuptools-pipfile = "*"
 cryptography = "*"
 minio = "*"
 validators = "*"
-web3 = "==5.24.0"
+web3 = "==6.8.*"
+aiohttp = "<4.0.0"  # broken freeze in one of dependencies
 pgpy = "*"
 
 [requires]

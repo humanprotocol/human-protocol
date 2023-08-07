@@ -145,7 +145,7 @@ class KVStoreTestCase(unittest.TestCase):
         mock_function = MagicMock()
         mock_function.return_value.call.return_value = "mock_value"
         self.kvstore.kvstore_contract.functions.get = mock_function
-        address = Web3.toChecksumAddress("0x1234567890123456789012345678901234567890")
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key"
 
         result = self.kvstore.get(address, key)
@@ -155,7 +155,7 @@ class KVStoreTestCase(unittest.TestCase):
         self.assertEqual(result, "mock_value")
 
     def test_get_empty_key(self):
-        address = Web3.toChecksumAddress("0x1234567890123456789012345678901234567890")
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = ""
         with self.assertRaises(KVStoreClientError) as cm:
             self.kvstore.get(address, key)
@@ -172,7 +172,7 @@ class KVStoreTestCase(unittest.TestCase):
         mock_function = MagicMock()
         mock_function.return_value.call.return_value = ""
         self.kvstore.kvstore_contract.functions.get = mock_function
-        address = Web3.toChecksumAddress("0x1234567890123456789012345678901234567890")
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key"
 
         result = self.kvstore.get(address, key)
@@ -193,7 +193,7 @@ class KVStoreTestCase(unittest.TestCase):
         mock_function.return_value.call.return_value = "mock_value"
         kvstore.kvstore_contract.functions.get = mock_function
 
-        address = Web3.toChecksumAddress("0x1234567890123456789012345678901234567890")
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
         key = "key"
 
         result = kvstore.get(address, key)
