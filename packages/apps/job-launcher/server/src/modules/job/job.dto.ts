@@ -180,3 +180,28 @@ export class ImageLabelBinaryManifestDto {
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
 }
+
+export class FortuneFinalResultDto {
+  @IsString()
+  exchangeAddress: string;
+
+  @IsString()
+  workerAddress: string;
+
+  @IsString()
+  solution: string;
+}
+
+export class ImageLabelBinaryFinalResultDto {
+  @IsString()
+  url: string;
+
+  @IsString()
+  final_answer: string;
+
+  @IsArray()
+  correct: string[];
+
+  @IsArray()
+  wrong: string[];
+}

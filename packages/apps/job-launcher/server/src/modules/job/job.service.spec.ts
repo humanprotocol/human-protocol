@@ -5,7 +5,7 @@ import {
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { BadGatewayException, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { BigNumber, FixedNumber, ethers } from 'ethers';
@@ -36,7 +36,9 @@ import {
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobFortuneDto,
 } from './job.dto';
@@ -658,4 +660,79 @@ describe('JobService', () => {
     });
   });
 
+  describe('getResult', () => {
+    let downloadFileFromUrlMock: any;
+
+    beforeEach(() => {
+      downloadFileFromUrlMock = jest.spyOn(
+        StorageClient,
+        'downloadFileFromUrl',
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should download and return the fortune result', async () => {
+      const fortuneResult: FortuneFinalResultDto = {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'good',
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(fortuneResult);
+
+      const result = await jobService.getResult(MOCK_FILE_URL);
+
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(fortuneResult);
+    });
+
+    it('should download and return the image binary result', async () => {
+      const imageBinaryResult: ImageLabelBinaryFinalResultDto = {
+        url: 'https://example.com',
+        final_answer: 'good',
+        correct: ['good', 'good', 'good'],
+        wrong: [''],
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(imageBinaryResult);
+
+      const result = await jobService.getResult(MOCK_FILE_URL);
+
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(imageBinaryResult);
+    });
+
+    it('should throw a NotFoundException if the result is not found', async () => {
+      downloadFileFromUrlMock.mockResolvedValue(null);
+
+      await expect(jobService.getResult(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ResultNotFound),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+
+    it('should throw a NotFoundException if the result is not valid', async () => {
+      downloadFileFromUrlMock.mockResolvedValue({
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solutionNotFortune: 'good',
+      });
+
+      await expect(jobService.getResult(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ResultValidationFailed),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+  });
 });

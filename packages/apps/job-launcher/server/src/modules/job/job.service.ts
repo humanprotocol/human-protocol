@@ -31,7 +31,9 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
@@ -389,5 +391,42 @@ export class JobService {
     }
 
     return true;
+  }
+
+  public async getResult(
+    finalResultUrl: string,
+  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+
+    if (!result) {
+      throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
+    const fortuneDtoCheck = new FortuneFinalResultDto();
+    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+
+    Object.assign(fortuneDtoCheck, result);
+    Object.assign(imageLabelBinaryDtoCheck, result);
+
+    const fortuneValidationErrors: ValidationError[] = await validate(
+      fortuneDtoCheck,
+    );
+    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
+      imageLabelBinaryDtoCheck,
+    );
+    if (
+      fortuneValidationErrors.length > 0 &&
+      imageLabelBinaryValidationErrors.length > 0
+    ) {
+      this.logger.log(
+        ErrorJob.ResultValidationFailed,
+        JobService.name,
+        fortuneValidationErrors,
+        imageLabelBinaryValidationErrors,
+      );
+      throw new NotFoundException(ErrorJob.ResultValidationFailed);
+    }
+
+    return result;
   }
 }
