@@ -56,11 +56,11 @@ class EscrowConfig:
             manifest_url (str): Manifest file url
             hash (str): Manifest file hash
         """
-        if not Web3.isAddress(recording_oracle_address):
+        if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
                 f"Invalid recording oracle address: {recording_oracle_address}"
             )
-        if not Web3.isAddress(reputation_oracle_address):
+        if not Web3.is_address(reputation_oracle_address):
             raise EscrowClientError(
                 f"Invalid reputation oracle address: {reputation_oracle_address}"
             )
@@ -116,7 +116,7 @@ class EscrowFilter:
             raise EscrowClientError(
                 "EscrowFilter class must have at least one parameter"
             )
-        if address and not Web3.isAddress(address):
+        if address and not Web3.is_address(address):
             raise EscrowClientError(f"Invalid address: {address}")
         if date_from and date_to and date_from > date_to:
             raise EscrowClientError(
@@ -175,11 +175,11 @@ class EscrowClient:
         Raises:
             EscrowClientError: If an error occurs while checking the parameters
         """
-        if not Web3.isAddress(token_address):
+        if not Web3.is_address(token_address):
             raise EscrowClientError(f"Invalid token address: {token_address}")
 
         for handler in trusted_handlers:
-            if not Web3.isAddress(handler):
+            if not Web3.is_address(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
         transaction_receipt = handle_transaction(
@@ -214,7 +214,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
@@ -272,7 +272,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         if 0 >= amount:
             raise EscrowClientError("Amount must be positive")
@@ -304,7 +304,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         if not hash:
             raise EscrowClientError("Invalid empty hash")
@@ -333,7 +333,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
@@ -369,10 +369,10 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         for recipient in recipients:
-            if not Web3.isAddress(recipient):
+            if not Web3.is_address(recipient):
                 raise EscrowClientError(f"Invalid recipient address: {recipient}")
         if len(recipients) == 0:
             raise EscrowClientError("Arrays must have any value")
@@ -415,7 +415,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
@@ -438,7 +438,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         handle_transaction(
@@ -461,10 +461,10 @@ class EscrowClient:
         Raises:
             EscrowClientError: If an error occurs while checking the parameters
         """
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         for handler in handlers:
-            if not Web3.isAddress(handler):
+            if not Web3.is_address(handler):
                 raise EscrowClientError(f"Invalid handler address: {handler}")
 
         handle_transaction(
@@ -489,7 +489,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
@@ -507,7 +507,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.manifestUrl().call()
@@ -525,7 +525,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return (
@@ -545,7 +545,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return (
@@ -567,7 +567,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.token().call()
@@ -585,7 +585,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return Status(
@@ -666,7 +666,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return (
@@ -686,7 +686,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return (
@@ -708,7 +708,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.launcher().call()
@@ -726,7 +726,7 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        if not Web3.isAddress(escrow_address):
+        if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return (
