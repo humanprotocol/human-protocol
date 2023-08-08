@@ -26,7 +26,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_webhook(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
 
         webhook_id = webhook_service.create_webhook(
@@ -47,7 +47,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
     def test_create_webhook_none_escrow_address(self):
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
         webhook_service.create_webhook(
             self.session,
@@ -74,7 +74,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_webhook_none_signature(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
 
         webhook_service.create_webhook(
             self.session,
@@ -88,7 +88,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_create_recoracle_webhook_none_s3_url(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
 
         webhook_service.create_webhook(
             self.session,
@@ -101,7 +101,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             self.session.commit()
 
     def test_get_pending_webhooks(self):
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
 
         webhook1_id = str(uuid.uuid4())
         webhook1 = Webhook(
@@ -163,7 +163,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_update_webhook_status(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
 
         webhook_id = webhook_service.create_webhook(
@@ -189,7 +189,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_update_webhook_invalid_status(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
 
         webhook_id = webhook_service.create_webhook(
@@ -207,7 +207,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_handle_webhook_success(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
 
         webhook_id = webhook_service.create_webhook(
@@ -231,7 +231,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_handle_webhook_fail(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
+        chain_id = Networks.localhost.value
         signature = "signature"
 
         webhook_id = webhook_service.create_webhook(
