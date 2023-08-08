@@ -38,6 +38,7 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'exchange_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
+
     depends_on:
       postgres:
         condition: service_started

@@ -19,7 +19,7 @@ export class InitialMigration1691063688205 implements MigrationInterface {
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "transaction" character varying NOT NULL,
                 "chain_id" integer,
-                "amount" DECIMAL NOT NULL,
+                "amount" character varying NOT NULL,
                 "rate" numeric(5, 2) NOT NULL,
                 "currency" character varying NOT NULL,
                 "type" "hmt"."payments_type_enum" NOT NULL,

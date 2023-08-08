@@ -1,7 +1,7 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { BadGatewayException, NotFoundException } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { BigNumber, FixedNumber, ethers } from 'ethers';
@@ -34,7 +34,9 @@ import {
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobFortuneDto,
 } from './job.dto';
@@ -43,6 +45,7 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { UserEntity } from '../user/user.entity';
 
@@ -71,7 +74,8 @@ describe('JobService', () => {
       jobRepository: JobRepository,
       paymentRepository: PaymentRepository,
       paymentService: PaymentService,
-      createPaymentMock: any;
+      createPaymentMock: any,
+      routingProtocolService: RoutingProtocolService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -120,6 +124,10 @@ describe('JobService', () => {
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: RoutingProtocolService,
+          useValue: createMock<RoutingProtocolService>(),
+        },
       ],
     }).compile();
 
@@ -127,6 +135,7 @@ describe('JobService', () => {
     jobRepository = moduleRef.get(JobRepository);
     paymentRepository = moduleRef.get(PaymentRepository);
     paymentService = moduleRef.get(PaymentService);
+    routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'create');
   });
 
@@ -193,6 +202,37 @@ describe('JobService', () => {
       });
     });
 
+    it('should create a fortune job successfully on network selected from round robin logic', async () => {
+      const userBalance = ethers.utils.parseUnits('15', 'ether');
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const fundAmountInWei = ethers.utils.parseUnits(
+        dto.fundAmount.toString(),
+        'ether',
+      );
+      const jobLauncherFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .div(100)
+        .mul(fundAmountInWei);
+
+      jest
+        .spyOn(routingProtocolService, 'selectNetwork')
+        .mockReturnValue(ChainId.MOONBEAM);
+
+      await jobService.createFortuneJob(userId, { ...dto, chainId: undefined });
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(jobRepository.create).toHaveBeenCalledWith({
+        chainId: ChainId.MOONBEAM,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        fee: jobLauncherFee.toString(),
+        fundAmount: fundAmountInWei.toString(),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
     it('should throw an exception for insufficient user balance', async () => {
       const fundAmount = 10; // ETH
 
@@ -218,6 +258,7 @@ describe('JobService', () => {
       const fundAmount = 1; // ETH
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
+
 
       const dto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
@@ -615,6 +656,82 @@ describe('JobService', () => {
 
       await expect(jobService.getManifest(MOCK_FILE_URL)).rejects.toThrowError(
         new NotFoundException(ErrorJob.ManifestNotFound),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+  });
+
+  describe('getResult', () => {
+    let downloadFileFromUrlMock: any;
+
+    beforeEach(() => {
+      downloadFileFromUrlMock = jest.spyOn(
+        StorageClient,
+        'downloadFileFromUrl',
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should download and return the fortune result', async () => {
+      const fortuneResult: FortuneFinalResultDto = {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'good',
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(fortuneResult);
+
+      const result = await jobService.getResult(MOCK_FILE_URL);
+
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(fortuneResult);
+    });
+
+    it('should download and return the image binary result', async () => {
+      const imageBinaryResult: ImageLabelBinaryFinalResultDto = {
+        url: 'https://example.com',
+        final_answer: 'good',
+        correct: ['good', 'good', 'good'],
+        wrong: [''],
+      };
+
+      downloadFileFromUrlMock.mockResolvedValue(imageBinaryResult);
+
+      const result = await jobService.getResult(MOCK_FILE_URL);
+
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(result).toEqual(imageBinaryResult);
+    });
+
+    it('should throw a NotFoundException if the result is not found', async () => {
+      downloadFileFromUrlMock.mockResolvedValue(null);
+
+      await expect(jobService.getResult(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ResultNotFound),
+      );
+      expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+    });
+
+    it('should throw a NotFoundException if the result is not valid', async () => {
+      downloadFileFromUrlMock.mockResolvedValue({
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solutionNotFortune: 'good',
+      });
+
+      await expect(jobService.getResult(MOCK_FILE_URL)).rejects.toThrowError(
+        new NotFoundException(ErrorJob.ResultValidationFailed),
       );
       expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
         MOCK_FILE_URL,
