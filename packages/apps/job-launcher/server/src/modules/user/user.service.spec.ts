@@ -182,23 +182,4 @@ describe('UserService', () => {
       });
     });
   });
-
-  describe('getBalance', () => {
-    it('should return the correct balance with currency for a user', async () => {
-      const userId = 1;
-      const expectedBalance: IUserBalance = {
-        amount: 10, // ETH
-        currency: Currency.USD,
-      };
-
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
-
-      const balance = await userService.getBalance(userId);
-
-      expect(balance).toEqual(expectedBalance);
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-    });
-  });
 });

@@ -24,7 +24,7 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
   ): Promise<number> {
-    return this.jobService.createFortuneJob(req.user.id, data);
+    return this.jobService.createFortuneJob(req.user, data);
   }
 
   @Post('/cvat')
@@ -32,7 +32,7 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCvatDto,
   ): Promise<number> {
-    return this.jobService.createCvatJob(req.user.id, data);
+    return this.jobService.createCvatJob(req.user, data);
   }
 
   @Get('/result')

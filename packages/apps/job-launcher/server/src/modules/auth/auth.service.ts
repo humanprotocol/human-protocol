@@ -59,7 +59,7 @@ export class AuthService {
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
-
+    
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
     // TODO: Add mail provider

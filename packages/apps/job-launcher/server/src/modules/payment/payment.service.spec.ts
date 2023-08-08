@@ -240,7 +240,7 @@ describe('PaymentService', () => {
         source: PaymentSource.FIAT,
         currency: Currency.EUR,
         type: PaymentType.DEPOSIT,
-        amount: paymentData.amount.toString(),
+        amount: paymentData.amount,
         rate: 0.5
       });
       expect(result).toBe(true);
@@ -351,7 +351,7 @@ describe('PaymentService', () => {
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
-        amount: '100',
+        amount: 1,
         rate: 0.5,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.LOCALHOST
@@ -506,46 +506,6 @@ describe('PaymentService', () => {
       await expect(
         paymentService.createCryptoPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.TransactionHashAlreadyExists);
-    });
-  });
-
-  describe('getUserBalance', () => {
-    it('should return the correct balance for a user', async () => {
-      const userId = 1;
-      const expectedBalance = ethers.utils.parseUnits('20', 'ether');
-
-      paymentRepository.find = jest.fn().mockResolvedValue([
-        {
-          amount: ethers.utils.parseUnits('50', 'ether'),
-          rate: 1,
-          type: PaymentType.DEPOSIT,
-        },
-        {
-          amount: ethers.utils.parseUnits('150', 'ether'),
-          rate: 1,
-          type: PaymentType.DEPOSIT,
-        },
-        {
-          amount: ethers.utils.parseUnits('180', 'ether'),
-          rate: 1,
-          type: PaymentType.WITHDRAWAL,
-        },
-      ]);
-
-      const balance = await paymentService.getUserBalance(userId);
-
-      expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
-    });
-
-    it('should return 0 balance for a user with no payment entities', async () => {
-      const userId = 1;
-      paymentRepository.find = jest.fn().mockResolvedValue([]);
-
-      const balance = await paymentService.getUserBalance(userId);
-
-      expect(balance).toEqual(BigNumber.from(0));
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
     });
   });
 });

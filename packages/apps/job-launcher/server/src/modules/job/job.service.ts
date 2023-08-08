@@ -57,6 +57,8 @@ import {
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
+import { UserEntity } from '../user/user.entity';
+import { v4 } from 'uuid';
 
 @Injectable()
 export class JobService {
@@ -97,7 +99,7 @@ export class JobService {
   }
 
   public async createFortuneJob(
-    userId: number,
+    user: UserEntity,
     dto: JobFortuneDto,
   ): Promise<number> {
     const {
@@ -107,9 +109,7 @@ export class JobService {
       requesterDescription,
       fundAmount,
     } = dto;
-
-    const userBalance = await this.paymentService.getUserBalance(userId);
-
+    
     const fundAmountInWei = ethers.utils.parseUnits(
       fundAmount.toString(),
       'ether',
@@ -117,19 +117,11 @@ export class JobService {
 
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .div(100)
-      .mul(fundAmountInWei);
-
-    const usdTotalAmount = BigNumber.from(
-      FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
-      ).mulUnsafe(FixedNumber.from(rate.toString())),
-    );
-
-    if (userBalance.lt(usdTotalAmount)) {
+    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!
+    const fee = (feePercentage / 100) * fundAmount
+    const usdTotalAmount = (fundAmount + fee) * rate
+    
+    if (user.balance < usdTotalAmount) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -149,11 +141,11 @@ export class JobService {
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
-      userId,
+      userId: user.id,
       manifestUrl,
       manifestHash,
-      fee: jobLauncherFee.toString(),
-      fundAmount: fundAmountInWei.toString(),
+      fee: BigNumber.from(feePercentage).div(100).mul(fundAmountInWei).toString(), // TODO: Use decimal
+      fundAmount: fundAmountInWei.toString(), // TODO: Use decimal
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -164,12 +156,14 @@ export class JobService {
     }
 
     await this.paymentRepository.create({
-      userId,
+      userId: user.id,
       source: PaymentSource.BALANCE,
       type: PaymentType.WITHDRAWAL,
-      amount: usdTotalAmount.toString(),
+      amount: -fundAmount,
       currency: TokenId.HMT,
-      rate
+      rate,
+      transaction: v4(), // TODO: Fix transaction index in payment model
+      chainId
     })
 
     jobEntity.status = JobStatus.PAID;
@@ -178,7 +172,7 @@ export class JobService {
     return jobEntity.id;
   }
 
-  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
+  public async createCvatJob(user: UserEntity, dto: JobCvatDto): Promise<number> {
     const {
       chainId,
       dataUrl,
@@ -188,9 +182,6 @@ export class JobService {
       requesterAccuracyTarget,
       fundAmount,
     } = dto;
-
-    const userBalance = await this.paymentService.getUserBalance(userId);
-
     const fundAmountInWei = ethers.utils.parseUnits(
       fundAmount.toString(),
       'ether',
@@ -198,19 +189,11 @@ export class JobService {
 
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .div(100)
-      .mul(fundAmountInWei);
-
-    const usdTotalAmount = BigNumber.from(
-      FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
-      ).mulUnsafe(FixedNumber.from(rate.toString())),
-    );
-
-    if (userBalance.lt(usdTotalAmount)) {
+    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!
+    const fee = (feePercentage / 100) * fundAmount
+    const usdTotalAmount = (fundAmount + fee) * rate
+    
+    if (user.balance < usdTotalAmount) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -231,12 +214,12 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
+      userId: user.id,
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
-      userId,
       manifestUrl,
       manifestHash,
-      fee: jobLauncherFee.toString(),
-      fundAmount: fundAmountInWei.toString(),
+      fee: BigNumber.from(feePercentage).div(100).mul(fundAmountInWei).toString(), // TODO: Use decimal
+      fundAmount: fundAmountInWei.toString(), // TODO: Use decimal
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -247,12 +230,14 @@ export class JobService {
     }
 
     await this.paymentRepository.create({
-      userId,
+      userId: user.id,
       source: PaymentSource.BALANCE,
       type: PaymentType.WITHDRAWAL,
-      amount: usdTotalAmount.toString(),
+      amount: -fundAmount,
       currency: TokenId.HMT,
-      rate
+      rate,
+      transaction: v4(), // TODO: Fix transaction index in payment model
+      chainId
     })
 
     jobEntity.status = JobStatus.PAID;
