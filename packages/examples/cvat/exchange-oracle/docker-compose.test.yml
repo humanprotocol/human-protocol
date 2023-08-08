@@ -11,6 +11,8 @@ services:
       PGDATA: '/var/lib/postgresql/data/pgdata'
     networks:
       - test-network
+    ports:
+      - 5432:5432
 
   blockchain-node:
     build: 
@@ -24,6 +26,8 @@ services:
       retries: 15
     networks:
       - test-network
+    ports:
+      - 8545:8545
 
   test:
     build:
