@@ -220,6 +220,7 @@ export class PaymentService {
     return true;
   }
 
+  
 
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
