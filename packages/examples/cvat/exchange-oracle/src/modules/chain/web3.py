@@ -28,6 +28,15 @@ def get_web3(chain_id: Networks):
             )
             w3.eth.default_account = gas_payer.address
             return w3
+        case Config.localhost.chain_id:
+            w3 = Web3(HTTPProvider(Config.localhost.rpc_api))
+            gas_payer = w3.eth.account.from_key(Config.localhost.private_key)
+            w3.middleware_onion.add(
+                construct_sign_and_send_raw_middleware(gas_payer),
+                "construct_sign_and_send_raw_middleware",
+            )
+            w3.eth.default_account = gas_payer.address
+            return w3
         case _:
             raise ValueError(f"{chain_id} is not in available list of networks.")
 

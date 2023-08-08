@@ -58,9 +58,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_get_web3_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
-            w3 = get_web3(ChainId.LOCALHOST.value)
+            w3 = get_web3(1234)
         self.assertEqual(
-            f"{ChainId.LOCALHOST.value} is not in available list of networks.",
+            "1234 is not in available list of networks.",
             str(error.exception),
         )
 
@@ -86,9 +86,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_sign_message_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
-            sign_message(ChainId.LOCALHOST.value, "message")
+            sign_message(1234, "message")
         self.assertEqual(
-            f"{ChainId.LOCALHOST.value} is not in available list of networks.",
+            "1234 is not in available list of networks.",
             str(error.exception),
         )
 

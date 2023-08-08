@@ -10,9 +10,8 @@ from tests.utils.setup_escrow import (
     create_escrow,
     fund_escrow,
     bulk_payout,
-    get_intermediate_results_url,
 )
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_URL, DEFAULT_HASH
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
 
 from human_protocol_sdk.escrow import EscrowClientError
 from human_protocol_sdk.storage import StorageClientError
