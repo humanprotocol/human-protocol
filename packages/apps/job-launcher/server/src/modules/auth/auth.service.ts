@@ -5,13 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { v4 } from 'uuid';
+
 import { ErrorAuth } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
 import {
+  AuthDto,
   ForgotPasswordDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
@@ -21,21 +22,31 @@ import {
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
-import { AuthStatus } from '../../common/enums/auth';
-import { AuthEntity } from './auth.entity';
+import { ConfigNames } from '../../common/config';
+import { ConfigService } from '@nestjs/config';
+import { createHash, randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-
+  private readonly refreshTokenExpiresIn: string;
+  private readonly salt: string;
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly tokenRepository: TokenRepository,
     private readonly authRepository: AuthRepository,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.refreshTokenExpiresIn = configService.get<string>(
+      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+      '100000000',
+    );
 
-  public async signin(data: SignInDto): Promise<string> {
+    this.salt = randomBytes(16).toString('hex');
+  }
+
+  public async signin(data: SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -68,42 +79,41 @@ export class AuthService {
   }
 
   public async logout(user: UserEntity): Promise<void> {
-    await this.authRepository.update(
-      { userId: user.id, status: AuthStatus.ACTIVE },
-      { status: AuthStatus.EXPIRED },
-    );
-    return;
+    await this.authRepository.delete({ userId: user.id });
   }
 
-  public async auth(userEntity: UserEntity): Promise<string> {
+  public async auth(userEntity: UserEntity): Promise<AuthDto> {
     const auth = await this.authRepository.findOne({ userId: userEntity.id });
-    const refreshToken = v4();
-    if (!auth) {
-      await this.authRepository.create({
-        user: userEntity,
-        refreshToken,
-        status: AuthStatus.ACTIVE,
-      });
-    } else {
-      await this.authRepository.update(
-        { id: auth.id },
-        { status: AuthStatus.ACTIVE, refreshToken },
-      );
+
+    const accessToken = await this.jwtService.signAsync({
+      email: userEntity.email,
+      userId: userEntity.id,
+    });
+
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        email: userEntity.email,
+        userId: userEntity.id,
+      },
+      {
+        expiresIn: this.refreshTokenExpiresIn,
+      },
+    );
+
+    const accessTokenHashed = this.hashToken(accessToken);
+    const refreshTokenHashed = this.hashToken(refreshToken);
+
+    if (auth) {
+      await this.logout(userEntity);
     }
 
-    return await this.jwtService.signAsync({
-      refreshToken: refreshToken,
-      email: userEntity.email,
+    await this.authRepository.create({
+      user: userEntity,
+      refreshToken: refreshTokenHashed,
+      accessToken: accessTokenHashed,
     });
-  }
 
-  public async getByRefreshToken(
-    refreshToken: string,
-  ): Promise<AuthEntity | null> {
-    return this.authRepository.findOne(
-      { refreshToken },
-      { relations: ['user'] },
-    );
+    return { accessToken, refreshToken };
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
@@ -174,5 +184,15 @@ export class AuthService {
     // Add mail provider
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
+  }
+
+  public hashToken(token: string): string {
+    const hash = createHash('sha256');
+    hash.update(token + this.salt);
+    return hash.digest('hex');
+  }
+
+  public compareToken(token: string, hashedToken: string): boolean {
+    return this.hashToken(token) === hashedToken;
   }
 }

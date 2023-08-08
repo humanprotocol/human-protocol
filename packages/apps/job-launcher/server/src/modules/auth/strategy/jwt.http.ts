@@ -1,21 +1,18 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Req, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { UserEntity } from '../../user/user.entity';
 import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
+import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
-import { AuthStatus } from '../../../common/enums/auth';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
   constructor(
+    private readonly authRepository: AuthRepository,
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {
@@ -26,28 +23,43 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
         ConfigNames.JWT_SECRET,
         'secretkey',
       ),
+      passReqToCallback: true,
     });
   }
 
-  public async validate(payload: {
-    refreshToken: string;
-    email: string;
-  }): Promise<UserEntity> {
-    const refreshToken = payload.refreshToken.toLowerCase();
-    const authEntity = await this.authService.getByRefreshToken(refreshToken);
+  public async validate(
+    @Req() request: any,
+    payload: { email: string; userId: number },
+  ): Promise<UserEntity> {
+    const auth = await this.authRepository.findOne(
+      {
+        userId: payload.userId,
+      },
+      {
+        relations: ['user'],
+      },
+    );
 
-    if (!authEntity?.user) {
-      throw new NotFoundException('User not found');
+    if (!auth?.user) {
+      throw new UnauthorizedException('User not found');
     }
 
-    if (authEntity?.user.status !== UserStatus.ACTIVE) {
+    if (auth?.user.status !== UserStatus.ACTIVE) {
       throw new UnauthorizedException('User not active');
     }
 
-    if (authEntity.status !== AuthStatus.ACTIVE) {
-      throw new UnauthorizedException('Token expired');
+    //check that the jwt exists in the database
+    const jwt = (request.headers['authorization'] as string).substring(7);
+    if (request.url === '/auth/refresh') {
+      if (!this.authService.compareToken(jwt, auth?.refreshToken)) {
+        throw new UnauthorizedException('Token expired');
+      }
+    } else {
+      if (!this.authService.compareToken(jwt, auth?.accessToken)) {
+        throw new UnauthorizedException('Token expired');
+      }
     }
 
-    return authEntity?.user;
+    return auth?.user;
   }
 }

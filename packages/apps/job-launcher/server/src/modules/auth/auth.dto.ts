@@ -4,7 +4,6 @@ import { IsEmail, IsString, Matches, IsEnum } from 'class-validator';
 import { IsConfirm, IsPassword } from '../../common/validators';
 import { TokenType } from '../auth/token.entity';
 import { UserEntity } from '../user/user.entity';
-import { AuthStatus } from '../../common/enums/auth';
 
 export class ForgotPasswordDto {
   @ApiProperty()
@@ -57,16 +56,20 @@ export class VerifyEmailDto {
   public token: string;
 }
 
+export class AuthDto {
+  public refreshToken: string;
+  public accessToken: string;
+}
+
 export class AuthCreateDto {
   public user: UserEntity;
   public refreshToken: string;
-  public status: AuthStatus;
+  public accessToken: string;
 }
 
 export class AuthUpdateDto {
-  @IsEnum(AuthStatus)
-  public status: AuthStatus;
   public refreshToken: string;
+  public accessToken: string;
 }
 
 export class TokenCreateDto {

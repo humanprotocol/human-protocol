@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { NS } from '../../common/constants';
 
-export class InitialMigration1691063688205 implements MigrationInterface {
-  name = 'InitialMigration1691063688205';
+export class InitialMigration1691485394906 implements MigrationInterface {
+  name = 'InitialMigration1691485394906';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createSchema(NS, true);
@@ -17,7 +17,7 @@ export class InitialMigration1691063688205 implements MigrationInterface {
                 "id" SERIAL NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
-                "transaction" character varying NOT NULL,
+                "transaction" character varying,
                 "chain_id" integer,
                 "amount" character varying NOT NULL,
                 "rate" numeric(5, 2) NOT NULL,
@@ -29,12 +29,18 @@ export class InitialMigration1691063688205 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_9da37db6eedec443459df3d968" ON "hmt"."payments" ("transaction")
-            WHERE (chain_Id IS NULL)
+            CREATE UNIQUE INDEX "IDX_72b30c486884d4c5be768e0ac9" ON "hmt"."payments" ("transaction")
+            WHERE (
+                    chain_Id IS NULL
+                    AND transaction IS NOT NULL
+                )
         `);
     await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_5bc46502e0f28ff5a03bf28923" ON "hmt"."payments" ("chain_id", "transaction")
-            WHERE (chain_Id IS NOT NULL)
+            CREATE UNIQUE INDEX "IDX_9b5d72797ec3ba4991cba5de4c" ON "hmt"."payments" ("chain_id", "transaction")
+            WHERE (
+                    chain_Id IS NOT NULL
+                    AND transaction IS NOT NULL
+                )
         `);
     await queryRunner.query(`
             CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
@@ -102,15 +108,12 @@ export class InitialMigration1691063688205 implements MigrationInterface {
             )
         `);
     await queryRunner.query(`
-            CREATE TYPE "hmt"."auths_status_enum" AS ENUM('ACTIVE', 'EXPIRED')
-        `);
-    await queryRunner.query(`
             CREATE TABLE "hmt"."auths" (
                 "id" SERIAL NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+                "access_token" character varying NOT NULL,
                 "refresh_token" character varying NOT NULL,
-                "status" "hmt"."auths_status_enum" NOT NULL,
                 "user_id" integer NOT NULL,
                 CONSTRAINT "REL_593ea7ee438b323776029d3185" UNIQUE ("user_id"),
                 CONSTRAINT "PK_22fc0631a651972ddc9c5a31090" PRIMARY KEY ("id")
@@ -151,9 +154,6 @@ export class InitialMigration1691063688205 implements MigrationInterface {
             DROP TABLE "hmt"."auths"
         `);
     await queryRunner.query(`
-            DROP TYPE "hmt"."auths_status_enum"
-        `);
-    await queryRunner.query(`
             DROP TABLE "hmt"."users"
         `);
     await queryRunner.query(`
@@ -178,10 +178,10 @@ export class InitialMigration1691063688205 implements MigrationInterface {
             DROP TYPE "hmt"."jobs_status_enum"
         `);
     await queryRunner.query(`
-            DROP INDEX "hmt"."IDX_5bc46502e0f28ff5a03bf28923"
+            DROP INDEX "hmt"."IDX_9b5d72797ec3ba4991cba5de4c"
         `);
     await queryRunner.query(`
-            DROP INDEX "hmt"."IDX_9da37db6eedec443459df3d968"
+            DROP INDEX "hmt"."IDX_72b30c486884d4c5be768e0ac9"
         `);
     await queryRunner.query(`
             DROP TABLE "hmt"."payments"

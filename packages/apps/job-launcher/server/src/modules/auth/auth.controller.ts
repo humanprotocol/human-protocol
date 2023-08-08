@@ -13,6 +13,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { UserCreateDto } from '../user/user.dto';
 import {
+  AuthDto,
   ForgotPasswordDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
@@ -38,7 +39,7 @@ export class AuthJwtController {
   @Public()
   @Post('/signin')
   @HttpCode(200)
-  public signin(@Body() data: SignInDto): Promise<string> {
+  public signin(@Body() data: SignInDto): Promise<AuthDto> {
     return this.authService.signin(data);
   }
 
@@ -46,7 +47,7 @@ export class AuthJwtController {
   @UseGuards(JwtAuthGuard)
   @Post('/refresh')
   @HttpCode(200)
-  async refreshToken(@Req() request: RequestWithUser): Promise<string> {
+  async refreshToken(@Req() request: RequestWithUser): Promise<AuthDto> {
     return this.authService.auth(request.user);
   }
 

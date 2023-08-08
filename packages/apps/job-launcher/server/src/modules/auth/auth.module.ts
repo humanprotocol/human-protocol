@@ -11,7 +11,7 @@ import { AuthEntity } from './auth.entity';
 import { TokenEntity } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
-import { ConfigNames } from 'src/common/config';
+import { ConfigNames } from '../../common/config';
 
 @Module({
   imports: [

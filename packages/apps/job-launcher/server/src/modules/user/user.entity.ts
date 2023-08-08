@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Auth, Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { NS } from '../../common/constants';
@@ -8,11 +8,12 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { TokenEntity } from '../auth/token.entity';
+import { AuthEntity } from '../auth/auth.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
   @Exclude()
-  @Column({ type: 'varchar', select: false })
+  @Column({ type: 'varchar' })
   public password: string;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
@@ -26,6 +27,9 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
+
+  @OneToOne(() => AuthEntity)
+  public auth: AuthEntity;
 
   @OneToOne(() => TokenEntity)
   public token: TokenEntity;
