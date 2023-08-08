@@ -10,7 +10,6 @@ import {
 import { NS } from '../../common/constants';
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
-import { AuthStatus } from '../../common/enums/auth';
 
 @Entity({ schema: NS, name: 'auths' })
 export class AuthEntity extends BaseEntity {
@@ -18,13 +17,10 @@ export class AuthEntity extends BaseEntity {
   public id: number;
 
   @Column({ type: 'varchar' })
-  public refreshToken: string;
+  public accessToken: string;
 
-  @Column({
-    type: 'enum',
-    enum: AuthStatus,
-  })
-  public status: AuthStatus;
+  @Column({ type: 'varchar' })
+  public refreshToken: string;
 
   @JoinColumn()
   @OneToOne(() => UserEntity)

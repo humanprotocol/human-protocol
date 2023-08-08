@@ -98,9 +98,6 @@ describe('UserService', () => {
       jest
         .spyOn(userRepository, 'create')
         .mockResolvedValue(createdUser as UserEntity);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
 
       const result = await userService.create(dto);
 
@@ -150,9 +147,6 @@ describe('UserService', () => {
       jest
         .spyOn(userRepository, 'findOne')
         .mockResolvedValue(userEntity as UserEntity);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
 
       const result = await userService.getByCredentials(email, password);
 
@@ -168,9 +162,6 @@ describe('UserService', () => {
       const password = 'password123';
 
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
 
       await expect(
         userService.getByCredentials(email, password),

@@ -7,11 +7,14 @@ import { UserEntity } from '../user/user.entity';
 @Entity({ schema: NS, name: 'payments' })
 @Index(['chainId', 'transaction'], {
   unique: true,
-  where: '(chain_Id IS NOT NULL)',
+  where: '(chain_Id IS NOT NULL AND transaction IS NOT NULL)',
 })
-@Index(['transaction'], { unique: true, where: '(chain_Id IS NULL)' })
+@Index(['transaction'], {
+  unique: true,
+  where: '(chain_Id IS NULL AND transaction IS NOT NULL)',
+})
 export class PaymentEntity extends BaseEntity {
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   public transaction: string;
 
   @Column({ type: 'int', nullable: true })

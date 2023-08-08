@@ -19,8 +19,8 @@ import {
   MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
+  MOCK_REFRESH_TOKEN,
 } from '../../../test/constants';
-import { AuthStatus } from '../../common/enums/auth';
 import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { PaymentService } from '../payment/payment.service';
@@ -100,7 +100,10 @@ describe('AuthService', () => {
 
     beforeEach(() => {
       getByCredentialsMock = jest.spyOn(userService, 'getByCredentials');
-      jest.spyOn(authService, 'auth').mockResolvedValue(MOCK_ACCESS_TOKEN);
+      jest.spyOn(authService, 'auth').mockResolvedValue({
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN,
+      });
     });
 
     afterEach(() => {
@@ -196,18 +199,15 @@ describe('AuthService', () => {
       jest.clearAllMocks();
     });
 
-    it('should update the authentication entities based on the given condition', async () => {
+    it('should delete the authentication entities based on email', async () => {
       const result = await authService.logout(userEntity as UserEntity);
 
       const expectedUpdateQuery = {
         userId: userEntity.id,
-        status: AuthStatus.ACTIVE,
       };
-      const expectedUpdateValues = { status: AuthStatus.EXPIRED };
 
-      expect(authRepository.update).toHaveBeenCalledWith(
+      expect(authRepository.delete).toHaveBeenCalledOnceWith(
         expectedUpdateQuery,
-        expectedUpdateValues,
       );
       expect(result).toBe(undefined);
     });
@@ -258,7 +258,6 @@ describe('AuthService', () => {
       expect(createAuthMock).toHaveBeenCalledWith({
         user: userEntity,
         refreshToken: refreshToken,
-        status: AuthStatus.ACTIVE,
       });
       expect(jwtSignMock).toHaveBeenCalledWith({
         refreshToken: refreshToken,
@@ -275,10 +274,7 @@ describe('AuthService', () => {
       const result = await authService.auth(userEntity as UserEntity);
 
       expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
-      expect(updateAuthMock).toHaveBeenCalledWith(
-        { id: authEntity.id },
-        { status: AuthStatus.ACTIVE, refreshToken },
-      );
+      expect(updateAuthMock).toHaveBeenCalledWith({ id: authEntity.id });
       expect(createAuthMock).not.toHaveBeenCalled();
       expect(jwtSignMock).toHaveBeenCalledWith({
         refreshToken: refreshToken,

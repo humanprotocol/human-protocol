@@ -9,6 +9,7 @@ export const ConfigNames = {
   PASSWORD_SECRET: 'PASSWORD_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
+  JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -47,6 +48,7 @@ export const envValidator = Joi.object({
   // Auth
   JWT_SECRET: Joi.string().default('secrete'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
+  JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   // Database
   DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
