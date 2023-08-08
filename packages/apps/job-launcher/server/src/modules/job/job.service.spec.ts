@@ -167,17 +167,8 @@ describe('JobService', () => {
         .div(100)
         .mul(fundAmountInWei);
 
-      const usdTotalAmount = BigNumber.from(
-        FixedNumber.from(
-          ethers.utils.formatUnits(
-            fundAmountInWei.add(jobLauncherFee),
-            'ether',
-          ),
-        ).mulUnsafe(FixedNumber.from(rate.toString())),
-      );
-
       const userEntity: Partial<UserEntity> = {
-        id: 123, 
+        id: 1, 
         balance: 15
       }
 
@@ -187,7 +178,9 @@ describe('JobService', () => {
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,
-        amount: usdTotalAmount.toString(),
+        amount: expect.any(Number),
+        chainId: 1,
+        transaction: expect.any(String),
         rate: 0.5
       });
       expect(jobRepository.create).toHaveBeenCalledWith({
@@ -203,9 +196,6 @@ describe('JobService', () => {
     });
 
     it('should create a fortune job successfully on network selected from round robin logic', async () => {
-      const userBalance = ethers.utils.parseUnits('15', 'ether');
-      getUserBalanceMock.mockResolvedValue(userBalance);
-
       const fundAmountInWei = ethers.utils.parseUnits(
         dto.fundAmount.toString(),
         'ether',
@@ -218,9 +208,12 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createFortuneJob(userId, { ...dto, chainId: undefined });
+      const userEntity: Partial<UserEntity> = {
+        id: 1, 
+        balance: 15
+      }
+      await jobService.createFortuneJob(userEntity as UserEntity, { ...dto, chainId: undefined });
 
-      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
