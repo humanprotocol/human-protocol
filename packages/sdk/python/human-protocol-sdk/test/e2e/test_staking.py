@@ -42,9 +42,9 @@ class StakingTestCase(unittest.TestCase):
             [self.gas_payer.address],
         ).transact()
 
-        tx_receipt = self.staking_client.w3.eth.waitForTransactionReceipt(tx_hash)
+        tx_receipt = self.staking_client.w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        events = self.staking_client.factory_contract.events.Launched().processReceipt(
+        events = self.staking_client.factory_contract.events.Launched().process_receipt(
             tx_receipt
         )
         self.escrow_address = events[0].get("args", {}).get("escrow", "")

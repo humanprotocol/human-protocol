@@ -84,7 +84,7 @@ class ServiceIntegrationTest(unittest.TestCase):
                 signed_message = sign_message(ChainId.POLYGON_MUMBAI.value, "message")
             self.assertEqual(signed_message, SIGNATURE)
 
-    def test_sign_message_mumbai(self):
+    def test_sign_message_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
             sign_message(ChainId.LOCALHOST.value, "message")
         self.assertEqual(

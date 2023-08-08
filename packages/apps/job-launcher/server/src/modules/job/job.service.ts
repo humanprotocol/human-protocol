@@ -31,7 +31,9 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
@@ -52,6 +54,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
+import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
 
@@ -70,6 +73,7 @@ export class JobService {
     private readonly paymentService: PaymentService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
+    private readonly routingProtocolService: RoutingProtocolService,
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
@@ -144,7 +148,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
@@ -227,7 +231,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
@@ -388,5 +392,42 @@ export class JobService {
     }
 
     return true;
+  }
+
+  public async getResult(
+    finalResultUrl: string,
+  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+
+    if (!result) {
+      throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
+    const fortuneDtoCheck = new FortuneFinalResultDto();
+    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+
+    Object.assign(fortuneDtoCheck, result);
+    Object.assign(imageLabelBinaryDtoCheck, result);
+
+    const fortuneValidationErrors: ValidationError[] = await validate(
+      fortuneDtoCheck,
+    );
+    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
+      imageLabelBinaryDtoCheck,
+    );
+    if (
+      fortuneValidationErrors.length > 0 &&
+      imageLabelBinaryValidationErrors.length > 0
+    ) {
+      this.logger.log(
+        ErrorJob.ResultValidationFailed,
+        JobService.name,
+        fortuneValidationErrors,
+        imageLabelBinaryValidationErrors,
+      );
+      throw new NotFoundException(ErrorJob.ResultValidationFailed);
+    }
+
+    return result;
   }
 }
