@@ -1,5 +1,4 @@
-import numpy as np
-from src.modules.webhook.agreement.measures import percent_agreement, cohens_kappa, fleiss_kappa
+from modules.agreement.measures import percent_agreement, cohens_kappa, fleiss_kappa
 
 
 def _eq_rounded(a, b, ndigits=3):
