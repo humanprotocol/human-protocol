@@ -10,6 +10,9 @@ import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
+import { ethers } from 'ethers';
+import { IUserBalance } from '../../common/interfaces';
+import { Currency } from '../../common/enums/payment';
 
 const PASSWORD_SECRET = '$2b$10$EICgM2wYixoJisgqckU9gu';
 
@@ -17,6 +20,7 @@ jest.mock('@human-protocol/sdk');
 
 describe('UserService', () => {
   let userService: UserService;
+  let paymentService: PaymentService;
   let userRepository: UserRepository;
   let configService: ConfigService;
   let httpService: HttpService;
@@ -45,6 +49,7 @@ describe('UserService', () => {
     userRepository = moduleRef.get(UserRepository);
     configService = moduleRef.get(ConfigService);
     httpService = moduleRef.get(HttpService);
+    paymentService = moduleRef.get(PaymentService);
   });
 
   describe('update', () => {
@@ -175,6 +180,23 @@ describe('UserService', () => {
         email,
         password: 'hashedPassword',
       });
+    });
+  });
+
+  describe('getBalance', () => {  
+    it('should return the correct balance with currency for a user', async () => {
+      const userId = 1;
+      const expectedBalance: IUserBalance = {
+        amount: 10, // ETH
+        currency: Currency.USD
+      }
+
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
+  
+      const balance = await userService.getBalance(userId);
+  
+      expect(balance).toEqual(expectedBalance);
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
   });
 });

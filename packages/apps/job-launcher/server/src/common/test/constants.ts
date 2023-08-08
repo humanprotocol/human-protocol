@@ -20,6 +20,12 @@ export const MOCK_REPUTATION_ORACLE_FEE = 5;
 export const MOCK_TRANSACTION_HASH =
   '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc';
 export const MOCK_EMAIL = 'test@example.com';
+export const MOCK_PASSWORD = 'password123';
+export const MOCK_HASHED_PASSWORD = 'hashedPassword';
+export const MOCK_IP = '127.0.0.1';
 export const MOCK_CUSTOMER_ID = 'customer123';
 export const MOCK_PAYMENT_ID = 'payment123';
-export const MOCK_EXPIRES_IN = 1787260813820;
+export const MOCK_ACCESS_TOKEN = 'access_token';
+export const MOCK_REFRESH_TOKEN = 'refresh_token';
+export const MOCK_EXPIRES_IN =  1000000000000000;
+export const MOCK_UID = 'mocked-uuid';

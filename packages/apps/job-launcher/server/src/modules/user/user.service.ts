@@ -15,6 +15,10 @@ import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
+import { PaymentService } from '../payment/payment.service';
+import { ethers } from 'ethers';
+import { IUserBalance } from '../../common/interfaces';
+import { Currency } from '../../common/enums/payment';
 
 @Injectable()
 export class UserService {
@@ -23,6 +27,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private readonly configService: ConfigService,
+    private readonly paymentService: PaymentService,
   ) {}
 
   public async update(userId: number, dto: UserUpdateDto): Promise<UserEntity> {
@@ -92,6 +97,15 @@ export class UserService {
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
       throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
+    }
+  }
+
+  public async getBalance(userId: number): Promise<IUserBalance> {
+    const balance = await this.paymentService.getUserBalance(userId);
+
+    return {
+      amount: Number(ethers.utils.formatUnits(balance, 'ether')),
+      currency: Currency.USD
     }
   }
 }

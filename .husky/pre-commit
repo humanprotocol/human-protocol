@@ -3,7 +3,12 @@
 
 npx lint-staged
 
-cd packages/sdk/python
-cd human-protocol-sdk && make format && git add . -u
-cd ../../../
-
+# Format python file changes
+cd packages/sdk/python/human-protocol-sdk
+diff=$(git diff --cached --name-only --diff-filter=ACM .)
+if [ -n "$diff" ]; then
+  echo "Running black on python files"
+  make format
+  git add . -u
+fi
+cd ../../../../

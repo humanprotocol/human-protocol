@@ -1,0 +1,8 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+.pytest_cache
+
+# Env file
+.env
+.python-version
+

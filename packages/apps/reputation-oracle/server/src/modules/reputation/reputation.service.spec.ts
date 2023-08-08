@@ -166,11 +166,17 @@ describe('ReputationService', () => {
 
       const result = await reputationService.getReputation(chainId, address);
 
+      const resultReputation = {
+        chainId,
+        address,
+        reputation: ReputationLevel.LOW,
+      }
+
       expect(reputationRepository.findOne).toHaveBeenCalledWith({
         chainId,
         address,
       });
-      expect(result).toEqual(reputationEntity);
+      expect(result).toEqual(resultReputation);
     });
   });
 
@@ -191,8 +197,14 @@ describe('ReputationService', () => {
 
       const result = await reputationService.getAllReputations();
 
+      const resultReputation = {
+        chainId,
+        address,
+        reputation: ReputationLevel.LOW,
+      }
+
       expect(reputationRepository.find).toHaveBeenCalled();
-      expect(result).toEqual([reputationEntity]);
+      expect(result).toEqual([resultReputation]);
     });
   });
 });
