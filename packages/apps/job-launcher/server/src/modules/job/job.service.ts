@@ -25,14 +25,15 @@ import {
   ChainId,
   EscrowClient,
   NETWORKS,
-  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  FortuneFinalResultDto,
   FortuneManifestDto,
+  ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
   JobCvatDto,
   JobFortuneDto,
@@ -54,6 +55,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { CurrencyService } from '../payment/currency.service';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 @Injectable()
 export class JobService {
@@ -70,6 +72,7 @@ export class JobService {
     private readonly currencyService: CurrencyService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
+    private readonly routingProtocolService: RoutingProtocolService,
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
@@ -111,14 +114,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -145,7 +147,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
@@ -193,14 +195,13 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(
-      Currency.USD,
-      TokenId.HMT
-    );
+    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    ).div(100).mul(fundAmountInWei);
+    )
+      .div(100)
+      .mul(fundAmountInWei);
 
     const usdTotalAmount = BigNumber.from(
       FixedNumber.from(
@@ -229,7 +230,7 @@ export class JobService {
     );
 
     const jobEntity = await this.jobRepository.create({
-      chainId,
+      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl,
       manifestHash,
@@ -252,7 +253,7 @@ export class JobService {
       PaymentType.WITHDRAWAL,
       usdTotalAmount,
     );
-    
+
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
 
@@ -344,15 +345,20 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<boolean> {
-    const dtoCheck = manifest.requestType === JobRequestType.FORTUNE
-      ? new FortuneManifestDto()
-      : new ImageLabelBinaryManifestDto();
+    const dtoCheck =
+      manifest.requestType === JobRequestType.FORTUNE
+        ? new FortuneManifestDto()
+        : new ImageLabelBinaryManifestDto();
 
     Object.assign(dtoCheck, manifest);
 
     const validationErrors: ValidationError[] = await validate(dtoCheck);
     if (validationErrors.length > 0) {
-      this.logger.log(ErrorJob.ManifestValidationFailed, JobService.name, validationErrors);
+      this.logger.log(
+        ErrorJob.ManifestValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
     }
 
@@ -385,5 +391,42 @@ export class JobService {
     }
 
     return true;
+  }
+
+  public async getResult(
+    finalResultUrl: string,
+  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+
+    if (!result) {
+      throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
+    const fortuneDtoCheck = new FortuneFinalResultDto();
+    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+
+    Object.assign(fortuneDtoCheck, result);
+    Object.assign(imageLabelBinaryDtoCheck, result);
+
+    const fortuneValidationErrors: ValidationError[] = await validate(
+      fortuneDtoCheck,
+    );
+    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
+      imageLabelBinaryDtoCheck,
+    );
+    if (
+      fortuneValidationErrors.length > 0 &&
+      imageLabelBinaryValidationErrors.length > 0
+    ) {
+      this.logger.log(
+        ErrorJob.ResultValidationFailed,
+        JobService.name,
+        fortuneValidationErrors,
+        imageLabelBinaryValidationErrors,
+      );
+      throw new NotFoundException(ErrorJob.ResultValidationFailed);
+    }
+
+    return result;
   }
 }

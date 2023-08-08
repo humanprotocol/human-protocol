@@ -10,6 +10,7 @@ import { HttpModule } from '@nestjs/axios';
 import { PaymentModule } from '../payment/payment.module';
 import { JobRepository } from './job.repository';
 import { Web3Module } from '../web3/web3.module';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 @Module({
   imports: [
@@ -20,7 +21,13 @@ import { Web3Module } from '../web3/web3.module';
     Web3Module,
   ],
   controllers: [JobController],
-  providers: [Logger, JobService, JobRepository, JobCron],
+  providers: [
+    Logger,
+    JobService,
+    JobRepository,
+    JobCron,
+    RoutingProtocolService,
+  ],
   exports: [JobService],
 })
 export class JobModule {}
