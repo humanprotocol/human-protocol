@@ -13,7 +13,7 @@ from src.modules.oracle_webhook.jobs.process_recording_oracle_webhooks import (
     process_recording_oracle_webhooks,
 )
 from src.modules.oracle_webhook.model import Webhook
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_URL
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
 from tests.utils.setup_escrow import create_escrow
 from tests.utils.setup_kvstore import store_kvstore_value
 from web3 import Web3

@@ -49,7 +49,6 @@ def create_project_and_task(session: SessionLocal) -> tuple:
         status=TaskStatuses.annotation.value,
     )
     session.add(cvat_project)
-    session.commit()
     session.add(cvat_task)
     session.commit()
 
