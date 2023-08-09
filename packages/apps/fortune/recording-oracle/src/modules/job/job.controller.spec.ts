@@ -6,12 +6,27 @@ import { of } from "rxjs";
 import { JobController } from "./job.controller";
 import { JobService } from "./job.service";
 import { Web3Service } from "../web3/web3.service";
-import { MOCK_ADDRESS, MOCK_FILE_HASH, MOCK_FILE_KEY, MOCK_FILE_URL, MOCK_HOST, MOCK_PORT, MOCK_REPUTATION_ORACLE_WEBHOOK_URL, MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL, MOCK_WEB3_PRIVATE_KEY } from "../../../test/constants";
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_HASH,
+  MOCK_FILE_KEY,
+  MOCK_FILE_URL,
+  MOCK_HOST,
+  MOCK_PORT,
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
+} from "../../../test/constants";
 import { ChainId } from "@human-protocol/sdk";
 import { JobRequestType } from "@/common/enums/job";
 
-jest.mock('@human-protocol/sdk', () => ({
-  ...jest.requireActual('@human-protocol/sdk'),
+jest.mock("@human-protocol/sdk", () => ({
+  ...jest.requireActual("@human-protocol/sdk"),
   StorageClient: jest.fn().mockImplementation(() => ({})),
 }));
 

@@ -1,3 +1,3 @@
 export enum JobRequestType {
-    FORTUNE = 'FORTUNE'
+  FORTUNE = "FORTUNE",
 }

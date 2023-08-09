@@ -1,10 +1,18 @@
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
-import { Test } from '@nestjs/testing';
-import { Web3Service } from './web3.service';
-import { MOCK_S3_ACCESS_KEY, MOCK_S3_BUCKET, MOCK_S3_ENDPOINT, MOCK_S3_PORT, MOCK_S3_SECRET_KEY, MOCK_S3_USE_SSL, MOCK_WEB3_PRIVATE_KEY } from '../../../test/constants';
-import { networkMap } from '../../common/constants/networks';
+import { ConfigModule, ConfigService, registerAs } from "@nestjs/config";
+import { Test } from "@nestjs/testing";
+import { Web3Service } from "./web3.service";
+import {
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
+} from "../../../test/constants";
+import { networkMap } from "../../common/constants/networks";
 
-describe('Web3Service', () => {
+describe("Web3Service", () => {
   let web3Service: Web3Service;
 
   beforeAll(async () => {
@@ -20,16 +28,14 @@ describe('Web3Service', () => {
           })),
         ),
       ],
-      providers: [
-        Web3Service
-      ],
+      providers: [Web3Service],
     }).compile();
 
     web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
-  describe('getSigner', () => {
-    it('should return the signer for the specified chainId', async () => {
+  describe("getSigner", () => {
+    it("should return the signer for the specified chainId", async () => {
       for (const networkKey of Object.keys(networkMap)) {
         // Iterate through the networkMap to test each chainId
         const network = networkMap[networkKey];
@@ -40,7 +46,7 @@ describe('Web3Service', () => {
       }
     });
 
-    it('should return undefined if chainId is not configured', () => {
+    it("should return undefined if chainId is not configured", () => {
       const chainId = 1;
 
       const signer = web3Service.getSigner(chainId);

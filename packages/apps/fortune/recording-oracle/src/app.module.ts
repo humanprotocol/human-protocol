@@ -16,9 +16,7 @@ import { envValidator, s3Config, serverConfig, web3Config } from "./common/confi
   ],
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV
-        ? `.env.${process.env.NODE_ENV as string}`
-        : '.env',
+      envFilePath: process.env.NODE_ENV ? `.env.${process.env.NODE_ENV as string}` : ".env",
       validationSchema: envValidator,
       load: [serverConfig, s3Config, web3Config],
     }),

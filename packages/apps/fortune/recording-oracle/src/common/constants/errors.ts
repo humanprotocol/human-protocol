@@ -9,14 +9,14 @@ export enum ErrorJob {
   NotFoundIntermediateResultsUrl = "Error while getting intermediate results url from escrow contract",
   SolutionAlreadyExists = "Solution already exists",
   AllSolutionsHaveAlreadyBeenSent = "All solutions have already been sent",
-  WebhookWasNotSent = 'Webhook was not sent',
-  ManifestNotFound = 'Manifest not found'
+  WebhookWasNotSent = "Webhook was not sent",
+  ManifestNotFound = "Manifest not found",
 }
 
 /**
  * Represents error messages related to bucket.
  */
 export enum ErrorBucket {
-  NotPublic = 'Bucket is not public',
-  UnableSaveFile = 'Unable to save file',
+  NotPublic = "Bucket is not public",
+  UnableSaveFile = "Unable to save file",
 }
