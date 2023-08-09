@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
@@ -6,12 +6,13 @@ import { JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
 
-@Entity({ schema: NS, name: 'job' })
+@Entity({ schema: NS, name: 'jobs' })
+@Index(['chainId', 'escrowAddress'], { unique: true })
 export class JobEntity extends BaseEntity implements IJob {
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   public chainId: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   public escrowAddress: string;
 
   @Column({ type: 'varchar' })
@@ -38,7 +39,7 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'int' })
   public userId: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   public retriesCount: number;
 
   @Column({ type: 'timestamptz' })

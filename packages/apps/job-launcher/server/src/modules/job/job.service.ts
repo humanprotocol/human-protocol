@@ -54,8 +54,9 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { CurrencyService } from '../payment/currency.service';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { PaymentRepository } from '../payment/payment.repository';
+import { getRate } from '../../common/utils';
 
 @Injectable()
 export class JobService {
@@ -68,8 +69,8 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
-    public readonly paymentService: PaymentService,
-    private readonly currencyService: CurrencyService,
+    private readonly paymentRepository: PaymentRepository,
+    private readonly paymentService: PaymentService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
@@ -87,7 +88,7 @@ export class JobService {
       useSSL,
     };
 
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
+    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -114,7 +115,7 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
@@ -162,14 +163,14 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    await this.paymentService.savePayment(
+    await this.paymentRepository.create({
       userId,
-      PaymentSource.BALANCE,
-      Currency.USD,
-      TokenId.HMT,
-      PaymentType.WITHDRAWAL,
-      usdTotalAmount,
-    );
+      source: PaymentSource.BALANCE,
+      type: PaymentType.WITHDRAWAL,
+      amount: usdTotalAmount.toString(),
+      currency: TokenId.HMT,
+      rate
+    })
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
@@ -195,7 +196,7 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
@@ -245,14 +246,14 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    await this.paymentService.savePayment(
+    await this.paymentRepository.create({
       userId,
-      PaymentSource.BALANCE,
-      Currency.USD,
-      TokenId.HMT,
-      PaymentType.WITHDRAWAL,
-      usdTotalAmount,
-    );
+      source: PaymentSource.BALANCE,
+      type: PaymentType.WITHDRAWAL,
+      amount: usdTotalAmount.toString(),
+      currency: TokenId.HMT,
+      rate
+    })
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();

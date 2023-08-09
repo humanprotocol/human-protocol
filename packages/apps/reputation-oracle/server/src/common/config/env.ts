@@ -49,7 +49,7 @@ export const envValidator = Joi.object({
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
-  S3_BACKET: Joi.string().default('launcher'),
+  S3_BUCKET: Joi.string().default('launcher'),
   S3_USE_SSL: Joi.string().default(false),
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),

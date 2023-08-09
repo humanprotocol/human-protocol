@@ -40,13 +40,14 @@ export class PaymentCryptoCreateDto {
 }
 
 export class PaymentCreateDto {
-  public transactionHash?: string;
+  public transaction?: string;
   public amount?: string;
   public currency?: string;
   public source?: PaymentSource;
   public userId?: number;
   public rate?: number;
   public type?: PaymentType;
+  public chainId?: number;
 }
 
 export class GetRateDto {

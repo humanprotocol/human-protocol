@@ -1,19 +1,17 @@
 import { createMock } from '@golevelup/ts-jest';
-import {
-  ChainId,
-  EscrowClient,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { BigNumber, FixedNumber, ethers } from 'ethers';
+import { ErrorBucket, ErrorJob } from '../../common/constants/errors';
 import {
-  ErrorBucket,
-  ErrorJob,
-} from '../../common/constants/errors';
-import { Currency, PaymentSource, PaymentType, TokenId } from '../../common/enums/payment';
+  Currency,
+  PaymentSource,
+  PaymentType,
+  TokenId,
+} from '../../common/enums/payment';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
@@ -32,7 +30,7 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-} from '../../common/test/constants';
+} from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
@@ -47,8 +45,8 @@ import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { CurrencyService } from '../payment/currency.service';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { PaymentRepository } from '../payment/payment.repository';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -66,12 +64,17 @@ jest.mock('@human-protocol/sdk', () => ({
   })),
 }));
 
+jest.mock('../../common/utils', () => ({
+  getRate: jest.fn().mockImplementation(() => 0.5)
+}));
+
 describe('JobService', () => {
-  let jobService: JobService;
-  let jobRepository: JobRepository;
-  let paymentService: PaymentService;
-  let currencyService: CurrencyService;
-  let routingProtocolService: RoutingProtocolService;
+  let jobService: JobService,
+      jobRepository: JobRepository,
+      paymentRepository: PaymentRepository,
+      paymentService: PaymentService,
+      createPaymentMock: any,
+      routingProtocolService: RoutingProtocolService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -115,8 +118,8 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
-        { provide: CurrencyService, useValue: createMock<CurrencyService>() },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
+        { provide: PaymentRepository, useValue: createMock<PaymentRepository>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
@@ -127,15 +130,15 @@ describe('JobService', () => {
       ],
     }).compile();
 
-    currencyService = moduleRef.get(CurrencyService);
     jobService = moduleRef.get<JobService>(JobService);
     jobRepository = moduleRef.get(JobRepository);
+    paymentRepository = moduleRef.get(PaymentRepository);
     paymentService = moduleRef.get(PaymentService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
+    createPaymentMock = jest.spyOn(paymentRepository, 'create');
   });
 
   describe('createFortuneJob', () => {
-    let userBalance: ethers.BigNumber;
     const rate = 0.5;
     const userId = 1;
     const dto: JobFortuneDto = {
@@ -150,9 +153,7 @@ describe('JobService', () => {
 
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
-
-      jest.spyOn(currencyService, 'getRate').mockResolvedValue(rate);
-      jest.spyOn(paymentService, 'savePayment').mockResolvedValue(true);
+      createPaymentMock.mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -160,34 +161,37 @@ describe('JobService', () => {
     });
 
     it('should create a fortune job successfully', async () => {
-      const userBalance = ethers.utils.parseUnits('15', 'ether')
+      const userBalance = ethers.utils.parseUnits('15', 'ether');
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       const fundAmountInWei = ethers.utils.parseUnits(
         dto.fundAmount.toString(),
         'ether',
       );
-      const jobLauncherFee = BigNumber.from(
-        MOCK_JOB_LAUNCHER_FEE,
-      ).div(100).mul(fundAmountInWei);
+      const jobLauncherFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .div(100)
+        .mul(fundAmountInWei);
 
       const usdTotalAmount = BigNumber.from(
         FixedNumber.from(
-          ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+          ethers.utils.formatUnits(
+            fundAmountInWei.add(jobLauncherFee),
+            'ether',
+          ),
         ).mulUnsafe(FixedNumber.from(rate.toString())),
       );
 
       await jobService.createFortuneJob(userId, dto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
+      expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        PaymentSource.BALANCE,
-        Currency.USD,
-        TokenId.HMT,
-        PaymentType.WITHDRAWAL,
-        usdTotalAmount,
-      );
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: usdTotalAmount.toString(),
+        rate: 0.5
+      });
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         userId,
@@ -212,15 +216,6 @@ describe('JobService', () => {
         .div(100)
         .mul(fundAmountInWei);
 
-      const usdTotalAmount = BigNumber.from(
-        FixedNumber.from(
-          ethers.utils.formatUnits(
-            fundAmountInWei.add(jobLauncherFee),
-            'ether',
-          ),
-        ).mulUnsafe(FixedNumber.from(rate.toString())),
-      );
-
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
@@ -228,14 +223,6 @@ describe('JobService', () => {
       await jobService.createFortuneJob(userId, { ...dto, chainId: undefined });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
-      expect(paymentService.savePayment).toHaveBeenCalledWith(
-        userId,
-        PaymentSource.BALANCE,
-        Currency.USD,
-        TokenId.HMT,
-        PaymentType.WITHDRAWAL,
-        usdTotalAmount,
-      );
       expect(jobRepository.create).toHaveBeenCalledWith({
         chainId: ChainId.MOONBEAM,
         userId,
@@ -252,8 +239,9 @@ describe('JobService', () => {
       const fundAmount = 10; // ETH
       const userBalance = ethers.utils.parseUnits('1', 'ether'); // 1 ETH
 
-      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(userBalance);
-
+      jest
+        .spyOn(paymentService, 'getUserBalance')
+        .mockResolvedValue(userBalance);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
@@ -273,11 +261,13 @@ describe('JobService', () => {
     it('should throw an exception if job entity creation fails', async () => {
       const fundAmount = 1; // ETH
 
-      const userBalance = ethers.utils.parseUnits('10', 'ether')
+      const userBalance = ethers.utils.parseUnits('10', 'ether');
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
+
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
+
 
       const dto: JobFortuneDto = {
         chainId: MOCK_CHAIN_ID,
@@ -302,8 +292,12 @@ describe('JobService', () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
       getManifestMock = jest.spyOn(jobService, 'getManifest');
+
+      createPaymentMock.mockResolvedValue(true);
     });
 
     afterEach(() => {
@@ -342,11 +336,16 @@ describe('JobService', () => {
 
       await jobService.launchJob(mockJobEntity as JobEntity);
 
-      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, mockJobEntity.fundAmount);
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(
+        MOCK_ADDRESS,
+        mockJobEntity.fundAmount,
+      );
       expect(mockJobEntity.escrowAddress).toBe(MOCK_ADDRESS);
       expect(mockJobEntity.status).toBe(JobStatus.LAUNCHED);
       expect(mockJobEntity.save).toHaveBeenCalled();
-      expect(jobService.getManifest).toHaveBeenCalledWith(mockJobEntity.manifestUrl);
+      expect(jobService.getManifest).toHaveBeenCalledWith(
+        mockJobEntity.manifestUrl,
+      );
     });
 
     it('should throw an unpredictable gas limit error if transfer failed', async () => {
@@ -361,7 +360,12 @@ describe('JobService', () => {
       };
 
       getManifestMock.mockResolvedValue(manifest);
-      mockTokenContract.transfer.mockRejectedValue(Object.assign(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT), { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT }));
+      mockTokenContract.transfer.mockRejectedValue(
+        Object.assign(
+          new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
+          { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT },
+        ),
+      );
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId,
@@ -374,7 +378,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow(new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT));
+      ).rejects.toThrow(
+        new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
+      );
     });
 
     it('should throw an error if the manifest does not exist', async () => {
@@ -420,9 +426,7 @@ describe('JobService', () => {
 
     it('should handle error during job launch', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        createAndSetupEscrow: jest
-          .fn()
-          .mockRejectedValue(new Error()),
+        createAndSetupEscrow: jest.fn().mockRejectedValue(new Error()),
       }));
 
       const mockJobEntity: Partial<JobEntity> = {
@@ -448,7 +452,9 @@ describe('JobService', () => {
     };
 
     beforeEach(() => {
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockTokenContract);
       getManifestMock = jest.spyOn(jobService, 'getManifest');
     });
 
@@ -458,12 +464,6 @@ describe('JobService', () => {
 
     it('should launch a job successfully', async () => {
       const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
-      const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-        .add(MOCK_RECORDING_ORACLE_FEE)
-        .add(MOCK_REPUTATION_ORACLE_FEE);
-      const totalFee = BigNumber.from(fundAmountInWei)
-        .mul(totalFeePercentage)
-        .div(100);
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
@@ -472,7 +472,7 @@ describe('JobService', () => {
         submissionsRequired: 10,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fundAmount: fundAmountInWei.toString(),
-        requestType: JobRequestType.IMAGE_LABEL_BINARY
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
       };
 
       jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
@@ -488,7 +488,9 @@ describe('JobService', () => {
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
       };
 
-      getManifestMock.mockResolvedValue(invalidManifest as ImageLabelBinaryManifestDto);
+      getManifestMock.mockResolvedValue(
+        invalidManifest as ImageLabelBinaryManifestDto,
+      );
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -549,7 +551,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.saveManifest(encryptedManifest, MOCK_BUCKET_NAME),
-      ).rejects.toThrowError(new BadGatewayException(ErrorBucket.UnableSaveFile));
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
         [encryptedManifest],
         MOCK_BUCKET_NAME,
@@ -608,7 +612,10 @@ describe('JobService', () => {
     let downloadFileFromUrlMock: any;
 
     beforeEach(() => {
-      downloadFileFromUrlMock = jest.spyOn(StorageClient, 'downloadFileFromUrl');
+      downloadFileFromUrlMock = jest.spyOn(
+        StorageClient,
+        'downloadFileFromUrl',
+      );
     });
 
     afterEach(() => {
@@ -616,17 +623,17 @@ describe('JobService', () => {
     });
 
     it('should download and return the manifest', async () => {
-      const fundAmountInWei = ethers.utils.parseUnits(
-        '10',
-        'ether',
-      );
-      const jobLauncherFee = BigNumber.from(
-        MOCK_JOB_LAUNCHER_FEE,
-      ).div(100).mul(fundAmountInWei);
+      const fundAmountInWei = ethers.utils.parseUnits('10', 'ether');
+      const jobLauncherFee = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
+        .div(100)
+        .mul(fundAmountInWei);
 
       const usdTotalAmount = BigNumber.from(
         FixedNumber.from(
-          ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
+          ethers.utils.formatUnits(
+            fundAmountInWei.add(jobLauncherFee),
+            'ether',
+          ),
         ).mulUnsafe(FixedNumber.from('10'.toString())),
       );
 

@@ -13,6 +13,7 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
+import * as bcrypt from 'bcrypt';
 
 const PASSWORD_SECRET = '$2b$10$EICgM2wYixoJisgqckU9gu';
 
@@ -87,20 +88,19 @@ describe('UserService', () => {
         password: 'password123',
         confirm: 'password123',
       };
-
+      const hashedPassword =
+        '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
       const createdUser: Partial<UserEntity> = {
         id: 1,
         email: dto.email,
-        password: 'hashedPassword',
+        password: hashedPassword,
       };
 
       jest.spyOn(userService, 'checkEmail').mockResolvedValue(undefined);
       jest
         .spyOn(userRepository, 'create')
         .mockResolvedValue(createdUser as UserEntity);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
+      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
 
       const result = await userService.create(dto);
 
@@ -108,9 +108,9 @@ describe('UserService', () => {
       expect(userRepository.create).toHaveBeenCalledWith({
         ...dto,
         email: dto.email,
-        password: 'hashedPassword',
+        password: hashedPassword,
         type: UserType.REQUESTER,
-        status: UserStatus.ACTIVE,
+        status: UserStatus.PENDING,
       });
       expect(result).toBe(createdUser);
     });
@@ -137,40 +137,32 @@ describe('UserService', () => {
   });
 
   describe('getByCredentials', () => {
+    const email = 'test@example.com';
+    const password = 'password123';
+    const hashedPassword =
+      '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
+
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email,
+      password: hashedPassword,
+    };
+
     it('should return the user entity if credentials are valid', async () => {
-      const email = 'test@example.com';
-      const password = 'password123';
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email,
-        password: 'hashedPassword',
-      };
-
       jest
         .spyOn(userRepository, 'findOne')
         .mockResolvedValue(userEntity as UserEntity);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
 
       const result = await userService.getByCredentials(email, password);
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
         email,
-        password: 'hashedPassword',
       });
       expect(result).toBe(userEntity);
     });
 
     it('should throw NotFoundException if credentials are invalid', async () => {
-      const email = 'test@example.com';
-      const password = 'password123';
-
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-      jest
-        .spyOn(userService, 'createPasswordHash')
-        .mockReturnValue('hashedPassword');
 
       await expect(
         userService.getByCredentials(email, password),
@@ -178,23 +170,24 @@ describe('UserService', () => {
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
         email,
-        password: 'hashedPassword',
       });
     });
   });
 
-  describe('getBalance', () => {  
+  describe('getBalance', () => {
     it('should return the correct balance with currency for a user', async () => {
       const userId = 1;
       const expectedBalance: IUserBalance = {
         amount: 10, // ETH
-        currency: Currency.USD
-      }
+        currency: Currency.USD,
+      };
 
-      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
-  
+      jest
+        .spyOn(paymentService, 'getUserBalance')
+        .mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
+
       const balance = await userService.getBalance(userId);
-  
+
       expect(balance).toEqual(expectedBalance);
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });

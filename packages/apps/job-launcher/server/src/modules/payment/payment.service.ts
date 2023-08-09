@@ -10,7 +10,6 @@ import Stripe from 'stripe';
 import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
-import { CurrencyService } from './currency.service';
 import {
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
@@ -18,21 +17,21 @@ import {
 } from './payment.dto';
 import {
   Currency,
-  PaymentFiatMethodType,
   PaymentSource,
   PaymentStatus,
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
-import { networkMap } from '../../common/constants/network';
-import { ConfigNames } from '../../common/config';
+import { ConfigNames, networkMap } from '../../common/config';
 import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
+import { getRate } from '../../common/utils';
+import { UserEntity } from '../user/user.entity';
 
 @Injectable()
 export class PaymentService {
@@ -42,7 +41,6 @@ export class PaymentService {
   constructor(
     private readonly web3Service: Web3Service,
     private readonly paymentRepository: PaymentRepository,
-    private readonly currencyService: CurrencyService,
     private configService: ConfigService,
   ) {
     this.stripe = new Stripe(
@@ -79,20 +77,15 @@ export class PaymentService {
   }
 
   public async createFiatPayment(
-    customerId: string,
+    user: UserEntity,
     dto: PaymentFiatCreateDto,
   ): Promise<string> {
     const { amount, currency } = dto;
 
     const params: Stripe.PaymentIntentCreateParams = {
-      payment_method_types: [PaymentFiatMethodType.CARD],
       amount: amount * 100,
       currency: currency,
     };
-
-    params.confirm = true;
-    params.customer = customerId;
-    params.payment_method_options = {};
 
     const paymentIntent = await this.stripe.paymentIntents.create(params);
 
@@ -104,14 +97,18 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.ClientSecretDoesNotExist);
     }
 
+    //TODO: save payment intent in database
+
     return paymentIntent.client_secret;
   }
 
   public async confirmFiatPayment(
     userId: number,
-    dto: PaymentFiatConfirmDto,
+    data: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    const paymentData = await this.getPayment(dto.paymentId);
+    const paymentData = await this.stripe.paymentIntents.retrieve(
+      data.paymentId,
+    );
 
     if (!paymentData) {
       this.logger.log(ErrorPayment.NotFound, PaymentService.name);
@@ -123,14 +120,16 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.NotSuccess);
     }
 
-    await this.savePayment(
+    const rate = await getRate(Currency.USD, paymentData.currency.toLowerCase());
+    
+    await this.paymentRepository.create({
       userId,
-      PaymentSource.FIAT,
-      Currency.USD,
-      paymentData.currency.toLowerCase(),
-      PaymentType.DEPOSIT,
-      BigNumber.from(paymentData.amount)
-    );
+      source: PaymentSource.FIAT,
+      type: PaymentType.DEPOSIT,
+      amount: BigNumber.from(paymentData.amount).toString(),
+      currency: paymentData.currency.toLowerCase(),
+      rate
+    })
 
     return true;
   }
@@ -141,7 +140,7 @@ export class PaymentService {
   ): Promise<boolean> {
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
-        (item) => item.network.chainId === dto.chainId,
+        (item) => item.chainId === dto.chainId,
       )?.rpcUrl,
     );
 
@@ -194,7 +193,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transactionHash: transaction.transactionHash,
+      transaction: transaction.transactionHash,
     });
 
     if (paymentEntity) {
@@ -205,62 +204,29 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionHashAlreadyExists);
     }
 
-    await this.savePayment(
+    const rate = await getRate(Currency.USD, TokenId.HMT);
+    
+    await this.paymentRepository.create({
       userId,
-      PaymentSource.CRYPTO,
-      Currency.USD,
-      TokenId.HMT,
-      PaymentType.DEPOSIT,
-      amount,
-      transaction.transactionHash
-    );
-
-    return true;
-  }
-
-  public async getPayment(
-    paymentId: string,
-  ): Promise<Stripe.Response<Stripe.PaymentIntent> | null> {
-    return this.stripe.paymentIntents.retrieve(paymentId);
-  }
-
-  public async savePayment(
-    userId: number,
-    source: PaymentSource,
-    currencyFrom: string,
-    currencyTo: string,
-    type: PaymentType,
-    amount: BigNumber,
-    transactionHash?: string
-  ): Promise<boolean> {
-    const rate = await this.currencyService.getRate(
-      currencyFrom,
-      currencyTo,
-    );
-
-    const paymentEntity = await this.paymentRepository.create({
-      userId,
+      source: PaymentSource.CRYPTO,
+      type: PaymentType.DEPOSIT,
       amount: amount.toString(),
-      currency: currencyTo,
-      source,
+      currency: TokenId.HMT,
       rate,
-      type,
-      transactionHash,
-    });
-
-    if (!paymentEntity) {
-      this.logger.log(ErrorPayment.NotFound, PaymentService.name);
-      throw new NotFoundException(ErrorPayment.NotFound);
-    }
+      chainId: dto.chainId,
+      transaction: dto.transactionHash
+    })
 
     return true;
   }
+
+  
 
   public async getUserBalance(userId: number): Promise<BigNumber> {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     let finalAmount = BigNumber.from(0);
-    
+
     paymentEntities.forEach((payment) => {
       const fixedAmount = FixedNumber.from(
         ethers.utils.formatUnits(payment.amount, 18),
