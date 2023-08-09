@@ -27,6 +27,7 @@ import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { PaymentService } from '../payment/payment.service';
 import { UserStatus } from '../../common/enums/user';
+import { SendGridService } from '../sendgrid/sendgrid.service';
 
 jest.mock('@human-protocol/sdk');
 
