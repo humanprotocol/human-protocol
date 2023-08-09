@@ -15,7 +15,7 @@ export interface IToken extends IBase {
   tokenType: TokenType;
 }
 
-@Entity({ schema: NS, name: 'token' })
+@Entity({ schema: NS, name: 'tokens' })
 export class TokenEntity extends BaseEntity implements IToken {
   @Column({ type: 'uuid', unique: true })
   @Generated('uuid')
@@ -28,7 +28,7 @@ export class TokenEntity extends BaseEntity implements IToken {
   public tokenType: TokenType;
 
   @JoinColumn()
-  @OneToOne((_type) => UserEntity)
+  @OneToOne(() => UserEntity)
   public user: UserEntity;
 
   @Column({ type: 'int' })
