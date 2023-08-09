@@ -22,6 +22,7 @@ import { JobSolutionRequestDto, SaveSoulutionsDto, SendWebhookDto } from "./job.
 import { Web3Service } from "../web3/web3.service";
 import { ErrorBucket, ErrorJob } from "../../common/constants/errors";
 import { firstValueFrom } from "rxjs";
+import { JobRequestType } from "../../common/enums/job";
 import { IManifest, ISolution } from "../../common/interfaces/job";
 
 @Injectable()
@@ -70,11 +71,16 @@ export class JobService {
     }
 
     const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { submissionsRequired }: IManifest = await StorageClient.downloadFileFromUrl(manifestUrl);
+    const { submissionsRequired, requestType }: IManifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
-    if (!submissionsRequired) {
+    if (!submissionsRequired || !requestType) {
       this.logger.log(ErrorJob.InvalidManifest, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidManifest);
+    }
+
+    if (requestType !== JobRequestType.FORTUNE) {
+      this.logger.log(ErrorJob.InvalidJobType, JobService.name);
+      throw new BadRequestException(ErrorJob.InvalidJobType);
     }
 
     // TODO: Develop a generic error handler for ethereum errors
