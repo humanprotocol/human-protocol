@@ -8,7 +8,7 @@ import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
 import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
-import { TOKEN_PREFIX } from '../../../common/constants';
+import { JWT_PREFIX } from '../../../common/constants';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -51,8 +51,8 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
 
     //check that the jwt exists in the database
     let jwt = request.headers['authorization'] as string;
-    if (jwt.toLowerCase().substring(0, TOKEN_PREFIX.length) === TOKEN_PREFIX) {
-      jwt = jwt.substring(TOKEN_PREFIX.length);
+    if (jwt.toLowerCase().substring(0, JWT_PREFIX.length) === JWT_PREFIX) {
+      jwt = jwt.substring(JWT_PREFIX.length);
     }
     if (request.url === '/auth/refresh') {
       if (!this.authService.compareToken(jwt, auth?.refreshToken)) {
