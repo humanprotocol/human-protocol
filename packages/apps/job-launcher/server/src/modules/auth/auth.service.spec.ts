@@ -11,17 +11,22 @@ import { AuthEntity } from './auth.entity';
 import { UserService } from '../user/user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserEntity } from '../user/user.entity';
-import { UserStatus } from '../../common/enums/user';
 import { AuthRepository } from './auth.repository';
 import { ErrorAuth } from '../../common/constants/errors';
-import { MOCK_ACCESS_TOKEN, MOCK_EMAIL, MOCK_EXPIRES_IN, MOCK_HASHED_PASSWORD, MOCK_IP, MOCK_PASSWORD, MOCK_REFRESH_TOKEN } from '../../common/test/constants';
-import { AuthStatus } from '../../common/enums/auth';
-import { IJwt } from '../../common/interfaces/auth';
+import {
+  MOCK_ACCESS_TOKEN,
+  MOCK_ACCESS_TOKEN_HASHED,
+  MOCK_EMAIL,
+  MOCK_EXPIRES_IN,
+  MOCK_HASHED_PASSWORD,
+  MOCK_PASSWORD,
+  MOCK_REFRESH_TOKEN,
+  MOCK_REFRESH_TOKEN_HASHED,
+} from '../../../test/constants';
 import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { PaymentService } from '../payment/payment.service';
-import { SendGridService } from '../sendgrid/sendgrid.service';
-
+import { UserStatus } from '../../common/enums/user';
 
 jest.mock('@human-protocol/sdk');
 
@@ -43,8 +48,6 @@ describe('AuthService', () => {
         switch (key) {
           case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
             return MOCK_EXPIRES_IN;
-          case 'JWT_REFRESH_TOKEN_EXPIRES_IN':
-            return MOCK_EXPIRES_IN;
         }
       }),
     };
@@ -60,7 +63,7 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: {
-            sign: jest.fn(),
+            signAsync: jest.fn(),
           },
         },
         { provide: AuthRepository, useValue: createMock<AuthRepository>() },
@@ -94,21 +97,17 @@ describe('AuthService', () => {
       id: 1,
       email: signInDto.email,
       password: MOCK_HASHED_PASSWORD,
-    };
-
-
-    const jwt: IJwt = {
-      accessToken: MOCK_ACCESS_TOKEN,
-      refreshToken: MOCK_REFRESH_TOKEN,
-      accessTokenExpiresAt: MOCK_EXPIRES_IN,
-      refreshTokenExpiresAt: MOCK_EXPIRES_IN,
+      status: UserStatus.ACTIVE,
     };
 
     let getByCredentialsMock: any;
 
     beforeEach(() => {
       getByCredentialsMock = jest.spyOn(userService, 'getByCredentials');
-      jest.spyOn(authService, 'auth').mockResolvedValue(jwt);
+      jest.spyOn(authService, 'auth').mockResolvedValue({
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN,
+      });
     });
 
     afterEach(() => {
@@ -118,20 +117,23 @@ describe('AuthService', () => {
     it('should sign in the user and return the JWT', async () => {
       getByCredentialsMock.mockResolvedValue(userEntity as UserEntity);
 
-      const result = await authService.signin(signInDto, MOCK_IP);
+      const result = await authService.signin(signInDto);
 
       expect(userService.getByCredentials).toHaveBeenCalledWith(
         signInDto.email,
         signInDto.password,
       );
-      expect(authService.auth).toHaveBeenCalledWith(userEntity, MOCK_IP);
-      expect(result).toBe(jwt);
+      expect(authService.auth).toHaveBeenCalledWith(userEntity);
+      expect(result).toStrictEqual({
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN,
+      });
     });
 
     it('should throw UnauthorizedException if user credentials are invalid', async () => {
       getByCredentialsMock.mockResolvedValue(undefined);
 
-      await expect(authService.signin(signInDto, MOCK_IP)).rejects.toThrow(
+      await expect(authService.signin(signInDto)).rejects.toThrow(
         ErrorAuth.InvalidEmailOrPassword,
       );
 
@@ -161,8 +163,7 @@ describe('AuthService', () => {
       user: userEntity,
     };
 
-    let createUserMock: any,
-        createTokenMock: any;
+    let createUserMock: any, createTokenMock: any;
 
     beforeEach(() => {
       createUserMock = jest.spyOn(userService, 'create');
@@ -188,10 +189,11 @@ describe('AuthService', () => {
     });
   });
 
-
   describe('logout', () => {
     let updateAuth: any;
-    const where = { userId: 1 };
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+    };
 
     const updateResult = {};
 
@@ -204,145 +206,130 @@ describe('AuthService', () => {
       jest.clearAllMocks();
     });
 
-    it('should update the authentication entities based on the given condition', async () => {
-      const result = await authService.logout(where);
+    it('should delete the authentication entities based on email', async () => {
+      const result = await authService.logout(userEntity as UserEntity);
 
-      const expectedUpdateQuery = { ...where, status: AuthStatus.ACTIVE };
-      const expectedUpdateValues = { status: AuthStatus.EXPIRED };
+      const expectedUpdateQuery = {
+        userId: userEntity.id,
+      };
 
-      expect(authRepository.update).toHaveBeenCalledWith(expectedUpdateQuery, expectedUpdateValues);
+      expect(authRepository.delete).toHaveBeenCalledWith(expectedUpdateQuery);
       expect(result).toBe(undefined);
     });
   });
 
-
-  describe('refresh', () => {
-    it('should refresh the JWT for a valid user and return the new JWT', async () => {
-      const where = { id: 1 };
-
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: MOCK_EMAIL,
-        password: MOCK_HASHED_PASSWORD,
-        status: UserStatus.ACTIVE,
-      };
-
-      const authEntity: Partial<AuthEntity> = {
-        id: 1,
-        user: userEntity as UserEntity,
-        refreshTokenExpiresAt: MOCK_EXPIRES_IN,
-      };
-
-      jest
-        .spyOn(authRepository, 'findOne')
-        .mockResolvedValue(authEntity as AuthEntity);
-
-      const jwt: IJwt = {
-        accessToken: MOCK_ACCESS_TOKEN,
-        refreshToken: MOCK_REFRESH_TOKEN,
-        accessTokenExpiresAt: MOCK_EXPIRES_IN,
-        refreshTokenExpiresAt: MOCK_EXPIRES_IN,
-      };
-
-      jest.spyOn(authService, 'auth').mockResolvedValue(jwt);
-
-      const result = await authService.refresh(where, MOCK_IP);
-
-      expect(authRepository.findOne).toHaveBeenCalledWith(where, {
-        relations: ['user'],
-      });
-      expect(authService.auth).toHaveBeenCalledWith(authEntity.user, MOCK_IP);
-      expect(result).toBe(jwt);
-    });
-
-    it('should throw UnauthorizedException if the refresh token has expired', async () => {
-      const where = { id: 1 };
-
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        email: MOCK_EMAIL,
-        password: MOCK_HASHED_PASSWORD,
-        status: UserStatus.ACTIVE,
-      };
-
-      const authEntity: Partial<AuthEntity> = {
-        id: 1,
-        user: userEntity as UserEntity,
-        refreshTokenExpiresAt: Date.now() - 86400 * 1000,
-      };
-
-      jest
-        .spyOn(authRepository, 'findOne')
-        .mockResolvedValue(authEntity as AuthEntity);
-
-      await expect(authService.refresh(where, MOCK_IP)).rejects.toThrow(
-        ErrorAuth.RefreshTokenHasExpired,
-      );
-
-      expect(authRepository.findOne).toHaveBeenCalledWith(where, {
-        relations: ['user'],
-      });
-    });
-
-    it('should throw UnauthorizedException if the user is not active', async () => {
-      const where = { id: 1 };
-
-
-      const userEntity: Partial<UserEntity> = {
-        id: 1,
-        status: UserStatus.INACTIVE,
-      };
-
-      const authEntity: Partial<AuthEntity> = {
-        id: 1,
-        user: userEntity as UserEntity,
-        refreshTokenExpiresAt: MOCK_EXPIRES_IN,
-      };
-
-      jest
-        .spyOn(authRepository, 'findOne')
-        .mockResolvedValue(authEntity as AuthEntity);
-
-      await expect(authService.refresh(where, MOCK_IP)).rejects.toThrow(
-        ErrorAuth.UserNotActive,
-      );
-
-      expect(authRepository.findOne).toHaveBeenCalledWith(where, {
-        relations: ['user'],
-      });
-    });
-  });
-
   describe('auth', () => {
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email: 'user@example.com',
+    };
+
+    const authEntity: Partial<AuthEntity> = {
+      id: 1,
+    };
+
+    let createAuthMock: any;
+    let updateAuthMock: any;
+    let jwtSignMock: any;
+    let hashTokenMock: any;
+    let logoutMock: any;
+    beforeEach(() => {
+      createAuthMock = jest
+        .spyOn(authRepository, 'create' as any)
+        .mockResolvedValueOnce(authEntity);
+
+      updateAuthMock = jest
+        .spyOn(authRepository, 'update' as any)
+        .mockResolvedValueOnce(authEntity);
+
+      jwtSignMock = jest
+        .spyOn(jwtService, 'signAsync')
+        .mockResolvedValueOnce(MOCK_ACCESS_TOKEN)
+        .mockResolvedValueOnce(MOCK_REFRESH_TOKEN);
+
+      hashTokenMock = jest
+        .spyOn(authService, 'hashToken')
+        .mockReturnValueOnce(MOCK_ACCESS_TOKEN_HASHED)
+        .mockReturnValueOnce(MOCK_REFRESH_TOKEN_HASHED);
+      logoutMock = jest
+        .spyOn(authService, 'logout' as any)
+        .mockResolvedValueOnce(undefined);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should create authentication tokens and return them', async () => {
-      const userEntity: Partial<UserEntity> = { id: 1, email: 'user@example.com' };
-      const refreshToken = v4();
-      const accessToken = MOCK_ACCESS_TOKEN
+      const findAuthMock = jest
+        .spyOn(authRepository, 'findOne' as any)
+        .mockResolvedValueOnce(undefined);
 
-      const logoutMock = jest.spyOn(authService, 'logout').mockResolvedValueOnce(undefined);
-      const createAuthMock = jest.spyOn(authRepository, 'create' as any).mockResolvedValueOnce(undefined);
-      const jwtSignMock = jest.spyOn(jwtService, 'sign').mockReturnValue(accessToken);
+      const result = await authService.auth(userEntity as UserEntity);
 
-      const result = await authService.auth(userEntity as UserEntity, MOCK_IP);
-
-      expect(logoutMock).toHaveBeenCalledWith({ userId: userEntity.id });
+      expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
+      expect(updateAuthMock).not.toHaveBeenCalled();
       expect(createAuthMock).toHaveBeenCalledWith({
         user: userEntity,
-        refreshToken,
-        refreshTokenExpiresAt: expect.any(Number),
-        ip: MOCK_IP,
-        status: AuthStatus.ACTIVE,
+        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
+        accessToken: MOCK_ACCESS_TOKEN_HASHED,
       });
-      expect(jwtSignMock).toHaveBeenCalledWith({ email: userEntity.email }, { expiresIn: expect.any(Number) });
+      expect(jwtSignMock).toHaveBeenCalledWith({
+        email: userEntity.email,
+        userId: userEntity.id,
+      });
+      expect(jwtSignMock).toHaveBeenLastCalledWith(
+        {
+          email: userEntity.email,
+          userId: userEntity.id,
+        },
+        {
+          expiresIn: undefined,
+        },
+      );
+      expect(logoutMock).not.toHaveBeenCalled();
+      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
+      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
       expect(result).toEqual({
-        accessToken,
-        refreshToken,
-        accessTokenExpiresAt: expect.any(Number),
-        refreshTokenExpiresAt: expect.any(Number)
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN,
+      });
+    });
+
+    it('should logout, create authentication tokens and return them', async () => {
+      const findAuthMock = jest
+        .spyOn(authRepository, 'findOne' as any)
+        .mockResolvedValueOnce(authEntity);
+
+      const result = await authService.auth(userEntity as UserEntity);
+
+      expect(findAuthMock).toHaveBeenCalledWith({ userId: userEntity.id });
+      expect(updateAuthMock).not.toHaveBeenCalled();
+      expect(createAuthMock).toHaveBeenCalledWith({
+        user: userEntity,
+        refreshToken: MOCK_REFRESH_TOKEN_HASHED,
+        accessToken: MOCK_ACCESS_TOKEN_HASHED,
+      });
+      expect(jwtSignMock).toHaveBeenCalledWith({
+        email: userEntity.email,
+        userId: userEntity.id,
+      });
+      expect(jwtSignMock).toHaveBeenLastCalledWith(
+        {
+          email: userEntity.email,
+          userId: userEntity.id,
+        },
+        {
+          expiresIn: undefined,
+        },
+      );
+      expect(logoutMock).toHaveBeenCalled();
+      expect(hashTokenMock).toHaveBeenCalledWith(MOCK_ACCESS_TOKEN);
+      expect(hashTokenMock).toHaveBeenLastCalledWith(MOCK_REFRESH_TOKEN);
+      expect(result).toEqual({
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN,
       });
     });
   });
 });
-

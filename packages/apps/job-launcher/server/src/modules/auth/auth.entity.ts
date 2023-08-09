@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Generated,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -9,35 +10,22 @@ import {
 import { NS } from '../../common/constants';
 import { UserEntity } from '../user/user.entity';
 import { BaseEntity } from '../../database/base.entity';
-import { AuthStatus } from '../../common/enums/auth';
 
-@Entity({ schema: NS, name: 'auth' })
+@Entity({ schema: NS, name: 'auths' })
 export class AuthEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
   @Column({ type: 'varchar' })
+  public accessToken: string;
+
+  @Column({ type: 'varchar' })
   public refreshToken: string;
 
-  @Column({ type: 'bigint' })
-  public refreshTokenExpiresAt: number;
-
-  @Column({
-    type: 'enum',
-    enum: AuthStatus,
-  })
-  public status: AuthStatus;
-
   @JoinColumn()
-  @OneToOne((_type) => UserEntity)
+  @OneToOne(() => UserEntity)
   public user: UserEntity;
 
   @Column({ type: 'int' })
   public userId: number;
-
-  @Column({
-    type: 'varchar',
-    select: false,
-  })
-  public ip: string;
 }
