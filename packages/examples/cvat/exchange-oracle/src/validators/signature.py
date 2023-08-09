@@ -20,7 +20,7 @@ async def validate_webhook_signature(request: Request, signature: str, webhook: 
 
     if signer.lower() != job_launcher_address.lower():
         raise ValueError(
-            f"Webhook sender address doesn't match. Excpected: {job_launcher_address}, received: {signer}."
+            f"Webhook sender address doesn't match. Expected: {job_launcher_address}, received: {signer}."
         )
 
 
