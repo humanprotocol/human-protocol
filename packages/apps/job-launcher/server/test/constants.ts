@@ -26,4 +26,6 @@ export const MOCK_CUSTOMER_ID = 'customer123';
 export const MOCK_PAYMENT_ID = 'payment123';
 export const MOCK_ACCESS_TOKEN = 'access_token';
 export const MOCK_REFRESH_TOKEN = 'refresh_token';
+export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
+export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
 export const MOCK_EXPIRES_IN = 1000000000000000;
