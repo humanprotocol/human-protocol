@@ -4,4 +4,4 @@ export const COINGECKO_API_URL =
 export const JOB_RETRIES_COUNT_THRESHOLD = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
 
-export const TOKEN_PREFIX = 'bearer ';
+export const JWT_PREFIX = 'bearer ';
