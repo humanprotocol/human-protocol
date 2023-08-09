@@ -1,7 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
 
-import { SendGridConstants } from './sendgrid.constants';
 import {
   SendGridModuleOptions,
   SendGridModuleOptionsFactory,
@@ -16,7 +15,7 @@ describe('SendGridModule', () => {
         module: SendGridModule,
         providers: [
           {
-            provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+            provide: 'SENDGRID_MODULE_OPTIONS',
             useValue: {},
           },
           MailService,

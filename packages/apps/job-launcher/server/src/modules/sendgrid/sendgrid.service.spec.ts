@@ -1,7 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { MailService } from '@sendgrid/mail';
-import { SendGridConstants } from './sendgrid.constants';
 import { SendGridModuleOptions } from './sendgrid.interfaces';
 import { SendGridService } from './sendgrid.service';
 
@@ -21,7 +20,7 @@ describe('SendGridService', () => {
         providers: [
           SendGridService,
           {
-            provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+            provide: 'SENDGRID_MODULE_OPTIONS',
             useValue: {} as SendGridModuleOptions,
           },
           MailService,
@@ -40,7 +39,7 @@ describe('SendGridService', () => {
         providers: [
           SendGridService,
           {
-            provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+            provide: 'SENDGRID_MODULE_OPTIONS',
             useValue: {} as SendGridModuleOptions,
           },
           MailService,
@@ -59,7 +58,7 @@ describe('SendGridService', () => {
         providers: [
           SendGridService,
           {
-            provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+            provide: 'SENDGRID_MODULE_OPTIONS',
             useValue: {
               substitutionWrappers: {
                 left: 'left',
@@ -82,7 +81,7 @@ describe('SendGridService', () => {
       providers: [
         SendGridService,
         {
-          provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+          provide: 'SENDGRID_MODULE_OPTIONS',
           useValue: {} as SendGridModuleOptions,
         },
         MailService,
@@ -114,7 +113,7 @@ describe('SendGridService', () => {
       providers: [
         SendGridService,
         {
-          provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+          provide: 'SENDGRID_MODULE_OPTIONS',
           useValue: {
             defaultMailData: {
               from: 'test@example.com',
@@ -191,7 +190,7 @@ describe('SendGridService', () => {
       providers: [
         SendGridService,
         {
-          provide: SendGridConstants.SENDGRID_MODULE_OPTIONS,
+          provide: 'SENDGRID_MODULE_OPTIONS',
           useValue: {} as SendGridModuleOptions,
         },
         MailService,

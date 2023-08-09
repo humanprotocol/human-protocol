@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   ClientResponse,
   MailDataRequired,
@@ -6,16 +6,16 @@ import {
   ResponseError,
 } from '@sendgrid/mail';
 import * as deepmerge from 'deepmerge';
-import { SendGridConstants } from './sendgrid.constants';
 import { SendGridModuleOptions } from './sendgrid.interfaces';
-import { logger } from './sendgrid.logger';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class SendGridService {
+  public readonly logger = new Logger(SendGridService.name);
+
   constructor(
-    @Inject(SendGridConstants.SENDGRID_MODULE_OPTIONS)
+    @Inject('SENDGRID_MODULE_OPTIONS')
     private readonly options: SendGridModuleOptions,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -23,7 +23,7 @@ export class SendGridService {
     this.mailService.setApiKey(
       this.configService.get<string>(ConfigNames.SENDGRID_API_KEY) || '',
     );
-    logger.log('Set API Key');
+    this.logger.log('Set API Key');
 
     if (
       options.substitutionWrappers &&
@@ -34,7 +34,7 @@ export class SendGridService {
         options.substitutionWrappers.left,
         options.substitutionWrappers.right,
       );
-      logger.log('Set Substitution Wrappers');
+      this.logger.log('Set Substitution Wrappers');
     }
   }
 
