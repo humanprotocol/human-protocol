@@ -8,6 +8,7 @@ import { UserStatus } from '../../../common/enums/user';
 import { ConfigNames } from '../../../common/config';
 import { AuthRepository } from '../auth.repository';
 import { AuthService } from '../auth.service';
+import { TOKEN_PREFIX } from '../../../common/constants';
 
 @Injectable()
 export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
@@ -49,7 +50,10 @@ export class JwtHttpStrategy extends PassportStrategy(Strategy, 'jwt-http') {
     }
 
     //check that the jwt exists in the database
-    const jwt = (request.headers['authorization'] as string).substring(7);
+    let jwt = request.headers['authorization'] as string;
+    if (jwt.toLowerCase().substring(0, TOKEN_PREFIX.length) === TOKEN_PREFIX) {
+      jwt = jwt.substring(TOKEN_PREFIX.length);
+    }
     if (request.url === '/auth/refresh') {
       if (!this.authService.compareToken(jwt, auth?.refreshToken)) {
         throw new UnauthorizedException('Token expired');
