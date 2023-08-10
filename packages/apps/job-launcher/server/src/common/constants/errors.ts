@@ -8,6 +8,8 @@ export enum ErrorJob {
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
   WebhookWasNotSent = 'Webhook was not sent',
+  ResultNotFound = 'Result not found',
+  ResultValidationFailed = 'Result validation failed',
 }
 
 /**
@@ -25,6 +27,8 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
+  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  InvalidCredentials = 'Invalid credentials',
 }
 
 /**
@@ -61,6 +65,7 @@ export enum ErrorPayment {
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
   UnsupportedToken = 'Unsupported token',
   InvalidRecipient = 'Invalid recipient',
+  ChainIdMissing = 'ChainId is missing',
 }
 
 /**

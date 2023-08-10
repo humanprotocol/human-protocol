@@ -8,48 +8,43 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from '../../common/guards';
+import { JwtAuthGuard } from 'src/common/guards';
+import { RequestWithUser } from 'src/common/types';
 
-import { PaymentService } from './payment.service';
 import {
   GetRateDto,
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
 } from './payment.dto';
-import { CurrencyService } from './currency.service';
+import { PaymentService } from './payment.service';
+import { getRate } from '../../common/utils';
 
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
 @Controller('/payment')
 export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
-    private readonly currencyService: CurrencyService,
   ) {}
 
-  @UseGuards(RolesGuard)
   @Post('/fiat')
   public async createFiatPayment(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatCreateDto,
   ): Promise<string> {
-    return this.paymentService.createFiatPayment(
-      req.user?.stripeCustomerId,
-      data,
-    );
+    return this.paymentService.createFiatPayment(req.user, data);
   }
 
-  @UseGuards(RolesGuard)
   @Post('/fiat/confirm-payment')
   public async confirmFiatPayment(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: PaymentFiatConfirmDto,
   ): Promise<boolean> {
-    return this.paymentService.confirmFiatPayment(req.user?.id, data);
+    return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Post('/crypto')
   public async createCryptoPayment(
     @Request() req: any,
@@ -58,11 +53,10 @@ export class PaymentController {
     return this.paymentService.createCryptoPayment(req.user?.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {
-      return this.currencyService.getRate(data.currency, data.token);
+      return getRate(data.currency, data.token);
     } catch (e) {
       throw new Error(e);
     }

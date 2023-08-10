@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 from human_protocol_sdk.constants import Status
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
 from src.modules.api_schema import OracleWebhook
 from tests.utils.constants import (
     DEFAULT_GAS_PAYER as JOB_LAUNCHER,
@@ -10,6 +11,12 @@ from tests.utils.constants import (
 )
 
 
+class PolygonMumbaiConfig:
+    chain_id = 80001
+    rpc_api = "http://blockchain-node:8545/"
+    private_key = DEFAULT_GAS_PAYER_PRIV
+
+
 def test_incoming_webhook_200(client: TestClient) -> None:
     with patch("src.modules.api.SessionLocal.begin") as mock_session_local, patch(
         "src.modules.api.create_webhook"
@@ -17,7 +24,9 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         "src.modules.chain.escrow.get_web3"
     ) as mock_get_web3, patch(
         "src.modules.chain.escrow.EscrowClient"
-    ) as mock_escrow_client:
+    ) as mock_escrow_client, patch(
+        "src.modules.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
+    ):
         mock_session = MagicMock()
         mock_session_local.return_value.__enter__.return_value = mock_session
         mock_create_webhook.return_value = "mocked_webhook_id"
@@ -42,13 +51,13 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         mock_get_web3.assert_called()
         mock_escrow_client.assert_called_with(mock_web3_instance)
         mock_escrow_instance.get_balance.assert_called_once_with(
-            "0xFE776895f6b00AA53969b20119a4777Ed920676a"
+            "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6"
         )
         mock_escrow_instance.get_status.assert_called_once_with(
-            "0xFE776895f6b00AA53969b20119a4777Ed920676a"
+            "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6"
         )
         mock_escrow_instance.get_job_launcher_address.assert_called_once_with(
-            "0xFE776895f6b00AA53969b20119a4777Ed920676a"
+            "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6"
         )
         mock_session_local.assert_called_once()
         mock_create_webhook.assert_called_once_with(
@@ -56,7 +65,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
             WEBHOOK_MESSAGE["escrow_address"],
             WEBHOOK_MESSAGE["chain_id"],
             "job_launcher",
-            "0x653242fc57766948d0e84c8466b1d52ce701a20fc6b08b5c1bee361aa8c480a61470db594dccb5724345712a216c35aa14be7d435faaa596a7ffba7f476887bb1b",
+            WEBHOOK_MESSAGE_SIGNED,
         )
 
 
@@ -85,7 +94,7 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     # Invalid Chain Id
     data = {
-        "escrow_address": "0xFE776895f6b00AA53969b20119a4777Ed920676a",
+        "escrow_address": "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6",
         "chain_id": 1234,
     }
 
@@ -109,7 +118,9 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.modules.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.modules.chain.escrow.EscrowClient"
-    ) as mock_escrow_client:
+    ) as mock_escrow_client, patch(
+        "src.modules.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
+    ):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 
@@ -131,7 +142,9 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.modules.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.modules.chain.escrow.EscrowClient"
-    ) as mock_escrow_client:
+    ) as mock_escrow_client, patch(
+        "src.modules.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
+    ):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 
@@ -155,7 +168,9 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.modules.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.modules.chain.escrow.EscrowClient"
-    ) as mock_escrow_client:
+    ) as mock_escrow_client, patch(
+        "src.modules.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
+    ):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 
@@ -172,5 +187,5 @@ def test_incoming_webhook_400(client: TestClient) -> None:
         )
         assert response.status_code == 400
         assert response.json() == {
-            "message": "Webhook sender address doesn't match. Excpected: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, received: 0xaF32359A1Ac2f8E2203fc37C0ce8ca04cc4459e1."
+            "message": "Webhook sender address doesn't match. Expected: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, received: 0x44EA19Fbb88cF0884867F81BE0363A469cBEa9AE."
         }

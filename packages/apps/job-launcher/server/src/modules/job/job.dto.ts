@@ -7,6 +7,7 @@ import {
   IsString,
   IsUrl,
   IsDate,
+  IsOptional,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
@@ -27,7 +28,8 @@ export class JobFortuneDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  @IsOptional()
+  public chainId?: ChainId;
 
   @ApiProperty()
   @IsNumber()
@@ -47,26 +49,13 @@ export class JobFortuneDto {
   public fundAmount: number;
 }
 
-export class JobFortuneCreateDto extends JobFortuneDto {
-  @IsNumber()
-  public userId: number;
-
-  @IsString()
-  public manifestUrl: string;
-
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-
-  @IsDate()
-  public waitUntil: Date;
-}
-
 export class JobCvatDto {
   @ApiProperty({
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  @IsOptional()
+  public chainId?: ChainId;
 
   @ApiProperty()
   @IsUrl()
@@ -93,20 +82,6 @@ export class JobCvatDto {
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
-}
-
-export class JobCvatCreateDto extends JobCvatDto {
-  @IsNumber()
-  public userId: number;
-
-  @IsString()
-  public manifestUrl: string;
-
-  @IsEnum(JobStatus)
-  public status: JobStatus;
-
-  @IsDate()
-  public waitUntil: Date;
 }
 
 export class JobUpdateDto {
@@ -176,4 +151,29 @@ export class ImageLabelBinaryManifestDto {
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
+}
+
+export class FortuneFinalResultDto {
+  @IsString()
+  exchangeAddress: string;
+
+  @IsString()
+  workerAddress: string;
+
+  @IsString()
+  solution: string;
+}
+
+export class ImageLabelBinaryFinalResultDto {
+  @IsString()
+  url: string;
+
+  @IsString()
+  final_answer: string;
+
+  @IsArray()
+  correct: string[];
+
+  @IsArray()
+  wrong: string[];
 }

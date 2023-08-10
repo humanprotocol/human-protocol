@@ -1,20 +1,24 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import {
-  Currency,
-  PaymentSource,
-  PaymentType,
-} from '../../common/enums/payment';
+import { PaymentSource, PaymentType } from '../../common/enums/payment';
 import { UserEntity } from '../user/user.entity';
 
-@Entity({ schema: NS, name: 'payment' })
+@Entity({ schema: NS, name: 'payments' })
+@Index(['chainId', 'transaction'], {
+  unique: true,
+  where: '(chain_Id IS NOT NULL AND transaction IS NOT NULL)',
+})
+@Index(['transaction'], {
+  unique: true,
+  where: '(chain_Id IS NULL AND transaction IS NOT NULL)',
+})
 export class PaymentEntity extends BaseEntity {
-  @Column({ type: 'varchar', default: null, nullable: true })
-  public paymentId: string;
+  @Column({ type: 'varchar', nullable: true })
+  public transaction: string;
 
-  @Column({ type: 'varchar', default: null, nullable: true })
-  public transactionHash: string;
+  @Column({ type: 'int', nullable: true })
+  public chainId: number;
 
   @Column({ type: 'varchar' })
   public amount: string;
