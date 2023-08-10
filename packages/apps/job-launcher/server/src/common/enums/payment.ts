@@ -64,6 +64,7 @@ export enum PaymentType {
 }
 
 export enum PaymentStatus {
+  PENDING = 'PENDING',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
 }
