@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.modules.agreement.validations import (
+from .validations import (
     validate_incidence_matrix,
     validate_confusion_matrix,
 )
