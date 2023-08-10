@@ -26,6 +26,11 @@ def _calculate_kappa_from_series(
     series_a: pd.Series, series_b: pd.Series, labels: Sequence = None
 ):
     df = pd.concat([series_a, series_b], join="inner", axis=1)
+
+    # disjoint sets of annotations
+    if len(df) == 0:
+        return np.NaN
+
     a = df.iloc[:, 0]
     b = df.iloc[:, 1]
     return cohens_kappa(confusion_matrix_from_sequence(a, b, labels=labels))
@@ -86,8 +91,8 @@ def process_image_label_binary_intermediate_results(
     assignees = np.unique(records["assignee"])
     pairwise_kappas = []
     for assignee_a, assignee_b in pairwise(assignees):
-        series_a = records["tag"].query(f"assignee == {assignee_a}")
-        series_b = records["tag"].query(f"assignee == {assignee_b}")
+        series_a = records.query("assignee == @assignee_a")["tag"]
+        series_b = records.query("assignee == @assignee_b")["tag"]
         pairwise_kappas.append(
             {
                 "assignee_a": assignee_a,
@@ -119,7 +124,7 @@ def process_image_label_binary_intermediate_results(
     tag_counts = tag_counts.reset_index().replace(mapping_dict)
     assignee_statistics = assignee_statistics.reset_index().replace(mapping_dict)
     records = records.reset_index().replace(mapping_dict)
-    pairwise_kappas.replace(mapping_dict)
+    pairwise_kappas = pairwise_kappas.replace(mapping_dict)
 
     # prepare response
     final_results = {
@@ -134,7 +139,7 @@ def process_image_label_binary_intermediate_results(
             "tag_counts": tag_counts.to_dict(orient="list"),
         },
         "assignee_information": {
-            "pairwise_agreement": pairwise_kappas,
+            "pairwise_agreement": pairwise_kappas.to_dict(orient="list"),
             "annotation_match_statistics": assignee_statistics.to_dict(orient="list"),
         },
         "raw_records": records.to_dict(orient="list"),
@@ -148,8 +153,6 @@ def process_intermediate_results(
 ) -> dict:
     match job_type:
         case JobTypes.image_label_binary.value:
-            final_results = process_image_label_binary_intermediate_results(
-                intermediate_results
-            )
+            return process_image_label_binary_intermediate_results(intermediate_results)
 
-    return final_results
+    raise ValueError(f'job_type "{job_type}" did not match any valid job type.')
