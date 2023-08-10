@@ -36,6 +36,7 @@ export const ConfigNames = {
   STRIPE_APP_VERSION: 'STRIPE_APP_VERSION',
   STRIPE_APP_INFO_URL: 'STRIPE_APP_INFO_URL',
   SENDGRID_API_KEY: 'SENDGRID_API_KEY',
+  SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
 };
 
 export const envValidator = Joi.object({

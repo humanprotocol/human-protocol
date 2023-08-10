@@ -13,7 +13,6 @@ import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
-import { SendGridModule } from './modules/sendgrid/sendgrid.module';
 
 @Module({
   providers: [
@@ -41,7 +40,6 @@ import { SendGridModule } from './modules/sendgrid/sendgrid.module';
     JobModule,
     PaymentModule,
     Web3Module,
-    SendGridModule.forRoot({}),
   ],
   controllers: [AppController],
 })

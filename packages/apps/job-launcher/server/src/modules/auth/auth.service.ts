@@ -75,7 +75,7 @@ export class AuthService {
 
     this.logger.debug('Verification token: ', tokenEntity.uuid);
 
-    this.sendgridService.send({
+    this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
       text: `Verify your email: ${tokenEntity.uuid}`,
@@ -135,7 +135,7 @@ export class AuthService {
       user: userEntity,
     });
 
-    this.sendgridService.send({
+    this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Reset password',
       text: `Reset password: ${tokenEntity.uuid}`,
@@ -156,7 +156,7 @@ export class AuthService {
 
     await this.userService.updatePassword(tokenEntity.user, data);
 
-    this.sendgridService.send({
+    this.sendgridService.sendEmail({
       to: tokenEntity.user.email,
       subject: 'Password changed',
       text: 'Password changed',
@@ -195,7 +195,7 @@ export class AuthService {
       user: userEntity,
     });
 
-    this.sendgridService.send({
+    this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
       text: `Verify your email: ${tokenEntity.uuid}`,

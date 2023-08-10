@@ -45,7 +45,7 @@ describe('AuthService', () => {
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string, defaultValue?: any) => {
+      get: jest.fn((key: string) => {
         switch (key) {
           case 'JWT_ACCESS_TOKEN_EXPIRES_IN':
             return MOCK_EXPIRES_IN;
@@ -82,6 +82,7 @@ describe('AuthService', () => {
     tokenRepository = moduleRef.get(TokenRepository);
     userService = moduleRef.get<UserService>(UserService);
     jwtService = moduleRef.get<JwtService>(JwtService);
+    sendGridService = moduleRef.get<SendGridService>(SendGridService);
   });
 
   afterEach(() => {
@@ -187,6 +188,14 @@ describe('AuthService', () => {
         user: userEntity,
       });
       expect(result).toBe(userEntity);
+    });
+
+    it("should call sendGridService sendEmail if user's email is valid", async () => {
+      sendGridService.sendEmail = jest.fn();
+
+      await authService.signup(userCreateDto);
+
+      expect(sendGridService.sendEmail).toHaveBeenCalled();
     });
   });
 
