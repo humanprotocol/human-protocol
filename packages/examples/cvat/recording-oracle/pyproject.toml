@@ -19,6 +19,7 @@ human-protocol-sdk = "^1.1.5"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 numpy = "^1.25.2"
+pandas = "^2.0.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
