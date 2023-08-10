@@ -40,30 +40,6 @@ describe('Web3Service', () => {
   });
 
   describe('getSigner', () => {
-    /*it.skip('should return the signer for the specified chainId', async () => {
-      for (const networkKey of Object.keys(networkMap)) {
-        // Iterate through the networkMap to test each chainId
-        const network = networkMap[networkKey];
-
-        const signer = web3Service.getSigner(network.chainId);
-        expect(signer).toBeDefined();
-        expect((signer.provider as any).connection.url).toBe(network.rpcUrl);
-      }
-    });*/
-
-
-    /*it('should throw invalid chain id provided for the mainnet environment', async () => {
-      const chainId = ChainId.LOCALHOST;
-
-      mockConfigService.get = jest.fn()
-                                .mockReturnValueOnce(privateKey)
-                                .mockReturnValue(Web3Env.MAINNET);
-
-      expect(
-        web3Service.getSigner(chainId)
-      ).toThrowError(ErrorWeb3.InvalidMainnetChainId);
-    });*/
-
     it('should return a signer for a valid chainId on MAINNET', () => {
       mockConfigService.get = jest.fn().mockReturnValue(Web3Env.MAINNET);
 
