@@ -26,7 +26,7 @@ def confusion_matrix_from_sequence(
 
     # filter NaN values
     M = np.vstack((a, b)).T  # 2 x N Matrix
-    if M.dtype.kind == "U":  # string types
+    if M.dtype.kind in "UO":  # string types
         mask = M != "nan"
     else:
         mask = ~np.isnan(M)
