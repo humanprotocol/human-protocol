@@ -22,9 +22,6 @@ def _reverse_map(d: Mapping[T, S]) -> Mapping[S, T]:
     return {v: k for k, v in d.items()}
 
 
-# TODO: move to agreement
-
-
 def _calculate_kappa_from_series(
     series_a: pd.Series, series_b: pd.Series, labels: Sequence = None
 ):
@@ -37,7 +34,6 @@ def _calculate_kappa_from_series(
 def process_image_label_binary_intermediate_results(
     intermediate_results: list[dict],
 ) -> dict:
-    # TODO: introduce constants for strings
     # turn into record format
     records = []
     for unit in intermediate_results:
@@ -102,7 +98,6 @@ def process_image_label_binary_intermediate_results(
         )
     pairwise_kappas = pd.DataFrame.from_records(pairwise_kappas)
 
-    # TODO: might be better to just choose a more efficient export format, like parquett
     # encode data and add mappings
     tag_to_id = _reverse_map(id_to_tag)
     id_to_assignee = _id_map(assignees)
