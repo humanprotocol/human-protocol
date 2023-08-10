@@ -24,6 +24,10 @@ def bin_2r_im() -> np.ndarray:
 
 @pytest.fixture
 def bin_mr_im() -> np.ndarray:
+    """
+    Returns an incidence matrix (item x class) for a binary classification
+    problem with multiple raters.
+    """
     return np.asarray(
         [[3, 0], [2, 1], [2, 1], [2, 1], [1, 2], [0, 3], [0, 3], [1, 2], [1, 2], [1, 2]]
     )
@@ -31,9 +35,35 @@ def bin_mr_im() -> np.ndarray:
 
 @pytest.fixture
 def single_anno_cm() -> np.ndarray:
+    """Returns a confusion matrix with only a single annotation."""
     return np.asarray([[1, 0], [0, 0]])
 
 
 @pytest.fixture
 def wrong_dtype_cm() -> np.ndarray:
-    return np.asarray([[1.0, 2.0], [3.0, 4.0]])
+    """Returns a confusion matrix with the wrong dtype."""
+    return np.asarray([["a", "b"], ["c", "d"]])
+
+
+@pytest.fixture
+def seq_labels():
+    """Returns sequence containing labels."""
+    return np.asarray(["a", "b", "c"])
+
+
+@pytest.fixture
+def seq_labels_nan():
+    """Returns a sequence containing labels and nan values."""
+    return np.asarray([np.NaN, "b", "c"])
+
+
+@pytest.fixture
+def seq_values():
+    """Returns a sequence containing values."""
+    return [1, 2, 3, 4]
+
+
+@pytest.fixture
+def seq_labels_long():
+    """Returns a sequence containing more values."""
+    return np.asarray(["e", "f", "g", "h"])
