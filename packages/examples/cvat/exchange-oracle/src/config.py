@@ -95,6 +95,7 @@ class StorageConfig:
     access_key = os.environ.get("ACCESS_KEY", "")
     secret_key = os.environ.get("SECRET_KEY", "")
     results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
+    secure = False if os.environ.get("USE_SSL", "true") == "false" else True
 
     @classmethod
     def bucket_url(cls):

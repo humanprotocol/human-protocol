@@ -49,6 +49,8 @@ def sign_message(chain_id: Networks, message) -> str:
             private_key = Config.polygon_mainnet.private_key
         case Config.polygon_mumbai.chain_id:
             private_key = Config.polygon_mumbai.private_key
+        case Config.localhost.chain_id:
+            private_key = Config.localhost.private_key
         case _:
             raise ValueError(f"{chain_id} is not in available list of networks.")
 
