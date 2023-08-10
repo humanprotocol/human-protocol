@@ -85,4 +85,5 @@ export const envValidator = Joi.object({
   STRIPE_APP_INFO_URL: Joi.string().default('https://hmt.ai'),
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
+  SENDGRID_FROM_EMAIL: Joi.string().default('info@hmt.ai'),
 });
