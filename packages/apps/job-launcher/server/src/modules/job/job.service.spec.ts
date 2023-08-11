@@ -5,7 +5,7 @@ import { BadGatewayException, BadRequestException, NotFoundException } from '@ne
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { BigNumber, FixedNumber, ethers } from 'ethers';
-import { ErrorBucket, ErrorJob } from '../../common/constants/errors';
+import { ErrorBucket, ErrorJob, ErrorWeb3 } from '../../common/constants/errors';
 import {
   Currency,
   PaymentSource,
@@ -117,7 +117,7 @@ describe('JobService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
-            validateChainId: jest.fn(),
+            validateChainId: jest.fn().mockReturnValue(new Error()),
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
@@ -236,6 +236,24 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
+    });
+
+    it('should throw an exception for invalid chain id provided', async () => {
+      web3Service.validateChainId = jest.fn(() => {
+        throw new Error(ErrorWeb3.InvalidTestnetChainId);
+      })
+
+      const dto: JobFortuneDto = {
+        chainId: ChainId.BSC_MAINNET, // Invalid chainId for testnet
+        fortunesRequired: MOCK_FORTUNES_REQUIRED,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+      };
+
+      await expect(
+        jobService.createFortuneJob(userId, dto),
+      ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
     });
 
     it('should throw an exception for insufficient user balance', async () => {
