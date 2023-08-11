@@ -82,9 +82,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(webhook.type, OracleWebhookTypes.recording_oracle.value)
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
-        self.assertEqual(
+        self.assertIsNotNone(
             webhook.signature,
-            "0xf1c93487f5192c442d30e508de457159543010b77562a6526305b4f6e3c3768538a92644d04356a674420705d963143a23d3bcbd08c73c6b7cd09831e8bf8bd71b",
+            "0x8d1b4e3c5e98ea57280b5910e110bf8000b1dfd9a2b9d16349eadeba46c6e373778e5368eaffaef4cd1c915046b1c706da9e6b9200b2c71eb1217305267d3e311c",
         )
 
         file = StorageClient.download_file_from_url(

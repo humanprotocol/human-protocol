@@ -80,7 +80,7 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'exchange_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      ENDPOINT_URL: '172.28.0.4:9000'
+      ENDPOINT_URL: 'host.docker.internal:9000'
       ACCESS_KEY: 'dev'
       SECRET_KEY: 'devdevdev'
       RESULTS_BUCKET_NAME: 'results'
@@ -92,6 +92,8 @@ services:
         condition: service_healthy
       minio-mc:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - test-network
     tty: true
