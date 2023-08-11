@@ -15,7 +15,10 @@ const mockConfigService: Partial<ConfigService> = {
 };
 
 describe('SendGridService', () => {
-  it('should send email', async () => {
+  let sendGridService: SendGridService;
+  let mailService: MailService;
+
+  beforeEach(async () => {
     const app = await Test.createTestingModule({
       providers: [
         SendGridService,
@@ -26,14 +29,17 @@ describe('SendGridService', () => {
         },
       ],
     }).compile();
-    const service = app.get<SendGridService>(SendGridService);
-    const sendgrid = app.get(MailService);
+    sendGridService = app.get<SendGridService>(SendGridService);
+    mailService = app.get(MailService);
+  });
+
+  it('should send email', async () => {
     const mock = jest
-      .spyOn(sendgrid, 'send')
+      .spyOn(mailService, 'send')
       .mockImplementationOnce(async () => {
         return [{} as any, {}];
       });
-    await service.sendEmail({
+    await sendGridService.sendEmail({
       to: 'test@example.com',
       from: 'test@example.com',
       subject: 'Sending with SendGrid is Fun',
@@ -44,24 +50,12 @@ describe('SendGridService', () => {
   });
 
   it('should send email from default address', async () => {
-    const app = await Test.createTestingModule({
-      providers: [
-        SendGridService,
-        MailService,
-        {
-          provide: ConfigService,
-          useValue: mockConfigService,
-        },
-      ],
-    }).compile();
-    const service = app.get<SendGridService>(SendGridService);
-    const sendgrid = app.get(MailService);
     const mock = jest
-      .spyOn(sendgrid, 'send')
+      .spyOn(mailService, 'send')
       .mockImplementationOnce(async () => {
         return [{} as any, {}];
       });
-    await service.sendEmail({
+    await sendGridService.sendEmail({
       to: 'test@example.com',
       subject: 'Sending with SendGrid is Fun',
       text: 'and easy to do anywhere, even with Node.js',
@@ -75,5 +69,20 @@ describe('SendGridService', () => {
         }),
       }),
     );
+  });
+
+  it("should throw error if email wasn't sent", async () => {
+    jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
+      throw new Error('Error');
+    });
+
+    await expect(
+      sendGridService.sendEmail({
+        to: 'test@example.com',
+        subject: 'Sending with SendGrid is Fun',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      }),
+    ).rejects.toThrowError('Error');
   });
 });
