@@ -29,7 +29,7 @@ import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
 import theme from './theme';
-import { isJwtExpired } from './utils/jwt';
+// import { isJwtExpired } from './utils/jwt';
 
 window.Buffer = window.Buffer || Buffer;
 
@@ -99,26 +99,12 @@ const publishableKey = import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY ?? '';
 loadStripe(publishableKey).then((stripePromise) => {
   const accessToken = localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken);
   const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.refreshToken);
-  const accessTokenExpiresAt = Number(
-    localStorage.getItem(LOCAL_STORAGE_KEYS.accessTokenExpiresAt)
-  );
-  const refreshTokenExpiresAt = Number(
-    localStorage.getItem(LOCAL_STORAGE_KEYS.refreshTokenExpiresAt)
-  );
 
-  if (
-    accessToken &&
-    refreshToken &&
-    accessTokenExpiresAt &&
-    refreshTokenExpiresAt &&
-    !isJwtExpired(accessToken)
-  ) {
+  if (accessToken && refreshToken) {
     store.dispatch(
       signIn({
         accessToken,
         refreshToken,
-        accessTokenExpiresAt,
-        refreshTokenExpiresAt,
       })
     );
     store.dispatch(fetchUserBalanceAsync());

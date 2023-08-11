@@ -7,7 +7,7 @@ import {
 import api from '../utils/api';
 
 export const signIn = async (body: SignInRequest) => {
-  const { data } = await api.post<SignUpResponse>('/auth/signIn', body);
+  const { data } = await api.post<SignUpResponse>('/auth/signin', body);
 
   return data;
 };

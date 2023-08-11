@@ -14,8 +14,6 @@ export type SignUpRequest = {
 export type SignUpResponse = {
   accessToken: string;
   refreshToken: string;
-  accessTokenExpiresAt: number;
-  refreshTokenExpiresAt: number;
 };
 
 export type ResetPasswordRequest = {

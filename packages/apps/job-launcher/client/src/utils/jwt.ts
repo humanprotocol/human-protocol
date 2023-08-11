@@ -6,6 +6,7 @@ export function getJwtPayload(token: string) {
 }
 
 export function isJwtExpired(token: string) {
-  const { exp } = jwtDecode<JwtPayload>(token);
+  const { sub, exp } = jwtDecode<JwtPayload>(token);
+  console.log(sub, exp);
   return Date.now() >= Number(exp) * 1000;
 }

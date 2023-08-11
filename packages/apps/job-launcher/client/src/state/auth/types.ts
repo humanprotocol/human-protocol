@@ -13,6 +13,4 @@ export type AuthState = {
   user?: User;
   accessToken?: string;
   refreshToken?: string;
-  accessTokenExpiresAt?: number;
-  refreshTokenExpiresAt?: number;
 };

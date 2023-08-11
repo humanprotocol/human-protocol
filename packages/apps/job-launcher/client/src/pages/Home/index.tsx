@@ -60,6 +60,7 @@ export default function Home() {
         onChange={(e, newValue) => {
           setTabValue(newValue);
           setMode(undefined);
+          setAlertMsg('');
         }}
         variant="fullWidth"
       >
