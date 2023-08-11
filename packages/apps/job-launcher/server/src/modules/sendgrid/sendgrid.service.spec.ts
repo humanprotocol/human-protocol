@@ -70,7 +70,9 @@ describe('SendGridService', () => {
 
     expect(mock).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: 'info@hmt.ai',
+        from: expect.objectContaining({
+          email: 'info@hmt.ai',
+        }),
       }),
     );
   });

@@ -28,6 +28,7 @@ import { v4 } from 'uuid';
 import { PaymentService } from '../payment/payment.service';
 import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
+import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk');
 
@@ -340,6 +341,210 @@ describe('AuthService', () => {
         accessToken: MOCK_ACCESS_TOKEN,
         refreshToken: MOCK_REFRESH_TOKEN,
       });
+    });
+  });
+
+  describe('forgotPassword', () => {
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email: 'user@example.com',
+      status: UserStatus.ACTIVE,
+    };
+
+    const tokenEntity = {
+      uuid: v4(),
+      tokenType: TokenType.EMAIL,
+      user: userEntity,
+    };
+
+    let createTokenMock: any;
+
+    beforeEach(() => {
+      createTokenMock = jest.spyOn(tokenRepository, 'create');
+
+      createTokenMock.mockResolvedValue(tokenEntity);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should throw NotFound exception if user is not found', () => {
+      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
+
+      expect(
+        authService.forgotPassword({ email: 'user@example.com' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw Unauthorized exception if user is not active', () => {
+      userService.getByEmail = jest
+        .fn()
+        .mockResolvedValueOnce({ ...userEntity, status: UserStatus.PENDING });
+
+      expect(
+        authService.forgotPassword({ email: 'user@example.com' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should create a new token and send email', async () => {
+      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
+
+      sendGridService.sendEmail = jest.fn();
+
+      await authService.forgotPassword({ email: 'user@example.com' });
+
+      expect(createTokenMock).toHaveBeenCalled();
+      expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(tokenEntity.uuid),
+        }),
+      );
+    });
+  });
+
+  describe('restorePassword', () => {
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email: 'user@example.com',
+    };
+
+    const tokenEntity = {
+      uuid: v4(),
+      tokenType: TokenType.EMAIL,
+      user: userEntity,
+      remove: jest.fn(),
+    };
+
+    let findTokenMock: any;
+
+    beforeEach(() => {
+      findTokenMock = jest.spyOn(tokenRepository, 'findOne');
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should throw NotFound exception if token is not found', () => {
+      findTokenMock.mockResolvedValueOnce(undefined);
+
+      expect(
+        authService.restorePassword({
+          token: 'token',
+          password: 'password',
+          confirm: 'password',
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should update password and send email', async () => {
+      findTokenMock.mockResolvedValueOnce(tokenEntity);
+
+      userService.updatePassword = jest.fn();
+      sendGridService.sendEmail = jest.fn();
+
+      const updatePasswordMock = jest.spyOn(userService, 'updatePassword');
+
+      await authService.restorePassword({
+        token: 'token',
+        password: 'password',
+        confirm: 'password',
+      });
+
+      expect(updatePasswordMock).toHaveBeenCalled();
+      expect(sendGridService.sendEmail).toHaveBeenCalled();
+      expect(tokenEntity.remove).toHaveBeenCalled();
+    });
+  });
+
+  describe('emailVerification', () => {
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email: 'user@example.com',
+    };
+
+    const tokenEntity = {
+      uuid: v4(),
+      tokenType: TokenType.EMAIL,
+      user: userEntity,
+      remove: jest.fn(),
+    };
+
+    let findTokenMock: any;
+
+    beforeEach(() => {
+      findTokenMock = jest.spyOn(tokenRepository, 'findOne');
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should throw NotFound exception if token is not found', () => {
+      findTokenMock.mockResolvedValueOnce(undefined);
+
+      expect(authService.emailVerification({ token: 'token' })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should activate user', async () => {
+      findTokenMock.mockResolvedValueOnce(tokenEntity);
+
+      userService.activate = jest.fn();
+      const userActivateMock = jest.spyOn(userService, 'activate');
+
+      await authService.emailVerification({ token: 'token' });
+
+      expect(userActivateMock).toHaveBeenCalled();
+      expect(tokenEntity.remove).toHaveBeenCalled();
+    });
+  });
+
+  describe('resendEmailVerification', () => {
+    const userEntity: Partial<UserEntity> = {
+      id: 1,
+      email: 'user@example.com',
+    };
+
+    const tokenEntity = {
+      uuid: v4(),
+      tokenType: TokenType.EMAIL,
+      user: userEntity,
+    };
+
+    let createTokenMock: any;
+
+    beforeEach(() => {
+      createTokenMock = jest.spyOn(tokenRepository, 'create');
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should throw NotFound exception if user is not found', () => {
+      userService.getByEmail = jest.fn().mockResolvedValueOnce(undefined);
+
+      expect(
+        authService.resendEmailVerification({ email: 'user@example.com' }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should create token and send email', async () => {
+      userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
+
+      sendGridService.sendEmail = jest.fn();
+
+      await authService.resendEmailVerification({ email: 'user@example.com' });
+
+      expect(createTokenMock).toHaveBeenCalled();
+      expect(sendGridService.sendEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(tokenEntity.uuid),
+        }),
+      );
     });
   });
 });

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { ErrorAuth } from '../../common/constants/errors';
+import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
 import { UserEntity } from '../user/user.entity';
@@ -32,6 +32,8 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly refreshTokenExpiresIn: string;
   private readonly salt: string;
+  private readonly feURL: string;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
@@ -40,12 +42,16 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
   ) {
-    this.refreshTokenExpiresIn = configService.get<string>(
+    this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
       '100000000',
     );
 
     this.salt = randomBytes(16).toString('hex');
+    this.feURL = this.configService.get<string>(
+      ConfigNames.FE_URL,
+      'http://localhost:3005',
+    );
   }
 
   public async signin(data: SignInDto): Promise<AuthDto> {
@@ -73,12 +79,13 @@ export class AuthService {
       user: userEntity,
     });
 
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
-
     this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
-      text: `Verify your email: ${tokenEntity.uuid}`,
+      html: `Welcome to the Job Launcher Service.<br />
+Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
+      text: `Welcome to the Job Launcher Service.
+Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     });
 
     return userEntity;
@@ -125,7 +132,9 @@ export class AuthService {
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) return;
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
 
     if (userEntity.status !== UserStatus.ACTIVE)
       throw new UnauthorizedException(ErrorAuth.UserNotActive);
@@ -138,10 +147,9 @@ export class AuthService {
     this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Reset password',
-      text: `Reset password: ${tokenEntity.uuid}`,
+      html: `Click <a href="${this.feURL}/reset-password?token=${tokenEntity.uuid}">here</a> to reset the password.`,
+      text: `Click ${this.feURL}/reset-password?token=${tokenEntity.uuid} to reset the password.`,
     });
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
 
   public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
@@ -159,10 +167,8 @@ export class AuthService {
     this.sendgridService.sendEmail({
       to: tokenEntity.user.email,
       subject: 'Password changed',
-      text: 'Password changed',
+      text: 'Password is changed successfully!',
     });
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
 
     await tokenEntity.remove();
 
@@ -188,7 +194,9 @@ export class AuthService {
   ): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) return;
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
 
     const tokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,
@@ -198,10 +206,11 @@ export class AuthService {
     this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
-      text: `Verify your email: ${tokenEntity.uuid}`,
+      html: `Welcome to the Job Launcher Service.<br />
+Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
+      text: `Welcome to the Job Launcher Service.
+Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     });
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
   }
 
   public hashToken(token: string): string {

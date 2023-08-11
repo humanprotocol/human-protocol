@@ -8,6 +8,9 @@ import { ConfigNames } from '../../common/config';
 export class SendGridService {
   private readonly logger = new Logger(SendGridService.name);
 
+  private readonly defaultFromEmail: string;
+  private readonly defaultFromName: string;
+
   constructor(
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -15,20 +18,32 @@ export class SendGridService {
     this.mailService.setApiKey(
       this.configService.get<string>(ConfigNames.SENDGRID_API_KEY) || '',
     );
+
+    this.defaultFromEmail =
+      this.configService.get<string>(ConfigNames.SENDGRID_FROM_EMAIL) ||
+      'job-launcher@hmt.ai';
+    this.defaultFromName =
+      this.configService.get<string>(ConfigNames.SENDGRID_FROM_NAME) ||
+      'Human Protocol Job Launcher';
   }
 
-  async sendEmail(emailData: Partial<MailDataRequired>): Promise<void> {
+  async sendEmail({
+    text = '',
+    from = {
+      email: this.defaultFromEmail,
+      name: this.defaultFromName,
+    },
+    ...emailData
+  }: Partial<MailDataRequired>): Promise<void> {
     try {
-      const from =
-        this.configService.get<string>(ConfigNames.SENDGRID_FROM_EMAIL) || '';
       await this.mailService.send({
-        ...emailData,
-        text: emailData.text || '',
         from,
+        text,
+        ...emailData,
       });
       this.logger.log('Email sent successfully');
     } catch (error) {
-      this.logger.error(`Error sending email: ${error.message}`);
+      this.logger.error(`Error sending email: ${error}`);
       throw error;
     }
   }
