@@ -108,6 +108,10 @@ export class JobService {
       fundAmount,
     } = dto;
 
+    if (chainId) {
+      this.web3Service.validateChainId(chainId);
+    }
+
     const userBalance = await this.paymentService.getUserBalance(userId);
 
     const fundAmountInWei = ethers.utils.parseUnits(
@@ -188,6 +192,10 @@ export class JobService {
       requesterAccuracyTarget,
       fundAmount,
     } = dto;
+
+    if (chainId) {
+      this.web3Service.validateChainId(chainId);
+    }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 

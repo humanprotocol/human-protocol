@@ -138,6 +138,8 @@ export class PaymentService {
     userId: number,
     dto: PaymentCryptoCreateDto,
   ): Promise<boolean> {
+    this.web3Service.validateChainId(dto.chainId);
+
     const provider = new providers.JsonRpcProvider(
       Object.values(networkMap).find(
         (item) => item.chainId === dto.chainId,

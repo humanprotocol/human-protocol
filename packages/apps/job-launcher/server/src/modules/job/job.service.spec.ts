@@ -74,7 +74,8 @@ describe('JobService', () => {
       paymentRepository: PaymentRepository,
       paymentService: PaymentService,
       createPaymentMock: any,
-      routingProtocolService: RoutingProtocolService;
+      routingProtocolService: RoutingProtocolService,
+      web3Service: Web3Service;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -116,6 +117,7 @@ describe('JobService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
+            validateChainId: jest.fn(),
           },
         },
         { provide: JobRepository, useValue: createMock<JobRepository>() },
@@ -136,6 +138,7 @@ describe('JobService', () => {
     paymentService = moduleRef.get(PaymentService);
     routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'create');
+    web3Service = moduleRef.get<Web3Service>(Web3Service);
   });
 
   describe('createFortuneJob', () => {

@@ -75,6 +75,7 @@ describe('PaymentService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
+            validateChainId: jest.fn(),
           },
         },
         { provide: ConfigService, useValue: mockConfigService },

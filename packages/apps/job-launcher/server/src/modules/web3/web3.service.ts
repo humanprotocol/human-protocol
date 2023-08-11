@@ -20,15 +20,19 @@ export class Web3Service {
     }
   }
 
-  getSigner(chainId: number): Wallet {
-    if (Web3Env.MAINNET === this.configService.get(ConfigNames.WEB3_ENV) && !MAINNET_CHAIN_IDS.includes(chainId)) {
-      this.logger.log(ErrorWeb3.InvalidMainnetChainId, Web3Service.name);
-      throw new BadRequestException(ErrorWeb3.InvalidMainnetChainId);
-    } else if (Web3Env.TESTNET === this.configService.get(ConfigNames.WEB3_ENV) && !TESTNET_CHAIN_IDS.includes(chainId)) {
-      this.logger.log(ErrorWeb3.InvalidTestnetChainId, Web3Service.name);
-      throw new BadRequestException(ErrorWeb3.InvalidTestnetChainId);
-    }
-
+  public getSigner(chainId: number): Wallet {
+    this.validateChainId(chainId);
     return this.signers[chainId];
+  }
+
+  public validateChainId(chainId: number): void {
+    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    const validChainIds = currentWeb3Env === Web3Env.MAINNET ? MAINNET_CHAIN_IDS : TESTNET_CHAIN_IDS;
+
+    if (!validChainIds.includes(chainId)) {
+      const errorType = currentWeb3Env === Web3Env.MAINNET ? ErrorWeb3.InvalidMainnetChainId : ErrorWeb3.InvalidTestnetChainId;
+      this.logger.log(errorType, Web3Service.name);
+      throw new BadRequestException(errorType);
+    }
   }
 }

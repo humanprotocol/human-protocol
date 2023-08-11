@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [ConfigModule],
-  providers: [Web3Service, Logger],
+  providers: [Web3Service],
   exports: [Web3Service],
 })
 export class Web3Module {}
