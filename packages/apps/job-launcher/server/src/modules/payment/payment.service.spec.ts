@@ -1,4 +1,4 @@
-import { ethers, FixedNumber } from 'ethers';
+import { ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import Stripe from 'stripe';
 import { PaymentService } from './payment.service';
@@ -8,20 +8,18 @@ import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
-import { TransactionReceipt, Log } from '@ethersproject/abstract-provider';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
-  PaymentFiatMethodType,
   PaymentSource,
   PaymentStatus,
   PaymentType,
+  StripePaymentStatus,
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
-  MOCK_CUSTOMER_ID,
-  MOCK_EMAIL,
   MOCK_PAYMENT_ID,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
@@ -188,11 +186,9 @@ describe('PaymentService', () => {
   });
 
   describe('confirmFiatPayment', () => {
-    let createPaymentMock: any,
-        retrievePaymentIntentMock: any;
+    let retrievePaymentIntentMock: any;
 
     beforeEach(() => {
-      createPaymentMock = jest.spyOn(paymentRepository, 'create');
       retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
     });
 
@@ -205,7 +201,6 @@ describe('PaymentService', () => {
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
-      const rate = 1.5;
 
       const paymentData = {
         status: 'succeeded',
@@ -214,30 +209,20 @@ describe('PaymentService', () => {
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
-      createPaymentMock.mockResolvedValue(true);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
-      expect(paymentRepository.create).toHaveBeenCalledWith({
-        userId,
-        source: PaymentSource.FIAT,
-        currency: Currency.EUR,
-        type: PaymentType.DEPOSIT,
-        amount: paymentData.amount.toString(),
-        rate: 0.5,
-        status: PaymentStatus.SUCCEEDED
-      });
       expect(result).toBe(true);
     });
 
-    it('should throw a bad request exception if the payment is not successful', async () => {
+    it('should handle payment cancellation', async () => {
       const userId = 1;
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
 
       const paymentData = {
-        status: 'canceled',
+        status: StripePaymentStatus.CANCELED,
         amount: 100,
       };
 
@@ -246,6 +231,42 @@ describe('PaymentService', () => {
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.NotSuccess);
+    });
+
+    it('should handle payment requiring a payment method', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+
+      const paymentData = {
+        status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
+        amount: 100,
+      };
+
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      await expect(
+        paymentService.confirmFiatPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+    });
+
+    it('should handle payment status other than succeeded', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+
+      const paymentData = {
+        status: 'unknown_status',
+        amount: 100,
+      };
+
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      const result = await paymentService.confirmFiatPayment(userId, dto);
+
+      expect(result).toBe(false);
     });
 
     it('should return false if the payment is not found', async () => {

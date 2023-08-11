@@ -20,6 +20,7 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
+  StripePaymentStatus,
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
@@ -125,11 +126,6 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.NotFound);
     }
 
-    if (paymentData?.status?.toUpperCase() !== PaymentStatus.SUCCEEDED) {
-      this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
-      throw new BadRequestException(ErrorPayment.NotSuccess);
-    }
-
     const paymentEntity = await this.paymentRepository.findOne({
       userId,
       transaction: data.paymentId,
@@ -144,17 +140,18 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.NotFound);
     }
 
-    const rate = await getRate(Currency.USD, paymentData.currency.toLowerCase());
-    
-    await this.paymentRepository.create({
-      userId,
-      source: PaymentSource.FIAT,
-      type: PaymentType.DEPOSIT,
-      amount: BigNumber.from(paymentData.amount).toString(),
-      currency: paymentData.currency.toLowerCase(),
-      rate,
-      status: PaymentStatus.SUCCEEDED
-    })
+    if (paymentData?.status === StripePaymentStatus.CANCELED || 
+        paymentData?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD) {
+      paymentEntity.status = PaymentStatus.FAILED;
+      await paymentEntity.save();
+      this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
+      throw new BadRequestException(ErrorPayment.NotSuccess);
+    } else if (paymentData?.status !== StripePaymentStatus.SUCCEEDED) {
+      return false; // TODO: Handling other cases
+    }
+
+    paymentEntity.status = PaymentStatus.SUCCEEDED;
+    await paymentEntity.save();
 
     return true;
   }
