@@ -13,6 +13,9 @@ export class InitialMigration1691485394906 implements MigrationInterface {
             CREATE TYPE "hmt"."payments_source_enum" AS ENUM('FIAT', 'CRYPTO', 'BALANCE')
         `);
     await queryRunner.query(`
+            CREATE TYPE "hmt"."payments_status_enum" AS ENUM('PENDING', 'FAILED', 'SUCCEEDED')
+        `);
+    await queryRunner.query(`
             CREATE TABLE "hmt"."payments" (
                 "id" SERIAL NOT NULL,
                 "created_at" TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -24,6 +27,7 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 "currency" character varying NOT NULL,
                 "type" "hmt"."payments_type_enum" NOT NULL,
                 "source" "hmt"."payments_source_enum" NOT NULL,
+                "status" "hmt"."payments_status_enum" NOT NULL,
                 "user_id" integer NOT NULL,
                 CONSTRAINT "PK_197ab7af18c93fbb0c9b28b4a59" PRIMARY KEY ("id")
             )
@@ -191,6 +195,9 @@ export class InitialMigration1691485394906 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TYPE "hmt"."payments_type_enum"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "hmt"."payments_status_enum"
         `);
     await queryRunner.dropSchema(NS);
   }
