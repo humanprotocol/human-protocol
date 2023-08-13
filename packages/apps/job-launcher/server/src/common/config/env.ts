@@ -86,6 +86,6 @@ export const envValidator = Joi.object({
   STRIPE_APP_INFO_URL: Joi.string().default('https://hmt.ai'),
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
-  SENDGRID_FROM_EMAIL: Joi.string().default('info@hmt.ai'),
-  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol'),
+  SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
+  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
 });
