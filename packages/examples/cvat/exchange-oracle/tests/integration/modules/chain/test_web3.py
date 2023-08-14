@@ -10,6 +10,7 @@ from src.modules.chain.web3 import (
 from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_GAS_PAYER, SIGNATURE
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
+from src.config import LocalhostConfig
 
 
 from web3 import Web3, HTTPProvider
@@ -56,11 +57,17 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
         self.assertEqual(w3.manager._provider.endpoint_uri, PolygonMumbaiConfig.rpc_api)
 
+    def test_get_web3_localhost(self):
+        w3 = get_web3(ChainId.LOCALHOST.value)
+        self.assertIsInstance(w3, Web3)
+        self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
+        self.assertEqual(w3.manager._provider.endpoint_uri, LocalhostConfig.rpc_api)
+
     def test_get_web3_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
-            w3 = get_web3(ChainId.LOCALHOST.value)
+            w3 = get_web3(1234)
         self.assertEqual(
-            f"{ChainId.LOCALHOST.value} is not in available list of networks.",
+            "1234 is not in available list of networks.",
             str(error.exception),
         )
 
@@ -86,9 +93,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     def test_sign_message_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
-            sign_message(ChainId.LOCALHOST.value, "message")
+            sign_message(1234, "message")
         self.assertEqual(
-            f"{ChainId.LOCALHOST.value} is not in available list of networks.",
+            "1234 is not in available list of networks.",
             str(error.exception),
         )
 

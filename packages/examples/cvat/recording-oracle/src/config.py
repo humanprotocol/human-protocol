@@ -36,6 +36,18 @@ class PolygonMumbaiConfig:
     addr = os.environ.get("POLYGON_MUMBAI_ADDR")
 
 
+class LocalhostConfig:
+    chain_id = 1338
+    rpc_api = os.environ.get("LOCALHOST_RPC_API_URL", "http://blockchain-node:8545")
+    private_key = os.environ.get(
+        "LOCALHOST_PRIVATE_KEY",
+        "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    )
+    addr = os.environ.get(
+        "LOCALHOST_MUMBAI_ADDR", "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    )
+
+
 class CronConfig:
     process_exchange_oracle_webhooks_int = int(
         os.environ.get("PROCESS_EXCHANGE_ORACLE_WEBHOOKS_INT", 3000)
@@ -57,6 +69,7 @@ class StorageConfig:
     access_key = os.environ.get("ACCESS_KEY", "")
     secret_key = os.environ.get("SECRET_KEY", "")
     results_bucket_name = os.environ.get("RESULTS_BUCKET_NAME", "")
+    secure = False if os.environ.get("USE_SSL", "true") == "false" else True
 
     @classmethod
     def bucket_url(cls):
@@ -74,6 +87,7 @@ class Config:
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_mumbai = PolygonMumbaiConfig
+    localhost = LocalhostConfig
 
     postgres_config = Postgres
     cron_config = CronConfig
