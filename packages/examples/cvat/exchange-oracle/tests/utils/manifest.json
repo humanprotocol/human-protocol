@@ -1,5 +1,5 @@
 {
-  "dataUrl": "https://wildfire-annotation.storage.googleapis.com/",
+  "dataUrl": "https://test.storage.googleapis.com/",
   "submissionsRequired": 1,
   "labels": ["contains burnt area"],
   "requesterDescription": "string",

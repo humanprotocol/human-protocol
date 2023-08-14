@@ -72,7 +72,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(updated_webhook.attempts, 1)
 
         mock_cvat_api.create_cloudstorage.assert_called_once_with(
-            "GOOGLE_CLOUD_STORAGE", "wildfire-annotation"
+            "GOOGLE_CLOUD_STORAGE", "test"
         )
         mock_cvat_api.create_project.assert_called_once_with(
             escrow_address, [{"name": "contains burnt area", "type": "tag"}]

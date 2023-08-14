@@ -92,6 +92,7 @@ services:
         condition: service_healthy
       minio-mc:
         condition: service_completed_successfully
+    # Used to reference localhost since minio:9000 is rejected by the SDK URL validator
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
