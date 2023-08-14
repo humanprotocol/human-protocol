@@ -75,7 +75,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             "GOOGLE_CLOUD_STORAGE", "test"
         )
         mock_cvat_api.create_project.assert_called_once_with(
-            escrow_address, [{"name": "contains burnt area", "type": "tag"}]
+            escrow_address, [{"name": "dummy_label", "type": "tag"}]
         )
         mock_cvat_api.create_task.assert_called_once_with(
             mock_cvat_api.create_cloudstorage.return_value.id, escrow_address
