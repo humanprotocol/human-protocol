@@ -83,12 +83,12 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertIsInstance(webhook.signature, str)
 
         file = StorageClient.download_file_from_url(
-            f"http://{StorageConfig.endpoint_url}/{StorageConfig.results_bucket_name}/s36c63b65d82aba10f4c30409135f1ef2938f8c926.json"
+            f"http://{StorageConfig.endpoint_url}/{StorageConfig.results_bucket_name}/s3783224a9268d5f493f01517cc9a4fe88d4ad5e5c.json"
         ).decode()
 
         self.assertEqual(
             file,
-            '[{"correct": ["John Doe"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/1.jpg", "wrong": []}, {"correct": ["John Doe"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/2.jpg", "wrong": []}, {"correct": ["John Doe"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/3.jpg", "wrong": []}]',
+            '[{"correct": ["0x1234567890123456789012345678901234567890"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/1.jpg", "wrong": []}, {"correct": ["0x1234567890123456789012345678901234567890"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/2.jpg", "wrong": []}, {"correct": ["0x1234567890123456789012345678901234567890"], "final_answer": "dummy_label", "url": "https://test.storage.googleapis.com/3.jpg", "wrong": []}]',
         )
 
     def test_process_recording_oracle_webhooks_invalid_escrow_address(self):
