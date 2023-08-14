@@ -1,0 +1,11 @@
+{
+  "dataUrl": "https://wildfire-annotation.storage.googleapis.com/",
+  "submissionsRequired": 1,
+  "labels": ["contains burnt area"],
+  "requesterDescription": "string",
+  "requesterAccuracyTarget": 10,
+  "fee": "250000000000",
+  "fundAmount": "1250000000000",
+  "mode": "BATCH",
+  "requestType": "IMAGE_LABEL_BINARY"
+}

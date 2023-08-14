@@ -43,6 +43,7 @@ def process_exchange_oracle_webhooks() -> None:
                     )
 
                     intermediate_results = get_intermediate_results(webhook.s3_url)
+
                     final_results = process_intermediate_results(
                         intermediate_results, job_type
                     )
@@ -54,6 +55,7 @@ def process_exchange_oracle_webhooks() -> None:
                             StorageConfig.access_key,
                             StorageConfig.secret_key,
                         ),
+                        StorageConfig.secure,
                     )
                     files = storage_client.upload_files(
                         [final_results], StorageConfig.results_bucket_name
@@ -63,7 +65,7 @@ def process_exchange_oracle_webhooks() -> None:
                         webhook.chain_id,
                         webhook.escrow_address,
                         f"{StorageConfig.bucket_url()}{files[0]['key']}",
-                        files[0],
+                        files[0]["hash"],
                     )
 
                     db_service.create_webhook(
