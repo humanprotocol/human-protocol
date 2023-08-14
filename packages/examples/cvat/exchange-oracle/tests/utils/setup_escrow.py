@@ -46,13 +46,3 @@ def bulk_payout(web3: Web3, escrow_address: str, recipient: str, amount: Decimal
     escrow_client.bulk_payout(
         escrow_address, [recipient], [amount], DEFAULT_URL, DEFAULT_HASH, 1
     )
-
-
-def get_intermediate_results_url(web3: Web3, escrow_address: str):
-    escrow_client = EscrowClient(web3)
-    intermediate_results_url = (
-        escrow_client._get_escrow_contract(escrow_address)
-        .functions.intermediateResultsUrl()
-        .call()
-    )
-    return intermediate_results_url
