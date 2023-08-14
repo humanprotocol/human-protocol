@@ -1,7 +1,7 @@
 {
   "dataUrl": "https://test.storage.googleapis.com/",
   "submissionsRequired": 1,
-  "labels": ["contains burnt area"],
+  "labels": ["dummy_label"],
   "requesterDescription": "string",
   "requesterAccuracyTarget": 10,
   "fee": "250000000000",
