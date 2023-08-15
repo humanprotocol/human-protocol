@@ -43,10 +43,6 @@ export class UserRepository {
       where,
       ...options,
     });
-    console.log({
-      where,
-      ...options,
-    });
 
     return userEntity;
   }

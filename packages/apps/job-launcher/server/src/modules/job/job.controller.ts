@@ -7,35 +7,34 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RolesGuard } from '../../common/guards';
+import { JwtAuthGuard } from 'src/common/guards';
+import { RequestWithUser } from 'src/common/types';
 import { JobCvatDto, JobFortuneDto } from './job.dto';
 import { JobService } from './job.service';
 
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Job')
 @Controller('/job')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @UseGuards(RolesGuard)
   @Post('/fortune')
   public async createFortuneJob(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: JobFortuneDto,
   ): Promise<number> {
-    return this.jobService.createFortuneJob(req.user?.id, data);
+    return this.jobService.createFortuneJob(req.user.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Post('/cvat')
   public async createCvatJob(
-    @Request() req: any,
+    @Request() req: RequestWithUser,
     @Body() data: JobCvatDto,
   ): Promise<number> {
-    return this.jobService.createCvatJob(req.user?.id, data);
+    return this.jobService.createCvatJob(req.user.id, data);
   }
 
-  @UseGuards(RolesGuard)
   @Get('/result')
   public async getResult(@Request() req: any): Promise<any> {
     return this.jobService.getResult(req.user?.id);

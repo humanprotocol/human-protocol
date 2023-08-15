@@ -1,0 +1,29 @@
+[
+  {
+    "answers": [
+      {
+        "assignee": "0x1234567890123456789012345678901234567890",
+        "tag": "dummy_label"
+      }
+    ],
+    "url": "https://test.storage.googleapis.com/1.jpg"
+  },
+  {
+    "answers": [
+      {
+        "assignee": "0x1234567890123456789012345678901234567890",
+        "tag": "dummy_label"
+      }
+    ],
+    "url": "https://test.storage.googleapis.com/2.jpg"
+  },
+  {
+    "answers": [
+      {
+        "assignee": "0x1234567890123456789012345678901234567890",
+        "tag": "dummy_label"
+      }
+    ],
+    "url": "https://test.storage.googleapis.com/3.jpg"
+  }
+]

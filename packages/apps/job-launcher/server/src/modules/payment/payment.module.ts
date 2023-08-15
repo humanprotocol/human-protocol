@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
 import { PaymentService } from './payment.service';
-import { CurrencyService } from './currency.service';
 import { MinioModule } from 'nestjs-minio-client';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentEntity } from './payment.entity';
@@ -32,7 +31,7 @@ import { Web3Module } from '../web3/web3.module';
     }),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentRepository, CurrencyService],
-  exports: [PaymentService, CurrencyService],
+  providers: [PaymentService, PaymentRepository],
+  exports: [PaymentService, PaymentRepository],
 })
 export class PaymentModule {}

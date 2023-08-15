@@ -69,6 +69,7 @@ def retrieve_annotations() -> None:
                         StorageConfig.access_key,
                         StorageConfig.secret_key,
                     ),
+                    StorageConfig.secure,
                 )
                 files = storage_client.upload_files(
                     [annotations], StorageConfig.results_bucket_name

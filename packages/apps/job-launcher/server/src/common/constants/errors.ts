@@ -27,6 +27,8 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
+  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  InvalidCredentials = 'Invalid credentials',
 }
 
 /**
@@ -57,12 +59,13 @@ export enum ErrorPayment {
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',
-  TransactionHashAlreadyExists = 'Transaction hash already exists',
+  TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
   InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
   UnsupportedToken = 'Unsupported token',
   InvalidRecipient = 'Invalid recipient',
+  ChainIdMissing = 'ChainId is missing',
 }
 
 /**

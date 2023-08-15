@@ -22,7 +22,7 @@ def create_project(session: SessionLocal) -> tuple:
         status=ProjectStatuses.annotation.value,
         job_type=JobTypes.image_label_binary.value,
         escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
-        chain_id=Networks.polygon_mumbai.value,
+        chain_id=Networks.localhost.value,
         bucket_url="https://test.storage.googleapis.com/",
     )
     session.add(cvat_project)
@@ -39,7 +39,7 @@ def create_project_and_task(session: SessionLocal) -> tuple:
         status=ProjectStatuses.annotation.value,
         job_type=JobTypes.image_label_binary.value,
         escrow_address="0x86e83d346041E8806e352681f3F14549C0d2BC67",
-        chain_id=Networks.polygon_mumbai.value,
+        chain_id=Networks.localhost.value,
         bucket_url="https://test.storage.googleapis.com/",
     )
     cvat_task = Task(
@@ -49,7 +49,6 @@ def create_project_and_task(session: SessionLocal) -> tuple:
         status=TaskStatuses.annotation.value,
     )
     session.add(cvat_project)
-    session.commit()
     session.add(cvat_task)
     session.commit()
 
@@ -67,7 +66,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         cvat_cloudstorage_id = 1
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
@@ -95,7 +94,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         cvat_cloudstorage_id = 1
         bucket_url = "https://test.storage.googleapis.com/"
         project_id = cvat_service.create_project(
@@ -125,7 +124,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
             self.session,
@@ -143,7 +142,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
             self.session,
@@ -161,7 +160,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         cvat_cloudstorage_id = 1
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
             self.session,
@@ -179,7 +178,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_id = 1
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         cvat_service.create_project(
             self.session,
@@ -217,7 +216,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         cvat_service.create_project(
             self.session,
             cvat_id,
@@ -235,7 +234,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
             self.session,
@@ -266,7 +265,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
             self.session,
@@ -302,7 +301,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
             self.session,
@@ -371,7 +370,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
             self.session,
@@ -403,7 +402,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         cvat_cloudstorage_id = 1
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC67"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         bucket_url = "https://test.storage.googleapis.com/"
         p_id = cvat_service.create_project(
             self.session,
@@ -562,7 +561,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         job_type = JobTypes.image_label_binary.value
         escrow_address = "0x86e83d346041E8806e352681f3F14549C0d2BC68"
         bucket_url = "https://test2.storage.googleapis.com/"
-        chain_id = Networks.polygon_mumbai.value
+        chain_id = Networks.localhost.value
         project_id = cvat_service.create_project(
             self.session,
             cvat_id,

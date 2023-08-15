@@ -10,7 +10,6 @@ export const ConfigNames = {
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
   JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
-  DB_TYPE: 'DB_TYPE',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
@@ -29,13 +28,16 @@ export const ConfigNames = {
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
-  S3_BACKET: 'S3_BACKET',
+  S3_BUCKET: 'S3_BUCKET',
   S3_USE_SSL: 'S3_USE_SSL',
   STRIPE_SECRET_KEY: 'STRIPE_SECRET_KEY',
   STRIPE_API_VERSION: 'STRIPE_API_VERSION',
   STRIPE_APP_NAME: 'STRIPE_APP_NAME',
   STRIPE_APP_VERSION: 'STRIPE_APP_VERSION',
   STRIPE_APP_INFO_URL: 'STRIPE_APP_INFO_URL',
+  SENDGRID_API_KEY: 'SENDGRID_API_KEY',
+  SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
+  SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
 };
 
 export const envValidator = Joi.object({
@@ -43,7 +45,7 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string().default('development'),
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(5000),
-  FE_URL: Joi.string().default('http://localhost:3001'),
+  FE_URL: Joi.string().default('http://localhost:3005'),
   SESSION_SECRET: Joi.string().default('session_key'),
   PASSWORD_SECRET: Joi.string().default('$2b$10$EICgM2wYixoJisgqckU9gu'),
   // Auth
@@ -72,7 +74,7 @@ export const envValidator = Joi.object({
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
-  S3_BACKET: Joi.string().default('launcher'),
+  S3_BUCKET: Joi.string().default('launcher'),
   S3_USE_SSL: Joi.string().default(false),
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().default(
@@ -82,4 +84,8 @@ export const envValidator = Joi.object({
   STRIPE_APP_NAME: Joi.string().default('Fortune'),
   STRIPE_APP_VERSION: Joi.string().default('0.0.1'),
   STRIPE_APP_INFO_URL: Joi.string().default('https://hmt.ai'),
+  // SendGrid
+  SENDGRID_API_KEY: Joi.string().required(),
+  SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
+  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
 });
