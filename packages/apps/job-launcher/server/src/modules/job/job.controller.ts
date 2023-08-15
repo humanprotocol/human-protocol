@@ -9,7 +9,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
 import { RequestWithUser } from 'src/common/types';
-import { CreateJobDto, JobCvatDto, JobFortuneDto } from './job.dto';
+import { CreateJobDto } from './job.dto';
 import { JobService } from './job.service';
 
 @ApiBearerAuth()

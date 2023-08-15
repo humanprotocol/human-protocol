@@ -38,7 +38,6 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
-  JobFortuneDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -259,14 +258,6 @@ describe('JobService', () => {
         throw new Error(ErrorWeb3.InvalidTestnetChainId);
       })
 
-      const dto: JobFortuneDto = {
-        chainId: ChainId.BSC_MAINNET, // Invalid chainId for testnet
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-      };
-
       await expect(
         jobService.createJob(userId, fortuneJobDto as CreateJobDto),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
@@ -282,14 +273,6 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const dto: JobFortuneDto = {
-        chainId: MOCK_CHAIN_ID,
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-      };
-
       await expect(
         jobService.createJob(userId, fortuneJobDto as CreateJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
@@ -304,15 +287,6 @@ describe('JobService', () => {
 
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-
-      const dto: JobFortuneDto = {
-        chainId: MOCK_CHAIN_ID,
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-      };
 
       await expect(
         jobService.createJob(userId, fortuneJobDto as CreateJobDto),
@@ -439,14 +413,6 @@ describe('JobService', () => {
         throw new Error(ErrorWeb3.InvalidTestnetChainId);
       })
 
-      const dto: JobFortuneDto = {
-        chainId: ChainId.BSC_MAINNET, // Invalid chainId for testnet
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-      };
-
       await expect(
         jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
@@ -462,14 +428,6 @@ describe('JobService', () => {
 
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const dto: JobFortuneDto = {
-        chainId: MOCK_CHAIN_ID,
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-      };
-
       await expect(
         jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
@@ -484,15 +442,6 @@ describe('JobService', () => {
 
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
-
-
-      const dto: JobFortuneDto = {
-        chainId: MOCK_CHAIN_ID,
-        submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-      };
 
       await expect(
         jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
