@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { ChainId } from "@human-protocol/sdk";
-import { IsEnum, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { ChainId } from '@human-protocol/sdk';
+import { IsEnum, IsString } from 'class-validator';
 
-import { IsValidEthereumAddress } from "@/common/validators";
+import { IsValidEthereumAddress } from '@/common/validators';
 
 export class JobSolutionRequestDto {
   @ApiProperty()
