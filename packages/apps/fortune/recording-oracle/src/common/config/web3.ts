@@ -1,6 +1,6 @@
-import { ConfigType, registerAs } from "@nestjs/config";
+import { ConfigType, registerAs } from '@nestjs/config';
 
-export const web3Config = registerAs("web3", () => ({
+export const web3Config = registerAs('web3', () => ({
   web3PrivateKey: process.env.WEB3_PRIVATE_KEY!,
 }));
 
