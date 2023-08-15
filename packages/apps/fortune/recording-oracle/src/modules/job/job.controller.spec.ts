@@ -1,22 +1,22 @@
-import { ConfigService } from "@nestjs/config";
-import { HttpService } from "@nestjs/axios";
-import { Test } from "@nestjs/testing";
-import { of } from "rxjs";
+import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { Test } from '@nestjs/testing';
+import { of } from 'rxjs';
 
-import { JobController } from "./job.controller";
-import { JobService } from "./job.service";
-import { Web3Service } from "../web3/web3.service";
+import { JobController } from './job.controller';
+import { JobService } from './job.service';
+import { Web3Service } from '../web3/web3.service';
 import {
   MOCK_ADDRESS,
   MOCK_HOST,
   MOCK_PORT,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_WEB3_PRIVATE_KEY,
-} from "../../../test/constants";
-import { ChainId } from "@human-protocol/sdk";
+} from '../../../test/constants';
+import { ChainId } from '@human-protocol/sdk';
 
-jest.mock("@human-protocol/sdk", () => ({
-  ...jest.requireActual("@human-protocol/sdk"),
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
   StorageClient: jest.fn().mockImplementation(() => ({})),
 }));
 
@@ -26,9 +26,11 @@ const signerMock = {
   getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
 };
 
-const httpServicePostMock = jest.fn().mockReturnValue(of({ status: 200, data: {} }));
+const httpServicePostMock = jest
+  .fn()
+  .mockReturnValue(of({ status: 200, data: {} }));
 
-describe("JobController", () => {
+describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
 
@@ -36,13 +38,13 @@ describe("JobController", () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case "REPUTATION_ORACLE_WEBHOOK_URL":
+          case 'REPUTATION_ORACLE_WEBHOOK_URL':
             return MOCK_REPUTATION_ORACLE_WEBHOOK_URL;
-          case "HOST":
+          case 'HOST':
             return MOCK_HOST;
-          case "PORT":
+          case 'PORT':
             return MOCK_PORT;
-          case "WEB3_PRIVATE_KEY":
+          case 'WEB3_PRIVATE_KEY':
             return MOCK_WEB3_PRIVATE_KEY;
           default:
             return null;
@@ -73,9 +75,11 @@ describe("JobController", () => {
     jobController = new JobController(jobService);
   });
 
-  describe.only("solve", () => {
-    it("should call service", async () => {
-      jest.spyOn(jobService, "processJobSolution").mockImplementation(async () => "OK");
+  describe.only('solve', () => {
+    it('should call service', async () => {
+      jest
+        .spyOn(jobService, 'processJobSolution')
+        .mockImplementation(async () => 'OK');
 
       expect(
         await jobController.solve({
@@ -83,9 +87,9 @@ describe("JobController", () => {
           chainId: ChainId.LOCALHOST,
           exchangeAddress: MOCK_ADDRESS,
           workerAddress: MOCK_ADDRESS,
-          solution: "Solution",
+          solution: 'Solution',
         }),
-      ).toBe("OK");
+      ).toBe('OK');
     });
   });
 });

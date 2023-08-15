@@ -1,15 +1,15 @@
-import { AppController } from "./app.controller";
+import { AppController } from './app.controller';
 
-describe("AppController", () => {
+describe('AppController', () => {
   let appController: AppController;
 
   beforeEach(() => {
     appController = new AppController();
   });
 
-  describe("Health Check", () => {
-    it("should return OK", async () => {
-      expect(await appController.health()).toBe("OK");
+  describe('Health Check', () => {
+    it('should return OK', async () => {
+      expect(await appController.health()).toBe('OK');
     });
   });
 });
