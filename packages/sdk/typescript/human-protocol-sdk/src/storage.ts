@@ -102,7 +102,6 @@ export class StorageClient {
     files: any[],
     bucket: string
   ): Promise<UploadFile[]> {
-    console.log(files);
     const isBucketExists = await this.client.bucketExists(bucket);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
