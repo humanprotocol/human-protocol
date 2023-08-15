@@ -37,8 +37,6 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
-  JobCvatDto,
-  JobFortuneDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -325,9 +323,9 @@ export class JobService {
   ): Promise<boolean> {
     let dtoCheck;
     if (dto.requestType === JobRequestType.FORTUNE) {
-      dtoCheck = new JobFortuneDto()
+      dtoCheck = new FortuneManifestDto()
     } else if (dto.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      dtoCheck = new JobCvatDto()
+      dtoCheck = new ImageLabelBinaryManifestDto()
     } else {
       throw new ConflictException(ErrorJob.InvalidRequestType);
     }

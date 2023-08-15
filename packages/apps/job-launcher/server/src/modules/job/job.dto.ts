@@ -72,39 +72,6 @@ export class CreateJobDto {
   public requesterAccuracyTarget?: number;
 }
 
-export class JobDto {
-  @IsEnum(ChainId)
-  @IsOptional()
-  public chainId?: ChainId;
-
-  @IsNumber()
-  public submissionsRequired: number;
-
-  @IsString()
-  public requesterDescription: string;
-
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-}
-
-export class JobFortuneDto extends JobDto {
-  @IsString()
-  public requesterTitle: string;
-}
-
-export class JobCvatDto extends JobDto {
-  @IsUrl()
-  public dataUrl: string;
-
-  @IsArray()
-  public labels: string[];
-
-  @IsNumber()
-  @IsPositive()
-  public requesterAccuracyTarget: number;
-}
-
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,
