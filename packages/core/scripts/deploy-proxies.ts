@@ -21,7 +21,9 @@ async function main() {
     await upgrades.erc1967.getImplementationAddress(stakingContract.address)
   );
 
-  const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+  const EscrowFactory = await ethers.getContractFactory(
+    'contracts/EscrowFactory.sol:EscrowFactory'
+  );
   const escrowFactoryContract = await upgrades.deployProxy(
     EscrowFactory,
     [stakingContract.address],

@@ -67,7 +67,7 @@ class EscrowTestCase(unittest.TestCase):
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
-        manifest_url = "http://localhost"
+        manifest_url = "https://www.example.com/result"
         hash = "test"
 
         escrow_config = EscrowConfig(
@@ -95,7 +95,7 @@ class EscrowTestCase(unittest.TestCase):
         valid_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
-        manifest_url = "http://localhost"
+        manifest_url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -128,7 +128,7 @@ class EscrowTestCase(unittest.TestCase):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         valid_oracle_fee = 10
-        manifest_url = "http://localhost"
+        manifest_url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -210,7 +210,7 @@ class EscrowTestCase(unittest.TestCase):
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
         reputation_oracle_fee = 10
-        manifest_url = "http://localhost"
+        manifest_url = "https://www.example.com/result"
         hash = ""
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -293,7 +293,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -323,7 +323,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -345,7 +345,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
         with self.assertRaises(EscrowClientError) as cm:
@@ -365,7 +365,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -389,7 +389,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -407,7 +407,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -431,7 +431,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
@@ -471,7 +471,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -491,7 +491,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -520,7 +520,7 @@ class EscrowTestCase(unittest.TestCase):
             "0x1234567890123456789012345678901234567890",
             10,
             10,
-            "http://localhost",
+            "https://www.example.com/result",
             "test",
         )
 
@@ -579,7 +579,7 @@ class EscrowTestCase(unittest.TestCase):
         mock_contract.functions.storeResults = MagicMock()
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
@@ -596,7 +596,7 @@ class EscrowTestCase(unittest.TestCase):
 
     def test_store_results_invalid_address(self):
         escrow_address = "invalid_address"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -614,7 +614,7 @@ class EscrowTestCase(unittest.TestCase):
 
     def test_store_results_invalid_hash(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = ""
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -630,7 +630,7 @@ class EscrowTestCase(unittest.TestCase):
         escrowClient = EscrowClient(w3)
 
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -645,7 +645,7 @@ class EscrowTestCase(unittest.TestCase):
         )
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -663,7 +663,7 @@ class EscrowTestCase(unittest.TestCase):
         )
         self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -676,7 +676,7 @@ class EscrowTestCase(unittest.TestCase):
     def test_store_results_invalid_escrow(self):
         self.escrow.factory_contract.functions.hasEscrow = MagicMock(return_value=False)
         escrow_address = "0x1234567890123456789012345678901234567890"
-        url = "http://localhost"
+        url = "https://www.example.com/result"
         hash = "test"
 
         with self.assertRaises(EscrowClientError) as cm:
@@ -694,7 +694,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -723,7 +723,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -755,7 +755,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100, 200]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -774,7 +774,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = []
         amounts = []
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -792,7 +792,7 @@ class EscrowTestCase(unittest.TestCase):
     def test_bulk_payout_zero_amount(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -810,7 +810,7 @@ class EscrowTestCase(unittest.TestCase):
     def test_bulk_payout_negative_amount(self):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -829,7 +829,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
         self.escrow.get_balance = MagicMock(return_value=50)
@@ -874,7 +874,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = ""
         txId = 1
         self.escrow.get_balance = MagicMock(return_value=100)
@@ -901,7 +901,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
         escrowClient.get_balance = MagicMock(return_value=100)
@@ -923,7 +923,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -951,7 +951,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -979,7 +979,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -1007,7 +1007,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
@@ -1035,7 +1035,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         recipients = ["0x1234567890123456789012345678901234567890"]
         amounts = [100]
-        final_results_url = "http://localhost"
+        final_results_url = "https://www.example.com/result"
         final_results_hash = "test"
         txId = 1
 
