@@ -38,6 +38,8 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
+  JobFortuneDto,
+  JobImageLabelBinaryDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -145,20 +147,12 @@ describe('JobService', () => {
   describe('createJob', () => {
     const rate = 0.5;
     const userId = 1;
-    const fortuneJobDto: Partial<CreateJobDto> = {
+    const fortuneJobDto: JobFortuneDto = {
       chainId: MOCK_CHAIN_ID,
-      requestType: JobRequestType.FORTUNE,
       submissionsRequired: MOCK_SUBMISSION_REQUIRED,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fundAmount: 10,
-    };
-
-    const invalidJobDto: Partial<CreateJobDto> = {
-      chainId: MOCK_CHAIN_ID,
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-      requesterTitle: MOCK_REQUESTER_TITLE,
     };
     
     let getUserBalanceMock: any;
@@ -193,7 +187,7 @@ describe('JobService', () => {
         ).mulUnsafe(FixedNumber.from(rate.toString())),
       );
 
-      await jobService.createJob(userId, fortuneJobDto as CreateJobDto);
+      await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
@@ -232,7 +226,7 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createJob(userId, { ...fortuneJobDto, chainId: undefined } as CreateJobDto);
+      await jobService.createJob(userId, JobRequestType.FORTUNE, { ...fortuneJobDto, chainId: undefined });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.create).toHaveBeenCalledWith({
@@ -247,19 +241,13 @@ describe('JobService', () => {
       });
     });
 
-    it('should throw an exception for job parameters validation failed', async () => {
-      await expect(
-        jobService.createJob(userId, invalidJobDto as CreateJobDto),
-      ).rejects.toThrowError(ErrorJob.JobParamsValidationFailed);
-    });
-
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
         throw new Error(ErrorWeb3.InvalidTestnetChainId);
       })
 
       await expect(
-        jobService.createJob(userId, fortuneJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
     });
 
@@ -274,7 +262,7 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
-        jobService.createJob(userId, fortuneJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
     });
 
@@ -289,7 +277,7 @@ describe('JobService', () => {
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
       await expect(
-        jobService.createJob(userId, fortuneJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });
@@ -298,22 +286,14 @@ describe('JobService', () => {
     const rate = 0.5;
     const userId = 1;
 
-    const imageLabelBinaryJobDto: Partial<CreateJobDto> = {
+    const imageLabelBinaryJobDto: JobImageLabelBinaryDto = {
       chainId: MOCK_CHAIN_ID,
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
       submissionsRequired: MOCK_SUBMISSION_REQUIRED,
       dataUrl: MOCK_FILE_URL,
       labels: ["cat", 'dog'],
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       requesterAccuracyTarget: 0.95,
       fundAmount: 10,
-    };
-
-    const invalidJobDto: Partial<CreateJobDto> = {
-      chainId: MOCK_CHAIN_ID,
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-      dataUrl: MOCK_FILE_URL,
     };
 
     let getUserBalanceMock: any;
@@ -348,7 +328,7 @@ describe('JobService', () => {
         ).mulUnsafe(FixedNumber.from(rate.toString())),
       );
 
-      await jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto);
+      await jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, imageLabelBinaryJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
@@ -387,7 +367,7 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createJob(userId, { ...imageLabelBinaryJobDto, chainId: undefined } as CreateJobDto);
+      await jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, { ...imageLabelBinaryJobDto, chainId: undefined });
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(jobRepository.create).toHaveBeenCalledWith({
@@ -402,19 +382,13 @@ describe('JobService', () => {
       });
     });
 
-    it('should throw an exception for job parameters validation failed', async () => {
-      await expect(
-        jobService.createJob(userId, invalidJobDto as CreateJobDto),
-      ).rejects.toThrowError(ErrorJob.JobParamsValidationFailed);
-    });
-
     it('should throw an exception for invalid chain id provided', async () => {
       web3Service.validateChainId = jest.fn(() => {
         throw new Error(ErrorWeb3.InvalidTestnetChainId);
       })
 
       await expect(
-        jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, imageLabelBinaryJobDto),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
     });
 
@@ -429,7 +403,7 @@ describe('JobService', () => {
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
-        jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, imageLabelBinaryJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
     });
 
@@ -444,7 +418,7 @@ describe('JobService', () => {
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
       await expect(
-        jobService.createJob(userId, imageLabelBinaryJobDto as CreateJobDto),
+        jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, imageLabelBinaryJobDto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });

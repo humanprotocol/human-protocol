@@ -9,8 +9,9 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
 import { RequestWithUser } from 'src/common/types';
-import { CreateJobDto } from './job.dto';
+import { JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
 import { JobService } from './job.service';
+import { JobRequestType } from 'src/common/enums/job';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -22,11 +23,19 @@ export class JobController {
   @Post('/fortune')
   public async createFortuneJob(
     @Request() req: RequestWithUser,
-    @Body() data: CreateJobDto,
+    @Body() data: JobFortuneDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, data);
+    return this.jobService.createJob(req.user.id, JobRequestType.FORTUNE, data);
   }
-  
+
+  @Post('/cvat')
+  public async createCvatJob(
+    @Request() req: RequestWithUser,
+    @Body() data: JobImageLabelBinaryDto,
+  ): Promise<number> {
+    return this.jobService.createJob(req.user.id, JobRequestType.IMAGE_LABEL_BINARY, data);
+  }
+
   @Get('/result')
   public async getResult(@Request() req: any): Promise<any> {
     return this.jobService.getResult(req.user?.id);

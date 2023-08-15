@@ -72,6 +72,49 @@ export class CreateJobDto {
   public requesterAccuracyTarget?: number;
 }
 
+export class JobDto {
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  @IsOptional()
+  public chainId?: ChainId;
+
+  @ApiProperty()
+  @IsNumber()
+  public submissionsRequired: number;
+
+  @ApiProperty()
+  @IsString()
+  public requesterDescription: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
+}
+
+export class JobFortuneDto extends JobDto {
+  @ApiProperty()
+  @IsString()
+  public requesterTitle: string;
+}
+
+export class JobImageLabelBinaryDto extends JobDto {
+  @ApiProperty()
+  @IsUrl()
+  public dataUrl: string;
+
+  @ApiProperty()
+  @IsArray()
+  public labels: string[];
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public requesterAccuracyTarget: number;
+}
+
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,

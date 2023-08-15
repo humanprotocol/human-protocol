@@ -37,6 +37,8 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
+  JobFortuneDto,
+  JobImageLabelBinaryDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -98,21 +100,15 @@ export class JobService {
 
   public async createJob(
     userId: number,
-    dto: CreateJobDto,
+    requestType: JobRequestType,
+    dto: JobFortuneDto | JobImageLabelBinaryDto,
   ): Promise<number> {
     const {
       chainId,
-      requestType,
       submissionsRequired,
-      requesterTitle,
       requesterDescription,
-      dataUrl,
-      labels,
-      requesterAccuracyTarget,
       fundAmount,
     } = dto;
-
-    await this.validateJob(dto);
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
@@ -145,14 +141,11 @@ export class JobService {
     }
 
     const { manifestUrl, manifestHash } = await this.saveManifest({
+      ...dto,
       requestType,
       submissionsRequired,
       requesterDescription,
       fundAmount: fundAmountInWei.toString(),
-      requesterTitle,
-      dataUrl,
-      labels,
-      requesterAccuracyTarget,
     } as FortuneManifestDto | ImageLabelBinaryManifestDto);
 
     const jobEntity = await this.jobRepository.create({
@@ -313,33 +306,6 @@ export class JobService {
         validationErrors,
       );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
-    }
-
-    return true;
-  }
-
-  private async validateJob(
-    dto: CreateJobDto,
-  ): Promise<boolean> {
-    let dtoCheck;
-    if (dto.requestType === JobRequestType.FORTUNE) {
-      dtoCheck = new FortuneManifestDto()
-    } else if (dto.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      dtoCheck = new ImageLabelBinaryManifestDto()
-    } else {
-      throw new ConflictException(ErrorJob.InvalidRequestType);
-    }
-
-    Object.assign(dtoCheck, dto);
-
-    const validationErrors: ValidationError[] = await validate(dtoCheck);
-    if (validationErrors.length > 0) {
-      this.logger.log(
-        ErrorJob.JobParamsValidationFailed,
-        JobService.name,
-        validationErrors,
-      );
-      throw new NotFoundException(ErrorJob.JobParamsValidationFailed);
     }
 
     return true;
