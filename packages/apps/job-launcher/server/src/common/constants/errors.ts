@@ -10,6 +10,8 @@ export enum ErrorJob {
   WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
+  InvalidRequestType = 'Invalid job type',
+  JobParamsValidationFailed = 'Job parameters validation failed',
 }
 
 /**
@@ -81,4 +83,12 @@ export enum ErrorCurrency {
 export enum ErrorBucket {
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+}
+
+/**
+ * Represents error messages related to web3.
+ */
+export enum ErrorWeb3 {
+  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
+  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
 }

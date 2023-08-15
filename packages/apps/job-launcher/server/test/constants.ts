@@ -1,9 +1,9 @@
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
-export const MOCK_FORTUNES_REQUIRED = 5;
+export const MOCK_SUBMISSION_REQUIRED = 5;
 export const MOCK_CHAIN_ID = 1;
 export const MOCK_ADDRESS = '0x1234567890123456789012345678901234567892';
-export const MOCK_FILE_URL = 'mockedFileUrl';
+export const MOCK_FILE_URL = 'http://mockedFileUrl.test';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_PRIVATE_KEY =
