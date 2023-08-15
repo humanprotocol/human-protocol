@@ -58,7 +58,7 @@ export const NewsView = () => {
                   fontSize: { xs: '14px', sm: '20px', md: '24px' },
                 }}
                 color="primary"
-                mb={{ xs: 0, md: 6 }}
+                mb={2}
               >
                 {data?.title}
               </Typography>
@@ -66,7 +66,7 @@ export const NewsView = () => {
                 variant="body2"
                 color="primary"
                 maxWidth={450}
-                mb={5}
+                mb={4}
                 sx={{ display: { xs: 'none', md: 'block' } }}
               >
                 {data?.description}
