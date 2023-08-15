@@ -1,12 +1,5 @@
 specVersion: 0.0.5
 description: '{{ description }}'
-{{#graft}}
-features:
-  - grafting
-graft:
-  base: {{ graft.base }}
-  block: {{ graft.block }}
-{{/graft}}
 schema:
   file: ./schema.graphql
 dataSources:
@@ -134,6 +127,26 @@ dataSources:
         - event: RewardAdded(indexed address,indexed address,indexed address,uint256)
           handler: handleRewardAdded
       file: ./src/mapping/RewardPool.ts
+  - kind: ethereum
+    name: LegacyEscrowFactory
+    network: '{{ network }}'
+    source:
+      abi: EscrowFactory
+      address: '{{ LegacyEscrowFactory.address }}'
+      startBlock: {{ LegacyEscrowFactory.startBlock }}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping/legacy/EscrowFactory.ts
+      entities:
+        - Launched
+      abis:
+        - name: EscrowFactory
+          file: '{{{ LegacyEscrowFactory.abi }}}'
+      eventHandlers:
+        - event: Launched(address,address)
+          handler: handleLaunched
 templates:
   - name: Escrow
     kind: ethereum/contract
@@ -162,3 +175,26 @@ templates:
           handler: handleCancelled
         - event: Completed()
           handler: handleCompleted
+  - name: LegacyEscrow
+    kind: ethereum/contract
+    network: '{{ network }}'
+    source:
+      abi: Escrow
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping/legacy/Escrow.ts
+      entities:
+        - ISEvent
+        - PEvent
+      abis:
+        - name: Escrow
+          file: '{{{ LegacyEscrow.abi }}}'
+      eventHandlers:
+        - event: IntermediateStorage(string,string)
+          handler: handleIntermediateStorage
+        - event: Pending(string,string)
+          handler: handlePending
+        - event: BulkTransfer(indexed uint256,uint256)
+          handler: handleBulkTransfer
