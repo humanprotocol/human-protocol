@@ -242,6 +242,13 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     payment.recipient = event.params._recipients[i];
     payment.amount = event.params._amounts[i];
     payment.save();
+
+    // Update worker, and payout day data
+    eventDayData.dailyWorkerCount = eventDayData.dailyWorkerCount.plus(ONE_BI);
+    eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
+    eventDayData.dailyPayoutAmount = eventDayData.dailyPayoutAmount.plus(
+      event.params._amounts[i]
+    );
   }
 
   // Save statistics, and event day data

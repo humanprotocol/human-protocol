@@ -99,6 +99,7 @@ export function handleTransfer(event: Transfer): void {
     event.params._value
   );
 
+  const eventDayData = getEventDayData(event);
   const escrow = Escrow.load(event.params._to.toHex());
   if (escrow) {
     // Create FundEvent entity
@@ -118,12 +119,10 @@ export function handleTransfer(event: Transfer): void {
     statsEntity.save();
 
     // Update event day data
-    const eventDayData = getEventDayData(event);
     eventDayData.dailyFundEventCount =
       eventDayData.dailyFundEventCount.plus(ONE_BI);
     eventDayData.dailyTotalEventCount =
       eventDayData.dailyTotalEventCount.plus(ONE_BI);
-    eventDayData.save();
 
     // Update escrow balance, and totalFundedAmount
     escrow.balance = escrow.balance.plus(event.params._value);
@@ -141,6 +140,13 @@ export function handleTransfer(event: Transfer): void {
     statsEntity.holders = statsEntity.holders.plus(diffHolders);
   }
 
+  // Update event day data for HMT transfer
+  eventDayData.dailyHMTTransferCount =
+    eventDayData.dailyHMTTransferCount.plus(ONE_BI);
+  eventDayData.dailyHMTTransferAmount =
+    eventDayData.dailyHMTTransferAmount.plus(event.params._value);
+
+  eventDayData.save();
   statsEntity.save();
 }
 

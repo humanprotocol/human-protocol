@@ -339,7 +339,12 @@ type EventDayData @entity {
   dailyPaidStatusEventCount: BigInt!
   dailyCompletedStatusEventCount: BigInt!
   dailyTotalEventCount: BigInt!
-  dailyEscrowAmounts: BigInt!
+  dailyEscrowCount: BigInt!
+  dailyWorkerCount: BigInt!
+  dailyPayoutCount: BigInt!
+  dailyPayoutAmount: BigInt!
+  dailyHMTTransferCount: BigInt!
+  dailyHMTTransferAmount: BigInt!
 }
 
 type LeaderStatistics @entity {

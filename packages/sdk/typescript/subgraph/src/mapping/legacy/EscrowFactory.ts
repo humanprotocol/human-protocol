@@ -34,8 +34,7 @@ export function handleLaunched(event: Launched): void {
 
   // Update escrow amount day data
   const eventDayData = getEventDayData(event);
-  eventDayData.dailyEscrowAmounts =
-    eventDayData.dailyEscrowAmounts.plus(ONE_BI);
+  eventDayData.dailyEscrowCount = eventDayData.dailyEscrowCount.plus(ONE_BI);
   eventDayData.save();
 
   // Increase amount of jobs launched by leader
