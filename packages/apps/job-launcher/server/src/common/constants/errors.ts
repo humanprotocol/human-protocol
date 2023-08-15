@@ -10,6 +10,8 @@ export enum ErrorJob {
   WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
+  InvalidRequestType = 'Invalid a job request type',
+  JobParamsValidationFailed = 'Job parameters validation failed',
 }
 
 /**

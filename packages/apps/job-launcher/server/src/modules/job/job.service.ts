@@ -4,6 +4,7 @@ import { validate } from 'class-validator';
 import {
   BadGatewayException,
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   Logger,
@@ -31,6 +32,7 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  CreateJobDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
@@ -96,17 +98,23 @@ export class JobService {
     );
   }
 
-  public async createFortuneJob(
+  public async createJob(
     userId: number,
-    dto: JobFortuneDto,
+    dto: CreateJobDto,
   ): Promise<number> {
     const {
       chainId,
-      fortunesRequired,
+      requestType,
+      submissionsRequired,
       requesterTitle,
       requesterDescription,
+      dataUrl,
+      labels,
+      requesterAccuracyTarget,
       fundAmount,
     } = dto;
+
+    await this.validateJob(dto);
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
@@ -138,105 +146,16 @@ export class JobService {
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
-    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
-      submissionsRequired: fortunesRequired,
+    const { manifestUrl, manifestHash } = await this.saveManifest({
+      requestType,
+      submissionsRequired,
+      requesterDescription,
+      fundAmount: fundAmountInWei.toString(),
       requesterTitle,
-      requesterDescription,
-      fundAmount: fundAmountInWei.toString(),
-      requestType: JobRequestType.FORTUNE,
-    };
-
-    const { manifestUrl, manifestHash } = await this.saveManifest(
-      manifestData,
-      this.bucket,
-    );
-
-    const jobEntity = await this.jobRepository.create({
-      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
-      userId,
-      manifestUrl,
-      manifestHash,
-      fee: jobLauncherFee.toString(),
-      fundAmount: fundAmountInWei.toString(),
-      status: JobStatus.PENDING,
-      waitUntil: new Date(),
-    });
-
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorJob.NotCreated);
-    }
-
-    await this.paymentRepository.create({
-      userId,
-      source: PaymentSource.BALANCE,
-      type: PaymentType.WITHDRAWAL,
-      amount: usdTotalAmount.toString(),
-      currency: TokenId.HMT,
-      rate
-    })
-
-    jobEntity.status = JobStatus.PAID;
-    await jobEntity.save();
-
-    return jobEntity.id;
-  }
-
-  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
-    const {
-      chainId,
       dataUrl,
-      annotationsPerImage,
       labels,
-      requesterDescription,
       requesterAccuracyTarget,
-      fundAmount,
-    } = dto;
-
-    if (chainId) {
-      this.web3Service.validateChainId(chainId);
-    }
-
-    const userBalance = await this.paymentService.getUserBalance(userId);
-
-    const fundAmountInWei = ethers.utils.parseUnits(
-      fundAmount.toString(),
-      'ether',
-    );
-
-    const rate = await getRate(Currency.USD, TokenId.HMT);
-
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .div(100)
-      .mul(fundAmountInWei);
-
-    const usdTotalAmount = BigNumber.from(
-      FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
-      ).mulUnsafe(FixedNumber.from(rate.toString())),
-    );
-
-    if (userBalance.lt(usdTotalAmount)) {
-      this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new BadRequestException(ErrorJob.NotEnoughFunds);
-    }
-
-    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
-      dataUrl,
-      submissionsRequired: annotationsPerImage,
-      labels,
-      requesterDescription,
-      requesterAccuracyTarget,
-      fundAmount: fundAmountInWei.toString(),
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-    };
-
-    const { manifestUrl, manifestHash } = await this.saveManifest(
-      manifestData,
-      this.bucket,
-    );
+    } as FortuneManifestDto | ImageLabelBinaryManifestDto);
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
@@ -332,12 +251,39 @@ export class JobService {
   }
 
   public async saveManifest(
-    encryptedManifest: any,
-    bucket: string,
+    dto: FortuneManifestDto | ImageLabelBinaryManifestDto
   ): Promise<SaveManifestDto> {
+    const {
+      requestType,
+      submissionsRequired,
+      requesterDescription,
+      fundAmount
+    } = dto;
+    
+    let manifestData;
+    if (requestType === JobRequestType.FORTUNE) {
+      manifestData = {
+        ...dto,
+        submissionsRequired,
+        requesterDescription,
+        fundAmount,
+        requestType: JobRequestType.FORTUNE
+      };
+    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      manifestData = {
+        ...dto,
+        submissionsRequired,
+        requesterDescription,
+        fundAmount,
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+      };
+    } else {
+      throw new ConflictException(ErrorJob.InvalidRequestType);
+    }
+
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [encryptedManifest],
-      bucket,
+      [manifestData],
+      this.bucket,
     );
 
     if (!uploadedFiles[0]) {
@@ -369,6 +315,33 @@ export class JobService {
         validationErrors,
       );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
+    }
+
+    return true;
+  }
+
+  private async validateJob(
+    dto: CreateJobDto,
+  ): Promise<boolean> {
+    let dtoCheck;
+    if (dto.requestType === JobRequestType.FORTUNE) {
+      dtoCheck = new JobFortuneDto()
+    } else if (dto.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      dtoCheck = new JobCvatDto()
+    } else {
+      throw new ConflictException(ErrorJob.InvalidRequestType);
+    }
+
+    Object.assign(dtoCheck, dto);
+
+    const validationErrors: ValidationError[] = await validate(dtoCheck);
+    if (validationErrors.length > 0) {
+      this.logger.log(
+        ErrorJob.JobParamsValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
+      throw new NotFoundException(ErrorJob.JobParamsValidationFailed);
     }
 
     return true;

@@ -23,7 +23,7 @@ export class JobCreateDto {
   public waitUntil: Date;
 }
 
-export class JobFortuneDto {
+export class CreateJobDto {
   @ApiProperty({
     enum: ChainId,
   })
@@ -31,57 +31,78 @@ export class JobFortuneDto {
   @IsOptional()
   public chainId?: ChainId;
 
-  @ApiProperty()
-  @IsNumber()
-  public fortunesRequired: number;
+  @ApiProperty({
+    enum: JobRequestType,
+  })
+  @IsEnum(JobRequestType)
+  public requestType: JobRequestType;
 
   @ApiProperty()
-  @IsString()
-  public requesterTitle: string;
+  @IsNumber()
+  public submissionsRequired: number;
 
   @ApiProperty()
   @IsString()
   public requesterDescription: string;
 
   @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  public requesterTitle?: string;
+
+  @ApiPropertyOptional()
+  @IsUrl()
+  @IsOptional()
+  public dataUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsArray()
+  @IsOptional()
+  public labels?: string[];
+
+  @ApiPropertyOptional()
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  public requesterAccuracyTarget?: number;
+}
+
+export class JobDto {
+  @IsEnum(ChainId)
+  @IsOptional()
+  public chainId?: ChainId;
+
+  @IsNumber()
+  public submissionsRequired: number;
+
+  @IsString()
+  public requesterDescription: string;
+
   @IsNumber()
   @IsPositive()
   public fundAmount: number;
 }
 
-export class JobCvatDto {
-  @ApiProperty({
-    enum: ChainId,
-  })
-  @IsEnum(ChainId)
-  @IsOptional()
-  public chainId?: ChainId;
+export class JobFortuneDto extends JobDto {
+  @IsString()
+  public requesterTitle: string;
+}
 
-  @ApiProperty()
+export class JobCvatDto extends JobDto {
   @IsUrl()
   public dataUrl: string;
 
-  @ApiProperty()
-  @IsNumber()
-  public annotationsPerImage: number;
-
-  @ApiProperty()
   @IsArray()
   public labels: string[];
 
-  @ApiProperty()
-  @IsString()
-  public requesterDescription: string;
-
-  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public requesterAccuracyTarget: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
 }
 
 export class JobUpdateDto {
