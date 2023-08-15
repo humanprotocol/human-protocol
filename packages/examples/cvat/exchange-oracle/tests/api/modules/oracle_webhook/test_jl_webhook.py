@@ -109,7 +109,7 @@ def test_incoming_webhook_400(client: TestClient) -> None:
         "errors": [
             {
                 "field": "chain_id",
-                "message": "value is not a valid enumeration member; permitted: 137, 80001",
+                "message": "value is not a valid enumeration member; permitted: 137, 80001, 1338",
             }
         ]
     }

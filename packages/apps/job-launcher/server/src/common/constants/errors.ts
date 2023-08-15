@@ -59,7 +59,7 @@ export enum ErrorPayment {
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',
-  TransactionHashAlreadyExists = 'Transaction hash already exists',
+  TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
   InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',

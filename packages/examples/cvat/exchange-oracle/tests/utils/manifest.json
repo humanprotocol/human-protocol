@@ -1,0 +1,11 @@
+{
+  "dataUrl": "https://test.storage.googleapis.com/",
+  "submissionsRequired": 1,
+  "labels": ["dummy_label"],
+  "requesterDescription": "string",
+  "requesterAccuracyTarget": 10,
+  "fee": "250000000000",
+  "fundAmount": "1250000000000",
+  "mode": "BATCH",
+  "requestType": "IMAGE_LABEL_BINARY"
+}
