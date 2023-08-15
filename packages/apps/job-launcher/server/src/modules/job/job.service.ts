@@ -146,7 +146,7 @@ export class JobService {
       submissionsRequired,
       requesterDescription,
       fundAmount: fundAmountInWei.toString(),
-    } as FortuneManifestDto | ImageLabelBinaryManifestDto);
+    });
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
