@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { ConfigNames } from '../../common/config';
@@ -17,7 +17,7 @@ export class SendGridService {
     private readonly configService: ConfigService,
   ) {
     const apiKey = this.configService.get<string>(ConfigNames.SENDGRID_API_KEY)!;
-    console.log(apiKey, SENDGRID_API_KEY_REGEX.test(apiKey))
+    
     if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
       throw new Error(ErrorSendGrid.InvalidApiKey)
     }
@@ -48,7 +48,7 @@ export class SendGridService {
       return;
     } catch (error) {
       this.logger.error(error, SendGridService.name);
-      throw new UnauthorizedException(ErrorSendGrid.EmailNotSent);
+      throw new BadRequestException(ErrorSendGrid.EmailNotSent);
     }
   }
 }
