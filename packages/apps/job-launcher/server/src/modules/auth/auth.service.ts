@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -78,8 +79,8 @@ export class AuthService {
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
-
-    this.sendgridService.sendEmail({
+    
+    await this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
       html: `Welcome to the Job Launcher Service.<br />

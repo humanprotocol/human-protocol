@@ -79,9 +79,7 @@ export const envValidator = Joi.object({
   S3_BUCKET: Joi.string().default('launcher'),
   S3_USE_SSL: Joi.string().default(false),
   // Stripe
-  STRIPE_SECRET_KEY: Joi.string().default(
-    'sk_test_51MO1RkABE7VUdqB3hviLNxMYafYQYhvtWd3Jaj9ZEH3SvkxM4frJLz00FmC5J8xYbNGhmzwobaLkN0GKUbuhQDvx00NeZwI93C',
-  ),
+  STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_API_VERSION: Joi.string().default('2022-11-15'),
   STRIPE_APP_NAME: Joi.string().default('Fortune'),
   STRIPE_APP_VERSION: Joi.string().default('0.0.1'),
