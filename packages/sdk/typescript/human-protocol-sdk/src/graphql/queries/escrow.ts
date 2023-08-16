@@ -43,8 +43,8 @@ export const GET_FILTERED_ESCROWS_QUERY = gql`
       where: {
         launcher: $launcherAddress
         status: $status
-        timestamp_gte: $from
-        timestamp_lte: $to
+        createdAt_gte: $from
+        createdAt_lte: $to
       }
     ) {
       ...EscrowFields

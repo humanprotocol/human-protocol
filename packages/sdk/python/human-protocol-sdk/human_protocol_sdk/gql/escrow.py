@@ -43,8 +43,8 @@ query GetFilteredEscrows(
         where: {{
             launcher: $launcherAddress
             status: $status
-            timestamp_gte: $from
-            timestamp_lte: $to
+            createdAt_gte: $from
+            createdAt_lte: $to
         }}
     ) {{
         ...EscrowFields
