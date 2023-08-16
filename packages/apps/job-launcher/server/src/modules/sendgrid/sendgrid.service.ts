@@ -1,7 +1,6 @@
-import { BadGatewayException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
-import axios from 'axios';
 import { ConfigNames } from '../../common/config';
 import { SENDGRID_API_KEY_REGEX } from 'src/common/constants';
 import { ErrorSendGrid } from 'src/common/constants/errors';
