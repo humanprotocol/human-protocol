@@ -3,9 +3,9 @@ from ast import literal_eval
 from hashlib import sha256
 
 from fastapi import HTTPException, Request
-from src.config import CvatConfig
-from src.modules.chain.escrow import get_job_launcher_address
-from src.modules.chain.web3 import recover_signer
+from src.core.config import CvatConfig
+from src.chain.escrow import get_job_launcher_address
+from src.chain.web3 import recover_signer
 
 
 async def validate_webhook_signature(request: Request, signature: str, webhook: dict):

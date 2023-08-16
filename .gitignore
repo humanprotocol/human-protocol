@@ -46,6 +46,3 @@ dist
 
 #cache
 cache
-
-#Postgres Data
-db

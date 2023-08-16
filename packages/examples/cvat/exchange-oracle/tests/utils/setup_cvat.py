@@ -5,9 +5,9 @@ import uuid
 from hashlib import sha256
 from sqlalchemy.sql import select
 
-from src.database import SessionLocal
-from src.config import CvatConfig
-from src.modules.cvat.model import Project, Task, Job
+from src.db import SessionLocal
+from src.core.config import CvatConfig
+from src.models.cvat import Project, Task, Job
 
 
 def generate_cvat_signature(data: dict):
