@@ -1,8 +1,7 @@
 import { FC } from 'react';
 
 import {
-  EscrowContainer,
-  LeaderboardContainer,
+  HumanAppDataContainer,
   TokenContainer,
   SolvedTasksContainer,
   PageWrapper,
@@ -12,9 +11,8 @@ export const Main: FC = () => {
   return (
     <PageWrapper>
       <SolvedTasksContainer />
-      <EscrowContainer />
+      <HumanAppDataContainer />
       <TokenContainer />
-      <LeaderboardContainer showAll={false} />
     </PageWrapper>
   );
 };

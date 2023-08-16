@@ -11,6 +11,7 @@ import {
   Profile,
   MyHMT,
   ConfigureOracle,
+  HowToHuman,
 } from 'src/pages';
 
 interface Route {
@@ -80,5 +81,11 @@ export const routes: Array<Route> = [
     title: 'Configure Oracle',
     path: '/configure-oracle',
     component: ConfigureOracle,
+  },
+  {
+    key: 'how-to-human',
+    title: 'How To HUMAN',
+    path: '/how-to-human',
+    component: HowToHuman,
   },
 ];

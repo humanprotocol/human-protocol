@@ -13,6 +13,7 @@ import { SUPPORTED_CHAIN_IDS } from 'src/constants';
 
 interface NetworkSelectProps extends SelectProps {
   showAllNetwork?: boolean;
+  supportedChainIds?: ChainId[];
 }
 
 export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
@@ -44,7 +45,7 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
           All Networks
         </MenuItem>
       )}
-      {SUPPORTED_CHAIN_IDS.map((chainId) => {
+      {(props.supportedChainIds ?? SUPPORTED_CHAIN_IDS).map((chainId) => {
         const IconComponent = CHAIN_ICONS[chainId];
         return (
           <MenuItem value={chainId} key={chainId}>

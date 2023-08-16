@@ -32,11 +32,6 @@ export const useFetchLeaderData = (chainId?: string, address?: string) => {
   }, [dispatch, chainId, address]);
 };
 
-export const useChainId = () => {
-  const escrow = useSelector((state: AppState) => state.escrow);
-  return escrow.chainId;
-};
-
 export const useLeadersByChainID = (): Array<
   LeaderData & {
     chainId: ChainId;

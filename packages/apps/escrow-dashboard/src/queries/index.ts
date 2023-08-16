@@ -16,6 +16,24 @@ export const RAW_EVENT_DAY_DATA_QUERY = `{
   }
 }`;
 
+export const RAW_EVENT_DAY_DATA_V2_QUERY = `{
+  eventDayDatas(first: 365, orderBy: timestamp, orderDirection: desc) {
+    id
+    timestamp
+    dailyBulkPayoutEventCount
+    dailyCancelledStatusEventCount
+    dailyCompletedStatusEventCount
+    dailyEscrowAmounts
+    dailyFundEventCount
+    dailyPaidStatusEventCount
+    dailyPartialStatusEventCount
+    dailyPendingStatusEventCount
+    dailySetupEventCount
+    dailyStoreResultsEventCount
+    dailyTotalEventCount
+  }
+}`;
+
 export const RAW_TOKEN_STATS_QUERY = `{
   hmtokenStatistics(id: "hmt-statistics-id") {
     totalApprovalEventCount

@@ -3,7 +3,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import * as React from 'react';
 import { useSelector } from 'react-redux';
 import { AppState, useAppDispatch } from 'src/state';
-import { setRange } from 'src/state/escrow/reducer';
+import { setDays } from 'src/state/humanAppData/reducer';
 
 const RANGE_BUTTONS = [
   { label: '1W', value: 7 },
@@ -15,19 +15,19 @@ const RANGE_BUTTONS = [
 ];
 
 export default function TimeRangeButtons() {
-  const { range } = useSelector((state: AppState) => state.escrow);
+  const { days } = useSelector((state: AppState) => state.humanAppData);
   const dispatch = useAppDispatch();
 
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
     newValue: number
   ) => {
-    dispatch(setRange(newValue));
+    dispatch(setDays(newValue));
   };
 
   return (
     <ToggleButtonGroup
-      value={range}
+      value={days}
       exclusive
       onChange={handleChange}
       aria-label="time range"

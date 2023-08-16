@@ -7,6 +7,7 @@ import { Container } from '../Container';
 type TextBlockProps = {
   title: string | ReactElement;
   value?: number | string;
+  component?: ReactElement;
   format?: string;
   changes?: number;
 };
@@ -14,6 +15,7 @@ type TextBlockProps = {
 export const TextBlock: FC<TextBlockProps> = ({
   title,
   value,
+  component,
   format = '0,0',
   changes,
 }) => {
@@ -23,15 +25,22 @@ export const TextBlock: FC<TextBlockProps> = ({
         {title}
       </Typography>
       <Box display="flex" alignItems="baseline">
-        <Typography
-          variant="h2"
-          color="primary"
-          lineHeight={1}
-          marginTop={3}
-          sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
-        >
-          {Number.isNaN(value) ? value : numeral(value).format(format)}
-        </Typography>
+        {component ? (
+          component
+        ) : (
+          <Typography
+            variant="h2"
+            color="primary"
+            lineHeight={1}
+            marginTop={3}
+            sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
+          >
+            {Number.isNaN(Number(value))
+              ? value
+              : numeral(value).format(format)}
+          </Typography>
+        )}
+
         {changes === undefined ? (
           <></>
         ) : changes >= 0 ? (

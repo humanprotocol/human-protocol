@@ -3,7 +3,7 @@ import BigNumberJS from 'bignumber.js';
 import { useSelector } from 'react-redux';
 
 import { AppState, useAppDispatch } from '..';
-import { useChainId } from '../escrow/hooks';
+import { useChainId } from '../humanAppData/hooks';
 import { fetchTokenStatsAsync } from './reducer';
 import { L1_L2_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';

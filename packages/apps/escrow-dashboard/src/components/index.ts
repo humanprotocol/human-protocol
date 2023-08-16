@@ -14,7 +14,7 @@ export * from './SocialIcons';
 export * from './ViewTitle';
 export * from './WalletModal';
 
-export * from './Escrow';
+export * from './HumanAppData';
 export * from './Faucet';
 export * from './Kvstore';
 export * from './Leaderboard';

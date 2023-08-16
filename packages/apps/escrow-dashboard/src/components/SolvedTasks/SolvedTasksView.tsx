@@ -102,10 +102,10 @@ export const SolvedTasksView: FC = () => {
                 >
                   <stop
                     offset="0.290598"
-                    stop-color="#CACFE8"
-                    stop-opacity="0.3"
+                    stopColor="#CACFE8"
+                    stopOpacity="0.3"
                   />
-                  <stop offset="1" stop-color="#E9ECFF" stop-opacity="0" />
+                  <stop offset="1" stopColor="#E9ECFF" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} strokeDasharray={3} />
