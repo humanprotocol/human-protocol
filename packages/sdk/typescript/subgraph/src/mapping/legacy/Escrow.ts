@@ -8,6 +8,7 @@ import {
 import {
   BulkPayoutEvent,
   Escrow,
+  PaidStatusEvent,
   PendingStatusEvent,
   SetupEvent,
   StoreResultsEvent,
@@ -125,74 +126,34 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
-  //   // Update escrow entity
-  //   const escrowEntity = Escrow.load(dataSource.address().toHex());
-  //   if (escrowEntity) {
-  //     escrowEntity.status = event.params._isPartial ? 'Partially Paid' : 'Paid';
-  //     const totalAmountPaid = event.params._amounts.reduce(
-  //       (a, b) => a.plus(b),
-  //       ZERO_BI
-  //     );
-  //     escrowEntity.amountPaid = escrowEntity.amountPaid.plus(totalAmountPaid);
-  //     escrowEntity.balance = escrowEntity.balance.minus(totalAmountPaid);
-  //     escrowEntity.save();
-  //   }
+  /**
+   * @notice Legacy contract does not contain partial status in the event data.
+   *         Simply consider the payout was the full payout.
+   */
 
-  //   if (event.params._isPartial) {
-  //     const statusEventEntity = new PartialStatusEvent(toEventId(event));
-  //     statusEventEntity.block = event.block.number;
-  //     statusEventEntity.timestamp = event.block.timestamp;
-  //     statusEventEntity.txHash = event.transaction.hash;
-  //     statusEventEntity.escrowAddress = event.address;
-  //     statusEventEntity.sender = event.transaction.from;
-  //     statusEventEntity.save();
+  // Update escrow entity
+  const escrowEntity = Escrow.load(dataSource.address().toHex());
+  if (escrowEntity) {
+    escrowEntity.status = 'Paid';
+    escrowEntity.save();
+  }
 
-  //     statsEntity.partialStatusEventCount =
-  //       statsEntity.partialStatusEventCount.plus(ONE_BI);
-  //     statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+  const statusEventEntity = new PaidStatusEvent(toEventId(event));
+  statusEventEntity.block = event.block.number;
+  statusEventEntity.timestamp = event.block.timestamp;
+  statusEventEntity.txHash = event.transaction.hash;
+  statusEventEntity.escrowAddress = event.address;
+  statusEventEntity.sender = event.transaction.from;
+  statusEventEntity.save();
 
-  //     eventDayData.dailyPartialStatusEventCount =
-  //       eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
-  //     eventDayData.dailyTotalEventCount =
-  //       eventDayData.dailyTotalEventCount.plus(ONE_BI);
-  //   } else {
-  //     const statusEventEntity = new PaidStatusEvent(toEventId(event));
-  //     statusEventEntity.block = event.block.number;
-  //     statusEventEntity.timestamp = event.block.timestamp;
-  //     statusEventEntity.txHash = event.transaction.hash;
-  //     statusEventEntity.escrowAddress = event.address;
-  //     statusEventEntity.sender = event.transaction.from;
-  //     statusEventEntity.save();
+  statsEntity.paidStatusEventCount =
+    statsEntity.paidStatusEventCount.plus(ONE_BI);
+  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
 
-  //     statsEntity.paidStatusEventCount =
-  //       statsEntity.paidStatusEventCount.plus(ONE_BI);
-  //     statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-
-  //     eventDayData.dailyPaidStatusEventCount =
-  //       eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
-  //     eventDayData.dailyTotalEventCount =
-  //       eventDayData.dailyTotalEventCount.plus(ONE_BI);
-  //   }
-
-  // Update workers, and create payout entities
-  //   for (let i = 0; i < event.params._recipients.length; i++) {
-  //     const worker = createOrLoadWorker(event.params._recipients[i]);
-  //     worker.totalAmountReceived = worker.totalAmountReceived.plus(
-  //       event.params._amounts[i]
-  //     );
-  //     worker.payoutCount = worker.payoutCount.plus(ONE_BI);
-  //     worker.save();
-
-  //     const payoutId = `${event.transaction.hash.toHex()}-${event.params._recipients[
-  //       i
-  //     ].toHex()}-${i}`;
-  //     const payment = new Payout(payoutId);
-  //     payment.escrowAddress = event.address;
-  //     payment.bulkPayoutTxId = event.params._txId;
-  //     payment.recipient = event.params._recipients[i];
-  //     payment.amount = event.params._amounts[i];
-  //     payment.save();
-  //   }
+  eventDayData.dailyPaidStatusEventCount =
+    eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
+  eventDayData.dailyTotalEventCount =
+    eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
   // Save statistics, and event day data
   statsEntity.save();

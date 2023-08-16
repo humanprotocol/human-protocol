@@ -587,11 +587,11 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.status().call()
         )
 
-    def get_launched_escrows(self, requester_address: str) -> List[dict]:
-        """Get escrows addresses created by a job requester.
+    def get_launched_escrows(self, launcher_address: str) -> List[dict]:
+        """Get escrows addresses created by a job launcher.
 
         Args:
-            requester_address (str): Address of the requester
+            launcher_address (str): Address of the launcher
 
         Returns:
             List[dict]: List of escrows
@@ -600,7 +600,7 @@ class EscrowClient:
         escrows_data = get_data_from_subgraph(
             self.network["subgraph_url"],
             query=get_escrows_by_launcher_query,
-            params={"launcherAddress": requester_address},
+            params={"launcherAddress": launcher_address},
         )
         escrows = escrows_data["data"]["escrows"]
 

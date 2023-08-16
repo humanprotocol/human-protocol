@@ -52,6 +52,7 @@ describe('HMToken', () => {
     escrow.balance = BigInt.fromI32(100);
     escrow.totalFundedAmount = BigInt.fromI32(100);
     escrow.amountPaid = ZERO_BI;
+    escrow.createdAt = BigInt.fromI32(0);
     escrow.status = 'Launched';
 
     escrow.save();
@@ -180,6 +181,73 @@ describe('HMToken', () => {
         holderAddressString
       );
       assert.fieldEquals('Holder', holderAddressString, 'balance', '1');
+    });
+
+    test('Should properly handle Transfer event from Escrow', () => {
+      const transfer = createTransferEvent(
+        escrowAddressString,
+        operatorAddressString,
+        1,
+        BigInt.fromI32(10)
+      );
+
+      handleTransfer(transfer);
+
+      const id = `${transfer.transaction.hash.toHex()}-${transfer.logIndex.toString()}-${
+        transfer.block.timestamp
+      }`;
+
+      // HMTTransferEvent
+      assert.fieldEquals(
+        'HMTTransferEvent',
+        id,
+        'block',
+        transfer.block.number.toString()
+      );
+      assert.fieldEquals(
+        'HMTTransferEvent',
+        id,
+        'timestamp',
+        transfer.block.timestamp.toString()
+      );
+      assert.fieldEquals(
+        'HMTTransferEvent',
+        id,
+        'txHash',
+        transfer.transaction.hash.toHex()
+      );
+      assert.fieldEquals('HMTTransferEvent', id, 'from', escrowAddressString);
+      assert.fieldEquals('HMTTransferEvent', id, 'to', operatorAddressString);
+      assert.fieldEquals('HMTTransferEvent', id, 'amount', '1');
+
+      // Escrow
+      assert.fieldEquals('Escrow', escrowAddressString, 'balance', '100');
+      assert.fieldEquals('Escrow', escrowAddressString, 'amountPaid', '1');
+
+      // Worker
+      assert.fieldEquals(
+        'Worker',
+        operatorAddressString,
+        'totalAmountReceived',
+        '1'
+      );
+      assert.fieldEquals('Worker', operatorAddressString, 'payoutCount', '1');
+
+      // Payout
+      const payoutId = `${transfer.transaction.hash.toHex()}-${operatorAddressString}`;
+      assert.fieldEquals(
+        'Payout',
+        payoutId,
+        'escrowAddress',
+        escrowAddressString
+      );
+      assert.fieldEquals(
+        'Payout',
+        payoutId,
+        'recipient',
+        operatorAddressString
+      );
+      assert.fieldEquals('Payout', payoutId, 'amount', '1');
     });
   });
 
@@ -457,6 +525,7 @@ describe('HMToken', () => {
       escrow.balance = BigInt.fromI32(100);
       escrow.totalFundedAmount = BigInt.fromI32(100);
       escrow.amountPaid = ZERO_BI;
+      escrow.createdAt = BigInt.fromI32(0);
       escrow.status = 'Launched';
 
       escrow.save();

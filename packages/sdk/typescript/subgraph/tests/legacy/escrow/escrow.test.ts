@@ -51,6 +51,7 @@ describe('Escrow', () => {
     escrow.totalFundedAmount = BigInt.fromI32(100);
     escrow.amountPaid = ZERO_BI;
     escrow.status = 'Launched';
+    escrow.createdAt = BigInt.fromI32(0);
 
     escrow.save();
   });
@@ -213,184 +214,35 @@ describe('Escrow', () => {
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
     assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
 
-    // PartialStatusEvent
-    // assert.fieldEquals(
-    //   'PartialStatusEvent',
-    //   id1,
-    //   'block',
-    //   bulk1.block.number.toString()
-    // );
-    // assert.fieldEquals(
-    //   'PartialStatusEvent',
-    //   id1,
-    //   'timestamp',
-    //   bulk1.block.timestamp.toString()
-    // );
-    // assert.fieldEquals(
-    //   'PartialStatusEvent',
-    //   id1,
-    //   'txHash',
-    //   bulk1.transaction.hash.toHex()
-    // );
-    // assert.fieldEquals(
-    //   'PartialStatusEvent',
-    //   id1,
-    //   'escrowAddress',
-    //   escrowAddressString
-    // );
-    // assert.fieldEquals(
-    //   'PartialStatusEvent',
-    //   id1,
-    //   'sender',
-    //   operatorAddressString
-    // );
-
-    // Payouts
-    // const idP1 = `${bulk1.transaction.hash.toHex()}-${bulk1.params._recipients[0].toHex()}-${0}`;
-    // assert.fieldEquals('Payout', idP1, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP1, 'bulkPayoutTxId', '1');
-    // assert.fieldEquals('Payout', idP1, 'recipient', workerAddressString);
-    // assert.fieldEquals('Payout', idP1, 'amount', '1');
-
-    // const idP2 = `${bulk1.transaction.hash.toHex()}-${bulk1.params._recipients[1].toHex()}-${1}`;
-    // assert.fieldEquals('Payout', idP2, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP2, 'bulkPayoutTxId', '1');
-    // assert.fieldEquals('Payout', idP2, 'recipient', workerAddressString);
-    // assert.fieldEquals('Payout', idP2, 'amount', '1');
-
-    // Escrow
-    // assert.fieldEquals(
-    //   'Escrow',
-    //   escrowAddress.toHex(),
-    //   'status',
-    //   'Partially Paid'
-    // );
-    // assert.fieldEquals('Escrow', escrowAddress.toHex(), 'amountPaid', '2');
-    // assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '98');
-
-    // Worker
-    // assert.fieldEquals(
-    //   'Worker',
-    //   workerAddress.toHex(),
-    //   'totalAmountReceived',
-    //   '2'
-    // );
-    // assert.fieldEquals('Worker', workerAddress.toHex(), 'payoutCount', '2');
-
-    // Bulk 2
-    const bulk2 = createBulkTransferEvent(
-      operatorAddress,
-      3,
-      4,
-      BigInt.fromI32(11)
-    );
-
-    handleBulkTransfer(bulk2);
-
-    const id2 = `${bulk2.transaction.hash.toHex()}-${bulk2.logIndex.toString()}-${
-      bulk2.block.timestamp
-    }`;
-
+    // PaidStatusEvent
     assert.fieldEquals(
-      'BulkPayoutEvent',
-      id2,
+      'PaidStatusEvent',
+      id1,
       'block',
-      bulk2.block.number.toString()
+      bulk1.block.number.toString()
     );
     assert.fieldEquals(
-      'BulkPayoutEvent',
-      id2,
+      'PaidStatusEvent',
+      id1,
       'timestamp',
-      bulk2.block.timestamp.toString()
+      bulk1.block.timestamp.toString()
     );
     assert.fieldEquals(
-      'BulkPayoutEvent',
-      id2,
+      'PaidStatusEvent',
+      id1,
       'txHash',
-      bulk2.transaction.hash.toHex()
+      bulk1.transaction.hash.toHex()
     );
     assert.fieldEquals(
-      'BulkPayoutEvent',
-      id2,
+      'PaidStatusEvent',
+      id1,
       'escrowAddress',
       escrowAddressString
     );
-    assert.fieldEquals('BulkPayoutEvent', id2, 'sender', operatorAddressString);
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkPayoutTxId', '3');
-    assert.fieldEquals('BulkPayoutEvent', id2, 'bulkCount', '4');
-
-    // PaidStatusEvent
-    // assert.fieldEquals(
-    //   'PaidStatusEvent',
-    //   id2,
-    //   'block',
-    //   bulk2.block.number.toString()
-    // );
-    // assert.fieldEquals(
-    //   'PaidStatusEvent',
-    //   id2,
-    //   'timestamp',
-    //   bulk2.block.timestamp.toString()
-    // );
-    // assert.fieldEquals(
-    //   'PaidStatusEvent',
-    //   id2,
-    //   'txHash',
-    //   bulk2.transaction.hash.toHex()
-    // );
-    // assert.fieldEquals(
-    //   'PaidStatusEvent',
-    //   id2,
-    //   'escrowAddress',
-    //   escrowAddressString
-    // );
-    // assert.fieldEquals('PaidStatusEvent', id2, 'sender', operatorAddressString);
-
-    // Payouts
-    // const idP3 = `${bulk2.transaction.hash.toHex()}-${workerAddressString}-${0}`;
-    // assert.fieldEquals('Payout', idP3, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP3, 'bulkPayoutTxId', '3');
-    // assert.fieldEquals('Payout', idP3, 'recipient', workerAddressString);
-    // assert.fieldEquals('Payout', idP3, 'amount', '1');
-
-    // const idP4 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[1].toHex()}-${1}`;
-    // assert.fieldEquals('Payout', idP4, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP4, 'bulkPayoutTxId', '3');
-    // assert.fieldEquals('Payout', idP4, 'recipient', workerAddressString);
-    // assert.fieldEquals('Payout', idP4, 'amount', '1');
-
-    // const idP5 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[2].toHex()}-${2}`;
-    // assert.fieldEquals('Payout', idP5, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP5, 'bulkPayoutTxId', '3');
-    // assert.fieldEquals('Payout', idP5, 'recipient', workerAddressString);
-    // assert.fieldEquals('Payout', idP5, 'amount', '1');
-
-    // const idP6 = `${bulk2.transaction.hash.toHex()}-${bulk2.params._recipients[3].toHex()}-${3}`;
-    // assert.fieldEquals('Payout', idP6, 'escrowAddress', escrowAddressString);
-    // assert.fieldEquals('Payout', idP6, 'bulkPayoutTxId', '3');
-    // assert.fieldEquals('Payout', idP6, 'recipient', worker2AddressString);
-    // assert.fieldEquals('Payout', idP6, 'amount', '95');
+    assert.fieldEquals('PaidStatusEvent', id1, 'sender', operatorAddressString);
 
     // Escrow
-    // assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');
-    // assert.fieldEquals('Escrow', escrowAddress.toHex(), 'amountPaid', '100');
-    // assert.fieldEquals('Escrow', escrowAddress.toHex(), 'balance', '0');
-
-    // Worker
-    // assert.fieldEquals(
-    //   'Worker',
-    //   workerAddress.toHex(),
-    //   'totalAmountReceived',
-    //   '5'
-    // );
-    // assert.fieldEquals('Worker', workerAddress.toHex(), 'payoutCount', '5');
-    // assert.fieldEquals(
-    //   'Worker',
-    //   worker2Address.toHex(),
-    //   'totalAmountReceived',
-    //   '95'
-    // );
-    // assert.fieldEquals('Worker', worker2Address.toHex(), 'payoutCount', '1');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');
   });
 
   describe('Statistics', () => {
@@ -495,28 +347,19 @@ describe('Escrow', () => {
       handleBulkTransfer(
         createBulkTransferEvent(operatorAddress, 1, 5, BigInt.fromI32(11))
       );
-      handleBulkTransfer(
-        createBulkTransferEvent(operatorAddress, 2, 4, BigInt.fromI32(11))
-      );
 
       assert.fieldEquals(
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
         'bulkPayoutEventCount',
-        '2'
+        '1'
       );
-      //   assert.fieldEquals(
-      //     'EscrowStatistics',
-      //     STATISTICS_ENTITY_ID,
-      //     'partialStatusEventCount',
-      //     '1'
-      //   );
-      //   assert.fieldEquals(
-      //     'EscrowStatistics',
-      //     STATISTICS_ENTITY_ID,
-      //     'paidStatusEventCount',
-      //     '1'
-      //   );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'paidStatusEventCount',
+        '1'
+      );
 
       [
         'fundEventCount',

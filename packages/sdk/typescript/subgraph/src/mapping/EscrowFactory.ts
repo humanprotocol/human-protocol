@@ -10,6 +10,7 @@ export function handleLaunched(event: Launched): void {
   // Create Escrow entity
   const entity = new Escrow(event.params.escrow.toHex());
 
+  entity.createdAt = event.block.timestamp;
   entity.address = event.params.escrow;
   entity.token = event.params.token;
   entity.factoryAddress = event.address;

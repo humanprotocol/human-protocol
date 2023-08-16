@@ -45,6 +45,7 @@ describe('Staking', () => {
     escrow1.totalFundedAmount = ZERO_BI;
     escrow1.amountPaid = ZERO_BI;
     escrow1.status = 'Launched';
+    escrow1.createdAt = BigInt.fromI32(0);
     escrow1.save();
 
     const escrow2 = new Escrow(escrow2Address.toHex());
@@ -57,6 +58,7 @@ describe('Staking', () => {
     escrow2.totalFundedAmount = ZERO_BI;
     escrow2.amountPaid = ZERO_BI;
     escrow2.status = 'Launched';
+    escrow2.createdAt = BigInt.fromI32(0);
     escrow2.save();
   });
 

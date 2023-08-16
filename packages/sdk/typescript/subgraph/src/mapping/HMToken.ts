@@ -15,10 +15,11 @@ import {
   HMTTransferEvent,
   HMTokenStatistics,
   Holder,
+  Payout,
 } from '../../generated/schema';
 import { toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
-import { createOrLoadEscrowStatistics } from './Escrow';
+import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
 
 export const HMT_STATISTICS_ENTITY_ID = 'hmt-statistics-id';
@@ -145,6 +146,36 @@ export function handleTransfer(event: Transfer): void {
     eventDayData.dailyHMTTransferCount.plus(ONE_BI);
   eventDayData.dailyHMTTransferAmount =
     eventDayData.dailyHMTTransferAmount.plus(event.params._value);
+
+  // Track HMT transfer from Escrow for paidAmount, balance, and payout items
+  const fromEscrow = Escrow.load(event.params._from.toHex());
+  if (fromEscrow) {
+    fromEscrow.amountPaid = fromEscrow.amountPaid.plus(event.params._value);
+    fromEscrow.balance = fromEscrow.balance.minus(event.params._value);
+    fromEscrow.save();
+
+    // Update worker, and create payout object
+    const worker = createOrLoadWorker(event.params._to);
+    worker.totalAmountReceived = worker.totalAmountReceived.plus(
+      event.params._value
+    );
+    worker.payoutCount = worker.payoutCount.plus(ONE_BI);
+    worker.save();
+
+    const payoutId = `${event.transaction.hash.toHex()}-${event.params._to.toHex()}`;
+    const payment = new Payout(payoutId);
+    payment.escrowAddress = event.params._from;
+    payment.recipient = event.params._to;
+    payment.amount = event.params._value;
+    payment.createdAt = event.block.timestamp;
+    payment.save();
+
+    // Update worker, and payout day data
+    eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
+    eventDayData.dailyPayoutAmount = eventDayData.dailyPayoutAmount.plus(
+      event.params._value
+    );
+  }
 
   eventDayData.save();
   statsEntity.save();

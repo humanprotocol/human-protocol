@@ -54,14 +54,15 @@ type Escrow @entity {
   recordingOracleFee: BigInt
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
+  createdAt: BigInt!
 }
 
 type Payout @entity {
   id: ID!
   escrowAddress: Bytes! # address
-  bulkPayoutTxId: BigInt!
   recipient: Bytes! # address
   amount: BigInt!
+  createdAt: BigInt!
 }
 
 ##################################################
