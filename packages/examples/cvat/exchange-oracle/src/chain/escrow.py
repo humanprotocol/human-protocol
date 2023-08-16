@@ -1,7 +1,5 @@
 import json
 
-from web3 import Web3
-
 from human_protocol_sdk.constants import Status
 from human_protocol_sdk.escrow import EscrowClient
 from human_protocol_sdk.storage import StorageClient

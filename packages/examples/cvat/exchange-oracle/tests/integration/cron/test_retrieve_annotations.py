@@ -20,7 +20,7 @@ from src.core.constants import (
     OracleWebhookStatuses,
 )
 from human_protocol_sdk.storage import StorageClient
-from src.core.config import CronConfig, StorageConfig
+from src.core.config import StorageConfig
 
 
 class ServiceIntegrationTest(unittest.TestCase):
