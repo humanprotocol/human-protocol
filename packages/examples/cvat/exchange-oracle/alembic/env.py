@@ -1,6 +1,3 @@
-from src.models.cvat import Task, Job
-from src.models.webhook import Webhook
-from src.db import Base
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -25,6 +22,10 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+
+from src.models.cvat import Task, Job
+from src.models.webhook import Webhook
+from src.db import Base
 
 target_metadata = Base.metadata
 

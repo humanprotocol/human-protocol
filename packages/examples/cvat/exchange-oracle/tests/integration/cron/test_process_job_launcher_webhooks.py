@@ -36,7 +36,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    @patch("src.cvat.job_flows.cvat_api")
+    @patch("src.cvat.create_job.cvat_api")
     def test_process_job_launcher_webhooks_successful(self, mock_cvat_api):
 
         mock_cvat_api.create_cloudstorage.return_value.id = 1
@@ -185,7 +185,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             in cm.output[0],
         )
 
-    @patch("src.cvat.job_flows.cvat_api")
+    @patch("src.cvat.create_job.cvat_api")
     def test_process_job_launcher_webhooks_invalid_cloudstorage(self, mock_cvat_api):
         mock_cvat_api.create_cloudstorage.side_effect = Exception("Connection error")
         chain_id = Networks.localhost.value
@@ -223,7 +223,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             ],
         )
 
-    @patch("src.cvat.job_flows.cvat_api")
+    @patch("src.cvat.create_job.cvat_api")
     def test_process_job_launcher_webhooks_invalid_project(self, mock_cvat_api):
         mock_cvat_api.create_cloudstorage.return_value.id = 1
         mock_cvat_api.create_project.side_effect = Exception("Connection error")
@@ -262,11 +262,14 @@ class ServiceIntegrationTest(unittest.TestCase):
             ],
         )
 
-    @patch("src.cvat.job_flows.cvat_api")
-    def test_process_job_launcher_webhooks_invalid_task(self, mock_cvat_api):
-        mock_cvat_api.create_cloudstorage.return_value.id = 1
-        mock_cvat_api.create_project.return_value.id = 1
-        mock_cvat_api.create_task.side_effect = Exception("Connection error")
+    @patch("src.cvat.revert_job.cvat_api")
+    @patch("src.cvat.create_job.cvat_api")
+    def test_process_job_launcher_webhooks_invalid_task(
+        self, mock_create_cvat_api, mock_revert_cvat_api
+    ):
+        mock_create_cvat_api.create_cloudstorage.return_value.id = 1
+        mock_create_cvat_api.create_project.return_value.id = 1
+        mock_create_cvat_api.create_task.side_effect = Exception("Connection error")
         chain_id = Networks.localhost.value
         escrow_address = create_escrow(self.w3)
         fund_escrow(self.w3, escrow_address)
@@ -296,7 +299,8 @@ class ServiceIntegrationTest(unittest.TestCase):
         project = (
             self.session.execute(
                 select(Project).where(
-                    Project.cvat_id == mock_cvat_api.create_project.return_value.id
+                    Project.cvat_id
+                    == mock_create_cvat_api.create_project.return_value.id
                 )
             )
             .scalars()

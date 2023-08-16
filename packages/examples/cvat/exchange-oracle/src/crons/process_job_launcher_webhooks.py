@@ -3,7 +3,8 @@ import logging
 from src.db import SessionLocal
 from src.core.config import CronConfig
 
-from src.cvat.job_flows import job_creation_process, revert_job_creation
+from src.cvat.create_job import job_creation_process
+from src.cvat.revert_job import revert_job_creation
 from src.chain.escrow import get_escrow_manifest, validate_escrow
 
 from src.core.constants import OracleWebhookTypes

@@ -31,15 +31,3 @@ def job_creation_process(escrow_address: str, chain_id: int, manifest: dict) -> 
 
     # Actual job creation on CVAT. Async process (will be created in DB once 'update:task' or 'update:job' webhook is received)
     cvat_api.put_task_data(task.id, cloudstorage.id)
-
-
-def revert_job_creation(escrow_address: str) -> None:
-    with SessionLocal.begin() as session:
-        project = db_service.get_project_by_escrow_address(session, escrow_address)
-        if project is not None:
-            if project.cvat_cloudstorage_id:
-                cvat_api.delete_cloustorage(project.cvat_cloudstorage_id)
-            if project.cvat_id:
-                cvat_api.delete_project(project.cvat_id)
-            db_service.delete_project(session, project.id)
-            session.commit()
