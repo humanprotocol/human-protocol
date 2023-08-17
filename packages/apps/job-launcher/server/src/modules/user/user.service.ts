@@ -96,10 +96,8 @@ export class UserService {
   }
 
   public async getBalance(userId: number): Promise<IUserBalance> {
-    const balance = await this.paymentService.getUserBalance(userId);
-
     return {
-      amount: Number(ethers.utils.formatUnits(balance, 'ether')),
+      amount: await this.paymentService.getUserBalance(userId),
       currency: Currency.USD,
     };
   }

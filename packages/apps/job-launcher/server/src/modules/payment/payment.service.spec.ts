@@ -20,6 +20,7 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
+  MOCK_JOB_LAUNCHER_FEE,
   MOCK_PAYMENT_ID,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
@@ -31,7 +32,7 @@ import { PaymentEntity } from './payment.entity';
 jest.mock('@human-protocol/sdk');
 
 jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 0.5)
+  getRate: jest.fn().mockImplementation(() => 1.5)
 }));
 
 describe('PaymentService', () => {
@@ -324,7 +325,7 @@ describe('PaymentService', () => {
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
-            data: '100',
+            data: ethers.utils.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -357,8 +358,8 @@ describe('PaymentService', () => {
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
-        amount: '100',
-        rate: 0.5,
+        amount: 10,
+        rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.LOCALHOST,
         status: PaymentStatus.SUCCEEDED,
@@ -378,7 +379,7 @@ describe('PaymentService', () => {
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
-            data: '100',
+            data: ethers.utils.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -449,7 +450,7 @@ describe('PaymentService', () => {
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
-            data: '100',
+            data: ethers.utils.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -487,7 +488,7 @@ describe('PaymentService', () => {
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
           {
-            data: '100',
+            data: ethers.utils.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -519,21 +520,21 @@ describe('PaymentService', () => {
   describe('getUserBalance', () => {
     it('should return the correct balance for a user', async () => {
       const userId = 1;
-      const expectedBalance = ethers.utils.parseUnits('20', 'ether');
+      const expectedBalance = 20;
 
       paymentRepository.find = jest.fn().mockResolvedValue([
         {
-          amount: ethers.utils.parseUnits('50', 'ether'),
+          amount: 50,
           rate: 1,
           type: PaymentType.DEPOSIT,
         },
         {
-          amount: ethers.utils.parseUnits('150', 'ether'),
+          amount: 150,
           rate: 1,
           type: PaymentType.DEPOSIT,
         },
         {
-          amount: ethers.utils.parseUnits('180', 'ether'),
+          amount: -(180),
           rate: 1,
           type: PaymentType.WITHDRAWAL,
         },
@@ -551,7 +552,7 @@ describe('PaymentService', () => {
 
       const balance = await paymentService.getUserBalance(userId);
 
-      expect(balance).toEqual(BigNumber.from(0));
+      expect(balance).toEqual(0);
       expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
     });
   });

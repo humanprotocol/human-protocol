@@ -20,10 +20,10 @@ export class PaymentEntity extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   public chainId: number;
 
-  @Column({ type: 'varchar' })
-  public amount: string;
+  @Column({ type: 'decimal', precision: 10, scale: 6 })
+  public amount: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 6 })
   public rate: number;
 
   @Column({ type: 'varchar' })

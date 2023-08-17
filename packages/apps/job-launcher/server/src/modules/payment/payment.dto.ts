@@ -42,7 +42,7 @@ export class PaymentCryptoCreateDto {
 
 export class PaymentCreateDto {
   public transaction?: string;
-  public amount?: string;
+  public amount?: number;
   public currency?: string;
   public source?: PaymentSource;
   public userId?: number;

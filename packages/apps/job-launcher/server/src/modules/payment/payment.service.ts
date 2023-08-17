@@ -103,7 +103,7 @@ export class PaymentService {
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: amount.toString(),
+      amount,
       currency,
       rate,
       transaction: paymentIntent.client_secret,
@@ -202,7 +202,7 @@ export class PaymentService {
       throw new ConflictException(ErrorPayment.InvalidRecipient);
     }
 
-    const amount = BigNumber.from(transaction.logs[0].data);
+    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
@@ -234,7 +234,7 @@ export class PaymentService {
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount: amount.toString(),
+      amount,
       currency: TokenId.HMT,
       rate,
       chainId: dto.chainId,
@@ -245,28 +245,13 @@ export class PaymentService {
     return true;
   }
 
-  
-
-  public async getUserBalance(userId: number): Promise<BigNumber> {
+  public async getUserBalance(userId: number): Promise<number> {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
-    let finalAmount = BigNumber.from(0);
+    const totalAmount = paymentEntities.reduce((total, payment) => {
+      return total + payment.amount * payment.rate;
+    }, 0);
 
-    paymentEntities.forEach((payment) => {
-      const fixedAmount = FixedNumber.from(
-        ethers.utils.formatUnits(payment.amount, 18),
-      );
-      const rate = FixedNumber.from(payment.rate);
-
-      const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
-
-      if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount = finalAmount.sub(amount);
-      } else {
-        finalAmount = finalAmount.add(amount);
-      }
-    });
-
-    return finalAmount;
+    return parseFloat(totalAmount.toFixed(6));
   }
 }

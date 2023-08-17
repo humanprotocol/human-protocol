@@ -178,13 +178,13 @@ describe('UserService', () => {
     it('should return the correct balance with currency for a user', async () => {
       const userId = 1;
       const expectedBalance: IUserBalance = {
-        amount: 10, // ETH
+        amount: 10,
         currency: Currency.USD,
       };
 
       jest
         .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
+        .mockResolvedValue(10);
 
       const balance = await userService.getBalance(userId);
 

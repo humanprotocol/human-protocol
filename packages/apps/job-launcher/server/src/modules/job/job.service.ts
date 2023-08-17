@@ -45,6 +45,7 @@ import {
 import {
   Currency,
   PaymentSource,
+  PaymentStatus,
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
@@ -116,26 +117,13 @@ export class JobService {
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
-    const fundAmountInWei = ethers.utils.parseUnits(
-      fundAmount.toString(),
-      'ether',
-    );
-
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .div(100)
-      .mul(fundAmountInWei);
-
-    const usdTotalAmount = BigNumber.from(
-      FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
-      ).mulUnsafe(FixedNumber.from(rate.toString())),
-    );
-
-    if (userBalance.lt(usdTotalAmount)) {
+    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!
+    const fee = (feePercentage / 100) * fundAmount
+    const usdTotalAmount = (fundAmount + fee) * rate
+ 
+    if (userBalance < usdTotalAmount) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -145,7 +133,7 @@ export class JobService {
       requestType,
       submissionsRequired,
       requesterDescription,
-      fundAmount: fundAmountInWei.toString(),
+      fundAmount,
     });
 
     const jobEntity = await this.jobRepository.create({
@@ -153,8 +141,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee: jobLauncherFee.toString(),
-      fundAmount: fundAmountInWei.toString(),
+      fee,
+      fundAmount,
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -168,9 +156,10 @@ export class JobService {
       userId,
       source: PaymentSource.BALANCE,
       type: PaymentType.WITHDRAWAL,
-      amount: usdTotalAmount.toString(),
+      amount: -(fundAmount + fee),
       currency: TokenId.HMT,
-      rate
+      rate,
+      status: PaymentStatus.SUCCEEDED
     })
 
     jobEntity.status = JobStatus.PAID;
