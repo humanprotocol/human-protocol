@@ -34,6 +34,7 @@ export class AuthJwtController {
   @UseInterceptors(ClassSerializerInterceptor)
   public async signup(@Body() data: UserCreateDto): Promise<void> {
     await this.authService.signup(data);
+    return;
   }
 
   @Public()
