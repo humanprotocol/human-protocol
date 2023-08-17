@@ -2,12 +2,13 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
+import { ErrorSendGrid } from '../../common/constants/errors';
 
 const mockConfigService: Partial<ConfigService> = {
   get: jest.fn((key: string) => {
     switch (key) {
       case 'SENDGRID_API_KEY':
-        return 'SG.xxxx';
+        return 'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
       case 'SENDGRID_FROM_EMAIL':
         return 'info@hmt.ai';
     }
@@ -73,7 +74,7 @@ describe('SendGridService', () => {
 
   it("should throw error if email wasn't sent", async () => {
     jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
-      throw new Error('Error');
+      throw new Error(ErrorSendGrid.EmailNotSent);
     });
 
     await expect(
@@ -83,6 +84,6 @@ describe('SendGridService', () => {
         text: 'and easy to do anywhere, even with Node.js',
         html: '<strong>and easy to do anywhere, even with Node.js</strong>',
       }),
-    ).rejects.toThrowError('Error');
+    ).rejects.toThrowError(ErrorSendGrid.EmailNotSent);
   });
 });
