@@ -1,4 +1,4 @@
-from src.modules.cvat.handlers.annotation import (
+from src.handlers.annotation import (
     process_image_label_binary_raw_annotations,
 )
 from tests.unit.helpers.predefined_annotations import (
