@@ -1,12 +1,34 @@
-import { Box, CircularProgress, Grid, Typography } from '@mui/material';
+import { Box, CircularProgress, Link, Grid, Typography } from '@mui/material';
 import { FC } from 'react';
 
 import { CardTextBlock } from '../Cards';
-
+import bingXIcon from 'src/assets/exchanges/bingx.png';
+import bitfinexIcon from 'src/assets/exchanges/bitfinex.png';
+import coinlistProIcon from 'src/assets/exchanges/coinlist-pro.png';
+import gateIoIcon from 'src/assets/exchanges/gate-io.png';
+import lBankIcon from 'src/assets/exchanges/lbank.svg';
+import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import {
   useTokenStatsByChainId,
   useTokenStatsLoaded,
 } from 'src/state/token/hooks';
+
+const EXCHANGES = [
+  { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
+  {
+    icon: probitGlobalIcon,
+    href: 'https://www.probit.com/',
+    name: 'Probit Global',
+  },
+  { icon: gateIoIcon, href: 'https://www.gate.io/', name: 'Gate.io' },
+  { icon: bingXIcon, href: 'https://www.bingx.com/', name: 'BingX' },
+  {
+    icon: coinlistProIcon,
+    href: 'https://pro.coinlist.co/trader/HMT-USD',
+    name: 'Coinlist Pro',
+  },
+  { icon: lBankIcon, href: 'https://www.lbank.com/', name: 'LBank' },
+];
 
 export const TokenView: FC = () => {
   const { totalTransferEventCount, holders, totalSupply } =
@@ -72,6 +94,54 @@ export const TokenView: FC = () => {
           <CircularProgress size={36} />
         </Box>
       )}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          mt: 4,
+        }}
+      >
+        <Typography
+          color="primary"
+          variant="body2"
+          fontWeight={600}
+          sx={{ mr: 4, whiteSpace: 'nowrap' }}
+        >
+          Find HMT at
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            flexWrap: 'wrap',
+          }}
+        >
+          {EXCHANGES.map(({ icon, href, name }) => (
+            <Link
+              key={name}
+              component="a"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                textDecoration: 'none',
+              }}
+              href={href}
+              target="_blank"
+            >
+              <img
+                src={icon}
+                alt={name}
+                style={{ width: '32px', height: '32px', borderRadius: '100%' }}
+              />
+              <Typography variant="body2" color="primary" sx={{ ml: 1 }}>
+                {name}
+              </Typography>
+            </Link>
+          ))}
+        </Box>
+      </Box>
     </Box>
   );
 };

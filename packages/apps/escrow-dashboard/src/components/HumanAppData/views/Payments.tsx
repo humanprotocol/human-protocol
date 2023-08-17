@@ -33,22 +33,22 @@ export const PaymentsView = () => {
         }}
       >
         <Tab
-          label="HMT Amount in a day"
+          label="HMT"
           value={PaymentTab.DailyAmount}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Count in a day"
+          label="Count"
           value={PaymentTab.DailyCount}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Average HMT per job in a day"
+          label="Job Average"
           value={PaymentTab.DailyAvgPerJob}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Average HMT per worker in a day"
+          label="Worker Average"
           value={PaymentTab.DailyAvgPerWorker}
           sx={{ alignItems: 'flex-start' }}
         />

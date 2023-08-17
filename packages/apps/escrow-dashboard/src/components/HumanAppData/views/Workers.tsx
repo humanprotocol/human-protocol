@@ -32,17 +32,17 @@ export const WorkersView = () => {
         }}
       >
         <Tab
-          label="Total workers over time"
+          label="Total workers"
           value={WorkerTab.TotalWorkers}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Daily active workers"
+          label="Active"
           value={WorkerTab.DailyActiveWorkers}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Average jobs solved in a day by worker"
+          label="Average Jobs"
           value={WorkerTab.AverageJobs}
           sx={{ alignItems: 'flex-start' }}
         />

@@ -12,7 +12,6 @@ import {
   Collapse,
   Drawer,
   IconButton,
-  Link,
   Stack,
   Toolbar,
   Typography,
@@ -20,6 +19,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { FC, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useAccount } from 'wagmi';
 import { ConnectButton } from '../ConnectButton';
@@ -84,11 +84,11 @@ export const Header: FC = () => {
       {NAV_LINKS.map((nav) => (
         <Link
           key={nav.title}
-          href={nav.href}
+          to={nav.href}
           target={nav.external ? '_blank' : '_self'}
-          sx={{ textDecoration: 'none' }}
+          style={{ textDecoration: 'none' }}
         >
-          <Typography variant="body2" fontWeight={600}>
+          <Typography color="primary" variant="body2" fontWeight={600}>
             {nav.title}
           </Typography>
         </Link>
@@ -180,8 +180,8 @@ export const Header: FC = () => {
               ) : (
                 <>
                   <Link
-                    href="/"
-                    sx={{
+                    to="/"
+                    style={{
                       display: 'flex',
                       alignItems: 'center',
                       textDecoration: 'none',

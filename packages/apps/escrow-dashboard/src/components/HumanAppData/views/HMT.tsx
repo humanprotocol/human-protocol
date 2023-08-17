@@ -37,12 +37,12 @@ export const HMTView = () => {
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="Transactions count in a day"
+          label="Transactions"
           value={HMTTab.DailyTransactionsCount}
           sx={{ alignItems: 'flex-start' }}
         />
         <Tab
-          label="HMT amount transfered in a day"
+          label="Amount Transfered"
           value={HMTTab.DailyTransferedAmount}
           sx={{ alignItems: 'flex-start' }}
         />
