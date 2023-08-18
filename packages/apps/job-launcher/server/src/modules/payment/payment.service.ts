@@ -98,7 +98,7 @@ export class PaymentService {
     }
 
     const rate = await getRate(Currency.USD, currency);
-    
+
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.FIAT,
@@ -108,7 +108,7 @@ export class PaymentService {
       rate,
       transaction: paymentIntent.client_secret,
       status: PaymentStatus.PENDING,
-    })
+    });
 
     return paymentIntent.client_secret;
   }
@@ -129,19 +129,18 @@ export class PaymentService {
     const paymentEntity = await this.paymentRepository.findOne({
       userId,
       transaction: data.paymentId,
-      status: PaymentStatus.PENDING
+      status: PaymentStatus.PENDING,
     });
 
     if (!paymentEntity) {
-      this.logger.log(
-        ErrorPayment.NotFound,
-        PaymentRepository.name,
-      );
+      this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
       throw new BadRequestException(ErrorPayment.NotFound);
     }
 
-    if (paymentData?.status === StripePaymentStatus.CANCELED || 
-        paymentData?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD) {
+    if (
+      paymentData?.status === StripePaymentStatus.CANCELED ||
+      paymentData?.status === StripePaymentStatus.REQUIRES_PAYMENT_METHOD
+    ) {
       paymentEntity.status = PaymentStatus.FAILED;
       await paymentEntity.save();
       this.logger.log(ErrorPayment.NotSuccess, PaymentService.name);
@@ -229,7 +228,7 @@ export class PaymentService {
     }
 
     const rate = await getRate(Currency.USD, TokenId.HMT);
-    
+
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.CRYPTO,
@@ -240,15 +239,16 @@ export class PaymentService {
       chainId: dto.chainId,
       transaction: dto.transactionHash,
       status: PaymentStatus.SUCCEEDED,
-    })
+    });
 
     return true;
   }
 
-  
-
   public async getUserBalance(userId: number): Promise<BigNumber> {
-    const paymentEntities = await this.paymentRepository.find({ userId });
+    const paymentEntities = await this.paymentRepository.find({
+      userId,
+      status: PaymentStatus.SUCCEEDED,
+    });
 
     let finalAmount = BigNumber.from(0);
 
