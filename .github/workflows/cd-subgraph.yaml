@@ -37,21 +37,21 @@ jobs:
       matrix:
         network:
           - name: matic
-            graph: polygon-v1
+            graph: polygon-v2
           - name: goerli
-            graph: goerli-v1
+            graph: goerli-v2
           - name: moonbeam
-            graph: moonbeam-v1
+            graph: moonbeam-v2
           - name: bsc
-            graph: bsc-v1
+            graph: bsc-v2
           - name: chapel
-            graph: bsctest-v1
+            graph: bsctest-v2
           - name: mumbai
-            graph: mumbai-v1
+            graph: mumbai-v2
           - name: mbase
-            graph: moonbase-alpha-v1
+            graph: moonbase-alpha-v2
           - name: mainnet
-            graph: mainnet-v1
+            graph: mainnet-v2
       fail-fast: true
       max-parallel: 3
     if: ${{ needs.contracts-check.outputs.contracts_updated != 'true' || github.event.inputs.subgraph-name }}
