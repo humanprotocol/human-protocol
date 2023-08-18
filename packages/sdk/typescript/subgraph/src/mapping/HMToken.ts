@@ -131,15 +131,15 @@ export function handleTransfer(event: Transfer): void {
       event.params._value
     );
     escrow.save();
-  } else {
-    // Update holders
-    const diffHolders = updateHolders(
-      event.params._from,
-      event.params._value,
-      false
-    ).plus(updateHolders(event.params._to, event.params._value, true));
-    statsEntity.holders = statsEntity.holders.plus(diffHolders);
   }
+
+  // Update holders
+  const diffHolders = updateHolders(
+    event.params._from,
+    event.params._value,
+    false
+  ).plus(updateHolders(event.params._to, event.params._value, true));
+  statsEntity.holders = statsEntity.holders.plus(diffHolders);
 
   // Update event day data for HMT transfer
   eventDayData.dailyHMTTransferCount =
