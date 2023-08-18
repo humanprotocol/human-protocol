@@ -2,6 +2,7 @@ import { dataSource } from '@graphprotocol/graph-ts';
 
 import {
   BulkTransfer,
+  Escrow as EscrowContract,
   IntermediateStorage,
   Pending,
 } from '../../../generated/templates/LegacyEscrow/Escrow';
@@ -9,6 +10,7 @@ import {
   BulkPayoutEvent,
   Escrow,
   PaidStatusEvent,
+  PartialStatusEvent,
   PendingStatusEvent,
   SetupEvent,
   StoreResultsEvent,
@@ -17,6 +19,15 @@ import { createOrLoadEscrowStatistics } from '../Escrow';
 import { ONE_BI } from '../utils/number';
 import { toEventId } from '../utils/event';
 import { getEventDayData } from '../utils/dayUpdates';
+
+enum EscrowStatuses {
+  Launched,
+  Pending,
+  Partial,
+  Paid,
+  Complete,
+  Cancelled,
+}
 
 export function handlePending(event: Pending): void {
   // Create SetupEvent entity
@@ -63,6 +74,28 @@ export function handlePending(event: Pending): void {
     escrowEntity.manifestUrl = event.params.manifest;
     escrowEntity.manifestHash = event.params.hash;
     escrowEntity.status = 'Pending';
+
+    // Read data on-chain
+    const escrowContract = EscrowContract.bind(event.address);
+
+    const reputationOracle = escrowContract.try_reputationOracle();
+    if (!reputationOracle.reverted) {
+      escrowEntity.reputationOracle = reputationOracle.value;
+    }
+    const reputationOracleStake = escrowContract.try_reputationOracleStake();
+    if (!reputationOracleStake.reverted) {
+      escrowEntity.reputationOracleFee = reputationOracleStake.value;
+    }
+
+    const recordingOracle = escrowContract.try_recordingOracle();
+    if (!recordingOracle.reverted) {
+      escrowEntity.recordingOracle = recordingOracle.value;
+    }
+    const recordingOracleStake = escrowContract.try_recordingOracleStake();
+    if (!recordingOracleStake.reverted) {
+      escrowEntity.recordingOracleFee = recordingOracleStake.value;
+    }
+
     escrowEntity.save();
   }
 }
@@ -126,34 +159,68 @@ export function handleBulkTransfer(event: BulkTransfer): void {
   eventDayData.dailyTotalEventCount =
     eventDayData.dailyTotalEventCount.plus(ONE_BI);
 
-  /**
-   * @notice Legacy contract does not contain partial status in the event data.
-   *         Simply consider the payout was the full payout.
-   */
-
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
-    escrowEntity.status = 'Paid';
+    // Read data on-chain
+    const escrowContract = EscrowContract.bind(event.address);
+    const escrowStatus = escrowContract.try_status();
+
+    if (!escrowStatus.reverted) {
+      if (escrowStatus.value == EscrowStatuses.Partial) {
+        // Partially Paid Status
+        escrowEntity.status = 'Partially Paid';
+
+        const statusEventEntity = new PartialStatusEvent(toEventId(event));
+        statusEventEntity.block = event.block.number;
+        statusEventEntity.timestamp = event.block.timestamp;
+        statusEventEntity.txHash = event.transaction.hash;
+        statusEventEntity.escrowAddress = event.address;
+        statusEventEntity.sender = event.transaction.from;
+        statusEventEntity.save();
+
+        statsEntity.partialStatusEventCount =
+          statsEntity.partialStatusEventCount.plus(ONE_BI);
+        statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+
+        eventDayData.dailyPartialStatusEventCount =
+          eventDayData.dailyPartialStatusEventCount.plus(ONE_BI);
+        eventDayData.dailyTotalEventCount =
+          eventDayData.dailyTotalEventCount.plus(ONE_BI);
+      } else if (escrowStatus.value == EscrowStatuses.Paid) {
+        // Paid Status
+        escrowEntity.status = 'Paid';
+
+        const statusEventEntity = new PaidStatusEvent(toEventId(event));
+        statusEventEntity.block = event.block.number;
+        statusEventEntity.timestamp = event.block.timestamp;
+        statusEventEntity.txHash = event.transaction.hash;
+        statusEventEntity.escrowAddress = event.address;
+        statusEventEntity.sender = event.transaction.from;
+        statusEventEntity.save();
+
+        statsEntity.paidStatusEventCount =
+          statsEntity.paidStatusEventCount.plus(ONE_BI);
+        statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
+
+        eventDayData.dailyPaidStatusEventCount =
+          eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
+        eventDayData.dailyTotalEventCount =
+          eventDayData.dailyTotalEventCount.plus(ONE_BI);
+      }
+    }
+
+    const finalResultsUrl = escrowContract.try_finalResultsUrl();
+    if (!finalResultsUrl.reverted) {
+      escrowEntity.finalResultsUrl = finalResultsUrl.value;
+    }
     escrowEntity.save();
   }
 
-  const statusEventEntity = new PaidStatusEvent(toEventId(event));
-  statusEventEntity.block = event.block.number;
-  statusEventEntity.timestamp = event.block.timestamp;
-  statusEventEntity.txHash = event.transaction.hash;
-  statusEventEntity.escrowAddress = event.address;
-  statusEventEntity.sender = event.transaction.from;
-  statusEventEntity.save();
-
-  statsEntity.paidStatusEventCount =
-    statsEntity.paidStatusEventCount.plus(ONE_BI);
-  statsEntity.totalEventCount = statsEntity.totalEventCount.plus(ONE_BI);
-
-  eventDayData.dailyPaidStatusEventCount =
-    eventDayData.dailyPaidStatusEventCount.plus(ONE_BI);
-  eventDayData.dailyTotalEventCount =
-    eventDayData.dailyTotalEventCount.plus(ONE_BI);
+  // Update Daily worker count
+  eventDayData.dailyWorkerCount = eventDayData.dailyWorkerCount.plus(
+    event.params._bulkCount
+  );
 
   // Save statistics, and event day data
   statsEntity.save();

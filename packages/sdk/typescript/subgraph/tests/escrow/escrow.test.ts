@@ -1,4 +1,9 @@
-import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  DataSourceContext,
+  ethereum,
+} from '@graphprotocol/graph-ts';
 import {
   afterAll,
   beforeAll,
@@ -8,6 +13,7 @@ import {
   clearStore,
   dataSourceMock,
   beforeEach,
+  createMockedFunction,
 } from 'matchstick-as/assembly';
 
 import { Escrow } from '../../generated/schema';
@@ -36,6 +42,14 @@ const workerAddressString = '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc';
 const workerAddress = Address.fromString(workerAddressString);
 const worker2AddressString = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
 const worker2Address = Address.fromString(worker2AddressString);
+const reputationOracleAddressString =
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79c9';
+const reputationOracleAddress = Address.fromString(
+  reputationOracleAddressString
+);
+const recordingOracleAddressString =
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79c0';
+const recordingOracleAddress = Address.fromString(recordingOracleAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -44,6 +58,22 @@ describe('Escrow', () => {
       'rinkeby',
       new DataSourceContext()
     );
+
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracle',
+      'reputationOracle():(address)'
+    ).returns([ethereum.Value.fromAddress(reputationOracleAddress)]);
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracle',
+      'recordingOracle():(address)'
+    ).returns([ethereum.Value.fromAddress(recordingOracleAddress)]);
+    createMockedFunction(
+      escrowAddress,
+      'finalResultsUrl',
+      'finalResultsUrl():(string)'
+    ).returns([ethereum.Value.fromString('test.com')]);
 
     const escrow = new Escrow(escrowAddress.toHex());
     escrow.address = escrowAddress;
@@ -67,6 +97,17 @@ describe('Escrow', () => {
   test('Should properly handle Pending event', () => {
     const URL = 'test.com';
     const HASH = 'is_hash_1';
+
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracleFeePercentage',
+      'reputationOracleFeePercentage():(uint8)'
+    ).returns([ethereum.Value.fromI32(10)]);
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracleFeePercentage',
+      'recordingOracleFeePercentage():(uint8)'
+    ).returns([ethereum.Value.fromI32(20)]);
 
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
 
@@ -134,6 +175,30 @@ describe('Escrow', () => {
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracle',
+      reputationOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '10'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracle',
+      recordingOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '20'
+    );
   });
 
   test('should properly handle IntermediateStorage event', () => {
@@ -333,6 +398,12 @@ describe('Escrow', () => {
 
     // Escrow
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Paid');
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'finalResultsUrl',
+      'test.com'
+    );
   });
 
   test('Should properly handle Cancelled event', () => {

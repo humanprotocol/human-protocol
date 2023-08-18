@@ -1,4 +1,9 @@
-import { Address, BigInt, DataSourceContext } from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  DataSourceContext,
+  ethereum,
+} from '@graphprotocol/graph-ts';
 import {
   afterAll,
   beforeAll,
@@ -8,6 +13,7 @@ import {
   clearStore,
   dataSourceMock,
   beforeEach,
+  createMockedFunction,
 } from 'matchstick-as/assembly';
 
 import { Escrow } from '../../../generated/schema';
@@ -32,6 +38,14 @@ const workerAddressString = '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc';
 const workerAddress = Address.fromString(workerAddressString);
 // const worker2AddressString = '0x70997970c51812dc3a010c7d01b50e0d17dc79c8';
 // const worker2Address = Address.fromString(worker2AddressString);
+const reputationOracleAddressString =
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79c9';
+const reputationOracleAddress = Address.fromString(
+  reputationOracleAddressString
+);
+const recordingOracleAddressString =
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79c0';
+const recordingOracleAddress = Address.fromString(recordingOracleAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -40,6 +54,32 @@ describe('Escrow', () => {
       'rinkeby',
       new DataSourceContext()
     );
+
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracle',
+      'reputationOracle():(address)'
+    ).returns([ethereum.Value.fromAddress(reputationOracleAddress)]);
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracle',
+      'recordingOracle():(address)'
+    ).returns([ethereum.Value.fromAddress(recordingOracleAddress)]);
+    createMockedFunction(
+      escrowAddress,
+      'finalResultsUrl',
+      'finalResultsUrl():(string)'
+    ).returns([ethereum.Value.fromString('test.com')]);
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracleStake',
+      'reputationOracleStake():(uint256)'
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(10))]);
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracleStake',
+      'recordingOracleStake():(uint256)'
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(20))]);
 
     const escrow = new Escrow(escrowAddress.toHex());
     escrow.address = escrowAddress;
@@ -130,6 +170,18 @@ describe('Escrow', () => {
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
     assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracle',
+      reputationOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracle',
+      recordingOracleAddressString
+    );
   });
 
   test('should properly handle IntermediateStorage event', () => {
@@ -170,7 +222,100 @@ describe('Escrow', () => {
     assert.fieldEquals('StoreResultsEvent', id, 'intermediateResultsUrl', URL);
   });
 
-  test('Should properly handle BulkTransfer events', () => {
+  test('Should properly handle BulkTransfer events with partially paid status', () => {
+    createMockedFunction(escrowAddress, 'status', 'status():(uint8)').returns([
+      ethereum.Value.fromI32(2),
+    ]);
+
+    // Bulk 1
+    const bulk1 = createBulkTransferEvent(
+      operatorAddress,
+      1,
+      2,
+      BigInt.fromI32(10)
+    );
+
+    handleBulkTransfer(bulk1);
+
+    const id1 = `${bulk1.transaction.hash.toHex()}-${bulk1.logIndex.toString()}-${
+      bulk1.block.timestamp
+    }`;
+
+    // BulkPayoutEvent
+    assert.fieldEquals(
+      'BulkPayoutEvent',
+      id1,
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'BulkPayoutEvent',
+      id1,
+      'timestamp',
+      bulk1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'BulkPayoutEvent',
+      id1,
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'BulkPayoutEvent',
+      id1,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals('BulkPayoutEvent', id1, 'sender', operatorAddressString);
+    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkPayoutTxId', '1');
+    assert.fieldEquals('BulkPayoutEvent', id1, 'bulkCount', '2');
+
+    // PartialStatusEvent
+    assert.fieldEquals(
+      'PartialStatusEvent',
+      id1,
+      'block',
+      bulk1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'PartialStatusEvent',
+      id1,
+      'timestamp',
+      bulk1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'PartialStatusEvent',
+      id1,
+      'txHash',
+      bulk1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'PartialStatusEvent',
+      id1,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'PartialStatusEvent',
+      id1,
+      'sender',
+      operatorAddressString
+    );
+
+    // Escrow
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'status',
+      'Partially Paid'
+    );
+  });
+
+  test('Should properly handle BulkTransfer events with fully paid status', () => {
+    createMockedFunction(escrowAddress, 'status', 'status():(uint8)').returns([
+      ethereum.Value.fromI32(3),
+    ]);
+
     // Bulk 1
     const bulk1 = createBulkTransferEvent(
       operatorAddress,
@@ -344,6 +489,38 @@ describe('Escrow', () => {
     });
 
     test('Should properly calculate bulkPayout, partialStatus, paidStatus event in statistics', () => {
+      dataSourceMock.setReturnValues(
+        escrowAddressString,
+        'rinkeby',
+        new DataSourceContext()
+      );
+
+      const escrow = new Escrow(escrowAddress.toHex());
+      escrow.address = escrowAddress;
+      escrow.token = Address.zero();
+      escrow.factoryAddress = Address.zero();
+      escrow.launcher = Address.zero();
+      escrow.count = ZERO_BI;
+      escrow.balance = BigInt.fromI32(100);
+      escrow.totalFundedAmount = BigInt.fromI32(100);
+      escrow.amountPaid = ZERO_BI;
+      escrow.status = 'Launched';
+      escrow.createdAt = BigInt.fromI32(0);
+
+      escrow.save();
+
+      createMockedFunction(escrowAddress, 'status', 'status():(uint8)').returns(
+        [ethereum.Value.fromI32(2)]
+      );
+
+      handleBulkTransfer(
+        createBulkTransferEvent(operatorAddress, 1, 5, BigInt.fromI32(11))
+      );
+
+      createMockedFunction(escrowAddress, 'status', 'status():(uint8)').returns(
+        [ethereum.Value.fromI32(3)]
+      );
+
       handleBulkTransfer(
         createBulkTransferEvent(operatorAddress, 1, 5, BigInt.fromI32(11))
       );
@@ -352,6 +529,12 @@ describe('Escrow', () => {
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
         'bulkPayoutEventCount',
+        '2'
+      );
+      assert.fieldEquals(
+        'EscrowStatistics',
+        STATISTICS_ENTITY_ID,
+        'partialStatusEventCount',
         '1'
       );
       assert.fieldEquals(
@@ -381,7 +564,7 @@ describe('Escrow', () => {
         'EscrowStatistics',
         STATISTICS_ENTITY_ID,
         'totalEventCount',
-        '2'
+        '4'
       );
     });
   });
