@@ -6,6 +6,7 @@ import {
   IntermediateStorage,
   Pending,
 } from '../../generated/templates/Escrow/Escrow';
+import { LegacyEscrow as LegacyEscrowContract } from '../../generated/templates/Escrow/LegacyEscrow';
 import {
   BulkPayoutEvent,
   CancelledStatusEvent,
@@ -115,6 +116,7 @@ export function handlePending(event: Pending): void {
 
     // Read data on-chain
     const escrowContract = EscrowContract.bind(event.address);
+    const legacyEscrowContract = LegacyEscrowContract.bind(event.address);
 
     // Reputation & Recording Oracle Fee Variable is changed over time
     // For old one, it was oracleStake, for new one it is oracleFeePercentage
@@ -130,6 +132,11 @@ export function handlePending(event: Pending): void {
         reputationOracleFeePercentage.value
       );
     }
+    const reputationOracleStake =
+      legacyEscrowContract.try_reputationOracleStake();
+    if (!reputationOracleStake.reverted) {
+      escrowEntity.reputationOracleFee = reputationOracleStake.value;
+    }
 
     const recordingOracle = escrowContract.try_recordingOracle();
     if (!recordingOracle.reverted) {
@@ -141,6 +148,11 @@ export function handlePending(event: Pending): void {
       escrowEntity.recordingOracleFee = BigInt.fromI32(
         recordingOracleFeePercentage.value
       );
+    }
+    const recordingOracleStake =
+      legacyEscrowContract.try_recordingOracleStake();
+    if (!recordingOracleStake.reverted) {
+      escrowEntity.recordingOracleFee = recordingOracleStake.value;
     }
 
     escrowEntity.save();

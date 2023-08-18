@@ -164,6 +164,8 @@ templates:
       abis:
         - name: Escrow
           file: '{{{ Escrow.abi }}}'
+        - name: LegacyEscrow
+          file: '{{{ LegacyEscrow.abi }}}'
       eventHandlers:
         - event: IntermediateStorage(string,string)
           handler: handleIntermediateStorage
