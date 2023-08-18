@@ -2,12 +2,18 @@ from collections import Counter
 from functools import partial
 import numpy as np
 
+from modules.webhook.api_schema import (
+    ImageLabelBinaryFinalResult,
+    ResultDataset,
+    WorkerPerformanceResult,
+    ImageLabelBinaryJobResults,
+)
 from src.constants import JobTypes
 from src.modules.agreement import cohens_kappa, fleiss_kappa, percent_agreement
 from src.modules.agreement.utils import confusion_matrix_from_sequence
 import pandas as pd
 
-from typing import Sequence, Mapping, TypeVar, Optional
+from typing import Sequence, Mapping, TypeVar
 
 T = TypeVar("T")
 S = TypeVar("S")
@@ -38,7 +44,7 @@ def _calculate_kappa_from_series(
 
 def process_image_label_binary_intermediate_results(
     intermediate_results: list[dict],
-) -> dict:
+) -> ImageLabelBinaryJobResults:
     # turn into record format
     records = []
     for item in intermediate_results:
@@ -114,24 +120,32 @@ def process_image_label_binary_intermediate_results(
             total_annotations=("tag", "count"),
             score=("tag", calc_majority_kappa),
         )
+        .reset_index()
         .rename(columns={"assignee": "worker_id"})
     )
 
     # prepare response
-    return {
-        "dataset": {
-            "dataset_scores": dataset_scores,
-            "data_points": dataset.reset_index().to_dict(orient="records"),
-        },
-        "worker_performance": assignee_statistics.reset_index().to_dict(
-            orient="records"
-        ),
-    }
+    result_dataset = ResultDataset(
+        dataset_scores=dataset_scores,
+        data_points=[
+            ImageLabelBinaryFinalResult(**data_point)
+            for data_point in dataset.reset_index().to_dict(orient="records")
+        ],
+    )
+
+    worker_performance = [
+        WorkerPerformanceResult(**result)
+        for result in assignee_statistics.to_dict(orient="records")
+    ]
+
+    results = ImageLabelBinaryJobResults(
+        dataset=result_dataset, worker_performance=worker_performance
+    )
+
+    return results
 
 
-def process_intermediate_results(
-    intermediate_results: list[dict], job_type: str
-) -> dict:
+def process_intermediate_results(intermediate_results: list[dict], job_type: str):
     match job_type:
         case JobTypes.image_label_binary.value:
             return process_image_label_binary_intermediate_results(intermediate_results)
