@@ -1,7 +1,12 @@
 import { newMockEvent } from 'matchstick-as/assembly/index';
 import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts';
 
-import { Transfer, Approval } from '../../generated/HMToken/HMToken';
+import {
+  Transfer,
+  Approval,
+  BulkTransfer,
+  BulkApproval,
+} from '../../generated/HMToken/HMToken';
 
 export function createTransferEvent(
   from: string,
@@ -59,4 +64,50 @@ export function createApprovalEvent(
   approvalEvent.parameters.push(valueParam);
 
   return approvalEvent;
+}
+
+export function createBulkTransferEvent(
+  txId: i32,
+  bulkCount: i32,
+  timestamp: BigInt
+): BulkTransfer {
+  const bulkTransferEvent = changetype<BulkTransfer>(newMockEvent());
+  bulkTransferEvent.parameters = [];
+  bulkTransferEvent.block.timestamp = timestamp;
+  const txIdParam = new ethereum.EventParam(
+    '_txId',
+    ethereum.Value.fromI32(txId)
+  );
+  const bulkCountParam = new ethereum.EventParam(
+    '_bulkCount',
+    ethereum.Value.fromI32(bulkCount)
+  );
+
+  bulkTransferEvent.parameters.push(txIdParam);
+  bulkTransferEvent.parameters.push(bulkCountParam);
+
+  return bulkTransferEvent;
+}
+
+export function createBulkApprovalEvent(
+  txId: i32,
+  bulkCount: i32,
+  timestamp: BigInt
+): BulkApproval {
+  const bulkApprovalEvent = changetype<BulkApproval>(newMockEvent());
+  bulkApprovalEvent.parameters = [];
+  bulkApprovalEvent.block.timestamp = timestamp;
+  const txIdParam = new ethereum.EventParam(
+    '_txId',
+    ethereum.Value.fromI32(txId)
+  );
+  const bulkCountParam = new ethereum.EventParam(
+    '_bulkCount',
+    ethereum.Value.fromI32(bulkCount)
+  );
+
+  bulkApprovalEvent.parameters.push(txIdParam);
+  bulkApprovalEvent.parameters.push(bulkCountParam);
+
+  return bulkApprovalEvent;
 }

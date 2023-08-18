@@ -39,8 +39,15 @@ describe('RewardPool', function () {
     ] = await ethers.getSigners();
 
     // Deploy HMTToken Contract
-    const HMToken = await ethers.getContractFactory('HMToken');
-    token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
+    const HMToken = await ethers.getContractFactory(
+      'contracts/HMToken.sol:HMToken'
+    );
+    token = (await HMToken.deploy(
+      1000000000,
+      'Human Token',
+      18,
+      'HMT'
+    )) as HMToken;
 
     // Deploy Staking Conract
     const Staking = await ethers.getContractFactory('Staking');
@@ -51,7 +58,9 @@ describe('RewardPool', function () {
     )) as Staking;
 
     // Deploy Escrow Factory Contract
-    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+    const EscrowFactory = await ethers.getContractFactory(
+      'contracts/EscrowFactory.sol:EscrowFactory'
+    );
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,
