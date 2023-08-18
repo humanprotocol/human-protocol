@@ -19,7 +19,7 @@ def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm)
     with pytest.raises(ValueError, match="must be a square"):
         percent_agreement(bin_2r_im, "cm")
 
-    with pytest.raises(ValueError, match="is a subtype of"):
+    with pytest.raises(ValueError, match="must be a numeric"):
         percent_agreement(wrong_dtype_cm)
 
 
