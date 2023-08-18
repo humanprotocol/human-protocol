@@ -1,7 +1,7 @@
 """ Config for the application logger"""
 from logging.config import dictConfig
 
-from src.config import Config
+from src.core.config import Config
 
 log_config = {
     "version": 1,

@@ -3,9 +3,9 @@ from fastapi import FastAPI
 
 import src.log
 from src.api import init_api
-from src.error_handlers import setup_error_handlers
-from src.cron import setup_cron_jobs
-from src.config import Config
+from src.handlers.error_handlers import setup_error_handlers
+from src.crons import setup_cron_jobs
+from src.core.config import Config
 
 
 app = FastAPI(
