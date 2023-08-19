@@ -9,7 +9,9 @@ async function main() {
     return;
   }
 
-  const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+  const EscrowFactory = await ethers.getContractFactory(
+    'contracts/EscrowFactory.sol:EscrowFactory'
+  );
   await upgrades.forceImport(escrowFactoryAddress, EscrowFactory, {
     kind: 'uups',
   });

@@ -141,7 +141,7 @@ describe('PaymentService', () => {
 
       createPaymentIntentMock.mockResolvedValue(paymentIntent);
       findOneMock.mockResolvedValue(null);
-      
+
       const result = await paymentService.createFiatPayment(userId, dto);
 
       expect(createPaymentIntentMock).toHaveBeenCalledWith({
@@ -164,7 +164,9 @@ describe('PaymentService', () => {
       };
 
       createPaymentIntentMock.mockResolvedValue(paymentIntent);
-      findOneMock.mockResolvedValue({ transaction: paymentIntent.client_secret } as PaymentEntity);
+      findOneMock.mockResolvedValue({
+        transaction: paymentIntent.client_secret,
+      } as PaymentEntity);
 
       await expect(
         paymentService.createFiatPayment(userId, dto),
@@ -527,23 +529,29 @@ describe('PaymentService', () => {
           amount: 50,
           rate: 1,
           type: PaymentType.DEPOSIT,
+          status: PaymentStatus.SUCCEEDED,
         },
         {
           amount: 150,
           rate: 1,
           type: PaymentType.DEPOSIT,
+          status: PaymentStatus.SUCCEEDED,
         },
         {
           amount: -(180),
           rate: 1,
           type: PaymentType.WITHDRAWAL,
+          status: PaymentStatus.SUCCEEDED,
         },
       ]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
+      expect(paymentRepository.find).toHaveBeenCalledWith({
+        userId,
+        status: PaymentStatus.SUCCEEDED,
+      });
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
@@ -553,7 +561,10 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(0);
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
+      expect(paymentRepository.find).toHaveBeenCalledWith({
+        userId,
+        status: PaymentStatus.SUCCEEDED,
+      });
     });
   });
 });

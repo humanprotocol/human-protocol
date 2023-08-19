@@ -47,8 +47,15 @@ describe('EscrowFactory', function () {
     ];
 
     // Deploy HMToken Contract
-    const HMToken = await ethers.getContractFactory('HMToken');
-    token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
+    const HMToken = await ethers.getContractFactory(
+      'contracts/HMToken.sol:HMToken'
+    );
+    token = (await HMToken.deploy(
+      1000000000,
+      'Human Token',
+      18,
+      'HMT'
+    )) as HMToken;
 
     // Send HMT tokens to the operator
     await token.connect(owner).transfer(await operator.getAddress(), 1000);
@@ -67,7 +74,9 @@ describe('EscrowFactory', function () {
     await token.connect(operator).approve(staking.address, 1000);
 
     // Deploy Escrow Factory Contract
-    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+    const EscrowFactory = await ethers.getContractFactory(
+      'contracts/EscrowFactory.sol:EscrowFactory'
+    );
 
     escrowFactory = (await upgrades.deployProxy(
       EscrowFactory,

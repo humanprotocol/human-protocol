@@ -7,6 +7,7 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.staking import StakingClient, StakingClientError
 
 from test.human_protocol_sdk.utils import (
@@ -400,11 +401,11 @@ class StakingTestCase(unittest.TestCase):
                 "data": {
                     "rewardAddedEvents": [
                         {
-                            "escrow": "escrow1",
+                            "escrowAddress": "escrow1",
                             "amount": 10,
                         },
                         {
-                            "escrow": "escrow2",
+                            "escrowAddress": "escrow2",
                             "amount": 20,
                         },
                     ]
@@ -414,11 +415,8 @@ class StakingTestCase(unittest.TestCase):
 
             mock_function.assert_called_once_with(
                 "subgraph_url",
-                """
-rewardAddedEvents(where:{slasher:"slasher1"}) {
-    escrow
-    amount
-}""",
+                query=get_reward_added_events_query,
+                params={"slasherAddress": slasher},
             )
 
             self.assertEqual(len(rewards_info), 2)

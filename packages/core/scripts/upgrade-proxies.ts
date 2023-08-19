@@ -22,7 +22,9 @@ async function main() {
   }
 
   if (deployEscrowFactory == 'true' && escrowFactoryAddress) {
-    const EscrowFactory = await ethers.getContractFactory('EscrowFactory');
+    const EscrowFactory = await ethers.getContractFactory(
+      'contracts/EscrowFactory.sol:EscrowFactory'
+    );
     // await upgrades.forceImport(escrowFactoryAddress, EscrowFactory, { kind: 'uups' });  //use this to get ./openzeppelin/[network].json
     const escrowFactoryContract = await upgrades.upgradeProxy(
       escrowFactoryAddress,
