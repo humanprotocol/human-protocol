@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
+import { ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -32,7 +32,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { UserEntity } from '../user/user.entity';
+import { add, mul } from '../../common/utils/decimal';
 
 @Injectable()
 export class PaymentService {
@@ -249,9 +249,9 @@ export class PaymentService {
     const paymentEntities = await this.paymentRepository.find({ userId });
 
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return total + payment.amount * payment.rate;
+      return add(total, mul(payment.amount, payment.rate));
     }, 0);
 
-    return parseFloat(totalAmount.toFixed(6));
+    return totalAmount;
   }
 }

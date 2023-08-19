@@ -100,3 +100,10 @@ export enum ErrorSendGrid {
   EmailNotSent = 'Email was not sent',
   InvalidApiKey = 'Invalid SendGrid API key',
 }
+
+/**
+ * Represents error messages related to postgres.
+ */
+export enum ErrorPostgres {
+  NumericFieldOverflow = 'Numeric field overflow',
+}

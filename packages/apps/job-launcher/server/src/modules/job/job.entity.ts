@@ -15,10 +15,10 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'varchar', nullable: true })
   public escrowAddress: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 6 })
+  @Column({ type: 'decimal', precision: 30, scale: 18 })
   public fee: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 6 })
+  @Column({ type: 'decimal', precision: 30, scale: 18 })
   public fundAmount: number;
 
   @Column({ type: 'varchar' })

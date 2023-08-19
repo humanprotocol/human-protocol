@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { FixedNumber, ethers } from 'ethers';
 import { validate } from 'class-validator';
 import {
   BadGatewayException,
@@ -21,6 +20,8 @@ import {
   ErrorBucket,
   ErrorEscrow,
   ErrorJob,
+  ErrorPayment,
+  ErrorPostgres,
 } from '../../common/constants/errors';
 import {
   ChainId,
@@ -32,7 +33,6 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
-  CreateJobDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
@@ -60,6 +60,8 @@ import {
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
+import { add, mul, div, lt } from '../../common/utils/decimal';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class JobService {
@@ -120,10 +122,10 @@ export class JobService {
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
     const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!
-    const fee = (feePercentage / 100) * fundAmount
-    const usdTotalAmount = (fundAmount + fee) * rate
+    const fee = mul(div(feePercentage, 100), fundAmount)
+    const usdTotalAmount = mul(add(fundAmount, fee), rate)
  
-    if (userBalance < usdTotalAmount) {
+    if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
@@ -152,15 +154,25 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    await this.paymentRepository.create({
-      userId,
-      source: PaymentSource.BALANCE,
-      type: PaymentType.WITHDRAWAL,
-      amount: -(fundAmount + fee),
-      currency: TokenId.HMT,
-      rate,
-      status: PaymentStatus.SUCCEEDED
-    })
+    try {
+      await this.paymentRepository.create({
+        userId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        amount: -add(fundAmount, fee),
+        currency: TokenId.HMT,
+        rate,
+        status: PaymentStatus.SUCCEEDED
+      })
+    } catch (error) {
+      if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
+        this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, JobService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
+    }
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();

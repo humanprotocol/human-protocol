@@ -322,7 +322,7 @@ describe('JobService', () => {
       const fundAmount = imageLabelBinaryJobDto.fundAmount;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
-      const userBalance = ethers.utils.parseUnits('15', 'ether');
+      const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       jest
