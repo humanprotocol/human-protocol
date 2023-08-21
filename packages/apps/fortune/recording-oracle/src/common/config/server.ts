@@ -1,6 +1,6 @@
-import { ConfigType, registerAs } from "@nestjs/config";
+import { ConfigType, registerAs } from '@nestjs/config';
 
-export const serverConfig = registerAs("server", () => ({
+export const serverConfig = registerAs('server', () => ({
   host: process.env.HOST!,
   port: +process.env.PORT!,
   sessionSecret: process.env.SESSION_SECRET!,

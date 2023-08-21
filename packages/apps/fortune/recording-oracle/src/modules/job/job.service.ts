@@ -1,4 +1,4 @@
-import { HttpService } from "@nestjs/axios";
+import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
   BadRequestException,
@@ -6,7 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-} from "@nestjs/common";
+} from '@nestjs/common';
 import {
   EscrowClient,
   EscrowStatus,
@@ -14,16 +14,25 @@ import {
   StorageCredentials,
   StorageParams,
   UploadFile,
-} from "@human-protocol/sdk";
-import { ethers } from "ethers";
+} from '@human-protocol/sdk';
+import { ethers } from 'ethers';
 
-import { ServerConfigType, S3ConfigType, serverConfigKey, s3ConfigKey } from "../../common/config";
-import { JobSolutionRequestDto, SaveSoulutionsDto, SendWebhookDto } from "./job.dto";
-import { Web3Service } from "../web3/web3.service";
-import { ErrorBucket, ErrorJob } from "../../common/constants/errors";
-import { firstValueFrom } from "rxjs";
-import { JobRequestType } from "../../common/enums/job";
-import { IManifest, ISolution } from "../../common/interfaces/job";
+import {
+  ServerConfigType,
+  S3ConfigType,
+  serverConfigKey,
+  s3ConfigKey,
+} from '../../common/config';
+import {
+  JobSolutionRequestDto,
+  SaveSoulutionsDto,
+  SendWebhookDto,
+} from './job.dto';
+import { Web3Service } from '../web3/web3.service';
+import { ErrorBucket, ErrorJob } from '../../common/constants/errors';
+import { firstValueFrom } from 'rxjs';
+import { JobRequestType } from '../../common/enums/job';
+import { IManifest, ISolution } from '../../common/interfaces/job';
 
 @Injectable()
 export class JobService {
@@ -51,27 +60,42 @@ export class JobService {
       useSSL: this.s3Config.useSSL,
     };
 
-    this.storageClient = new StorageClient(storageCredentials, this.storageParams);
+    this.storageClient = new StorageClient(
+      storageCredentials,
+      this.storageParams,
+    );
   }
 
-  async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<string> {
+  async processJobSolution(
+    jobSolution: JobSolutionRequestDto,
+  ): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
     const escrowClient = await EscrowClient.build(signer);
 
-    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
-    if (ethers.utils.getAddress(recordingOracleAddress) !== (await signer.getAddress())) {
+    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
+      jobSolution.escrowAddress,
+    );
+    if (
+      ethers.utils.getAddress(recordingOracleAddress) !==
+      (await signer.getAddress())
+    ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
       throw new BadRequestException(ErrorJob.AddressMismatches);
     }
 
-    const escrowStatus = await escrowClient.getStatus(jobSolution.escrowAddress);
+    const escrowStatus = await escrowClient.getStatus(
+      jobSolution.escrowAddress,
+    );
     if (escrowStatus !== EscrowStatus.Pending) {
       this.logger.log(ErrorJob.InvalidStatus, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidStatus);
     }
 
-    const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { submissionsRequired, requestType }: IManifest = await StorageClient.downloadFileFromUrl(manifestUrl);
+    const manifestUrl = await escrowClient.getManifestUrl(
+      jobSolution.escrowAddress,
+    );
+    const { submissionsRequired, requestType }: IManifest =
+      await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
       this.logger.log(ErrorJob.InvalidManifest, JobService.name);
@@ -84,10 +108,16 @@ export class JobService {
     }
 
     // TODO: Develop a generic error handler for ethereum errors
-    const existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
-    const existingJobSolutions: ISolution[] = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL);
+    const existingJobSolutionsURL =
+      await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
+    const existingJobSolutions: ISolution[] =
+      await StorageClient.downloadFileFromUrl(existingJobSolutionsURL);
 
-    if (existingJobSolutions.find(({ solution }) => solution === jobSolution.solution)) {
+    if (
+      existingJobSolutions.find(
+        ({ solution }) => solution === jobSolution.solution,
+      )
+    ) {
       this.logger.log(ErrorJob.SolutionAlreadyExists, JobService.name);
       throw new BadRequestException(ErrorJob.SolutionAlreadyExists);
     }
@@ -102,14 +132,24 @@ export class JobService {
     ];
 
     if (newJobSolutions.length > submissionsRequired) {
-      this.logger.log(ErrorJob.AllSolutionsHaveAlreadyBeenSent, JobService.name);
+      this.logger.log(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+        JobService.name,
+      );
       throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
-    const jobSolutionUploaded = await this.uploadJobSolutions(newJobSolutions, this.s3Config.bucket);
+    const jobSolutionUploaded = await this.uploadJobSolutions(
+      newJobSolutions,
+      this.s3Config.bucket,
+    );
 
     if (!existingJobSolutionsURL) {
-      await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
+      await escrowClient.storeResults(
+        jobSolution.escrowAddress,
+        jobSolutionUploaded.url,
+        jobSolutionUploaded.hash,
+      );
     }
 
     // TODO: Uncomment this to read reputation oracle URL from KVStore
@@ -123,14 +163,20 @@ export class JobService {
         escrowAddress: jobSolution.escrowAddress,
       });
 
-      return "The requested job is completed.";
+      return 'The requested job is completed.';
     }
 
-    return "Solution is recorded.";
+    return 'Solution is recorded.';
   }
 
-  private async uploadJobSolutions(jobSolutions: any[], bucket: string): Promise<SaveSoulutionsDto> {
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(jobSolutions, bucket);
+  private async uploadJobSolutions(
+    jobSolutions: any[],
+    bucket: string,
+  ): Promise<SaveSoulutionsDto> {
+    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
+      jobSolutions,
+      bucket,
+    );
 
     if (!uploadedFiles[0]) {
       this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
@@ -140,8 +186,13 @@ export class JobService {
     return uploadedFiles[0];
   }
 
-  public async sendWebhook(webhookUrl: string, webhookData: SendWebhookDto): Promise<boolean> {
-    const { data } = await firstValueFrom(await this.httpService.post(webhookUrl, webhookData));
+  public async sendWebhook(
+    webhookUrl: string,
+    webhookData: SendWebhookDto,
+  ): Promise<boolean> {
+    const { data } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, webhookData),
+    );
 
     if (!data) {
       this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);

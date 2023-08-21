@@ -1,5 +1,5 @@
-import { ChainId } from "@human-protocol/sdk";
-import { JobRequestType } from "../enums/job";
+import { ChainId } from '@human-protocol/sdk';
+import { JobRequestType } from '../enums/job';
 
 export interface IManifest {
   submissionsRequired: number;
