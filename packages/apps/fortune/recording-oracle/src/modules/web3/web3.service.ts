@@ -1,18 +1,17 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { Wallet, providers } from "ethers";
-
-import { EthereumConfigType, ethereumConfigKey } from "@/common/config";
-import { networkMap } from "@/common/constants";
+import { Inject, Injectable } from '@nestjs/common';
+import { Wallet, providers } from 'ethers';
+import { Web3ConfigType, web3ConfigKey } from '../../common/config';
+import { networkMap } from '../../common/constants/networks';
 
 @Injectable()
 export class Web3Service {
   private signers: { [key: number]: Wallet } = {};
 
   constructor(
-    @Inject(ethereumConfigKey)
-    private ethereumConfig: EthereumConfigType,
+    @Inject(web3ConfigKey)
+    private web3Config: Web3ConfigType,
   ) {
-    const privateKey = this.ethereumConfig.privateKey;
+    const privateKey = this.web3Config.web3PrivateKey;
 
     for (const networkKey of Object.keys(networkMap)) {
       const network = networkMap[networkKey];
