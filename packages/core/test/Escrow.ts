@@ -29,8 +29,8 @@ let token: HMToken, escrow: Escrow;
 
 async function deployEscrow() {
   // Deploy Escrow Contract
-  const Escrow = await ethers.getContractFactory('Escrow');
-  escrow = await Escrow.deploy(
+  const Escrow = await ethers.getContractFactory('contracts/Escrow.sol:Escrow');
+  escrow = (await Escrow.deploy(
     token.address,
     await launcher.getAddress(),
     await owner.getAddress(),
@@ -38,7 +38,7 @@ async function deployEscrow() {
     await Promise.all(
       trustedHandlers.map(async (handler) => await handler.getAddress())
     )
-  );
+  )) as Escrow;
 }
 
 async function setupEscrow() {
@@ -73,8 +73,15 @@ describe('Escrow', function () {
     trustedHandlers = [restAccounts[0], restAccounts[1]];
 
     // Deploy HMTToken Contract
-    const HMToken = await ethers.getContractFactory('HMToken');
-    token = await HMToken.deploy(1000000000, 'Human Token', 18, 'HMT');
+    const HMToken = await ethers.getContractFactory(
+      'contracts/HMToken.sol:HMToken'
+    );
+    token = (await HMToken.deploy(
+      1000000000,
+      'Human Token',
+      18,
+      'HMT'
+    )) as HMToken;
   });
 
   describe('deployment', () => {

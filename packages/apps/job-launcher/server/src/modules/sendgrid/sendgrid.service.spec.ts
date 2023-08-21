@@ -2,27 +2,42 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { SendGridService } from './sendgrid.service';
 import { MailService } from '@sendgrid/mail';
+import { ErrorSendGrid } from '../../common/constants/errors';
+import { MOCK_SENDGRID_API_KEY, MOCK_SENDGRID_FROM_EMAIL, MOCK_SENDGRID_FROM_NAME } from '../../../test/constants';
 
-const mockConfigService: Partial<ConfigService> = {
-  get: jest.fn((key: string) => {
-    switch (key) {
-      case 'SENDGRID_API_KEY':
-        return 'SG.xxxx';
-      case 'SENDGRID_FROM_EMAIL':
-        return 'info@hmt.ai';
-    }
-  }),
-};
+
 
 describe('SendGridService', () => {
   let sendGridService: SendGridService;
   let mailService: MailService;
+  let mockConfigService: Partial<ConfigService>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
+    const mockMailService = {
+      send: jest.fn(),
+      setApiKey: jest.fn(),
+    };
+
+    mockConfigService = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case 'SENDGRID_API_KEY':
+            return MOCK_SENDGRID_API_KEY
+          case 'SENDGRID_FROM_EMAIL':
+            return MOCK_SENDGRID_FROM_EMAIL;
+          case 'SENDGRID_FROM_NAME':
+            return MOCK_SENDGRID_FROM_NAME
+        }
+      }),
+    };
+
     const app = await Test.createTestingModule({
       providers: [
         SendGridService,
-        MailService,
+        {
+          provide: MailService,
+          useValue: mockMailService,
+        },
         {
           provide: ConfigService,
           useValue: mockConfigService,
@@ -33,56 +48,77 @@ describe('SendGridService', () => {
     mailService = app.get(MailService);
   });
 
-  it('should send email', async () => {
-    const mock = jest
-      .spyOn(mailService, 'send')
-      .mockImplementationOnce(async () => {
-        return [{} as any, {}];
+  describe('sendEmail', () => {
+    it('should send email', async () => {
+      const mock = jest
+        .spyOn(mailService, 'send')
+        .mockImplementationOnce(async () => {
+          return [{} as any, {}];
+        });
+      await sendGridService.sendEmail({
+        to: 'test@example.com',
+        from: 'test@example.com',
+        subject: 'Sending with SendGrid is Fun',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
       });
-    await sendGridService.sendEmail({
-      to: 'test@example.com',
-      from: 'test@example.com',
-      subject: 'Sending with SendGrid is Fun',
-      text: 'and easy to do anywhere, even with Node.js',
-      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-    });
-    expect(mock).toHaveBeenCalled();
-  });
-
-  it('should send email from default address', async () => {
-    const mock = jest
-      .spyOn(mailService, 'send')
-      .mockImplementationOnce(async () => {
-        return [{} as any, {}];
-      });
-    await sendGridService.sendEmail({
-      to: 'test@example.com',
-      subject: 'Sending with SendGrid is Fun',
-      text: 'and easy to do anywhere, even with Node.js',
-      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      expect(mock).toHaveBeenCalled();
     });
 
-    expect(mock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        from: expect.objectContaining({
-          email: 'info@hmt.ai',
-        }),
-      }),
-    );
-  });
-
-  it("should throw error if email wasn't sent", async () => {
-    jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
-      throw new Error('Error');
-    });
-
-    await expect(
-      sendGridService.sendEmail({
+    it('should send email from default address', async () => {
+      const mock = jest
+        .spyOn(mailService, 'send')
+        .mockImplementationOnce(async () => {
+          return [{} as any, {}];
+        });
+      await sendGridService.sendEmail({
         to: 'test@example.com',
         subject: 'Sending with SendGrid is Fun',
         text: 'and easy to do anywhere, even with Node.js',
         html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-      }),
-    ).rejects.toThrowError('Error');
+      });
+
+      expect(mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: expect.objectContaining({
+            email: 'info@hmt.ai',
+          }),
+        }),
+      );
+    });
+
+    it("should throw error if email wasn't sent", async () => {
+      jest.spyOn(mailService, 'send').mockImplementationOnce(async () => {
+        throw new Error(ErrorSendGrid.EmailNotSent);
+      });
+
+      await expect(
+        sendGridService.sendEmail({
+          to: 'test@example.com',
+          subject: 'Sending with SendGrid is Fun',
+          text: 'and easy to do anywhere, even with Node.js',
+          html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        }),
+      ).rejects.toThrowError(ErrorSendGrid.EmailNotSent);
+    });
+  });
+
+  describe('constructor', () => {
+    it('should initialize SendGridService with valid API key', () => {
+      sendGridService = new SendGridService(mailService, mockConfigService as any);
+
+      expect(mailService.setApiKey).toHaveBeenCalledWith(MOCK_SENDGRID_API_KEY);
+      expect(sendGridService['defaultFromEmail']).toEqual(MOCK_SENDGRID_FROM_EMAIL);
+      expect(sendGridService['defaultFromName']).toEqual(MOCK_SENDGRID_FROM_NAME);
+    });
+
+    it('should throw an error with invalid API key', async () => {
+      const invalidApiKey = 'invalid-api-key';
+      mockConfigService.get = jest.fn().mockReturnValue(invalidApiKey);
+
+      expect(() => {
+        sendGridService = new SendGridService(mailService, mockConfigService as any)
+      }).toThrowError(ErrorSendGrid.InvalidApiKey);  
+    });
   });
 });
