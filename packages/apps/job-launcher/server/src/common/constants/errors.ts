@@ -100,3 +100,11 @@ export enum ErrorSendGrid {
   EmailNotSent = 'Email was not sent',
   InvalidApiKey = 'Invalid SendGrid API key',
 }
+
+/**
+ * Represents error messages related to signature.
+ */
+export enum ErrorSignature {
+  SignatureNotVerified = 'Signature not verified',
+  InvalidSignature = 'Invalid signature',
+}
