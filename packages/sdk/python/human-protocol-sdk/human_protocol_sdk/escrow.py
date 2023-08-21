@@ -308,6 +308,8 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         if not hash:
             raise EscrowClientError("Invalid empty hash")
+        print(f"!!!! URL: {url}")
+        print(f"!!!! URL validation: {URL(url)}")
         if not URL(url):
             raise EscrowClientError(f"Invalid URL: {url}")
         if not self.w3.eth.default_account:
