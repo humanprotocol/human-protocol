@@ -130,7 +130,7 @@ export const HowToHuman = () => {
           }}
         >
           <iframe
-            src="https://www.youtube.com/embed/GLyUmCYxyNI?rel=0&amp;controls=1&amp;autoplay=0&amp;mute=0&amp;start=0"
+            src={`https://www.youtube.com/embed/${config?.youtubeId}?rel=0&amp;controls=1&amp;autoplay=0&amp;mute=0&amp;start=0`}
             frameBorder={0}
             allow="autoplay; encrypted-media"
             allowFullScreen={false}
