@@ -1,9 +1,9 @@
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
-export const MOCK_FORTUNES_REQUIRED = 5;
+export const MOCK_SUBMISSION_REQUIRED = 5;
 export const MOCK_CHAIN_ID = 1;
 export const MOCK_ADDRESS = '0x1234567890123456789012345678901234567892';
-export const MOCK_FILE_URL = 'mockedFileUrl';
+export const MOCK_FILE_URL = 'http://mockedFileUrl.test';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_PRIVATE_KEY =
@@ -29,3 +29,7 @@ export const MOCK_REFRESH_TOKEN = 'refresh_token';
 export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
 export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
 export const MOCK_EXPIRES_IN = 1000000000000000;
+
+export const MOCK_SENDGRID_API_KEY = 'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
+export const MOCK_SENDGRID_FROM_NAME = 'John Doe';

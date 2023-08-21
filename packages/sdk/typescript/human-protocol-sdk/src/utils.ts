@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios';
 import { ethers } from 'ethers';
 
 import {
   ContractExecutionError,
-  ErrorNoURLprovided,
   EthereumError,
   InvalidArgumentError,
   NonceExpired,
@@ -71,32 +69,5 @@ export const isValidUrl = (url: string) => {
     return true;
   } catch (err) {
     return false;
-  }
-};
-
-/**
- * **Fetching data with queries.*
- *
- * @param {string} url
- * @param {string} query
- * @param {any} variables
- * @param {any} headers
- * @returns
- */
-export const gqlFetch = (
-  url: string,
-  query: string,
-  variables?: any,
-  headers?: any
-) => {
-  if (url && url.length) {
-    return axios.post(url, JSON.stringify({ query, variables }), {
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-    });
-  } else {
-    return Promise.reject(ErrorNoURLprovided);
   }
 };

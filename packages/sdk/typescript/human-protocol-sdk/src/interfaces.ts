@@ -24,7 +24,7 @@ export interface IStaker {
 }
 
 export interface IEscrowsFilter {
-  address?: string;
+  launcherAddress?: string;
   role?: number;
   status?: EscrowStatus;
   from?: Date;

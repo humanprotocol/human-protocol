@@ -48,8 +48,15 @@ task(
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.9',
-    settings: { optimizer: { enabled: true, runs: 1000000 } },
+    compilers: [
+      {
+        version: '0.6.2',
+      },
+      {
+        version: '0.8.9',
+        settings: { optimizer: { enabled: true, runs: 1000000 } },
+      },
+    ],
   },
   defaultNetwork: 'hardhat',
   networks: {
@@ -157,15 +164,26 @@ const config: HardhatUserConfig = {
     only: [],
     except: [],
   },
-  abiExporter: {
-    path: './abis',
-    runOnCompile: true,
-    clear: true,
-    flat: true,
-    only: [],
-    spacing: 2,
-    format: 'json',
-  },
+  abiExporter: [
+    {
+      path: './abis',
+      runOnCompile: true,
+      clear: true,
+      flat: true,
+      only: ['contracts/[a-zA-Z]*.sol'],
+      spacing: 2,
+      format: 'json',
+    },
+    {
+      path: './abis/legacy',
+      runOnCompile: true,
+      clear: true,
+      flat: true,
+      only: ['legacy'],
+      spacing: 2,
+      format: 'json',
+    },
+  ],
   etherscan: {
     apiKey: {
       // For Mainnet, Goerli

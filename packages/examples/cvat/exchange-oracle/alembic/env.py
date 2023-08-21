@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.config import Config
+from src.core.config import Config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -22,9 +22,10 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from src.database import Base
-from src.modules.oracle_webhook.model import Webhook
-from src.modules.cvat.model import Task, Job
+
+from src.models.cvat import Task, Job
+from src.models.webhook import Webhook
+from src.db import Base
 
 target_metadata = Base.metadata
 

@@ -18,7 +18,7 @@ services:
   blockchain-node:
     build: 
       context: ./
-      dockerfile: blockchain-node.Dockerfile
+      dockerfile: dockerfiles/blockchain-node.Dockerfile
     healthcheck:
       # Using a magic nubmer of 28 here because this is a block number when blockchain-node container is ready to use
       test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://blockchain-node:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 28 ]; then exit 0; else exit 1; fi
@@ -28,10 +28,49 @@ services:
     networks:
       - test-network
 
+  minio:
+    container_name: minio
+    image: minio/minio:RELEASE.2022-05-26T05-48-41Z
+    ports:
+      - 9001:9001
+      - 9000:9000
+    environment:
+      MINIO_ROOT_USER: dev
+      MINIO_ROOT_PASSWORD: devdevdev
+    volumes:
+      - ./tests/utils/manifest.json:/tmp/manifests/manifest.json
+      - ./tests/utils/intermediate-results.json:/tmp/results/intermediate-results.json
+    entrypoint: 'sh'
+    command:
+      -c "mkdir -p /data/manifests && cp /tmp/manifests/manifest.json /data/manifests/manifest.json && mkdir -p /data/results && cp /tmp/results/intermediate-results.json /data/results/intermediate-results.json && minio server /data --console-address ':9001'"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    networks:
+      - test-network
+
+  minio-mc:
+    container_name: minio-mc
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 dev devdevdev;
+      /usr/bin/mc anonymous set public myminio/manifests;
+      /usr/bin/mc anonymous set public myminio/results;
+      "
+    networks:
+      - test-network
+
+
   test:
     build:
       context: ./
-      dockerfile: test.Dockerfile
+      dockerfile: dockerfiles/test.Dockerfile
     environment:
       SQLALCHEMY_SILENCE_UBER_WARNING: 1
       ENVIRONMENT: 'test'
@@ -41,11 +80,21 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'recording_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
+      ENDPOINT_URL: 'host.docker.internal:9000'
+      ACCESS_KEY: 'dev'
+      SECRET_KEY: 'devdevdev'
+      RESULTS_BUCKET_NAME: 'results'
+      USE_SSL: False
     depends_on:
       postgres:
         condition: service_started
       blockchain-node:
         condition: service_healthy
+      minio-mc:
+        condition: service_completed_successfully
+    # Used to reference localhost since minio:9000 is rejected by the SDK URL validator.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - test-network
     tty: true

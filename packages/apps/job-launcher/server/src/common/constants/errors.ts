@@ -10,6 +10,8 @@ export enum ErrorJob {
   WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
+  InvalidRequestType = 'Invalid job type',
+  JobParamsValidationFailed = 'Job parameters validation failed',
 }
 
 /**
@@ -59,7 +61,7 @@ export enum ErrorPayment {
   CustomerNotFound = 'Customer not found',
   CustomerNotCreated = 'Customer not created',
   IncorrectAmount = 'Incorrect amount',
-  TransactionHashAlreadyExists = 'Transaction hash already exists',
+  TransactionAlreadyExists = 'Transaction already exists',
   TransactionNotFoundByHash = 'Transaction not found by hash',
   InvalidTransactionData = 'Invalid transaction data',
   TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
@@ -81,4 +83,20 @@ export enum ErrorCurrency {
 export enum ErrorBucket {
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+}
+
+/**
+ * Represents error messages related to web3.
+ */
+export enum ErrorWeb3 {
+  InvalidTestnetChainId = 'Invalid chain id provided for the testnet environment',
+  InvalidMainnetChainId = 'Invalid chain id provided for the mainnet environment',
+}
+
+/**
+ * Represents error messages related to send grid.
+ */
+export enum ErrorSendGrid {
+  EmailNotSent = 'Email was not sent',
+  InvalidApiKey = 'Invalid SendGrid API key',
 }

@@ -1,14 +1,14 @@
-import { Controller, Get } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
-import { Public } from "@/common/decorators";
+import { Public } from '@/common/decorators';
 
-@Controller("/")
+@Controller('/')
 export class AppController {
   @Public()
-  @Get("/")
-  @ApiTags("Health Check")
+  @Get('/')
+  @ApiTags('Health Check')
   public health(): string {
-    return "OK";
+    return 'OK';
   }
 }

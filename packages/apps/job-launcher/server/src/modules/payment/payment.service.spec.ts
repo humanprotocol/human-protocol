@@ -1,4 +1,4 @@
-import { ethers, FixedNumber } from 'ethers';
+import { ethers } from 'ethers';
 import { Test } from '@nestjs/testing';
 import Stripe from 'stripe';
 import { PaymentService } from './payment.service';
@@ -8,25 +8,25 @@ import { HttpService } from '@nestjs/axios';
 import { BigNumber } from 'ethers';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
-import { TransactionReceipt, Log } from '@ethersproject/abstract-provider';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
-  PaymentFiatMethodType,
   PaymentSource,
+  PaymentStatus,
   PaymentType,
+  StripePaymentStatus,
   TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
-  MOCK_CUSTOMER_ID,
-  MOCK_EMAIL,
   MOCK_PAYMENT_ID,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId } from '@human-protocol/sdk';
+import { PaymentEntity } from './payment.entity';
 
 jest.mock('@human-protocol/sdk');
 
@@ -75,6 +75,7 @@ describe('PaymentService', () => {
           provide: Web3Service,
           useValue: {
             getSigner: jest.fn().mockReturnValue(signerMock),
+            validateChainId: jest.fn(),
           },
         },
         { provide: ConfigService, useValue: mockConfigService },
@@ -111,48 +112,12 @@ describe('PaymentService', () => {
       .spyOn(stripe.paymentIntents, 'retrieve')
       .mockImplementation(stripePaymentIntentsRetrieveMock);
   });
-
-  describe('createCustomer', () => {
-    let createCustomerMock: any;
-
-    beforeEach(() => {
-      createCustomerMock = jest.spyOn(stripe.customers, 'create');
-    });
-
-    afterEach(() => {
-      expect(createCustomerMock).toHaveBeenCalledTimes(1);
-      expect(createCustomerMock).toHaveBeenCalledWith({
-        email: MOCK_EMAIL,
-      });
-      createCustomerMock.mockRestore();
-    });
-
-    it('should create a customer', async () => {
-      const stripeApiResponse = {
-        id: MOCK_CUSTOMER_ID,
-        email: MOCK_EMAIL,
-      };
-
-      createCustomerMock.mockResolvedValue(
-        stripeApiResponse as Stripe.Response<Stripe.Customer>,
-      );
-
-      const result = await paymentService.createCustomer(MOCK_EMAIL);
-
-      expect(result).toBe(MOCK_CUSTOMER_ID);
-    });
-
-    it('should throw bad request exception if customer creation fails', async () => {
-      createCustomerMock.mockRejectedValue(new Error());
-
-      expect(paymentService.createCustomer(MOCK_EMAIL)).rejects.toThrowError();
-    });
-  });
-
+  
   describe('createFiatPayment', () => {
-    let createPaymentIntentMock: any;
+    let createPaymentIntentMock: any, findOneMock: any, createPaymentMock: any;
 
     beforeEach(() => {
+      findOneMock = jest.spyOn(paymentRepository, 'findOne');
       createPaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'create');
     });
 
@@ -167,16 +132,16 @@ describe('PaymentService', () => {
         currency: Currency.USD,
       };
 
+      const userId = 1;
+
       const paymentIntent = {
         client_secret: 'clientSecret123',
       };
 
       createPaymentIntentMock.mockResolvedValue(paymentIntent);
+      findOneMock.mockResolvedValue(null);
 
-      // TODO: Remove this after resolve remove comments
-      const user = {}
-
-      const result = await paymentService.createFiatPayment(user as any, dto);
+      const result = await paymentService.createFiatPayment(userId, dto);
 
       expect(createPaymentIntentMock).toHaveBeenCalledWith({
         amount: dto.amount * 100,
@@ -185,31 +150,48 @@ describe('PaymentService', () => {
       expect(result).toEqual(paymentIntent.client_secret);
     });
 
-    it('should throw a bad request exception if the payment intent creation fails', async () => {
-      const customerId = MOCK_CUSTOMER_ID;
-
+    it('should throw a bad request exception if transaction already exist', async () => {0
       const dto = {
         amount: 100,
         currency: Currency.USD,
       };
 
-      createPaymentIntentMock.mockRejectedValue(new Error());
+      const userId = 1;
 
-      // TODO: Remove this after resolve remove comments
-      const user = {}
+      const paymentIntent = {
+        client_secret: 'clientSecret123',
+      };
+
+      createPaymentIntentMock.mockResolvedValue(paymentIntent);
+      findOneMock.mockResolvedValue({
+        transaction: paymentIntent.client_secret,
+      } as PaymentEntity);
 
       await expect(
-        paymentService.createFiatPayment(user as any, dto),
+        paymentService.createFiatPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
+    });
+
+    it('should throw a bad request exception if the payment intent creation fails', async () => {0
+      const dto = {
+        amount: 100,
+        currency: Currency.USD,
+      };
+
+      const userId = 1;
+
+      createPaymentIntentMock.mockRejectedValue(new Error());
+
+      await expect(
+        paymentService.createFiatPayment(userId, dto),
       ).rejects.toThrowError();
     });
   });
 
   describe('confirmFiatPayment', () => {
-    let createPaymentMock: any,
-        retrievePaymentIntentMock: any;
+    let retrievePaymentIntentMock: any;
 
     beforeEach(() => {
-      createPaymentMock = jest.spyOn(paymentRepository, 'create');
       retrievePaymentIntentMock = jest.spyOn(stripe.paymentIntents, 'retrieve');
     });
 
@@ -222,7 +204,6 @@ describe('PaymentService', () => {
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
-      const rate = 1.5;
 
       const paymentData = {
         status: 'succeeded',
@@ -231,29 +212,20 @@ describe('PaymentService', () => {
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
-      createPaymentMock.mockResolvedValue(true);
 
       const result = await paymentService.confirmFiatPayment(userId, dto);
 
-      expect(paymentRepository.create).toHaveBeenCalledWith({
-        userId,
-        source: PaymentSource.FIAT,
-        currency: Currency.EUR,
-        type: PaymentType.DEPOSIT,
-        amount: paymentData.amount.toString(),
-        rate: 0.5
-      });
       expect(result).toBe(true);
     });
 
-    it('should throw a bad request exception if the payment is not successful', async () => {
+    it('should handle payment cancellation', async () => {
       const userId = 1;
       const dto = {
         paymentId: MOCK_PAYMENT_ID,
       };
 
       const paymentData = {
-        status: 'canceled',
+        status: StripePaymentStatus.CANCELED,
         amount: 100,
       };
 
@@ -262,6 +234,42 @@ describe('PaymentService', () => {
       await expect(
         paymentService.confirmFiatPayment(userId, dto),
       ).rejects.toThrowError(ErrorPayment.NotSuccess);
+    });
+
+    it('should handle payment requiring a payment method', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+
+      const paymentData = {
+        status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
+        amount: 100,
+      };
+
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      await expect(
+        paymentService.confirmFiatPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.NotSuccess);
+    });
+
+    it('should handle payment status other than succeeded', async () => {
+      const userId = 1;
+      const dto = {
+        paymentId: MOCK_PAYMENT_ID,
+      };
+
+      const paymentData = {
+        status: 'unknown_status',
+        amount: 100,
+      };
+
+      retrievePaymentIntentMock.mockResolvedValue(paymentData);
+
+      const result = await paymentService.confirmFiatPayment(userId, dto);
+
+      expect(result).toBe(false);
     });
 
     it('should return false if the payment is not found', async () => {
@@ -354,7 +362,8 @@ describe('PaymentService', () => {
         amount: '100',
         rate: 0.5,
         transaction: MOCK_TRANSACTION_HASH,
-        chainId: ChainId.LOCALHOST
+        chainId: ChainId.LOCALHOST,
+        status: PaymentStatus.SUCCEEDED,
       });
       expect(result).toBe(true);
     });
@@ -505,7 +514,7 @@ describe('PaymentService', () => {
 
       await expect(
         paymentService.createCryptoPayment(userId, dto),
-      ).rejects.toThrowError(ErrorPayment.TransactionHashAlreadyExists);
+      ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
     });
   });
 
@@ -519,23 +528,29 @@ describe('PaymentService', () => {
           amount: ethers.utils.parseUnits('50', 'ether'),
           rate: 1,
           type: PaymentType.DEPOSIT,
+          status: PaymentStatus.SUCCEEDED,
         },
         {
           amount: ethers.utils.parseUnits('150', 'ether'),
           rate: 1,
           type: PaymentType.DEPOSIT,
+          status: PaymentStatus.SUCCEEDED,
         },
         {
           amount: ethers.utils.parseUnits('180', 'ether'),
           rate: 1,
           type: PaymentType.WITHDRAWAL,
+          status: PaymentStatus.SUCCEEDED,
         },
       ]);
 
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(expectedBalance);
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
+      expect(paymentRepository.find).toHaveBeenCalledWith({
+        userId,
+        status: PaymentStatus.SUCCEEDED,
+      });
     });
 
     it('should return 0 balance for a user with no payment entities', async () => {
@@ -545,7 +560,10 @@ describe('PaymentService', () => {
       const balance = await paymentService.getUserBalance(userId);
 
       expect(balance).toEqual(BigNumber.from(0));
-      expect(paymentRepository.find).toHaveBeenCalledWith({ userId });
+      expect(paymentRepository.find).toHaveBeenCalledWith({
+        userId,
+        status: PaymentStatus.SUCCEEDED,
+      });
     });
   });
 });

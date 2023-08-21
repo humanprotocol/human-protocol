@@ -1,55 +1,103 @@
-import { HttpService } from "@nestjs/axios";
-import { BadRequestException, ConflictException, Inject, Injectable, Logger } from "@nestjs/common";
-import { EscrowClient, EscrowStatus, StorageClient } from "@human-protocol/sdk";
-import { ethers } from "ethers";
+import { HttpService } from '@nestjs/axios';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  EscrowClient,
+  EscrowStatus,
+  StorageClient,
+  StorageCredentials,
+  StorageParams,
+  UploadFile,
+} from '@human-protocol/sdk';
+import { ethers } from 'ethers';
 
-import { serverConfigKey, ServerConfigType, storageConfigKey, StorageConfigType } from "@/common/config";
-import { JobRequestType, JobSolutionRequestDto } from "./job.dto";
-import { Web3Service } from "../web3/web3.service";
-import { ErrorJob } from "../../common/constants/errors";
+import {
+  ServerConfigType,
+  S3ConfigType,
+  serverConfigKey,
+  s3ConfigKey,
+} from '../../common/config';
+import {
+  JobSolutionRequestDto,
+  SaveSoulutionsDto,
+  SendWebhookDto,
+} from './job.dto';
+import { Web3Service } from '../web3/web3.service';
+import { ErrorBucket, ErrorJob } from '../../common/constants/errors';
+import { firstValueFrom } from 'rxjs';
+import { JobRequestType } from '../../common/enums/job';
+import { IManifest, ISolution } from '../../common/interfaces/job';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
+  public readonly storageClient: StorageClient;
+  public readonly storageParams: StorageParams;
 
   constructor(
-    @Inject(storageConfigKey)
-    private storageConfig: StorageConfigType,
+    @Inject(s3ConfigKey)
+    private s3Config: S3ConfigType,
     @Inject(serverConfigKey)
     private serverConfig: ServerConfigType,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    const storageCredentials: StorageCredentials = {
+      accessKey: this.s3Config.accessKey,
+      secretKey: this.s3Config.secretKey,
+    };
 
-  async processJobSolution(jobSolution: JobSolutionRequestDto): Promise<string> {
+    this.storageParams = {
+      endPoint: this.s3Config.accessKey,
+      port: this.s3Config.port,
+      useSSL: this.s3Config.useSSL,
+    };
+
+    this.storageClient = new StorageClient(
+      storageCredentials,
+      this.storageParams,
+    );
+  }
+
+  async processJobSolution(
+    jobSolution: JobSolutionRequestDto,
+  ): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
     const escrowClient = await EscrowClient.build(signer);
 
-    // Validate if recording oracle address is valid
-    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(jobSolution.escrowAddress);
-
-    if (ethers.utils.getAddress(recordingOracleAddress) !== (await signer.getAddress())) {
+    const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
+      jobSolution.escrowAddress,
+    );
+    if (
+      ethers.utils.getAddress(recordingOracleAddress) !==
+      (await signer.getAddress())
+    ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
       throw new BadRequestException(ErrorJob.AddressMismatches);
     }
 
-    // Validate if the escrow is in the correct state
-    const escrowStatus = await escrowClient.getStatus(jobSolution.escrowAddress);
+    const escrowStatus = await escrowClient.getStatus(
+      jobSolution.escrowAddress,
+    );
     if (escrowStatus !== EscrowStatus.Pending) {
       this.logger.log(ErrorJob.InvalidStatus, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidStatus);
     }
 
-    // Validate if the escrow has the correct manifest
-    const manifestUrl = await escrowClient.getManifestUrl(jobSolution.escrowAddress);
-    const { submissionsRequired, requestType } = (await StorageClient.downloadFileFromUrl(manifestUrl)) as Record<
-      string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any
-    >;
+    const manifestUrl = await escrowClient.getManifestUrl(
+      jobSolution.escrowAddress,
+    );
+    const { submissionsRequired, requestType }: IManifest =
+      await StorageClient.downloadFileFromUrl(manifestUrl);
 
-    if (!submissionsRequired && !requestType) {
+    if (!submissionsRequired || !requestType) {
       this.logger.log(ErrorJob.InvalidManifest, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidManifest);
     }
@@ -59,37 +107,22 @@ export class JobService {
       throw new BadRequestException(ErrorJob.InvalidJobType);
     }
 
-    // Initialize Storage Client
-    const storageClient = new StorageClient(
-      {
-        accessKey: this.storageConfig.accessKey,
-        secretKey: this.storageConfig.secretKey,
-      },
-      {
-        endPoint: this.storageConfig.endPoint,
-        port: this.storageConfig.port,
-        useSSL: this.storageConfig.useSSL,
-      },
-    );
-    const bucket = this.storageConfig.bucket;
+    // TODO: Develop a generic error handler for ethereum errors
+    const existingJobSolutionsURL =
+      await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
+    const existingJobSolutions: ISolution[] =
+      await StorageClient.downloadFileFromUrl(existingJobSolutionsURL);
 
-    let existingJobSolutionsURL;
-    try {
-      existingJobSolutionsURL = await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
-    } catch (e) {
-      console.log(e);
-      this.logger.log(ErrorJob.NotFoundIntermediateResultsUrl, JobService.name);
-      throw new BadRequestException(ErrorJob.NotFoundIntermediateResultsUrl);
-    }
-
-    const existingJobSolutions = await StorageClient.downloadFileFromUrl(existingJobSolutionsURL).catch(() => []);
-    if (existingJobSolutions.find(({ solution }: { solution: string }) => solution === jobSolution.solution)) {
+    if (
+      existingJobSolutions.find(
+        ({ solution }) => solution === jobSolution.solution,
+      )
+    ) {
       this.logger.log(ErrorJob.SolutionAlreadyExists, JobService.name);
       throw new BadRequestException(ErrorJob.SolutionAlreadyExists);
     }
 
-    // Save new solution to S3
-    const newJobSolutions = [
+    const newJobSolutions: ISolution[] = [
       ...existingJobSolutions,
       {
         exchangeAddress: jobSolution.exchangeAddress,
@@ -98,31 +131,74 @@ export class JobService {
       },
     ];
 
-    const [jobSolutionUploaded] = await storageClient.uploadFiles([newJobSolutions], bucket);
+    if (newJobSolutions.length > submissionsRequired) {
+      this.logger.log(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+        JobService.name,
+      );
+      throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+    }
 
-    // Save solution URL/HASH on-chain
-    await escrowClient.storeResults(jobSolution.escrowAddress, jobSolutionUploaded.url, jobSolutionUploaded.hash);
+    const jobSolutionUploaded = await this.uploadJobSolutions(
+      newJobSolutions,
+      this.s3Config.bucket,
+    );
+
+    if (!existingJobSolutionsURL) {
+      await escrowClient.storeResults(
+        jobSolution.escrowAddress,
+        jobSolutionUploaded.url,
+        jobSolutionUploaded.hash,
+      );
+    }
 
     // TODO: Uncomment this to read reputation oracle URL from KVStore
     // const reputationOracleAddress = await escrowClient.getReputationOracleAddress(jobSolution.escrowAddress);
     // const reputationOracleURL = (await kvstoreClient.get(reputationOracleAddress, "url")) as string;
 
     // TODO: Remove this when KVStore is used
-    const reputationOracleURL = this.serverConfig.reputationOracleURL;
-
-    // If number of solutions is equeal to the number required, call Reputation Oracle webhook.
     if (newJobSolutions.length === submissionsRequired) {
-      await this.httpService.post(`${reputationOracleURL}/webhook`, {
+      await this.sendWebhook(this.serverConfig.reputationOracleWebhookUrl, {
         chainId: jobSolution.chainId,
         escrowAddress: jobSolution.escrowAddress,
       });
 
-      return "The requested job is completed.";
-    } else if (newJobSolutions.length > submissionsRequired) {
-      this.logger.log(ErrorJob.AllSolutionsHaveAlreadyBeenSent, JobService.name);
-      throw new ConflictException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
+      return 'The requested job is completed.';
     }
 
-    return "Solution is recorded.";
+    return 'Solution is recorded.';
+  }
+
+  private async uploadJobSolutions(
+    jobSolutions: any[],
+    bucket: string,
+  ): Promise<SaveSoulutionsDto> {
+    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
+      jobSolutions,
+      bucket,
+    );
+
+    if (!uploadedFiles[0]) {
+      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
+      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
+    }
+
+    return uploadedFiles[0];
+  }
+
+  public async sendWebhook(
+    webhookUrl: string,
+    webhookData: SendWebhookDto,
+  ): Promise<boolean> {
+    const { data } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, webhookData),
+    );
+
+    if (!data) {
+      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
+      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
+    }
+
+    return true;
   }
 }

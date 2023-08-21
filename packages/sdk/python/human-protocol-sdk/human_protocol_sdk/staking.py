@@ -11,6 +11,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
+from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.utils import (
     get_erc20_interface,
     get_factory_interface,
@@ -392,19 +393,14 @@ class StakingClient:
 
         reward_added_events_data = get_data_from_subgraph(
             self.network["subgraph_url"],
-            """
-rewardAddedEvents(where:{{slasher:"{0}"}}) {{
-    escrow
-    amount
-}}""".format(
-                slasher
-            ),
+            query=get_reward_added_events_query,
+            params={"slasherAddress": slasher},
         )
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
 
         return [
             {
-                "escrow_address": reward_added_events[i]["escrow"],
+                "escrow_address": reward_added_events[i]["escrowAddress"],
                 "amount": reward_added_events[i]["amount"],
             }
             for i in range(len(reward_added_events))

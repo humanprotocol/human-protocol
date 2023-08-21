@@ -34,7 +34,7 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: PaymentFiatCreateDto,
   ): Promise<string> {
-    return this.paymentService.createFiatPayment(req.user, data);
+    return this.paymentService.createFiatPayment(req.user.id, data);
   }
 
   @Post('/fiat/confirm-payment')
@@ -50,7 +50,7 @@ export class PaymentController {
     @Request() req: any,
     @Body() data: PaymentCryptoCreateDto,
   ): Promise<boolean> {
-    return this.paymentService.createCryptoPayment(req.user?.id, data);
+    return this.paymentService.createCryptoPayment(req.user.id, data);
   }
 
   @Get('/rates')

@@ -194,13 +194,13 @@ def get_kvstore_interface():
     )
 
 
-def get_data_from_subgraph(url: str, query: str):
-    request = requests.post(url, json={"query": query})
+def get_data_from_subgraph(url: str, query: str, params: dict = None):
+    request = requests.post(url, json={"query": query, "variables": params})
     if request.status_code == 200:
         return request.json()
     else:
         raise Exception(
-            "Subgraph query failed. return code is {}.      {}".format(
+            "Subgraph query failed. return code is {}. \n{}".format(
                 request.status_code, query
             )
         )

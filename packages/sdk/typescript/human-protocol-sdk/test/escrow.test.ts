@@ -1416,7 +1416,7 @@ describe('EscrowClient', () => {
       const requesterAddress = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getEscrowsFiltered({ address: requesterAddress })
+        escrowClient.getEscrowsFiltered({ launcherAddress: requesterAddress })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -1429,7 +1429,7 @@ describe('EscrowClient', () => {
       );
 
       const results = await escrowClient.getEscrowsFiltered({
-        address: requesterAddress,
+        launcherAddress: requesterAddress,
       });
 
       expect(results).toEqual([

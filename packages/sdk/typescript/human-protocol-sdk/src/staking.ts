@@ -12,6 +12,7 @@ import {
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, Signer, ethers } from 'ethers';
+import gqlFetch from 'graphql-request';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -27,9 +28,10 @@ import {
   ErrorUnsupportedChainID,
 } from './error';
 import { IAllocation, IReward, IStaker } from './interfaces';
-import { RAW_REWARDS_QUERY } from './queries';
 import { NetworkData } from './types';
-import { gqlFetch, throwError } from './utils';
+import { throwError } from './utils';
+import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
+import { RewardAddedEventData } from './graphql';
 
 export class StakingClient {
   public signerOrProvider: Signer | Provider;
@@ -442,12 +444,13 @@ export class StakingClient {
     }
 
     try {
-      const { data } = await gqlFetch(
-        this.network.subgraphUrl,
-        RAW_REWARDS_QUERY(slasherAddress)
-      );
+      const { rewardAddedEvents } = await gqlFetch<{
+        rewardAddedEvents: RewardAddedEventData[];
+      }>(this.network.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+        slasherAddress,
+      });
 
-      return data.rewardAddedEvents.map((reward: any) => {
+      return rewardAddedEvents.map((reward: any) => {
         return {
           escrowAddress: reward.escrow,
           amount: reward.amount,
