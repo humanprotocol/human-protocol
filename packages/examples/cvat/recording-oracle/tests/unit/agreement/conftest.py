@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from hypothesis.strategies import tuples, integers
+from hypothesis.strategies import tuples, integers, builds, just
 
 
 @pytest.fixture
