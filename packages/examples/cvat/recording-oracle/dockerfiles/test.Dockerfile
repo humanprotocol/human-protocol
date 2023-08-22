@@ -13,4 +13,4 @@ RUN poetry config virtualenvs.create false \
 
 COPY . .
 
-CMD ["pytest", "-W", "ignore::DeprecationWarning"]
+CMD ["pytest", "-W", "ignore::DeprecationWarning", "-W", "ignore::RuntimeWarning"]
