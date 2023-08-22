@@ -70,10 +70,8 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency } = dto;
 
-    const amountInCents = Math.round(amount * 100);
-    
     const params: Stripe.PaymentIntentCreateParams = {
-      amount: amountInCents,
+      amount: mul(amount, 100),
       currency: currency,
     };
 
@@ -88,7 +86,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
     });
 
     if (paymentEntity) {
@@ -108,7 +106,7 @@ export class PaymentService {
       amount,
       currency,
       rate,
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });
 
@@ -219,6 +217,7 @@ export class PaymentService {
 
     const paymentEntity = await this.paymentRepository.findOne({
       transaction: transaction.transactionHash,
+      chainId: dto.chainId,
     });
 
     if (paymentEntity) {
@@ -229,13 +228,13 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(Currency.USD, tokenId);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount,
+      amount: mul(amount, rate),
       currency: TokenId.HMT,
       rate,
       chainId: dto.chainId,
@@ -253,7 +252,7 @@ export class PaymentService {
     });
 
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, mul(payment.amount, payment.rate));
+      return add(total, payment.amount);
     }, 0);
 
     return totalAmount;

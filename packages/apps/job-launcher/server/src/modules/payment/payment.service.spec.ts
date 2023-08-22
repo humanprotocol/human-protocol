@@ -5,7 +5,6 @@ import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { BigNumber } from 'ethers';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
@@ -20,7 +19,6 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
-  MOCK_JOB_LAUNCHER_FEE,
   MOCK_PAYMENT_ID,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
@@ -28,6 +26,7 @@ import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
+import { mul } from '../../common/utils/decimal';
 
 jest.mock('@human-protocol/sdk');
 
@@ -97,7 +96,7 @@ describe('PaymentService', () => {
       },
       paymentIntents: {
         create: stripePaymentIntentsCreateMock,
-        retrieve: stripePaymentIntentsRetrieveMock
+        retrieve: stripePaymentIntentsRetrieveMock,
       },
     } as any;
 
@@ -113,9 +112,9 @@ describe('PaymentService', () => {
       .spyOn(stripe.paymentIntents, 'retrieve')
       .mockImplementation(stripePaymentIntentsRetrieveMock);
   });
-  
+
   describe('createFiatPayment', () => {
-    let createPaymentIntentMock: any, findOneMock: any, createPaymentMock: any;
+    let createPaymentIntentMock: any, findOneMock: any;
 
     beforeEach(() => {
       findOneMock = jest.spyOn(paymentRepository, 'findOne');
@@ -354,13 +353,14 @@ describe('PaymentService', () => {
 
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
         transaction: dto.transactionHash,
+        chainId: dto.chainId,
       });
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
-        amount: 10,
+        amount: mul(10, 1.5),
         rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.LOCALHOST,
