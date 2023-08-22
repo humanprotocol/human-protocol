@@ -8,6 +8,7 @@ import {
   IsUrl,
   IsDate,
   IsOptional,
+  IsNumberString
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
@@ -117,8 +118,7 @@ export class JobImageLabelBinaryDto extends JobDto {
 
 export class JobCancelDto {
   @ApiProperty()
-  @IsNumber()
-  @IsPositive()
+  @IsNumberString()
   public id: number;
 }
 

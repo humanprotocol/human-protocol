@@ -244,10 +244,8 @@ export class JobService {
 
   public async cancelJob(
     userId: number,
-    dto: JobCancelDto,
+    id: number,
   ): Promise<boolean> {
-    const { id } = dto;
-
     const jobEntity = await this.jobRepository.findOne({ id, userId });
     
     if (!jobEntity) {

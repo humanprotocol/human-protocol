@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -41,11 +43,11 @@ export class JobController {
     return this.jobService.getResult(req.user?.id);
   }
 
-  @Post('/cancel')
+  @Patch('/cancel/:id')
   public async cancelJob(
     @Request() req: RequestWithUser,
-    @Body() data: JobCancelDto,
+    @Param() params: JobCancelDto,
   ): Promise<boolean> {
-    return this.jobService.cancelJob(req.user.id, data);
+    return this.jobService.cancelJob(req.user.id, params.id);
   }
 }
