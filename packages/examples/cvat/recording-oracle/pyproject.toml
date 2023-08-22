@@ -2,7 +2,7 @@
 name = "recording-oracle"
 version = "0.1.0"
 description = "An example of recording with with CVAT as an annotation instrument"
-authors = ["Sergey Dzeranov <sergey.dzeranov@gmail.com>"]
+authors = ["Sergey Dzeranov <sergey.dzeranov@gmail.com>", "Marius Hamacher <marius.hamacher@outlook.de>"]
 readme = "README.md"
 packages = [{include = "recording_oracle"}]
 
@@ -18,11 +18,13 @@ pytest = "^7.4.0"
 human-protocol-sdk = "^1.1.5"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
-
+numpy = "^1.25.2"
+pandas = "^2.0.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 pre-commit = "^3.3.3"
+hypothesis = "^6.82.6"
 
 [build-system]
 requires = ["poetry-core"]

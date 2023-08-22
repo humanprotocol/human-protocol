@@ -7,6 +7,10 @@ from decimal import Decimal
 from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Role, Status
+from human_protocol_sdk.gql.escrow import (
+    get_escrows_by_launcher_query,
+    get_filtered_escrows_query,
+)
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
@@ -44,6 +48,7 @@ class EscrowConfig:
         reputation_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
+        skip_manifest_url_validation: bool = False,
     ):
         """
         Initializes a Escrow instance.
@@ -55,6 +60,7 @@ class EscrowConfig:
             reputation_oracle_fee (Decimal): Fee percentage of the Reputation Oracle
             manifest_url (str): Manifest file url
             hash (str): Manifest file hash
+            skip_manifest_url_validation (bool): Identify wether validate manifest_url
         """
         if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
@@ -70,7 +76,7 @@ class EscrowConfig:
             raise EscrowClientError("Fee must be between 0 and 100")
         if recording_oracle_fee + reputation_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
-        if not URL(manifest_url):
+        if not URL(manifest_url) and not skip_manifest_url_validation:
             raise EscrowClientError(f"Invalid manifest URL: {manifest_url}")
         if not hash:
             raise EscrowClientError("Invalid empty manifest hash")
@@ -90,8 +96,7 @@ class EscrowFilter:
 
     def __init__(
         self,
-        address: Optional[str] = None,
-        addressRole: Optional[Role] = None,
+        launcher_address: Optional[str] = None,
         status: Optional[Status] = None,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
@@ -100,31 +105,23 @@ class EscrowFilter:
         Initializes a EscrowFilter instance.
 
         Args:
-            address (Optional[str]): Address of the Recording Oracle
-            addressRole (Optional[Role]): Address of the Reputation Oracle
-            status (Optional[Role]): Fee percentage of the Recording Oracle
-            date_from (Optional[date]): Fee percentage of the Reputation Oracle
-            date_to (Optional[date]): Manifest file url
+            launcher_address (Optional[str]): Launcher ddress
+            status (Optional[Status]): Escrow status
+            date_from (Optional[date]): Created from date
+            date_to (Optional[date]): Created to date
         """
-        if (
-            not address
-            and not addressRole
-            and not status
-            and not date_from
-            and not date_to
-        ):
+        if not launcher_address and not status and not date_from and not date_to:
             raise EscrowClientError(
                 "EscrowFilter class must have at least one parameter"
             )
-        if address and not Web3.is_address(address):
-            raise EscrowClientError(f"Invalid address: {address}")
+        if launcher_address and not Web3.is_address(launcher_address):
+            raise EscrowClientError(f"Invalid address: {launcher_address}")
         if date_from and date_to and date_from > date_to:
             raise EscrowClientError(
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
             )
 
-        self.address = address
-        self.addressRole = addressRole
+        self.launcher_address = launcher_address
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
@@ -192,7 +189,7 @@ class EscrowClient:
         )
         return next(
             (
-                self.factory_contract.events.Launched().processLog(log)
+                self.factory_contract.events.Launched().process_log(log)
                 for log in transaction_receipt["logs"]
                 if log["address"] == self.network["factory_address"]
             ),
@@ -592,66 +589,47 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.status().call()
         )
 
-    def get_launched_escrows(self, requester_address: str) -> List[str]:
-        """Get escrows addresses created by a job requester.
+    def get_launched_escrows(self, launcher_address: str) -> List[dict]:
+        """Get escrows addresses created by a job launcher.
 
         Args:
-            requester_address (str): Address of the requester
+            launcher_address (str): Address of the launcher
 
         Returns:
-            List[str]: List of escrow addresses
+            List[dict]: List of escrows
         """
 
-        launched_escrows_data = get_data_from_subgraph(
+        escrows_data = get_data_from_subgraph(
             self.network["subgraph_url"],
-            """
-            {{
-                launchedEscrows(
-                    where:{{from:"{0}"}}
-                ) {{
-                    id
-                }}
-            }}
-            """.format(
-                requester_address
-            ),
+            query=get_escrows_by_launcher_query,
+            params={"launcherAddress": launcher_address},
         )
-        launched_escrows = launched_escrows_data["data"]["launchedEscrows"]
+        escrows = escrows_data["data"]["escrows"]
 
-        return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
+        return escrows
 
-    def get_escrows_filtered(self, filter: EscrowFilter) -> List[str]:
+    def get_escrows_filtered(self, filter: EscrowFilter) -> List[dict]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         Args:
             filter (EscrowFilter): Object containing all the necessary parameters to filter
 
         Returns:
-            List[str]: List of escrow addresses
+            List[dict]: List of escrows
         """
-        launched_escrows_data = get_data_from_subgraph(
+        escrows_data = get_data_from_subgraph(
             self.network["subgraph_url"],
-            """
-            {{
-                launchedEscrows(where:{{{0}{1}{2}{3}}}
-                ) {{
-                    id
-                }}
-            }}
-            """.format(
-                """from:"{0}",""".format(filter.address) if filter.address else "",
-                """status:"{0}",""".format(filter.status.name) if filter.status else "",
-                """timestamp_gte:"{0}",""".format(int(filter.date_from.timestamp()))
-                if filter.date_from
-                else "",
-                """timestamp_lte:"{0}",""".format(int(filter.date_to.timestamp()))
-                if filter.date_to
-                else "",
-            ),
+            query=get_filtered_escrows_query,
+            params={
+                "launcherAddress": filter.launcher_address,
+                "status": filter.status.name if filter.status else None,
+                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
+                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+            },
         )
-        launched_escrows = launched_escrows_data["data"]["launchedEscrows"]
+        launched_escrows = escrows_data["data"]["escrows"]
 
-        return [launched_escrows[i]["id"] for i in range(len(launched_escrows))]
+        return launched_escrows
 
     def get_recording_oracle_address(self, escrow_address: str) -> str:
         """Gets the recording oracle address of the escrow.

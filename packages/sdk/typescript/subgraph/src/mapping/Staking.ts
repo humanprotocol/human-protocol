@@ -8,7 +8,6 @@ import {
 } from '../../generated/Staking/Staking';
 import {
   AllocationClosedEvent,
-  LaunchedEscrow,
   Leader,
   LeaderStatistics,
   StakeAllocatedEvent,
@@ -17,16 +16,28 @@ import {
   StakeSlashedEvent,
   StakeWithdrawnEvent,
 } from '../../generated/schema';
-import { Address, BigInt } from '@graphprotocol/graph-ts';
+import { Address } from '@graphprotocol/graph-ts';
+import { ONE_BI, ZERO_BI } from './utils/number';
+import { toEventId } from './utils/event';
 
 export const STATISTICS_ENTITY_ID = 'leader-statistics-id';
 
-export function constructStatsEntity(): LeaderStatistics {
+function constructStatsEntity(): LeaderStatistics {
   const entity = new LeaderStatistics(STATISTICS_ENTITY_ID);
 
-  entity.leaders = BigInt.fromI32(0);
+  entity.leaders = ZERO_BI;
 
   return entity;
+}
+
+export function createOrLoadLeaderStatistics(): LeaderStatistics {
+  let statsEntity = LeaderStatistics.load(STATISTICS_ENTITY_ID);
+
+  if (!statsEntity) {
+    statsEntity = constructStatsEntity();
+  }
+
+  return statsEntity;
 }
 
 export function createOrLoadLeader(address: Address): Leader {
@@ -36,235 +47,138 @@ export function createOrLoadLeader(address: Address): Leader {
     leader = new Leader(address.toHex());
 
     leader.address = address;
-    leader.role = '';
-    leader.amountStaked = BigInt.fromI32(0);
-    leader.amountAllocated = BigInt.fromI32(0);
-    leader.amountLocked = BigInt.fromI32(0);
-    leader.lockedUntilTimestamp = BigInt.fromI32(0);
-    leader.amountSlashed = BigInt.fromI32(0);
-    leader.amountWithdrawn = BigInt.fromI32(0);
-    leader.reward = BigInt.fromI32(0);
-    leader.reputation = BigInt.fromI32(0);
-    leader.amountJobsLaunched = BigInt.fromI32(0);
+    leader.amountStaked = ZERO_BI;
+    leader.amountAllocated = ZERO_BI;
+    leader.amountLocked = ZERO_BI;
+    leader.lockedUntilTimestamp = ZERO_BI;
+    leader.amountSlashed = ZERO_BI;
+    leader.amountWithdrawn = ZERO_BI;
+    leader.reward = ZERO_BI;
+    leader.reputation = ZERO_BI;
+    leader.amountJobsLaunched = ZERO_BI;
   }
 
   return leader;
 }
 
 export function handleStakeDeposited(event: StakeDeposited): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+  // Create StakeDepostiedEvent entity
+  const eventEntity = new StakeDepositedEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.save();
 
-  const entity = new StakeDepositedEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
+  // Update leader
   const leader = createOrLoadLeader(event.params.staker);
 
   // Increase leader count for new leader
   if (
-    leader.amountStaked.equals(BigInt.fromI32(0)) &&
-    leader.amountLocked.equals(BigInt.fromI32(0)) &&
-    leader.amountWithdrawn.equals(BigInt.fromI32(0))
+    leader.amountStaked.equals(ZERO_BI) &&
+    leader.amountLocked.equals(ZERO_BI) &&
+    leader.amountWithdrawn.equals(ZERO_BI)
   ) {
     // Update Leader Statistics
-    let statsEntity = LeaderStatistics.load(STATISTICS_ENTITY_ID);
-
-    if (!statsEntity) {
-      statsEntity = constructStatsEntity();
-    }
-
-    statsEntity.leaders = statsEntity.leaders.plus(BigInt.fromI32(1));
-
+    const statsEntity = createOrLoadLeaderStatistics();
+    statsEntity.leaders = statsEntity.leaders.plus(ONE_BI);
     statsEntity.save();
   }
 
-  leader.amountStaked = leader.amountStaked.plus(entity.amount);
-
+  leader.amountStaked = leader.amountStaked.plus(eventEntity.amount);
   leader.save();
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+  // Create StakeLockedEvent entity
+  const eventEntity = new StakeLockedEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.lockedUntilTimestamp = event.params.until;
+  eventEntity.save();
 
-  const entity = new StakeLockedEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-  entity.lockedUntilTimestamp = event.params.until;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
+  // Update leader
   const leader = createOrLoadLeader(event.params.staker);
-
-  leader.amountLocked = entity.amount;
-  leader.lockedUntilTimestamp = entity.lockedUntilTimestamp;
-
+  leader.amountLocked = eventEntity.amount;
+  leader.lockedUntilTimestamp = eventEntity.lockedUntilTimestamp;
   leader.save();
 }
 
 export function handleStakeWithdrawn(event: StakeWithdrawn): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+  // Create StakeWithdrawnEvent entity
+  const eventEntity = new StakeWithdrawnEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.save();
 
-  const entity = new StakeWithdrawnEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
+  // Update leader
   const leader = createOrLoadLeader(event.params.staker);
-
-  leader.amountLocked = leader.amountLocked.minus(entity.amount);
-  if (leader.amountLocked.equals(BigInt.fromI32(0))) {
-    leader.lockedUntilTimestamp = BigInt.fromI32(0);
+  leader.amountLocked = leader.amountLocked.minus(eventEntity.amount);
+  if (leader.amountLocked.equals(ZERO_BI)) {
+    leader.lockedUntilTimestamp = ZERO_BI;
   }
+  leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
+  leader.amountWithdrawn = leader.amountWithdrawn.plus(eventEntity.amount);
+  leader.save();
+}
 
-  leader.amountStaked = leader.amountStaked.minus(entity.amount);
-  leader.amountWithdrawn = leader.amountWithdrawn.plus(entity.amount);
+export function handleStakeAllocated(event: StakeAllocated): void {
+  // Create StakeAllocatedEvent entity
+  const eventEntity = new StakeAllocatedEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.escrowAddress = event.params.escrowAddress;
+  eventEntity.save();
 
+  // Update leader
+  const leader = createOrLoadLeader(event.params.staker);
+  leader.amountAllocated = leader.amountAllocated.plus(eventEntity.amount);
+  leader.save();
+}
+
+export function handleAllocationClosed(event: AllocationClosed): void {
+  // Create AllocationClosedEvent entity
+  const eventEntity = new AllocationClosedEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.escrowAddress = event.params.escrowAddress;
+  eventEntity.save();
+
+  // Update leader
+  const leader = createOrLoadLeader(event.params.staker);
+  leader.amountAllocated = leader.amountAllocated.minus(eventEntity.amount);
   leader.save();
 }
 
 export function handleStakeSlashed(event: StakeSlashed): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
+  // Create StakeSlashedEvent entity
+  const eventEntity = new StakeSlashedEvent(toEventId(event));
+  eventEntity.block = event.block.number;
+  eventEntity.timestamp = event.block.timestamp;
+  eventEntity.txHash = event.transaction.hash;
+  eventEntity.staker = event.params.staker;
+  eventEntity.amount = event.params.tokens;
+  eventEntity.escrowAddress = event.params.escrowAddress;
+  eventEntity.slasher = event.params.slasher;
+  eventEntity.save();
 
-  const entity = new StakeSlashedEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-  entity.escrow = event.params.escrowAddress;
-  entity.slasher = event.params.slasher;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
+  // Update leader
   const leader = createOrLoadLeader(event.params.staker);
-
-  leader.amountSlashed = leader.amountSlashed.plus(entity.amount);
-  leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
-  leader.amountStaked = leader.amountStaked.minus(entity.amount);
-
+  leader.amountSlashed = leader.amountSlashed.plus(eventEntity.amount);
+  leader.amountAllocated = leader.amountAllocated.minus(eventEntity.amount);
+  leader.amountStaked = leader.amountStaked.minus(eventEntity.amount);
   leader.save();
-
-  // Update escrow entity
-  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
-  if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        escrowEntity.amountAllocated!.minus(event.params.tokens)
-      : null;
-    escrowEntity.save();
-  }
-}
-
-export function handleStakeAllocated(event: StakeAllocated): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
-
-  const entity = new StakeAllocatedEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-  entity.escrow = event.params.escrowAddress;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
-  const leader = createOrLoadLeader(event.params.staker);
-
-  leader.amountAllocated = leader.amountAllocated.plus(entity.amount);
-
-  leader.save();
-
-  // Update escrow entity
-  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
-  if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        escrowEntity.amountAllocated!.plus(event.params.tokens)
-      : event.params.tokens;
-    escrowEntity.save();
-  }
-}
-
-export function handleAllocationClosed(event: AllocationClosed): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  const id = `${event.transaction.hash.toHex()}-${event.logIndex.toString()}-${
-    event.block.timestamp
-  }`;
-
-  const entity = new AllocationClosedEvent(id);
-
-  // Entity fields can be set based on event parameters
-  entity.staker = event.params.staker;
-  entity.amount = event.params.tokens;
-  entity.escrow = event.params.escrowAddress;
-
-  entity.block = event.block.number;
-  entity.timestamp = event.block.timestamp;
-  entity.transaction = event.transaction.hash;
-
-  entity.save();
-
-  const leader = createOrLoadLeader(event.params.staker);
-
-  leader.amountAllocated = leader.amountAllocated.minus(entity.amount);
-
-  leader.save();
-
-  // Update escrow entity
-  const escrowEntity = LaunchedEscrow.load(event.params.escrowAddress.toHex());
-  if (escrowEntity) {
-    escrowEntity.amountAllocated = escrowEntity.amountAllocated
-      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        escrowEntity.amountAllocated!.minus(entity.amount)
-      : null;
-    escrowEntity.save();
-  }
 }

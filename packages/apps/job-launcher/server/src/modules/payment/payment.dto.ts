@@ -3,6 +3,7 @@ import { IsEnum, IsNumber, IsString, Min } from 'class-validator';
 import {
   Currency,
   PaymentSource,
+  PaymentStatus,
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
@@ -40,13 +41,15 @@ export class PaymentCryptoCreateDto {
 }
 
 export class PaymentCreateDto {
-  public transactionHash?: string;
+  public transaction?: string;
   public amount?: string;
   public currency?: string;
   public source?: PaymentSource;
   public userId?: number;
   public rate?: number;
   public type?: PaymentType;
+  public chainId?: number;
+  public status?: PaymentStatus;
 }
 
 export class GetRateDto {

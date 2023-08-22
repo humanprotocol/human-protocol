@@ -10,6 +10,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
+import gqlFetch from 'graphql-request';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -36,12 +37,13 @@ import {
   InvalidEthereumAddressError,
 } from './error';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
-import {
-  RAW_LAUNCHED_ESCROWS_FILTERED_QUERY,
-  RAW_LAUNCHED_ESCROWS_QUERY,
-} from './queries';
 import { EscrowStatus, NetworkData } from './types';
-import { gqlFetch, isValidUrl, throwError } from './utils';
+import { isValidUrl, throwError } from './utils';
+import {
+  EscrowData,
+  GET_ESCROWS_BY_LAUNCHER_QUERY,
+  GET_FILTERED_ESCROWS_QUERY,
+} from './graphql';
 
 export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
@@ -725,18 +727,19 @@ export class EscrowClient {
    * @returns {Promise<string[]>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getLaunchedEscrows(requesterAddress: string): Promise<string[]> {
-    if (!ethers.utils.isAddress(requesterAddress)) {
+  async getLaunchedEscrows(launcherAddress: string): Promise<EscrowData[]> {
+    if (!ethers.utils.isAddress(launcherAddress)) {
       throw ErrorInvalidAddress;
     }
 
     try {
-      const { data } = await gqlFetch(
+      const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
         this.network.subgraphUrl,
-        RAW_LAUNCHED_ESCROWS_QUERY(requesterAddress)
+        GET_ESCROWS_BY_LAUNCHER_QUERY,
+        { launcherAddress }
       );
 
-      return data.data.launchedEscrows.map((escrow: any) => escrow.id);
+      return escrows;
     } catch (e: any) {
       return throwError(e);
     }
@@ -746,26 +749,27 @@ export class EscrowClient {
    * Returns the escrow addresses based on a specified filter.
    *
    * @param {IEscrowsFilter} filter - Filter parameters.
-   * @returns {Promise<string[]>}
+   * @returns {Promise<EscrowData[]>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getEscrowsFiltered(filter: IEscrowsFilter): Promise<string[]> {
-    if (filter?.address && !ethers.utils.isAddress(filter?.address)) {
+  async getEscrowsFiltered(filter: IEscrowsFilter): Promise<EscrowData[]> {
+    if (
+      filter?.launcherAddress &&
+      !ethers.utils.isAddress(filter?.launcherAddress)
+    ) {
       throw ErrorInvalidAddress;
     }
 
     try {
-      const { data } = await gqlFetch(
+      const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
         this.network.subgraphUrl,
-        RAW_LAUNCHED_ESCROWS_FILTERED_QUERY(
-          filter.address,
-          filter.status,
-          filter.from,
-          filter.to
-        )
+        GET_FILTERED_ESCROWS_QUERY,
+        {
+          ...filter,
+        }
       );
 
-      return data.data.launchedEscrows.map((escrow: any) => escrow.id);
+      return escrows;
     } catch (e: any) {
       return throwError(e);
     }

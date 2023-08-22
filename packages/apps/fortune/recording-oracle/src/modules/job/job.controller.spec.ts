@@ -1,23 +1,46 @@
-import { ConfigModule, registerAs } from "@nestjs/config";
-import { HttpService } from "@nestjs/axios";
-import { Test } from "@nestjs/testing";
-import { of } from "rxjs";
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { Test } from '@nestjs/testing';
+import { of } from 'rxjs';
 
-import { JobController } from "./job.controller";
-import { JobService } from "./job.service";
-import { Web3Service } from "../web3/web3.service";
+import { JobController } from './job.controller';
+import { JobService } from './job.service';
+import { Web3Service } from '../web3/web3.service';
+import {
+  MOCK_ADDRESS,
+  MOCK_FILE_HASH,
+  MOCK_FILE_KEY,
+  MOCK_FILE_URL,
+  MOCK_HOST,
+  MOCK_PORT,
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
+} from '../../../test/constants';
+import { ChainId } from '@human-protocol/sdk';
+import { JobRequestType } from '@/common/enums/job';
 
-const OPERATOR_ADDRESS = "TEST_OPERATOR_ADDRESS";
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  StorageClient: jest.fn().mockImplementation(() => ({})),
+}));
 
 const signerMock = {
-  address: OPERATOR_ADDRESS,
-  getAddress: jest.fn().mockResolvedValue(OPERATOR_ADDRESS),
+  address: MOCK_ADDRESS,
+  getAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
   getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
 };
 
-const httpServicePostMock = jest.fn().mockReturnValue(of({ status: 200, data: {} }));
+const httpServicePostMock = jest
+  .fn()
+  .mockReturnValue(of({ status: 200, data: {} }));
 
-describe("JobController", () => {
+describe('JobController', () => {
   let jobController: JobController;
   let jobService: JobService;
 
@@ -25,18 +48,18 @@ describe("JobController", () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
-          registerAs("storage", () => ({
-            accessKey: "TEST_ACCESS_KEY",
-            secretKey: "TEST_SECRET_KEY",
-            endPoint: "localhost",
-            port: 9000,
-            useSSL: false,
-            bucket: "TEST_BUCKET",
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
           })),
         ),
         ConfigModule.forFeature(
-          registerAs("server", () => ({
-            reputationOracleURL: "REPUTATION_ORACLE_URL",
+          registerAs('server', () => ({
+            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
           })),
         ),
       ],
@@ -61,19 +84,21 @@ describe("JobController", () => {
     jobController = new JobController(jobService);
   });
 
-  describe("Solve", () => {
-    it("should call service", async () => {
-      jest.spyOn(jobService, "processJobSolution").mockImplementation(async () => "OK");
+  describe('solve', () => {
+    it('should call service', async () => {
+      jest
+        .spyOn(jobService, 'processJobSolution')
+        .mockImplementation(async () => 'OK');
 
       expect(
         await jobController.solve({
-          escrowAddress: "ESCROW_ADDRESS",
-          chainId: 1,
-          exchangeAddress: "EXCHANGE_ADDRESS",
-          workerAddress: "WORKER_ADDRESS",
-          solution: "Good",
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: 'Solution',
         }),
-      ).toBe("OK");
+      ).toBe('OK');
     });
   });
 });

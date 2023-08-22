@@ -64,6 +64,15 @@ export enum PaymentType {
 }
 
 export enum PaymentStatus {
+  PENDING = 'PENDING',
   FAILED = 'FAILED',
   SUCCEEDED = 'SUCCEEDED',
 }
+
+export enum StripePaymentStatus {
+  CANCELED = 'canceled',
+  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
+  SUCCEEDED = 'succeeded',
+}
+
+

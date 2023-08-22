@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
-import { JwtHttpGuard, RolesGuard } from './common/guards';
+import { JwtAuthGuard } from './common/guards';
 import { HttpValidationPipe } from './common/pipes';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -18,11 +18,7 @@ import { envValidator } from './common/config';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtHttpGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_PIPE,

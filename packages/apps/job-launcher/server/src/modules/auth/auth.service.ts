@@ -5,43 +5,56 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { FindOptionsWhere } from 'typeorm';
-import { v4 } from 'uuid';
 
-import { UserEntity } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { AuthEntity } from './auth.entity';
-import { TokenType } from './token.entity';
+import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
 import { UserStatus } from '../../common/enums/user';
 import { UserCreateDto } from '../user/user.dto';
+import { UserEntity } from '../user/user.entity';
+import { UserService } from '../user/user.service';
 import {
+  AuthDto,
   ForgotPasswordDto,
   ResendEmailVerificationDto,
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
 } from './auth.dto';
+import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
-import { ErrorAuth } from '../../common/constants/errors';
 import { ConfigNames } from '../../common/config';
-import { AuthStatus } from '../../common/enums/auth';
-import { IJwt } from '../../common/interfaces/auth';
+import { ConfigService } from '@nestjs/config';
+import { createHash, randomBytes } from 'crypto';
+import { SendGridService } from '../sendgrid/sendgrid.service';
 
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly refreshTokenExpiresIn: string;
+  private readonly salt: string;
+  private readonly feURL: string;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    private readonly configService: ConfigService,
     private readonly tokenRepository: TokenRepository,
     private readonly authRepository: AuthRepository,
-  ) {}
+    private readonly configService: ConfigService,
+    private readonly sendgridService: SendGridService,
+  ) {
+    this.refreshTokenExpiresIn = this.configService.get<string>(
+      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
+      '100000000',
+    );
 
-  public async signin(data: SignInDto, ip: string): Promise<IJwt> {
+    this.salt = randomBytes(16).toString('hex');
+    this.feURL = this.configService.get<string>(
+      ConfigNames.FE_URL,
+      'http://localhost:3005',
+    );
+  }
+
+  public async signin(data: SignInDto): Promise<AuthDto> {
     const userEntity = await this.userService.getByCredentials(
       data.email,
       data.password,
@@ -51,7 +64,11 @@ export class AuthService {
       throw new NotFoundException(ErrorAuth.InvalidEmailOrPassword);
     }
 
-    return this.auth(userEntity, ip);
+    if (userEntity.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException(ErrorAuth.UserNotActive);
+    }
+
+    return this.auth(userEntity);
   }
 
   public async signup(data: UserCreateDto): Promise<UserEntity> {
@@ -61,79 +78,63 @@ export class AuthService {
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
-
-    // TODO: Add mail provider
+    
+    await this.sendgridService.sendEmail({
+      to: data.email,
+      subject: 'Verify your email',
+      html: `Welcome to the Job Launcher Service.<br />
+Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
+      text: `Welcome to the Job Launcher Service.
+Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+    });
 
     return userEntity;
   }
 
-  public async logout(
-    where: FindOptionsWhere<AuthEntity>,
-  ): Promise<void> {
-    await this.authRepository.update({ ...where, status: AuthStatus.ACTIVE }, { status: AuthStatus.EXPIRED });
-    return;
+  public async logout(user: UserEntity): Promise<void> {
+    await this.authRepository.delete({ userId: user.id });
   }
 
-  public async refresh(
-    where: FindOptionsWhere<AuthEntity>,
-    ip: string,
-  ): Promise<IJwt> {
-    const authEntity = await this.authRepository.findOne(where, {
-      relations: ['user'],
+  public async auth(userEntity: UserEntity): Promise<AuthDto> {
+    const auth = await this.authRepository.findOne({ userId: userEntity.id });
+
+    const accessToken = await this.jwtService.signAsync({
+      email: userEntity.email,
+      userId: userEntity.id,
     });
 
-    if (
-      !authEntity ||
-      authEntity.refreshTokenExpiresAt < new Date().getTime()
-    ) {
-      throw new UnauthorizedException(ErrorAuth.RefreshTokenHasExpired);
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        email: userEntity.email,
+        userId: userEntity.id,
+      },
+      {
+        expiresIn: this.refreshTokenExpiresIn,
+      },
+    );
+
+    const accessTokenHashed = this.hashToken(accessToken);
+    const refreshTokenHashed = this.hashToken(refreshToken);
+
+    if (auth) {
+      await this.logout(userEntity);
     }
 
-    if (authEntity.user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(ErrorAuth.UserNotActive);
-    }
-
-    return this.auth(authEntity.user, ip);
-  }
-
-  public async auth(userEntity: UserEntity, ip: string): Promise<IJwt> {
-    const refreshToken = v4();
-    const date = new Date();
-
-    const accessTokenExpiresIn = ~~this.configService.get<number>(
-      ConfigNames.JWT_ACCESS_TOKEN_EXPIRES_IN,
-    )!;
-    const refreshTokenExpiresIn = ~~this.configService.get<number>(
-      ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
-    )!;
-
-    await this.logout({ userId: userEntity.id });
-    
     await this.authRepository.create({
       user: userEntity,
-      refreshToken,
-      refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
-      ip,
-      status: AuthStatus.ACTIVE
+      refreshToken: refreshTokenHashed,
+      accessToken: accessTokenHashed,
     });
 
-    return {
-      accessToken: this.jwtService.sign(
-        { email: userEntity.email },
-        { expiresIn: accessTokenExpiresIn },
-      ),
-      refreshToken: refreshToken,
-      accessTokenExpiresAt: date.getTime() + accessTokenExpiresIn * 1000,
-      refreshTokenExpiresAt: date.getTime() + refreshTokenExpiresIn * 1000,
-    };
+    return { accessToken, refreshToken };
   }
 
   public async forgotPassword(data: ForgotPasswordDto): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) return;
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
 
     if (userEntity.status !== UserStatus.ACTIVE)
       throw new UnauthorizedException(ErrorAuth.UserNotActive);
@@ -143,9 +144,12 @@ export class AuthService {
       user: userEntity,
     });
 
-    // Add mail provider
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
+    this.sendgridService.sendEmail({
+      to: data.email,
+      subject: 'Reset password',
+      html: `Click <a href="${this.feURL}/reset-password?token=${tokenEntity.uuid}">here</a> to reset the password.`,
+      text: `Click ${this.feURL}/reset-password?token=${tokenEntity.uuid} to reset the password.`,
+    });
   }
 
   public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
@@ -160,19 +164,18 @@ export class AuthService {
 
     await this.userService.updatePassword(tokenEntity.user, data);
 
-    // Add mail provider
-
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
+    this.sendgridService.sendEmail({
+      to: tokenEntity.user.email,
+      subject: 'Password changed',
+      text: 'Password is changed successfully!',
+    });
 
     await tokenEntity.remove();
 
     return true;
   }
 
-  public async emailVerification(
-    data: VerifyEmailDto,
-    ip: string,
-  ): Promise<IJwt> {
+  public async emailVerification(data: VerifyEmailDto): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.EMAIL,
@@ -182,11 +185,8 @@ export class AuthService {
       throw new NotFoundException('Token not found');
     }
 
-    await this.userService.activate(tokenEntity.user);
-
+    this.userService.activate(tokenEntity.user);
     await tokenEntity.remove();
-
-    return this.auth(tokenEntity.user, ip);
   }
 
   public async resendEmailVerification(
@@ -194,15 +194,32 @@ export class AuthService {
   ): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) return;
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
 
     const tokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
 
-    // Add mail provider
+    this.sendgridService.sendEmail({
+      to: data.email,
+      subject: 'Verify your email',
+      html: `Welcome to the Job Launcher Service.<br />
+Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
+      text: `Welcome to the Job Launcher Service.
+Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+    });
+  }
 
-    this.logger.debug('Verification token: ', tokenEntity.uuid);
+  public hashToken(token: string): string {
+    const hash = createHash('sha256');
+    hash.update(token + this.salt);
+    return hash.digest('hex');
+  }
+
+  public compareToken(token: string, hashedToken: string): boolean {
+    return this.hashToken(token) === hashedToken;
   }
 }

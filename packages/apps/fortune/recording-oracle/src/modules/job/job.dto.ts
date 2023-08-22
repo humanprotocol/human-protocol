@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { ChainId } from "@human-protocol/sdk";
-import { IsEnum, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { ChainId } from '@human-protocol/sdk';
+import { IsEnum, IsString } from 'class-validator';
 
-import { IsValidEthereumAddress } from "@/common/validators";
+import { IsValidEthereumAddress } from '@/common/validators';
 
 export class JobSolutionRequestDto {
   @ApiProperty()
@@ -31,6 +31,12 @@ export class JobSolutionRequestDto {
   public solution: string;
 }
 
-export enum JobRequestType {
-  FORTUNE = "FORTUNE",
+export class SendWebhookDto {
+  public escrowAddress: string;
+  public chainId: number;
+}
+
+export class SaveSoulutionsDto {
+  public url: string;
+  public hash: string;
 }

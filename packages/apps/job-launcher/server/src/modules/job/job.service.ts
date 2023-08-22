@@ -4,6 +4,7 @@ import { validate } from 'class-validator';
 import {
   BadGatewayException,
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   Logger,
@@ -31,12 +32,13 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
+  CreateJobDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
-  JobCvatDto,
   JobFortuneDto,
+  JobImageLabelBinaryDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -54,8 +56,9 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { CurrencyService } from '../payment/currency.service';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { PaymentRepository } from '../payment/payment.repository';
+import { getRate } from '../../common/utils';
 
 @Injectable()
 export class JobService {
@@ -68,8 +71,8 @@ export class JobService {
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     public readonly jobRepository: JobRepository,
-    public readonly paymentService: PaymentService,
-    private readonly currencyService: CurrencyService,
+    private readonly paymentRepository: PaymentRepository,
+    private readonly paymentService: PaymentService,
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
@@ -87,7 +90,7 @@ export class JobService {
       useSSL,
     };
 
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BACKET)!;
+    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
       storageCredentials,
@@ -95,17 +98,21 @@ export class JobService {
     );
   }
 
-  public async createFortuneJob(
+  public async createJob(
     userId: number,
-    dto: JobFortuneDto,
+    requestType: JobRequestType,
+    dto: JobFortuneDto | JobImageLabelBinaryDto,
   ): Promise<number> {
     const {
       chainId,
-      fortunesRequired,
-      requesterTitle,
+      submissionsRequired,
       requesterDescription,
       fundAmount,
     } = dto;
+
+    if (chainId) {
+      this.web3Service.validateChainId(chainId);
+    }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
 
@@ -114,7 +121,7 @@ export class JobService {
       'ether',
     );
 
-    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(Currency.USD, TokenId.HMT);
 
     const jobLauncherFee = BigNumber.from(
       this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
@@ -133,18 +140,13 @@ export class JobService {
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
-    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
-      submissionsRequired: fortunesRequired,
-      requesterTitle,
+    const { manifestUrl, manifestHash } = await this.saveManifest({
+      ...dto,
+      requestType,
+      submissionsRequired,
       requesterDescription,
       fundAmount: fundAmountInWei.toString(),
-      requestType: JobRequestType.FORTUNE,
-    };
-
-    const { manifestUrl, manifestHash } = await this.saveManifest(
-      manifestData,
-      this.bucket,
-    );
+    });
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
@@ -162,97 +164,14 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotCreated);
     }
 
-    await this.paymentService.savePayment(
+    await this.paymentRepository.create({
       userId,
-      PaymentSource.BALANCE,
-      Currency.USD,
-      TokenId.HMT,
-      PaymentType.WITHDRAWAL,
-      usdTotalAmount,
-    );
-
-    jobEntity.status = JobStatus.PAID;
-    await jobEntity.save();
-
-    return jobEntity.id;
-  }
-
-  public async createCvatJob(userId: number, dto: JobCvatDto): Promise<number> {
-    const {
-      chainId,
-      dataUrl,
-      annotationsPerImage,
-      labels,
-      requesterDescription,
-      requesterAccuracyTarget,
-      fundAmount,
-    } = dto;
-
-    const userBalance = await this.paymentService.getUserBalance(userId);
-
-    const fundAmountInWei = ethers.utils.parseUnits(
-      fundAmount.toString(),
-      'ether',
-    );
-
-    const rate = await this.currencyService.getRate(Currency.USD, TokenId.HMT);
-
-    const jobLauncherFee = BigNumber.from(
-      this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!,
-    )
-      .div(100)
-      .mul(fundAmountInWei);
-
-    const usdTotalAmount = BigNumber.from(
-      FixedNumber.from(
-        ethers.utils.formatUnits(fundAmountInWei.add(jobLauncherFee), 'ether'),
-      ).mulUnsafe(FixedNumber.from(rate.toString())),
-    );
-
-    if (userBalance.lt(usdTotalAmount)) {
-      this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new BadRequestException(ErrorJob.NotEnoughFunds);
-    }
-
-    const manifestData: FortuneManifestDto | ImageLabelBinaryManifestDto = {
-      dataUrl,
-      submissionsRequired: annotationsPerImage,
-      labels,
-      requesterDescription,
-      requesterAccuracyTarget,
-      fundAmount: fundAmountInWei.toString(),
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-    };
-
-    const { manifestUrl, manifestHash } = await this.saveManifest(
-      manifestData,
-      this.bucket,
-    );
-
-    const jobEntity = await this.jobRepository.create({
-      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
-      userId,
-      manifestUrl,
-      manifestHash,
-      fee: jobLauncherFee.toString(),
-      fundAmount: fundAmountInWei.toString(),
-      status: JobStatus.PENDING,
-      waitUntil: new Date(),
-    });
-
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorJob.NotCreated);
-    }
-
-    await this.paymentService.savePayment(
-      userId,
-      PaymentSource.BALANCE,
-      Currency.USD,
-      TokenId.HMT,
-      PaymentType.WITHDRAWAL,
-      usdTotalAmount,
-    );
+      source: PaymentSource.BALANCE,
+      type: PaymentType.WITHDRAWAL,
+      amount: usdTotalAmount.toString(),
+      currency: TokenId.HMT,
+      rate
+    })
 
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
@@ -308,7 +227,7 @@ export class JobService {
     await jobEntity.save();
 
     if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      this.sendWebhook(
+      await this.sendWebhook(
         this.configService.get<string>(
           ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
         )!,
@@ -323,12 +242,39 @@ export class JobService {
   }
 
   public async saveManifest(
-    encryptedManifest: any,
-    bucket: string,
+    dto: FortuneManifestDto | ImageLabelBinaryManifestDto
   ): Promise<SaveManifestDto> {
+    const {
+      requestType,
+      submissionsRequired,
+      requesterDescription,
+      fundAmount
+    } = dto;
+    
+    let manifestData;
+    if (requestType === JobRequestType.FORTUNE) {
+      manifestData = {
+        ...dto,
+        submissionsRequired,
+        requesterDescription,
+        fundAmount,
+        requestType: JobRequestType.FORTUNE
+      };
+    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      manifestData = {
+        ...dto,
+        submissionsRequired,
+        requesterDescription,
+        fundAmount,
+        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+      };
+    } else {
+      throw new ConflictException(ErrorJob.InvalidRequestType);
+    }
+
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [encryptedManifest],
-      bucket,
+      [manifestData],
+      this.bucket,
     );
 
     if (!uploadedFiles[0]) {

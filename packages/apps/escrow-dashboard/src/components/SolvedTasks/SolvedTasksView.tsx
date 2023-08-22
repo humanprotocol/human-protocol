@@ -1,13 +1,15 @@
-import { Box, Typography, useTheme } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import {
-  BarChart as RechartsBarChart,
-  Bar,
+  AreaChart,
+  Area,
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
+  CartesianGrid,
 } from 'recharts';
 
 import SOLVED_TASKS from '../../history-data/sovled_tasks.json';
@@ -19,22 +21,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <Box
         sx={{
           background: '#fff',
-          border: '1px solid rgba(218, 222, 240, 0.8)',
-          borderRadius: '16px',
-          padding: '30px 38px',
+          border: '1px solid #CBCFE6',
+          borderRadius: '10px',
+          padding: '8px 16px',
         }}
       >
-        <Typography color="text.primary" variant="body2" fontWeight={600}>
-          {dayjs(label).format('MMM YYYY')}
+        <Typography color="text.primary" variant="h6" fontWeight={500}>
+          {numeral(payload[0].value).format('0a').toUpperCase()}
         </Typography>
-        <Box mt={2}>
-          <Typography color="text.primary" variant="caption" component="p">
-            Task Solved
-          </Typography>
-          <Typography color="text.primary" variant="h6" fontWeight={500}>
-            {payload[0].value}
-          </Typography>
-        </Box>
       </Box>
     );
   }
@@ -43,71 +37,119 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export const SolvedTasksView: FC = () => {
-  const theme = useTheme();
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
+
+  const qoqGrowth = useMemo(() => {
+    const currentTasks = SOLVED_TASKS[SOLVED_TASKS.length - 1].value;
+    const previousTasks = SOLVED_TASKS[SOLVED_TASKS.length - 4].value;
+    return numeral((currentTasks - previousTasks) / previousTasks).format('0%');
+  }, []);
 
   return (
     <CardContainer>
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-evenly',
-        }}
-      >
-        <Box>
-          <Typography variant="body2" color="primary" fontWeight={600} mb="8px">
-            {`Solved Tasks till ${dayjs(
-              SOLVED_TASKS[SOLVED_TASKS.length - 1].date
-            ).format('MMM D, YYYY')}`}
-          </Typography>
-          <Typography
-            variant="h2"
-            color="primary"
-            fontWeight={600}
-            lineHeight={1.125}
-          >
-            {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
-          </Typography>
-        </Box>
-        <Box sx={{ width: 400, height: 300 }}>
-          <ResponsiveContainer>
-            <RechartsBarChart
-              data={SOLVED_TASKS}
-              margin={{ top: 30, left: 4, right: 4 }}
+      <Grid container sx={{ height: '100%' }} spacing={3}>
+        <Grid item xs={12} lg={4}>
+          <Box mb={2}>
+            <Typography
+              variant="body2"
+              color="primary"
+              fontWeight={600}
+              mb="8px"
             >
+              {`Solved Tasks till ${dayjs(
+                SOLVED_TASKS[SOLVED_TASKS.length - 1].date
+              ).format('MMM D, YYYY')}`}
+            </Typography>
+            <Typography
+              variant="h2"
+              color="primary"
+              fontWeight={800}
+              lineHeight={1.125}
+            >
+              {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography
+              variant="body2"
+              color="secondary"
+              fontWeight={600}
+              mb="8px"
+            >
+              QoQ Growth
+            </Typography>
+            <Typography
+              variant="h2"
+              color="secondary"
+              fontWeight={800}
+              lineHeight={1.125}
+            >
+              {qoqGrowth}
+            </Typography>
+          </Box>
+        </Grid>
+        <Grid item xs={12} lg={8}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+            <AreaChart data={SOLVED_TASKS} margin={{ right: 30, bottom: 10 }}>
+              <defs>
+                <linearGradient
+                  id="paint0_linear_4037_63345"
+                  x1="257"
+                  y1="0"
+                  x2="257"
+                  y2="276.5"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0.290598"
+                    stop-color="#CACFE8"
+                    stop-opacity="0.3"
+                  />
+                  <stop offset="1" stop-color="#E9ECFF" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray={3} />
               <XAxis
                 dataKey="date"
-                type="category"
                 axisLine={false}
                 tickLine={false}
-                interval="preserveStartEnd"
-                ticks={[
-                  SOLVED_TASKS[0].date,
-                  SOLVED_TASKS[SOLVED_TASKS.length - 1].date,
-                ]}
                 tick={{
                   fill: '#320A8D',
-                  fontSize: '12px',
+                  fontSize: '14px',
                   fontFamily: 'Inter',
+                  fontWeight: 500,
                 }}
-                tickFormatter={(value: any) => dayjs(value).format('MMM D')}
+                tickFormatter={(value: any) => dayjs(value).format('MMM')}
                 tickMargin={12}
                 padding={{ left: 10, right: 10 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: '#320A8D',
+                  fontSize: '14px',
+                  fontFamily: 'Inter',
+                  fontWeight: 500,
+                }}
+                tickFormatter={(value: any) =>
+                  numeral(value).format('0a').toUpperCase()
+                }
               />
               <Tooltip
                 cursor={{ fill: '#dadef0' }}
                 content={<CustomTooltip />}
               />
-              <Bar
+              <Area
+                type="monotone"
                 dataKey="value"
-                fill={theme.palette.primary.main}
-                barSize={16}
+                stroke="#320A8D"
+                fill="url(#paint0_linear_4037_63345)"
               />
-            </RechartsBarChart>
+            </AreaChart>
           </ResponsiveContainer>
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
     </CardContainer>
   );
 };

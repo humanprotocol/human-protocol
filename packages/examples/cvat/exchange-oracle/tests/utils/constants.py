@@ -12,7 +12,7 @@ RECORDING_ORACLE_FEE = 10
 REPUTATION_ORACLE_ADDRESS = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
 REPUTATION_ORACLE_FEE = 10
 
-DEFAULT_URL = "https://storage.googleapis.com/fortune-manifests/manifest.json"
+DEFAULT_URL = "http://host.docker.internal:9000/manifests/manifest.json"
 DEFAULT_HASH = "test"
 
 SIGNATURE = "0x63fde9fec5d1924c8837bae8f19c632291725fb94bb03fb3e8d89bf6de17f52014e402e5769d27989a73e889c9aa35c7ace790d2b239d8e1d9d07046ae2d44f51c"
