@@ -557,6 +557,8 @@ describe('JobService', () => {
     });
 
     it('should launch a job successfully', async () => {
+      const fundAmount = 10;
+
       (EscrowClient.build as any).mockImplementation(() => ({
         createAndSetupEscrow: jest
           .fn()
@@ -564,8 +566,6 @@ describe('JobService', () => {
       }));
       
       jobService.sendWebhook = jest.fn().mockResolvedValue(true);
-      
-      const fundAmount = 10;
 
       const manifest: ImageLabelBinaryManifestDto = {
         dataUrl: MOCK_FILE_URL,
