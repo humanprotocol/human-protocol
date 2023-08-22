@@ -115,6 +115,13 @@ export class JobImageLabelBinaryDto extends JobDto {
   public requesterAccuracyTarget: number;
 }
 
+export class JobCancelDto {
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public id: number;
+}
+
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,

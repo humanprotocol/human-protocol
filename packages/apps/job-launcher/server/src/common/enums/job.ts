@@ -4,6 +4,7 @@ export enum JobStatus {
   LAUNCHED = 'LAUNCHED',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
+  CANCELED = 'CANCELED',
 }
 
 export enum JobRequestType {

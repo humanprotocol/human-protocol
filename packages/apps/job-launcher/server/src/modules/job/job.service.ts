@@ -37,6 +37,7 @@ import {
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
+  JobCancelDto,
   JobFortuneDto,
   JobImageLabelBinaryDto,
   SaveManifestDto,
@@ -239,6 +240,32 @@ export class JobService {
     }
 
     return jobEntity;
+  }
+
+  public async cancelJob(
+    userId: number,
+    dto: JobCancelDto,
+  ): Promise<boolean> {
+    const { id } = dto;
+
+    const jobEntity = await this.jobRepository.findOne({ id, userId });
+    
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+    
+    if (jobEntity.status === JobStatus.LAUNCHED && jobEntity.escrowAddress) {
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+      const escrowClient = await EscrowClient.build(signer);
+      await escrowClient.cancel(jobEntity.escrowAddress)
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+    
+    return true;
   }
 
   public async saveManifest(

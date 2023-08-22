@@ -52,7 +52,8 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 'PAID',
                 'LAUNCHED',
                 'COMPLETED',
-                'FAILED'
+                'FAILED',
+                'CANCELED'
             )
         `);
     await queryRunner.query(`

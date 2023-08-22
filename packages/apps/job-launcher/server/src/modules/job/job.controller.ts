@@ -9,7 +9,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards';
 import { RequestWithUser } from 'src/common/types';
-import { JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
+import { JobCancelDto, JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType } from 'src/common/enums/job';
 
@@ -39,5 +39,13 @@ export class JobController {
   @Get('/result')
   public async getResult(@Request() req: any): Promise<any> {
     return this.jobService.getResult(req.user?.id);
+  }
+
+  @Post('/cancel')
+  public async cancelJob(
+    @Request() req: RequestWithUser,
+    @Body() data: JobCancelDto,
+  ): Promise<number> {
+    return this.jobService.cancelJob(req.user.id, JobRequestType.FORTUNE, data);
   }
 }
