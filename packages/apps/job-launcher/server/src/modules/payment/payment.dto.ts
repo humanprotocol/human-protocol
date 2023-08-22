@@ -18,7 +18,7 @@ export class PaymentFiatConfirmDto {
 export class PaymentFiatCreateDto {
   @ApiProperty()
   @IsNumber()
-  @Min(10)
+  @Min(0.5)
   public amount: number;
 
   @ApiProperty({

@@ -70,8 +70,10 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency } = dto;
 
+    const amountInCents = Math.round(amount * 100);
+    console.log(amountInCents)
     const params: Stripe.PaymentIntentCreateParams = {
-      amount: amount * 100,
+      amount: amountInCents,
       currency: currency,
     };
 
