@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from hypothesis.strategies import tuples, integers
 
 
 @pytest.fixture
@@ -67,3 +68,20 @@ def seq_values():
 def seq_labels_long():
     """Returns a sequence containing more values."""
     return np.asarray(["e", "f", "g", "h"])
+
+
+@pytest.fixture
+def normal_sample():
+    return np.random.randn(10_000)
+
+
+_incidence_matrix_generator = tuples(integers(1, 500), integers(2, 50)).map(
+    lambda xs: np.random.randint(0, 100, size=xs)
+)
+_confusion_matrix_generator = integers(2).map(
+    lambda x: np.random.randint(0, 100, size=(x, x))
+)
+
+
+def _eq_rounded(a, b, n_digits=3):
+    return round(a, n_digits) == round(b, n_digits)
