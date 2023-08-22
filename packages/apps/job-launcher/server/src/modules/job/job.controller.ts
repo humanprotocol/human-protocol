@@ -45,7 +45,7 @@ export class JobController {
   public async cancelJob(
     @Request() req: RequestWithUser,
     @Body() data: JobCancelDto,
-  ): Promise<number> {
-    return this.jobService.cancelJob(req.user.id, JobRequestType.FORTUNE, data);
+  ): Promise<boolean> {
+    return this.jobService.cancelJob(req.user.id, data);
   }
 }
