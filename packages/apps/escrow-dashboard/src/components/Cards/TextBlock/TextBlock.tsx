@@ -3,6 +3,7 @@ import numeral from 'numeral';
 import { FC, ReactElement } from 'react';
 
 import { Container } from '../Container';
+import { TooltipIcon } from 'src/components/TooltipIcon';
 
 type TextBlockProps = {
   title: string | ReactElement;
@@ -24,7 +25,7 @@ export const TextBlock: FC<TextBlockProps> = ({
       <Typography variant="body2" color="primary" fontWeight={600}>
         {title}
       </Typography>
-      <Box display="flex" alignItems="baseline">
+      <Box display="flex" alignItems="baseline" overflow="hidden">
         {component ? (
           component
         ) : (
@@ -33,7 +34,7 @@ export const TextBlock: FC<TextBlockProps> = ({
             color="primary"
             lineHeight={1}
             marginTop={3}
-            sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
+            sx={{ fontSize: { xs: 32, md: 42, xl: 60 } }}
           >
             {Number.isNaN(Number(value))
               ? value
@@ -53,6 +54,10 @@ export const TextBlock: FC<TextBlockProps> = ({
           </Typography>
         )}
       </Box>
+      <TooltipIcon
+        position="topRight"
+        title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim."
+      />
     </Container>
   );
 };

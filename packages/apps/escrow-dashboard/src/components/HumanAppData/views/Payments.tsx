@@ -1,69 +1,51 @@
-import { Box, Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-enum PaymentTab {
-  DailyAmount,
-  DailyCount,
-  DailyAvgPerJob,
-  DailyAvgPerWorker,
+import { ChartContainer } from './Container';
+import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
+import { EventDayData } from 'src/state/humanAppData/types';
+
+enum PaymentStatus {
+  HMT,
+  Count,
+  JobAverage,
+  WorkerAverage,
 }
 
+const PAYMENT_STATUS_ITEMS = [
+  { label: 'HMT', value: PaymentStatus.HMT },
+  { label: 'Count', value: PaymentStatus.Count },
+  { label: 'Job Average', value: PaymentStatus.JobAverage },
+  { label: 'Worker Average', value: PaymentStatus.WorkerAverage },
+];
+
 export const PaymentsView = () => {
-  const [tabValue, setTabValue] = useState(PaymentTab.DailyAmount);
+  const [status, setStatus] = useState(PaymentStatus.HMT);
+  const eventDayDatas = useHumanAppDataByChainId();
+
+  const seriesData = useMemo(() => {
+    if (eventDayDatas) {
+      const VALUES_BY_TYPE: Record<PaymentStatus, keyof EventDayData> = {
+        [PaymentStatus.HMT]: 'dailyPayoutAmount',
+        [PaymentStatus.Count]: 'dailyPayoutCount',
+        [PaymentStatus.JobAverage]: 'dailyBulkPayoutEventCount',
+        [PaymentStatus.WorkerAverage]: 'dailyBulkPayoutEventCount',
+      };
+      return eventDayDatas
+        .map((d) => ({
+          date: d.timestamp * 1000,
+          value: Number(d[VALUES_BY_TYPE[status]]),
+        }))
+        .reverse();
+    }
+    return [];
+  }, [eventDayDatas, status]);
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        bgcolor: 'background.paper',
-        display: 'flex',
-      }}
-    >
-      <Tabs
-        orientation="vertical"
-        value={tabValue}
-        onChange={(e, newValue) => setTabValue(newValue)}
-        sx={{
-          '& .MuiTabs-indicator': {
-            // display: 'none',
-            width: '100%',
-            left: 0,
-            height: '2px !important',
-            marginTop: '46px',
-          },
-        }}
-      >
-        <Tab
-          label="HMT"
-          value={PaymentTab.DailyAmount}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Count"
-          value={PaymentTab.DailyCount}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Job Average"
-          value={PaymentTab.DailyAvgPerJob}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Worker Average"
-          value={PaymentTab.DailyAvgPerWorker}
-          sx={{ alignItems: 'flex-start' }}
-        />
-      </Tabs>
-      <Box
-        sx={{
-          flexGrow: 1,
-          borderRadius: '8px',
-          background: '#F6F7FE',
-          py: 10,
-          px: 5,
-          ml: { xs: 4, md: 6, xl: 12 },
-          minHeight: 400,
-        }}
-      ></Box>
-    </Box>
+    <ChartContainer
+      data={seriesData}
+      title="Payments"
+      items={PAYMENT_STATUS_ITEMS}
+      onChange={(_status) => setStatus(_status)}
+    />
   );
 };

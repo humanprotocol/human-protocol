@@ -13,26 +13,27 @@ export const HumanAppDataContainer: FC = () => {
   useHumanAppData();
 
   return (
-    <Box id="network" mt={{ xs: 4, md: 8 }}>
+    <Box id="human-app-data" mt={{ xs: 4, md: 8 }}>
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
+          flexDirection: { xs: 'column', lg: 'row' },
+          justifyContent: { xs: 'flex-start', lg: 'space-between' },
+          alignItems: { xs: 'flex-start', lg: 'center' },
           gap: 4,
           mb: 4,
         }}
       >
         <ViewTitle title="HUMAN App data" iconUrl={networkSvg} />
-        <Box sx={{ ml: 'auto' }}>
+        <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '513px' } }}>
           <NetworkSelect
             value={ChainId.POLYGON_MUMBAI}
             supportedChainIds={[ChainId.POLYGON_MUMBAI]}
+            width="100%"
           />
         </Box>
-        <Box sx={{ ml: 'auto' }}>
-          <TimeRangeButtons />
+        <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '368px' } }}>
+          <TimeRangeButtons fullWidth />
         </Box>
       </Box>
       <HumanAppDataView />

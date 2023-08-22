@@ -17,9 +17,9 @@ export const NewsView = () => {
         >
           <Box
             sx={{
-              padding: '24px',
+              padding: '32px',
               display: 'flex',
-              flexDirection: { xs: 'row', md: 'column' },
+              flexDirection: 'column',
               justifyContent: 'space-between',
               height: '100%',
               boxSizing: 'border-box',
@@ -46,8 +46,6 @@ export const NewsView = () => {
                   fontSize: '12px',
                   lineHeight: '266%',
                   mb: '20px',
-                  position: { xs: 'absolute', md: 'relative' },
-                  top: { xs: '-16px', md: 'auto' },
                 }}
               >
                 NEWS
@@ -55,20 +53,14 @@ export const NewsView = () => {
               <Typography
                 sx={{
                   lineHeight: '150%',
-                  fontSize: { xs: '14px', sm: '20px', md: '24px' },
+                  fontSize: '24px',
                 }}
                 color="primary"
                 mb={2}
               >
                 {data?.title}
               </Typography>
-              <Typography
-                variant="body2"
-                color="primary"
-                maxWidth={450}
-                mb={4}
-                sx={{ display: { xs: 'none', md: 'block' } }}
-              >
+              <Typography variant="body2" color="primary" maxWidth={450} mb={4}>
                 {data?.description}
               </Typography>
             </Box>
@@ -77,10 +69,18 @@ export const NewsView = () => {
                 sx={{
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  maxWidth: { xs: '40%', md: '100%' },
                 }}
               >
-                <img src={data?.image} alt="news" style={{ width: '100%' }} />
+                <Box
+                  component="img"
+                  src={data?.image}
+                  alt="news"
+                  sx={{
+                    width: '100%',
+                    maxHeight: { xs: '160px', sm: '240px' },
+                    objectFit: 'cover',
+                  }}
+                />
               </Box>
             )}
           </Box>

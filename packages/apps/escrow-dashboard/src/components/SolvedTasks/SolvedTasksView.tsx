@@ -14,6 +14,7 @@ import {
 
 import SOLVED_TASKS from '../../history-data/sovled_tasks.json';
 import { CardContainer } from '../Cards';
+import { TooltipIcon } from '../TooltipIcon';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -46,9 +47,9 @@ export const SolvedTasksView: FC = () => {
   }, []);
 
   return (
-    <CardContainer>
-      <Grid container sx={{ height: '100%' }} spacing={3}>
-        <Grid item xs={12} lg={4}>
+    <CardContainer sxProps={{ padding: { xs: '24px 32px', md: '48px 64px' } }}>
+      <Grid container sx={{ height: '100%' }} spacing={2}>
+        <Grid item xs={12} md={5} xl={4}>
           <Box mb={2}>
             <Typography
               variant="body2"
@@ -65,6 +66,8 @@ export const SolvedTasksView: FC = () => {
               color="primary"
               fontWeight={800}
               lineHeight={1.125}
+              sx={{ whiteSpace: 'nowrap' }}
+              fontSize={{ xs: '55px', xl: '80px' }}
             >
               {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
             </Typography>
@@ -83,12 +86,14 @@ export const SolvedTasksView: FC = () => {
               color="secondary"
               fontWeight={800}
               lineHeight={1.125}
+              sx={{ whiteSpace: 'nowrap' }}
+              fontSize={{ xs: '55px', xl: '80px' }}
             >
               {qoqGrowth}
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={12} lg={8}>
+        <Grid item xs={12} md={7} xl={8}>
           <ResponsiveContainer width="100%" height="100%" minHeight={300}>
             <AreaChart data={SOLVED_TASKS} margin={{ right: 30, bottom: 10 }}>
               <defs>
@@ -150,6 +155,7 @@ export const SolvedTasksView: FC = () => {
           </ResponsiveContainer>
         </Grid>
       </Grid>
+      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
     </CardContainer>
   );
 };

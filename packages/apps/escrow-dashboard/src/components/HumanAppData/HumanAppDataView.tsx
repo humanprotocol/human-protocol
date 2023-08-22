@@ -1,6 +1,14 @@
-import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import {
+  Box,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import { FC, useState } from 'react';
 
+import { TooltipIcon } from '../TooltipIcon';
 import { HMTView } from './views/HMT';
 import { PaymentsView } from './views/Payments';
 import { TasksView } from './views/Tasks';
@@ -21,7 +29,20 @@ const VIEW_BUTTONS = [
 ];
 
 export const HumanAppDataView: FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(600));
   const [viewButton, setViewButton] = useState(ViewButton.Tasks);
+
+  if (isMobile) {
+    return (
+      <Stack spacing={4}>
+        <TasksView />
+        <WorkersView />
+        <PaymentsView />
+        <HMTView />
+      </Stack>
+    );
+  }
 
   return (
     <Box
@@ -32,6 +53,7 @@ export const HumanAppDataView: FC = () => {
           '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA;',
         py: 5,
         px: 4,
+        position: 'relative',
       }}
     >
       <ToggleButtonGroup
@@ -62,6 +84,7 @@ export const HumanAppDataView: FC = () => {
         {viewButton === ViewButton.Payments && <PaymentsView />}
         {viewButton === ViewButton.HMT && <HMTView />}
       </Box>
+      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
     </Box>
   );
 };

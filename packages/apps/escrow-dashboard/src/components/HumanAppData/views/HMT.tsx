@@ -1,63 +1,48 @@
-import { Box, Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-enum HMTTab {
-  Holders,
-  DailyTransactionsCount,
-  DailyTransferedAmount,
+import { ChartContainer } from './Container';
+import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
+import { EventDayData } from 'src/state/humanAppData/types';
+
+enum HMTStatus {
+  // Holders,
+  Transactions,
+  AmountTransfered,
 }
 
+const HMT_STATUS_ITEMS = [
+  // { label: 'Holders', value: HMTStatus.Holders },
+  { label: 'Transactions', value: HMTStatus.Transactions },
+  { label: 'Amount Transfered', value: HMTStatus.AmountTransfered },
+];
+
 export const HMTView = () => {
-  const [tabValue, setTabValue] = useState(HMTTab.Holders);
+  const [status, setStatus] = useState(HMTStatus.Transactions);
+  const eventDayDatas = useHumanAppDataByChainId();
+
+  const seriesData = useMemo(() => {
+    if (eventDayDatas) {
+      const VALUES_BY_TYPE: Record<HMTStatus, keyof EventDayData> = {
+        // [HMTStatus.Holders]: 'dailyEscrowCount',
+        [HMTStatus.Transactions]: 'dailyHMTTransferCount',
+        [HMTStatus.AmountTransfered]: 'dailyHMTTransferAmount',
+      };
+      return eventDayDatas
+        .map((d) => ({
+          date: d.timestamp * 1000,
+          value: Number(d[VALUES_BY_TYPE[status]]),
+        }))
+        .reverse();
+    }
+    return [];
+  }, [eventDayDatas, status]);
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        bgcolor: 'background.paper',
-        display: 'flex',
-      }}
-    >
-      <Tabs
-        orientation="vertical"
-        value={tabValue}
-        onChange={(e, newValue) => setTabValue(newValue)}
-        sx={{
-          '& .MuiTabs-indicator': {
-            // display: 'none',
-            width: '100%',
-            left: 0,
-            height: '2px !important',
-            marginTop: '46px',
-          },
-        }}
-      >
-        <Tab
-          label="Holders"
-          value={HMTTab.Holders}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Transactions"
-          value={HMTTab.DailyTransactionsCount}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Amount Transfered"
-          value={HMTTab.DailyTransferedAmount}
-          sx={{ alignItems: 'flex-start' }}
-        />
-      </Tabs>
-      <Box
-        sx={{
-          flexGrow: 1,
-          borderRadius: '8px',
-          background: '#F6F7FE',
-          py: 10,
-          px: 5,
-          ml: { xs: 4, md: 6, xl: 12 },
-          minHeight: 400,
-        }}
-      ></Box>
-    </Box>
+    <ChartContainer
+      data={seriesData}
+      title="HMT"
+      items={HMT_STATUS_ITEMS}
+      onChange={(_status) => setStatus(_status)}
+    />
   );
 };

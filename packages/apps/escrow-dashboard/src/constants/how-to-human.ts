@@ -8,14 +8,8 @@ export const HOW_TO_HUMAN_DATA = [
   {
     key: 'types-of-jobs',
     label: 'Types of Jobs',
-    title: 'HUMAN Job Types',
-    youtubeId: '',
-  },
-  {
-    key: 'fortune-demo',
-    label: 'Fortune Demo',
-    title: 'Fortune Demo',
-    youtubeId: '',
+    title: 'Job Types on HUMAN Protocol',
+    youtubeId: 'wHtdQZkxPNc',
   },
 ];
 

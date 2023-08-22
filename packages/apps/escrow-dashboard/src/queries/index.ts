@@ -23,14 +23,19 @@ export const RAW_EVENT_DAY_DATA_V2_QUERY = `{
     dailyBulkPayoutEventCount
     dailyCancelledStatusEventCount
     dailyCompletedStatusEventCount
-    dailyEscrowAmounts
+    dailyEscrowCount
     dailyFundEventCount
+    dailyHMTTransferAmount
+    dailyHMTTransferCount
     dailyPaidStatusEventCount
     dailyPartialStatusEventCount
+    dailyPayoutAmount
+    dailyPayoutCount
     dailyPendingStatusEventCount
     dailySetupEventCount
     dailyStoreResultsEventCount
     dailyTotalEventCount
+    dailyWorkerCount
   }
 }`;
 

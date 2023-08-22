@@ -14,7 +14,11 @@ const RANGE_BUTTONS = [
   { label: 'Max', value: 1000 },
 ];
 
-export default function TimeRangeButtons() {
+export default function TimeRangeButtons({
+  fullWidth,
+}: {
+  fullWidth?: boolean;
+}) {
   const { days } = useSelector((state: AppState) => state.humanAppData);
   const dispatch = useAppDispatch();
 
@@ -31,6 +35,7 @@ export default function TimeRangeButtons() {
       exclusive
       onChange={handleChange}
       aria-label="time range"
+      fullWidth={fullWidth}
     >
       {RANGE_BUTTONS.map(({ label, value }) => (
         <ToggleButton

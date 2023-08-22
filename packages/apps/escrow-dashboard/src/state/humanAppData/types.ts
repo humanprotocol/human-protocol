@@ -4,12 +4,17 @@ export type EventDayData = {
   dailyBulkPayoutEventCount: string;
   dailyCancelledStatusEventCount: string;
   dailyCompletedStatusEventCount: string;
-  dailyEscrowAmounts: string;
+  dailyEscrowCount: string;
   dailyFundEventCount: string;
+  dailyHMTTransferAmount: string;
+  dailyHMTTransferCount: string;
   dailyPaidStatusEventCount: string;
   dailyPartialStatusEventCount: string;
+  dailyPayoutAmount: string;
+  dailyPayoutCount: string;
   dailyPendingStatusEventCount: string;
   dailySetupEventCount: string;
   dailyStoreResultsEventCount: string;
   dailyTotalEventCount: string;
+  dailyWorkerCount: string;
 };

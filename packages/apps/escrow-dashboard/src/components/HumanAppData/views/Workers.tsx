@@ -1,63 +1,48 @@
-import { Box, Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-enum WorkerTab {
+import { ChartContainer } from './Container';
+import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
+import { EventDayData } from 'src/state/humanAppData/types';
+
+enum WorkerStatus {
   TotalWorkers,
-  DailyActiveWorkers,
-  AverageJobs,
+  ActiveWorkers,
+  AverageJobsSolved,
 }
 
+const WORKER_STATUS_ITEMS = [
+  { label: 'Total workers', value: WorkerStatus.TotalWorkers },
+  { label: 'Active workers', value: WorkerStatus.ActiveWorkers },
+  { label: 'Average jobs solved', value: WorkerStatus.AverageJobsSolved },
+];
+
 export const WorkersView = () => {
-  const [tabValue, setTabValue] = useState(WorkerTab.TotalWorkers);
+  const [status, setStatus] = useState(WorkerStatus.TotalWorkers);
+  const eventDayDatas = useHumanAppDataByChainId();
+
+  const seriesData = useMemo(() => {
+    if (eventDayDatas) {
+      const VALUES_BY_TYPE: Record<WorkerStatus, keyof EventDayData> = {
+        [WorkerStatus.TotalWorkers]: 'dailyWorkerCount',
+        [WorkerStatus.ActiveWorkers]: 'dailyPendingStatusEventCount',
+        [WorkerStatus.AverageJobsSolved]: 'dailyBulkPayoutEventCount',
+      };
+      return eventDayDatas
+        .map((d) => ({
+          date: d.timestamp * 1000,
+          value: Number(d[VALUES_BY_TYPE[status]]),
+        }))
+        .reverse();
+    }
+    return [];
+  }, [eventDayDatas, status]);
+
   return (
-    <Box
-      sx={{
-        width: '100%',
-        bgcolor: 'background.paper',
-        display: 'flex',
-      }}
-    >
-      <Tabs
-        orientation="vertical"
-        value={tabValue}
-        onChange={(e, newValue) => setTabValue(newValue)}
-        sx={{
-          '& .MuiTabs-indicator': {
-            // display: 'none',
-            width: '100%',
-            left: 0,
-            height: '2px !important',
-            marginTop: '46px',
-          },
-        }}
-      >
-        <Tab
-          label="Total workers"
-          value={WorkerTab.TotalWorkers}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Active"
-          value={WorkerTab.DailyActiveWorkers}
-          sx={{ alignItems: 'flex-start' }}
-        />
-        <Tab
-          label="Average Jobs"
-          value={WorkerTab.AverageJobs}
-          sx={{ alignItems: 'flex-start' }}
-        />
-      </Tabs>
-      <Box
-        sx={{
-          flexGrow: 1,
-          borderRadius: '8px',
-          background: '#F6F7FE',
-          py: 10,
-          px: 5,
-          ml: { xs: 4, md: 6, xl: 12 },
-          minHeight: 400,
-        }}
-      ></Box>
-    </Box>
+    <ChartContainer
+      data={seriesData}
+      title="Workers"
+      items={WORKER_STATUS_ITEMS}
+      onChange={(_status) => setStatus(_status)}
+    />
   );
 };

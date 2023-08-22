@@ -9,9 +9,9 @@ type ViewTitleProps = {
 export const ViewTitle: FC<ViewTitleProps> = ({ title, iconUrl }) => (
   <Box display="flex" alignItems="center" height="92px" marginLeft="-32px">
     <Box height="100%">
-      <img src={iconUrl} alt="network" />
+      <Box component="img" src={iconUrl} alt={title} />
     </Box>
-    <Typography variant="h4" color="primary">
+    <Typography variant="h4" color="primary" whiteSpace="nowrap">
       {title}
     </Typography>
   </Box>

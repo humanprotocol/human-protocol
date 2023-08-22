@@ -44,12 +44,19 @@ export const TokenView: FC = () => {
     const [number, unit] = compactNumber.split(' ');
 
     return (
-      <Box sx={{ display: 'flex', alignItems: 'baseline', mt: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'baseline',
+          mt: 3,
+          overflow: 'hidden',
+        }}
+      >
         <Typography
           variant="h2"
           color="primary"
           lineHeight={1}
-          sx={{ fontSize: { xs: 32, md: 48, lg: 64, xl: 80 } }}
+          sx={{ fontSize: { xs: 32, md: 42, xl: 60 } }}
         >
           {number}
         </Typography>
@@ -57,7 +64,7 @@ export const TokenView: FC = () => {
           variant="h4"
           color="primary"
           sx={{
-            fontSize: { xs: 14, md: 22, lg: 28, xl: 34 },
+            fontSize: { xs: 20, md: 28, xl: 34 },
             textTransform: 'capitalize',
             ml: 2,
           }}

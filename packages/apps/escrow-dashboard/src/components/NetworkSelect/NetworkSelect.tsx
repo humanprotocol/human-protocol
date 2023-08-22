@@ -14,10 +14,14 @@ import { SUPPORTED_CHAIN_IDS } from 'src/constants';
 interface NetworkSelectProps extends SelectProps {
   showAllNetwork?: boolean;
   supportedChainIds?: ChainId[];
+  width?: number | string;
 }
 
 export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
-  <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
+  <FormControl
+    variant="standard"
+    sx={{ m: 1, minWidth: 220, width: props.width }}
+  >
     <InputLabel id="newtork-select-label">Network</InputLabel>
     <Select
       labelId="network-select-label"

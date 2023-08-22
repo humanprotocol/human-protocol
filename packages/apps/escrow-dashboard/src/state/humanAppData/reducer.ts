@@ -1,3 +1,5 @@
+import { BigNumber } from '@ethersproject/bignumber';
+import { formatUnits } from '@ethersproject/units';
 import { ChainId } from '@human-protocol/sdk';
 import {
   createAction,
@@ -47,7 +49,7 @@ export const fetchEventDayDatas = createAsyncThunk<
   { state: AppState }
 >('humanAppData/fetchEventDayDatas', async () => {
   const rawData = await getEventDayDatas(
-    'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2'
+    'https://api.thegraph.com/subgraphs/name/leric7/mumbai-v2'
   );
 
   const currentDayId = Math.floor(Date.now() / 1000 / 60 / 60 / 24);
@@ -56,7 +58,18 @@ export const fetchEventDayDatas = createAsyncThunk<
   let j = 0;
   for (let i = currentDayId; i > currentDayId - 365; i--) {
     if (Number(rawData.data.eventDayDatas[j]?.id) === i) {
-      eventDayDatas.push(rawData.data.eventDayDatas[j++]);
+      const dayData = rawData.data.eventDayDatas[j++];
+      eventDayDatas.push({
+        ...dayData,
+        dailyPayoutAmount: formatUnits(
+          BigNumber.from(dayData.dailyPayoutAmount),
+          18
+        ),
+        dailyHMTTransferAmount: formatUnits(
+          BigNumber.from(dayData.dailyHMTTransferAmount),
+          18
+        ),
+      });
     } else {
       eventDayDatas.push({
         id: i.toString(),
@@ -64,14 +77,19 @@ export const fetchEventDayDatas = createAsyncThunk<
         dailyBulkPayoutEventCount: '0',
         dailyCancelledStatusEventCount: '0',
         dailyCompletedStatusEventCount: '0',
-        dailyEscrowAmounts: '0',
+        dailyEscrowCount: '0',
         dailyFundEventCount: '0',
+        dailyHMTTransferAmount: '0',
+        dailyHMTTransferCount: '0',
         dailyPaidStatusEventCount: '0',
         dailyPartialStatusEventCount: '0',
+        dailyPayoutAmount: '0',
+        dailyPayoutCount: '0',
         dailyPendingStatusEventCount: '0',
         dailySetupEventCount: '0',
         dailyStoreResultsEventCount: '0',
         dailyTotalEventCount: '0',
+        dailyWorkerCount: '0',
       });
     }
   }
