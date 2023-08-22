@@ -48,6 +48,6 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Param() params: JobCancelDto,
   ): Promise<boolean> {
-    return this.jobService.cancelJob(req.user.id, params.id);
+    return this.jobService.requestToCancelJob(req.user.id, params.id);
   }
 }

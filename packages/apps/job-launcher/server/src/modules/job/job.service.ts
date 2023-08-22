@@ -242,7 +242,7 @@ export class JobService {
     return jobEntity;
   }
 
-  public async cancelJob(
+  public async requestToCancelJob(
     userId: number,
     id: number,
   ): Promise<boolean> {
@@ -252,8 +252,18 @@ export class JobService {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
     }
+  
+    jobEntity.status = JobStatus.TO_CANCEL;
+    jobEntity.retriesCount = 0;
+    await jobEntity.save();
     
-    if (jobEntity.status === JobStatus.LAUNCHED && jobEntity.escrowAddress) {
+    return true;
+  }
+
+  public async cancelJob(
+    jobEntity: JobEntity
+  ): Promise<boolean> {
+    if (jobEntity.escrowAddress) {
       const signer = this.web3Service.getSigner(jobEntity.chainId);
 
       const escrowClient = await EscrowClient.build(signer);

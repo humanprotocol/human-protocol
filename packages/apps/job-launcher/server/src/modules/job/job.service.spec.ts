@@ -673,10 +673,11 @@ describe('JobService', () => {
     });
   });
 
-  describe('cancelJob', () => {
-    it('should cancel the job', async () => {
-      const jobId = 1;
-      const userId = 123;
+  describe('requestToCancelJob', () => {
+    const jobId = 1;
+    const userId = 123;
+
+    it('should to cancel the job', async () => {
       const escrowAddress = '0xValidEscrowAddress';
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
@@ -687,28 +688,49 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      const dto: JobCancelDto = { id: jobId };
-      const mockEscrowClient = { cancel: jest.fn() };
-
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
-      EscrowClient.build = jest.fn().mockResolvedValue(mockEscrowClient);
 
-      const result = await jobService.cancelJob(userId, dto);
+      const result = await jobService.requestToCancelJob(userId, jobId);
 
       expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
-      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.LOCALHOST);
-      expect(EscrowClient.build).toHaveBeenCalledWith(signerMock);
-      expect(mockEscrowClient.cancel).toHaveBeenCalledWith(escrowAddress);
       expect(mockJobEntity.save).toHaveBeenCalled();
     });
 
     it('should throw not found exception if job not found', async () => {
       jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
 
-      const dto: JobCancelDto = { id: 1 };
+      await expect(jobService.requestToCancelJob(userId, jobId)).rejects.toThrow(NotFoundException);
+    });
+  });
 
-      await expect(jobService.cancelJob(123, dto)).rejects.toThrow(NotFoundException);
+
+  describe('cancelJob', () => {
+    it('should cancel the job', async () => {
+      const jobId = 1;
+      const userId = 123;
+      const escrowAddress = '0xValidEscrowAddress';
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.TO_CANCEL,
+        escrowAddress,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      const mockEscrowClient = { cancel: jest.fn() };
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      EscrowClient.build = jest.fn().mockResolvedValue(mockEscrowClient);
+
+      const result = await jobService.cancelJob(mockJobEntity as JobEntity);
+
+      expect(result).toEqual(true);
+      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.LOCALHOST);
+      expect(EscrowClient.build).toHaveBeenCalledWith(signerMock);
+      expect(mockEscrowClient.cancel).toHaveBeenCalledWith(escrowAddress);
+      expect(mockJobEntity.save).toHaveBeenCalled();
     });
   });
 

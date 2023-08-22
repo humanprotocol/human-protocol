@@ -51,8 +51,8 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 'PENDING',
                 'PAID',
                 'LAUNCHED',
-                'COMPLETED',
                 'FAILED',
+                'TO_CANCEL',
                 'CANCELED'
             )
         `);
