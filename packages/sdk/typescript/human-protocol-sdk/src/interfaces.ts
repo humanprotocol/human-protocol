@@ -25,7 +25,8 @@ export interface IStaker {
 
 export interface IEscrowsFilter {
   launcherAddress?: string;
-  role?: number;
+  reputationOracle?: string;
+  recordingOracle?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
@@ -45,4 +46,9 @@ export interface IKeyPair {
   publicKey: string;
   passphrase: string;
   revocationCertificate?: string;
+}
+
+export interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
 }

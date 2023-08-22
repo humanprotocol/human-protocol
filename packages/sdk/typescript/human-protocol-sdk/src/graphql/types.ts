@@ -19,6 +19,49 @@ export type EscrowData = {
   totalFundedAmount: string;
 };
 
+export type HMTStatisticsData = {
+  totalTransferEventCount: string;
+  totalBulkTransferEventCount: string;
+  totalApprovalEventCount: string;
+  totalBulkApprovalEventCount: string;
+  totalValueTransfered: string;
+  holders: string;
+};
+
+export type EscrowStatisticsData = {
+  fundEventCount: string;
+  setupEventCount: string;
+  storeResultsEventCount: string;
+  bulkPayoutEventCount: string;
+  pendingStatusEventCount: string;
+  cancelledStatusEventCount: string;
+  partialStatusEventCount: string;
+  paidStatusEventCount: string;
+  completedStatusEventCount: string;
+  totalEventCount: string;
+  totalEscrowCount: string;
+};
+
+export type EventDayData = {
+  timestamp: string;
+  dailyFundEventCount: string;
+  dailySetupEventCount: string;
+  dailyStoreResultsEventCount: string;
+  dailyBulkPayoutEventCount: string;
+  dailyPendingStatusEventCount: string;
+  dailyCancelledStatusEventCount: string;
+  dailyPartialStatusEventCount: string;
+  dailyPaidStatusEventCount: string;
+  dailyCompletedStatusEventCount: string;
+  dailyTotalEventCount: string;
+  dailyEscrowCount: string;
+  dailyWorkerCount: string;
+  dailyPayoutCount: string;
+  dailyPayoutAmount: string;
+  dailyHMTTransferCount: string;
+  dailyHMTTransferAmount: string;
+};
+
 export type RewardAddedEventData = {
   escrowAddress: string;
   staker: string;
@@ -76,7 +119,6 @@ export type HMTHolder = {
 export type HMTStatistics = {
   totalTransferAmount: number;
   totalHolders: number;
-  totalSupply: number;
   holders: HMTHolder[];
   dailyHMTData: DailyHMTData[];
 };

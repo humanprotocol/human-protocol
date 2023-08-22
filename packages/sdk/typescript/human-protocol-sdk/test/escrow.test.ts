@@ -79,8 +79,7 @@ describe('EscrowClient', () => {
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
       status: vi.fn(),
-      getLaunchedEscrows: vi.fn(),
-      getEscrowsFiltered: vi.fn(),
+      getEscrows: vi.fn(),
       address: ethers.constants.AddressZero,
       canceler: vi.fn(),
       recordingOracle: vi.fn(),
@@ -1385,50 +1384,24 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('getLaunchedEscrows', () => {
+  describe('getEscrows', () => {
     test('should throw an error if requesterAddress is an invalid address', async () => {
       const requesterAddress = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getLaunchedEscrows(requesterAddress)
+        escrowClient.getEscrows({ launcherAddress: requesterAddress })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
-    test('should successfully getLaunchedEscrows', async () => {
+    test('should successfully getEscrows', async () => {
       const requesterAddress = FAKE_ADDRESS;
       const mockLaunchedEscrowsResult = { id: ethers.constants.AddressZero };
 
-      vi.spyOn(escrowClient, 'getLaunchedEscrows').mockImplementation(() =>
+      vi.spyOn(escrowClient, 'getEscrows').mockImplementation(() =>
         Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
       );
 
-      const results = await escrowClient.getLaunchedEscrows(requesterAddress);
-
-      expect(results).toEqual([
-        mockLaunchedEscrowsResult,
-        mockLaunchedEscrowsResult,
-      ]);
-    });
-  });
-
-  describe('getEscrowsFiltered', () => {
-    test('should throw an error if requesterAddress is an invalid address', async () => {
-      const requesterAddress = FAKE_ADDRESS;
-
-      await expect(
-        escrowClient.getEscrowsFiltered({ launcherAddress: requesterAddress })
-      ).rejects.toThrow(ErrorInvalidAddress);
-    });
-
-    test('should successfully getEscrowsFiltered', async () => {
-      const requesterAddress = FAKE_ADDRESS;
-      const mockLaunchedEscrowsResult = { id: ethers.constants.AddressZero };
-
-      vi.spyOn(escrowClient, 'getEscrowsFiltered').mockImplementation(() =>
-        Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
-      );
-
-      const results = await escrowClient.getEscrowsFiltered({
+      const results = await escrowClient.getEscrows({
         launcherAddress: requesterAddress,
       });
 

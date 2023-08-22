@@ -23,18 +23,11 @@ const ESCROW_FRAGMENT = gql`
   }
 `;
 
-export const GET_ESCROWS_BY_LAUNCHER_QUERY = gql`
-  query GetEscrowByLauncher($launcherAddress: String!) {
-    escrows(where: { launcher: $launcherAddress }) {
-      ...EscrowFields
-    }
-  }
-  ${ESCROW_FRAGMENT}
-`;
-
-export const GET_FILTERED_ESCROWS_QUERY = gql`
-  query GetFilteredEscrows(
+export const GET_ESCROWS_QUERY = gql`
+  query GetEscrows(
     $launcherAddress: String
+    $reputationOracle: String
+    $recordingOracle: String
     $status: EscrowStatus
     $from: Int
     $to: Int
@@ -42,6 +35,8 @@ export const GET_FILTERED_ESCROWS_QUERY = gql`
     escrows(
       where: {
         launcher: $launcherAddress
+        reputationOracle: $reputationOracle
+        recordingOracle: $recordingOracle
         status: $status
         createdAt_gte: $from
         createdAt_lte: $to
