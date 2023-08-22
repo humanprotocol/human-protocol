@@ -557,6 +557,14 @@ describe('JobService', () => {
     });
 
     it('should launch a job successfully', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        createAndSetupEscrow: jest
+          .fn()
+          .mockResolvedValue(MOCK_ADDRESS),
+      }));
+      
+      jobService.sendWebhook = jest.fn().mockResolvedValue(true);
+      
       const fundAmount = 10;
 
       const manifest: ImageLabelBinaryManifestDto = {
@@ -569,7 +577,24 @@ describe('JobService', () => {
         requestType: JobRequestType.IMAGE_LABEL_BINARY,
       };
 
-      jest.spyOn(jobService, 'getManifest').mockResolvedValue(manifest);
+      getManifestMock.mockResolvedValue(manifest as ImageLabelBinaryManifestDto);
+  
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      await jobService.launchJob(mockJobEntity as JobEntity);
+
+      expect(mockTokenContract.transfer).toHaveBeenCalledWith(MOCK_ADDRESS, mockJobEntity.fundAmount);
+      expect(mockJobEntity.escrowAddress).toBe(MOCK_ADDRESS);
+      expect(mockJobEntity.status).toBe(JobStatus.LAUNCHED);
+      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobService.getManifest).toHaveBeenCalledWith(mockJobEntity.manifestUrl);
     });
 
     it('should throw an error if the manifest validation failed', async () => {
