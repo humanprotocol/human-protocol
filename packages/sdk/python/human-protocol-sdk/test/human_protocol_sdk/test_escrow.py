@@ -90,6 +90,35 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_config.manifest_url, manifest_url)
         self.assertEqual(escrow_config.hash, hash)
 
+    def test_escrow_config_valid_params(self):
+        recording_oracle_address = "0x1234567890123456789012345678901234567890"
+        reputation_oracle_address = "0x1234567890123456789012345678901234567890"
+        recording_oracle_fee = 10
+        reputation_oracle_fee = 10
+        manifest_url = "http://test:6000"
+        hash = "test"
+
+        escrow_config = EscrowConfig(
+            recording_oracle_address,
+            reputation_oracle_address,
+            recording_oracle_fee,
+            reputation_oracle_fee,
+            manifest_url,
+            hash,
+            True,
+        )
+
+        self.assertEqual(
+            escrow_config.recording_oracle_address, recording_oracle_address
+        )
+        self.assertEqual(
+            escrow_config.reputation_oracle_address, reputation_oracle_address
+        )
+        self.assertEqual(escrow_config.recording_oracle_fee, recording_oracle_fee)
+        self.assertEqual(escrow_config.reputation_oracle_fee, reputation_oracle_fee)
+        self.assertEqual(escrow_config.manifest_url, manifest_url)
+        self.assertEqual(escrow_config.hash, hash)
+
     def test_escrow_config_invalid_address(self):
         invalid_address = "invalid_address"
         valid_address = "0x1234567890123456789012345678901234567890"
