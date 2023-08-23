@@ -131,6 +131,8 @@ export class PaymentService {
       userId,
       transaction: data.paymentId,
       status: PaymentStatus.PENDING,
+      amount: div(paymentData.amount_received, 100),
+      currency: paymentData.currency,
     });
 
     if (!paymentEntity) {

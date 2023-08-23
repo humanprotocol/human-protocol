@@ -208,9 +208,10 @@ describe('PaymentService', () => {
       };
 
       const paymentData = {
-        status: 'succeeded',
+        status: StripePaymentStatus.SUCCEEDED,
         amount: 100,
-        currency: Currency.EUR,
+        amount_received: 100,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -229,6 +230,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: StripePaymentStatus.CANCELED,
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -247,6 +250,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -265,6 +270,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: 'unknown_status',
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
