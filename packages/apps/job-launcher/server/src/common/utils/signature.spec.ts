@@ -7,8 +7,7 @@ describe('Signature utility', () => {
   describe('verifySignature', () => {
     it('should return true for valid signature', async () => {
         const message = "Hello, this is a signed message!";
-        const wallet = new ethers.Wallet(MOCK_PRIVATE_KEY);
-        const signature = await wallet.signMessage(message)
+        const signature = await signMessage(message, MOCK_PRIVATE_KEY)
 
         const result = verifySignature(message, signature, wallet.address);
 
@@ -17,9 +16,8 @@ describe('Signature utility', () => {
 
     it('should throw conflict exception for signature not verified', async () => {
         const message = "Hello, this is a signed message!";
-        const wallet = new ethers.Wallet(MOCK_PRIVATE_KEY);
 
-        const invalidSignature = await wallet.signMessage(message)
+        const invalidSignature = await signMessage(message, MOCK_PRIVATE_KEY)
 
         expect(() => {
             verifySignature(message, invalidSignature, MOCK_ADDRESS);
@@ -40,8 +38,7 @@ describe('Signature utility', () => {
   describe('recoverSigner', () => {
     it('should recover the correct signer', async () => {
         const message = "value";
-        const wallet = new ethers.Wallet(MOCK_PRIVATE_KEY);
-        const signature = await wallet.signMessage(message)
+        const signature = await signMessage(message, MOCK_PRIVATE_KEY)
 
         const result = recoverSigner(message, signature);
 
