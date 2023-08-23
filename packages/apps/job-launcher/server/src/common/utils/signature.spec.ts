@@ -9,7 +9,7 @@ describe('Signature utility', () => {
         const message = "Hello, this is a signed message!";
         const signature = await signMessage(message, MOCK_PRIVATE_KEY)
 
-        const result = verifySignature(message, signature, wallet.address);
+        const result = verifySignature(message, signature, MOCK_ADDRESS);
 
         expect(result).toBe(true);
     });
@@ -18,9 +18,10 @@ describe('Signature utility', () => {
         const message = "Hello, this is a signed message!";
 
         const invalidSignature = await signMessage(message, MOCK_PRIVATE_KEY)
+        const invalidAddress = '0x1234567890123456789012345678901234567892';
 
         expect(() => {
-            verifySignature(message, invalidSignature, MOCK_ADDRESS);
+            verifySignature(message, invalidSignature, invalidAddress);
         }).toThrow(ErrorSignature.SignatureNotVerified);
     });
 
@@ -42,7 +43,7 @@ describe('Signature utility', () => {
 
         const result = recoverSigner(message, signature);
 
-        expect(result).toBe(wallet.address);
+        expect(result).toBe(MOCK_ADDRESS);
     });
 
     it('should throw conflict exception for invalid signature', () => {
