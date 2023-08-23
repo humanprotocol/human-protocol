@@ -3,39 +3,32 @@ import { ethers } from "ethers";
 import { ErrorSignature } from "../constants/errors";
 
 export function verifySignature(
-    message: string,
-    signature: string,
-    address: string,
-  ): boolean {
-    const messageBytes = ethers.utils.toUtf8Bytes(message);
-    const signer = recoverSigner(messageBytes, signature);
+  message: string,
+  signature: string,
+  address: string,
+): boolean {
+  const signer = recoverSigner(message, signature);
 
-    if (signer.toLowerCase() !== address.toLowerCase()) {
-      throw new ConflictException(
-        ErrorSignature.SignatureNotVerified);
-    }
-
-    return true;
-  }
-
-export function recoverSigner(message: object, signature: string): string {  
-  try {  
-    const messageHash = ethers.utils.hashMessage(JSON.stringify(message));
-    const signer = ethers.utils.verifyMessage(messageHash, signature);
-
-    return signer;
-  } catch (e) {
+  if (signer.toLowerCase() !== address.toLowerCase()) {
     throw new ConflictException(
-      ErrorSignature.InvalidSignature);
+      ErrorSignature.SignatureNotVerified);
   }
+
+  return true;
 }
 
 export async function signMessage(message: string, privateKey: string): Promise<string> {
   const wallet = new ethers.Wallet(privateKey);
+  const signature = await wallet.signMessage(message);
 
-  const messageBytes = ethers.utils.toUtf8Bytes(message);
-  const messageHash = ethers.utils.hashMessage(JSON.stringify(messageBytes));
-  const signature = await wallet.signMessage(messageHash);
+  return signature;
+}
 
-  return signature
+export function recoverSigner(message: string, signature: string): string {  
+  try {  
+    return ethers.utils.verifyMessage(message, signature);
+  } catch (e) {
+    throw new ConflictException(
+      ErrorSignature.InvalidSignature);
+  }
 }

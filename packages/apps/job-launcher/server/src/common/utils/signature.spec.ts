@@ -7,10 +7,8 @@ describe('Signature utility', () => {
   describe('verifySignature', () => {
     it('should return true for valid signature', async () => {
         const message = "Hello, this is a signed message!";
-        const messageBytes = ethers.utils.toUtf8Bytes(message);
-        const messageHash = ethers.utils.hashMessage(JSON.stringify(messageBytes));
         const wallet = new ethers.Wallet(MOCK_PRIVATE_KEY);
-        const signature = await wallet.signMessage(messageHash)
+        const signature = await wallet.signMessage(message)
 
         const result = verifySignature(message, signature, wallet.address);
 
@@ -41,9 +39,9 @@ describe('Signature utility', () => {
 
   describe('recoverSigner', () => {
     it('should recover the correct signer', async () => {
-        const message = { key: "value" };
+        const message = "value";
         const wallet = new ethers.Wallet(MOCK_PRIVATE_KEY);
-        const signature = await wallet.signMessage(ethers.utils.hashMessage(JSON.stringify(message)))
+        const signature = await wallet.signMessage(message)
 
         const result = recoverSigner(message, signature);
 
@@ -52,11 +50,10 @@ describe('Signature utility', () => {
 
     it('should throw conflict exception for invalid signature', () => {
         const message = "Hello, this is a signed message!";
-        const messageBytes = ethers.utils.toUtf8Bytes(message);
         const invalidSignature = "0xInvalidSignature";
   
         expect(() => {
-            recoverSigner(messageBytes, invalidSignature);
+            recoverSigner(message, invalidSignature);
         }).toThrow(ErrorSignature.InvalidSignature);
       });
   });
