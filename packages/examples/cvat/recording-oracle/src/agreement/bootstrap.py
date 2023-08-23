@@ -144,6 +144,14 @@ def bootstrap_ci(
         case _:
             raise ValueError(f"Algorithm '{algorithm}' is not available!")
 
-    ci_low, ci_high = np.percentile(theta_b, q * 100)
+    # sanity checks
+    if np.any(np.isnan(q)):
+        warn(f"q contains NaN values. Input data is probably invalid. Interval will be (nan, nan). data: {data}")
+        ci_low = ci_high = np.nan
+    else:
+        if np.any((q < 0.0) | (q > 1.0)):
+            warn(f"q ({q}) out of bounds. Input data is probably invalid. q will be clipped into interval [0.0, 1.0]. data: {data}")
+            q = np.clip(q, 0.0, 1.0)
+        ci_low, ci_high = np.percentile(theta_b, q * 100)
 
     return (ci_low, ci_high), theta_b
