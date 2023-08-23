@@ -79,14 +79,14 @@ export const Header: FC = () => {
   const renderNavLinks = (orientation = 'horizontal') => (
     <Stack
       direction={orientation === 'horizontal' ? 'row' : 'column'}
-      spacing={3}
+      spacing={2}
     >
       {NAV_LINKS.map((nav) => (
         <Link
           key={nav.title}
           to={nav.href}
           target={nav.external ? '_blank' : '_self'}
-          style={{ textDecoration: 'none' }}
+          style={{ textDecoration: 'none', padding: '6px 8px' }}
         >
           <Typography color="primary" variant="body2" fontWeight={600}>
             {nav.title}
@@ -206,7 +206,7 @@ export const Header: FC = () => {
                     </Box>
                   )}
                   {!isDownLg && (
-                    <Box display="flex" alignItems="center" gap={2}>
+                    <Box display="flex" alignItems="center" gap={3}>
                       {/* {isDownLg && (
                         <IconButton color="primary" onClick={toggleSearchBox}>
                           <SearchIcon />
