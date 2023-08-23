@@ -42,10 +42,10 @@ import { Web3Service } from '../web3/web3.service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
-  ImageLabelBinaryFinalResultDto,
-  ImageLabelBinaryManifestDto,
+  CvatManifestDto,
   JobFortuneDto,
   JobImageLabelBinaryDto,
+  CvatFinalResultDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -277,12 +277,12 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobImageLabelBinaryDto = {
       chainId: MOCK_CHAIN_ID,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
       dataUrl: MOCK_FILE_URL,
       labels: ['cat', 'dog'],
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      requesterAccuracyTarget: 0.95,
+      minQuality: 0.95,
       fundAmount: 10,
+      gtUrl: '',
     };
 
     let getUserBalanceMock: any;
@@ -505,7 +505,7 @@ describe('JobService', () => {
     });
 
     it('should throw an error if the manifest does not exist', async () => {
-      getManifestMock.mockResolvedValue(null!);
+      getManifestMock.mockResolvedValue(null);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId,
@@ -584,27 +584,31 @@ describe('JobService', () => {
     });
 
     it('should launch a job successfully', async () => {
-      const fundAmount = 10;
-
       (EscrowClient.build as any).mockImplementation(() => ({
         createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       }));
 
       jobService.sendWebhook = jest.fn().mockResolvedValue(true);
 
-      const manifest: ImageLabelBinaryManifestDto = {
-        dataUrl: MOCK_FILE_URL,
-        labels: ['label1'],
-        requesterAccuracyTarget: 1,
-        submissionsRequired: 10,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+      const manifest: CvatManifestDto = {
+        data: {
+          data_url: MOCK_FILE_URL,
+        },
+        annotation: {
+          labels: [{ name: 'label1' }],
+          description: MOCK_REQUESTER_DESCRIPTION,
+          type: JobRequestType.IMAGE_LABEL_BINARY,
+          job_size: 10,
+          max_time: 300,
+        },
+        validation: {
+          min_quality: 1,
+          val_size: 2,
+          gt_url: '',
+        },
       };
 
-      getManifestMock.mockResolvedValue(
-        manifest as ImageLabelBinaryManifestDto,
-      );
+      getManifestMock.mockResolvedValue(manifest as CvatManifestDto);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -630,18 +634,20 @@ describe('JobService', () => {
     });
 
     it('should throw an error if the manifest validation failed', async () => {
-      const invalidManifest: Partial<ImageLabelBinaryManifestDto> = {
-        dataUrl: MOCK_FILE_URL,
-        labels: ['label1'],
-        requesterAccuracyTarget: 1,
-        submissionsRequired: 10,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+      const invalidManifest: Partial<CvatManifestDto> = {
+        data: {
+          data_url: MOCK_FILE_URL,
+        },
+        annotation: {
+          labels: [{ name: 'label1' }],
+          description: MOCK_REQUESTER_DESCRIPTION,
+          type: JobRequestType.IMAGE_LABEL_BINARY,
+          job_size: 10,
+          max_time: 300,
+        },
       };
 
-      getManifestMock.mockResolvedValue(
-        invalidManifest as ImageLabelBinaryManifestDto,
-      );
+      getManifestMock.mockResolvedValue(invalidManifest as CvatManifestDto);
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
@@ -730,14 +736,22 @@ describe('JobService', () => {
   });
 
   describe('saveManifest with image label binary request type', () => {
-    const imageLabelBinaryManifestParams = {
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: 10,
-      dataUrl: MOCK_FILE_URL,
-      labels: ['cat', 'dog'],
-      requesterAccuracyTarget: 0.95,
+    const manifest: CvatManifestDto = {
+      data: {
+        data_url: MOCK_FILE_URL,
+      },
+      annotation: {
+        labels: [{ name: 'label1' }],
+        description: MOCK_REQUESTER_DESCRIPTION,
+        type: JobRequestType.IMAGE_LABEL_BINARY,
+        job_size: 10,
+        max_time: 300,
+      },
+      validation: {
+        min_quality: 1,
+        val_size: 2,
+        gt_url: '',
+      },
     };
 
     let uploadFilesMock: any;
@@ -758,16 +772,14 @@ describe('JobService', () => {
         },
       ]);
 
-      const result = await jobService.saveManifest(
-        imageLabelBinaryManifestParams,
-      );
+      const result = await jobService.saveManifest(manifest);
 
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -777,13 +789,11 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(
-        jobService.saveManifest(imageLabelBinaryManifestParams),
-      ).rejects.toThrowError(
+      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -794,11 +804,11 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(
-        jobService.saveManifest(imageLabelBinaryManifestParams),
-      ).rejects.toThrowError(new Error(errorMessage));
+      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
+        new Error(errorMessage),
+      );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -917,7 +927,7 @@ describe('JobService', () => {
     });
 
     it('should download and return the image binary result', async () => {
-      const imageBinaryResult: ImageLabelBinaryFinalResultDto = {
+      const imageBinaryResult: CvatFinalResultDto = {
         url: 'https://example.com',
         final_answer: 'good',
         correct: ['good', 'good', 'good'],
