@@ -33,7 +33,11 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobImageLabelBinaryDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.IMAGE_LABEL_BINARY, data);
+    return this.jobService.createJob(
+      req.user.id,
+      JobRequestType.IMAGE_LABEL_BINARY,
+      data,
+    );
   }
 
   @Get('/result')
