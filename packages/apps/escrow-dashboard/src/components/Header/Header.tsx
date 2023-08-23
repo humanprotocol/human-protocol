@@ -162,7 +162,7 @@ export const Header: FC = () => {
                 padding: {
                   xs: '22px 8px 18px',
                   sm: '22px 28px 18px',
-                  md: '22px 52px 18px',
+                  md: '29px 77px 20px 60px',
                 },
               }}
             >
@@ -188,7 +188,15 @@ export const Header: FC = () => {
                     }}
                   >
                     <img src={logoSvg} alt="logo" />
-                    <Typography variant="h6" color="primary" ml="10px">
+                    <Typography
+                      sx={{
+                        fontSize: '16px',
+                        lineHeight: 1.5,
+                        letterSpacing: '0.15px',
+                      }}
+                      color="primary"
+                      ml="10px"
+                    >
                       Dashboard
                     </Typography>
                   </Link>

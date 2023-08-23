@@ -106,7 +106,8 @@ export const TokenView: FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
-          mt: 4,
+          mt: '52px',
+          pr: 3,
         }}
       >
         <Typography
@@ -142,7 +143,15 @@ export const TokenView: FC = () => {
                 alt={name}
                 style={{ width: '32px', height: '32px', borderRadius: '100%' }}
               />
-              <Typography variant="body2" color="primary" sx={{ ml: 1 }}>
+              <Typography
+                color="primary"
+                sx={{
+                  fontSize: '12px',
+                  letterSpacing: '0.4px',
+                  lineHeight: 1.6,
+                  ml: 1,
+                }}
+              >
                 {name}
               </Typography>
             </Link>

@@ -11,7 +11,12 @@ export const ViewTitle: FC<ViewTitleProps> = ({ title, iconUrl }) => (
     <Box height="100%">
       <Box component="img" src={iconUrl} alt={title} />
     </Box>
-    <Typography variant="h4" color="primary" whiteSpace="nowrap">
+    <Typography
+      variant="h4"
+      color="primary"
+      whiteSpace="nowrap"
+      sx={{ ml: '-1px' }}
+    >
       {title}
     </Typography>
   </Box>

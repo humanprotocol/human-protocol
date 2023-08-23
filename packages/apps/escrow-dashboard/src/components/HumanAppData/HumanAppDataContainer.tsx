@@ -13,7 +13,7 @@ export const HumanAppDataContainer: FC = () => {
   useHumanAppData();
 
   return (
-    <Box id="human-app-data" mt={{ xs: 4, md: 8 }}>
+    <Box id="human-app-data" mt={{ xs: 4, md: '51px' }}>
       <Box
         sx={{
           display: 'flex',
@@ -21,7 +21,8 @@ export const HumanAppDataContainer: FC = () => {
           justifyContent: { xs: 'flex-start', lg: 'space-between' },
           alignItems: { xs: 'flex-start', lg: 'center' },
           gap: 4,
-          mb: 4,
+          mb: '40px',
+          px: '12px',
         }}
       >
         <ViewTitle title="HUMAN App data" iconUrl={networkSvg} />

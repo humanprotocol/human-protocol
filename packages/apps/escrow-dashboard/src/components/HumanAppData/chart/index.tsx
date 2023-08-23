@@ -81,7 +81,7 @@ export const HumanAppDataChart = ({
           tickLine={false}
           tick={{
             fill: '#320A8D',
-            fontSize: '14px',
+            fontSize: '10px',
             fontFamily: 'Inter',
             fontWeight: 500,
           }}
@@ -94,7 +94,7 @@ export const HumanAppDataChart = ({
           tickLine={false}
           tick={{
             fill: '#320A8D',
-            fontSize: '14px',
+            fontSize: '10px',
             fontFamily: 'Inter',
             fontWeight: 500,
           }}

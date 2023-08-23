@@ -2,23 +2,17 @@ import Box from '@mui/material/Box';
 import { FC, PropsWithChildren } from 'react';
 
 export const PageWrapper: FC<PropsWithChildren<{}>> = ({ children }) => (
-  <Box sx={{ px: { xs: 0, md: 3, lg: 4, xl: 5 } }}>
+  <Box sx={{ px: { xs: 0, md: 3, lg: 5, xl: 7 } }}>
     <Box
       sx={{
         minHeight: 'calc(100vh - 180px)',
         background: '#f6f7fe',
         boxSizing: 'border-box',
-        borderRadius: {
-          xs: '0px',
-          md: '24px',
-          lg: '32px',
-          xl: '40px',
-        },
+        borderRadius: { xs: '0px', md: '24px' },
         padding: {
           xs: '24px 16px',
           md: '42px 54px',
-          lg: '56px 72px',
-          xl: '70px 90px',
+          xl: '58px 104px 104px 104px',
         },
       }}
     >

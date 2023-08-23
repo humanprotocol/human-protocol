@@ -17,7 +17,7 @@ export const NewsView = () => {
         >
           <Box
             sx={{
-              padding: '32px',
+              padding: '22px 24px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -31,7 +31,7 @@ export const NewsView = () => {
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 px: { xs: 0, md: 3 },
-                pt: { xs: 0, md: 2 },
+                pt: { xs: 0, md: '20px' },
               }}
             >
               <Box
@@ -41,11 +41,15 @@ export const NewsView = () => {
                   background: '#fff',
                   boxShadow:
                     '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
-                  px: 2,
                   color: '#320A8D',
                   fontSize: '12px',
+                  letterSpacing: '0.4px',
                   lineHeight: '266%',
                   mb: '20px',
+                  width: '72px',
+                  height: '32px',
+                  textAlign: 'center',
+                  boxSizing: 'border-box',
                 }}
               >
                 NEWS
@@ -54,34 +58,39 @@ export const NewsView = () => {
                 sx={{
                   lineHeight: '150%',
                   fontSize: '24px',
+                  maxWidth: '375px',
                 }}
                 color="primary"
-                mb={2}
+                mb="14px"
               >
                 {data?.title}
               </Typography>
-              <Typography variant="body2" color="primary" maxWidth={450} mb={4}>
+              <Typography
+                sx={{
+                  lineHeight: '143%',
+                  fontSize: '14px',
+                  maxWidth: '375px',
+                  letterSpacing: '0.17px',
+                }}
+                color="primary"
+                mb="38px"
+              >
                 {data?.description}
               </Typography>
             </Box>
             {data?.image && (
               <Box
+                component="img"
+                src={data?.image}
+                alt="news"
                 sx={{
                   borderRadius: '8px',
                   overflow: 'hidden',
+                  width: '100%',
+                  height: { xs: '160px', sm: '248px' },
+                  objectFit: 'cover',
                 }}
-              >
-                <Box
-                  component="img"
-                  src={data?.image}
-                  alt="news"
-                  sx={{
-                    width: '100%',
-                    maxHeight: { xs: '160px', sm: '240px' },
-                    objectFit: 'cover',
-                  }}
-                />
-              </Box>
+              />
             )}
           </Box>
         </CardActionArea>

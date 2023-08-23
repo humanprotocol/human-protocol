@@ -32,8 +32,8 @@ export const TextBlock: FC<TextBlockProps> = ({
           <Typography
             variant="h2"
             color="primary"
-            lineHeight={1}
-            marginTop={3}
+            lineHeight={1.2}
+            marginTop={2}
             sx={{ fontSize: { xs: 32, md: 42, xl: 60 } }}
           >
             {Number.isNaN(Number(value))

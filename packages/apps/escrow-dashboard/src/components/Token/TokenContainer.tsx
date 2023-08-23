@@ -11,7 +11,7 @@ export const TokenContainer: FC = () => {
   usePollTokenStats();
 
   return (
-    <Box mt={{ xs: 4, md: 8 }} id="token">
+    <Box mt={{ xs: 4, md: '51px' }} id="token">
       <ViewTitle title="Token" iconUrl={tokenSvg} />
       <Box mt={{ xs: 4, md: 8 }}>
         <TokenView />

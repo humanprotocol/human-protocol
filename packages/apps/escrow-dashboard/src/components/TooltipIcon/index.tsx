@@ -36,6 +36,7 @@ export const TooltipIcon = ({
           height: '32px',
           borderRadius: '50%',
           border: '1px solid rgba(203, 207, 232, 0.80)',
+          boxSizing: 'border-box',
           boxShadow:
             '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
           background: '#fff',
@@ -51,8 +52,8 @@ export const TooltipIcon = ({
           position: 'absolute',
           top: position === 'topRight' ? '24px' : 'auto',
           right: position === 'topRight' ? '32px' : 'auto',
-          bottom: position === 'bottomLeft' ? '24px' : 'auto',
-          left: position === 'bottomLeft' ? '32px' : 'auto',
+          bottom: position === 'bottomLeft' ? '20px' : 'auto',
+          left: position === 'bottomLeft' ? '30px' : 'auto',
         }}
       >
         i

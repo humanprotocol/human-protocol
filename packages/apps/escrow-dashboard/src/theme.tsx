@@ -31,6 +31,8 @@ const theme = createTheme({
     h4: {
       fontSize: '34px',
       fontWeight: 600,
+      lineHeight: '123.5%',
+      letterSpacing: '0.25px',
       '@media (max-width: 576px)': {
         fontSize: '28px',
       },

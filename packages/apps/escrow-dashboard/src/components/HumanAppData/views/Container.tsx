@@ -116,7 +116,7 @@ export const ChartContainer = ({
             width: '100%',
             left: 0,
             height: '2px !important',
-            marginTop: '46px',
+            marginTop: '42px',
           },
         }}
       >
@@ -125,7 +125,12 @@ export const ChartContainer = ({
             key={item.value}
             label={item.label}
             value={item.value}
-            sx={{ alignItems: 'flex-start' }}
+            sx={{
+              alignItems: 'flex-start',
+              padding: '9px 16px',
+              lineHeight: '24px',
+              minHeight: 'unset',
+            }}
           />
         ))}
       </Tabs>
@@ -134,9 +139,10 @@ export const ChartContainer = ({
           flex: 1,
           borderRadius: '8px',
           background: '#F6F7FE',
-          py: { xs: 5, md: 10 },
+          pt: { xs: 5, md: 10 },
+          pb: { xs: 5, md: 7 },
           px: { xs: 2, md: 5 },
-          ml: { xs: 4, md: 6, xl: 12 },
+          ml: { xs: 4, md: 6, xl: '100px' },
           minHeight: 400,
           overflowX: 'auto',
         }}

@@ -47,7 +47,9 @@ export const SolvedTasksView: FC = () => {
   }, []);
 
   return (
-    <CardContainer sxProps={{ padding: { xs: '24px 32px', md: '48px 64px' } }}>
+    <CardContainer
+      sxProps={{ padding: { xs: '24px 32px', md: '80px 59px 74px 78px' } }}
+    >
       <Grid container sx={{ height: '100%' }} spacing={2}>
         <Grid item xs={12} md={5} xl={4}>
           <Box mb={2}>
@@ -120,7 +122,7 @@ export const SolvedTasksView: FC = () => {
                 tickLine={false}
                 tick={{
                   fill: '#320A8D',
-                  fontSize: '14px',
+                  fontSize: '10px',
                   fontFamily: 'Inter',
                   fontWeight: 500,
                 }}
@@ -133,7 +135,7 @@ export const SolvedTasksView: FC = () => {
                 tickLine={false}
                 tick={{
                   fill: '#320A8D',
-                  fontSize: '14px',
+                  fontSize: '10px',
                   fontFamily: 'Inter',
                   fontWeight: 500,
                 }}

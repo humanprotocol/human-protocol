@@ -73,6 +73,7 @@ export const HumanAppDataView: FC = () => {
               borderColor: 'text.secondary',
               minWidth: 50,
             }}
+            size="small"
           >
             {label}
           </ToggleButton>

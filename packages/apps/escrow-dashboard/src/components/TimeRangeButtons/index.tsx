@@ -47,6 +47,7 @@ export default function TimeRangeButtons({
             fontWeight: 500,
             borderColor: 'text.secondary',
             minWidth: 50,
+            padding: '10px 11px',
           }}
         >
           {label}
