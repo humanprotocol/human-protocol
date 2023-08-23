@@ -5,7 +5,6 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  TokenId,
 } from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
 
@@ -53,15 +52,11 @@ export class PaymentCreateDto {
 }
 
 export class GetRateDto {
-  @ApiProperty({
-    enum: TokenId,
-  })
-  @IsEnum(TokenId)
-  public token: TokenId;
+  @ApiProperty()
+  @IsString()
+  public from: string;
 
-  @ApiProperty({
-    enum: Currency,
-  })
-  @IsEnum(Currency)
-  public currency: Currency;
+  @ApiProperty()
+  @IsString()
+  public to: string;
 }

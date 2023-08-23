@@ -121,19 +121,23 @@ export class JobService {
       ConfigNames.JOB_LAUNCHER_FEE,
     )!;
     const fee = mul(div(feePercentage, 100), fundAmount);
-    const usdTotalAmount = mul(add(fundAmount, fee), rate);
+    const usdTotalAmount = add(fundAmount, fee);
 
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
 
+    const tokenFundAmount = mul(fundAmount, rate);
+    const tokenFee = mul(fee, rate);
+    const tokenTotalAmount = add(tokenFundAmount, tokenFee);
+
     const { manifestUrl, manifestHash } = await this.saveManifest({
       ...dto,
       requestType,
       submissionsRequired,
       requesterDescription,
-      fundAmount,
+      fundAmount: tokenFundAmount,
     });
 
     const jobEntity = await this.jobRepository.create({
@@ -141,8 +145,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee,
-      fundAmount,
+      fee: tokenFee,
+      fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -157,9 +161,9 @@ export class JobService {
         userId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
-        amount: -add(fundAmount, fee),
+        amount: -tokenTotalAmount,
         currency: TokenId.HMT,
-        rate,
+        rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
     } catch (error) {

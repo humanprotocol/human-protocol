@@ -54,7 +54,9 @@ import { JobService } from './job.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
+import { div, mul } from '../../common/utils/decimal';
 
+const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
@@ -72,7 +74,7 @@ jest.mock('@human-protocol/sdk', () => ({
 }));
 
 jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 1.5),
+  getRate: jest.fn().mockImplementation(() => rate),
 }));
 
 describe('JobService', () => {
@@ -154,7 +156,6 @@ describe('JobService', () => {
   });
 
   describe('createJob', () => {
-    const rate = 0.5;
     const userId = 1;
     const fortuneJobDto: JobFortuneDto = {
       chainId: MOCK_CHAIN_ID,
@@ -177,7 +178,6 @@ describe('JobService', () => {
 
     it('should create a job successfully', async () => {
       const fundAmount = 10;
-      const rate = 1.5;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
       const userBalance = 25;
@@ -191,8 +191,8 @@ describe('JobService', () => {
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,
-        amount: -(fundAmount + fee),
-        rate: rate,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
       expect(jobRepository.create).toHaveBeenCalledWith({
@@ -200,8 +200,8 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee,
-        fundAmount,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -229,8 +229,8 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee,
-        fundAmount,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -273,7 +273,6 @@ describe('JobService', () => {
   });
 
   describe('createJob with image label binary type', () => {
-    const rate = 0.5;
     const userId = 1;
 
     const imageLabelBinaryJobDto: JobImageLabelBinaryDto = {
@@ -316,8 +315,8 @@ describe('JobService', () => {
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,
-        amount: -(fundAmount + fee),
-        rate: 1.5,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
         status: PaymentStatus.SUCCEEDED,
       });
       expect(jobRepository.create).toHaveBeenCalledWith({
@@ -325,8 +324,8 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee,
-        fundAmount: fundAmount,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -354,8 +353,8 @@ describe('JobService', () => {
         userId,
         manifestUrl: expect.any(String),
         manifestHash: expect.any(String),
-        fee,
-        fundAmount,
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });

@@ -32,7 +32,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { add, mul } from '../../common/utils/decimal';
+import { add, div, mul } from '../../common/utils/decimal';
 
 @Injectable()
 export class PaymentService {
@@ -70,8 +70,9 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency } = dto;
 
+    const amountInCents = Math.ceil(mul(amount, 100));
     const params: Stripe.PaymentIntentCreateParams = {
-      amount: mul(amount, 100),
+      amount: amountInCents,
       currency: currency,
     };
 
@@ -97,13 +98,13 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, currency);
+    const rate = await getRate(currency, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount,
+      amount: div(amountInCents, 100),
       currency,
       rate,
       transaction: paymentIntent.id,
@@ -228,14 +229,14 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, tokenId);
+    const rate = await getRate(tokenId, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount: mul(amount, rate),
-      currency: TokenId.HMT,
+      amount: amount,
+      currency: tokenId,
       rate,
       chainId: dto.chainId,
       transaction: dto.transactionHash,
@@ -252,7 +253,7 @@ export class PaymentService {
     });
 
     const totalAmount = paymentEntities.reduce((total, payment) => {
-      return add(total, payment.amount);
+      return add(total, mul(payment.amount, payment.rate));
     }, 0);
 
     return totalAmount;

@@ -31,7 +31,7 @@ import { mul } from '../../common/utils/decimal';
 jest.mock('@human-protocol/sdk');
 
 jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 1.5)
+  getRate: jest.fn().mockImplementation(() => 1.5),
 }));
 
 describe('PaymentService', () => {
@@ -150,7 +150,8 @@ describe('PaymentService', () => {
       expect(result).toEqual(paymentIntent.client_secret);
     });
 
-    it('should throw a bad request exception if transaction already exist', async () => {0
+    it('should throw a bad request exception if transaction already exist', async () => {
+      0;
       const dto = {
         amount: 100,
         currency: Currency.USD,
@@ -172,7 +173,8 @@ describe('PaymentService', () => {
       ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
     });
 
-    it('should throw a bad request exception if the payment intent creation fails', async () => {0
+    it('should throw a bad request exception if the payment intent creation fails', async () => {
+      0;
       const dto = {
         amount: 100,
         currency: Currency.USD,
@@ -360,7 +362,7 @@ describe('PaymentService', () => {
         source: PaymentSource.CRYPTO,
         type: PaymentType.DEPOSIT,
         currency: TokenId.HMT,
-        amount: mul(10, 1.5),
+        amount: 10,
         rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
         chainId: ChainId.LOCALHOST,
@@ -538,7 +540,7 @@ describe('PaymentService', () => {
           status: PaymentStatus.SUCCEEDED,
         },
         {
-          amount: -(180),
+          amount: -180,
           rate: 1,
           type: PaymentType.WITHDRAWAL,
           status: PaymentStatus.SUCCEEDED,

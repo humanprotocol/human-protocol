@@ -14,8 +14,9 @@ export async function getRate(from: string, to: string): Promise<number> {
 
   if (Object.values(TokenId).includes(to as TokenId)) {
     [from, to] = [CoingeckoTokenId[to], from];
-  } else {
     reversed = true;
+  } else {
+    [from, to] = [CoingeckoTokenId[from], to];
   }
 
   const httpService = new HttpService();
