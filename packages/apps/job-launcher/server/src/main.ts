@@ -63,7 +63,11 @@ async function bootstrap() {
   const host = configService.get<string>(ConfigNames.HOST)!;
   const port = configService.get<string>(ConfigNames.PORT)!;
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    }),
+  );
 
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
