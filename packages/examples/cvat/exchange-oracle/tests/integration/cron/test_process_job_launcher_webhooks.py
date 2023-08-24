@@ -38,7 +38,6 @@ class ServiceIntegrationTest(unittest.TestCase):
 
     @patch("src.cvat.create_job.cvat_api")
     def test_process_job_launcher_webhooks_successful(self, mock_cvat_api):
-
         mock_cvat_api.create_cloudstorage.return_value.id = 1
         mock_cvat_api.create_project.return_value.id = 1
         mock_cvat_api.create_task.return_value.id = 1
