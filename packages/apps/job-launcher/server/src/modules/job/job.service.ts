@@ -1,5 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { validate } from 'class-validator';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
+import {
+  ChainId,
+  EscrowClient,
+  NETWORKS,
+  StorageClient,
+  StorageCredentials,
+  StorageParams,
+  UploadFile,
+} from '@human-protocol/sdk';
+import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
   BadRequestException,
@@ -11,11 +24,12 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { validate } from 'class-validator';
 import { BigNumber } from 'ethers';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
-import { PaymentService } from '../payment/payment.service';
-import { JobEntity } from './job.entity';
-import { JobRepository } from './job.repository';
+import { firstValueFrom } from 'rxjs';
+import { add, div, lt, mul } from '../../common/utils/decimal';
+import { QueryFailedError } from 'typeorm';
+import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
   ErrorEscrow,
@@ -23,25 +37,7 @@ import {
   ErrorPayment,
   ErrorPostgres,
 } from '../../common/constants/errors';
-import {
-  ChainId,
-  EscrowClient,
-  NETWORKS,
-  StorageClient,
-  StorageCredentials,
-  StorageParams,
-  UploadFile,
-} from '@human-protocol/sdk';
-import {
-  FortuneFinalResultDto,
-  FortuneManifestDto,
-  ImageLabelBinaryFinalResultDto,
-  ImageLabelBinaryManifestDto,
-  JobFortuneDto,
-  JobImageLabelBinaryDto,
-  SaveManifestDto,
-  SendWebhookDto,
-} from './job.dto';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   Currency,
   PaymentSource,
@@ -49,19 +45,23 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { firstValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { Web3Service } from '../web3/web3.service';
-import { ConfigNames } from '../../common/config';
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
-import { RoutingProtocolService } from './routing-protocol.service';
-import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
-import { add, mul, div, lt } from '../../common/utils/decimal';
-import { QueryFailedError } from 'typeorm';
+import { PaymentRepository } from '../payment/payment.repository';
+import { PaymentService } from '../payment/payment.service';
+import { Web3Service } from '../web3/web3.service';
+import {
+  CvatFinalResultDto,
+  CvatManifestDto,
+  FortuneFinalResultDto,
+  FortuneManifestDto,
+  JobFortuneDto,
+  JobCvatDto,
+  SaveManifestDto,
+  SendWebhookDto,
+} from './job.dto';
+import { JobEntity } from './job.entity';
+import { JobRepository } from './job.repository';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 @Injectable()
 export class JobService {
@@ -104,10 +104,10 @@ export class JobService {
   public async createJob(
     userId: number,
     requestType: JobRequestType,
-    dto: JobFortuneDto | JobImageLabelBinaryDto,
+    dto: JobFortuneDto | JobCvatDto,
   ): Promise<number> {
-    const { chainId, submissionsRequired, requesterDescription, fundAmount } =
-      dto;
+    let manifestUrl, manifestHash;
+    const { chainId, fundAmount } = dto;
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
@@ -132,13 +132,39 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    const { manifestUrl, manifestHash } = await this.saveManifest({
-      ...dto,
-      requestType,
-      submissionsRequired,
-      requesterDescription,
-      fundAmount: tokenFundAmount,
-    });
+    if (requestType == JobRequestType.FORTUNE) {
+      ({ manifestUrl, manifestHash } = await this.saveManifest({
+        ...(dto as JobFortuneDto),
+        requestType,
+        fundAmount: tokenFundAmount,
+      }));
+    } else {
+      dto = dto as JobCvatDto;
+      ({ manifestUrl, manifestHash } = await this.saveManifest({
+        data: {
+          data_url: dto.dataUrl,
+        },
+        annotation: {
+          labels: dto.labels.map((item) => ({ name: item })),
+          description: dto.requesterDescription,
+          type: requestType,
+          job_size: Number(
+            this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
+          ),
+          max_time: Number(
+            this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
+          ),
+        },
+        validation: {
+          min_quality: dto.minQuality,
+          val_size: Number(
+            this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
+          ),
+          gt_url: dto.gtUrl,
+        },
+        job_bounty: dto.jobBounty,
+      }));
+    }
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
@@ -232,7 +258,7 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
 
-    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+    if ((manifest as CvatManifestDto)?.annotation?.type) {
       await this.sendWebhook(
         this.configService.get<string>(
           ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
@@ -248,38 +274,10 @@ export class JobService {
   }
 
   public async saveManifest(
-    dto: FortuneManifestDto | ImageLabelBinaryManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto,
   ): Promise<SaveManifestDto> {
-    const {
-      requestType,
-      submissionsRequired,
-      requesterDescription,
-      fundAmount,
-    } = dto;
-
-    let manifestData;
-    if (requestType === JobRequestType.FORTUNE) {
-      manifestData = {
-        ...dto,
-        submissionsRequired,
-        requesterDescription,
-        fundAmount,
-        requestType: JobRequestType.FORTUNE,
-      };
-    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      manifestData = {
-        ...dto,
-        submissionsRequired,
-        requesterDescription,
-        fundAmount,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
-      };
-    } else {
-      throw new ConflictException(ErrorJob.InvalidRequestType);
-    }
-
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [manifestData],
+      [manifest],
       this.bucket,
     );
 
@@ -295,12 +293,12 @@ export class JobService {
   }
 
   private async validateManifest(
-    manifest: FortuneManifestDto | ImageLabelBinaryManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto,
   ): Promise<boolean> {
     const dtoCheck =
-      manifest.requestType === JobRequestType.FORTUNE
+      (manifest as FortuneManifestDto).requestType == JobRequestType.FORTUNE
         ? new FortuneManifestDto()
-        : new ImageLabelBinaryManifestDto();
+        : new CvatManifestDto();
 
     Object.assign(dtoCheck, manifest);
 
@@ -319,7 +317,7 @@ export class JobService {
 
   public async getManifest(
     manifestUrl: string,
-  ): Promise<FortuneManifestDto | ImageLabelBinaryManifestDto> {
+  ): Promise<FortuneManifestDto | CvatManifestDto> {
     const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!manifest) {
@@ -348,7 +346,7 @@ export class JobService {
   public async getResult(
     userId: number,
     jobId: number,
-  ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+  ): Promise<FortuneFinalResultDto | CvatFinalResultDto> {
     const jobEntity = await this.jobRepository.findOne({
       id: jobId,
       userId,
@@ -378,7 +376,7 @@ export class JobService {
     }
 
     const fortuneDtoCheck = new FortuneFinalResultDto();
-    const imageLabelBinaryDtoCheck = new ImageLabelBinaryFinalResultDto();
+    const imageLabelBinaryDtoCheck = new CvatFinalResultDto();
 
     Object.assign(fortuneDtoCheck, result);
     Object.assign(imageLabelBinaryDtoCheck, result);

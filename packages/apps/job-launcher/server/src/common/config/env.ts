@@ -39,6 +39,9 @@ export const ConfigNames = {
   SENDGRID_API_KEY: 'SENDGRID_API_KEY',
   SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
+  CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
+  CVAT_MAX_TIME: 'CVAT_MAX_TIME',
+  CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
 };
 
 export const envValidator = Joi.object({
@@ -88,4 +91,8 @@ export const envValidator = Joi.object({
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
   SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
+  // CVAT
+  CVAT_JOB_SIZE: Joi.string().default('10'),
+  CVAT_MAX_TIME: Joi.string().default('300'),
+  CVAT_VAL_SIZE: Joi.string().default('2'),
 });
