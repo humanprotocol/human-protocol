@@ -133,34 +133,29 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      //TODO: improve structure, single if
       let finalResults: FortuneFinalResult[] | ImageLabelBinaryJobResults = [];
+      let checkPassed = false;
 
-      if (manifest.requestType === JobRequestType.FORTUNE) {
-        finalResults = await this.finalizeFortuneResults(
-          intermediateResults as FortuneFinalResult[],
-        );
-      } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        finalResults = intermediateResults as ImageLabelBinaryJobResults;
+      if (
+        manifest.requestType === JobRequestType.FORTUNE &&
+        !(intermediateResults instanceof ImageLabelBinaryJobResults)
+      ) {
+        finalResults = await this.finalizeFortuneResults(intermediateResults);
+        checkPassed = intermediateResults.length <= finalResults.length;
+      } else if (
+        manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY &&
+        intermediateResults instanceof ImageLabelBinaryJobResults
+      ) {
+        finalResults = intermediateResults;
+        checkPassed =
+          intermediateResults.dataset.data_points.length <=
+          finalResults.dataset.data_points.length;
       }
 
       const [{ url, hash }] = await this.storageClient.uploadFiles(
         [finalResults],
         this.bucket,
       );
-
-      let checkPassed = false;
-
-      if (!(intermediateResults instanceof ImageLabelBinaryJobResults)) {
-        checkPassed =
-          intermediateResults.length <=
-          (finalResults as FortuneFinalResult[]).length;
-      } else {
-        checkPassed =
-          intermediateResults.dataset.data_points.length <=
-          (finalResults as ImageLabelBinaryJobResults).dataset.data_points
-            .length;
-      }
 
       await this.webhookRepository.updateOne(
         {
