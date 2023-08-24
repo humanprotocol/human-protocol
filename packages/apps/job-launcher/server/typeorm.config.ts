@@ -21,4 +21,5 @@ export default new DataSource({
   migrationsTableName: 'migrations_typeorm',
   migrationsRun: true,
   namingStrategy: new SnakeNamingStrategy(),
+  ssl: process.env.POSTGRES_SSL?.toLowerCase() === 'true',
 });
