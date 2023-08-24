@@ -186,5 +186,5 @@ def test_incoming_webhook_400(client: TestClient) -> None:
         )
         assert response.status_code == 400
         assert response.json() == {
-            "message": "Webhook sender address doesn't match. Expected: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, received: 0x44EA19Fbb88cF0884867F81BE0363A469cBEa9AE."
+            "message": "Webhook sender address doesn't match. Expected: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, received: 0x0a2a7194105FeC656c2cB10F53aA75db504B7281."
         }
