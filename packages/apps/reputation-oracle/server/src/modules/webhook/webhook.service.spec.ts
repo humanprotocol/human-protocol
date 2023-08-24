@@ -7,7 +7,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
 import {
   FortuneFinalResult,
-  ImageLabelBinaryFinalResult,
+  ImageLabelBinaryJobResults,
   ManifestDto,
   WebhookIncomingDto,
 } from './webhook.dto';
@@ -31,9 +31,9 @@ import {
   MOCK_BUCKET_NAME,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
-  MOCK_FILE_URL,
+  MOCK_FILE_URL, MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS,
   MOCK_JOB_LAUNCHER_FEE,
-  MOCK_LABEL,
+  MOCK_LABEL, MOCK_LABEL_NEGATIVE,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_FEE,
   MOCK_REPUTATION_ORACLE_FEE,
@@ -348,12 +348,12 @@ describe('WebhookService', () => {
   describe.skip('call processPendingWebhook on job request type image label binary', () => {
     let manifest: ManifestDto,
         webhookEntity: Partial<WebhookIncomingEntity>,
-        intermediateResults: ImageLabelBinaryFinalResult[];
+        intermediateResults: ImageLabelBinaryJobResults;
 
     beforeEach(async () => {
       manifest = {
         dataUrl: MOCK_FILE_URL,
-        labels: [MOCK_LABEL],
+        labels: [MOCK_LABEL_NEGATIVE, MOCK_LABEL],
         requestType: JobRequestType.IMAGE_LABEL_BINARY, // image label binary job type
         submissionsRequired: 1,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
@@ -370,14 +370,7 @@ describe('WebhookService', () => {
         waitUntil: new Date(),
       };
   
-      intermediateResults = [
-        {
-          final_answer: '',
-          url: MOCK_FILE_URL,
-          wrong: [],
-          correct: [MOCK_ADDRESS],
-        },
-      ];
+      intermediateResults = MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS;
     });
 
     afterEach(() => {
