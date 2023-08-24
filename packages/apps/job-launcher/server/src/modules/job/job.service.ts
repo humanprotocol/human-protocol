@@ -55,7 +55,7 @@ import {
   FortuneFinalResultDto,
   FortuneManifestDto,
   JobFortuneDto,
-  JobImageLabelBinaryDto,
+  JobCvatDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -104,7 +104,7 @@ export class JobService {
   public async createJob(
     userId: number,
     requestType: JobRequestType,
-    dto: JobFortuneDto | JobImageLabelBinaryDto,
+    dto: JobFortuneDto | JobCvatDto,
   ): Promise<number> {
     let manifestUrl, manifestHash;
     const { chainId, fundAmount } = dto;
@@ -139,7 +139,7 @@ export class JobService {
         fundAmount: tokenFundAmount,
       }));
     } else {
-      dto = dto as JobImageLabelBinaryDto;
+      dto = dto as JobCvatDto;
       ({ manifestUrl, manifestHash } = await this.saveManifest({
         data: {
           data_url: dto.dataUrl,
@@ -148,14 +148,21 @@ export class JobService {
           labels: dto.labels.map((item) => ({ name: item })),
           description: dto.requesterDescription,
           type: requestType,
-          job_size: 10,
-          max_time: 300,
+          job_size: Number(
+            this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
+          ),
+          max_time: Number(
+            this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
+          ),
         },
         validation: {
           min_quality: dto.minQuality,
-          val_size: 2,
+          val_size: Number(
+            this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
+          ),
           gt_url: dto.gtUrl,
         },
+        job_bounty: dto.jobBounty,
       }));
     }
 
