@@ -9,9 +9,9 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { IUserBalance } from '../../common/interfaces';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
-import { ErrorUser } from 'src/common/constants/errors';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
+import { ErrorUser } from '../../common/constants/errors';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
