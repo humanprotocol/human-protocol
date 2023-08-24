@@ -104,17 +104,22 @@ export const TokenView: FC = () => {
       <Box
         sx={{
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: { xs: 'column', md: 'row ' },
+          alignItems: { xs: 'flex-start', md: 'center' },
           justifyContent: 'flex-end',
           mt: '52px',
-          pr: 3,
+          px: { xs: 4, md: 0 },
         }}
       >
         <Typography
           color="primary"
           variant="body2"
           fontWeight={600}
-          sx={{ mr: 4, whiteSpace: 'nowrap' }}
+          sx={{
+            mr: { xs: 0, md: 4 },
+            mb: { xs: 3, md: 0 },
+            whiteSpace: 'nowrap',
+          }}
         >
           Find HMT at
         </Typography>
@@ -134,6 +139,7 @@ export const TokenView: FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 textDecoration: 'none',
+                minWidth: { xs: '110px', md: 'auto' },
               }}
               href={href}
               target="_blank"
