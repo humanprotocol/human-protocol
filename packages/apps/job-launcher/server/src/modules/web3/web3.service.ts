@@ -27,10 +27,16 @@ export class Web3Service {
 
   public validateChainId(chainId: number): void {
     const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds = currentWeb3Env === Web3Env.MAINNET ? MAINNET_CHAIN_IDS : TESTNET_CHAIN_IDS;
+    const validChainIds =
+      currentWeb3Env === Web3Env.MAINNET
+        ? MAINNET_CHAIN_IDS
+        : TESTNET_CHAIN_IDS;
 
     if (!validChainIds.includes(chainId)) {
-      const errorType = currentWeb3Env === Web3Env.MAINNET ? ErrorWeb3.InvalidMainnetChainId : ErrorWeb3.InvalidTestnetChainId;
+      const errorType =
+        currentWeb3Env === Web3Env.MAINNET
+          ? ErrorWeb3.InvalidMainnetChainId
+          : ErrorWeb3.InvalidTestnetChainId;
       this.logger.log(errorType, Web3Service.name);
       throw new BadRequestException(errorType);
     }
