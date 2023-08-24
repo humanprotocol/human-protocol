@@ -7,9 +7,19 @@ type ViewTitleProps = {
 };
 
 export const ViewTitle: FC<ViewTitleProps> = ({ title, iconUrl }) => (
-  <Box display="flex" alignItems="center" height="92px" marginLeft="-32px">
+  <Box
+    display="flex"
+    alignItems="center"
+    height={{ xs: '50px', md: '92px' }}
+    marginLeft={{ xs: '-16px', md: '-32px' }}
+  >
     <Box height="100%">
-      <Box component="img" src={iconUrl} alt={title} />
+      <Box
+        component="img"
+        src={iconUrl}
+        alt={title}
+        sx={{ width: { xs: '80px', md: '149px' } }}
+      />
     </Box>
     <Typography
       variant="h4"

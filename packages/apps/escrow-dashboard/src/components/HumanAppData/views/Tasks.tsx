@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { ChartContainer } from './Container';
+import { TooltipIcon } from 'src/components/TooltipIcon';
 import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
 import { EventDayData } from 'src/state/humanAppData/types';
 
@@ -49,6 +50,8 @@ export const TasksView = () => {
       title="Tasks"
       items={TASK_STATUS_ITEMS}
       onChange={(_status) => setStatus(_status)}
-    />
+    >
+      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+    </ChartContainer>
   );
 };

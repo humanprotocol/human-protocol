@@ -20,7 +20,7 @@ interface NetworkSelectProps extends SelectProps {
 export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
   <FormControl
     variant="standard"
-    sx={{ m: 1, minWidth: 220, width: props.width }}
+    sx={{ m: { xs: 0, md: 1 }, minWidth: 220, width: props.width }}
   >
     <InputLabel id="newtork-select-label">Network</InputLabel>
     <Select

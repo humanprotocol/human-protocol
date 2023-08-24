@@ -56,7 +56,7 @@ export const TokenView: FC = () => {
           variant="h2"
           color="primary"
           lineHeight={1}
-          sx={{ fontSize: { xs: 32, md: 42, xl: 60 } }}
+          sx={{ fontSize: { xs: 40, xl: 60 } }}
         >
           {number}
         </Typography>
@@ -64,7 +64,7 @@ export const TokenView: FC = () => {
           variant="h4"
           color="primary"
           sx={{
-            fontSize: { xs: 20, md: 28, xl: 34 },
+            fontSize: { xs: 28, xl: 34 },
             textTransform: 'capitalize',
             ml: 2,
           }}

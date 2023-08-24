@@ -7,9 +7,9 @@ export const Footer: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   return isMobile ? (
-    <Box px={4} py={6}>
+    <Box px="28px" py={6}>
       <SocialIcons />
-      <Box display="flex" flexDirection="column" ml={1} mt={2}>
+      <Box display="flex" flexDirection="column" ml={2} mt={4}>
         <Typography color="text.secondary" variant="caption" lineHeight={1}>
           Terms and conditions
         </Typography>

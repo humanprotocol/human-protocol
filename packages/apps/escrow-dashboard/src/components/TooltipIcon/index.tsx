@@ -32,8 +32,8 @@ export const TooltipIcon = ({
     <BootstrapTooltip arrow title={title}>
       <Box
         sx={{
-          width: '32px',
-          height: '32px',
+          width: { xs: '24px', md: '32px' },
+          height: { xs: '24px', md: '32px' },
           borderRadius: '50%',
           border: '1px solid rgba(203, 207, 232, 0.80)',
           boxSizing: 'border-box',
@@ -51,9 +51,9 @@ export const TooltipIcon = ({
           cursor: 'pointer',
           position: 'absolute',
           top: position === 'topRight' ? '24px' : 'auto',
-          right: position === 'topRight' ? '32px' : 'auto',
+          right: position === 'topRight' ? { xs: '22px', md: '32px' } : 'auto',
           bottom: position === 'bottomLeft' ? '20px' : 'auto',
-          left: position === 'bottomLeft' ? '30px' : 'auto',
+          left: position === 'bottomLeft' ? { xs: '24px', md: '30px' } : 'auto',
         }}
       >
         i

@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 import { FC, useMemo } from 'react';
@@ -39,6 +39,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const SolvedTasksView: FC = () => {
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const qoqGrowth = useMemo(() => {
     const currentTasks = SOLVED_TASKS[SOLVED_TASKS.length - 1].value;
@@ -48,9 +50,9 @@ export const SolvedTasksView: FC = () => {
 
   return (
     <CardContainer
-      sxProps={{ padding: { xs: '24px 32px', md: '80px 59px 74px 78px' } }}
+      sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
     >
-      <Grid container sx={{ height: '100%' }} spacing={2}>
+      <Grid container sx={{ height: '100%' }} spacing={{ xs: 4, md: 2 }}>
         <Grid item xs={12} md={5} xl={4}>
           <Box mb={2}>
             <Typography
@@ -69,7 +71,7 @@ export const SolvedTasksView: FC = () => {
               fontWeight={800}
               lineHeight={1.125}
               sx={{ whiteSpace: 'nowrap' }}
-              fontSize={{ xs: '55px', xl: '80px' }}
+              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
             >
               {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
             </Typography>
@@ -89,15 +91,15 @@ export const SolvedTasksView: FC = () => {
               fontWeight={800}
               lineHeight={1.125}
               sx={{ whiteSpace: 'nowrap' }}
-              fontSize={{ xs: '55px', xl: '80px' }}
+              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
             >
               {qoqGrowth}
             </Typography>
           </Box>
         </Grid>
         <Grid item xs={12} md={7} xl={8}>
-          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-            <AreaChart data={SOLVED_TASKS} margin={{ right: 30, bottom: 10 }}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+            <AreaChart data={SOLVED_TASKS} margin={{ bottom: 10 }}>
               <defs>
                 <linearGradient
                   id="paint0_linear_4037_63345"
@@ -133,6 +135,7 @@ export const SolvedTasksView: FC = () => {
               <YAxis
                 axisLine={false}
                 tickLine={false}
+                width={40}
                 tick={{
                   fill: '#320A8D',
                   fontSize: '10px',
@@ -157,7 +160,10 @@ export const SolvedTasksView: FC = () => {
           </ResponsiveContainer>
         </Grid>
       </Grid>
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon
+        position={isMobile ? 'topRight' : 'bottomLeft'}
+        title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim."
+      />
     </CardContainer>
   );
 };

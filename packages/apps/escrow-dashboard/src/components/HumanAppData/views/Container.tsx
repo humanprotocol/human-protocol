@@ -19,6 +19,7 @@ type ChartContainerProps = {
   title: string;
   items: Array<{ label: string; value: any }>;
   onChange: (value: any) => void;
+  children?: React.ReactNode;
 };
 
 export const ChartContainer = ({
@@ -26,6 +27,7 @@ export const ChartContainer = ({
   title,
   items,
   onChange,
+  children,
 }: ChartContainerProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(600));
@@ -50,6 +52,8 @@ export const ChartContainer = ({
           boxShadow:
             '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA;',
           p: 4,
+          pb: 8,
+          position: 'relative',
         }}
       >
         <Typography fontSize={24} color="primary">
@@ -61,7 +65,7 @@ export const ChartContainer = ({
           variant="contained"
           endIcon={<KeyboardArrowDownIcon />}
           fullWidth
-          sx={{ my: 3 }}
+          sx={{ mt: 3, mb: 4 }}
           onClick={handleClick}
         >
           {items[menuValue].label}
@@ -92,6 +96,7 @@ export const ChartContainer = ({
           ))}
         </Menu>
         {data && <HumanAppDataChart data={data} minHeight={250} />}
+        {children}
       </Box>
     );
   }

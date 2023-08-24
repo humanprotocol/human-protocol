@@ -12,8 +12,8 @@ export const SolvedTasksContainer: FC = () => {
       <Box display="flex" alignItems="center" flexWrap="wrap">
         <ViewTitle title="Solved Tasks" iconUrl={tasksSvg} />
       </Box>
-      <Box mt={{ xs: 4, md: '51px' }}>
-        <Grid container spacing={4}>
+      <Box mt={{ xs: '26px', md: '51px' }}>
+        <Grid container spacing={{ xs: 5, lg: 3, xl: 4 }}>
           <Grid item xs={12} md={8}>
             <SolvedTasksView />
           </Grid>

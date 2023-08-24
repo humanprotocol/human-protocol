@@ -46,7 +46,13 @@ const MyHMTButton = (props: ButtonProps) => {
     <Button
       variant="contained"
       color="primary"
-      sx={{ borderRadius: '40px', boxShadow: 'none', p: 1, pr: 2 }}
+      sx={{
+        borderRadius: '40px',
+        boxShadow: 'none',
+        p: 1,
+        pr: 2,
+        display: 'none',
+      }}
       {...props}
     >
       <img src={myHMTSvg} alt="my-hmt" />
@@ -76,11 +82,8 @@ export const Header: FC = () => {
 
   const toggleSearchBox = () => setSearchOpen(!searchOpen);
 
-  const renderNavLinks = (orientation = 'horizontal') => (
-    <Stack
-      direction={orientation === 'horizontal' ? 'row' : 'column'}
-      spacing={2}
-    >
+  const renderNavLinks = () => (
+    <Stack direction="row" spacing={2}>
       {NAV_LINKS.map((nav) => (
         <Link
           key={nav.title}
@@ -96,6 +99,27 @@ export const Header: FC = () => {
     </Stack>
   );
 
+  const renderMobileLinks = () => (
+    <Box>
+      {NAV_LINKS.map((nav) => (
+        <Link
+          key={nav.title}
+          to={nav.href}
+          target={nav.external ? '_blank' : '_self'}
+          style={{
+            textDecoration: 'none',
+            padding: '20px 32px',
+            borderBottom: '1px solid #E9EBFA',
+            display: 'block',
+          }}
+        >
+          <Typography color="primary" variant="body2" fontWeight={400}>
+            {nav.title}
+          </Typography>
+        </Link>
+      ))}
+    </Box>
+  );
   const handleCloseWarning = () => {
     localStorage.setItem('HUMAN_ESCROW_DASHBOARD_SHOW_WARNING', 'false');
     setShowWarning(false);
@@ -160,8 +184,7 @@ export const Header: FC = () => {
                 height: '88px',
                 boxSizing: 'border-box',
                 padding: {
-                  xs: '22px 8px 18px',
-                  sm: '22px 28px 18px',
+                  xs: '29px 24px',
                   md: '29px 77px 20px 60px',
                 },
               }}
@@ -187,11 +210,16 @@ export const Header: FC = () => {
                       textDecoration: 'none',
                     }}
                   >
-                    <img src={logoSvg} alt="logo" />
+                    <Box
+                      component="img"
+                      src={logoSvg}
+                      alt="logo"
+                      sx={{ width: { xs: '100px', md: '118px' } }}
+                    />
                     <Typography
                       sx={{
-                        fontSize: '16px',
-                        lineHeight: 1.5,
+                        fontSize: { xs: '14px', md: '16px' },
+                        lineHeight: { xs: 1, md: 1.5 },
                         letterSpacing: '0.15px',
                       }}
                       color="primary"
@@ -214,7 +242,7 @@ export const Header: FC = () => {
                       )} */}
                       {renderNavLinks()}
                       <ConnectButton />
-                      {/* {address && <MyHMTButton href="/staking" />} */}
+                      {address && <MyHMTButton href="/staking" />}
                     </Box>
                   )}
                   {isDownLg && (
@@ -246,28 +274,33 @@ export const Header: FC = () => {
         open={drawerOpen}
         onClose={toggleDrawer}
         SlideProps={{ appear: false }}
-        PaperProps={{ sx: { top: '96px' } }}
+        PaperProps={{ sx: { top: '88px', bottom: '0px' } }}
         sx={{
-          top: '96px',
+          top: '88px',
           '& .MuiBackdrop-root': {
-            top: '96px',
+            top: '88px',
           },
         }}
       >
-        <Box display="flex">
-          <Box flex="1" sx={{ p: 6 }}>
-            {renderNavLinks('vertical')}
-            <Box mt={4} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <ConnectButton />
-              {address && <MyHMTButton href="/staking" />}
-            </Box>
+        <Box height="100%" position="relative">
+          {renderMobileLinks()}
+          <Box px={4} py="26px">
+            <ConnectButton />
           </Box>
+          {address && (
+            <Box px={4} py="26px">
+              <MyHMTButton href="/staking" />
+            </Box>
+          )}
           <Box
-            display="flex"
-            alignItems="center"
-            sx={{ px: 2, background: 'rgba(246, 247, 254, 0.7);' }}
+            sx={{
+              position: 'absolute',
+              bottom: '32px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
           >
-            <SocialIcons direction="column" />
+            <SocialIcons />
           </Box>
         </Box>
       </Drawer>

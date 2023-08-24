@@ -10,8 +10,8 @@ export const PageWrapper: FC<PropsWithChildren<{}>> = ({ children }) => (
         boxSizing: 'border-box',
         borderRadius: { xs: '0px', md: '24px' },
         padding: {
-          xs: '24px 16px',
-          md: '42px 54px',
+          xs: '36px 32px',
+          lg: '60px 67px 69px',
           xl: '58px 104px 104px 104px',
         },
       }}

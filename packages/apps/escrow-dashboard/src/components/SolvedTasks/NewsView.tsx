@@ -17,7 +17,7 @@ export const NewsView = () => {
         >
           <Box
             sx={{
-              padding: '22px 24px',
+              padding: { xs: '22px 24px', lg: '19px 17px', xl: '22px 24px' },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -30,8 +30,8 @@ export const NewsView = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                px: { xs: 0, md: 3 },
-                pt: { xs: 0, md: '20px' },
+                px: { xs: '8px', lg: '18px', xl: '24px' },
+                pt: { xs: '10px', lg: '18px', xl: '20px' },
               }}
             >
               <Box
@@ -86,9 +86,10 @@ export const NewsView = () => {
                 sx={{
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  width: '100%',
-                  height: { xs: '160px', sm: '248px' },
+                  width: { xs: 'calc(100% - 20px)', md: '100%' },
+                  height: { xs: '160px', lg: '183px', xl: '248px' },
                   objectFit: 'cover',
+                  mx: { xs: '10px', md: 0 },
                 }}
               />
             )}
