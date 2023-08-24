@@ -24,9 +24,8 @@ import {
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { ChainId } from '@human-protocol/sdk';
+import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
-import { mul } from '../../common/utils/decimal';
 
 jest.mock('@human-protocol/sdk');
 
@@ -326,7 +325,7 @@ describe('PaymentService', () => {
     it('should create a crypto payment successfully', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -340,7 +339,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: MOCK_ADDRESS,
+            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -372,20 +371,20 @@ describe('PaymentService', () => {
         amount: 10,
         rate: 1.5,
         transaction: MOCK_TRANSACTION_HASH,
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         status: PaymentStatus.SUCCEEDED,
       });
       expect(result).toBe(true);
     });
 
-    it('should throw a conflict exception if an unsupported token is used', async () => {
+    it('should throw a conflict exception if the token address is unsupported', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const unsupportedToken = 'doge';
+      const token = 'hmt';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
         logs: [
@@ -409,6 +408,44 @@ describe('PaymentService', () => {
         transactionReceipt,
       );
 
+      mockTokenContract.symbol.mockResolvedValue(token);
+
+      await expect(
+        paymentService.createCryptoPayment(userId, dto),
+      ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+    });
+
+    it('should throw a conflict exception if an unsupported token is used', async () => {
+      const userId = 1;
+      const dto = {
+        chainId: ChainId.POLYGON_MUMBAI,
+        transactionHash: MOCK_TRANSACTION_HASH,
+      };
+
+      const unsupportedToken = 'doge';
+
+      const transactionReceipt: Partial<TransactionReceipt> = {
+        logs: [
+          {
+            data: ethers.utils.parseUnits('10').toString(),
+            blockNumber: 123,
+            blockHash: '123',
+            transactionIndex: 123,
+            removed: false,
+            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
+            topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
+            transactionHash: MOCK_TRANSACTION_HASH,
+            logIndex: 123,
+          },
+        ],
+        transactionHash: MOCK_TRANSACTION_HASH,
+        confirmations: TX_CONFIRMATION_TRESHOLD,
+      };
+
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
+        transactionReceipt,
+      );
+
       mockTokenContract.symbol.mockResolvedValue(unsupportedToken);
 
       await expect(
@@ -419,7 +456,7 @@ describe('PaymentService', () => {
     it('should throw a not found exception if the transaction is not found by hash', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -454,7 +491,7 @@ describe('PaymentService', () => {
     it('should throw a not found exception if the transaction has insufficient confirmations', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -466,7 +503,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: MOCK_ADDRESS,
+            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,
@@ -490,7 +527,7 @@ describe('PaymentService', () => {
     it('should throw a bad request exception if the payment with the same transaction hash already exists', async () => {
       const userId = 1;
       const dto = {
-        chainId: ChainId.LOCALHOST,
+        chainId: ChainId.POLYGON_MUMBAI,
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
@@ -504,7 +541,7 @@ describe('PaymentService', () => {
             blockHash: '123',
             transactionIndex: 123,
             removed: false,
-            address: MOCK_ADDRESS,
+            address: NETWORKS[ChainId.POLYGON_MUMBAI]?.hmtAddress as string,
             topics: ['0x123', '0x0000000000000000000000000123', MOCK_ADDRESS],
             transactionHash: MOCK_TRANSACTION_HASH,
             logIndex: 123,

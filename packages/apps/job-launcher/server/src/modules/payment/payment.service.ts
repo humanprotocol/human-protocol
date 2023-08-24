@@ -33,6 +33,7 @@ import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
+import { token } from '@human-protocol/core/typechain-types/@openzeppelin/contracts';
 
 @Injectable()
 export class PaymentService {
@@ -163,12 +164,10 @@ export class PaymentService {
     dto: PaymentCryptoCreateDto,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
-
-    const provider = new providers.JsonRpcProvider(
-      Object.values(networkMap).find(
-        (item) => item.chainId === dto.chainId,
-      )?.rpcUrl,
+    const network = Object.values(networkMap).find(
+      (item) => item.chainId === dto.chainId,
     );
+    const provider = new providers.JsonRpcProvider(network?.rpcUrl);
 
     const transaction = await provider.getTransactionReceipt(
       dto.transactionHash,
@@ -195,11 +194,11 @@ export class PaymentService {
 
     const signer = this.web3Service.getSigner(dto.chainId);
 
-    const recepientAddress = transaction.logs[0].topics.some(
+    const recipientAddress = transaction.logs[0].topics.some(
       (topic) =>
         ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
     );
-    if (!recepientAddress) {
+    if (!recipientAddress) {
       this.logger.error(ErrorPayment.InvalidRecipient);
       throw new ConflictException(ErrorPayment.InvalidRecipient);
     }
@@ -213,7 +212,10 @@ export class PaymentService {
     );
     const tokenId = (await tokenContract.symbol()).toLowerCase();
 
-    if (!CoingeckoTokenId[tokenId]) {
+    if (
+      network?.tokens[tokenId] != tokenAddress ||
+      !CoingeckoTokenId[tokenId]
+    ) {
       this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
       throw new ConflictException(ErrorPayment.UnsupportedToken);
     }
