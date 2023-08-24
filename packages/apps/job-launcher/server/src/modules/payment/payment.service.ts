@@ -32,7 +32,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { add, mul } from '../../common/utils/decimal';
+import { add, div, mul } from '../../common/utils/decimal';
 
 @Injectable()
 export class PaymentService {
@@ -70,8 +70,7 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency } = dto;
 
-    const amountInCents = Math.round(amount * 100);
-    
+    const amountInCents = Math.ceil(mul(amount, 100));
     const params: Stripe.PaymentIntentCreateParams = {
       amount: amountInCents,
       currency: currency,
@@ -88,7 +87,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
     });
 
     if (paymentEntity) {
@@ -99,16 +98,16 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, currency);
+    const rate = await getRate(currency, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount,
+      amount: div(amountInCents, 100),
       currency,
       rate,
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });
 
@@ -132,6 +131,8 @@ export class PaymentService {
       userId,
       transaction: data.paymentId,
       status: PaymentStatus.PENDING,
+      amount: div(paymentData.amount_received, 100),
+      currency: paymentData.currency,
     });
 
     if (!paymentEntity) {
@@ -219,6 +220,7 @@ export class PaymentService {
 
     const paymentEntity = await this.paymentRepository.findOne({
       transaction: transaction.transactionHash,
+      chainId: dto.chainId,
     });
 
     if (paymentEntity) {
@@ -229,14 +231,14 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(tokenId, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount,
-      currency: TokenId.HMT,
+      amount: amount,
+      currency: tokenId,
       rate,
       chainId: dto.chainId,
       transaction: dto.transactionHash,

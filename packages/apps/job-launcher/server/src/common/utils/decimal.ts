@@ -1,6 +1,5 @@
 import Decimal from 'decimal.js';
 
-
 export function mul(a: number, b: number): number {
   const decimalA = new Decimal(a);
   const decimalB = new Decimal(b);

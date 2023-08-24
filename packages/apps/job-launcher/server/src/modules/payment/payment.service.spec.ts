@@ -5,7 +5,6 @@ import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { BigNumber } from 'ethers';
 import { createMock } from '@golevelup/ts-jest';
 import { ErrorPayment } from '../../common/constants/errors';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
@@ -20,7 +19,6 @@ import {
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
-  MOCK_JOB_LAUNCHER_FEE,
   MOCK_PAYMENT_ID,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
@@ -28,11 +26,12 @@ import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
+import { mul } from '../../common/utils/decimal';
 
 jest.mock('@human-protocol/sdk');
 
 jest.mock('../../common/utils', () => ({
-  getRate: jest.fn().mockImplementation(() => 1.5)
+  getRate: jest.fn().mockImplementation(() => 1.5),
 }));
 
 describe('PaymentService', () => {
@@ -97,7 +96,7 @@ describe('PaymentService', () => {
       },
       paymentIntents: {
         create: stripePaymentIntentsCreateMock,
-        retrieve: stripePaymentIntentsRetrieveMock
+        retrieve: stripePaymentIntentsRetrieveMock,
       },
     } as any;
 
@@ -113,9 +112,9 @@ describe('PaymentService', () => {
       .spyOn(stripe.paymentIntents, 'retrieve')
       .mockImplementation(stripePaymentIntentsRetrieveMock);
   });
-  
+
   describe('createFiatPayment', () => {
-    let createPaymentIntentMock: any, findOneMock: any, createPaymentMock: any;
+    let createPaymentIntentMock: any, findOneMock: any;
 
     beforeEach(() => {
       findOneMock = jest.spyOn(paymentRepository, 'findOne');
@@ -151,7 +150,8 @@ describe('PaymentService', () => {
       expect(result).toEqual(paymentIntent.client_secret);
     });
 
-    it('should throw a bad request exception if transaction already exist', async () => {0
+    it('should throw a bad request exception if transaction already exist', async () => {
+      0;
       const dto = {
         amount: 100,
         currency: Currency.USD,
@@ -173,7 +173,8 @@ describe('PaymentService', () => {
       ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
     });
 
-    it('should throw a bad request exception if the payment intent creation fails', async () => {0
+    it('should throw a bad request exception if the payment intent creation fails', async () => {
+      0;
       const dto = {
         amount: 100,
         currency: Currency.USD,
@@ -207,9 +208,10 @@ describe('PaymentService', () => {
       };
 
       const paymentData = {
-        status: 'succeeded',
+        status: StripePaymentStatus.SUCCEEDED,
         amount: 100,
-        currency: Currency.EUR,
+        amount_received: 100,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -228,6 +230,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: StripePaymentStatus.CANCELED,
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -246,6 +250,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: StripePaymentStatus.REQUIRES_PAYMENT_METHOD,
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -264,6 +270,8 @@ describe('PaymentService', () => {
       const paymentData = {
         status: 'unknown_status',
         amount: 100,
+        amount_received: 0,
+        currency: Currency.USD,
       };
 
       retrievePaymentIntentMock.mockResolvedValue(paymentData);
@@ -354,6 +362,7 @@ describe('PaymentService', () => {
 
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
         transaction: dto.transactionHash,
+        chainId: dto.chainId,
       });
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
@@ -538,7 +547,7 @@ describe('PaymentService', () => {
           status: PaymentStatus.SUCCEEDED,
         },
         {
-          amount: -(180),
+          amount: -180,
           rate: 1,
           type: PaymentType.WITHDRAWAL,
           status: PaymentStatus.SUCCEEDED,

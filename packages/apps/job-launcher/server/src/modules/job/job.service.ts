@@ -106,12 +106,8 @@ export class JobService {
     requestType: JobRequestType,
     dto: JobFortuneDto | JobImageLabelBinaryDto,
   ): Promise<number> {
-    const {
-      chainId,
-      submissionsRequired,
-      requesterDescription,
-      fundAmount,
-    } = dto;
+    const { chainId, submissionsRequired, requesterDescription, fundAmount } =
+      dto;
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
@@ -121,21 +117,27 @@ export class JobService {
 
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
-    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!
-    const fee = mul(div(feePercentage, 100), fundAmount)
-    const usdTotalAmount = mul(add(fundAmount, fee), rate)
- 
+    const feePercentage = this.configService.get<number>(
+      ConfigNames.JOB_LAUNCHER_FEE,
+    )!;
+    const fee = mul(div(feePercentage, 100), fundAmount);
+    const usdTotalAmount = add(fundAmount, fee);
+
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
+
+    const tokenFundAmount = mul(fundAmount, rate);
+    const tokenFee = mul(fee, rate);
+    const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     const { manifestUrl, manifestHash } = await this.saveManifest({
       ...dto,
       requestType,
       submissionsRequired,
       requesterDescription,
-      fundAmount,
+      fundAmount: tokenFundAmount,
     });
 
     const jobEntity = await this.jobRepository.create({
@@ -143,8 +145,8 @@ export class JobService {
       userId,
       manifestUrl,
       manifestHash,
-      fee,
-      fundAmount,
+      fee: tokenFee,
+      fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -159,13 +161,16 @@ export class JobService {
         userId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
-        amount: -add(fundAmount, fee),
+        amount: -tokenTotalAmount,
         currency: TokenId.HMT,
-        rate,
-        status: PaymentStatus.SUCCEEDED
-      })
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
     } catch (error) {
-      if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
         this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
         throw new ConflictException(ErrorPayment.IncorrectAmount);
       } else {
@@ -243,15 +248,15 @@ export class JobService {
   }
 
   public async saveManifest(
-    dto: FortuneManifestDto | ImageLabelBinaryManifestDto
+    dto: FortuneManifestDto | ImageLabelBinaryManifestDto,
   ): Promise<SaveManifestDto> {
     const {
       requestType,
       submissionsRequired,
       requesterDescription,
-      fundAmount
+      fundAmount,
     } = dto;
-    
+
     let manifestData;
     if (requestType === JobRequestType.FORTUNE) {
       manifestData = {
@@ -259,7 +264,7 @@ export class JobService {
         submissionsRequired,
         requesterDescription,
         fundAmount,
-        requestType: JobRequestType.FORTUNE
+        requestType: JobRequestType.FORTUNE,
       };
     } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
       manifestData = {
@@ -341,8 +346,31 @@ export class JobService {
   }
 
   public async getResult(
-    finalResultUrl: string,
+    userId: number,
+    jobId: number,
   ): Promise<FortuneFinalResultDto | ImageLabelBinaryFinalResultDto> {
+    const jobEntity = await this.jobRepository.findOne({
+      id: jobId,
+      userId,
+      status: JobStatus.LAUNCHED,
+    });
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const finalResultUrl = await escrowClient.getResultsUrl(
+      jobEntity.escrowAddress,
+    );
+
+    if (!finalResultUrl) {
+      this.logger.log(ErrorJob.ResultNotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.ResultNotFound);
+    }
+
     const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
 
     if (!result) {

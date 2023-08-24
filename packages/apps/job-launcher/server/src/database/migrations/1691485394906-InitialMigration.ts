@@ -191,13 +191,13 @@ export class InitialMigration1691485394906 implements MigrationInterface {
             DROP TABLE "hmt"."payments"
         `);
     await queryRunner.query(`
+            DROP TYPE "hmt"."payments_status_enum"
+        `);
+    await queryRunner.query(`
             DROP TYPE "hmt"."payments_source_enum"
         `);
     await queryRunner.query(`
             DROP TYPE "hmt"."payments_type_enum"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "hmt"."payments_status_enum"
         `);
     await queryRunner.dropSchema(NS);
   }

@@ -15,7 +15,6 @@ import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
 import { PaymentService } from '../payment/payment.service';
-import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 
