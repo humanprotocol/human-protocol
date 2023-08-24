@@ -506,6 +506,7 @@ describe('AuthService', () => {
     const userEntity: Partial<UserEntity> = {
       id: 1,
       email: 'user@example.com',
+      status: UserStatus.PENDING,
     };
 
     const tokenEntity = {

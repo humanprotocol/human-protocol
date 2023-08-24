@@ -17,8 +17,8 @@ export class JobCreateDto {
   public userId: number;
   public manifestUrl: string;
   public manifestHash: string;
-  public fee: string;
-  public fundAmount: string;
+  public fee: number;
+  public fundAmount: number;
   public status: JobStatus;
   public waitUntil: Date;
 }
@@ -152,8 +152,9 @@ export class FortuneManifestDto {
   @IsString()
   requesterDescription: string;
 
-  @IsString()
-  fundAmount: string;
+  @IsNumber()
+  @IsPositive()
+  fundAmount: number;
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
@@ -177,8 +178,9 @@ export class ImageLabelBinaryManifestDto {
   @IsPositive()
   requesterAccuracyTarget: number;
 
-  @IsString()
-  fundAmount: string;
+  @IsNumber()
+  @IsPositive()
+  fundAmount: number;
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;

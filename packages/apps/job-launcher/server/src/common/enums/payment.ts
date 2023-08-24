@@ -45,6 +45,7 @@ export enum Currency {
 
 export enum TokenId {
   HMT = 'hmt',
+  USDT = 'usdt',
 }
 
 export enum PaymentSource {
@@ -74,5 +75,3 @@ export enum StripePaymentStatus {
   REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
   SUCCEEDED = 'succeeded',
 }
-
-

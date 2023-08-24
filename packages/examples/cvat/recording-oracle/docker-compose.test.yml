@@ -18,7 +18,7 @@ services:
   blockchain-node:
     build: 
       context: ./
-      dockerfile: blockchain-node.Dockerfile
+      dockerfile: dockerfiles/blockchain-node.Dockerfile
     healthcheck:
       # Using a magic nubmer of 28 here because this is a block number when blockchain-node container is ready to use
       test: if [ $(( $(wget -q --post-data='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -O- http://blockchain-node:8545 | grep -o '"result":"[^"]*"' | awk -F'"' '{print $4}' ) )) -ge 28 ]; then exit 0; else exit 1; fi
@@ -70,7 +70,7 @@ services:
   test:
     build:
       context: ./
-      dockerfile: test.Dockerfile
+      dockerfile: dockerfiles/test.Dockerfile
     environment:
       SQLALCHEMY_SILENCE_UBER_WARNING: 1
       ENVIRONMENT: 'test'
