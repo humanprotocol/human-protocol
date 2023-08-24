@@ -258,10 +258,7 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
 
-    if (
-      manifest instanceof CvatManifestDto &&
-      manifest.annotation.type === JobRequestType.IMAGE_LABEL_BINARY
-    ) {
+    if ((manifest as CvatManifestDto)?.annotation?.type) {
       await this.sendWebhook(
         this.configService.get<string>(
           ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,

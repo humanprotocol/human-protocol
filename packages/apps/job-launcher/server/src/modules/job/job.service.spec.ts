@@ -283,7 +283,7 @@ describe('JobService', () => {
       minQuality: 0.95,
       fundAmount: 10,
       gtUrl: '',
-      jobBounty: 1,
+      jobBounty: '1',
       type: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -608,7 +608,7 @@ describe('JobService', () => {
           val_size: 2,
           gt_url: '',
         },
-        job_bounty: 1,
+        job_bounty: '1',
       };
 
       getManifestMock.mockResolvedValue(manifest as CvatManifestDto);
@@ -755,7 +755,7 @@ describe('JobService', () => {
         val_size: 2,
         gt_url: '',
       },
-      job_bounty: 1,
+      job_bounty: '1',
     };
 
     let uploadFilesMock: any;
