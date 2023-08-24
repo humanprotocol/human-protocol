@@ -1,9 +1,10 @@
 import { ConflictException } from "@nestjs/common";
 import { ethers } from "ethers";
 import { ErrorSignature } from "../constants/errors";
+import { toUtf8Bytes } from "ethers/lib/utils";
 
 export function verifySignature(
-  message: string,
+  message: object | string,
   signature: string,
   address: string,
 ): boolean {
@@ -17,14 +18,18 @@ export function verifySignature(
   return true;
 }
 
-export async function signMessage(message: string, privateKey: string): Promise<string> {
+export async function signMessage(message: object | string, privateKey: string): Promise<string> {
+  if (typeof(message) !== "string") { message = JSON.stringify(message); }
+  
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(message);
 
   return signature;
 }
 
-export function recoverSigner(message: string, signature: string): string {  
+export function recoverSigner(message: object | string, signature: string): string {  
+  if (typeof(message) !== "string") { message = JSON.stringify(message); }
+
   try {  
     return ethers.utils.verifyMessage(message, signature);
   } catch (e) {
