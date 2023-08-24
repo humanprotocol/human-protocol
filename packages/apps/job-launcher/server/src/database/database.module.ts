@@ -63,7 +63,7 @@ import { ConfigNames } from '../common/config';
             'qwerty',
           ),
           database: configService.get<string>(
-            ConfigNames.POSTGRES_DB,
+            ConfigNames.POSTGRES_DATABASE,
             'job-launcher',
           ),
           keepConnectionAlive:
