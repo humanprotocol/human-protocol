@@ -15,8 +15,6 @@ import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 import * as bcrypt from 'bcrypt';
 
-const PASSWORD_SECRET = '$2b$10$EICgM2wYixoJisgqckU9gu';
-
 jest.mock('@human-protocol/sdk');
 
 describe('UserService', () => {
@@ -27,14 +25,7 @@ describe('UserService', () => {
   let httpService: HttpService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'PASSWORD_SECRET':
-            return PASSWORD_SECRET;
-        }
-      }),
-    };
+    const mockConfigService: Partial<ConfigService> = {};
 
     const moduleRef = await Test.createTestingModule({
       providers: [
