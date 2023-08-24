@@ -78,7 +78,7 @@ export class AuthService {
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
-    
+
     await this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
@@ -167,7 +167,7 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     this.sendgridService.sendEmail({
       to: tokenEntity.user.email,
       subject: 'Password changed',
-      text: 'Password is changed successfully!',
+      text: 'Password has been changed successfully!',
     });
 
     await tokenEntity.remove();
@@ -194,7 +194,7 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
   ): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) {
+    if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
