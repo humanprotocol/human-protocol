@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -33,11 +34,18 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobImageLabelBinaryDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.IMAGE_LABEL_BINARY, data);
+    return this.jobService.createJob(
+      req.user.id,
+      JobRequestType.IMAGE_LABEL_BINARY,
+      data,
+    );
   }
 
   @Get('/result')
-  public async getResult(@Request() req: any): Promise<any> {
-    return this.jobService.getResult(req.user?.id);
+  public async getResult(
+    @Request() req: RequestWithUser,
+    @Query('jobId') jobId: number,
+  ): Promise<any> {
+    return this.jobService.getResult(req.user.id, jobId);
   }
 }
