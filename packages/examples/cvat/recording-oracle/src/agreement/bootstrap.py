@@ -136,7 +136,8 @@ def bootstrap_ci(
             ppf = np.vectorize(N.ppf)
             cdf = np.vectorize(N.cdf)
 
-            z_0 = ppf(np.mean(theta_b <= theta_hat))
+            # bias term. discrepancy between bootrap values and estimated value
+            z_0 = ppf(np.mean(theta_b < theta_hat))
             z_u = ppf(q)
             z_diff = z_0 + z_u
 
