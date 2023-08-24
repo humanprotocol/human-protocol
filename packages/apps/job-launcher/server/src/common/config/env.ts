@@ -16,6 +16,7 @@ export const ConfigNames = {
   POSTGRES_DB: 'POSTGRES_DB',
   POSTGRES_PORT: 'POSTGRES_PORT',
   POSTGRES_SYNC: 'POSTGRES_SYNC',
+  POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
@@ -61,6 +62,7 @@ export const envValidator = Joi.object({
   POSTGRES_DB: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SYNC: Joi.string().default(false),
+  POSTGRES_SSL: Joi.string().default(false),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
