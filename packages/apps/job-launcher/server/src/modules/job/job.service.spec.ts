@@ -44,7 +44,7 @@ import {
   FortuneManifestDto,
   CvatManifestDto,
   JobFortuneDto,
-  JobImageLabelBinaryDto,
+  JobCvatDto,
   CvatFinalResultDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
@@ -275,7 +275,7 @@ describe('JobService', () => {
   describe('createJob with image label binary type', () => {
     const userId = 1;
 
-    const imageLabelBinaryJobDto: JobImageLabelBinaryDto = {
+    const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
       dataUrl: MOCK_FILE_URL,
       labels: ['cat', 'dog'],
@@ -283,6 +283,8 @@ describe('JobService', () => {
       minQuality: 0.95,
       fundAmount: 10,
       gtUrl: '',
+      jobBounty: 1,
+      type: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
     let getUserBalanceMock: any;
@@ -606,6 +608,7 @@ describe('JobService', () => {
           val_size: 2,
           gt_url: '',
         },
+        job_bounty: 1,
       };
 
       getManifestMock.mockResolvedValue(manifest as CvatManifestDto);
@@ -752,6 +755,7 @@ describe('JobService', () => {
         val_size: 2,
         gt_url: '',
       },
+      job_bounty: 1,
     };
 
     let uploadFilesMock: any;

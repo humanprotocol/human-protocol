@@ -52,7 +52,7 @@ export class JobFortuneDto extends JobDto {
   public submissionsRequired: number;
 }
 
-export class JobImageLabelBinaryDto extends JobDto {
+export class JobCvatDto extends JobDto {
   @ApiProperty()
   @IsUrl()
   public dataUrl: string;
@@ -69,6 +69,13 @@ export class JobImageLabelBinaryDto extends JobDto {
   @ApiProperty()
   @IsString()
   public gtUrl: string;
+
+  @IsEnum(JobRequestType)
+  type: JobRequestType;
+
+  @ApiProperty()
+  @IsString()
+  public jobBounty: string;
 }
 
 export class JobUpdateDto {
@@ -167,6 +174,9 @@ export class CvatManifestDto {
 
   @IsObject()
   validation: Validation;
+
+  @IsString()
+  job_bounty: string;
 }
 
 export class FortuneFinalResultDto {
