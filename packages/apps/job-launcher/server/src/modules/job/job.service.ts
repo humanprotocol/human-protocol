@@ -62,7 +62,7 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
 import { add, mul, div, lt } from '../../common/utils/decimal';
 import { LessThanOrEqual, QueryFailedError } from 'typeorm';
-import { JOB_RETRIES_COUNT_THRESHOLD } from 'src/common/constants';
+import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 
 @Injectable()
