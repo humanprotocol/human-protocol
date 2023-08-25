@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
-import { EventType } from 'src/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;

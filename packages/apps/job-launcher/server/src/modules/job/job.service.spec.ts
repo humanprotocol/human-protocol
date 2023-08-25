@@ -1,12 +1,13 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import {
   ErrorBucket,
+  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -674,8 +675,8 @@ describe('JobService', () => {
     const jobId = 1;
     const userId = 123;
 
-    it('should to cancel the job', async () => {
-      const escrowAddress = '0xValidEscrowAddress';
+    it('should cancel the job', async () => {
+      const escrowAddress = MOCK_ADDRESS;
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
@@ -702,17 +703,20 @@ describe('JobService', () => {
   });
 
   describe('cancelJob', () => {
-    let getManifestMock: any,
+    let escrowClientMock: any,
+        getManifestMock: any,
         saveMock: any,
         buildMock: any,
         sendWebhookMock: any,
         jobEntityMock: Partial<JobEntity>
 
-    const escrowClientMock: any = {
-      cancel: jest.fn().mockResolvedValue(undefined)
-    };
-
     beforeEach(() => {
+      escrowClientMock = {
+        cancel: jest.fn().mockResolvedValue(undefined),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
+        getBalance: jest.fn().mockResolvedValue(BigNumber.from(10))
+      };
+
       jobEntityMock = {
         escrowAddress: MOCK_ADDRESS,
         chainId: 1,
@@ -731,38 +735,43 @@ describe('JobService', () => {
       jest.clearAllMocks();
     });
 
-    it('cancels a job successfully with Fortune job type, without escrow address and pending status', async () => {
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-        requestType: JobRequestType.FORTUNE
-      };
-      
-
-      jobEntityMock.status = JobStatus.PENDING;
+    it('cancels a job successfully', async () => {
       jobEntityMock.escrowAddress = undefined;
       saveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      getManifestMock.mockResolvedValue(manifest);
-      sendWebhookMock.mockResolvedValue(true);
       
       const result = await jobService.cancelJob(jobEntityMock as any);
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toBeCalledTimes(0);
       expect(saveMock).toHaveBeenCalledWith();
-      expect(sendWebhookMock).toHaveBeenCalledWith(
-        expect.any(String),
-        {
-          escrowAddress: jobEntityMock.escrowAddress,
-          chainId: jobEntityMock.chainId,
-          eventType: EventType.ESCROW_CANCELED
-        }
+    });
+
+    it('should throw an error if the escrow has invalid status', async () => {
+      escrowClientMock.getStatus = jest.fn().mockResolvedValue(EscrowStatus.Complete);
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      buildMock.mockResolvedValue(escrowClientMock as any); 
+
+      await expect(
+        jobService.cancelJob(jobEntityMock as any)
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorEscrow.InvalidStatusCancellation),
       );
     });
 
-    it('cancels a job successfully with Fortune job type and launched escrow', async () => {
+    it('should throw an error if the escrow has invalid balance', async () => {
+      escrowClientMock.getStatus = jest.fn().mockResolvedValue(EscrowStatus.Launched);
+      escrowClientMock.getBalance = jest.fn().mockResolvedValue(BigNumber.from(0));
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      buildMock.mockResolvedValue(escrowClientMock as any); 
+
+      await expect(
+        jobService.cancelJob(jobEntityMock as any)
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorEscrow.InvalidBalanceCancellation),
+      );
+    });
+
+    it('cancels a job successfully with Fortune job type and send webhook', async () => {
       const manifest: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
@@ -791,43 +800,24 @@ describe('JobService', () => {
       );
     });
 
-    it('cancels a job successfully with image binary lavel job type, without escrow address and pending status', async () => {
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY
-      };
-      
-      jobEntityMock.status = JobStatus.PENDING;
-      jobEntityMock.escrowAddress = undefined;
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      getManifestMock.mockResolvedValue(manifest);
-      sendWebhookMock.mockResolvedValue(true);
-      
-      const result = await jobService.cancelJob(jobEntityMock as any);
-
-      expect(result).toBe(true);
-      expect(escrowClientMock.cancel).toBeCalledTimes(0);
-      expect(saveMock).toHaveBeenCalledWith();
-      expect(sendWebhookMock).toHaveBeenCalledWith(
-        expect.any(String),
-        {
-          escrowAddress: jobEntityMock.escrowAddress,
-          chainId: jobEntityMock.chainId,
-          eventType: EventType.ESCROW_CANCELED
-        }
-      );
-    });
-
-    it('cancels a job successfully with image binary lavel job type and launched escrow', async () => {
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
-        requestType: JobRequestType.IMAGE_LABEL_BINARY
+    it('cancels a job successfully with image binary lavel job type and send webhook', async () => {
+      const manifest: CvatManifestDto = {
+        data: {
+          data_url: MOCK_FILE_URL,
+        },
+        annotation: {
+          labels: [{ name: 'label1' }],
+          description: MOCK_REQUESTER_DESCRIPTION,
+          type: JobRequestType.IMAGE_LABEL_BINARY,
+          job_size: 10,
+          max_time: 300,
+        },
+        validation: {
+          min_quality: 1,
+          val_size: 2,
+          gt_url: '',
+        },
+        job_bounty: '1',
       };
       
       saveMock.mockResolvedValue(jobEntityMock as JobEntity);
