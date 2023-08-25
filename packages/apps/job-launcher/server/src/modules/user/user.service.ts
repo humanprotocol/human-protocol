@@ -15,7 +15,6 @@ import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
 import { PaymentService } from '../payment/payment.service';
-import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 
@@ -96,10 +95,8 @@ export class UserService {
   }
 
   public async getBalance(userId: number): Promise<IUserBalance> {
-    const balance = await this.paymentService.getUserBalance(userId);
-
     return {
-      amount: Number(ethers.utils.formatUnits(balance, 'ether')),
+      amount: await this.paymentService.getUserBalance(userId),
       currency: Currency.USD,
     };
   }

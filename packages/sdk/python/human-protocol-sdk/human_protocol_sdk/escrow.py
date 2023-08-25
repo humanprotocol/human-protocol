@@ -48,6 +48,7 @@ class EscrowConfig:
         reputation_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
+        skip_manifest_url_validation: bool = False,
     ):
         """
         Initializes a Escrow instance.
@@ -59,6 +60,7 @@ class EscrowConfig:
             reputation_oracle_fee (Decimal): Fee percentage of the Reputation Oracle
             manifest_url (str): Manifest file url
             hash (str): Manifest file hash
+            skip_manifest_url_validation (bool): Identify wether validate manifest_url
         """
         if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
@@ -74,7 +76,7 @@ class EscrowConfig:
             raise EscrowClientError("Fee must be between 0 and 100")
         if recording_oracle_fee + reputation_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
-        if not URL(manifest_url):
+        if not URL(manifest_url) and not skip_manifest_url_validation:
             raise EscrowClientError(f"Invalid manifest URL: {manifest_url}")
         if not hash:
             raise EscrowClientError("Invalid empty manifest hash")
@@ -187,7 +189,7 @@ class EscrowClient:
         )
         return next(
             (
-                self.factory_contract.events.Launched().processLog(log)
+                self.factory_contract.events.Launched().process_log(log)
                 for log in transaction_receipt["logs"]
                 if log["address"] == self.network["factory_address"]
             ),

@@ -79,9 +79,32 @@ export class FortuneFinalResult {
   solution: string;
 }
 
-export class ImageLabelBinaryFinalResult {
+export class ImageLabelBinaryJobResults {
+  dataset: Dataset<ImageLabelBinaryResult>;
+  worker_performance: WorkerPerformanceResult[];
+}
+
+class Dataset<T> {
+  dataset_scores: { [score_name: string]: AgreementEstimate };
+  data_points: T[];
+}
+
+class AgreementEstimate {
+  score: number;
+  interval?: [number, number];
+  alpha?: number;
+}
+
+class ImageLabelBinaryResult {
   url: string;
-  final_answer: string;
-  correct: string[];
-  wrong: string[];
+  label: string;
+  label_counts: { [label: string]: number };
+  score: number;
+}
+
+class WorkerPerformanceResult {
+  worker_id: string;
+  consensus_annotations: number;
+  total_annotations: number;
+  score: number;
 }

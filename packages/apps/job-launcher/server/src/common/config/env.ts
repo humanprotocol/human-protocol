@@ -6,16 +6,16 @@ export const ConfigNames = {
   PORT: 'PORT',
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
-  PASSWORD_SECRET: 'PASSWORD_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
   JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
   POSTGRES_HOST: 'POSTGRES_HOST',
   POSTGRES_USER: 'POSTGRES_USER',
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
-  POSTGRES_DB: 'POSTGRES_DB',
+  POSTGRES_DATABASE: 'POSTGRES_DATABASE',
   POSTGRES_PORT: 'POSTGRES_PORT',
   POSTGRES_SYNC: 'POSTGRES_SYNC',
+  POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
@@ -41,6 +41,9 @@ export const ConfigNames = {
   SENDGRID_API_KEY: 'SENDGRID_API_KEY',
   SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
+  CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
+  CVAT_MAX_TIME: 'CVAT_MAX_TIME',
+  CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
 };
 
 export const envValidator = Joi.object({
@@ -50,7 +53,6 @@ export const envValidator = Joi.object({
   PORT: Joi.string().default(5000),
   FE_URL: Joi.string().default('http://localhost:3005'),
   SESSION_SECRET: Joi.string().default('session_key'),
-  PASSWORD_SECRET: Joi.string().default('$2b$10$EICgM2wYixoJisgqckU9gu'),
   // Auth
   JWT_SECRET: Joi.string().default('secrete'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
@@ -60,9 +62,10 @@ export const envValidator = Joi.object({
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
-  POSTGRES_DB: Joi.string().default('job-launcher'),
+  POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SYNC: Joi.string().default(false),
+  POSTGRES_SSL: Joi.string().default(false),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
@@ -92,4 +95,8 @@ export const envValidator = Joi.object({
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
   SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
+  // CVAT
+  CVAT_JOB_SIZE: Joi.string().default('10'),
+  CVAT_MAX_TIME: Joi.string().default('300'),
+  CVAT_VAL_SIZE: Joi.string().default('2'),
 });

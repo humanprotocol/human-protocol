@@ -4,8 +4,8 @@ import { IBase } from './base';
 export interface IJob extends IBase {
   userId: number;
   chainId: number;
-  fee: string;
-  fundAmount: string;
+  fee: number;
+  fundAmount: number;
   escrowAddress: string;
   manifestUrl: string;
   manifestHash: string;

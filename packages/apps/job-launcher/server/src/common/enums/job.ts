@@ -9,5 +9,7 @@ export enum JobStatus {
 
 export enum JobRequestType {
   IMAGE_LABEL_BINARY = 'IMAGE_LABEL_BINARY',
+  IMAGE_POINTS = 'IMAGE_POINTS',
+  IMAGE_BOXES = 'IMAGE_BOXES',
   FORTUNE = 'FORTUNE',
 }

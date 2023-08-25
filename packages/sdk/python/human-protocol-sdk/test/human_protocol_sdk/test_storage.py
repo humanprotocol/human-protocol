@@ -176,6 +176,35 @@ class TestStorageClient(unittest.TestCase):
         )
         self.assertEqual(result[0]["hash"], hash)
 
+    def test_upload_encrypted_files(self):
+        encrypted_file = "encrypted file content"
+        hash = hashlib.sha1(json.dumps(encrypted_file).encode("utf-8")).hexdigest()
+        encrypted_file_key = f"s3{hash}"
+        file = {
+            "file": encrypted_file.encode("utf-8"),
+            "hash": hash,
+            "key": encrypted_file_key,
+        }
+
+        self.client.client.stat_object = MagicMock(
+            side_effect=S3Error(
+                code="NoSuchKey",
+                message="Object does not exist",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        self.client.client.put_object = MagicMock()
+        result = self.client.upload_files(files=[file], bucket=self.bucket)
+        self.assertEqual(result[0]["key"], encrypted_file_key)
+        self.assertEqual(
+            result[0]["url"],
+            f"https://s3.us-west-2.amazonaws.com/my-bucket/{encrypted_file_key}",
+        )
+        self.assertEqual(result[0]["hash"], hash)
+
     def test_upload_files_exist(self):
         file3 = "file3 content"
         hash = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
