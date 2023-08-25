@@ -3,6 +3,23 @@ import { ethers } from "ethers";
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from "../../../test/constants";
 import { ErrorSignature } from "../constants/errors";
 
+//ethers.utils.verifyMessage = jest.fn().mockResolvedValue(true);
+jest.doMock('ethers', () => {
+  return {
+    utils: {
+      get verifyMessage() {
+        return jest.fn((message, signature) => {
+          if (message === 'valid-message' && signature === 'valid-signature') {
+            return 'recovered-address';
+          } else {
+            throw new Error('Invalid signature');
+          }
+        });
+      }
+    }
+  };
+});
+
 describe('Signature utility', () => {
   describe('verifySignature', () => {
     it('should return true for valid signature', async () => {
@@ -38,22 +55,40 @@ describe('Signature utility', () => {
 
   describe('recoverSigner', () => {
     it('should recover the correct signer', async () => {
-        const message = "value";
-        const signature = await signMessage(message, MOCK_PRIVATE_KEY)
+      const message = "value";
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY)
 
-        const result = recoverSigner(message, signature);
+      const result = recoverSigner(message, signature);
 
-        expect(result).toBe(MOCK_ADDRESS);
+      expect(result).toBe(MOCK_ADDRESS);
     });
 
     it('should throw conflict exception for invalid signature', () => {
-        const message = "Hello, this is a signed message!";
-        const invalidSignature = "0xInvalidSignature";
+      const message = "Hello, this is a signed message!";
+      const invalidSignature = "0xInvalidSignature";
+
+      expect(() => {
+          recoverSigner(message, invalidSignature);
+      }).toThrow(ErrorSignature.InvalidSignature);
+    });
+
+    it('should stringify message object if it is not already a string', async () => {
+      const message = { key: 'value' };
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
   
-        expect(() => {
-            recoverSigner(message, invalidSignature);
-        }).toThrow(ErrorSignature.InvalidSignature);
-      });
+      const recoveredAddress = recoverSigner(message, signature);
+  
+      expect(recoveredAddress).toBe(MOCK_ADDRESS);
+    });
+  
+    it('should not stringify message if it is already a string', async () => {
+      const message = 'valid message';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+  
+      const recoveredAddress = recoverSigner(message, signature);
+  
+      expect(recoveredAddress).toBe(MOCK_ADDRESS);
+    });
   });
 
   describe('signMessage', () => {
@@ -61,6 +96,20 @@ describe('Signature utility', () => {
       const message = "Hello, this is a test message";
       const signature = await signMessage(message, MOCK_PRIVATE_KEY);
 
+      expect(signature).toBeDefined();
+    });
+
+    it('should stringify message object if it is not already a string', async () => {
+      const message = { key: 'value' };
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+  
+      expect(signature).toBeDefined();
+    });
+  
+    it('should not stringify message if it is already a string', async () => {
+      const message = 'valid message';
+      const signature = await signMessage(message, MOCK_PRIVATE_KEY);
+  
       expect(signature).toBeDefined();
     });
   });
