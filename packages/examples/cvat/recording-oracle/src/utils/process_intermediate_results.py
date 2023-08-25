@@ -9,7 +9,7 @@ from src.schemas.agreement import (
     ImageLabelBinaryJobResults,
 )
 from src.core.constants import JobTypes
-from src.agreement import cohens_kappa, fleiss_kappa, percent_agreement
+from src.agreement import cohens_kappa, fleiss_kappa, percent_agreement, bootstrap_ci
 from src.utils import confusion_matrix_from_sequence
 import pandas as pd
 
@@ -85,16 +85,23 @@ def process_image_label_binary_intermediate_results(
     dataset["score"] = dataset["label_counts"].map(calc_label_score)
 
     # calculate dataset wide statistics
+    alpha = 0.05
+    args_bootstrap = {"ci": 1 - alpha, "n_iterations": 5_000, "algorithm": "bca"}
+    fleiss_kappa_ci, _ = bootstrap_ci(tag_counts, fleiss_kappa, **args_bootstrap)
+    percent_agreement_ci, _ = bootstrap_ci(
+        tag_counts, percent_agreement, **args_bootstrap
+    )
+
     dataset_scores = {
         "fleiss_kappa": {
             "score": fleiss_kappa(tag_counts),
-            "interval": None,
-            "alpha": None,
+            "interval": fleiss_kappa_ci,
+            "alpha": alpha,
         },
         "avg_percent_agreement_across_labels": {
             "score": percent_agreement(tag_counts),
-            "interval": None,
-            "alpha": None,
+            "interval": percent_agreement_ci,
+            "alpha": alpha,
         },
     }
 
