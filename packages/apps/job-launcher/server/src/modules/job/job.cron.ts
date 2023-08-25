@@ -20,6 +20,7 @@ export class JobCron {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   public async launchJob() {
+    console.log('Start cron job');
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
       const jobEntity = await this.jobEntityRepository.findOne({
