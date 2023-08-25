@@ -1,16 +1,35 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { Box, Button, FormHelperText, Link, TextField } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Formik } from 'formik';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
+import * as authService from '../../services/auth';
 import { Password } from './Password';
 import { RegisterValidationSchema } from './schema';
 
-export const SignUpForm = ({ onSignUp }) => {
+export const SignUpForm = ({ onFinish, onError }) => {
   const captchaRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleRegister = async ({ email, password, confirm }) => {
-    const body = { email, password, confirm };
-    onSignUp(body);
+    setIsLoading(true);
+    try {
+      await authService.signUp({ email, password, confirm });
+
+      setIsSuccess(true);
+    } catch (err) {
+      onError(err?.message);
+    }
+    setIsLoading(false);
   };
 
   const initialValues = {
@@ -19,6 +38,46 @@ export const SignUpForm = ({ onSignUp }) => {
     confirm: '',
     hcaptchaToken: '',
   };
+
+  if (isSuccess) {
+    return (
+      <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
+        <Box>
+          <CheckFilledIcon />
+        </Box>
+        <Typography variant="h6" fontWeight={500} mt={4}>
+          Success!
+        </Typography>
+        <Typography variant="body2" mt={5}>
+          Please check your email box for the link to verify email.
+        </Typography>
+        <Box mt={13}>
+          <Button
+            size="large"
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={onFinish}
+          >
+            Sign in
+          </Button>
+        </Box>
+        <Link
+          href="https://humanprotocol.org/app/terms-and-conditions"
+          target="_blank"
+          sx={{
+            fontSize: '12px',
+            textAlign: 'center',
+            display: 'block',
+            width: '100%',
+            mt: 3,
+          }}
+        >
+          Terms & conditions
+        </Link>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: '303px', mx: 'auto' }}>
@@ -90,16 +149,17 @@ export const SignUpForm = ({ onSignUp }) => {
               )}
             </Box>
             <Box>
-              <Button
+              <LoadingButton
                 fullWidth
                 color="primary"
                 variant="contained"
                 size="large"
                 onClick={handleSubmit}
                 disabled={!(isValid && dirty)}
+                loading={isLoading}
               >
                 Sign up for Job Launcher
-              </Button>
+              </LoadingButton>
             </Box>
             <Link
               href="https://humanprotocol.org/app/terms-and-conditions"

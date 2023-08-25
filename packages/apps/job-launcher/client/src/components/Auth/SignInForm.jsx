@@ -1,20 +1,20 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Link as MuiLink,
-  TextField,
-} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Box, FormHelperText, Link as MuiLink, TextField } from '@mui/material';
 import { useFormik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import * as authService from '../../services/auth';
+import { useAppDispatch } from '../../state';
+import { fetchUserBalanceAsync, signIn } from '../../state/auth/reducer';
 import { Password } from './Password';
 import { LoginValidationSchema } from './schema';
 
-export const SignInForm = ({ onSignIn }) => {
+export const SignInForm = ({ onError }) => {
   const captchaRef = useRef(null);
   const [hcaptchaToken, setHcaptchaToken] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -22,8 +22,23 @@ export const SignInForm = ({ onSignIn }) => {
       token: '',
     },
     validationSchema: LoginValidationSchema,
-    onSubmit: (values) => onSignIn(values),
+    onSubmit: (values) => handleSignIn(values),
   });
+
+  const handleSignIn = async (body) => {
+    setIsLoading(true);
+    try {
+      const data = await authService.signIn({
+        email: body.email,
+        password: body.password,
+      });
+      dispatch(signIn(data));
+      dispatch(fetchUserBalanceAsync());
+    } catch (err) {
+      onError(err?.response?.data?.message);
+    }
+    setIsLoading(false);
+  };
 
   const handleVerificationToken = (token) => {
     setHcaptchaToken(token);
@@ -91,16 +106,17 @@ export const SignInForm = ({ onSignIn }) => {
             </FormHelperText>
           )}
         </Box>
-        <Button
+        <LoadingButton
           fullWidth
           color="primary"
           variant="contained"
           size="large"
           onClick={() => formik.handleSubmit()}
           disabled={!(formik.isValid && formik.dirty && hcaptchaToken)}
+          loading={isLoading}
         >
           Sign in to Job Launcher
-        </Button>
+        </LoadingButton>
         <MuiLink
           href="https://humanprotocol.org/app/terms-and-conditions"
           target="_blank"

@@ -31,3 +31,11 @@ export const forgotPassword = async (email: string) => {
 export const resetPassword = async (body: ResetPasswordRequest) => {
   await api.post('/auth/restore-password', body);
 };
+
+export const verifyEmail = async (body: { token: string }) => {
+  await api.post('/auth/email-verification', body);
+};
+
+export const resendEmailVerification = async (email: string) => {
+  await api.post('/auth/resend-email-verification', { email });
+};

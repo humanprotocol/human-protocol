@@ -1,9 +1,9 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { LoadingButton } from '@mui/lab';
 import {
   Alert,
   AlertTitle,
   Box,
-  Button,
   FormHelperText,
   Link,
   Typography,
@@ -18,10 +18,12 @@ import { ResetPasswordValidationSchema } from './schema';
 export const ResetPasswordForm = () => {
   const captchaRef = useRef(null);
   const [alertMsg, setAlertMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const token = new URLSearchParams(window.location.search).get('token');
 
   const handleResetPassword = async ({ password, repeatPassword }) => {
+    setIsLoading(true);
     try {
       await authService.resetPassword({
         password,
@@ -33,6 +35,7 @@ export const ResetPasswordForm = () => {
     } catch (err) {
       console.error(err);
     }
+    setIsLoading(false);
   };
 
   const initialValues = {
@@ -110,16 +113,17 @@ export const ResetPasswordForm = () => {
               )}
             </Box>
             <Box>
-              <Button
+              <LoadingButton
                 fullWidth
                 color="primary"
                 variant="contained"
                 size="large"
                 onClick={handleSubmit}
                 disabled={!(isValid && dirty)}
+                loading={isLoading}
               >
                 Reset Password
-              </Button>
+              </LoadingButton>
             </Box>
             <Link
               href="https://humanprotocol.org/app/terms-and-conditions"

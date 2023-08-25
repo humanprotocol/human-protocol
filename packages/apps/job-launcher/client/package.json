@@ -8,6 +8,7 @@
     "@hcaptcha/react-hcaptcha": "^1.8.1",
     "@human-protocol/core": "*",
     "@human-protocol/sdk": "*",
+    "@mui/lab": "^5.0.0-alpha.141",
     "@mui/material": "^5.11.7",
     "@reduxjs/toolkit": "^1.9.5",
     "@stripe/react-stripe-js": "^1.16.4",

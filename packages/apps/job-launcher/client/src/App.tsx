@@ -10,6 +10,7 @@ import JobDetail from './pages/Job/JobDetail';
 import JobList from './pages/Job/JobList';
 import TopUpAccount from './pages/Profile/TopUpAccount';
 import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 
 import './index.css';
 
@@ -19,6 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="/verify" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route

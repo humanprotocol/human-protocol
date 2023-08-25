@@ -4,13 +4,9 @@ import { Navigate } from 'react-router-dom';
 import { SignInForm } from '../../components/Auth/SignInForm';
 import { SignUpForm } from '../../components/Auth/SignUpForm';
 import { HomeStyledTab, HomeStyledTabs } from '../../components/Tabs';
-import * as authService from '../../services/auth';
-import { useAppDispatch, useAppSelector } from '../../state';
-import { signIn } from '../../state/auth/reducer';
-import { SignInRequest, SignUpRequest } from '../../types';
+import { useAppSelector } from '../../state';
 
 export default function Home() {
-  const dispatch = useAppDispatch();
   const [tabValue, setTabValue] = useState(0);
   const [mode, setMode] = useState<string>();
   const [alertMsg, setAlertMsg] = useState('');
@@ -20,27 +16,9 @@ export default function Home() {
     return <Navigate to="/dashboard" />;
   }
 
-  const handleSignIn = async (body: SignInRequest) => {
-    try {
-      const data = await authService.signIn({
-        email: body.email,
-        password: body.password,
-      });
-      dispatch(signIn(data));
-    } catch (err: any) {
-      console.log(err);
-      setAlertMsg(err?.response?.data?.message);
-    }
-  };
-
-  const handleSignUp = async (body: SignUpRequest) => {
-    try {
-      await authService.signUp(body);
-      setTabValue(0);
-      setMode('sign_in');
-    } catch (err: any) {
-      setAlertMsg(err?.message);
-    }
+  const handleSignUp = () => {
+    setTabValue(0);
+    setMode('sign_in');
   };
 
   return (
@@ -93,7 +71,7 @@ export default function Home() {
         {tabValue === 0 && (
           <>
             {mode === 'sign_in' ? (
-              <SignInForm onSignIn={handleSignIn} />
+              <SignInForm onError={(message: string) => setAlertMsg(message)} />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button
@@ -120,7 +98,10 @@ export default function Home() {
         {tabValue === 1 && (
           <>
             {mode === 'sign_up' ? (
-              <SignUpForm onSignUp={handleSignUp} />
+              <SignUpForm
+                onFinish={handleSignUp}
+                onError={(message: string) => setAlertMsg(message)}
+              />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button

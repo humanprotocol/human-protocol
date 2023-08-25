@@ -48,3 +48,9 @@ export const ResetPasswordValidationSchema = Yup.object().shape({
     .oneOf([Yup.ref('password'), ''], ERROR_MESSAGES.notConfirmedPassword),
   hcaptchaToken: Yup.string().required(ERROR_MESSAGES.captchaPassRequired),
 });
+
+export const ResendEmailVerificationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email(ERROR_MESSAGES.invalidEmail)
+    .required(ERROR_MESSAGES.requireEmail),
+});

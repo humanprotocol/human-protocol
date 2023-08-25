@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab';
 import {
   AppBar,
   Box,
@@ -50,6 +51,7 @@ export const AuthHeader = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { user, refreshToken } = useAppSelector((state) => state.auth);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -64,8 +66,10 @@ export const AuthHeader = () => {
 
   const handleLogOut = async () => {
     if (refreshToken) {
+      setIsLoggingOut(true);
       await authServices.signOut(refreshToken);
       dispatch(signOut());
+      setIsLoggingOut(false);
     }
   };
 
@@ -193,9 +197,14 @@ export const AuthHeader = () => {
             </Link>
           </Box>
           <Box sx={{ padding: '8px 16px' }}>
-            <Button variant="contained" fullWidth onClick={handleLogOut}>
+            <LoadingButton
+              variant="contained"
+              fullWidth
+              onClick={handleLogOut}
+              loading={isLoggingOut}
+            >
               Log out
-            </Button>
+            </LoadingButton>
           </Box>
         </ProfileMenu>
       </Toolbar>

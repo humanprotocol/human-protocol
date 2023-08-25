@@ -1,4 +1,5 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { LoadingButton } from '@mui/lab';
 import {
   Alert,
   AlertTitle,
@@ -20,15 +21,18 @@ export const ForgotPasswordForm = () => {
   const captchaRef = useRef(null);
   const [alertMsg, setAlertMsg] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleForgotPassword = async ({ email }) => {
+    setIsLoading(true);
     try {
       await authService.forgotPassword(email);
       setIsSuccess(true);
     } catch (err) {
-      console.error(err);
+      setAlertMsg(err?.message);
     }
+    setIsLoading(false);
   };
 
   const initialValues = {
@@ -137,16 +141,17 @@ export const ForgotPasswordForm = () => {
               )}
             </Box>
             <Box>
-              <Button
+              <LoadingButton
                 fullWidth
                 color="primary"
                 variant="contained"
                 size="large"
                 onClick={handleSubmit}
                 disabled={!(isValid && dirty)}
+                loading={isLoading}
               >
                 Send reset link
-              </Button>
+              </LoadingButton>
             </Box>
             <Link
               href="https://humanprotocol.org/app/terms-and-conditions"
