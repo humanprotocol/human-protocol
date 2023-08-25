@@ -203,3 +203,11 @@ export class CvatFinalResultDto {
   @IsArray()
   wrong: string[];
 }
+
+export class JobListDto {
+  jobId: number;
+  escrowAddress?: string;
+  network: string;
+  fundAmount: number;
+  status: JobStatus;
+}
