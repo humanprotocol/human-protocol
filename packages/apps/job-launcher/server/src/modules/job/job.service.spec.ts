@@ -33,12 +33,10 @@ import {
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  CreateJobDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
-  JobCancelDto,
   JobFortuneDto,
   JobImageLabelBinaryDto,
 } from './job.dto';
@@ -49,6 +47,7 @@ import { JobService } from './job.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
+import { EventType } from '../../common/enums/webhook';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -100,7 +99,9 @@ describe('JobService', () => {
             return MOCK_RECORDING_ORACLE_ADDRESS;
           case 'REPUTATION_ORACLE_ADDRESS':
             return MOCK_REPUTATION_ORACLE_ADDRESS;
-          case 'EXCHANGE_ORACLE_WEBHOOK_URL':
+          case 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL':
+            return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
+          case 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL':
             return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
           case 'HOST':
             return '127.0.0.1';
@@ -704,33 +705,153 @@ describe('JobService', () => {
     });
   });
 
-
   describe('cancelJob', () => {
-    it('should cancel the job', async () => {
-      const jobId = 1;
-      const userId = 123;
-      const escrowAddress = '0xValidEscrowAddress';
-      const mockJobEntity: Partial<JobEntity> = {
-        id: jobId,
-        userId,
+    let getManifestMock: any,
+        saveMock: any,
+        buildMock: any,
+        sendWebhookMock: any,
+        jobEntityMock: Partial<JobEntity>
+
+    const escrowClientMock: any = {
+      cancel: jest.fn().mockResolvedValue(undefined)
+    };
+
+    beforeEach(() => {
+      jobEntityMock = {
+        escrowAddress: MOCK_ADDRESS,
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
         status: JobStatus.TO_CANCEL,
-        escrowAddress,
-        chainId: ChainId.LOCALHOST,
-        save: jest.fn().mockResolvedValue(true),
+        save: jest.fn(),
       };
 
-      const mockEscrowClient = { cancel: jest.fn() };
+      getManifestMock = jest.spyOn(jobService, 'getManifest');
+      saveMock = jest.spyOn(jobEntityMock, 'save');
+      buildMock = jest.spyOn(EscrowClient, 'build');
+      sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
+    });
 
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
-      EscrowClient.build = jest.fn().mockResolvedValue(mockEscrowClient);
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
-      const result = await jobService.cancelJob(mockJobEntity as JobEntity);
+    it('cancels a job successfully with Fortune job type, without escrow address and pending status', async () => {
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: '10',
+        requestType: JobRequestType.FORTUNE
+      };
+      
 
-      expect(result).toEqual(true);
-      expect(web3Service.getSigner).toHaveBeenCalledWith(ChainId.LOCALHOST);
-      expect(EscrowClient.build).toHaveBeenCalledWith(signerMock);
-      expect(mockEscrowClient.cancel).toHaveBeenCalledWith(escrowAddress);
-      expect(mockJobEntity.save).toHaveBeenCalled();
+      jobEntityMock.status = JobStatus.PENDING;
+      jobEntityMock.escrowAddress = undefined;
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      getManifestMock.mockResolvedValue(manifest);
+      sendWebhookMock.mockResolvedValue(true);
+      
+      const result = await jobService.cancelJob(jobEntityMock as any);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.cancel).toBeCalledTimes(0);
+      expect(saveMock).toHaveBeenCalledWith();
+      expect(sendWebhookMock).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          escrowAddress: jobEntityMock.escrowAddress,
+          chainId: jobEntityMock.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        }
+      );
+    });
+
+    it('cancels a job successfully with Fortune job type and launched escrow', async () => {
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: '10',
+        requestType: JobRequestType.FORTUNE
+      };
+      
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      getManifestMock.mockResolvedValue(manifest);
+      buildMock.mockResolvedValue(escrowClientMock as any);
+      sendWebhookMock.mockResolvedValue(true);
+      
+      const result = await jobService.cancelJob(jobEntityMock as any);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
+      expect(saveMock).toHaveBeenCalledWith();
+      expect(sendWebhookMock).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          escrowAddress: jobEntityMock.escrowAddress,
+          chainId: jobEntityMock.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        }
+      );
+    });
+
+    it('cancels a job successfully with image binary lavel job type, without escrow address and pending status', async () => {
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: '10',
+        requestType: JobRequestType.IMAGE_LABEL_BINARY
+      };
+      
+      jobEntityMock.status = JobStatus.PENDING;
+      jobEntityMock.escrowAddress = undefined;
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      getManifestMock.mockResolvedValue(manifest);
+      sendWebhookMock.mockResolvedValue(true);
+      
+      const result = await jobService.cancelJob(jobEntityMock as any);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.cancel).toBeCalledTimes(0);
+      expect(saveMock).toHaveBeenCalledWith();
+      expect(sendWebhookMock).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          escrowAddress: jobEntityMock.escrowAddress,
+          chainId: jobEntityMock.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        }
+      );
+    });
+
+    it('cancels a job successfully with image binary lavel job type and launched escrow', async () => {
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: '10',
+        requestType: JobRequestType.IMAGE_LABEL_BINARY
+      };
+      
+      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      getManifestMock.mockResolvedValue(manifest);
+      buildMock.mockResolvedValue(escrowClientMock as any);
+      sendWebhookMock.mockResolvedValue(true);
+      
+      const result = await jobService.cancelJob(jobEntityMock as any);
+
+      expect(result).toBe(true);
+      expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
+      expect(saveMock).toHaveBeenCalledWith();
+      expect(sendWebhookMock).toHaveBeenCalledWith(
+        expect.any(String),
+        {
+          escrowAddress: jobEntityMock.escrowAddress,
+          chainId: jobEntityMock.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        }
+      );
     });
   });
 

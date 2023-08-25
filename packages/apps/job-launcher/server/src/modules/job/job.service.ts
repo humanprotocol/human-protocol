@@ -32,12 +32,10 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import {
-  CreateJobDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
   ImageLabelBinaryManifestDto,
-  JobCancelDto,
   JobFortuneDto,
   JobImageLabelBinaryDto,
   SaveManifestDto,
@@ -60,6 +58,7 @@ import {
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
+import { EventType } from '../../common/enums/webhook';
 
 @Injectable()
 export class JobService {
@@ -230,11 +229,12 @@ export class JobService {
     if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
       await this.sendWebhook(
         this.configService.get<string>(
-          ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+          ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
         )!,
         {
           escrowAddress: jobEntity.escrowAddress,
           chainId: jobEntity.chainId,
+          eventType: EventType.ESCROW_CREATED
         },
       );
     }
@@ -272,6 +272,32 @@ export class JobService {
 
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
+
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
+
+    if (manifest.requestType === JobRequestType.FORTUNE) {
+      await this.sendWebhook(
+        this.configService.get<string>(
+          ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
+        )!,
+        {
+          escrowAddress: jobEntity.escrowAddress,
+          chainId: jobEntity.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        },
+      );
+    } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+      await this.sendWebhook(
+        this.configService.get<string>(
+          ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
+        )!,
+        {
+          escrowAddress: jobEntity.escrowAddress,
+          chainId: jobEntity.chainId,
+          eventType: EventType.ESCROW_CANCELED
+        },
+      );
+    }
     
     return true;
   }

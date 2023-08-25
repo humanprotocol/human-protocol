@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { EventType } from 'src/common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -146,6 +147,7 @@ export class SaveManifestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
+  public eventType: EventType;
 }
 
 export class FortuneManifestDto {
