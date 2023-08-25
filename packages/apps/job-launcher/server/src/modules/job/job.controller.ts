@@ -13,6 +13,7 @@ import { RequestWithUser } from '../../common/types';
 import { JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType } from '../../common/enums/job';
+import { Public } from '../../common/decorators';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -47,5 +48,11 @@ export class JobController {
     @Query('jobId') jobId: number,
   ): Promise<any> {
     return this.jobService.getResult(req.user.id, jobId);
+  }
+
+  @Public()
+  @Get('/cron-job')
+  public async launchCronJob(): Promise<any> {
+    return this.jobService.launchCronJob();
   }
 }

@@ -61,7 +61,9 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { getRate } from '../../common/utils';
 import { add, mul, div, lt } from '../../common/utils/decimal';
-import { QueryFailedError } from 'typeorm';
+import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { JOB_RETRIES_COUNT_THRESHOLD } from 'src/common/constants';
+import { SortDirection } from '../../common/enums/collection';
 
 @Injectable()
 export class JobService {
@@ -403,5 +405,31 @@ export class JobService {
     }
 
     return result;
+  }
+
+  public async launchCronJob() {
+    console.log('Start cron job');
+    try {
+      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+      const jobEntity = await this.jobRepository.findOne(
+        {
+          status: JobStatus.PAID,
+          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      if (!jobEntity) return;
+
+      await this.launchJob(jobEntity);
+    } catch (e) {
+      this.logger.error(e);
+      return;
+    }
   }
 }
