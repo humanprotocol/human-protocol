@@ -7,6 +7,7 @@ import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { JobStatus } from '../../common/enums/job';
 import { JobEntity } from './job.entity';
 import { JobService } from './job.service';
+import { SendGridService } from '../sendgrid/sendgrid.service';
 
 @Injectable()
 export class JobCron {
@@ -16,11 +17,17 @@ export class JobCron {
     private readonly jobService: JobService,
     @InjectRepository(JobEntity)
     private readonly jobEntityRepository: Repository<JobEntity>,
+    private readonly sendgridService: SendGridService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   public async launchJob() {
     console.log('Start cron job');
+    await this.sendgridService.sendEmail({
+      to: 'adrian@mt.ai',
+      subject: 'Test',
+      text: `Test`,
+    });
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
       const jobEntity = await this.jobEntityRepository.findOne({
