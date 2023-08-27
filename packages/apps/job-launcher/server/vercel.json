@@ -16,11 +16,5 @@
         "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
       }
     }
-  ],
-  "crons": [
-    {
-      "path": "/job/cron-job",
-      "schedule": "* * * * *"
-    }
   ]
 }
