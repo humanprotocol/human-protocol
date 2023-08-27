@@ -22,8 +22,8 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "transaction" character varying,
                 "chain_id" integer,
-                "amount" character varying NOT NULL,
-                "rate" numeric(5, 2) NOT NULL,
+                "amount" numeric(30, 18) NOT NULL,
+                "rate" numeric(30, 18) NOT NULL,
                 "currency" character varying NOT NULL,
                 "type" "hmt"."payments_type_enum" NOT NULL,
                 "source" "hmt"."payments_source_enum" NOT NULL,
@@ -62,8 +62,8 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL,
                 "chain_id" integer,
                 "escrow_address" character varying,
-                "fee" character varying NOT NULL,
-                "fund_amount" character varying NOT NULL,
+                "fee" numeric(30, 18) NOT NULL,
+                "fund_amount" numeric(30, 18) NOT NULL,
                 "manifest_url" character varying NOT NULL,
                 "manifest_hash" character varying NOT NULL,
                 "status" "hmt"."jobs_status_enum" NOT NULL,
@@ -191,13 +191,13 @@ export class InitialMigration1691485394906 implements MigrationInterface {
             DROP TABLE "hmt"."payments"
         `);
     await queryRunner.query(`
+            DROP TYPE "hmt"."payments_status_enum"
+        `);
+    await queryRunner.query(`
             DROP TYPE "hmt"."payments_source_enum"
         `);
     await queryRunner.query(`
             DROP TYPE "hmt"."payments_type_enum"
-        `);
-    await queryRunner.query(`
-            DROP TYPE "hmt"."payments_status_enum"
         `);
     await queryRunner.dropSchema(NS);
   }

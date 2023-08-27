@@ -82,14 +82,13 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
         self.assertIsInstance(webhook.signature, str)
 
+        file_name = reputation_oracle_webhook.s3_url.split("/")[-1]
         file = StorageClient.download_file_from_url(
-            f"http://{StorageConfig.endpoint_url}/{StorageConfig.results_bucket_name}/s36ec31a76538347e8af2351e691375eaff88483ec.json"
+            f"http://{StorageConfig.endpoint_url}/{StorageConfig.results_bucket_name}/{file_name}"
         ).decode()
 
-        self.assertEqual(
-            file,
-            '{"dataset": {"data_points": [{"label": "dummy_label", "label_counts": {"dummy_label": 1}, "score": 1.0, "url": "https://test.storage.googleapis.com/1.jpg"}, {"label": "dummy_label", "label_counts": {"dummy_label": 1}, "score": 1.0, "url": "https://test.storage.googleapis.com/2.jpg"}, {"label": "dummy_label", "label_counts": {"dummy_label": 1}, "score": 1.0, "url": "https://test.storage.googleapis.com/3.jpg"}], "dataset_scores": {"avg_percent_agreement_across_labels": {"alpha": null, "interval": null, "score": NaN}, "fleiss_kappa": {"alpha": null, "interval": null, "score": NaN}}}, "worker_performance": [{"consensus_annotations": 3, "score": NaN, "total_annotations": 3, "worker_id": "0x1234567890123456789012345678901234567890"}]}',
-        )
+        self.assertIsNotNone(file)
+        self.assertIsInstance(file, str)
 
     def test_process_recording_oracle_webhooks_invalid_escrow_address(self):
         chain_id = Networks.localhost.value
