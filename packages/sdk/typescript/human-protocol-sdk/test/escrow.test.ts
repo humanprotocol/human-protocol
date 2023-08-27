@@ -5,6 +5,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ethers } from 'ethers';
+import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { DEFAULT_TX_ID } from '../src/constants';
 import { ChainId } from '../src/enums';
@@ -38,7 +39,13 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
+import { GET_ESCROWS_QUERY } from '../src/graphql';
 
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
 vi.mock('../src/init');
 
 describe('EscrowClient', () => {
@@ -1385,30 +1392,98 @@ describe('EscrowClient', () => {
   });
 
   describe('getEscrows', () => {
-    test('should throw an error if requesterAddress is an invalid address', async () => {
-      const requesterAddress = FAKE_ADDRESS;
+    test('should throw an error if launcher is an invalid address', async () => {
+      const launcher = FAKE_ADDRESS;
+
+      await expect(escrowClient.getEscrows({ launcher })).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should throw an error if recordingOracle is an invalid address', async () => {
+      const recordingOracle = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getEscrows({ launcherAddress: requesterAddress })
+        escrowClient.getEscrows({ recordingOracle })
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should throw an error if reputationOracle is an invalid address', async () => {
+      const reputationOracle = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getEscrows({ reputationOracle })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should successfully getEscrows', async () => {
-      const requesterAddress = FAKE_ADDRESS;
-      const mockLaunchedEscrowsResult = { id: ethers.constants.AddressZero };
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+        {
+          id: '2',
+          address: '0x0',
+          amountPaid: '0',
+          balance: '3',
+          count: '2',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Pending',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
 
-      vi.spyOn(escrowClient, 'getEscrows').mockImplementation(() =>
-        Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
-      );
+      const result = await escrowClient.getEscrows();
 
-      const results = await escrowClient.getEscrows({
-        launcherAddress: requesterAddress,
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_ESCROWS_QUERY({}), {});
+    });
+
+    test('should successfully getEscrows for the filter', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await escrowClient.getEscrows({
+        launcher: ethers.constants.AddressZero,
       });
 
-      expect(results).toEqual([
-        mockLaunchedEscrowsResult,
-        mockLaunchedEscrowsResult,
-      ]);
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        '',
+        GET_ESCROWS_QUERY({ launcher: ethers.constants.AddressZero }),
+        {
+          launcher: ethers.constants.AddressZero,
+        }
+      );
     });
   });
 

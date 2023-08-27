@@ -723,24 +723,21 @@ export class EscrowClient {
    * @returns {Promise<EscrowData[]>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getEscrows(filter: IEscrowsFilter): Promise<EscrowData[]> {
+  async getEscrows(filter: IEscrowsFilter = {}): Promise<EscrowData[]> {
+    if (filter.launcher && !ethers.utils.isAddress(filter.launcher)) {
+      throw ErrorInvalidAddress;
+    }
+
     if (
-      filter?.launcherAddress &&
-      !ethers.utils.isAddress(filter?.launcherAddress)
+      filter.recordingOracle &&
+      !ethers.utils.isAddress(filter.recordingOracle)
     ) {
       throw ErrorInvalidAddress;
     }
 
     if (
-      filter?.recordingOracle &&
-      !ethers.utils.isAddress(filter?.recordingOracle)
-    ) {
-      throw ErrorInvalidAddress;
-    }
-
-    if (
-      filter?.reputationOracle &&
-      !ethers.utils.isAddress(filter?.reputationOracle)
+      filter.reputationOracle &&
+      !ethers.utils.isAddress(filter.reputationOracle)
     ) {
       throw ErrorInvalidAddress;
     }
@@ -748,9 +745,11 @@ export class EscrowClient {
     try {
       const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
         this.network.subgraphUrl,
-        GET_ESCROWS_QUERY,
+        GET_ESCROWS_QUERY(filter),
         {
           ...filter,
+          from: filter.from ? +filter.from.getTime() / 1000 : undefined,
+          to: filter.to ? +filter.to.getTime() / 1000 : undefined,
         }
       );
 

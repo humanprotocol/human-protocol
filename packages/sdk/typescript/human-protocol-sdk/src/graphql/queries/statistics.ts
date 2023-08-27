@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import { IStatisticsParams } from '../../interfaces';
 
 const HMTOKEN_STATISTICS_FRAGMENT = gql`
   fragment HMTokenStatisticsFields on HMTokenStatistics {
@@ -50,8 +51,8 @@ const EVENT_DAY_DATA_FRAGMENT = gql`
 `;
 
 export const GET_HMTOKEN_STATISTICS_QUERY = gql`
-  query GetHMTokenStatistics() {
-    hmTokenStatistics(id: "hmt-statistics-id") {
+  query GetHMTokenStatistics {
+    hmtokenStatistics(id: "hmt-statistics-id") {
       ...HMTokenStatisticsFields
     }
   }
@@ -59,7 +60,7 @@ export const GET_HMTOKEN_STATISTICS_QUERY = gql`
 `;
 
 export const GET_ESCROW_STATISTICS_QUERY = gql`
-  query GetEscrowStatistics() {
+  query GetEscrowStatistics {
     escrowStatistics(id: "escrow-statistics-id") {
       ...EscrowStatisticsFields
     }
@@ -67,11 +68,21 @@ export const GET_ESCROW_STATISTICS_QUERY = gql`
   ${ESCROW_STATISTICS_FRAGMENT}
 `;
 
-export const GET_EVENT_DAY_DATA_QUERY = gql`
-  query GetEscrowDayData($from: Int, $to: Int) {
-    eventDayDatas(where: { timestamp_gte: $from, timestamp_lte: $to }) {
-      ...EventDayDataFields
+export const GET_EVENT_DAY_DATA_QUERY = (params: IStatisticsParams) => {
+  const { from, to } = params;
+  const WHERE_CLAUSE = `
+    where: {
+      ${from !== undefined ? `timestamp_gte: $from` : ''}
+      ${to !== undefined ? `timestamp_lte: $to` : ''}
     }
-  }
-  ${EVENT_DAY_DATA_FRAGMENT}
-`;
+  `;
+
+  return gql`
+    query GetEscrowDayData($from: Int, $to: Int) {
+      eventDayDatas(${WHERE_CLAUSE}) {
+        ...EventDayDataFields
+      }
+    }
+    ${EVENT_DAY_DATA_FRAGMENT}
+  `;
+};

@@ -1,11 +1,6 @@
 from typing import Optional, List
-from pgpy import PGPKey, PGPMessage, PGPUID
-from pgpy.constants import (
-    SymmetricKeyAlgorithm,
-    HashAlgorithm,
-    KeyFlags,
-    PubKeyAlgorithm,
-)
+from pgpy import PGPKey, PGPMessage
+from pgpy.constants import SymmetricKeyAlgorithm
 from pgpy.errors import PGPError
 
 

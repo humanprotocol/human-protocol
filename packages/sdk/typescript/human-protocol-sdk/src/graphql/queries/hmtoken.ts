@@ -8,7 +8,7 @@ const HOLDER_FRAGMENT = gql`
 `;
 
 export const GET_HOLDERS_QUERY = gql`
-  query GetHolders() {
+  query GetHolders {
     holders {
       ...HolderFields
     }

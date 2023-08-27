@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import { IEscrowsFilter } from '../../interfaces';
 
 const ESCROW_FRAGMENT = gql`
   fragment EscrowFields on Escrow {
@@ -20,30 +21,40 @@ const ESCROW_FRAGMENT = gql`
     status
     token
     totalFundedAmount
+    createdAt
   }
 `;
 
-export const GET_ESCROWS_QUERY = gql`
-  query GetEscrows(
-    $launcherAddress: String
-    $reputationOracle: String
-    $recordingOracle: String
-    $status: EscrowStatus
-    $from: Int
-    $to: Int
-  ) {
-    escrows(
-      where: {
-        launcher: $launcherAddress
-        reputationOracle: $reputationOracle
-        recordingOracle: $recordingOracle
-        status: $status
-        createdAt_gte: $from
-        createdAt_lte: $to
-      }
-    ) {
-      ...EscrowFields
+export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
+  const { launcher, reputationOracle, recordingOracle, status, from, to } =
+    filter;
+
+  const WHERE_CLAUSE = `
+    where: {
+      ${launcher ? `launcher: $launcher` : ''}
+      ${reputationOracle ? `reputationOracle: $reputationOracle` : ''}
+      ${recordingOracle ? `recordingOracle: $recordingOracle` : ''}
+      ${status ? `status: $status` : ''}
+      ${from ? `createdAt_gte: $from` : ''}
+      ${to ? `createdAt_lte: $to` : ''}
     }
-  }
-  ${ESCROW_FRAGMENT}
-`;
+  `;
+
+  return gql`
+    query getEscrows(
+      $launcher: String
+      $reputationOracle: String
+      $recordingOracle: String
+      $status: String
+      $from: Int
+      $to: Int
+    ) {
+      escrows(
+        ${WHERE_CLAUSE}
+      ) {
+        ...EscrowFields
+      }
+    }
+    ${ESCROW_FRAGMENT}
+  `;
+};

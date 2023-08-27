@@ -1,25 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import gqlFetch from 'graphql-request';
 
-import { IStatisticsParams } from './interfaces';
-import { NetworkData } from './types';
-import { throwError } from './utils';
 import {
+  GET_ESCROW_STATISTICS_QUERY,
+  GET_EVENT_DAY_DATA_QUERY,
+  GET_HOLDERS_QUERY,
+  GET_HMTOKEN_STATISTICS_QUERY,
   EscrowStatistics,
   EscrowStatisticsData,
   EventDayData,
-  HMTHolder,
   HMTStatistics,
   HMTStatisticsData,
   PaymentStatistics,
   WorkerStatistics,
+  HMTHolderData,
 } from './graphql';
-import {
-  GET_ESCROW_STATISTICS_QUERY,
-  GET_EVENT_DAY_DATA_QUERY,
-  GET_HMTOKEN_STATISTICS_QUERY,
-} from './graphql/queries/statistics';
-import { GET_HOLDERS_QUERY } from './graphql/queries/hmtoken';
+import { IStatisticsParams } from './interfaces';
+import { NetworkData } from './types';
+import { throwError } from './utils';
+import { BigNumber } from 'ethers';
 
 export class StatisticsClient {
   public network: NetworkData;
@@ -41,7 +40,7 @@ export class StatisticsClient {
    * @throws {Error} - An error object if an error occurred.
    */
   async getEscrowStatistics(
-    params: IStatisticsParams
+    params: IStatisticsParams = {}
   ): Promise<EscrowStatistics> {
     try {
       const { escrowStatistics } = await gqlFetch<{
@@ -50,7 +49,7 @@ export class StatisticsClient {
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY, {
+      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -79,12 +78,12 @@ export class StatisticsClient {
    * @throws {Error} - An error object if an error occurred.
    */
   async getWorkerStatistics(
-    params: IStatisticsParams
+    params: IStatisticsParams = {}
   ): Promise<WorkerStatistics> {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY, {
+      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -94,8 +93,10 @@ export class StatisticsClient {
           timestamp: new Date(+eventDayData.timestamp * 1000),
           activeWorkers: +eventDayData.dailyWorkerCount,
           averageJobsSolved:
-            +eventDayData.dailyCompletedStatusEventCount /
-            +eventDayData.dailyWorkerCount,
+            eventDayData.dailyWorkerCount === '0'
+              ? 0
+              : +eventDayData.dailyBulkPayoutEventCount /
+                +eventDayData.dailyWorkerCount,
         })),
       };
     } catch (e: any) {
@@ -111,12 +112,12 @@ export class StatisticsClient {
    * @throws {Error} - An error object if an error occurred.
    */
   async getPaymentStatistics(
-    params: IStatisticsParams
+    params: IStatisticsParams = {}
   ): Promise<PaymentStatistics> {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY, {
+      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -124,13 +125,20 @@ export class StatisticsClient {
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalAmountPaid: +eventDayData.dailyPayoutAmount,
+          totalAmountPaid: BigNumber.from(eventDayData.dailyPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
           averageAmountPerJob:
-            +eventDayData.dailyPayoutAmount /
-            +eventDayData.dailyCompletedStatusEventCount,
+            eventDayData.dailyBulkPayoutEventCount === '0'
+              ? BigNumber.from(0)
+              : BigNumber.from(eventDayData.dailyPayoutAmount).div(
+                  eventDayData.dailyBulkPayoutEventCount
+                ),
           averageAmountPerWorker:
-            +eventDayData.dailyPayoutAmount / +eventDayData.dailyWorkerCount,
+            eventDayData.dailyWorkerCount === '0'
+              ? BigNumber.from(0)
+              : BigNumber.from(eventDayData.dailyPayoutAmount).div(
+                  eventDayData.dailyWorkerCount
+                ),
         })),
       };
     } catch (e: any) {
@@ -145,30 +153,39 @@ export class StatisticsClient {
    * @returns {Promise<HMTStatistics>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getHMTStatistics(params: IStatisticsParams): Promise<HMTStatistics> {
+  async getHMTStatistics(
+    params: IStatisticsParams = {}
+  ): Promise<HMTStatistics> {
     try {
-      const { hmTokenStatistics } = await gqlFetch<{
-        hmTokenStatistics: HMTStatisticsData;
+      const { hmtokenStatistics } = await gqlFetch<{
+        hmtokenStatistics: HMTStatisticsData;
       }>(this.network.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
 
       const { holders } = await gqlFetch<{
-        holders: HMTHolder[];
+        holders: HMTHolderData[];
       }>(this.network.subgraphUrl, GET_HOLDERS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY, {
+      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
 
       return {
-        totalTransferAmount: +hmTokenStatistics.totalValueTransfered,
-        totalHolders: +hmTokenStatistics.holders,
-        holders,
+        totalTransferAmount: BigNumber.from(
+          hmtokenStatistics.totalValueTransfered
+        ),
+        totalHolders: +hmtokenStatistics.holders,
+        holders: holders.map((holder) => ({
+          address: holder.address,
+          balance: BigNumber.from(holder.balance),
+        })),
         dailyHMTData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalTransactionAmount: +eventDayData.dailyHMTTransferAmount,
+          totalTransactionAmount: BigNumber.from(
+            eventDayData.dailyHMTTransferAmount
+          ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,
         })),
       };
