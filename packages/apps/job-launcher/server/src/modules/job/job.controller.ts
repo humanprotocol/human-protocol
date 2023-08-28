@@ -16,6 +16,7 @@ import { RequestWithUser } from 'src/common/types';
 import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from 'src/common/enums/job';
+import { Public } from 'src/common/decorators';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -67,5 +68,11 @@ export class JobController {
     @Param() params: JobCancelDto,
   ): Promise<boolean> {
     return this.jobService.requestToCancelJob(req.user.id, params.id);
+  }
+
+  @Public()
+  @Get('/cron/cancel')
+  public async cancelCronJob(): Promise<any> {
+    return this.jobService.cancelCronJob();
   }
 }

@@ -746,6 +746,7 @@ describe('JobService', () => {
     let escrowClientMock: any,
         getManifestMock: any,
         jobSaveMock: any,
+        findOneJobMock: any,
         findOnePaymentMock: any,
         buildMock: any,
         sendWebhookMock: any,
@@ -777,9 +778,11 @@ describe('JobService', () => {
 
       getManifestMock = jest.spyOn(jobService, 'getManifest');
       jobSaveMock = jest.spyOn(jobEntityMock, 'save');
+      findOneJobMock = jest.spyOn(jobRepository, 'findOne');
       findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
       buildMock = jest.spyOn(EscrowClient, 'build');
       sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
+      findOneJobMock.mockResolvedValueOnce(jobEntityMock as JobCvatDto);
       findOnePaymentMock.mockResolvedValueOnce(paymentEntityMock as PaymentEntity);
     });
 
@@ -791,7 +794,7 @@ describe('JobService', () => {
       jobEntityMock.escrowAddress = undefined;
       jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       
-      const result = await jobService.cancelJob(jobEntityMock as any);
+      const result = await jobService.cancelCronJob();
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toBeCalledTimes(0);
@@ -805,7 +808,7 @@ describe('JobService', () => {
       buildMock.mockResolvedValue(escrowClientMock as any); 
 
       await expect(
-        jobService.cancelJob(jobEntityMock as any)
+        jobService.cancelCronJob()
       ).rejects.toThrowError(
         new BadGatewayException(ErrorEscrow.InvalidStatusCancellation),
       );
@@ -818,7 +821,7 @@ describe('JobService', () => {
       buildMock.mockResolvedValue(escrowClientMock as any); 
 
       await expect(
-        jobService.cancelJob(jobEntityMock as any)
+        jobService.cancelCronJob()
       ).rejects.toThrowError(
         new BadGatewayException(ErrorEscrow.InvalidBalanceCancellation),
       );
@@ -838,7 +841,7 @@ describe('JobService', () => {
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
       
-      const result = await jobService.cancelJob(jobEntityMock as any);
+      const result = await jobService.cancelCronJob();
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
@@ -878,7 +881,7 @@ describe('JobService', () => {
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
       
-      const result = await jobService.cancelJob(jobEntityMock as any);
+      const result = await jobService.cancelCronJob();
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
