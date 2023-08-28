@@ -21,7 +21,6 @@ import {
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
-  TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ConfigNames, networkMap } from '../../common/config';
@@ -33,7 +32,6 @@ import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
-import { token } from '@human-protocol/core/typechain-types/@openzeppelin/contracts';
 
 @Injectable()
 export class PaymentService {

@@ -2,10 +2,11 @@ import { Test } from '@nestjs/testing';
 
 import { RoutingProtocolService } from './routing-protocol.service';
 import { NETWORKS } from '@human-protocol/sdk';
-import { MOCK_ADDRESS,
+import {
+  MOCK_ADDRESS,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
-  MOCK_FILE_URL
+  MOCK_FILE_URL,
 } from '../../../test/constants';
 
 jest.mock('@human-protocol/sdk', () => ({

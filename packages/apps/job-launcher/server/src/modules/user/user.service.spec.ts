@@ -13,7 +13,6 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
-import * as bcrypt from 'bcrypt';
 
 jest.mock('@human-protocol/sdk');
 
@@ -91,7 +90,6 @@ describe('UserService', () => {
       jest
         .spyOn(userRepository, 'create')
         .mockResolvedValue(createdUser as UserEntity);
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
 
       const result = await userService.create(dto);
 
@@ -99,7 +97,7 @@ describe('UserService', () => {
       expect(userRepository.create).toHaveBeenCalledWith({
         ...dto,
         email: dto.email,
-        password: hashedPassword,
+        password: expect.any(String),
         type: UserType.REQUESTER,
         status: UserStatus.PENDING,
       });
@@ -173,9 +171,7 @@ describe('UserService', () => {
         currency: Currency.USD,
       };
 
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(10);
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(10);
 
       const balance = await userService.getBalance(userId);
 

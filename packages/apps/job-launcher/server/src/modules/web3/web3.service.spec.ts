@@ -53,7 +53,9 @@ describe('Web3Service', () => {
       mockConfigService.get = jest.fn().mockReturnValue(Web3Env.MAINNET);
       const invalidChainId = ChainId.LOCALHOST;
 
-      expect(() => web3Service.getSigner(invalidChainId)).toThrow(ErrorWeb3.InvalidMainnetChainId);
+      expect(() => web3Service.getSigner(invalidChainId)).toThrow(
+        ErrorWeb3.InvalidMainnetChainId,
+      );
     });
 
     it('should return a signer for a valid chainId on TESTNET', () => {
@@ -69,7 +71,9 @@ describe('Web3Service', () => {
       mockConfigService.get = jest.fn().mockReturnValue(Web3Env.TESTNET);
       const invalidChainId = ChainId.POLYGON;
 
-      expect(() => web3Service.getSigner(invalidChainId)).toThrow(ErrorWeb3.InvalidTestnetChainId);
+      expect(() => web3Service.getSigner(invalidChainId)).toThrow(
+        ErrorWeb3.InvalidTestnetChainId,
+      );
     });
   });
 });
