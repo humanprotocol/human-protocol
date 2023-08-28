@@ -1,10 +1,11 @@
-import { Column, Entity, Index, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
 import { JobStatus } from '../../common/enums/job';
 import { BaseEntity } from '../../database/base.entity';
 import { UserEntity } from '../user/user.entity';
+import { PaymentEntity } from '../payment/payment.entity';
 
 @Entity({ schema: NS, name: 'jobs' })
 @Index(['chainId', 'escrowAddress'], { unique: true })
@@ -38,6 +39,9 @@ export class JobEntity extends BaseEntity implements IJob {
 
   @Column({ type: 'int' })
   public userId: number;
+
+  @OneToMany(() => PaymentEntity, (payment) => payment.job)
+  public payments: PaymentEntity[];
 
   @Column({ type: 'int', default: 0 })
   public retriesCount: number;
