@@ -229,12 +229,13 @@ export class JobService {
   public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const tokenContract: HMToken = HMToken__factory.connect(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      signer,
+    const escrowClient = await EscrowClient.build(signer);
+
+    const weiAmount = ethers.utils.parseUnits(
+      jobEntity.fundAmount.toString(),
+      'ether',
     );
-    const weiAmount = ethers.utils.parseUnits(jobEntity.fundAmount.toString(),"ether");
-    await tokenContract.transfer(jobEntity.escrowAddress, weiAmount);
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
 
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
@@ -421,13 +422,13 @@ export class JobService {
       const manifest = await this.getManifest(jobEntity.manifestUrl);
       await this.validateManifest(manifest);
 
-      if(!jobEntity.escrowAddress){
+      if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);
       }
-      if(jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID){
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
         jobEntity = await this.fundJob(jobEntity);
       }
-      if(jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED){
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
         if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
           await this.sendWebhook(
             this.configService.get<string>(

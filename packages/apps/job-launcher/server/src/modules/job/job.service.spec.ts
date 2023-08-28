@@ -4,19 +4,6 @@ import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
-import {
-  ErrorBucket,
-  ErrorJob,
-  ErrorWeb3,
-} from '../../common/constants/errors';
-import {
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-  TokenId,
-} from '../../common/enums/payment';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -25,7 +12,7 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_SUBMISSION_REQUIRED,
+  MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
@@ -34,16 +21,27 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_JOB_ID,
+  MOCK_SUBMISSION_REQUIRED,
   MOCK_USER_ID,
 } from '../../../test/constants';
+import {
+  ErrorBucket,
+  ErrorJob,
+  ErrorWeb3,
+} from '../../common/constants/errors';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+  TokenId,
+} from '../../common/enums/payment';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
   ImageLabelBinaryFinalResultDto,
-  ImageLabelBinaryManifestDto,
   JobFortuneDto,
   JobImageLabelBinaryDto,
 } from './job.dto';
@@ -51,10 +49,9 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { RoutingProtocolService } from './routing-protocol.service';
-import { PaymentRepository } from '../payment/payment.repository';
 import { div, mul } from '../../common/utils/decimal';
+import { PaymentRepository } from '../payment/payment.repository';
+import { RoutingProtocolService } from './routing-protocol.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -426,7 +423,9 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
 
-      const jobEntityResult = await jobService.launchJob(mockJobEntity as JobEntity);
+      const jobEntityResult = await jobService.launchJob(
+        mockJobEntity as JobEntity,
+      );
 
       mockJobEntity.escrowAddress = MOCK_ADDRESS;
       expect(jobEntityResult).toMatchObject(mockJobEntity);
@@ -448,6 +447,56 @@ describe('JobService', () => {
 
       await expect(
         jobService.launchJob(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('fundJob', () => {
+    const chainId = ChainId.LOCALHOST;
+
+    it('should fund a job successfully', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        fund: jest.fn(),
+      }));
+
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        fee,
+        fundAmount,
+        status: JobStatus.PAID,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      const jobEntityResult = await jobService.fundJob(
+        mockJobEntity as JobEntity,
+      );
+
+      mockJobEntity.escrowAddress = MOCK_ADDRESS;
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
+      expect(jobEntityResult.status).toBe(JobStatus.LAUNCHED);
+      expect(mockJobEntity.save).toHaveBeenCalled();
+    });
+
+    it('should handle error during job fund', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        fund: jest.fn().mockRejectedValue(new Error()),
+      }));
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      await expect(
+        jobService.fundJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
   });
