@@ -373,7 +373,10 @@ export class JobService {
       address: original.escrowAddress,
       network: NETWORKS[original.chainId as ChainId]!.title,
       fundAmount: original.fundAmount,
-      status: original.status,
+      status:
+        original.status === JobStatus.PAID
+          ? JobStatusFilter.PENDING
+          : JobStatusFilter[original.status],
     }));
 
     return transformedJobs;
