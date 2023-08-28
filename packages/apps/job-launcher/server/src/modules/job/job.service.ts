@@ -343,6 +343,12 @@ export class JobService {
       }
     }
 
+    const paymentEntity = await this.paymentRepository.findOne({ jobId: jobEntity.id, type: PaymentType.WITHDRAWAL, status: PaymentStatus.SUCCEEDED });
+    if (paymentEntity) {
+      paymentEntity.status = PaymentStatus.FAILED;
+      await paymentEntity.save();
+    }
+
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
     

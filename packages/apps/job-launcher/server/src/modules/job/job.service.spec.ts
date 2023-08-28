@@ -57,6 +57,7 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { div, mul } from '../../common/utils/decimal';
 import { EventType } from '../../common/enums/webhook';
+import { PaymentEntity } from '../payment/payment.entity';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -739,10 +740,12 @@ describe('JobService', () => {
   describe('cancelJob', () => {
     let escrowClientMock: any,
         getManifestMock: any,
-        saveMock: any,
+        jobSaveMock: any,
+        findOnePaymentMock: any,
         buildMock: any,
         sendWebhookMock: any,
-        jobEntityMock: Partial<JobEntity>
+        jobEntityMock: Partial<JobEntity>,
+        paymentEntityMock: Partial<PaymentEntity>
 
     beforeEach(() => {
       escrowClientMock = {
@@ -752,6 +755,7 @@ describe('JobService', () => {
       };
 
       jobEntityMock = {
+        id: 1,
         escrowAddress: MOCK_ADDRESS,
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
@@ -759,10 +763,19 @@ describe('JobService', () => {
         save: jest.fn(),
       };
 
+      paymentEntityMock = {
+        chainId: 1,
+        jobId: jobEntityMock.id,
+        status: PaymentStatus.SUCCEEDED,
+        save: jest.fn(),
+      };
+
       getManifestMock = jest.spyOn(jobService, 'getManifest');
-      saveMock = jest.spyOn(jobEntityMock, 'save');
+      jobSaveMock = jest.spyOn(jobEntityMock, 'save');
+      findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
       buildMock = jest.spyOn(EscrowClient, 'build');
       sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
+      findOnePaymentMock.mockResolvedValueOnce(paymentEntityMock as PaymentEntity);
     });
 
     afterEach(() => {
@@ -771,18 +784,19 @@ describe('JobService', () => {
 
     it('cancels a job successfully', async () => {
       jobEntityMock.escrowAddress = undefined;
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       
       const result = await jobService.cancelJob(jobEntityMock as any);
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toBeCalledTimes(0);
-      expect(saveMock).toHaveBeenCalledWith();
+      expect(paymentEntityMock.status).toBe(PaymentStatus.FAILED);
+      expect(jobSaveMock).toHaveBeenCalledWith();
     });
 
     it('should throw an error if the escrow has invalid status', async () => {
       escrowClientMock.getStatus = jest.fn().mockResolvedValue(EscrowStatus.Complete);
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       buildMock.mockResolvedValue(escrowClientMock as any); 
 
       await expect(
@@ -795,7 +809,7 @@ describe('JobService', () => {
     it('should throw an error if the escrow has invalid balance', async () => {
       escrowClientMock.getStatus = jest.fn().mockResolvedValue(EscrowStatus.Launched);
       escrowClientMock.getBalance = jest.fn().mockResolvedValue(BigNumber.from(0));
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       buildMock.mockResolvedValue(escrowClientMock as any); 
 
       await expect(
@@ -814,7 +828,7 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE
       };
       
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       getManifestMock.mockResolvedValue(manifest);
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
@@ -823,7 +837,7 @@ describe('JobService', () => {
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
-      expect(saveMock).toHaveBeenCalledWith();
+      expect(jobSaveMock).toHaveBeenCalledWith();
       expect(sendWebhookMock).toHaveBeenCalledWith(
         expect.any(String),
         {
@@ -854,7 +868,7 @@ describe('JobService', () => {
         job_bounty: '1',
       };
       
-      saveMock.mockResolvedValue(jobEntityMock as JobEntity);
+      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       getManifestMock.mockResolvedValue(manifest);
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
@@ -863,7 +877,7 @@ describe('JobService', () => {
 
       expect(result).toBe(true);
       expect(escrowClientMock.cancel).toHaveBeenCalledWith(jobEntityMock.escrowAddress);
-      expect(saveMock).toHaveBeenCalledWith();
+      expect(jobSaveMock).toHaveBeenCalledWith();
       expect(sendWebhookMock).toHaveBeenCalledWith(
         expect.any(String),
         {
