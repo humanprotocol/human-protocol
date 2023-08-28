@@ -21,8 +21,8 @@ import {
   VerifyEmailDto,
 } from './auth.dto';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
 
 @ApiTags('Auth')
 @Controller('/auth')
