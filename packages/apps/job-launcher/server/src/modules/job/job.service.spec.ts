@@ -161,6 +161,7 @@ describe('JobService', () => {
 
   describe('createJob', () => {
     const userId = 1;
+    const jobId = 123;
     const fortuneJobDto: JobFortuneDto = {
       chainId: MOCK_CHAIN_ID,
       submissionsRequired: MOCK_SUBMISSION_REQUIRED,
@@ -187,11 +188,27 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userId,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
+        jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,
@@ -278,6 +295,7 @@ describe('JobService', () => {
 
   describe('createJob with image label binary type', () => {
     const userId = 1;
+    const jobId = 123;
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
@@ -309,6 +327,21 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userId,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+
       await jobService.createJob(
         userId,
         JobRequestType.IMAGE_LABEL_BINARY,
@@ -318,6 +351,7 @@ describe('JobService', () => {
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
+        jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         currency: TokenId.HMT,

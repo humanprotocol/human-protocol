@@ -29,6 +29,8 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 "source" "hmt"."payments_source_enum" NOT NULL,
                 "status" "hmt"."payments_status_enum" NOT NULL,
                 "user_id" integer NOT NULL,
+                "job_id" integer,
+                CONSTRAINT "REL_f83af8ea8055b85bde0e095e40" UNIQUE ("job_id"),
                 CONSTRAINT "PK_197ab7af18c93fbb0c9b28b4a59" PRIMARY KEY ("id")
             )
         `);
@@ -133,6 +135,10 @@ export class InitialMigration1691485394906 implements MigrationInterface {
             ADD CONSTRAINT "FK_9027c8f0ba75fbc1ac46647d043" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
     await queryRunner.query(`
+            ALTER TABLE "hmt"."payments"
+            ADD CONSTRAINT "FK_f83af8ea8055b85bde0e095e400" FOREIGN KEY ("job_id") REFERENCES "hmt"."jobs"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
+        `);
+    await queryRunner.query(`
             ALTER TABLE "hmt"."tokens"
             ADD CONSTRAINT "FK_8769073e38c365f315426554ca5" FOREIGN KEY ("user_id") REFERENCES "hmt"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
         `);
@@ -151,6 +157,9 @@ export class InitialMigration1691485394906 implements MigrationInterface {
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."jobs" DROP CONSTRAINT "FK_9027c8f0ba75fbc1ac46647d043"
+        `);
+    await queryRunner.query(`
+            ALTER TABLE "hmt"."payments" DROP CONSTRAINT "FK_f83af8ea8055b85bde0e095e400"
         `);
     await queryRunner.query(`
             ALTER TABLE "hmt"."payments" DROP CONSTRAINT "FK_427785468fb7d2733f59e7d7d39"
