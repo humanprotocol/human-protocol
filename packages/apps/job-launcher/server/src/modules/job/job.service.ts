@@ -187,6 +187,7 @@ export class JobService {
     try {
       await this.paymentRepository.create({
         userId,
+        jobId: jobEntity.id,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         amount: -tokenTotalAmount,

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import { PaymentSource, PaymentStatus, PaymentType } from '../../common/enums/payment';
@@ -56,7 +56,7 @@ export class PaymentEntity extends BaseEntity {
   public userId: number;
 
   @JoinColumn()
-  @ManyToOne(() => JobEntity, (job) => job.payments)
+  @OneToOne(() => JobEntity, (job) => job.payment)
   public job: JobEntity;
 
   @Column({ type: 'int', nullable: true  })
