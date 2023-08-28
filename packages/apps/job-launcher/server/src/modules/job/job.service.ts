@@ -11,7 +11,7 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { PaymentService } from '../payment/payment.service';
 import { JobEntity } from './job.entity';
@@ -220,31 +220,24 @@ export class JobService {
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    jobEntity.escrowAddress = escrowAddress;
+    await jobEntity.save();
 
-    await this.validateManifest(manifest);
+    return jobEntity;
+  }
+
+  public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const tokenContract: HMToken = HMToken__factory.connect(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       signer,
     );
-    await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
+    const weiAmount = ethers.utils.parseUnits(jobEntity.fundAmount.toString(),"ether");
+    await tokenContract.transfer(jobEntity.escrowAddress, weiAmount);
 
-    jobEntity.escrowAddress = escrowAddress;
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
-
-    if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      await this.sendWebhook(
-        this.configService.get<string>(
-          ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
-        )!,
-        {
-          escrowAddress: jobEntity.escrowAddress,
-          chainId: jobEntity.chainId,
-        },
-      );
-    }
 
     return jobEntity;
   }
@@ -408,10 +401,9 @@ export class JobService {
   }
 
   public async launchCronJob() {
-    console.log('Start cron job');
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-      const jobEntity = await this.jobRepository.findOne(
+      let jobEntity = await this.jobRepository.findOne(
         {
           status: JobStatus.PAID,
           retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
@@ -426,7 +418,28 @@ export class JobService {
 
       if (!jobEntity) return;
 
-      await this.launchJob(jobEntity);
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      await this.validateManifest(manifest);
+
+      if(!jobEntity.escrowAddress){
+        jobEntity = await this.launchJob(jobEntity);
+      }
+      if(jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID){
+        jobEntity = await this.fundJob(jobEntity);
+      }
+      if(jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED){
+        if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
+          await this.sendWebhook(
+            this.configService.get<string>(
+              ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+            )!,
+            {
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+            },
+          );
+        }
+      }
     } catch (e) {
       this.logger.error(e);
       return;
