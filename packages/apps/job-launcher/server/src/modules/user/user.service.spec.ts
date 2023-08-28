@@ -171,9 +171,7 @@ describe('UserService', () => {
         currency: Currency.USD,
       };
 
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(10);
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(10);
 
       const balance = await userService.getBalance(userId);
 

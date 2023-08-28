@@ -1,18 +1,19 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Post,
   Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
+import { JobFortuneDto, JobCvatDto, JobListDto } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from '../../common/enums/job';
+import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
 
 @ApiBearerAuth()
@@ -33,13 +34,22 @@ export class JobController {
   @Post('/cvat')
   public async createCvatJob(
     @Request() req: RequestWithUser,
-    @Body() data: JobImageLabelBinaryDto,
+    @Body() data: JobCvatDto,
   ): Promise<number> {
-    return this.jobService.createJob(
-      req.user.id,
-      JobRequestType.IMAGE_LABEL_BINARY,
-      data,
-    );
+    return this.jobService.createJob(req.user.id, data.type, data);
+  }
+
+  @Get('/list')
+  @ApiQuery({ name: 'status', required: false, enum: JobStatusFilter })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  public async getJobList(
+    @Request() req: RequestWithUser,
+    @Query('status') status: JobStatusFilter,
+    @Query('skip', new DefaultValuePipe(null)) skip?: number,
+    @Query('limit', new DefaultValuePipe(null)) limit?: number,
+  ): Promise<JobListDto[]> {
+    return this.jobService.getJobsByStatus(req.user.id, status, skip, limit);
   }
 
   @Get('/result')

@@ -5,6 +5,22 @@ import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  ErrorBucket,
+  ErrorJob,
+  ErrorWeb3,
+} from '../../common/constants/errors';
+import {
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+  TokenId,
+} from '../../common/enums/payment';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
+import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
@@ -24,26 +40,15 @@ import {
   MOCK_SUBMISSION_REQUIRED,
   MOCK_USER_ID,
 } from '../../../test/constants';
-import {
-  ErrorBucket,
-  ErrorJob,
-  ErrorWeb3,
-} from '../../common/constants/errors';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
-import {
-  PaymentSource,
-  PaymentStatus,
-  PaymentType,
-  TokenId,
-} from '../../common/enums/payment';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
-  ImageLabelBinaryFinalResultDto,
+  CvatManifestDto,
   JobFortuneDto,
-  JobImageLabelBinaryDto,
+  JobCvatDto,
+  CvatFinalResultDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -52,6 +57,7 @@ import { JobService } from './job.service';
 import { div, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { In } from 'typeorm';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -272,14 +278,16 @@ describe('JobService', () => {
   describe('createJob with image label binary type', () => {
     const userId = 1;
 
-    const imageLabelBinaryJobDto: JobImageLabelBinaryDto = {
+    const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
       dataUrl: MOCK_FILE_URL,
       labels: ['cat', 'dog'],
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      requesterAccuracyTarget: 0.95,
+      minQuality: 0.95,
       fundAmount: 10,
+      gtUrl: '',
+      jobBounty: '1',
+      type: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
     let getUserBalanceMock: any;
@@ -573,14 +581,23 @@ describe('JobService', () => {
   });
 
   describe('saveManifest with image label binary request type', () => {
-    const imageLabelBinaryManifestParams = {
-      requestType: JobRequestType.IMAGE_LABEL_BINARY,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: 10,
-      dataUrl: MOCK_FILE_URL,
-      labels: ['cat', 'dog'],
-      requesterAccuracyTarget: 0.95,
+    const manifest: CvatManifestDto = {
+      data: {
+        data_url: MOCK_FILE_URL,
+      },
+      annotation: {
+        labels: [{ name: 'label1' }],
+        description: MOCK_REQUESTER_DESCRIPTION,
+        type: JobRequestType.IMAGE_LABEL_BINARY,
+        job_size: 10,
+        max_time: 300,
+      },
+      validation: {
+        min_quality: 1,
+        val_size: 2,
+        gt_url: '',
+      },
+      job_bounty: '1',
     };
 
     let uploadFilesMock: any;
@@ -601,16 +618,14 @@ describe('JobService', () => {
         },
       ]);
 
-      const result = await jobService.saveManifest(
-        imageLabelBinaryManifestParams,
-      );
+      const result = await jobService.saveManifest(manifest);
 
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -620,13 +635,11 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(
-        jobService.saveManifest(imageLabelBinaryManifestParams),
-      ).rejects.toThrowError(
+      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -637,11 +650,11 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(
-        jobService.saveManifest(imageLabelBinaryManifestParams),
-      ).rejects.toThrowError(new Error(errorMessage));
+      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
+        new Error(errorMessage),
+      );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [imageLabelBinaryManifestParams],
+        [manifest],
         MOCK_BUCKET_NAME,
       );
     });
@@ -760,7 +773,7 @@ describe('JobService', () => {
     });
 
     it('should download and return the image binary result', async () => {
-      const imageBinaryResult: ImageLabelBinaryFinalResultDto = {
+      const imageBinaryResult: CvatFinalResultDto = {
         url: 'https://example.com',
         final_answer: 'good',
         correct: ['good', 'good', 'good'],
@@ -802,6 +815,82 @@ describe('JobService', () => {
       );
       expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
         MOCK_FILE_URL,
+      );
+    });
+  });
+
+  describe('getJobsByStatus', () => {
+    const userId = 1;
+    const skip = 0;
+    const limit = 5;
+
+    it('should call the database with PENDING status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.PENDING, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.PENDING, JobStatus.PAID]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with LAUNCHED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.LAUNCHED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.LAUNCHED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with COMPLETED status', async () => {
+      jobService.getJobsByStatus(
+        userId,
+        JobStatusFilter.COMPLETED,
+        skip,
+        limit,
+      );
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.COMPLETED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with FAILED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.FAILED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.FAILED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with no status', async () => {
+      jobService.getJobsByStatus(userId, undefined, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
       );
     });
   });
