@@ -11,7 +11,11 @@ import {
   IsObject,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -202,4 +206,12 @@ export class CvatFinalResultDto {
 
   @IsArray()
   wrong: string[];
+}
+
+export class JobListDto {
+  jobId: number;
+  escrowAddress?: string;
+  network: string;
+  fundAmount: number;
+  status: JobStatusFilter;
 }

@@ -16,7 +16,11 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -55,6 +59,7 @@ import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { PaymentRepository } from '../payment/payment.repository';
 import { div, mul } from '../../common/utils/decimal';
+import { In } from 'typeorm';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -973,6 +978,82 @@ describe('JobService', () => {
       );
       expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
         MOCK_FILE_URL,
+      );
+    });
+  });
+
+  describe('getJobsByStatus', () => {
+    const userId = 1;
+    const skip = 0;
+    const limit = 5;
+
+    it('should call the database with PENDING status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.PENDING, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.PENDING, JobStatus.PAID]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with LAUNCHED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.LAUNCHED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.LAUNCHED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with COMPLETED status', async () => {
+      jobService.getJobsByStatus(
+        userId,
+        JobStatusFilter.COMPLETED,
+        skip,
+        limit,
+      );
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.COMPLETED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with FAILED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.FAILED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.FAILED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with no status', async () => {
+      jobService.getJobsByStatus(userId, undefined, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
       );
     });
   });
