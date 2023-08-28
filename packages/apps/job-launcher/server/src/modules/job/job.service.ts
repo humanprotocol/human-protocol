@@ -28,8 +28,7 @@ import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber } from 'ethers';
 import { firstValueFrom } from 'rxjs';
-import { add, div, lt, mul } from '../../common/utils/decimal';
-import { QueryFailedError } from 'typeorm';
+import { In, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
@@ -38,7 +37,11 @@ import {
   ErrorPayment,
   ErrorPostgres,
 } from '../../common/constants/errors';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 import {
   Currency,
   PaymentSource,
@@ -47,6 +50,7 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { getRate } from '../../common/utils';
+import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -55,8 +59,9 @@ import {
   CvatManifestDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
-  JobFortuneDto,
   JobCvatDto,
+  JobFortuneDto,
+  JobListDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -423,6 +428,40 @@ export class JobService {
     }
 
     return true;
+  }
+
+  public async getJobsByStatus(
+    userId: number,
+    status?: JobStatusFilter,
+    skip = 0,
+    limit = 10,
+  ): Promise<JobListDto[]> {
+    let statusFilter: any;
+    if (status) {
+      statusFilter = In([status]);
+      if (status === JobStatusFilter.PENDING)
+        statusFilter = In([JobStatus.PENDING, JobStatus.PAID]);
+    }
+
+    const jobs = await this.jobRepository.find(
+      {
+        userId,
+        status: statusFilter,
+      },
+      { skip: skip, take: limit },
+    );
+    const transformedJobs: JobListDto[] = jobs.map((original) => ({
+      jobId: original.id,
+      address: original.escrowAddress,
+      network: NETWORKS[original.chainId as ChainId]!.title,
+      fundAmount: original.fundAmount,
+      status:
+        original.status === JobStatus.PAID
+          ? JobStatusFilter.PENDING
+          : JobStatusFilter[original.status],
+    }));
+
+    return transformedJobs;
   }
 
   public async getResult(

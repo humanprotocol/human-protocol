@@ -104,6 +104,14 @@ export enum ErrorSendGrid {
 }
 
 /**
+ * Represents error messages related to signature.
+ */
+export enum ErrorSignature {
+  SignatureNotVerified = 'Signature not verified',
+  InvalidSignature = 'Invalid signature',
+}
+
+/**
  * Represents error messages related to postgres.
  */
 export enum ErrorPostgres {

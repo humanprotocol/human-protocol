@@ -7,6 +7,15 @@ export enum JobStatus {
   CANCELED = 'CANCELED',
 }
 
+export enum JobStatusFilter {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  LAUNCHED = 'LAUNCHED',
+  FAILED = 'FAILED',
+  TO_CANCEL = 'TO_CANCEL',
+  CANCELED = 'CANCELED',
+}
+
 export enum JobRequestType {
   IMAGE_LABEL_BINARY = 'IMAGE_LABEL_BINARY',
   IMAGE_POINTS = 'IMAGE_POINTS',
