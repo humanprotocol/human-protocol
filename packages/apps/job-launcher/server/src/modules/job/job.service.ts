@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  HMToken,
-  HMToken__factory,
-} from '@human-protocol/core/typechain-types';
 import {
   ChainId,
   EscrowClient,
@@ -105,8 +100,8 @@ export class JobService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
@@ -282,16 +277,16 @@ export class JobService {
     id: number,
   ): Promise<boolean> {
     const jobEntity = await this.jobRepository.findOne({ id, userId });
-    
+
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
     }
-  
+
     jobEntity.status = JobStatus.TO_CANCEL;
     jobEntity.retriesCount = 0;
     await jobEntity.save();
-    
+
     return true;
   }
 
@@ -496,7 +491,7 @@ export class JobService {
             {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED
+              eventType: EventType.ESCROW_CREATED,
             },
           );
         }
@@ -509,7 +504,7 @@ export class JobService {
 
   public async cancelCronJob() {
     // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-    let jobEntity = await this.jobRepository.findOne(
+    const jobEntity = await this.jobRepository.findOne(
       {
         status: JobStatus.TO_CANCEL,
         retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
@@ -524,27 +519,35 @@ export class JobService {
 
     if (!jobEntity) return;
 
-    const { escrowAddress } = jobEntity
+    const { escrowAddress } = jobEntity;
     if (escrowAddress) {
       const signer = this.web3Service.getSigner(jobEntity.chainId);
       const escrowClient = await EscrowClient.build(signer);
 
-      const escrowStatus = await escrowClient.getStatus(escrowAddress)
-      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid) {
+      const escrowStatus = await escrowClient.getStatus(escrowAddress);
+      if (
+        escrowStatus === EscrowStatus.Complete ||
+        escrowStatus === EscrowStatus.Paid
+      ) {
         this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
         throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
       }
 
       const balance = await escrowClient.getBalance(escrowAddress);
       if (balance.eq(0)) {
-        this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+        this.logger.log(
+          ErrorEscrow.InvalidBalanceCancellation,
+          JobService.name,
+        );
         throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
       }
 
-      await escrowClient.cancel(escrowAddress)
+      await escrowClient.cancel(escrowAddress);
 
       const manifest = await this.getManifest(jobEntity.manifestUrl);
-      if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      if (
+        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+      ) {
         await this.sendWebhook(
           this.configService.get<string>(
             ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
@@ -552,7 +555,7 @@ export class JobService {
           {
             escrowAddress,
             chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED
+            eventType: EventType.ESCROW_CANCELED,
           },
         );
       } else {
@@ -563,13 +566,17 @@ export class JobService {
           {
             escrowAddress,
             chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED
+            eventType: EventType.ESCROW_CANCELED,
           },
         );
       }
     }
 
-    const paymentEntity = await this.paymentRepository.findOne({ jobId: jobEntity.id, type: PaymentType.WITHDRAWAL, status: PaymentStatus.SUCCEEDED });
+    const paymentEntity = await this.paymentRepository.findOne({
+      jobId: jobEntity.id,
+      type: PaymentType.WITHDRAWAL,
+      status: PaymentStatus.SUCCEEDED,
+    });
     if (paymentEntity) {
       paymentEntity.status = PaymentStatus.FAILED;
       await paymentEntity.save();
@@ -577,7 +584,7 @@ export class JobService {
 
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
-    
+
     return true;
   }
 }
