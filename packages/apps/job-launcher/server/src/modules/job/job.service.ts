@@ -103,8 +103,8 @@ export class JobService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
