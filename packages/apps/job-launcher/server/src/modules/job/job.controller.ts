@@ -63,7 +63,7 @@ export class JobController {
   }
 
   @Public()
-  @Get('/cron-job')
+  @Get('/job/cron/launch')
   public async launchCronJob(): Promise<any> {
     return this.jobService.launchCronJob();
   }
