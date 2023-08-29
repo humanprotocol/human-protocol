@@ -19,9 +19,9 @@
   ],
   "crons": [
     {
-      "path": "/job/cron-job",
+      "path": "/job/cron/launch",
       "schedule": "* * * * *"
-    }
+    },
     {
       "path": "/job/cron/cancel",
       "schedule": "* * * * *"
