@@ -11,12 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
 import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType, JobStatusFilter } from 'src/common/enums/job';
-import { Public } from 'src/common/decorators';
+import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
+import { Public } from '../../common/decorators';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -60,6 +60,12 @@ export class JobController {
     @Query('jobId') jobId: number,
   ): Promise<any> {
     return this.jobService.getResult(req.user.id, jobId);
+  }
+
+  @Public()
+  @Get('/cron-job')
+  public async launchCronJob(): Promise<any> {
+    return this.jobService.launchCronJob();
   }
 
   @Patch('/cancel/:id')

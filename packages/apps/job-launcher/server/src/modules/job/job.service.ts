@@ -26,7 +26,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
@@ -254,32 +254,25 @@ export class JobService {
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-    await this.validateManifest(manifest);
-
-    const tokenContract: HMToken = HMToken__factory.connect(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      signer,
-    );
-    await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
-
     jobEntity.escrowAddress = escrowAddress;
-    jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
 
-    if ((manifest as CvatManifestDto)?.annotation?.type) {
-      await this.sendWebhook(
-        this.configService.get<string>(
-          ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-        )!,
-        {
-          escrowAddress: jobEntity.escrowAddress,
-          chainId: jobEntity.chainId,
-          eventType: EventType.ESCROW_CREATED
-        },
-      );
-    }
+    return jobEntity;
+  }
+
+  public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const weiAmount = ethers.utils.parseUnits(
+      jobEntity.fundAmount.toString(),
+      'ether',
+    );
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
+
+    jobEntity.status = JobStatus.LAUNCHED;
+    await jobEntity.save();
 
     return jobEntity;
   }
@@ -464,6 +457,53 @@ export class JobService {
     }
 
     return result;
+  }
+
+  public async launchCronJob() {
+    try {
+      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+      let jobEntity = await this.jobRepository.findOne(
+        {
+          status: JobStatus.PAID,
+          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      if (!jobEntity) return;
+
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      await this.validateManifest(manifest);
+
+      if (!jobEntity.escrowAddress) {
+        jobEntity = await this.launchJob(jobEntity);
+      }
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
+        jobEntity = await this.fundJob(jobEntity);
+      }
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
+        if ((manifest as CvatManifestDto)?.annotation?.type) {
+          await this.sendWebhook(
+            this.configService.get<string>(
+              ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
+            )!,
+            {
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CREATED
+            },
+          );
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      return;
+    }
   }
 
   public async cancelCronJob() {

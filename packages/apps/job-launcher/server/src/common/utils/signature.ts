@@ -1,7 +1,6 @@
-import { ConflictException } from "@nestjs/common";
-import { ethers } from "ethers";
-import { ErrorSignature } from "../constants/errors";
-import { toUtf8Bytes } from "ethers/lib/utils";
+import { ConflictException } from '@nestjs/common';
+import { ethers } from 'ethers';
+import { ErrorSignature } from '../constants/errors';
 
 export function verifySignature(
   message: object | string,
@@ -11,29 +10,37 @@ export function verifySignature(
   const signer = recoverSigner(message, signature);
 
   if (signer.toLowerCase() !== address.toLowerCase()) {
-    throw new ConflictException(
-      ErrorSignature.SignatureNotVerified);
+    throw new ConflictException(ErrorSignature.SignatureNotVerified);
   }
 
   return true;
 }
 
-export async function signMessage(message: object | string, privateKey: string): Promise<string> {
-  if (typeof(message) !== "string") { message = JSON.stringify(message); }
-  
+export async function signMessage(
+  message: object | string,
+  privateKey: string,
+): Promise<string> {
+  if (typeof message !== 'string') {
+    message = JSON.stringify(message);
+  }
+
   const wallet = new ethers.Wallet(privateKey);
   const signature = await wallet.signMessage(message);
 
   return signature;
 }
 
-export function recoverSigner(message: object | string, signature: string): string {  
-  if (typeof(message) !== "string") { message = JSON.stringify(message); }
+export function recoverSigner(
+  message: object | string,
+  signature: string,
+): string {
+  if (typeof message !== 'string') {
+    message = JSON.stringify(message);
+  }
 
-  try {  
+  try {
     return ethers.utils.verifyMessage(message, signature);
   } catch (e) {
-    throw new ConflictException(
-      ErrorSignature.InvalidSignature);
+    throw new ConflictException(ErrorSignature.InvalidSignature);
   }
 }
