@@ -92,25 +92,11 @@ describe('Storage tests', () => {
       };
 
       const storageClient = new StorageClient(
-        storageCredentials,
-        storageParams
+        storageParams,
+        storageCredentials
       );
 
       expect(storageClient).toBeInstanceOf(StorageClient);
-    });
-
-    test('should not init client with an error', async () => {
-      // TODO: Adapt it for particular test case
-      /* vi.mock('../src/storage', () => {
-        const StorageClient = vi.fn().mockImplementation(() => {
-          throw ErrorStorageClientNotInitialized;
-        });
-
-        return {
-          default: StorageClient
-        }
-      }) */
-      // expect(() => new StorageClient(storageCredentials, storageParams)).toThrow(ErrorStorageClientNotInitialized);
     });
   });
 
@@ -118,18 +104,13 @@ describe('Storage tests', () => {
     let storageClient: StorageClient;
 
     beforeAll(async () => {
-      const storageCredentials: StorageCredentials = {
-        accessKey: '',
-        secretKey: '',
-      };
-
       const storageParams: StorageParams = {
         endPoint: DEFAULT_ENDPOINT,
         port: DEFAULT_PORT,
         useSSL: DEFAULT_USE_SSL,
       };
 
-      storageClient = new StorageClient(storageCredentials, storageParams);
+      storageClient = new StorageClient(storageParams);
     });
 
     test('should return the bucket exists', async () => {
@@ -305,7 +286,7 @@ describe('Storage tests', () => {
         useSSL: DEFAULT_USE_SSL,
       };
 
-      storageClient = new StorageClient(storageCredentials, storageParams);
+      storageClient = new StorageClient(storageParams, storageCredentials);
     });
 
     test('should return the bucket exists', async () => {
