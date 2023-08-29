@@ -3,6 +3,8 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -11,7 +13,7 @@ import {
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { JobFortuneDto, JobCvatDto, JobListDto } from './job.dto';
+import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
@@ -64,5 +66,13 @@ export class JobController {
   @Get('/cron-job')
   public async launchCronJob(): Promise<any> {
     return this.jobService.launchCronJob();
+  }
+
+  @Patch('/cancel/:id')
+  public async cancelJob(
+    @Request() req: RequestWithUser,
+    @Param() params: JobCancelDto,
+  ): Promise<boolean> {
+    return this.jobService.requestToCancelJob(req.user.id, params.id);
   }
 }

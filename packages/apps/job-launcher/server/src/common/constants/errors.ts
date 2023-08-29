@@ -21,6 +21,8 @@ export enum ErrorEscrow {
   NotFound = 'Escrow not found',
   NotCreated = 'Escrow has not been created',
   NotLaunched = 'Escrow has not been launched',
+  InvalidStatusCancellation = 'Escrow has an invalid status for cancellation',
+  InvalidBalanceCancellation = 'Escrow has an invalid balance for cancellation'
 }
 
 /**

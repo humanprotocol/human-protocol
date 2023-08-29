@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
 import {
@@ -7,6 +7,7 @@ import {
   PaymentType,
 } from '../../common/enums/payment';
 import { UserEntity } from '../user/user.entity';
+import { JobEntity } from '../job/job.entity';
 
 @Entity({ schema: NS, name: 'payments' })
 @Index(['chainId', 'transaction'], {
@@ -57,4 +58,11 @@ export class PaymentEntity extends BaseEntity {
 
   @Column({ type: 'int' })
   public userId: number;
+
+  @JoinColumn()
+  @OneToOne(() => JobEntity, (job) => job.payment)
+  public job: JobEntity;
+
+  @Column({ type: 'int', nullable: true  })
+  public jobId: number;
 }
