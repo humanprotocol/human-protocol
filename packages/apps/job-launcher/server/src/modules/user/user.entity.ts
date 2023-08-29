@@ -1,4 +1,4 @@
-import { Auth, Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { NS } from '../../common/constants';

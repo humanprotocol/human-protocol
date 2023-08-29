@@ -1,18 +1,22 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
-import { JobFortuneDto, JobCvatDto } from './job.dto';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
+import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from 'src/common/enums/job';
+import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
+import { Public } from '../../common/decorators';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -37,11 +41,44 @@ export class JobController {
     return this.jobService.createJob(req.user.id, data.type, data);
   }
 
+  @Get('/list')
+  @ApiQuery({ name: 'status', required: false, enum: JobStatusFilter })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  public async getJobList(
+    @Request() req: RequestWithUser,
+    @Query('status') status: JobStatusFilter,
+    @Query('skip', new DefaultValuePipe(null)) skip?: number,
+    @Query('limit', new DefaultValuePipe(null)) limit?: number,
+  ): Promise<JobListDto[]> {
+    return this.jobService.getJobsByStatus(req.user.id, status, skip, limit);
+  }
+
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
     @Query('jobId') jobId: number,
   ): Promise<any> {
     return this.jobService.getResult(req.user.id, jobId);
+  }
+
+  @Public()
+  @Get('/job/cron/launch')
+  public async launchCronJob(): Promise<any> {
+    return this.jobService.launchCronJob();
+  }
+
+  @Patch('/cancel/:id')
+  public async cancelJob(
+    @Request() req: RequestWithUser,
+    @Param() params: JobCancelDto,
+  ): Promise<boolean> {
+    return this.jobService.requestToCancelJob(req.user.id, params.id);
+  }
+
+  @Public()
+  @Get('/cron/cancel')
+  public async cancelCronJob(): Promise<any> {
+    return this.jobService.cancelCronJob();
   }
 }

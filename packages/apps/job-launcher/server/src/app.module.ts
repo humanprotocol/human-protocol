@@ -13,6 +13,8 @@ import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   providers: [
@@ -40,6 +42,10 @@ import { envValidator } from './common/config';
     JobModule,
     PaymentModule,
     Web3Module,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'swagger-static'),
+      serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
+    }),
   ],
   controllers: [AppController],
 })

@@ -20,17 +20,17 @@ export class StorageClient {
   /**
    * **Storage client constructor**
    *
-   * @param {StorageCredentials} credentials - Cloud storage access data
    * @param {StorageParams} params - Cloud storage params
+   * @param {StorageCredentials} credentials - Optional. Cloud storage access data. If credentials is not provided - use an anonymous access to the bucket
    */
-  constructor(credentials: StorageCredentials, params: StorageParams) {
+  constructor(params: StorageParams, credentials?: StorageCredentials) {
     try {
       this.clientParams = params;
 
       this.client = new Minio.Client({
         ...params,
-        accessKey: credentials.accessKey,
-        secretKey: credentials.secretKey,
+        accessKey: credentials?.accessKey ?? '',
+        secretKey: credentials?.secretKey ?? '',
       });
     } catch (e) {
       throw ErrorStorageClientNotInitialized;
