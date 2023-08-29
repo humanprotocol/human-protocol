@@ -1,12 +1,11 @@
 import { createMock } from '@golevelup/ts-jest';
-import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -23,6 +22,7 @@ import {
 } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
+  MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
@@ -59,9 +59,6 @@ import { div, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { In } from 'typeorm';
-import { EventType } from '../../common/enums/webhook';
-import { PaymentEntity } from '../payment/payment.entity';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -77,10 +74,12 @@ jest.mock('@human-protocol/sdk', () => ({
       .mockResolvedValue([
         { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
       ]),
+    listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
   })),
 }));
 
 jest.mock('../../common/utils', () => ({
+  ...jest.requireActual('../../common/utils'),
   getRate: jest.fn().mockImplementation(() => rate),
 }));
 
@@ -126,6 +125,8 @@ describe('JobService', () => {
             return MOCK_PRIVATE_KEY;
           case 'S3_BUCKET':
             return MOCK_BUCKET_NAME;
+          case 'CVAT_JOB_SIZE':
+            return 1;
         }
       }),
     };
@@ -298,6 +299,18 @@ describe('JobService', () => {
     });
   });
 
+  describe('calculateJobBounty', () => {
+    it('should calculate the job bounty correctly', async () => {
+      const fundAmount = 10;
+      const result = await jobService['calculateJobBounty'](
+        MOCK_FILE_URL,
+        fundAmount,
+      );
+
+      expect(result).toEqual(2);
+    });
+  });
+
   describe('createJob with image label binary type', () => {
     const userId = 1;
     const jobId = 123;
@@ -310,7 +323,6 @@ describe('JobService', () => {
       minQuality: 0.95,
       fundAmount: 10,
       gtUrl: '',
-      jobBounty: '1',
       type: JobRequestType.IMAGE_LABEL_BINARY,
     };
 
@@ -459,7 +471,6 @@ describe('JobService', () => {
     const userId = 123;
 
     it('should cancel the job', async () => {
-      const escrowAddress = MOCK_ADDRESS;
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
@@ -480,7 +491,9 @@ describe('JobService', () => {
     it('should throw not found exception if job not found', async () => {
       jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
 
-      await expect(jobService.requestToCancelJob(userId, jobId)).rejects.toThrow(NotFoundException);
+      await expect(
+        jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
