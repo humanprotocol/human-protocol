@@ -66,8 +66,8 @@ export class WebhookService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      this.storageParams,
       storageCredentials,
+      this.storageParams,
     );
   }
 
