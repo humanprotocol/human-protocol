@@ -63,7 +63,7 @@ export class JobController {
   }
 
   @Public()
-  @Get('/cron-job')
+  @Get('/job/cron/launch')
   public async launchCronJob(): Promise<any> {
     return this.jobService.launchCronJob();
   }
@@ -74,5 +74,11 @@ export class JobController {
     @Param() params: JobCancelDto,
   ): Promise<boolean> {
     return this.jobService.requestToCancelJob(req.user.id, params.id);
+  }
+
+  @Public()
+  @Get('/cron/cancel')
+  public async cancelCronJob(): Promise<any> {
+    return this.jobService.cancelCronJob();
   }
 }
