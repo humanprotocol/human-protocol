@@ -75,4 +75,10 @@ export class JobController {
   ): Promise<boolean> {
     return this.jobService.requestToCancelJob(req.user.id, params.id);
   }
+
+  @Public()
+  @Get('/cron/cancel')
+  public async cancelCronJob(): Promise<any> {
+    return this.jobService.cancelCronJob();
+  }
 }

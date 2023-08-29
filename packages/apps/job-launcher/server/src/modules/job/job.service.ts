@@ -68,9 +68,9 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
-import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
+import { SortDirection } from '../../common/enums/collection';
+import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -295,66 +295,6 @@ export class JobService {
     return true;
   }
 
-  public async cancelJob(
-    jobEntity: JobEntity
-  ): Promise<boolean> {
-    const { escrowAddress } = jobEntity
-    if (escrowAddress) {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
-      const escrowClient = await EscrowClient.build(signer);
-
-      const escrowStatus = await escrowClient.getStatus(escrowAddress)
-      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid) {
-        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
-        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
-      }
-
-      const balance = await escrowClient.getBalance(escrowAddress);
-      if (balance.eq(0)) {
-        this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
-        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
-      }
-
-      await escrowClient.cancel(escrowAddress)
-
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-      if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.TASK_CREATION_FAILED
-          },
-        );
-      } else {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.TASK_CREATION_FAILED
-          },
-        );
-      }
-    }
-
-    const paymentEntity = await this.paymentRepository.findOne({ jobId: jobEntity.id, type: PaymentType.WITHDRAWAL, status: PaymentStatus.SUCCEEDED });
-    if (paymentEntity) {
-      paymentEntity.status = PaymentStatus.FAILED;
-      await paymentEntity.save();
-    }
-
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
-    
-    return true;
-  }
-
   public async saveManifest(
     manifest: FortuneManifestDto | CvatManifestDto,
   ): Promise<SaveManifestDto> {
@@ -564,5 +504,79 @@ export class JobService {
       this.logger.error(e);
       return;
     }
+  }
+
+  public async cancelCronJob() {
+    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+    let jobEntity = await this.jobRepository.findOne(
+      {
+        status: JobStatus.TO_CANCEL,
+        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
+      {
+        order: {
+          waitUntil: SortDirection.ASC,
+        },
+      },
+    );
+
+    if (!jobEntity) return;
+
+    const { escrowAddress } = jobEntity
+    if (escrowAddress) {
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+
+      const escrowStatus = await escrowClient.getStatus(escrowAddress)
+      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid) {
+        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+      }
+
+      const balance = await escrowClient.getBalance(escrowAddress);
+      if (balance.eq(0)) {
+        this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+      }
+
+      await escrowClient.cancel(escrowAddress)
+
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+        await this.sendWebhook(
+          this.configService.get<string>(
+            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
+          )!,
+          {
+            escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.ESCROW_CANCELED
+          },
+        );
+      } else {
+        await this.sendWebhook(
+          this.configService.get<string>(
+            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
+          )!,
+          {
+            escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.ESCROW_CANCELED
+          },
+        );
+      }
+    }
+
+    const paymentEntity = await this.paymentRepository.findOne({ jobId: jobEntity.id, type: PaymentType.WITHDRAWAL, status: PaymentStatus.SUCCEEDED });
+    if (paymentEntity) {
+      paymentEntity.status = PaymentStatus.FAILED;
+      await paymentEntity.save();
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+    
+    return true;
   }
 }

@@ -41,27 +41,4 @@ export class JobCron {
       return;
     }
   }
-
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  public async cancelJob() {
-    try {
-      const jobEntity = await this.jobEntityRepository.findOne({
-        where: {
-          status: JobStatus.TO_CANCEL,
-          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-          waitUntil: LessThanOrEqual(new Date()),
-        },
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      });
-
-      if (!jobEntity) return;
-
-      await this.jobService.cancelJob(jobEntity);
-    } catch (e) {
-      this.logger.error(e);
-      return;
-    }
-  }
 }
