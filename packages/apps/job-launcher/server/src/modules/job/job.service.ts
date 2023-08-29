@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   ChainId,
   EscrowClient,
@@ -44,7 +45,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate } from '../../common/utils';
+import { getRate, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -166,7 +167,9 @@ export class JobService {
           ),
           gt_url: dto.gtUrl,
         },
-        job_bounty: dto.jobBounty,
+        job_bounty: (
+          await this.calculateJobBounty(dto.dataUrl, fundAmount)
+        ).toString(),
       }));
     }
 
@@ -214,6 +217,28 @@ export class JobService {
     await jobEntity.save();
 
     return jobEntity.id;
+  }
+
+  private async calculateJobBounty(
+    endpointUrl: string,
+    fundAmount: number,
+  ): Promise<number> {
+    const storageData = parseUrl(endpointUrl);
+    const storageClient = new StorageClient({
+      endPoint: storageData.endpoint,
+      port: storageData.port,
+      useSSL: false,
+    });
+
+    const totalImages = (await storageClient.listObjects(storageData.bucket))
+      .length;
+
+    const totalJobs = Math.ceil(
+      totalImages /
+        Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
+    );
+
+    return fundAmount / totalJobs;
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
@@ -285,6 +310,76 @@ export class JobService {
 
     jobEntity.status = JobStatus.TO_CANCEL;
     jobEntity.retriesCount = 0;
+    await jobEntity.save();
+
+    return true;
+  }
+
+  public async cancelJob(jobEntity: JobEntity): Promise<boolean> {
+    const { escrowAddress } = jobEntity;
+    if (escrowAddress) {
+      const signer = this.web3Service.getSigner(jobEntity.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+
+      const escrowStatus = await escrowClient.getStatus(escrowAddress);
+      if (
+        escrowStatus === EscrowStatus.Complete ||
+        escrowStatus === EscrowStatus.Paid
+      ) {
+        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+      }
+
+      const balance = await escrowClient.getBalance(escrowAddress);
+      if (balance.eq(0)) {
+        this.logger.log(
+          ErrorEscrow.InvalidBalanceCancellation,
+          JobService.name,
+        );
+        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+      }
+
+      await escrowClient.cancel(escrowAddress);
+
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      if (
+        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+      ) {
+        await this.sendWebhook(
+          this.configService.get<string>(
+            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
+          )!,
+          {
+            escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.TASK_CREATION_FAILED,
+          },
+        );
+      } else {
+        await this.sendWebhook(
+          this.configService.get<string>(
+            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
+          )!,
+          {
+            escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.TASK_CREATION_FAILED,
+          },
+        );
+      }
+    }
+
+    const paymentEntity = await this.paymentRepository.findOne({
+      jobId: jobEntity.id,
+      type: PaymentType.WITHDRAWAL,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    if (paymentEntity) {
+      paymentEntity.status = PaymentStatus.FAILED;
+      await paymentEntity.save();
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
     return true;
