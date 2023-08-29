@@ -195,7 +195,6 @@ export class JobService {
       await this.paymentRepository.create({
         userId,
         jobId: jobEntity.id,
-        jobId: jobEntity.id,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
         amount: -tokenTotalAmount,
@@ -497,7 +496,6 @@ export class JobService {
             {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED
               eventType: EventType.ESCROW_CREATED
             },
           );

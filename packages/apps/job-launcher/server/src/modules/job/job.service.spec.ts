@@ -1,13 +1,11 @@
 import { createMock } from '@golevelup/ts-jest';
 import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
-import { ChainId, EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
@@ -63,7 +61,7 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { In } from 'typeorm';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
+import Decimal from 'decimal.js';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -172,7 +170,6 @@ describe('JobService', () => {
   describe('createJob', () => {
     const userId = 1;
     const jobId = 123;
-    const jobId = 123;
     const fortuneJobDto: JobFortuneDto = {
       chainId: MOCK_CHAIN_ID,
       submissionsRequired: MOCK_SUBMISSION_REQUIRED,
@@ -214,27 +211,11 @@ describe('JobService', () => {
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const mockJobEntity: Partial<JobEntity> = {
-        id: jobId,
-        userId: userId,
-        chainId: ChainId.LOCALHOST,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        fee,
-        fundAmount,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
-
       await jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        jobId,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -323,7 +304,6 @@ describe('JobService', () => {
   describe('createJob with image label binary type', () => {
     const userId = 1;
     const jobId = 123;
-    const jobId = 123;
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
@@ -370,21 +350,6 @@ describe('JobService', () => {
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const mockJobEntity: Partial<JobEntity> = {
-        id: jobId,
-        userId: userId,
-        chainId: ChainId.LOCALHOST,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        fee,
-        fundAmount,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
-
       await jobService.createJob(
         userId,
         JobRequestType.IMAGE_LABEL_BINARY,
@@ -394,7 +359,6 @@ describe('JobService', () => {
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
       expect(paymentRepository.create).toHaveBeenCalledWith({
         userId,
-        jobId,
         jobId,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
