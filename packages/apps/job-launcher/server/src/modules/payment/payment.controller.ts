@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
+import { JwtAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
 
 import {
   GetRateDto,

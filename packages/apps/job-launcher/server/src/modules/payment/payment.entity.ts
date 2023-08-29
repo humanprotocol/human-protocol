@@ -1,7 +1,11 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { PaymentSource, PaymentStatus, PaymentType } from '../../common/enums/payment';
+import {
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+} from '../../common/enums/payment';
 import { UserEntity } from '../user/user.entity';
 import { JobEntity } from '../job/job.entity';
 
