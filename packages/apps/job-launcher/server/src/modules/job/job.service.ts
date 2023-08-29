@@ -68,9 +68,9 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { EventType } from '../../common/enums/webhook';
-import { SortDirection } from '../../common/enums/collection';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { SortDirection } from '../../common/enums/collection';
+import { EventType } from '../../common/enums/webhook';
 
 @Injectable()
 export class JobService {
@@ -105,8 +105,8 @@ export class JobService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
@@ -194,6 +194,7 @@ export class JobService {
     try {
       await this.paymentRepository.create({
         userId,
+        jobId: jobEntity.id,
         jobId: jobEntity.id,
         source: PaymentSource.BALANCE,
         type: PaymentType.WITHDRAWAL,
@@ -491,10 +492,12 @@ export class JobService {
           await this.sendWebhook(
             this.configService.get<string>(
               ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
+              ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
             )!,
             {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CREATED
               eventType: EventType.ESCROW_CREATED
             },
           );
