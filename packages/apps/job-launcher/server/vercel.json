@@ -22,5 +22,9 @@
       "path": "/job/cron-job",
       "schedule": "* * * * *"
     }
+    {
+      "path": "/job/cron/cancel",
+      "schedule": "* * * * *"
+    }
   ]
 }
