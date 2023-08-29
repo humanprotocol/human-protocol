@@ -4,7 +4,6 @@ import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ethers } from 'ethers';
 import {
   ErrorBucket,
   ErrorJob,
@@ -16,7 +15,11 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -25,7 +28,7 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_SUBMISSION_REQUIRED,
+  MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
@@ -34,7 +37,7 @@ import {
   MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
-  MOCK_JOB_ID,
+  MOCK_SUBMISSION_REQUIRED,
   MOCK_USER_ID,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
@@ -51,10 +54,10 @@ import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { JobService } from './job.service';
 
-import { HMToken__factory } from '@human-protocol/core/typechain-types';
-import { RoutingProtocolService } from './routing-protocol.service';
-import { PaymentRepository } from '../payment/payment.repository';
 import { div, mul } from '../../common/utils/decimal';
+import { PaymentRepository } from '../payment/payment.repository';
+import { RoutingProtocolService } from './routing-protocol.service';
+import { In } from 'typeorm';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -411,140 +414,30 @@ describe('JobService', () => {
     });
   });
 
-  describe('launchJob with Fortune request type', () => {
-    let getManifestMock: any;
+  describe('launchJob', () => {
     const chainId = ChainId.LOCALHOST;
-
-    const mockTokenContract: any = {
-      transfer: jest.fn(),
-    };
-
-    beforeEach(() => {
-      jest
-        .spyOn(HMToken__factory, 'connect')
-        .mockReturnValue(mockTokenContract);
-      getManifestMock = jest.spyOn(jobService, 'getManifest');
-
-      createPaymentMock.mockResolvedValue(true);
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
 
     it('should launch a job successfully', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-        requestType: JobRequestType.FORTUNE,
-      };
-
-      getManifestMock.mockResolvedValue(manifest);
-
       const mockJobEntity: Partial<JobEntity> = {
         chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
         fee,
         fundAmount,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
 
-      await jobService.launchJob(mockJobEntity as JobEntity);
-
-      expect(mockTokenContract.transfer).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
-        mockJobEntity.fundAmount,
+      const jobEntityResult = await jobService.launchJob(
+        mockJobEntity as JobEntity,
       );
-      expect(mockJobEntity.escrowAddress).toBe(MOCK_ADDRESS);
-      expect(mockJobEntity.status).toBe(JobStatus.LAUNCHED);
+
+      mockJobEntity.escrowAddress = MOCK_ADDRESS;
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
       expect(mockJobEntity.save).toHaveBeenCalled();
-      expect(jobService.getManifest).toHaveBeenCalledWith(
-        mockJobEntity.manifestUrl,
-      );
-    });
-
-    it('should throw an unpredictable gas limit error if transfer failed', async () => {
-      const fundAmount = 10;
-
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount,
-        requestType: JobRequestType.FORTUNE,
-      };
-
-      getManifestMock.mockResolvedValue(manifest);
-      mockTokenContract.transfer.mockRejectedValue(
-        Object.assign(
-          new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
-          { code: ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT },
-        ),
-      );
-
-      const mockJobEntity: Partial<JobEntity> = {
-        chainId,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      await expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow(
-        new Error(ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT),
-      );
-    });
-
-    it('should throw an error if the manifest does not exist', async () => {
-      getManifestMock.mockResolvedValue(null);
-
-      const mockJobEntity: Partial<JobEntity> = {
-        chainId,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      await expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow();
-    });
-
-    it('should throw an error if the manifest validation failed', async () => {
-      const invalidManifest: Partial<FortuneManifestDto> = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        requestType: JobRequestType.FORTUNE,
-      };
-
-      getManifestMock.mockResolvedValue(invalidManifest as FortuneManifestDto);
-
-      const mockJobEntity: Partial<JobEntity> = {
-        chainId,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      await expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow();
     });
 
     it('should handle error during job launch', async () => {
@@ -556,7 +449,6 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
@@ -567,102 +459,52 @@ describe('JobService', () => {
     });
   });
 
-  describe('launchJob with image label binary request type', () => {
-    let getManifestMock: any;
+  describe('fundJob', () => {
+    const chainId = ChainId.LOCALHOST;
 
-    const mockTokenContract: any = {
-      transfer: jest.fn(),
-    };
-
-    beforeEach(() => {
-      jest
-        .spyOn(HMToken__factory, 'connect')
-        .mockReturnValue(mockTokenContract);
-      getManifestMock = jest.spyOn(jobService, 'getManifest');
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should launch a job successfully', async () => {
+    it('should fund a job successfully', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        fund: jest.fn(),
       }));
 
-      jobService.sendWebhook = jest.fn().mockResolvedValue(true);
-
-      const manifest: CvatManifestDto = {
-        data: {
-          data_url: MOCK_FILE_URL,
-        },
-        annotation: {
-          labels: [{ name: 'label1' }],
-          description: MOCK_REQUESTER_DESCRIPTION,
-          type: JobRequestType.IMAGE_LABEL_BINARY,
-          job_size: 10,
-          max_time: 300,
-        },
-        validation: {
-          min_quality: 1,
-          val_size: 2,
-          gt_url: '',
-        },
-        job_bounty: '1',
-      };
-
-      getManifestMock.mockResolvedValue(manifest as CvatManifestDto);
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
       const mockJobEntity: Partial<JobEntity> = {
-        chainId: 1,
+        chainId,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
-        status: JobStatus.PENDING,
+        fee,
+        fundAmount,
+        status: JobStatus.PAID,
         save: jest.fn().mockResolvedValue(true),
       };
 
-      await jobService.launchJob(mockJobEntity as JobEntity);
+      const jobEntityResult = await jobService.fundJob(
+        mockJobEntity as JobEntity,
+      );
 
-      expect(mockTokenContract.transfer).toHaveBeenCalledWith(
-        MOCK_ADDRESS,
-        mockJobEntity.fundAmount,
-      );
-      expect(mockJobEntity.escrowAddress).toBe(MOCK_ADDRESS);
-      expect(mockJobEntity.status).toBe(JobStatus.LAUNCHED);
+      mockJobEntity.escrowAddress = MOCK_ADDRESS;
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
+      expect(jobEntityResult.status).toBe(JobStatus.LAUNCHED);
       expect(mockJobEntity.save).toHaveBeenCalled();
-      expect(jobService.getManifest).toHaveBeenCalledWith(
-        mockJobEntity.manifestUrl,
-      );
     });
 
-    it('should throw an error if the manifest validation failed', async () => {
-      const invalidManifest: Partial<CvatManifestDto> = {
-        data: {
-          data_url: MOCK_FILE_URL,
-        },
-        annotation: {
-          labels: [{ name: 'label1' }],
-          description: MOCK_REQUESTER_DESCRIPTION,
-          type: JobRequestType.IMAGE_LABEL_BINARY,
-          job_size: 10,
-          max_time: 300,
-        },
-      };
-
-      getManifestMock.mockResolvedValue(invalidManifest as CvatManifestDto);
+    it('should handle error during job fund', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        fund: jest.fn().mockRejectedValue(new Error()),
+      }));
 
       const mockJobEntity: Partial<JobEntity> = {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
 
       await expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
+        jobService.fundJob(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
   });
@@ -973,6 +815,82 @@ describe('JobService', () => {
       );
       expect(StorageClient.downloadFileFromUrl).toHaveBeenCalledWith(
         MOCK_FILE_URL,
+      );
+    });
+  });
+
+  describe('getJobsByStatus', () => {
+    const userId = 1;
+    const skip = 0;
+    const limit = 5;
+
+    it('should call the database with PENDING status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.PENDING, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.PENDING, JobStatus.PAID]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with LAUNCHED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.LAUNCHED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.LAUNCHED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with COMPLETED status', async () => {
+      jobService.getJobsByStatus(
+        userId,
+        JobStatusFilter.COMPLETED,
+        skip,
+        limit,
+      );
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.COMPLETED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with FAILED status', async () => {
+      jobService.getJobsByStatus(userId, JobStatusFilter.FAILED, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          status: In([JobStatus.FAILED]),
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
+      );
+    });
+    it('should call the database with no status', async () => {
+      jobService.getJobsByStatus(userId, undefined, skip, limit);
+      expect(jobRepository.find).toHaveBeenCalledWith(
+        {
+          userId: userId,
+        },
+        {
+          skip: skip,
+          take: limit,
+        },
       );
     });
   });

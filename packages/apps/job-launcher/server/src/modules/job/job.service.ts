@@ -25,10 +25,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
-import { add, div, lt, mul } from '../../common/utils/decimal';
-import { QueryFailedError } from 'typeorm';
+import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
@@ -37,7 +36,11 @@ import {
   ErrorPayment,
   ErrorPostgres,
 } from '../../common/constants/errors';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
 import {
   Currency,
   PaymentSource,
@@ -46,6 +49,7 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import { getRate } from '../../common/utils';
+import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -54,14 +58,17 @@ import {
   CvatManifestDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
-  JobFortuneDto,
   JobCvatDto,
+  JobFortuneDto,
+  JobListDto,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { SortDirection } from '../../common/enums/collection';
 
 @Injectable()
 export class JobService {
@@ -96,8 +103,8 @@ export class JobService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
@@ -244,31 +251,25 @@ export class JobService {
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-    await this.validateManifest(manifest);
-
-    const tokenContract: HMToken = HMToken__factory.connect(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      signer,
-    );
-    await tokenContract.transfer(escrowAddress, jobEntity.fundAmount);
-
     jobEntity.escrowAddress = escrowAddress;
-    jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
 
-    if ((manifest as CvatManifestDto)?.annotation?.type) {
-      await this.sendWebhook(
-        this.configService.get<string>(
-          ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
-        )!,
-        {
-          escrowAddress: jobEntity.escrowAddress,
-          chainId: jobEntity.chainId,
-        },
-      );
-    }
+    return jobEntity;
+  }
+
+  public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    const weiAmount = ethers.utils.parseUnits(
+      jobEntity.fundAmount.toString(),
+      'ether',
+    );
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
+
+    jobEntity.status = JobStatus.LAUNCHED;
+    await jobEntity.save();
 
     return jobEntity;
   }
@@ -343,6 +344,40 @@ export class JobService {
     return true;
   }
 
+  public async getJobsByStatus(
+    userId: number,
+    status?: JobStatusFilter,
+    skip = 0,
+    limit = 10,
+  ): Promise<JobListDto[]> {
+    let statusFilter: any;
+    if (status) {
+      statusFilter = In([status]);
+      if (status === JobStatusFilter.PENDING)
+        statusFilter = In([JobStatus.PENDING, JobStatus.PAID]);
+    }
+
+    const jobs = await this.jobRepository.find(
+      {
+        userId,
+        status: statusFilter,
+      },
+      { skip: skip, take: limit },
+    );
+    const transformedJobs: JobListDto[] = jobs.map((original) => ({
+      jobId: original.id,
+      address: original.escrowAddress,
+      network: NETWORKS[original.chainId as ChainId]!.title,
+      fundAmount: original.fundAmount,
+      status:
+        original.status === JobStatus.PAID
+          ? JobStatusFilter.PENDING
+          : JobStatusFilter[original.status],
+    }));
+
+    return transformedJobs;
+  }
+
   public async getResult(
     userId: number,
     jobId: number,
@@ -401,5 +436,51 @@ export class JobService {
     }
 
     return result;
+  }
+
+  public async launchCronJob() {
+    try {
+      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+      let jobEntity = await this.jobRepository.findOne(
+        {
+          status: JobStatus.PAID,
+          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      if (!jobEntity) return;
+
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      await this.validateManifest(manifest);
+
+      if (!jobEntity.escrowAddress) {
+        jobEntity = await this.launchJob(jobEntity);
+      }
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
+        jobEntity = await this.fundJob(jobEntity);
+      }
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
+        if ((manifest as CvatManifestDto)?.annotation?.type) {
+          await this.sendWebhook(
+            this.configService.get<string>(
+              ConfigNames.EXCHANGE_ORACLE_WEBHOOK_URL,
+            )!,
+            {
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+            },
+          );
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      return;
+    }
   }
 }
