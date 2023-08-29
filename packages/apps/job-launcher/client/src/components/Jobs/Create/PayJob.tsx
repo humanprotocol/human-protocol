@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Snackbar, Alert } from '@mui/material';
 import React, { useState } from 'react';
 import { StyledTabs, StyledTab } from '../../../components/Tabs';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -10,6 +10,7 @@ import { LaunchJobProgress } from './LaunchJobProgress';
 export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
   const [isPaying, setIsPaying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleStart = () => {
     setIsPaying(true);
@@ -20,8 +21,8 @@ export const PayJob = () => {
     goToNextStep?.();
   };
 
-  const handleError = (err: any) => {
-    console.log(err);
+  const handleError = (err: Error) => {
+    setErrorMessage(err.message);
   };
 
   return !isPaying ? (
@@ -82,6 +83,16 @@ export const PayJob = () => {
           />
         )}
       </Box>
+      <Snackbar
+        open={errorMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setErrorMessage(null)} severity="error">
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   ) : (
     <LaunchJobProgress />

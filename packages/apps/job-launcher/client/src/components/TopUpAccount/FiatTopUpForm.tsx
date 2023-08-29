@@ -1,11 +1,13 @@
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
-  Button,
   FormControl,
   Grid,
   Link,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   CardCvcElement,
@@ -16,13 +18,19 @@ import {
 } from '@stripe/react-stripe-js';
 import React, { useState } from 'react';
 import * as paymentService from '../../services/payment';
+import { useAppDispatch } from '../../state';
+import { fetchUserBalanceAsync } from '../../state/auth/reducer';
 import { TopUpSuccess } from './TopUpSuccess';
 
 export const FiatTopUpForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+  const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [amount, setAmount] = useState<string>();
+  const [name, setName] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
 
   const handleTopUpAccount = async () => {
     if (!stripe || !elements) {
@@ -32,50 +40,58 @@ export const FiatTopUpForm = () => {
       return;
     }
 
-    if (!amount) return;
-
+    setIsLoading(true);
     try {
+      const cardNumber = elements.getElement(CardNumberElement) as any;
+      const cardExpiry = elements.getElement(CardExpiryElement) as any;
+      const cardCvc = elements.getElement(CardCvcElement) as any;
+      if (!cardNumber || !cardExpiry || !cardCvc) {
+        throw new Error('Card elements are not initialized');
+      }
+      if (cardNumber._invalid || cardNumber._empty) {
+        throw new Error('Your card number is incomplete.');
+      }
+      if (cardExpiry._invalid || cardExpiry._empty) {
+        throw new Error("Your card's expiration date is incomplete.");
+      }
+      if (cardCvc._invalid || cardCvc._empty) {
+        throw new Error("Your card's security code is incomplete.");
+      }
+
       // get client secret
       const clientSecret = await paymentService.createFiatPayment({
         amount: Number(amount),
         currency: 'usd',
       });
 
-      const cardNumber = elements.getElement(CardNumberElement);
-      const cardExpiry = elements.getElement(CardExpiryElement);
-      const cardCvc = elements.getElement(CardCvcElement);
-      if (!cardNumber || !cardExpiry || !cardCvc) {
-        return;
-      }
-
       // stripe payment
       const { error: stripeError, paymentIntent } =
         await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
             card: cardNumber,
-            // billing_details: {
-            //   name: paymentData.name,
-            // },
+            billing_details: { name },
           },
         });
+
       if (stripeError) {
-        console.error(stripeError);
-        return;
+        throw stripeError;
       }
 
       // confirm payment
       const success = await paymentService.confirmFiatPayment(paymentIntent.id);
 
       if (!success) {
-        console.error('Payment confirmation error');
-        return;
+        throw new Error('Payment confirmation failed.');
       }
+
+      dispatch(fetchUserBalanceAsync());
 
       setIsSuccess(true);
     } catch (err) {
-      console.error(err);
+      setErrorMessage(err.message);
       setIsSuccess(false);
     }
+    setIsLoading(false);
   };
 
   return isSuccess ? (
@@ -120,6 +136,15 @@ export const FiatTopUpForm = () => {
           </Box>
         </Grid>
         <Grid item xs={12}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Name on Card"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </Grid>
+        <Grid item xs={12}>
           <FormControl fullWidth>
             <TextField
               fullWidth
@@ -131,15 +156,17 @@ export const FiatTopUpForm = () => {
           </FormControl>
         </Grid>
         <Grid item xs={12}>
-          <Button
+          <LoadingButton
             color="primary"
             variant="contained"
             fullWidth
             size="large"
             onClick={handleTopUpAccount}
+            loading={isLoading}
+            disabled={!amount || !name}
           >
             Top up account
-          </Button>
+          </LoadingButton>
         </Grid>
         <Grid item xs={12}>
           <Link
@@ -152,6 +179,16 @@ export const FiatTopUpForm = () => {
           </Link>
         </Grid>
       </Grid>
+      <Snackbar
+        open={errorMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setErrorMessage(null)} severity="error">
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

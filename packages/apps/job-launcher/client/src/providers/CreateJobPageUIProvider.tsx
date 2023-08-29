@@ -1,11 +1,12 @@
-import { ChainId } from '@human-protocol/sdk';
 import React, { createContext, useContext, useState } from 'react';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
 
 export type CreateJobPageUIType = {
   step: CreateJobStep;
   payMethod: PayMethod;
   jobRequest: JobRequest;
+  reset?: () => void;
   changePayMethod?: (method: PayMethod) => void;
   updateJobRequest?: (jobRequest: JobRequest) => void;
   goToPrevStep?: () => void;
@@ -20,7 +21,7 @@ const initialData: Omit<
   payMethod: PayMethod.Crypto,
   jobRequest: {
     jobType: JobType.Fortune,
-    chainId: ChainId.MAINNET,
+    chainId: SUPPORTED_CHAIN_IDS[0],
   },
 };
 
@@ -38,7 +39,7 @@ export const CreateJobPageUIProvider = ({
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
     jobType: JobType.Fortune,
-    chainId: ChainId.MAINNET,
+    chainId: SUPPORTED_CHAIN_IDS[0],
   });
 
   const goToPrevStep = () => {
@@ -54,6 +55,15 @@ export const CreateJobPageUIProvider = ({
   const updateJobRequest = (newJobRequest: JobRequest) =>
     setJobRequest(newJobRequest);
 
+  const reset = () => {
+    setStep(CreateJobStep.FundingMethod);
+    setPayMethod(PayMethod.Crypto);
+    setJobRequest({
+      jobType: JobType.Fortune,
+      chainId: SUPPORTED_CHAIN_IDS[0],
+    });
+  };
+
   const value = {
     step,
     payMethod,
@@ -62,6 +72,7 @@ export const CreateJobPageUIProvider = ({
     goToNextStep,
     changePayMethod,
     updateJobRequest,
+    reset,
   };
 
   return (

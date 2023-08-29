@@ -1,9 +1,11 @@
 import { Box, Button, Typography } from '@mui/material';
 import React from 'react';
 import { CheckFilledIcon } from '../../../components/Icons/CheckFilledIcon';
-// import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 
 export const LaunchSuccess = () => {
+  const { reset } = useCreateJobPageUI();
+
   return (
     <Box
       sx={{
@@ -27,7 +29,12 @@ export const LaunchSuccess = () => {
         Your request has been submitted
       </Typography>
       <Box mt={4}>
-        <Button size="large" variant="contained" color="primary">
+        <Button
+          size="large"
+          variant="contained"
+          color="primary"
+          onClick={() => reset?.()}
+        >
           Add New Job
         </Button>
         <Button size="large" variant="contained" color="primary" sx={{ ml: 4 }}>

@@ -19,9 +19,9 @@ export const confirmFiatPayment = async (paymentId: string) => {
   return data;
 };
 
-export const getRate = async (token: string, currency: string) => {
+export const getRate = async (from: string, to: string) => {
   const { data } = await api.get('/payment/rates', {
-    params: { token, currency },
+    params: { from, to },
   });
 
   return data;

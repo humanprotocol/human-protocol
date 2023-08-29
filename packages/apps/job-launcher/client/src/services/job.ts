@@ -13,7 +13,7 @@ export const createFortuneJob = async (
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
-    fortunesRequired: data.fortunesRequested,
+    submissionsRequired: Number(data.fortunesRequested),
     requesterTitle: data.title,
     requesterDescription: data.description,
     fundAmount: Number(amount),
@@ -29,7 +29,7 @@ export const createAnnotationJob = async (
   const body: CreateAnnotationJobRequest = {
     chainId,
     dataUrl: data.dataUrl,
-    annotationsPerImage: data.annotationsPerImage,
+    submissionsRequired: data.annotationsPerImage,
     labels: data.labels,
     requesterDescription: data.description,
     requesterAccuracyTarget: data.accuracyTarget,

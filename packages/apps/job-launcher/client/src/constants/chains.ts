@@ -1,19 +1,9 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const SUPPORTED_CHAIN_IDS = [
-  ChainId.MAINNET,
-  ChainId.RINKEBY,
-  ChainId.GOERLI,
-  ChainId.BSC_MAINNET,
-  ChainId.BSC_TESTNET,
-  ChainId.POLYGON,
-  ChainId.POLYGON_MUMBAI,
-  ChainId.SKALE,
-  ChainId.MOONBEAM,
-  ChainId.MOONBASE_ALPHA,
-  ChainId.AVALANCHE_TESTNET,
-  ChainId.AVALANCHE,
-];
+export const SUPPORTED_CHAIN_IDS =
+  import.meta.env.VITE_APP_NETWORK === 'mainnet'
+    ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
+    : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
 
 export const RPC_URLS: {
   [chainId in ChainId]?: string;

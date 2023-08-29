@@ -34,7 +34,7 @@ export type FiatPaymentRequest = {
 
 export type CreateFortuneJobRequest = {
   chainId: number;
-  fortunesRequired: number;
+  submissionsRequired: number;
   requesterTitle: string;
   requesterDescription: string;
   fundAmount: number;
@@ -43,7 +43,7 @@ export type CreateFortuneJobRequest = {
 export type CreateAnnotationJobRequest = {
   chainId: number;
   dataUrl: string;
-  annotationsPerImage: number;
+  submissionsRequired: number;
   labels: string[];
   requesterDescription: string;
   requesterAccuracyTarget: number;

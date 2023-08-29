@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
@@ -17,12 +18,13 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import React, { useState } from 'react';
-import { useTokenRate } from '../../../hooks/useTokenRate';
+import React, { useMemo, useState } from 'react';
+import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
-import { useAppSelector } from '../../../state';
+import { useAppDispatch, useAppSelector } from '../../../state';
+import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
 import { JobType } from '../../../types';
 
 export const FiatPayForm = ({
@@ -37,13 +39,32 @@ export const FiatPayForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const { jobRequest, goToPrevStep } = useCreateJobPageUI();
-  const rate = useTokenRate('hmt', 'usd');
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
 
+  const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [paymentData, setPaymentData] = useState({
     amount: '',
     name: '',
   });
+
+  const fundAmount = paymentData.amount ? Number(paymentData.amount) : 0;
+  const feeAmount = fundAmount * (JOB_LAUNCHER_FEE / 100);
+  const totalAmount = fundAmount + feeAmount;
+  const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
+
+  const balancePayAmount = useMemo(() => {
+    if (!payWithAccountBalance) return 0;
+    if (totalAmount < accountAmount) return totalAmount;
+    return accountAmount;
+  }, [payWithAccountBalance, totalAmount, accountAmount]);
+
+  const creditCardPayAmount = useMemo(() => {
+    if (!payWithAccountBalance) return totalAmount;
+    if (totalAmount < accountAmount) return 0;
+    return totalAmount - accountAmount;
+  }, [payWithAccountBalance, totalAmount, accountAmount]);
 
   const handlePaymentDataFormFieldChange = (
     fieldName: string,
@@ -60,62 +81,82 @@ export const FiatPayForm = ({
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // get client secret
-      const clientSecret = await paymentService.createFiatPayment({
-        amount: Number(paymentData.amount),
-        currency: 'usd',
-      });
+      if (creditCardPayAmount > 0) {
+        if (!paymentData.name) {
+          throw new Error('Please enter name on card.');
+        }
 
-      const cardNumber = elements.getElement(CardNumberElement);
-      const cardExpiry = elements.getElement(CardExpiryElement);
-      const cardCvc = elements.getElement(CardCvcElement);
-      if (!cardNumber || !cardExpiry || !cardCvc) {
-        return;
-      }
+        // Stripe elements validation
+        const cardNumber = elements.getElement(CardNumberElement) as any;
+        const cardExpiry = elements.getElement(CardExpiryElement) as any;
+        const cardCvc = elements.getElement(CardCvcElement) as any;
 
-      // stripe payment
-      const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: cardNumber,
-            billing_details: {
-              name: paymentData.name,
-            },
-          },
+        if (!cardNumber || !cardExpiry || !cardCvc) {
+          throw new Error('Card elements are not initialized');
+        }
+        if (cardNumber._invalid || cardNumber._empty) {
+          throw new Error('Your card number is incomplete.');
+        }
+        if (cardExpiry._invalid || cardExpiry._empty) {
+          throw new Error("Your card's expiration date is incomplete.");
+        }
+        if (cardCvc._invalid || cardCvc._empty) {
+          throw new Error("Your card's security code is incomplete.");
+        }
+
+        // send payment if creditCardPayment > 0
+        const clientSecret = await paymentService.createFiatPayment({
+          amount: creditCardPayAmount,
+          currency: 'usd',
         });
-      if (stripeError) {
-        onError(stripeError);
-        return;
+
+        // stripe payment
+        const { error: stripeError, paymentIntent } =
+          await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+              card: cardNumber,
+              billing_details: {
+                name: paymentData.name,
+              },
+            },
+          });
+        if (stripeError) {
+          throw stripeError;
+        }
+
+        // confirm payment
+        const success = await paymentService.confirmFiatPayment(
+          paymentIntent.id
+        );
+
+        if (!success) {
+          throw new Error('Payment confirmation failed.');
+        }
       }
-
-      // confirm payment
-      const success = await paymentService.confirmFiatPayment(paymentIntent.id);
-
-      if (!success) {
-        onError({ message: 'Payment confirmation error' });
-        return;
-      }
-
-      const tokenAmount = Number(paymentData.amount) / rate;
 
       // create job
       const { jobType, chainId, fortuneRequest, annotationRequest } =
         jobRequest;
       if (jobType === JobType.Fortune && fortuneRequest) {
-        await jobService.createFortuneJob(chainId, fortuneRequest, tokenAmount);
+        await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
       } else if (jobType === JobType.Annotation && annotationRequest) {
         await jobService.createAnnotationJob(
           chainId,
           annotationRequest,
-          tokenAmount
+          fundAmount
         );
       }
+
+      dispatch(fetchUserBalanceAsync());
       onFinish();
     } catch (err) {
-      console.error(err);
       onError(err);
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -132,7 +173,15 @@ export const FiatPayForm = ({
                 }}
               >
                 <FormControlLabel
-                  control={<Checkbox defaultChecked />}
+                  control={
+                    <Checkbox
+                      defaultChecked
+                      checked={payWithAccountBalance}
+                      onChange={(e) =>
+                        setPayWithAccountBalance(e.target.checked)
+                      }
+                    />
+                  }
                   label="I want to pay with my account balance"
                 />
               </Box>
@@ -220,12 +269,13 @@ export const FiatPayForm = ({
               }}
             >
               <Typography>Account Balance</Typography>
-              <Typography color="text.secondary">
-                {user?.balance?.amount ?? '0'}{' '}
-                {user?.balance?.currency?.toUpperCase() ?? 'USD'}
-              </Typography>
+              {user?.balance && (
+                <Typography color="text.secondary">
+                  {user?.balance?.amount} USD
+                </Typography>
+              )}
             </Box>
-            <Box
+            {/* <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -235,7 +285,21 @@ export const FiatPayForm = ({
               }}
             >
               <Typography>Amount due</Typography>
-              <Typography color="text.secondary">300 USD</Typography>
+              <Typography color="text.secondary">{totalAmount} USD</Typography>
+            </Box> */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                py: 2,
+                borderBottom: '1px solid #E5E7EB',
+              }}
+            >
+              <Typography>Fees</Typography>
+              <Typography color="text.secondary">
+                ({JOB_LAUNCHER_FEE}%) {feeAmount} USD
+              </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>
               <Typography mb={2}>Payment method</Typography>
@@ -246,7 +310,9 @@ export const FiatPayForm = ({
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Balance</Typography>
-                  <Typography color="text.secondary">100 USD</Typography>
+                  <Typography color="text.secondary">
+                    {balancePayAmount} USD
+                  </Typography>
                 </Stack>
                 <Stack
                   direction="row"
@@ -254,23 +320,27 @@ export const FiatPayForm = ({
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Credit Card</Typography>
-                  <Typography color="text.secondary">200 USD</Typography>
+                  <Typography color="text.secondary">
+                    {creditCardPayAmount} USD
+                  </Typography>
                 </Stack>
-                <Stack
+                {/* <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Fees</Typography>
-                  <Typography color="text.secondary">(3.1%) 9.3 USD</Typography>
-                </Stack>
+                  <Typography color="text.secondary">
+                    ({JOB_LAUNCHER_FEE}%) {feeAmount} USD
+                  </Typography>
+                </Stack> */}
                 <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
                 >
                   <Typography>Total</Typography>
-                  <Typography>309.3 USD</Typography>
+                  <Typography>{totalAmount} USD</Typography>
                 </Stack>
               </Stack>
             </Box>
@@ -286,15 +356,17 @@ export const FiatPayForm = ({
         }}
       >
         <Box>
-          <Button
+          <LoadingButton
             color="primary"
             variant="contained"
             sx={{ width: '240px' }}
             size="large"
             onClick={handlePay}
+            loading={isLoading}
+            disabled={!paymentData.amount}
           >
             Pay now
-          </Button>
+          </LoadingButton>
           <Button
             color="primary"
             variant="outlined"
