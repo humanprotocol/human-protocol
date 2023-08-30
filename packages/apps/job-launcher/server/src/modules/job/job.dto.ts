@@ -17,7 +17,7 @@ import {
   JobStatus,
   JobStatusFilter,
 } from '../../common/enums/job';
-import { EventType } from '../../common/enums/webhook';
+import { EventType, OracleType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
