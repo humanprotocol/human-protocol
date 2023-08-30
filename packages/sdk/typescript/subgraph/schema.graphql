@@ -54,6 +54,7 @@ type Escrow @entity {
   recordingOracleFee: BigInt
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
+  jobRequesterId: String # string
   createdAt: BigInt!
 }
 
