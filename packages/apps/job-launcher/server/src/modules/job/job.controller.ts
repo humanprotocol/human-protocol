@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
-import { RequestWithUser, RequestWithWeb3Address } from '../../common/types';
+import { RequestWithUser } from '../../common/types';
 import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhookDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
