@@ -1,5 +1,4 @@
 import { BigNumber } from 'ethers';
-import { EscrowStatus } from './types';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -23,9 +22,18 @@ export interface IStaker {
   tokensAvailable: BigNumber;
 }
 
+type EscrowStatus =
+  | 'Launched'
+  | 'Pending'
+  | 'Partial'
+  | 'Paid'
+  | 'Complete'
+  | 'Cancelled';
+
 export interface IEscrowsFilter {
-  launcherAddress?: string;
-  role?: number;
+  launcher?: string;
+  reputationOracle?: string;
+  recordingOracle?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
@@ -45,4 +53,9 @@ export interface IKeyPair {
   publicKey: string;
   passphrase: string;
   revocationCertificate?: string;
+}
+
+export interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
 }
