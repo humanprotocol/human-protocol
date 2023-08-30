@@ -61,8 +61,8 @@ export class JobService {
     };
 
     this.storageClient = new StorageClient(
-      this.storageParams,
       storageCredentials,
+      this.storageParams,
     );
   }
 

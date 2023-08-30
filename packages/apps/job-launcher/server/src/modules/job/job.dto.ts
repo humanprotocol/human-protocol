@@ -9,6 +9,7 @@ import {
   IsDate,
   IsOptional,
   IsObject,
+  IsNumberString
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import {
@@ -16,6 +17,7 @@ import {
   JobStatus,
   JobStatusFilter,
 } from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -74,12 +76,15 @@ export class JobCvatDto extends JobDto {
   @IsString()
   public gtUrl: string;
 
+  @ApiProperty()
   @IsEnum(JobRequestType)
   type: JobRequestType;
+}
 
+export class JobCancelDto {
   @ApiProperty()
-  @IsString()
-  public jobBounty: string;
+  @IsNumberString()
+  public id: number;
 }
 
 export class JobUpdateDto {
@@ -106,6 +111,7 @@ export class SaveManifestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
+  public eventType: EventType;
 }
 
 export class FortuneManifestDto {
