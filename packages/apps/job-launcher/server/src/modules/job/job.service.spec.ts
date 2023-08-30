@@ -313,13 +313,13 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
-      const fundAmount = 10;
+      const fundAmount = 0.013997056833333334;
       const result = await jobService['calculateJobBounty'](
         MOCK_FILE_URL,
         fundAmount,
       );
 
-      expect(result).toEqual(2);
+      expect(result).toEqual('0.002332842805555555');
     });
   });
 

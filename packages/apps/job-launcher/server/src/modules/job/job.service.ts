@@ -167,9 +167,7 @@ export class JobService {
           ),
           gt_url: dto.gtUrl,
         },
-        job_bounty: (
-          await this.calculateJobBounty(dto.dataUrl, fundAmount)
-        ).toString(),
+        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
       }));
     }
 
@@ -222,7 +220,7 @@ export class JobService {
   private async calculateJobBounty(
     endpointUrl: string,
     fundAmount: number,
-  ): Promise<number> {
+  ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
     const storageClient = new StorageClient({
       endPoint: storageData.endpoint,
@@ -234,11 +232,15 @@ export class JobService {
       .length;
 
     const totalJobs = Math.ceil(
-      totalImages /
+      div(
+        totalImages,
         Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
+      ),
     );
 
-    return fundAmount / totalJobs;
+    return ethers.utils.formatEther(
+      ethers.utils.parseUnits(fundAmount.toString(), 'ether').div(totalJobs),
+    );
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {

@@ -53,6 +53,17 @@ class KVStoreTestCase(unittest.TestCase):
             KVStoreClient(w3)
         self.assertEqual("Invalid ChainId: 9999", str(cm.exception))
 
+    def test_init_with_invalid_web3(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+
+        mock_chain_id = None
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        with self.assertRaises(KVStoreClientError) as cm:
+            KVStoreClient(w3)
+        self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
+
     def test_set(self):
         mock_function = MagicMock()
         self.kvstore.kvstore_contract.functions.set = mock_function

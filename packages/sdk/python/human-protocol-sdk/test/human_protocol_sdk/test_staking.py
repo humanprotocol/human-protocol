@@ -60,6 +60,17 @@ class StakingTestCase(unittest.TestCase):
             StakingClient(w3)
         self.assertEqual("Invalid ChainId: 9999", str(cm.exception))
 
+    def test_init_with_invalid_web3(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+
+        mock_chain_id = None
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        with self.assertRaises(StakingClientError) as cm:
+            StakingClient(w3)
+        self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
+
     def test_approve_stake(self):
         mock_function = MagicMock()
         self.staking_client.hmtoken_contract.functions.approve = mock_function

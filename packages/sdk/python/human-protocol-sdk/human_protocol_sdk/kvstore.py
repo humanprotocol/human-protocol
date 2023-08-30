@@ -41,12 +41,16 @@ class KVStoreClient:
         if not self.w3.middleware_onion.get("geth_poa"):
             self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
+        chain_id = None
         # Load network configuration based on chainId
         try:
             chain_id = self.w3.eth.chain_id
             self.network = NETWORKS[ChainId(chain_id)]
         except:
-            raise KVStoreClientError(f"Invalid ChainId: {chain_id}")
+            if chain_id is not None:
+                raise KVStoreClientError(f"Invalid ChainId: {chain_id}")
+            else:
+                raise KVStoreClientError(f"Invalid Web3 Instance")
 
         # Initialize contract instances
         kvstore_interface = get_kvstore_interface()
