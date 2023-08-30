@@ -32,3 +32,41 @@ export async function getRate(from: string, to: string): Promise<number> {
 
   return reversed ? 1 / rate : rate;
 }
+
+export const parseUrl = (
+  url: string,
+): {
+  endpoint: string;
+  bucket: string;
+  port?: number;
+} => {
+  const patterns = [
+    {
+      regex: /^https:\/\/storage\.googleapis\.com\/([^/]+)\/?$/,
+      endpoint: 'storage.googleapis.com',
+    },
+    {
+      regex: /^https:\/\/([^\.]+)\.storage\.googleapis\.com\/?$/,
+      endpoint: 'storage.googleapis.com',
+    },
+    {
+      regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
+      endpoint: '$1',
+      port: '$2',
+    },
+  ];
+
+  for (const { regex, endpoint, port } of patterns) {
+    const match = url.match(regex);
+    if (match) {
+      const bucket = match[3] ? match[3].split('/')[1] : '';
+      return {
+        endpoint: endpoint.replace('$1', match[1]),
+        bucket,
+        port: port ? Number(match[2]) : undefined,
+      };
+    }
+  }
+
+  throw new Error('Invalid URL');
+};
