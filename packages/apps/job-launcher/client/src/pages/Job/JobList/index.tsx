@@ -4,14 +4,21 @@ import { Navigate, useParams } from 'react-router-dom';
 import { JobTable } from '../../../components/Jobs/Table';
 import { NetworkSelect } from '../../../components/NetworkSelect';
 import { SearchField } from '../../../components/SearchField';
-import { JOB_STATUS } from '../../../constants';
-import { useAppSelector } from '../../../state';
+import { JobStatus } from '../../../types';
+
+const JOB_NAV_ITEMS = [
+  { status: JobStatus.LAUNCHED, label: 'launched' },
+  { status: JobStatus.PENDING, label: 'pending' },
+  { status: JobStatus.PAID, label: 'completed' },
+  { status: JobStatus.CANCELED, label: 'canceled' },
+  { status: JobStatus.FAILED, label: 'failed' },
+];
 
 export default function JobList() {
   const params = useParams();
-  const { data } = useAppSelector((state) => state.jobs);
 
-  if (!JOB_STATUS.includes(params.status!)) {
+  const item = JOB_NAV_ITEMS.find((x) => x.label === params.status);
+  if (!item) {
     return <Navigate to="/jobs/launched" />;
   }
 
@@ -33,7 +40,7 @@ export default function JobList() {
             component={'span'}
             sx={{ textTransform: 'capitalize' }}
           >
-            {params.status}
+            {item.label}
           </Typography>
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
@@ -41,7 +48,7 @@ export default function JobList() {
           <SearchField />
         </Box>
       </Box>
-      <JobTable data={data} />
+      <JobTable status={item.status} />
     </Box>
   );
 }

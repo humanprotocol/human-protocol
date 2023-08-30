@@ -1,11 +1,3 @@
-export const JOB_STATUS = [
-  'launched',
-  'pending',
-  'completed',
-  'cancelled',
-  'failed',
-];
-
 export const SUPPORTED_TOKEN_SYMBOLS = ['HMT'];
 
 export const ERROR_MESSAGES = {

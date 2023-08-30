@@ -3,6 +3,7 @@ import {
   CreateCvatJobRequest,
   FortuneRequest,
   CvatRequest,
+  JobStatus,
 } from '../types';
 import api from '../utils/api';
 
@@ -34,8 +35,12 @@ export const createCvatJob = async (
     labels: data.labels,
     minQuality: Number(data.accuracyTarget),
     gtUrl: data.groundTruthUrl,
-    jobBounty: '1',
     type: data.type,
   };
   await api.post('/job/cvat', body);
+};
+
+export const getJobListByStatus = async (status: JobStatus) => {
+  const { data } = await api.get(`/job/list`, { params: { status } });
+  return data;
 };

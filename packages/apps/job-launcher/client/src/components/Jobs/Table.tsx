@@ -2,9 +2,12 @@ import { Box, Button, IconButton, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
+import { useJobs } from '../../hooks/useJobs';
+import { JobStatus } from '../../types';
 
-export const JobTable = ({ data }: { data: Array<any> }) => {
+export const JobTable = ({ status }: { status: JobStatus }) => {
   const navigate = useNavigate();
+  const { data } = useJobs(status);
 
   return (
     <Table
@@ -13,21 +16,24 @@ export const JobTable = ({ data }: { data: Array<any> }) => {
           id: 'address',
           label: 'Address',
           sortable: true,
-          render: ({ address }) => (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {address}
-              <IconButton color="primary" sx={{ ml: 3 }}>
-                <CopyLinkIcon />
-              </IconButton>
-            </Box>
-          ),
+          render: ({ address }) =>
+            address ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {address}
+                <IconButton color="primary" sx={{ ml: 3 }}>
+                  <CopyLinkIcon />
+                </IconButton>
+              </Box>
+            ) : (
+              <></>
+            ),
         },
         { id: 'network', label: 'Network', sortable: true },
         {
-          id: 'balance',
+          id: 'fundAmount',
           label: 'Balance',
           sortable: true,
-          render: ({ balance }) => `${balance} HMT`,
+          render: ({ fundAmount }) => `${fundAmount} HMT`,
         },
         { id: 'status', label: 'Status' },
         {
@@ -36,7 +42,7 @@ export const JobTable = ({ data }: { data: Array<any> }) => {
           render: (row) => (
             <Link
               style={{ fontWeight: 600, textDecoration: 'underline' }}
-              to="/jobs/details/1"
+              to={`/jobs/details/${row.jobId}`}
             >
               Details
             </Link>

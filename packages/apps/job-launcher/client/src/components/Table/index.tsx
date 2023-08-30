@@ -44,7 +44,7 @@ function stableSort<T>(
   array: readonly T[],
   comparator: (a: T, b: T) => number
 ) {
-  const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
+  const stabilizedThis = array?.map((el, index) => [el, index] as [T, number]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) {
@@ -140,17 +140,19 @@ export const Table = ({
   };
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data?.length) : 0;
 
   const visibleRows = useMemo(() => {
     if (!orderBy) {
-      return data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+      return data?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     }
     return stableSort(data, getComparator(order, orderBy)).slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [order, orderBy, page, rowsPerPage]);
+  }, [data, order, orderBy, page, rowsPerPage]);
+
+  console.log(data, visibleRows);
 
   return (
     <Box>
@@ -175,7 +177,7 @@ export const Table = ({
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
           />
-          {data.length > 0 ? (
+          {data?.length > 0 ? (
             <TableBody>
               {visibleRows.map((row: any, i: number) => (
                 <TableRow
@@ -217,7 +219,7 @@ export const Table = ({
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={data.length}
+        count={data?.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

@@ -8,11 +8,9 @@ import { StatusToggleButtons } from '../../components/Jobs/StatusToggleButtons';
 import { JobTable } from '../../components/Jobs/Table';
 import { NetworkSelect } from '../../components/NetworkSelect';
 import { SearchField } from '../../components/SearchField';
-import { useAppSelector } from '../../state';
+import { JobStatus } from '../../types';
 
 export default function Dashboard() {
-  const { data } = useAppSelector((state) => state.jobs);
-
   return (
     <Box>
       <Box
@@ -63,7 +61,7 @@ export default function Dashboard() {
           <StatusToggleButtons />
         </Box>
       </Box>
-      <JobTable data={data} />
+      <JobTable status={JobStatus.LAUNCHED} />
     </Box>
   );
 }

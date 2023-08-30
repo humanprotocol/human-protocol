@@ -48,7 +48,6 @@ export type CreateCvatJobRequest = {
   labels: string[];
   minQuality: number;
   gtUrl: string;
-  jobBounty: string;
   type: CvatJobType;
 };
 
@@ -96,3 +95,12 @@ export type JobRequest = {
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
 };
+
+export enum JobStatus {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  LAUNCHED = 'LAUNCHED',
+  FAILED = 'FAILED',
+  TO_CANCEL = 'TO_CANCEL',
+  CANCELED = 'CANCELED',
+}

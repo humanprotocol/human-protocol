@@ -8,7 +8,6 @@ import {
   Tooltip,
   XAxis,
 } from 'recharts';
-import { useAppSelector } from '../../state';
 
 const JOBS_DATA = [
   { date: '2022-07-31', value: 2181348 },
@@ -98,7 +97,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export const JobsGraph = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data } = useAppSelector((state) => state.jobs);
+  const data = [];
 
   return (
     <Card sx={{ height: '100%', boxSizing: 'border-box', padding: '60px' }}>

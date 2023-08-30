@@ -170,6 +170,7 @@ export const AuthHeader = () => {
                 cursor: 'pointer',
               }}
               to="/profile/top-up"
+              onClick={handleClose}
             >
               <CardIcon /> Top up account
             </Link>
