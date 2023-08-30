@@ -76,12 +76,9 @@ export class JobCvatDto extends JobDto {
   @IsString()
   public gtUrl: string;
 
+  @ApiProperty()
   @IsEnum(JobRequestType)
   type: JobRequestType;
-
-  @ApiProperty()
-  @IsString()
-  public jobBounty: string;
 }
 
 export class JobCancelDto {

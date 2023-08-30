@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   ChainId,
   EscrowClient,
@@ -44,7 +45,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate } from '../../common/utils';
+import { getRate, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -166,7 +167,9 @@ export class JobService {
           ),
           gt_url: dto.gtUrl,
         },
-        job_bounty: dto.jobBounty,
+        job_bounty: (
+          await this.calculateJobBounty(dto.dataUrl, fundAmount)
+        ).toString(),
       }));
     }
 
@@ -214,6 +217,28 @@ export class JobService {
     await jobEntity.save();
 
     return jobEntity.id;
+  }
+
+  private async calculateJobBounty(
+    endpointUrl: string,
+    fundAmount: number,
+  ): Promise<number> {
+    const storageData = parseUrl(endpointUrl);
+    const storageClient = new StorageClient({
+      endPoint: storageData.endpoint,
+      port: storageData.port,
+      useSSL: false,
+    });
+
+    const totalImages = (await storageClient.listObjects(storageData.bucket))
+      .length;
+
+    const totalJobs = Math.ceil(
+      totalImages /
+        Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
+    );
+
+    return fundAmount / totalJobs;
   }
 
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
