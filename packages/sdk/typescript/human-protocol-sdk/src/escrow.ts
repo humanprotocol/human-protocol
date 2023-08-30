@@ -103,7 +103,8 @@ export class EscrowClient {
   @requiresSigner
   public async createEscrow(
     tokenAddress: string,
-    trustedHandlers: string[]
+    trustedHandlers: string[],
+    jobRequesterId: string
   ): Promise<string> {
     if (!ethers.utils.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
@@ -119,12 +120,13 @@ export class EscrowClient {
       const result: ContractReceipt = await (
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
-          trustedHandlers
+          trustedHandlers,
+          jobRequesterId
         )
       ).wait();
 
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       if (!event) {
@@ -229,12 +231,14 @@ export class EscrowClient {
   async createAndSetupEscrow(
     tokenAddress: string,
     trustedHandlers: string[],
+    jobRequesterId: string,
     escrowConfig: IEscrowConfig
   ): Promise<string> {
     try {
       const escrowAddress = await this.createEscrow(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
 
       await this.setup(escrowAddress, escrowConfig);

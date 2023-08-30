@@ -167,13 +167,16 @@ class EscrowClient:
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
 
-    def create_escrow(self, token_address: str, trusted_handlers: List[str]) -> str:
+    def create_escrow(
+        self, token_address: str, trusted_handlers: List[str], job_requester_id: str
+    ) -> str:
         """
         Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
 
         Args:
             tokenAddress (str): The address of the token to use for payouts
             trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
+            job_requester_id (str): The id of the job requester
 
         Returns:
             str: The address of the escrow created
@@ -192,13 +195,13 @@ class EscrowClient:
             self.w3,
             "Create Escrow",
             self.factory_contract.functions.createEscrow(
-                token_address, trusted_handlers
+                token_address, trusted_handlers, job_requester_id
             ),
             EscrowClientError,
         )
         return next(
             (
-                self.factory_contract.events.Launched().process_log(log)
+                self.factory_contract.events.LaunchedV2().process_log(log)
                 for log in transaction_receipt["logs"]
                 if log["address"] == self.network["factory_address"]
             ),
@@ -241,6 +244,7 @@ class EscrowClient:
         self,
         token_address: str,
         trusted_handlers: List[str],
+        job_requester_id: str,
         escrow_config: EscrowConfig,
     ) -> str:
         """
@@ -249,6 +253,7 @@ class EscrowClient:
         Args:
             token_address (str): Token to use for pay outs
             trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
+            job_requester_id (str): The id of the job requester
             escrow_config (EscrowConfig): Object containing all the necessary information to setup an escrow
 
         Returns:
@@ -258,7 +263,9 @@ class EscrowClient:
             EscrowClientError: If an error occurs while checking the parameters
         """
 
-        escrow_address = self.create_escrow(token_address, trusted_handlers)
+        escrow_address = self.create_escrow(
+            token_address, trusted_handlers, job_requester_id
+        )
         self.setup(escrow_address, escrow_config)
 
         return escrow_address
