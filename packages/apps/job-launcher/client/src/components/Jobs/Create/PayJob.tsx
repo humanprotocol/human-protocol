@@ -21,8 +21,15 @@ export const PayJob = () => {
     goToNextStep?.();
   };
 
-  const handleError = (err: Error) => {
-    setErrorMessage(err.message);
+  const handleError = (err: any) => {
+    if (
+      err.code === 'UNPREDICTABLE_GAS_LIMIT' ||
+      err.code === 'ACTION_REJECTED'
+    ) {
+      setErrorMessage(err.code);
+    } else {
+      setErrorMessage(err.message);
+    }
   };
 
   return !isPaying ? (

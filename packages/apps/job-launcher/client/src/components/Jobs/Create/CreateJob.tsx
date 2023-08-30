@@ -1,14 +1,24 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { NetworkSelect } from '../../../components/NetworkSelect';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
-import { JobType } from '../../../types';
-import { AnnotationJobRequestForm } from './AnnotationJobRequestForm';
+import { JobType, PayMethod } from '../../../types';
+import { CvatJobRequestForm } from './CvatJobRequestForm';
 import { FortuneJobRequestForm } from './FortuneJobRequestForm';
 
 export const CreateJob = () => {
-  const { jobRequest, updateJobRequest } = useCreateJobPageUI();
+  const { payMethod, jobRequest, updateJobRequest } = useCreateJobPageUI();
+  const { chainId } = jobRequest;
+  const { chain } = useNetwork();
+  const { switchNetworkAsync } = useSwitchNetwork();
+
+  useEffect(() => {
+    if (payMethod === PayMethod.Crypto && chainId !== chain?.id) {
+      switchNetworkAsync?.(chainId);
+    }
+  }, [payMethod, chainId]);
 
   return (
     <Box
@@ -49,7 +59,7 @@ export const CreateJob = () => {
             }
           >
             <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
-            <MenuItem value={JobType.Annotation}>Annotation</MenuItem>
+            <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
           </Select>
         </FormControl>
         <NetworkSelect
@@ -64,9 +74,7 @@ export const CreateJob = () => {
         />
       </Box>
       {jobRequest.jobType === JobType.Fortune && <FortuneJobRequestForm />}
-      {jobRequest.jobType === JobType.Annotation && (
-        <AnnotationJobRequestForm />
-      )}
+      {jobRequest.jobType === JobType.CVAT && <CvatJobRequestForm />}
     </Box>
   );
 };

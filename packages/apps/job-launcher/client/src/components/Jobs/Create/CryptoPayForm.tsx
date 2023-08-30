@@ -1,4 +1,5 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import { LoadingButton } from '@mui/lab';
 import {
   Alert,
   Box,
@@ -13,10 +14,13 @@ import {
   Typography,
 } from '@mui/material';
 import { ethers } from 'ethers';
-import React, { useState } from 'react';
-import { useAccount, useSigner } from 'wagmi';
+import React, { useMemo, useState } from 'react';
+import { useAccount, useNetwork, useSigner } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
 import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
+import { SUPPORTED_CHAIN_IDS } from '../../../constants/chains';
+import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
+import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import * as jobService from '../../../services/job';
 import * as paymentService from '../../../services/payment';
@@ -33,53 +37,88 @@ export const CryptoPayForm = ({
   onError: (err: any) => void;
 }) => {
   const { isConnected } = useAccount();
+  const { chain } = useNetwork();
   const { jobRequest, goToPrevStep } = useCreateJobPageUI();
   const [tokenAddress, setTokenAddress] = useState<string>();
+  const [payWithAccountBalance, setPayWithAccountBalance] = useState(false);
   const [amount, setAmount] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
   const { data: signer } = useSigner();
   const { user } = useAppSelector((state) => state.auth);
+  const { data: rate } = useTokenRate('hmt', 'usd');
+
+  const fundAmount = useMemo(() => {
+    if (amount && rate) return Number(amount) * rate;
+    return 0;
+  }, [amount, rate]);
+  const feeAmount = fundAmount * (JOB_LAUNCHER_FEE / 100);
+  const totalAmount = fundAmount + feeAmount;
+  const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
+
+  const balancePayAmount = useMemo(() => {
+    if (!payWithAccountBalance) return 0;
+    if (totalAmount < accountAmount) return totalAmount;
+    return accountAmount;
+  }, [payWithAccountBalance, totalAmount, accountAmount]);
+
+  const walletPayAmount = useMemo(() => {
+    if (!payWithAccountBalance) return totalAmount;
+    if (totalAmount < accountAmount) return 0;
+    return totalAmount - accountAmount;
+  }, [payWithAccountBalance, totalAmount, accountAmount]);
 
   const handlePay = async () => {
     if (signer && tokenAddress && amount) {
-      onStart();
+      setIsLoading(true);
       try {
-        // send HMT token to operator and retrieve transaction hash
-        const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
-        const tokenAmount = ethers.utils.parseUnits(amount, 18);
+        if (walletPayAmount > 0) {
+          // send HMT token to operator and retrieve transaction hash
+          const tokenAmount = walletPayAmount / rate;
 
-        const tx = await contract.transfer(
-          JOB_LAUNCHER_OPERATOR_ADDRESS,
-          tokenAmount
-        );
+          const contract = new ethers.Contract(
+            tokenAddress,
+            HMTokenABI,
+            signer
+          );
 
-        await tx.wait();
+          const tx = await contract.transfer(
+            JOB_LAUNCHER_OPERATOR_ADDRESS,
+            ethers.utils.parseUnits(tokenAmount.toString(), 18)
+          );
 
-        const transactionHash = tx.hash;
+          await tx.wait();
 
-        // create crypto payment record
-        await paymentService.createCryptoPayment({
-          chainId: jobRequest.chainId,
-          transactionHash,
-        });
+          // create crypto payment record
+          await paymentService.createCryptoPayment({
+            chainId: jobRequest.chainId,
+            transactionHash: tx.hash,
+          });
+        }
 
         // create job
-        const { jobType, chainId, fortuneRequest, annotationRequest } =
-          jobRequest;
+        const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
         if (jobType === JobType.Fortune && fortuneRequest) {
           await jobService.createFortuneJob(chainId, fortuneRequest, amount);
-        } else if (jobType === JobType.Annotation && annotationRequest) {
-          await jobService.createAnnotationJob(
-            chainId,
-            annotationRequest,
-            amount
-          );
+        } else if (jobType === JobType.CVAT && cvatRequest) {
+          await jobService.createCvatJob(chainId, cvatRequest, amount);
         }
         onFinish();
       } catch (err) {
         onError(err);
       }
+      setIsLoading(false);
     }
   };
+
+  if (!chain || chain.unsupported || !SUPPORTED_CHAIN_IDS.includes(chain.id))
+    return (
+      <Box>
+        <Typography>
+          You are on wrong network, please switch to one of the supported
+          networks.
+        </Typography>
+      </Box>
+    );
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -103,7 +142,13 @@ export const CryptoPayForm = ({
               }}
             >
               <FormControlLabel
-                control={<Checkbox defaultChecked />}
+                control={
+                  <Checkbox
+                    defaultChecked
+                    checked={payWithAccountBalance}
+                    onChange={(e) => setPayWithAccountBalance(e.target.checked)}
+                  />
+                }
                 label="I want to pay with my account balance"
               />
             </Box>
@@ -117,7 +162,7 @@ export const CryptoPayForm = ({
               </Alert>
             )}
             <TokenSelect
-              chainId={jobRequest.chainId}
+              chainId={chain?.id}
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value as string)}
             />
@@ -145,11 +190,11 @@ export const CryptoPayForm = ({
             >
               <Typography>Account Balance</Typography>
               <Typography color="text.secondary">
-                {user?.balance?.amount ?? '0'}{' '}
+                {user?.balance?.amount?.toFixed(2) ?? '0'}{' '}
                 {user?.balance?.currency?.toUpperCase() ?? 'USD'}
               </Typography>
             </Box>
-            <Box
+            {/* <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -160,6 +205,20 @@ export const CryptoPayForm = ({
             >
               <Typography>Amount due</Typography>
               <Typography color="text.secondary">300 USD</Typography>
+            </Box> */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                py: 2,
+                borderBottom: '1px solid #E5E7EB',
+              }}
+            >
+              <Typography>Fees</Typography>
+              <Typography color="text.secondary">
+                ({JOB_LAUNCHER_FEE}%) {feeAmount?.toFixed(2)} USD
+              </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>
               <Typography mb={2}>Payment method</Typography>
@@ -170,7 +229,9 @@ export const CryptoPayForm = ({
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Balance</Typography>
-                  <Typography color="text.secondary">100 USD</Typography>
+                  <Typography color="text.secondary">
+                    {balancePayAmount.toFixed(2)} USD
+                  </Typography>
                 </Stack>
                 <Stack
                   direction="row"
@@ -178,23 +239,25 @@ export const CryptoPayForm = ({
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Crypto Wallet</Typography>
-                  <Typography color="text.secondary">200 USD</Typography>
+                  <Typography color="text.secondary">
+                    {walletPayAmount.toFixed(2)} USD
+                  </Typography>
                 </Stack>
-                <Stack
+                {/* <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
                 >
                   <Typography color="text.secondary">Fees</Typography>
                   <Typography color="text.secondary">(3.1%) 9.3 USD</Typography>
-                </Stack>
+                </Stack> */}
                 <Stack
                   direction="row"
                   justifyContent="space-between"
                   alignItems="center"
                 >
                   <Typography>Total</Typography>
-                  <Typography>309.3 USD</Typography>
+                  <Typography>{totalAmount?.toFixed(2)} USD</Typography>
                 </Stack>
               </Stack>
             </Box>
@@ -210,16 +273,22 @@ export const CryptoPayForm = ({
         }}
       >
         <Box>
-          <Button
+          <LoadingButton
             color="primary"
             variant="contained"
             sx={{ width: '240px' }}
             size="large"
             onClick={handlePay}
-            disabled={!isConnected || !tokenAddress || !amount}
+            disabled={
+              !isConnected ||
+              !tokenAddress ||
+              !amount ||
+              jobRequest.chainId !== chain?.id
+            }
+            loading={isLoading}
           >
             Pay now
-          </Button>
+          </LoadingButton>
           <Button
             color="primary"
             variant="outlined"

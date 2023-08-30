@@ -1,8 +1,8 @@
 import {
   CreateFortuneJobRequest,
-  CreateAnnotationJobRequest,
+  CreateCvatJobRequest,
   FortuneRequest,
-  AnnotationRequest,
+  CvatRequest,
 } from '../types';
 import api from '../utils/api';
 
@@ -21,19 +21,21 @@ export const createFortuneJob = async (
   await api.post('/job/fortune', body);
 };
 
-export const createAnnotationJob = async (
+export const createCvatJob = async (
   chainId: number,
-  data: AnnotationRequest,
+  data: CvatRequest,
   amount: number | string
 ) => {
-  const body: CreateAnnotationJobRequest = {
+  const body: CreateCvatJobRequest = {
     chainId,
-    dataUrl: data.dataUrl,
-    submissionsRequired: data.annotationsPerImage,
-    labels: data.labels,
     requesterDescription: data.description,
-    requesterAccuracyTarget: data.accuracyTarget,
     fundAmount: Number(amount),
+    dataUrl: data.dataUrl,
+    labels: data.labels,
+    minQuality: Number(data.accuracyTarget),
+    gtUrl: data.groundTruthUrl,
+    jobBounty: '1',
+    type: data.type,
   };
   await api.post('/job/cvat', body);
 };

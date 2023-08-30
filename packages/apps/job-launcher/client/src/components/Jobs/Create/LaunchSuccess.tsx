@@ -33,12 +33,10 @@ export const LaunchSuccess = () => {
           size="large"
           variant="contained"
           color="primary"
+          sx={{ width: 240 }}
           onClick={() => reset?.()}
         >
           Add New Job
-        </Button>
-        <Button size="large" variant="contained" color="primary" sx={{ ml: 4 }}>
-          Launch Exchange Oracle
         </Button>
       </Box>
     </Box>

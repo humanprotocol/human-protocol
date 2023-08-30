@@ -40,14 +40,16 @@ export type CreateFortuneJobRequest = {
   fundAmount: number;
 };
 
-export type CreateAnnotationJobRequest = {
+export type CreateCvatJobRequest = {
   chainId: number;
-  dataUrl: string;
-  submissionsRequired: number;
-  labels: string[];
   requesterDescription: string;
-  requesterAccuracyTarget: number;
   fundAmount: number;
+  dataUrl: string;
+  labels: string[];
+  minQuality: number;
+  gtUrl: string;
+  jobBounty: string;
+  type: CvatJobType;
 };
 
 export enum CreateJobStep {
@@ -64,7 +66,13 @@ export enum PayMethod {
 
 export enum JobType {
   Fortune,
-  Annotation,
+  CVAT,
+}
+
+export enum CvatJobType {
+  IMAGE_LABEL_BINARY = 'IMAGE_LABEL_BINARY',
+  IMAGE_POINTS = 'IMAGE_POINTS',
+  IMAGE_BOXES = 'IMAGE_BOXES',
 }
 
 export type FortuneRequest = {
@@ -73,18 +81,18 @@ export type FortuneRequest = {
   description: string;
 };
 
-export type AnnotationRequest = {
+export type CvatRequest = {
   labels: string[];
+  type: CvatJobType;
   description: string;
   dataUrl: string;
-  annotationsPerImage: number;
+  groundTruthUrl: string;
   accuracyTarget: number;
-  rewardToWorkers: number;
 };
 
 export type JobRequest = {
   jobType: JobType;
   chainId: ChainId;
   fortuneRequest?: FortuneRequest;
-  annotationRequest?: AnnotationRequest;
+  cvatRequest?: CvatRequest;
 };

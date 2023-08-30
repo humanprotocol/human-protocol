@@ -138,16 +138,11 @@ export const FiatPayForm = ({
       }
 
       // create job
-      const { jobType, chainId, fortuneRequest, annotationRequest } =
-        jobRequest;
+      const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
       if (jobType === JobType.Fortune && fortuneRequest) {
         await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
-      } else if (jobType === JobType.Annotation && annotationRequest) {
-        await jobService.createAnnotationJob(
-          chainId,
-          annotationRequest,
-          fundAmount
-        );
+      } else if (jobType === JobType.CVAT && cvatRequest) {
+        await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
       }
 
       dispatch(fetchUserBalanceAsync());
@@ -271,7 +266,7 @@ export const FiatPayForm = ({
               <Typography>Account Balance</Typography>
               {user?.balance && (
                 <Typography color="text.secondary">
-                  {user?.balance?.amount} USD
+                  {user?.balance?.amount?.toFixed(2)} USD
                 </Typography>
               )}
             </Box>
@@ -298,7 +293,7 @@ export const FiatPayForm = ({
             >
               <Typography>Fees</Typography>
               <Typography color="text.secondary">
-                ({JOB_LAUNCHER_FEE}%) {feeAmount} USD
+                ({JOB_LAUNCHER_FEE}%) {feeAmount.toFixed(2)} USD
               </Typography>
             </Box>
             <Box sx={{ py: 1.5 }}>
@@ -311,7 +306,7 @@ export const FiatPayForm = ({
                 >
                   <Typography color="text.secondary">Balance</Typography>
                   <Typography color="text.secondary">
-                    {balancePayAmount} USD
+                    {balancePayAmount.toFixed(2)} USD
                   </Typography>
                 </Stack>
                 <Stack
@@ -321,7 +316,7 @@ export const FiatPayForm = ({
                 >
                   <Typography color="text.secondary">Credit Card</Typography>
                   <Typography color="text.secondary">
-                    {creditCardPayAmount} USD
+                    {creditCardPayAmount.toFixed(2)} USD
                   </Typography>
                 </Stack>
                 {/* <Stack
@@ -340,7 +335,7 @@ export const FiatPayForm = ({
                   alignItems="center"
                 >
                   <Typography>Total</Typography>
-                  <Typography>{totalAmount} USD</Typography>
+                  <Typography>{totalAmount.toFixed(2)} USD</Typography>
                 </Stack>
               </Stack>
             </Box>
