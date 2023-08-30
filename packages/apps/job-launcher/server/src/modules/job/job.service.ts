@@ -52,6 +52,7 @@ import { Web3Service } from '../web3/web3.service';
 import {
   CvatFinalResultDto,
   CvatManifestDto,
+  EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
   JobCvatDto,
@@ -584,6 +585,33 @@ export class JobService {
 
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
+
+    return true;
+  }
+
+  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
+    if (dto.event_type !== EventType.TASK_CREATION_FAILED) {
+      this.logger.log(ErrorJob.InvalidEventType, JobService.name);
+      throw new BadRequestException(ErrorJob.InvalidEventType);
+    }
+
+    const jobEntity = await this.jobRepository.findOne({
+      chainId: dto.chain_id,
+      escrowAddress: dto.escrow_address,
+    });
+
+    if (!jobEntity) {
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (jobEntity.status !== JobStatus.LAUNCHED) {
+      this.logger.log(ErrorJob.NotLaunched, JobService.name);
+      throw new ConflictException(ErrorJob.NotLaunched);
+    }
+
+    jobEntity.status = JobStatus.FAILED
+    await jobEntity.save()
 
     return true;
   }

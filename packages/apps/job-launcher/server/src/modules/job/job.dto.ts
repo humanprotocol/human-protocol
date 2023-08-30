@@ -224,3 +224,23 @@ export class JobListDto {
   fundAmount: number;
   status: JobStatusFilter;
 }
+
+export class EscrowFailedWebhookDto {
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chain_id: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  public escrow_address: string;
+
+  @ApiProperty()
+  @IsEnum(EventType)
+  public event_type: EventType;
+
+  @ApiProperty()
+  @IsString()
+  public reason: string;
+}
