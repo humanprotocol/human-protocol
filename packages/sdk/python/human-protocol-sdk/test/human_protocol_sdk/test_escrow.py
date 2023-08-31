@@ -268,6 +268,7 @@ class EscrowTestCase(unittest.TestCase):
         self.escrow.factory_contract.functions.createEscrow = mock_function_create
         escrow_address = "0x1234567890123456789012345678901234567890"
         token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
         trusted_handlers = [self.w3.eth.default_account]
 
         with patch("human_protocol_sdk.escrow.handle_transaction") as mock_function:
@@ -275,11 +276,13 @@ class EscrowTestCase(unittest.TestCase):
                 mock_function_next.return_value = SimpleNamespace(
                     args=SimpleNamespace(escrow=escrow_address)
                 )
-                response = self.escrow.create_escrow(token_address, trusted_handlers)
+                response = self.escrow.create_escrow(
+                    token_address, trusted_handlers, job_requester_id
+                )
 
                 self.assertEqual(response, escrow_address)
                 mock_function_create.assert_called_once_with(
-                    token_address, trusted_handlers
+                    token_address, trusted_handlers, job_requester_id
                 )
                 mock_function_next.assert_called_once()
 
@@ -293,17 +296,19 @@ class EscrowTestCase(unittest.TestCase):
     def test_create_escrow_invalid_token(self):
         token_address = "invalid_address"
         trusted_handlers = [self.w3.eth.default_account]
+        job_requester_id = "job-requester"
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.create_escrow(token_address, trusted_handlers)
+            self.escrow.create_escrow(token_address, trusted_handlers, job_requester_id)
         self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
 
     def test_create_escrow_invalid_handler(self):
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = ["invalid_address"]
+        job_requester_id = "job-requester"
 
         with self.assertRaises(EscrowClientError) as cm:
-            self.escrow.create_escrow(token_address, trusted_handlers)
+            self.escrow.create_escrow(token_address, trusted_handlers, job_requester_id)
         self.assertEqual(
             f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
         )
@@ -318,8 +323,11 @@ class EscrowTestCase(unittest.TestCase):
 
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = ["0x1234567890123456789012345678901234567890"]
+        job_requester_id = "job-requester"
         with self.assertRaises(EscrowClientError) as cm:
-            escrowClient.create_escrow(token_address, trusted_handlers)
+            escrowClient.create_escrow(
+                token_address, trusted_handlers, job_requester_id
+            )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
     def test_setup(self):
@@ -465,6 +473,7 @@ class EscrowTestCase(unittest.TestCase):
         escrow_address = "0x1234567890123456789012345678901234567890"
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = [self.w3.eth.default_account]
+        job_requester_id = "job-requester"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
@@ -479,12 +488,12 @@ class EscrowTestCase(unittest.TestCase):
                     args=SimpleNamespace(escrow=escrow_address)
                 )
                 response = self.escrow.create_and_setup_escrow(
-                    token_address, trusted_handlers, escrow_config
+                    token_address, trusted_handlers, job_requester_id, escrow_config
                 )
 
                 self.assertEqual(response, escrow_address)
                 mock_function_create.assert_called_once_with(
-                    token_address, trusted_handlers
+                    token_address, trusted_handlers, job_requester_id
                 )
                 mock_function_next.assert_called_once()
 
@@ -505,6 +514,7 @@ class EscrowTestCase(unittest.TestCase):
         self.escrow.setup = MagicMock()
         token_address = "invalid_address"
         trusted_handlers = [self.w3.eth.default_account]
+        job_requester_id = "job-requester"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
@@ -516,7 +526,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_and_setup_escrow(
-                token_address, trusted_handlers, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config
             )
         self.assertEqual(f"Invalid token address: {token_address}", str(cm.exception))
         self.escrow.setup.assert_not_called()
@@ -525,6 +535,7 @@ class EscrowTestCase(unittest.TestCase):
         self.escrow.setup = MagicMock()
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = ["invalid_address"]
+        job_requester_id = "job-requester"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
@@ -536,7 +547,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             self.escrow.create_and_setup_escrow(
-                token_address, trusted_handlers, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config
             )
         self.assertEqual(
             f"Invalid handler address: {trusted_handlers[0]}", str(cm.exception)
@@ -554,6 +565,7 @@ class EscrowTestCase(unittest.TestCase):
         escrowClient.setup = MagicMock()
         token_address = "0x1234567890123456789012345678901234567890"
         trusted_handlers = ["0x1234567890123456789012345678901234567890"]
+        job_requester_id = "job-requester"
         escrow_config = EscrowConfig(
             "0x1234567890123456789012345678901234567890",
             "0x1234567890123456789012345678901234567890",
@@ -565,7 +577,7 @@ class EscrowTestCase(unittest.TestCase):
 
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.create_and_setup_escrow(
-                token_address, trusted_handlers, escrow_config
+                token_address, trusted_handlers, job_requester_id, escrow_config
             )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
         escrowClient.setup.assert_not_called()

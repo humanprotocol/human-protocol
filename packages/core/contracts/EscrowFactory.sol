@@ -19,6 +19,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
     address public staking;
 
     event Launched(address token, address escrow);
+    event LaunchedV2(address token, address escrow, string jobRequesterId);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -39,7 +40,8 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     function createEscrow(
         address token,
-        address[] memory trustedHandlers
+        address[] memory trustedHandlers,
+        string memory jobRequesterId
     ) public returns (address) {
         bool hasAvailableStake = IStaking(staking).hasAvailableStake(
             msg.sender
@@ -59,7 +61,7 @@ contract EscrowFactory is OwnableUpgradeable, UUPSUpgradeable {
         counter++;
         escrowCounters[address(escrow)] = counter;
         lastEscrow = address(escrow);
-        emit Launched(token, lastEscrow);
+        emit LaunchedV2(token, lastEscrow, jobRequesterId);
         return lastEscrow;
     }
 

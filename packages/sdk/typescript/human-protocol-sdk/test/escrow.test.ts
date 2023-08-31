@@ -185,6 +185,7 @@ describe('EscrowClient', () => {
     test('should create an escrow and return its address', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
       const expectedEscrowAddress = ethers.constants.AddressZero;
 
       // Create a spy object for the createEscrow method
@@ -194,7 +195,7 @@ describe('EscrowClient', () => {
           wait: async () => ({
             events: [
               {
-                topics: [ethers.utils.id('Launched(address,address)')],
+                topics: [ethers.utils.id('LaunchedV2(address,address,string)')],
                 args: {
                   escrow: expectedEscrowAddress,
                 },
@@ -205,12 +206,14 @@ describe('EscrowClient', () => {
 
       const result = await escrowClient.createEscrow(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
 
       expect(createEscrowSpy).toHaveBeenCalledWith(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
       expect(result).toBe(expectedEscrowAddress);
     });
@@ -218,18 +221,19 @@ describe('EscrowClient', () => {
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
 
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
         new Error()
       );
 
       await expect(
-        escrowClient.createEscrow(tokenAddress, trustedHandlers)
+        escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId)
       ).rejects.toThrow();
 
       expect(
         escrowClient.escrowFactoryContract.createEscrow
-      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers);
+      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers, jobRequesterId);
     });
   });
 
@@ -439,6 +443,8 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
@@ -455,12 +461,14 @@ describe('EscrowClient', () => {
       await escrowClient.createAndSetupEscrow(
         tokenAddress,
         trustedHandlers,
+        jobRequesterId,
         escrowConfig
       );
 
       expect(escrowClient.createEscrow).toHaveBeenCalledWith(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
