@@ -7,7 +7,7 @@ import { JobStatus } from '../../types';
 
 export const JobTable = ({ status }: { status: JobStatus }) => {
   const navigate = useNavigate();
-  const { data } = useJobs(status);
+  const { data, isLoading } = useJobs(status);
 
   return (
     <Table
@@ -50,6 +50,7 @@ export const JobTable = ({ status }: { status: JobStatus }) => {
         },
       ]}
       data={data}
+      loading={isLoading}
       emptyCell={
         <>
           <Typography variant="h5">

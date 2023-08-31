@@ -117,6 +117,7 @@ export const CryptoTopUpForm = () => {
             <FormControl fullWidth>
               <TextField
                 placeholder="Amount"
+                type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
               />

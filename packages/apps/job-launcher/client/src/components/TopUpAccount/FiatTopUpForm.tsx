@@ -151,6 +151,7 @@ export const FiatTopUpForm = () => {
               placeholder="Amount USD"
               variant="outlined"
               value={amount}
+              type="number"
               onChange={(e) => setAmount(e.target.value)}
             />
           </FormControl>

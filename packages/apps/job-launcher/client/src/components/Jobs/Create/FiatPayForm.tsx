@@ -235,6 +235,7 @@ export const FiatPayForm = ({
                   placeholder="Amount USD"
                   variant="outlined"
                   value={paymentData.amount}
+                  type="number"
                   onChange={(e) =>
                     handlePaymentDataFormFieldChange('amount', e.target.value)
                   }

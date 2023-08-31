@@ -107,11 +107,13 @@ export const Table = ({
   data,
   columns,
   defaultOrderBy,
+  loading,
   emptyCell,
 }: {
   data: any;
   columns: Array<TableColumn>;
   defaultOrderBy?: string;
+  loading?: boolean;
   emptyCell?: React.ReactNode;
 }) => {
   const [order, setOrder] = useState<Order>('asc');
@@ -152,8 +154,6 @@ export const Table = ({
     );
   }, [data, order, orderBy, page, rowsPerPage]);
 
-  console.log(data, visibleRows);
-
   return (
     <Box>
       <TableContainer
@@ -177,7 +177,15 @@ export const Table = ({
             orderBy={orderBy}
             onRequestSort={handleRequestSort}
           />
-          {data?.length > 0 ? (
+          {loading ? (
+            <TableBody>
+              <TableRow style={{ height: 53 * 10 }}>
+                <TableCell align="center" colSpan={columns.length}>
+                  Loading...
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          ) : data?.length > 0 ? (
             <TableBody>
               {visibleRows.map((row: any, i: number) => (
                 <TableRow
@@ -208,7 +216,7 @@ export const Table = ({
           ) : (
             <TableBody>
               <TableRow style={{ height: 53 * 10 }}>
-                <TableCell align="center" colSpan={5}>
+                <TableCell align="center" colSpan={columns.length}>
                   {emptyCell ? emptyCell : <></>}
                 </TableCell>
               </TableRow>

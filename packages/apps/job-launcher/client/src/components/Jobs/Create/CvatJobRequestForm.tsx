@@ -167,6 +167,7 @@ export const CvatJobRequestForm = () => {
                 <FormControl fullWidth>
                   <TextField
                     name="accuracyTarget"
+                    type="number"
                     value={values.accuracyTarget}
                     onChange={(e) =>
                       setFieldValue('accuracyTarget', e.target.value)

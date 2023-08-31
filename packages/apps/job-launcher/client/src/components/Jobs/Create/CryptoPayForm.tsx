@@ -51,7 +51,10 @@ export const CryptoPayForm = ({
     if (amount && rate) return Number(amount) * rate;
     return 0;
   }, [amount, rate]);
-  const feeAmount = fundAmount * (JOB_LAUNCHER_FEE / 100);
+  const feeAmount =
+    fundAmount === 0
+      ? 0
+      : Math.max(0.01, fundAmount * (JOB_LAUNCHER_FEE / 100));
   const totalAmount = fundAmount + feeAmount;
   const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
 
@@ -83,7 +86,7 @@ export const CryptoPayForm = ({
 
           const tx = await contract.transfer(
             JOB_LAUNCHER_OPERATOR_ADDRESS,
-            ethers.utils.parseUnits(tokenAmount.toString(), 18)
+            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18)
           );
 
           await tx.wait();
@@ -98,9 +101,13 @@ export const CryptoPayForm = ({
         // create job
         const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
         if (jobType === JobType.Fortune && fortuneRequest) {
-          await jobService.createFortuneJob(chainId, fortuneRequest, amount);
+          await jobService.createFortuneJob(
+            chainId,
+            fortuneRequest,
+            fundAmount
+          );
         } else if (jobType === JobType.CVAT && cvatRequest) {
-          await jobService.createCvatJob(chainId, cvatRequest, amount);
+          await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
         }
         onFinish();
       } catch (err) {
@@ -169,6 +176,7 @@ export const CryptoPayForm = ({
             <FormControl fullWidth>
               <TextField
                 value={amount}
+                type="number"
                 onChange={(e) => setAmount(e.target.value as string)}
                 placeholder="Amount"
               />
