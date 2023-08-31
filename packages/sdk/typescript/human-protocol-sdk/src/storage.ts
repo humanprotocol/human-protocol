@@ -49,12 +49,10 @@ export class StorageClient {
       throw ErrorStorageBucketNotFound;
     }
 
-    console.log(keys);
     return Promise.all(
       keys.map(async (key) => {
         try {
           const response = await this.client.getObject(bucket, key);
-          console.log(response);
           if (response) {
             let content = response.read();
 
