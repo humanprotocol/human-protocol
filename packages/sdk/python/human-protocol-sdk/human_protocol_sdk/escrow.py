@@ -507,6 +507,24 @@ class EscrowClient:
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
 
+    def get_manifest_hash(self, escrow_address: str) -> str:
+        """Gets the manifest file hash.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Manifest file hash
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return self._get_escrow_contract(escrow_address).functions.manifestHash().call()
+
     def get_manifest_url(self, escrow_address: str) -> str:
         """Gets the manifest file URL.
 
