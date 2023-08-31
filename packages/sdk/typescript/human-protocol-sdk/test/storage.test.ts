@@ -144,6 +144,38 @@ describe('Storage tests', () => {
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
+    test('should upload binary file with success', async () => {
+      const binaryContent = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]); // Sample binary data (e.g., "Hello")
+      const blob = new Blob([binaryContent.buffer], {
+        type: 'application/octet-stream',
+      });
+
+      const uploadedResults = await storageClient.uploadFiles(
+        [blob],
+        DEFAULT_PUBLIC_BUCKET
+      );
+
+      const hash = crypto
+        .createHash('sha1')
+        .update(Buffer.from(binaryContent))
+        .digest('hex');
+      const key = `s3${hash}.bin`;
+
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        Buffer.from(binaryContent),
+        {
+          'Content-Type': 'application/octet-stream',
+        }
+      );
+      expect(uploadedResults[0].key).toEqual(key);
+      expect(uploadedResults[0].url).toEqual(
+        `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${key}`
+      );
+      expect(uploadedResults[0].hash).toEqual(hash);
+    });
+
     test('should not upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
       vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
@@ -174,6 +206,34 @@ describe('Storage tests', () => {
       );
       expect(downloadedResults[0].key).toEqual(key);
       expect(downloadedResults[0].content).toEqual(file);
+    });
+
+    test('should download binary file with success', async () => {
+      const binaryContent = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]); // Sample binary data (e.g., "Hello")
+      const hash = crypto
+        .createHash('sha1')
+        .update(binaryContent)
+        .digest('hex');
+      const key = `s3${hash}.bin`;
+
+      storageClient['client'].getObject = vi.fn().mockImplementation(() => {
+        const read = () => {
+          return binaryContent;
+        };
+        return Promise.resolve({ read });
+      });
+
+      const downloadedResults = await storageClient.downloadFiles(
+        [key],
+        DEFAULT_PUBLIC_BUCKET
+      );
+
+      expect(storageClient['client'].getObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key
+      );
+      expect(downloadedResults[0].key).toEqual(key);
+      expect(downloadedResults[0].content).toEqual(binaryContent);
     });
 
     test('should not download the files with an error', async () => {
@@ -320,6 +380,38 @@ describe('Storage tests', () => {
       expect(uploadedResults[0].hash).toEqual(hash);
     });
 
+    test('should upload binary file with success', async () => {
+      const binaryContent = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]); // Sample binary data (e.g., "Hello")
+      const blob = new Blob([binaryContent.buffer], {
+        type: 'application/octet-stream',
+      });
+
+      const uploadedResults = await storageClient.uploadFiles(
+        [blob],
+        DEFAULT_PUBLIC_BUCKET
+      );
+
+      const hash = crypto
+        .createHash('sha1')
+        .update(Buffer.from(binaryContent))
+        .digest('hex');
+      const key = `s3${hash}.bin`;
+
+      expect(storageClient['client'].putObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key,
+        Buffer.from(binaryContent),
+        {
+          'Content-Type': 'application/octet-stream',
+        }
+      );
+      expect(uploadedResults[0].key).toEqual(key);
+      expect(uploadedResults[0].url).toEqual(
+        `http://${DEFAULT_ENDPOINT}:${DEFAULT_PORT}/${DEFAULT_PUBLIC_BUCKET}/${key}`
+      );
+      expect(uploadedResults[0].hash).toEqual(hash);
+    });
+
     test('should not upload the file with an error', async () => {
       const file = { key: STORAGE_TEST_FILE_VALUE };
       vi.spyOn(storageClient, 'uploadFiles').mockImplementation(() => {
@@ -350,6 +442,34 @@ describe('Storage tests', () => {
       );
       expect(downloadedResults[0].key).toEqual(key);
       expect(downloadedResults[0].content).toEqual(file);
+    });
+
+    test('should download binary file with success', async () => {
+      const binaryContent = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]); // Sample binary data (e.g., "Hello")
+      const hash = crypto
+        .createHash('sha1')
+        .update(binaryContent)
+        .digest('hex');
+      const key = `s3${hash}.bin`;
+
+      storageClient['client'].getObject = vi.fn().mockImplementation(() => {
+        const read = () => {
+          return binaryContent;
+        };
+        return Promise.resolve({ read });
+      });
+
+      const downloadedResults = await storageClient.downloadFiles(
+        [key],
+        DEFAULT_PUBLIC_BUCKET
+      );
+
+      expect(storageClient['client'].getObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        key
+      );
+      expect(downloadedResults[0].key).toEqual(key);
+      expect(downloadedResults[0].content).toEqual(binaryContent);
     });
 
     test('should not download the file with an error', async () => {

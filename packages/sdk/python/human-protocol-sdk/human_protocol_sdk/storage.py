@@ -165,13 +165,17 @@ class StorageClient:
         for file in files:
             try:
                 response = self.client.get_object(bucket_name=bucket, object_name=file)
-                result_files.append(response.read())
+                content = response.read()
+
+                if file.endswith(".json"):
+                    # If it's a JSON file, parse the content
+                    content = json.loads(content.decode("utf-8"))
+
+                result_files.append(content)
             except Exception as e:
                 if hasattr(e, "code") and str(e.code) == "NoSuchKey":
                     raise StorageFileNotFoundError("No object found - returning empty")
-                LOG.warning(
-                    f"Reading the key {file} with S3 failed" f" because of: {str(e)}"
-                )
+                print(f"Reading the key {file} with S3 failed because of: {str(e)}")
                 raise StorageClientError(str(e))
         return result_files
 
@@ -191,19 +195,28 @@ class StorageClient:
         """
         result_files = []
         for file in files:
-            if "file" in file and "key" in file and "hash" in file:
+            if isinstance(file, bytes):
+                data = file
+                hash = hashlib.sha1(data).hexdigest()
+                key = f"s3{hash}.bin"
+            elif "file" in file and "key" in file and "hash" in file:
                 data = file["file"]
                 hash = file["hash"]
                 key = file["key"]
             else:
-                try:
-                    artifact = json.dumps(file, sort_keys=True)
-                except Exception as e:
-                    LOG.error("Can't extract the json from the object")
-                    raise e
-                data = artifact.encode("utf-8")
-                hash = hashlib.sha1(data).hexdigest()
-                key = f"s3{hash}.json"
+                if isinstance(file, bytes):
+                    data = file
+                    hash = hashlib.sha1(data).hexdigest()
+                    key = f"s3{hash}.bin"
+                else:
+                    try:
+                        artifact = json.dumps(file, sort_keys=True)
+                    except Exception as e:
+                        LOG.error("Can't extract the json from the object")
+                        raise e
+                    data = artifact.encode("utf-8")
+                    hash = hashlib.sha1(data).hexdigest()
+                    key = f"s3{hash}.json"
 
             url = (
                 f"{'https' if self.secure else 'http'}://{self.endpoint}/{bucket}/{key}"

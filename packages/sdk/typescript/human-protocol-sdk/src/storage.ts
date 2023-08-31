@@ -49,13 +49,23 @@ export class StorageClient {
       throw ErrorStorageBucketNotFound;
     }
 
+    console.log(keys);
     return Promise.all(
       keys.map(async (key) => {
         try {
           const response = await this.client.getObject(bucket, key);
-          const content = response?.read();
+          console.log(response);
+          if (response) {
+            let content = response.read();
 
-          return { key, content: JSON.parse(content?.toString('utf-8') || '') };
+            if (key.endsWith('.json')) {
+              content = JSON.parse(content.toString('utf-8'));
+            }
+
+            return { key, content };
+          } else {
+            throw ErrorStorageFileNotFound;
+          }
         } catch (e) {
           throw ErrorStorageFileNotFound;
         }
@@ -92,11 +102,11 @@ export class StorageClient {
   }
 
   /**
-   * **Upload file to cloud storage**
+   * **Upload files to cloud storage**
    *
-   * @param {File[]} files - Files to upload
+   * @param {any[]} files - Files to upload (can be Blob, text content, or binary content)
    * @param {string} bucket - Bucket name
-   * @returns {Promise<UploadFile>} - Uploaded file with key/hash
+   * @returns {Promise<UploadFile>} - Uploaded files with keys/hashes
    */
   public async uploadFiles(
     files: any[],
@@ -109,14 +119,26 @@ export class StorageClient {
 
     return Promise.all(
       files.map(async (file) => {
-        const content = JSON.stringify(file);
+        let content;
+        let contentType;
+        if (file instanceof Blob) {
+          // For binary files
+          content = await file.arrayBuffer();
+          contentType = file.type;
+          content = Buffer.from(content);
+        } else {
+          // For text or other content
+          content = JSON.stringify(file);
+          contentType = 'application/json';
+        }
 
         const hash = crypto.createHash('sha1').update(content).digest('hex');
-        const key = `s3${hash}.json`;
+        const extension = file instanceof Blob ? 'bin' : 'json';
+        const key = `s3${hash}.${extension}`;
 
         try {
           await this.client.putObject(bucket, key, content, {
-            'Content-Type': 'application/json',
+            'Content-Type': contentType,
           });
 
           return {

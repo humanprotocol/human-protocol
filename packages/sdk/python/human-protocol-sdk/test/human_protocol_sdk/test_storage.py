@@ -118,6 +118,17 @@ class TestStorageClient(unittest.TestCase):
         result = self.client.download_files(files=self.files, bucket=self.bucket)
         self.assertEqual(result, expected_result)
 
+    def test_download_binary_files(self):
+        expected_result = [b"file1 contents", b"file2 contents"]
+        self.client.client.get_object = MagicMock(
+            side_effect=[
+                MagicMock(read=MagicMock(return_value=expected_result[0])),
+                MagicMock(read=MagicMock(return_value=expected_result[1])),
+            ]
+        )
+        result = self.client.download_files(files=self.files, bucket=self.bucket)
+        self.assertEqual(result, expected_result)
+
     def test_download_files_error(self):
         self.client.client.get_object = MagicMock(
             side_effect=S3Error(
@@ -157,6 +168,29 @@ class TestStorageClient(unittest.TestCase):
         file3 = "file3 content"
         hash = hashlib.sha1(json.dumps("file3 content").encode("utf-8")).hexdigest()
         key3 = f"s3{hash}.json"
+
+        self.client.client.stat_object = MagicMock(
+            side_effect=S3Error(
+                code="NoSuchKey",
+                message="Object does not exist",
+                resource="",
+                request_id="",
+                host_id="",
+                response="",
+            )
+        )
+        self.client.client.put_object = MagicMock()
+        result = self.client.upload_files(files=[file3], bucket=self.bucket)
+        self.assertEqual(result[0]["key"], key3)
+        self.assertEqual(
+            result[0]["url"], f"https://s3.us-west-2.amazonaws.com/my-bucket/{key3}"
+        )
+        self.assertEqual(result[0]["hash"], hash)
+
+    def test_upload_binary_files(self):
+        file3 = b"file3 binary content"
+        hash = hashlib.sha1(file3).hexdigest()
+        key3 = f"s3{hash}.bin"
 
         self.client.client.stat_object = MagicMock(
             side_effect=S3Error(
