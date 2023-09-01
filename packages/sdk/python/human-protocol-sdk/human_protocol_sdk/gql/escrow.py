@@ -17,6 +17,8 @@ fragment EscrowFields on Escrow {
     recordingOracleFee
     reputationOracle
     reputationOracleFee
+    exchangeOracle
+    exchangeOracleFee
     status
     token
     totalFundedAmount
@@ -31,6 +33,7 @@ query GetEscrows(
     $launcher: String
     $reputationOracle: String
     $recordingOracle: String
+    $exchangeOracle: String
     $status: String
     $from: Int
     $to: Int
@@ -40,6 +43,7 @@ query GetEscrows(
         {launcher_clause}
         {reputation_oracle_clause}
         {recording_oracle_clause}
+        {exchange_oracle_clause}
         {status_clause}
         {from_clause}
         {to_clause}
@@ -57,6 +61,9 @@ query GetEscrows(
         else "",
         recording_oracle_clause="recordingOracle: $recordingOracle"
         if filter.recording_oracle
+        else "",
+        exchange_oracle_clause="exchangeOracle: $exchangeOracle"
+        if filter.exchange_oracle
         else "",
         status_clause="status: $status" if filter.status else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",

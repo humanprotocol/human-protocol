@@ -34,6 +34,7 @@ const urls = {
 const stakes = {
   repOracle: process.env.REP_ORACLE_STAKE || 10,
   recOracle: process.env.REC_ORACLE_STAKE || 10,
+  exOracle: process.env.EX_ORACLE_STAKE || 10,
 };
 
 const gasLimit = process.env.GAS_LIMIT || 5000000;

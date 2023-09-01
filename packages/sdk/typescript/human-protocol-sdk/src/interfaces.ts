@@ -34,6 +34,7 @@ export interface IEscrowsFilter {
   launcher?: string;
   reputationOracle?: string;
   recordingOracle?: string;
+  exchangeOracle?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
@@ -42,8 +43,10 @@ export interface IEscrowsFilter {
 export interface IEscrowConfig {
   recordingOracle: string;
   reputationOracle: string;
+  exchangeOracle: string;
   recordingOracleFee: BigNumber;
   reputationOracleFee: BigNumber;
+  exchangeOracleFee: BigNumber;
   manifestUrl: string;
   manifestHash: string;
 }

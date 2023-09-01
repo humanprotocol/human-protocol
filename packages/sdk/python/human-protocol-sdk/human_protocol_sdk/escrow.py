@@ -40,8 +40,10 @@ class EscrowConfig:
         self,
         recording_oracle_address: str,
         reputation_oracle_address: str,
+        exchange_oracle_address: str,
         recording_oracle_fee: Decimal,
         reputation_oracle_fee: Decimal,
+        exchange_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
         skip_manifest_url_validation: bool = False,
@@ -66,11 +68,18 @@ class EscrowConfig:
             raise EscrowClientError(
                 f"Invalid reputation oracle address: {reputation_oracle_address}"
             )
-        if not (0 <= recording_oracle_fee <= 100) or not (
-            0 <= reputation_oracle_fee <= 100
+        if not Web3.is_address(exchange_oracle_address):
+            raise EscrowClientError(
+                f"Invalid exchange oracle address: {exchange_oracle_address}"
+            )
+
+        if (
+            not (0 <= recording_oracle_fee <= 100)
+            or not (0 <= reputation_oracle_fee <= 100)
+            or not (0 <= exchange_oracle_fee <= 100)
         ):
             raise EscrowClientError("Fee must be between 0 and 100")
-        if recording_oracle_fee + reputation_oracle_fee > 100:
+        if recording_oracle_fee + reputation_oracle_fee + exchange_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
         if not URL(manifest_url) and not skip_manifest_url_validation:
             raise EscrowClientError(f"Invalid manifest URL: {manifest_url}")
@@ -79,8 +88,10 @@ class EscrowConfig:
 
         self.recording_oracle_address = recording_oracle_address
         self.reputation_oracle_address = reputation_oracle_address
+        self.exchange_oracle_address = exchange_oracle_address
         self.recording_oracle_fee = recording_oracle_fee
         self.reputation_oracle_fee = reputation_oracle_fee
+        self.exchange_oracle_fee = exchange_oracle_fee
         self.manifest_url = manifest_url
         self.hash = hash
 
@@ -95,6 +106,7 @@ class EscrowFilter:
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
+        exchange_oracle: Optional[str] = None,
         status: Optional[Status] = None,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
@@ -119,6 +131,9 @@ class EscrowFilter:
         if recording_oracle and not Web3.is_address(recording_oracle):
             raise EscrowClientError(f"Invalid address: {recording_oracle}")
 
+        if exchange_oracle and not Web3.is_address(exchange_oracle):
+            raise EscrowClientError(f"Invalid address: {exchange_oracle}")
+
         if date_from and date_to and date_from > date_to:
             raise EscrowClientError(
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
@@ -127,6 +142,7 @@ class EscrowFilter:
         self.launcher = launcher
         self.reputation_oracle = reputation_oracle
         self.recording_oracle = recording_oracle
+        self.exchange_oracle = exchange_oracle
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
@@ -232,8 +248,10 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.setup(
                 escrow_config.reputation_oracle_address,
                 escrow_config.recording_oracle_address,
+                escrow_config.exchange_oracle_address,
                 escrow_config.reputation_oracle_fee,
                 escrow_config.recording_oracle_fee,
+                escrow_config.exchange_oracle_fee,
                 escrow_config.manifest_url,
                 escrow_config.hash,
             ),
@@ -625,6 +643,7 @@ class EscrowClient:
                 "launcher": filter.launcher,
                 "reputationOracle": filter.reputation_oracle,
                 "recordingOracle": filter.recording_oracle,
+                "exchangeOracle": filter.exchange_oracle,
                 "status": filter.status.name if filter.status else None,
                 "from": int(filter.date_from.timestamp()) if filter.date_from else None,
                 "to": int(filter.date_to.timestamp()) if filter.date_to else None,
@@ -674,6 +693,26 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address)
             .functions.reputationOracle()
             .call()
+        )
+
+    def get_exchange_oracle_address(self, escrow_address: str) -> str:
+        """Gets the exchange oracle address of the escrow.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Exchange oracle address
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return (
+            self._get_escrow_contract(escrow_address).functions.exchangeOracle().call()
         )
 
     def get_job_launcher_address(self, escrow_address: str) -> str:

@@ -14,9 +14,9 @@ On the other hand, it can be cancelled anytime.
 
   Create a new escrow with ERC20 token for payments, launcher who initiated the call to escrow factory, canceler who receives the money back when the job is cancelled, job duration before expiry, and extra trusted handlers that act like super admin of the escrow. Initial escrow status is `Launched`.
 
-- `setup(reputationOracle, recordingOracle, reputationOracleFeePercentage, recordingOracleFeePercentage, url, hash)`
+- `setup(reputationOracle, recordingOracle, exchangeOracle, reputationOracleFeePercentage, recordingOracleFeePercentage, exchangeOracleFeePercentage, url, hash)`
 
-  Assigns the reputation, and recording oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status.
+  Assigns the reputation, recording, and exchange oracle to the job, with relevant fee percentages. Job manifest url, and hash is also configured at this point. This function should be called after the escrow is funded from the job launcher. The escrow is now in `Pending` status.
 
   > Only trusted handlers can call this function.
 
