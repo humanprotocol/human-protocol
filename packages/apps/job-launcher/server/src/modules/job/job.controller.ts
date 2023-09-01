@@ -18,7 +18,7 @@ import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhoo
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
