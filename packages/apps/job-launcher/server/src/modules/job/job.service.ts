@@ -3,6 +3,7 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
+  KVStoreClient,
   NETWORKS,
   StorageClient,
   StorageCredentials,
@@ -512,10 +513,12 @@ export class JobService {
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
         if ((manifest as CvatManifestDto)?.annotation?.type) {
           await this.sendWebhook(
-            this.configService.get<string>(
-              ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-              ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-            )!,
+            await this.getExchangeOracleWebhookUrl(
+              this.configService.get<string>(
+                ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+              )!,
+              jobEntity.chainId,
+            ),
             {
               escrowAddress: jobEntity.escrowAddress,
               chainId: jobEntity.chainId,
@@ -577,9 +580,12 @@ export class JobService {
         (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
       ) {
         await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
+          await this.getExchangeOracleWebhookUrl(
+            this.configService.get<string>(
+              ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
+            )!,
+            jobEntity.chainId,
+          ),
           {
             escrowAddress,
             chainId: jobEntity.chainId,
@@ -588,9 +594,12 @@ export class JobService {
         );
       } else {
         await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
+          await this.getExchangeOracleWebhookUrl(
+            this.configService.get<string>(
+              ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
+            )!,
+            jobEntity.chainId,
+          ),
           {
             escrowAddress,
             chainId: jobEntity.chainId,
@@ -616,7 +625,9 @@ export class JobService {
     return true;
   }
 
-  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
+  public async escrowFailedWebhook(
+    dto: EscrowFailedWebhookDto,
+  ): Promise<boolean> {
     if (dto.event_type !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -637,9 +648,22 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
-    jobEntity.status = JobStatus.FAILED
-    await jobEntity.save()
+    jobEntity.status = JobStatus.FAILED;
+    await jobEntity.save();
 
     return true;
+  }
+
+  private async getExchangeOracleWebhookUrl(
+    address: string,
+    chainId: ChainId,
+  ): Promise<string> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const kvStoreClient = await KVStoreClient.build(signer);
+
+    const exchangeOracleUrl = await kvStoreClient.get(address, 'Webhook_url');
+
+    return exchangeOracleUrl;
   }
 }
