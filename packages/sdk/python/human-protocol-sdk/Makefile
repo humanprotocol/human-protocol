@@ -38,3 +38,6 @@ build-package:
 publish-package:
 	make build-package
 	twine upload dist/* --skip-existing
+
+run-example:
+	pipenv run python3 example.py

@@ -216,7 +216,7 @@ class StorageClient:
                     bucket_name=bucket, object_name=key
                 )
             except Exception as e:
-                if e.code == "NoSuchKey":
+                if hasattr(e, "code") and str(e.code) == "NoSuchKey":
                     # file does not exist in bucket, so upload it
                     pass
                 else:

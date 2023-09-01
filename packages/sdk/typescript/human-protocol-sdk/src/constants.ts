@@ -61,7 +61,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
     kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },
@@ -88,7 +88,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
     kvstoreAddress: '0xc9Fe39c4b6e1d7A2991355Af159956982DADf842',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli',
     oldFactoryAddress: '0xaAe6a2646C1F88763E62e0cD08aD050Ea66AC46F',
@@ -102,7 +102,7 @@ export const NETWORKS: {
     stakingAddress: '0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C',
     rewardPoolAddress: '0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e',
     kvstoreAddress: '0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6',
-    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v1',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v2',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
   },
@@ -116,7 +116,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
     kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest',
     oldFactoryAddress: '0xaae6a2646c1f88763e62e0cd08ad050ea66ac46f',
@@ -131,7 +131,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
     kvstoreAddress: '0x35Cf4beBD58F9C8D75B9eA2599479b6C173d406F',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon',
     oldFactoryAddress: '0x45eBc3eAE6DA485097054ae10BA1A0f8e8c7f794',
@@ -146,7 +146,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
     kvstoreAddress: '0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai',
     oldFactoryAddress: '0x558cd800f9F0B02f3B149667bDe003284c867E94',
@@ -161,7 +161,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
     kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v2',
     oldSubgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam',
     oldFactoryAddress: '0x98108c28B7767a52BE38B4860832dd4e11A7ecad',
@@ -176,7 +176,7 @@ export const NETWORKS: {
     rewardPoolAddress: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
     kvstoreAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
     subgraphUrl:
-      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1',
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v2',
     oldSubgraphUrl: '',
     oldFactoryAddress: '',
   },

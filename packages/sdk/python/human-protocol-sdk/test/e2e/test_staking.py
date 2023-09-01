@@ -40,12 +40,15 @@ class StakingTestCase(unittest.TestCase):
         tx_hash = self.staking_client.factory_contract.functions.createEscrow(
             self.staking_client.hmtoken_contract.address,
             [self.gas_payer.address],
+            "job-requester",
         ).transact()
 
         tx_receipt = self.staking_client.w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        events = self.staking_client.factory_contract.events.Launched().process_receipt(
-            tx_receipt
+        events = (
+            self.staking_client.factory_contract.events.LaunchedV2().process_receipt(
+                tx_receipt
+            )
         )
         self.escrow_address = events[0].get("args", {}).get("escrow", "")
 

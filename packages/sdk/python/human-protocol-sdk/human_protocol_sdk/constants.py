@@ -24,7 +24,7 @@ NETWORKS = {
     ChainId.MAINNET: {
         "title": "Ethereum",
         "scan_url": "https://etherscan.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2",
         "hmt_address": "0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
         "staking_address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
@@ -36,7 +36,7 @@ NETWORKS = {
     ChainId.GOERLI: {
         "title": "Ethereum Goerli",
         "scan_url": "https://goerli.etherscan.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v2",
         "hmt_address": "0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317",
         "factory_address": "0x87469B4f2Fcf37cBd34E54244c0BD4Fa0603664c",
         "staking_address": "0xf46B45Df3d956369726d8Bd93Ba33963Ab692920",
@@ -48,7 +48,7 @@ NETWORKS = {
     ChainId.BSC_MAINNET: {
         "title": "Binance Smart Chain",
         "scan_url": "https://bscscan.com",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v2",
         "hmt_address": "0x711Fd6ab6d65A98904522d4e3586F492B989c527",
         "factory_address": "0x92FD968AcBd521c232f5fB8c33b342923cC72714",
         "staking_address": "0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C",
@@ -60,7 +60,7 @@ NETWORKS = {
     ChainId.BSC_TESTNET: {
         "title": "Binance Smart Chain (Testnet)",
         "scan_url": "https://testnet.bscscan.com",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v2",
         "hmt_address": "0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d",
         "factory_address": "0x2bfA592DBDaF434DDcbb893B1916120d181DAD18",
         "staking_address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
@@ -72,7 +72,7 @@ NETWORKS = {
     ChainId.POLYGON: {
         "title": "Polygon",
         "scan_url": "https://polygonscan.com",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2",
         "hmt_address": "0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF",
         "factory_address": "0xBDBfD2cC708199C5640C6ECdf3B0F4A4C67AdfcB",
         "staking_address": "0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29",
@@ -84,7 +84,7 @@ NETWORKS = {
     ChainId.POLYGON_MUMBAI: {
         "title": "Polygon Mumbai",
         "scan_url": "https://mumbai.polygonscan.com",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2",
         "hmt_address": "0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4",
         "factory_address": "0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d",
         "staking_address": "0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac",
@@ -96,7 +96,7 @@ NETWORKS = {
     ChainId.MOONBEAM: {
         "title": "Moonbeam",
         "scan_url": "https://moonbeam.moonscan.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v2",
         "hmt_address": "0x3b25BC1dC591D24d60560d0135D6750A561D4764",
         "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
         "staking_address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
@@ -108,7 +108,7 @@ NETWORKS = {
     ChainId.MOONBASE_ALPHA: {
         "title": "Moonbase Alpha",
         "scan_url": "https://moonbase.moonscan.io/",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v1",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v2",
         "hmt_address": "0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3",
         "factory_address": "0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed",
         "staking_address": "0xBFC7009F3371F93F3B54DdC8caCd02914a37495c",

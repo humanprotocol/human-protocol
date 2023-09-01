@@ -23,6 +23,8 @@ dataSources:
       eventHandlers:
         - event: Launched(address,address)
           handler: handleLaunched
+        - event: LaunchedV2(address,address,string)
+          handler: handleLaunchedV2
   - kind: ethereum
     name: HMToken
     network: '{{ network }}'
