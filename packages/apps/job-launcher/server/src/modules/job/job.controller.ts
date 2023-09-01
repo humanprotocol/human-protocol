@@ -3,6 +3,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -11,12 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../common/guards';
+import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto } from './job.dto';
+import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhookDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
+import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -80,5 +82,15 @@ export class JobController {
   @Get('/cron/cancel')
   public async cancelCronJob(): Promise<any> {
     return this.jobService.cancelCronJob();
+  }
+
+  @Public()
+  @UseGuards(SignatureAuthGuard)
+  @Post('/:oracleType/escrow-failed-webhook')
+  public async (
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
+    @Body() data: EscrowFailedWebhookDto,
+  ): Promise<any> {
+    return this.jobService.escrowFailedWebhook(data);
   }
 }
