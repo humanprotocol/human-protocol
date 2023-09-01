@@ -1,6 +1,7 @@
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  BoxProps,
   Button,
   Checkbox,
   FormControl,
@@ -11,6 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
   CardNumberElement,
   CardExpiryElement,
@@ -26,6 +28,20 @@ import * as paymentService from '../../../services/payment';
 import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
 import { JobType } from '../../../types';
+
+const StripeElement = styled(Box)<BoxProps & { disabled?: boolean }>(
+  (props) => ({
+    border: '1px solid rgba(50,10,141,0.5)',
+    borderRadius: '4px',
+    height: '56px',
+    padding: '18px 16px',
+    pointerEvents: props.disabled ? 'none' : 'auto',
+    opacity: props.disabled ? 0.2 : 1,
+    '&:focus-within': {
+      borderColor: '#32108D',
+    },
+  })
+);
 
 export const FiatPayForm = ({
   onStart,
@@ -182,16 +198,19 @@ export const FiatPayForm = ({
               </Box>
             </Grid>
             <Grid item xs={12}>
-              <Box
-                sx={{
-                  border: '1px solid #320A8D',
-                  borderRadius: '4px',
-                  height: '56px',
-                  padding: '18px 16px',
-                }}
-              >
+              <StripeElement disabled={creditCardPayAmount <= 0}>
                 <CardNumberElement id="card-number" />
-              </Box>
+              </StripeElement>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <StripeElement disabled={creditCardPayAmount <= 0}>
+                <CardExpiryElement id="card-expiry" />
+              </StripeElement>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <StripeElement disabled={creditCardPayAmount <= 0}>
+                <CardCvcElement id="card-cvc" />
+              </StripeElement>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -203,30 +222,6 @@ export const FiatPayForm = ({
                   handlePaymentDataFormFieldChange('name', e.target.value)
                 }
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box
-                sx={{
-                  border: '1px solid #320A8D',
-                  borderRadius: '4px',
-                  height: '56px',
-                  padding: '18px 16px',
-                }}
-              >
-                <CardExpiryElement id="card-expiry" />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box
-                sx={{
-                  border: '1px solid #320A8D',
-                  borderRadius: '4px',
-                  height: '56px',
-                  padding: '18px 16px',
-                }}
-              >
-                <CardCvcElement id="card-cvc" />
-              </Box>
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>

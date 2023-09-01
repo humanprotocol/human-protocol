@@ -62,8 +62,6 @@ export const AuthHeader = () => {
     setAnchorEl(null);
   };
 
-  const segements = pathname.split('/').filter((s) => s);
-
   const handleLogOut = async () => {
     if (refreshToken) {
       setIsLoggingOut(true);
@@ -72,6 +70,11 @@ export const AuthHeader = () => {
       setIsLoggingOut(false);
     }
   };
+
+  let segements = pathname.split('/').filter((s) => s);
+  if (pathname.includes('jobs/details')) {
+    segements = segements.slice(0, -2);
+  }
 
   return (
     <AppBar

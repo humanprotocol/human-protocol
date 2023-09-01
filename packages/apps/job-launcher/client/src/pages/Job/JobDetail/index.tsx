@@ -1,11 +1,13 @@
 import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
 import { SearchField } from '../../../components/SearchField';
 import { Table } from '../../../components/Table';
+import { useJob } from '../../../hooks/useJob';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -18,6 +20,9 @@ const CardContainer = styled(Card)(({ theme }) => ({
 }));
 
 export default function JobDetail() {
+  const { chainId, address } = useParams();
+  useJob({ chainId, address });
+
   return (
     <Box>
       <Box>

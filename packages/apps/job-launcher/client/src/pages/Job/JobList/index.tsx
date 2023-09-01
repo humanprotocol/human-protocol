@@ -9,8 +9,8 @@ import { JobStatus } from '../../../types';
 const JOB_NAV_ITEMS = [
   { status: JobStatus.LAUNCHED, label: 'launched' },
   { status: JobStatus.PENDING, label: 'pending' },
-  { status: JobStatus.PAID, label: 'completed' },
-  { status: JobStatus.CANCELED, label: 'canceled' },
+  // { status: JobStatus.PAID, label: 'completed' },
+  { status: JobStatus.CANCELED, label: 'cancelled' },
   { status: JobStatus.FAILED, label: 'failed' },
 ];
 

@@ -59,9 +59,9 @@ export default function AuthLayout() {
                 <ListItem>
                   <Link to="/jobs/pending">Pending</Link>
                 </ListItem>
-                <ListItem>
+                {/* <ListItem>
                   <Link to="/jobs/completed">Completed</Link>
-                </ListItem>
+                </ListItem> */}
                 <ListItem>
                   <Link to="/jobs/cancelled">Cancelled</Link>
                 </ListItem>

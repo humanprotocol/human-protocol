@@ -5,6 +5,12 @@ export const SUPPORTED_CHAIN_IDS =
     ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
     : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
 
+export const CHAIN_ID_BY_NAME: Record<string, number> = {
+  'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
+  'Binance Smart Chain': ChainId.BSC_MAINNET,
+  'Ethereum Goerli': ChainId.GOERLI,
+};
+
 export const RPC_URLS: {
   [chainId in ChainId]?: string;
 } = {

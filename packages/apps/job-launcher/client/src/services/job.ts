@@ -44,3 +44,8 @@ export const getJobListByStatus = async (status: JobStatus) => {
   const { data } = await api.get(`/job/list`, { params: { status } });
   return data;
 };
+
+export const getJobResult = async (jobId: number) => {
+  const { data } = await api.get(`/job/result`, { params: { jobId } });
+  return data;
+};

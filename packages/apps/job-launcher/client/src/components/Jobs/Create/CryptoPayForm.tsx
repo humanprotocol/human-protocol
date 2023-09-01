@@ -202,7 +202,7 @@ export const CryptoPayForm = ({
                 {user?.balance?.currency?.toUpperCase() ?? 'USD'}
               </Typography>
             </Box>
-            {/* <Box
+            <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -211,9 +211,11 @@ export const CryptoPayForm = ({
                 borderBottom: '1px solid #E5E7EB',
               }}
             >
-              <Typography>Amount due</Typography>
-              <Typography color="text.secondary">300 USD</Typography>
-            </Box> */}
+              <Typography>Fund Amount</Typography>
+              <Typography color="text.secondary">
+                {fundAmount?.toFixed(2)} USD
+              </Typography>
+            </Box>
             <Box
               sx={{
                 display: 'flex',
