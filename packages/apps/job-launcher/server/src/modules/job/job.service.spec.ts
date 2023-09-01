@@ -555,6 +555,7 @@ describe('JobService', () => {
         fundAmount,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
+        userId: 1,
       };
 
       const jobEntityResult = await jobService.launchJob(

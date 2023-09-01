@@ -269,6 +269,7 @@ export class JobService {
     const escrowAddress = await escrowClient.createAndSetupEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
+      jobEntity.userId.toString(),
       escrowConfig,
     );
 
