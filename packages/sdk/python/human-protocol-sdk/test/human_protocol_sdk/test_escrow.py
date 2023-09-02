@@ -100,7 +100,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_config.manifest_url, manifest_url)
         self.assertEqual(escrow_config.hash, hash)
 
-    def test_escrow_config_valid_params(self):
+    def test_escrow_config_valid_params_with_docker_network_url(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
@@ -115,7 +115,6 @@ class EscrowTestCase(unittest.TestCase):
             reputation_oracle_fee,
             manifest_url,
             hash,
-            True,
         )
 
         self.assertEqual(
