@@ -14,9 +14,10 @@ from human_protocol_sdk.utils import (
     get_erc20_interface,
     handle_transaction,
 )
-from validators import url as URL
 from web3 import Web3, contract
 from web3.middleware import geth_poa_middleware
+
+from .utils import validate_url
 
 GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
@@ -44,7 +45,6 @@ class EscrowConfig:
         reputation_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
-        skip_manifest_url_validation: bool = False,
     ):
         """
         Initializes a Escrow instance.
@@ -72,7 +72,7 @@ class EscrowConfig:
             raise EscrowClientError("Fee must be between 0 and 100")
         if recording_oracle_fee + reputation_oracle_fee > 100:
             raise EscrowClientError("Total fee must be less than 100")
-        if not URL(manifest_url) and not skip_manifest_url_validation:
+        if not validate_url(manifest_url):
             raise EscrowClientError(f"Invalid manifest URL: {manifest_url}")
         if not hash:
             raise EscrowClientError("Invalid empty manifest hash")
@@ -321,7 +321,7 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
         if not hash:
             raise EscrowClientError("Invalid empty hash")
-        if not URL(url):
+        if not validate_url(url):
             raise EscrowClientError(f"Invalid URL: {url}")
         if not self.w3.eth.default_account:
             raise EscrowClientError("You must add an account to Web3 instance")
@@ -401,7 +401,7 @@ class EscrowClient:
             raise EscrowClientError(
                 f"Escrow does not have enough balance. Current balance: {balance}. Amounts: {total_amount}"
             )
-        if not URL(final_results_url):
+        if not validate_url(final_results_url):
             raise EscrowClientError(f"Invalid final results URL: {final_results_url}")
         if not final_results_hash:
             raise EscrowClientError("Invalid empty final results hash")
@@ -506,6 +506,24 @@ class EscrowClient:
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
 
         return self._get_escrow_contract(escrow_address).functions.getBalance().call()
+
+    def get_manifest_hash(self, escrow_address: str) -> str:
+        """Gets the manifest file hash.
+
+        Args:
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            str: Manifest file hash
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        return self._get_escrow_contract(escrow_address).functions.manifestHash().call()
 
     def get_manifest_url(self, escrow_address: str) -> str:
         """Gets the manifest file URL.

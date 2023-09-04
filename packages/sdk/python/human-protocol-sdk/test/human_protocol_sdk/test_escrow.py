@@ -100,7 +100,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_config.manifest_url, manifest_url)
         self.assertEqual(escrow_config.hash, hash)
 
-    def test_escrow_config_valid_params(self):
+    def test_escrow_config_valid_params_with_docker_network_url(self):
         recording_oracle_address = "0x1234567890123456789012345678901234567890"
         reputation_oracle_address = "0x1234567890123456789012345678901234567890"
         recording_oracle_fee = 10
@@ -115,7 +115,6 @@ class EscrowTestCase(unittest.TestCase):
             reputation_oracle_fee,
             manifest_url,
             hash,
-            True,
         )
 
         self.assertEqual(
@@ -1478,6 +1477,26 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )
+
+    def test_get_manifest_hash(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.manifestHash = MagicMock()
+        mock_contract.functions.manifestHash.return_value.call.return_value = (
+            "mock_value"
+        )
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+
+        result = self.escrow.get_manifest_hash(escrow_address)
+
+        self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+        mock_contract.functions.manifestHash.assert_called_once_with()
+        self.assertEqual(result, "mock_value")
+
+    def test_get_manifest_hash_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            self.escrow.get_manifest_hash("invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(cm.exception))
 
     def test_get_manifest_url(self):
         mock_contract = MagicMock()
