@@ -49,6 +49,7 @@ export class PaymentCreateDto {
   public type?: PaymentType;
   public chainId?: number;
   public status?: PaymentStatus;
+  public jobId?: number;
 }
 
 export class GetRateDto {

@@ -6,6 +6,7 @@ export const ConfigNames = {
   PORT: 'PORT',
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
+  HASH_SECRET: 'HASH_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
   JWT_REFRESH_TOKEN_EXPIRES_IN: 'JWT_REFRESH_TOKEN_EXPIRES_IN',
@@ -21,8 +22,10 @@ export const ConfigNames = {
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
-  EXCHANGE_ORACLE_ADDRESS: 'EXCHANGE_ORACLE_ADDRESS',
-  EXCHANGE_ORACLE_WEBHOOK_URL: 'EXCHANGE_ORACLE_WEBHOOK_URL',
+  FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
+  CVAT_EXCHANGE_ORACLE_ADDRESS: 'CVAT_EXCHANGE_ORACLE_ADDRESS',
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL',
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL',
   RECORDING_ORACLE_ADDRESS: 'RECORDING_ORACLE_ADDRESS',
   REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
   S3_ENDPOINT: 'S3_ENDPOINT',
@@ -39,6 +42,9 @@ export const ConfigNames = {
   SENDGRID_API_KEY: 'SENDGRID_API_KEY',
   SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
+  CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
+  CVAT_MAX_TIME: 'CVAT_MAX_TIME',
+  CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
 };
 
 export const envValidator = Joi.object({
@@ -49,7 +55,8 @@ export const envValidator = Joi.object({
   FE_URL: Joi.string().default('http://localhost:3005'),
   SESSION_SECRET: Joi.string().default('session_key'),
   // Auth
-  JWT_SECRET: Joi.string().default('secrete'),
+  HASH_SECRET: Joi.string().default('a328af3fc1dad15342cc3d68936008fa'),
+  JWT_SECRET: Joi.string().default('secret'),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   // Database
@@ -67,8 +74,10 @@ export const envValidator = Joi.object({
   JOB_LAUNCHER_FEE: Joi.string().default(10),
   RECORDING_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
-  EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
-  EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
+  FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
+  CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3004'),
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
   RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
   // S3
@@ -88,4 +97,8 @@ export const envValidator = Joi.object({
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
   SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
+  // CVAT
+  CVAT_JOB_SIZE: Joi.string().default('10'),
+  CVAT_MAX_TIME: Joi.string().default('300'),
+  CVAT_VAL_SIZE: Joi.string().default('2'),
 });

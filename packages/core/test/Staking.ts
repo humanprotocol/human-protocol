@@ -27,6 +27,7 @@ describe('Staking', function () {
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 1;
+  const jobRequesterId = 'job-requester-id';
 
   let owner: Signer,
     validator: Signer,
@@ -252,10 +253,14 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [await validator.getAddress()])
+          .createEscrow(
+            token.address,
+            [await validator.getAddress()],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
@@ -350,10 +355,14 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [await validator.getAddress()])
+          .createEscrow(
+            token.address,
+            [await validator.getAddress()],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
@@ -542,10 +551,14 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow(token.address, [await validator.getAddress()])
+            .createEscrow(
+              token.address,
+              [await validator.getAddress()],
+              jobRequesterId
+            )
         ).wait();
         const event = result.events?.find(({ topics }) =>
-          topics.includes(ethers.utils.id('Launched(address,address)'))
+          topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
         )?.args;
 
         expect(event?.token).to.equal(
@@ -608,10 +621,14 @@ describe('Staking', function () {
         const result = await (
           await escrowFactory
             .connect(operator)
-            .createEscrow(token.address, [await validator.getAddress()])
+            .createEscrow(
+              token.address,
+              [await validator.getAddress()],
+              jobRequesterId
+            )
         ).wait();
         const event = result.events?.find(({ topics }) =>
-          topics.includes(ethers.utils.id('Launched(address,address)'))
+          topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
         )?.args;
 
         expect(event?.token).to.equal(
@@ -667,10 +684,14 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [await validator.getAddress()])
+          .createEscrow(
+            token.address,
+            [await validator.getAddress()],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
@@ -857,14 +878,18 @@ describe('Staking', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [
-            await validator.getAddress(),
-            await reputationOracle.getAddress(),
-            await recordingOracle.getAddress(),
-          ])
+          .createEscrow(
+            token.address,
+            [
+              await validator.getAddress(),
+              await reputationOracle.getAddress(),
+              await recordingOracle.getAddress(),
+            ],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');

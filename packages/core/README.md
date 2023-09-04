@@ -64,9 +64,9 @@ On the other hand, it can be cancelled anytime.
 
 EscrowFactory allows job launchers to create new Escrow contracts.
 
-- `createEscrow(token, trustedHandlers)`
+- `createEscrow(token, trustedHandlers, jobRequesterId)`
 
-  Create a new escrow, which uses ERC20 token for payment, as well as extra trusted handlers. Job launcher is canceler itself, and the job duration is 100 days.
+  Create a new escrow, which uses ERC20 token for payment, as well as extra trusted handlers. Job launcher is canceler itself, and the job duration is 100 days. Job Requester Id is passed to keep track of job creators. Here, jobRequesterId is an internal id of the Job Launcher, and it can be used to identify the jobs requested by each Job Requester without crossing data between Subgraph and database.
 
 - `hasEscrow(escrow)`
 

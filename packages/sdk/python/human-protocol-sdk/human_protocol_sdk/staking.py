@@ -27,8 +27,6 @@ LOG = logging.getLogger("human_protocol_sdk.staking")
 
 
 class StakingClientError(Exception):
-    """Raises when some error happens when interacting with staking."""
-
     """
     Raises when some error happens when interacting with staking.
     """
@@ -37,14 +35,8 @@ class StakingClientError(Exception):
 
 
 class StakingClient:
-    """A class used to manage staking, and allocation on the HUMAN network.
-
-    Args:
-        staking_addr (str): The address of staking contract
-
-    Attributes:
-
-
+    """
+    A class used to manage staking, and allocation on the HUMAN network.
     """
 
     def __init__(self, w3: Web3):
@@ -59,12 +51,16 @@ class StakingClient:
         if not self.w3.middleware_onion.get("geth_poa"):
             self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
+        chain_id = None
         # Load network configuration based on chain_id
         try:
             chain_id = self.w3.eth.chain_id
             self.network = NETWORKS[ChainId(chain_id)]
         except:
-            raise StakingClientError(f"Invalid ChainId: {chain_id}")
+            if chain_id is not None:
+                raise StakingClientError(f"Invalid ChainId: {chain_id}")
+            else:
+                raise StakingClientError(f"Invalid Web3 Instance")
 
         if not self.network:
             raise StakingClientError("Empty network configuration")

@@ -25,6 +25,7 @@ describe('RewardPool', function () {
   const minimumStake = 2;
   const lockPeriod = 2;
   const rewardFee = 2;
+  const jobRequesterId = 'job-requester-id';
 
   this.beforeAll(async () => {
     [
@@ -136,10 +137,14 @@ describe('RewardPool', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [await validator.getAddress()])
+          .createEscrow(
+            token.address,
+            [await validator.getAddress()],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');
@@ -226,10 +231,14 @@ describe('RewardPool', function () {
       const result = await (
         await escrowFactory
           .connect(operator)
-          .createEscrow(token.address, [await validator.getAddress()])
+          .createEscrow(
+            token.address,
+            [await validator.getAddress()],
+            jobRequesterId
+          )
       ).wait();
       const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('Launched(address,address)'))
+        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
       )?.args;
 
       expect(event?.token).to.equal(token.address, 'token address is correct');

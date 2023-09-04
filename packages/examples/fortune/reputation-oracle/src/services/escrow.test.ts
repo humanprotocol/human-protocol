@@ -124,7 +124,7 @@ describe('Fortune', () => {
 
   beforeEach(async () => {
     await escrowFactory.methods
-      .createEscrow(token.options.address, [launcher.address])
+      .createEscrow(token.options.address, [launcher.address], 'job-requester')
       .send({ from: launcher.address });
 
     escrowAddress = await escrowFactory.methods.lastEscrow().call();

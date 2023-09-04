@@ -29,7 +29,7 @@ import { ConfigNames } from '../../common/config';
 import { WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
-import {isInstance} from "class-validator";
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export class WebhookService {
@@ -66,8 +66,8 @@ export class WebhookService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
