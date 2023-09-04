@@ -24,7 +24,7 @@ import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 
 @Injectable()
@@ -47,7 +47,10 @@ export class AuthService {
       '100000000',
     );
 
-    this.salt = randomBytes(16).toString('hex');
+    this.salt = this.configService.get<string>(
+      ConfigNames.HASH_SECRET,
+      'a328af3fc1dad15342cc3d68936008fa',
+    );
     this.feURL = this.configService.get<string>(
       ConfigNames.FE_URL,
       'http://localhost:3005',
@@ -78,7 +81,7 @@ export class AuthService {
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
-    
+
     await this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
@@ -167,7 +170,7 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     this.sendgridService.sendEmail({
       to: tokenEntity.user.email,
       subject: 'Password changed',
-      text: 'Password is changed successfully!',
+      text: 'Password has been changed successfully!',
     });
 
     await tokenEntity.remove();
@@ -194,7 +197,7 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
   ): Promise<void> {
     const userEntity = await this.userService.getByEmail(data.email);
 
-    if (!userEntity) {
+    if (!userEntity || userEntity?.status != UserStatus.PENDING) {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 

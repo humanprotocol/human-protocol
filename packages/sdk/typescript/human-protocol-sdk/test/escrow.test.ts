@@ -5,6 +5,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ethers } from 'ethers';
+import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { DEFAULT_TX_ID } from '../src/constants';
 import { ChainId } from '../src/enums';
@@ -38,7 +39,13 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
+import { GET_ESCROWS_QUERY } from '../src/graphql';
 
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
 vi.mock('../src/init');
 
 describe('EscrowClient', () => {
@@ -75,12 +82,12 @@ describe('EscrowClient', () => {
       abort: vi.fn(),
       addTrustedHandlers: vi.fn(),
       getBalance: vi.fn(),
+      manifestHash: vi.fn(),
       manifestUrl: vi.fn(),
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
       status: vi.fn(),
-      getLaunchedEscrows: vi.fn(),
-      getEscrowsFiltered: vi.fn(),
+      getEscrows: vi.fn(),
       address: ethers.constants.AddressZero,
       canceler: vi.fn(),
       recordingOracle: vi.fn(),
@@ -179,6 +186,7 @@ describe('EscrowClient', () => {
     test('should create an escrow and return its address', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
       const expectedEscrowAddress = ethers.constants.AddressZero;
 
       // Create a spy object for the createEscrow method
@@ -188,7 +196,7 @@ describe('EscrowClient', () => {
           wait: async () => ({
             events: [
               {
-                topics: [ethers.utils.id('Launched(address,address)')],
+                topics: [ethers.utils.id('LaunchedV2(address,address,string)')],
                 args: {
                   escrow: expectedEscrowAddress,
                 },
@@ -199,12 +207,14 @@ describe('EscrowClient', () => {
 
       const result = await escrowClient.createEscrow(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
 
       expect(createEscrowSpy).toHaveBeenCalledWith(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
       expect(result).toBe(expectedEscrowAddress);
     });
@@ -212,18 +222,19 @@ describe('EscrowClient', () => {
     test('should throw an error if the create an escrow fails', async () => {
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
 
       escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
         new Error()
       );
 
       await expect(
-        escrowClient.createEscrow(tokenAddress, trustedHandlers)
+        escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId)
       ).rejects.toThrow();
 
       expect(
         escrowClient.escrowFactoryContract.createEscrow
-      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers);
+      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers, jobRequesterId);
     });
   });
 
@@ -433,6 +444,8 @@ describe('EscrowClient', () => {
       const escrowAddress = ethers.constants.AddressZero;
       const tokenAddress = ethers.constants.AddressZero;
       const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
@@ -449,12 +462,14 @@ describe('EscrowClient', () => {
       await escrowClient.createAndSetupEscrow(
         tokenAddress,
         trustedHandlers,
+        jobRequesterId,
         escrowConfig
       );
 
       expect(escrowClient.createEscrow).toHaveBeenCalledWith(
         tokenAddress,
-        trustedHandlers
+        trustedHandlers,
+        jobRequesterId
       );
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
@@ -1144,6 +1159,54 @@ describe('EscrowClient', () => {
     });
   });
 
+  describe('getManifestHash', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.getManifestHash(escrowAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.getManifestHash(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully getManifestHash', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.manifestHash.mockReturnValue(hash);
+
+      const manifestHash = await escrowClient.getManifestHash(escrowAddress);
+
+      expect(manifestHash).toEqual(hash);
+      expect(escrowClient.escrowContract.manifestHash).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getManifestHash fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.manifestHash.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getManifestHash(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.manifestHash).toHaveBeenCalledWith();
+    });
+  });
+
   describe('getManifestUrl', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
@@ -1385,57 +1448,99 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('getLaunchedEscrows', () => {
-    test('should throw an error if requesterAddress is an invalid address', async () => {
-      const requesterAddress = FAKE_ADDRESS;
+  describe('getEscrows', () => {
+    test('should throw an error if launcher is an invalid address', async () => {
+      const launcher = FAKE_ADDRESS;
+
+      await expect(escrowClient.getEscrows({ launcher })).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should throw an error if recordingOracle is an invalid address', async () => {
+      const recordingOracle = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getLaunchedEscrows(requesterAddress)
+        escrowClient.getEscrows({ recordingOracle })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
-    test('should successfully getLaunchedEscrows', async () => {
-      const requesterAddress = FAKE_ADDRESS;
-      const mockLaunchedEscrowsResult = { id: ethers.constants.AddressZero };
-
-      vi.spyOn(escrowClient, 'getLaunchedEscrows').mockImplementation(() =>
-        Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
-      );
-
-      const results = await escrowClient.getLaunchedEscrows(requesterAddress);
-
-      expect(results).toEqual([
-        mockLaunchedEscrowsResult,
-        mockLaunchedEscrowsResult,
-      ]);
-    });
-  });
-
-  describe('getEscrowsFiltered', () => {
-    test('should throw an error if requesterAddress is an invalid address', async () => {
-      const requesterAddress = FAKE_ADDRESS;
+    test('should throw an error if reputationOracle is an invalid address', async () => {
+      const reputationOracle = FAKE_ADDRESS;
 
       await expect(
-        escrowClient.getEscrowsFiltered({ launcherAddress: requesterAddress })
+        escrowClient.getEscrows({ reputationOracle })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
-    test('should successfully getEscrowsFiltered', async () => {
-      const requesterAddress = FAKE_ADDRESS;
-      const mockLaunchedEscrowsResult = { id: ethers.constants.AddressZero };
+    test('should successfully getEscrows', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+        {
+          id: '2',
+          address: '0x0',
+          amountPaid: '0',
+          balance: '3',
+          count: '2',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Pending',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
 
-      vi.spyOn(escrowClient, 'getEscrowsFiltered').mockImplementation(() =>
-        Promise.resolve([mockLaunchedEscrowsResult, mockLaunchedEscrowsResult])
-      );
+      const result = await escrowClient.getEscrows();
 
-      const results = await escrowClient.getEscrowsFiltered({
-        launcherAddress: requesterAddress,
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_ESCROWS_QUERY({}), {});
+    });
+
+    test('should successfully getEscrows for the filter', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await escrowClient.getEscrows({
+        launcher: ethers.constants.AddressZero,
       });
 
-      expect(results).toEqual([
-        mockLaunchedEscrowsResult,
-        mockLaunchedEscrowsResult,
-      ]);
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        '',
+        GET_ESCROWS_QUERY({ launcher: ethers.constants.AddressZero }),
+        {
+          launcher: ethers.constants.AddressZero,
+        }
+      );
     });
   });
 

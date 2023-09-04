@@ -1,17 +1,24 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
+  Headers,
+  Param,
+  Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards';
-import { RequestWithUser } from 'src/common/types';
-import { JobFortuneDto, JobImageLabelBinaryDto } from './job.dto';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
+import { RequestWithUser } from '../../common/types';
+import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhookDto } from './job.dto';
 import { JobService } from './job.service';
-import { JobRequestType } from 'src/common/enums/job';
+import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
+import { Public } from '../../common/decorators';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -31,13 +38,59 @@ export class JobController {
   @Post('/cvat')
   public async createCvatJob(
     @Request() req: RequestWithUser,
-    @Body() data: JobImageLabelBinaryDto,
+    @Body() data: JobCvatDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.IMAGE_LABEL_BINARY, data);
+    return this.jobService.createJob(req.user.id, data.type, data);
+  }
+
+  @Get('/list')
+  @ApiQuery({ name: 'status', required: false, enum: JobStatusFilter })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  public async getJobList(
+    @Request() req: RequestWithUser,
+    @Query('status') status: JobStatusFilter,
+    @Query('skip', new DefaultValuePipe(null)) skip?: number,
+    @Query('limit', new DefaultValuePipe(null)) limit?: number,
+  ): Promise<JobListDto[]> {
+    return this.jobService.getJobsByStatus(req.user.id, status, skip, limit);
   }
 
   @Get('/result')
-  public async getResult(@Request() req: any): Promise<any> {
-    return this.jobService.getResult(req.user?.id);
+  public async getResult(
+    @Request() req: RequestWithUser,
+    @Query('jobId') jobId: number,
+  ): Promise<any> {
+    return this.jobService.getResult(req.user.id, jobId);
+  }
+
+  @Public()
+  @Get('/cron/launch')
+  public async launchCronJob(): Promise<any> {
+    return this.jobService.launchCronJob();
+  }
+
+  @Patch('/cancel/:id')
+  public async cancelJob(
+    @Request() req: RequestWithUser,
+    @Param() params: JobCancelDto,
+  ): Promise<boolean> {
+    return this.jobService.requestToCancelJob(req.user.id, params.id);
+  }
+
+  @Public()
+  @Get('/cron/cancel')
+  public async cancelCronJob(): Promise<any> {
+    return this.jobService.cancelCronJob();
+  }
+
+  @Public()
+  @UseGuards(SignatureAuthGuard)
+  @Post('/:oracleType/escrow-failed-webhook')
+  public async (
+    @Headers(HEADER_SIGNATURE_KEY) _: string,
+    @Body() data: EscrowFailedWebhookDto,
+  ): Promise<any> {
+    return this.jobService.escrowFailedWebhook(data);
   }
 }

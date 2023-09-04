@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "migration:create": "typeorm-ts-node-commonjs migration:create",
     "migration:generate": "yarn build && typeorm-ts-node-commonjs migration:generate -p -d typeorm.config.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
@@ -24,7 +24,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "vercel-build": "yarn workspace @human-protocol/sdk build"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
@@ -36,6 +37,7 @@
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^9.4.3",
     "@nestjs/schedule": "^3.0.1",
+    "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.0.6",
     "@nestjs/terminus": "^10.0.1",
     "@nestjs/typeorm": "^10.0.0",
@@ -46,6 +48,7 @@
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "cookie-parser": "^1.4.6",
+    "decimal.js": "^10.4.3",
     "ethers": "^5.7.2",
     "express-session": "^1.17.3",
     "joi": "^17.9.2",

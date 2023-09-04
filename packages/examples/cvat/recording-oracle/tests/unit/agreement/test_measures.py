@@ -4,19 +4,12 @@ import pytest
 import numpy as np
 
 from hypothesis import given, note, settings
-from hypothesis.strategies import integers, tuples
 
-
-_incidence_matrix_generator = tuples(integers(1, 500), integers(2, 50)).map(
-    lambda xs: np.random.randint(0, 100, size=xs)
+from tests.unit.agreement.conftest import (
+    _incidence_matrix_generator,
+    _confusion_matrix_generator,
+    _eq_rounded,
 )
-_confusion_matrix_generator = integers(2).map(
-    lambda x: np.random.randint(0, 100, size=(x, x))
-)
-
-
-def _eq_rounded(a, b, n_digits=3):
-    return round(a, n_digits) == round(b, n_digits)
 
 
 def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):

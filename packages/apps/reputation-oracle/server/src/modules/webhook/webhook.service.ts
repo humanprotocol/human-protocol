@@ -10,7 +10,7 @@ import {
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import {
   FortuneFinalResult,
-  ImageLabelBinaryFinalResult,
+  ImageLabelBinaryJobResults,
   ManifestDto,
   WebhookIncomingDto,
 } from './webhook.dto';
@@ -29,6 +29,7 @@ import { ConfigNames } from '../../common/config';
 import { WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
+import { isInstance } from 'class-validator';
 
 @Injectable()
 export class WebhookService {
@@ -65,8 +66,8 @@ export class WebhookService {
     this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
 
     this.storageClient = new StorageClient(
-      storageCredentials,
       this.storageParams,
+      storageCredentials,
     );
   }
 
@@ -132,23 +133,29 @@ export class WebhookService {
         webhookEntity.escrowAddress,
       );
 
-      let finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[] =
-        [];
+      let finalResults: FortuneFinalResult[] | ImageLabelBinaryJobResults = [];
+      let checkPassed = false;
 
-      if (manifest.requestType === JobRequestType.FORTUNE) {
-        finalResults = await this.finalizeFortuneResults(
-          intermediateResults as FortuneFinalResult[],
-        );
-      } else if (manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-        finalResults = intermediateResults as ImageLabelBinaryFinalResult[];
+      if (
+        manifest.requestType === JobRequestType.FORTUNE &&
+        !(intermediateResults instanceof ImageLabelBinaryJobResults)
+      ) {
+        finalResults = await this.finalizeFortuneResults(intermediateResults);
+        checkPassed = intermediateResults.length <= finalResults.length;
+      } else if (
+        manifest.requestType === JobRequestType.IMAGE_LABEL_BINARY &&
+        intermediateResults instanceof ImageLabelBinaryJobResults
+      ) {
+        finalResults = intermediateResults;
+        checkPassed =
+          intermediateResults.dataset.data_points.length <=
+          finalResults.dataset.data_points.length;
       }
-      
+
       const [{ url, hash }] = await this.storageClient.uploadFiles(
         [finalResults],
         this.bucket,
       );
-
-      const checkPassed = intermediateResults.length <= finalResults.length;
 
       await this.webhookRepository.updateOne(
         {
@@ -217,7 +224,7 @@ export class WebhookService {
   public async getIntermediateResults(
     chainId: ChainId,
     escrowAddress: string,
-  ): Promise<FortuneFinalResult[] | ImageLabelBinaryFinalResult[]> {
+  ): Promise<FortuneFinalResult[] | ImageLabelBinaryJobResults> {
     const signer = this.web3Service.getSigner(chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -262,17 +269,20 @@ export class WebhookService {
    * @returns {string[]} - Returns an array of recipient addresses.
    */
   public getRecipients(
-    finalResults: FortuneFinalResult[] | ImageLabelBinaryFinalResult[],
+    finalResults: FortuneFinalResult[] | ImageLabelBinaryJobResults,
     requestType: JobRequestType,
   ): string[] {
     if (requestType === JobRequestType.FORTUNE) {
-      return finalResults.map(
-        (item) => (item as FortuneFinalResult).workerAddress,
+      return (finalResults as FortuneFinalResult[]).map(
+        (item) => item.workerAddress,
       );
-    } else if (requestType === JobRequestType.IMAGE_LABEL_BINARY) {
-      return finalResults.flatMap(
-        (item) => (item as ImageLabelBinaryFinalResult).correct,
-      );
+    } else if (
+      requestType === JobRequestType.IMAGE_LABEL_BINARY &&
+      finalResults instanceof ImageLabelBinaryJobResults
+    ) {
+      return finalResults.worker_performance.flatMap((item) => {
+        return Array<string>(item.consensus_annotations).fill(item.worker_id);
+      });
     }
 
     return [];

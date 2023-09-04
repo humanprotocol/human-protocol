@@ -5,7 +5,6 @@ import {
   PaymentSource,
   PaymentStatus,
   PaymentType,
-  TokenId,
 } from '../../common/enums/payment';
 import { ChainId } from '@human-protocol/sdk';
 
@@ -18,7 +17,7 @@ export class PaymentFiatConfirmDto {
 export class PaymentFiatCreateDto {
   @ApiProperty()
   @IsNumber()
-  @Min(10)
+  @Min(0.5)
   public amount: number;
 
   @ApiProperty({
@@ -42,7 +41,7 @@ export class PaymentCryptoCreateDto {
 
 export class PaymentCreateDto {
   public transaction?: string;
-  public amount?: string;
+  public amount?: number;
   public currency?: string;
   public source?: PaymentSource;
   public userId?: number;
@@ -50,18 +49,15 @@ export class PaymentCreateDto {
   public type?: PaymentType;
   public chainId?: number;
   public status?: PaymentStatus;
+  public jobId?: number;
 }
 
 export class GetRateDto {
-  @ApiProperty({
-    enum: TokenId,
-  })
-  @IsEnum(TokenId)
-  public token: TokenId;
+  @ApiProperty()
+  @IsString()
+  public from: string;
 
-  @ApiProperty({
-    enum: Currency,
-  })
-  @IsEnum(Currency)
-  public currency: Currency;
+  @ApiProperty()
+  @IsString()
+  public to: string;
 }

@@ -8,68 +8,26 @@ import {
   IsUrl,
   IsDate,
   IsOptional,
+  IsObject,
+  IsNumberString
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobRequestType,
+  JobStatus,
+  JobStatusFilter,
+} from '../../common/enums/job';
+import { EventType, OracleType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
   public userId: number;
   public manifestUrl: string;
   public manifestHash: string;
-  public fee: string;
-  public fundAmount: string;
+  public fee: number;
+  public fundAmount: number;
   public status: JobStatus;
   public waitUntil: Date;
-}
-
-export class CreateJobDto {
-  @ApiProperty({
-    enum: ChainId,
-  })
-  @IsEnum(ChainId)
-  @IsOptional()
-  public chainId?: ChainId;
-
-  @ApiProperty({
-    enum: JobRequestType,
-  })
-  @IsEnum(JobRequestType)
-  public requestType: JobRequestType;
-
-  @ApiProperty()
-  @IsNumber()
-  public submissionsRequired: number;
-
-  @ApiProperty()
-  @IsString()
-  public requesterDescription: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  public requesterTitle?: string;
-
-  @ApiPropertyOptional()
-  @IsUrl()
-  @IsOptional()
-  public dataUrl?: string;
-
-  @ApiPropertyOptional()
-  @IsArray()
-  @IsOptional()
-  public labels?: string[];
-
-  @ApiPropertyOptional()
-  @IsNumber()
-  @IsPositive()
-  @IsOptional()
-  public requesterAccuracyTarget?: number;
 }
 
 export class JobDto {
@@ -79,10 +37,6 @@ export class JobDto {
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
-
-  @ApiProperty()
-  @IsNumber()
-  public submissionsRequired: number;
 
   @ApiProperty()
   @IsString()
@@ -98,9 +52,13 @@ export class JobFortuneDto extends JobDto {
   @ApiProperty()
   @IsString()
   public requesterTitle: string;
+
+  @ApiProperty()
+  @IsNumber()
+  public submissionsRequired: number;
 }
 
-export class JobImageLabelBinaryDto extends JobDto {
+export class JobCvatDto extends JobDto {
   @ApiProperty()
   @IsUrl()
   public dataUrl: string;
@@ -112,7 +70,21 @@ export class JobImageLabelBinaryDto extends JobDto {
   @ApiProperty()
   @IsNumber()
   @IsPositive()
-  public requesterAccuracyTarget: number;
+  public minQuality: number;
+
+  @ApiProperty()
+  @IsString()
+  public gtUrl: string;
+
+  @ApiProperty()
+  @IsEnum(JobRequestType)
+  type: JobRequestType;
+}
+
+export class JobCancelDto {
+  @ApiProperty()
+  @IsNumberString()
+  public id: number;
 }
 
 export class JobUpdateDto {
@@ -139,6 +111,7 @@ export class SaveManifestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
+  public eventType: EventType;
 }
 
 export class FortuneManifestDto {
@@ -152,36 +125,68 @@ export class FortuneManifestDto {
   @IsString()
   requesterDescription: string;
 
-  @IsString()
-  fundAmount: string;
+  @IsNumber()
+  @IsPositive()
+  fundAmount: number;
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
 }
 
-export class ImageLabelBinaryManifestDto {
+export class CvatData {
   @IsString()
-  dataUrl: string;
+  data_url: string;
+}
 
+export class Label {
+  @IsString()
+  name: string;
+}
+
+export class Annotation {
   @IsArray()
-  labels: string[];
-
-  @IsNumber()
-  @IsPositive()
-  submissionsRequired: number;
+  labels: Label[];
 
   @IsString()
-  requesterDescription: string;
-
-  @IsNumber()
-  @IsPositive()
-  requesterAccuracyTarget: number;
-
-  @IsString()
-  fundAmount: string;
+  description: string;
 
   @IsEnum(JobRequestType)
-  requestType: JobRequestType;
+  type: JobRequestType;
+
+  @IsNumber()
+  @IsPositive()
+  job_size: number;
+
+  @IsNumber()
+  @IsPositive()
+  max_time: number;
+}
+
+export class Validation {
+  @IsNumber()
+  @IsPositive()
+  min_quality: number;
+
+  @IsNumber()
+  @IsPositive()
+  val_size: number;
+
+  @IsString()
+  gt_url: string;
+}
+
+export class CvatManifestDto {
+  @IsObject()
+  data: CvatData;
+
+  @IsObject()
+  annotation: Annotation;
+
+  @IsObject()
+  validation: Validation;
+
+  @IsString()
+  job_bounty: string;
 }
 
 export class FortuneFinalResultDto {
@@ -195,7 +200,7 @@ export class FortuneFinalResultDto {
   solution: string;
 }
 
-export class ImageLabelBinaryFinalResultDto {
+export class CvatFinalResultDto {
   @IsString()
   url: string;
 
@@ -207,4 +212,32 @@ export class ImageLabelBinaryFinalResultDto {
 
   @IsArray()
   wrong: string[];
+}
+
+export class JobListDto {
+  jobId: number;
+  escrowAddress?: string;
+  network: string;
+  fundAmount: number;
+  status: JobStatusFilter;
+}
+
+export class EscrowFailedWebhookDto {
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chain_id: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  public escrow_address: string;
+
+  @ApiProperty()
+  @IsEnum(EventType)
+  public event_type: EventType;
+
+  @ApiProperty()
+  @IsString()
+  public reason: string;
 }

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { BigNumber, FixedNumber, ethers, providers } from 'ethers';
+import { ethers, providers } from 'ethers';
 import { ErrorPayment } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -21,7 +21,6 @@ import {
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
-  TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ConfigNames, networkMap } from '../../common/config';
@@ -32,7 +31,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
-import { UserEntity } from '../user/user.entity';
+import { add, div, mul } from '../../common/utils/decimal';
 
 @Injectable()
 export class PaymentService {
@@ -70,8 +69,9 @@ export class PaymentService {
   ): Promise<string> {
     const { amount, currency } = dto;
 
+    const amountInCents = Math.ceil(mul(amount, 100));
     const params: Stripe.PaymentIntentCreateParams = {
-      amount: amount * 100,
+      amount: amountInCents,
       currency: currency,
     };
 
@@ -86,7 +86,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
     });
 
     if (paymentEntity) {
@@ -97,16 +97,16 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, currency);
+    const rate = await getRate(currency, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.FIAT,
       type: PaymentType.DEPOSIT,
-      amount: amount.toString(),
+      amount: div(amountInCents, 100),
       currency,
       rate,
-      transaction: paymentIntent.client_secret,
+      transaction: paymentIntent.id,
       status: PaymentStatus.PENDING,
     });
 
@@ -130,6 +130,8 @@ export class PaymentService {
       userId,
       transaction: data.paymentId,
       status: PaymentStatus.PENDING,
+      amount: div(paymentData.amount_received, 100),
+      currency: paymentData.currency,
     });
 
     if (!paymentEntity) {
@@ -160,12 +162,10 @@ export class PaymentService {
     dto: PaymentCryptoCreateDto,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
-
-    const provider = new providers.JsonRpcProvider(
-      Object.values(networkMap).find(
-        (item) => item.chainId === dto.chainId,
-      )?.rpcUrl,
+    const network = Object.values(networkMap).find(
+      (item) => item.chainId === dto.chainId,
     );
+    const provider = new providers.JsonRpcProvider(network?.rpcUrl);
 
     const transaction = await provider.getTransactionReceipt(
       dto.transactionHash,
@@ -192,16 +192,16 @@ export class PaymentService {
 
     const signer = this.web3Service.getSigner(dto.chainId);
 
-    const recepientAddress = transaction.logs[0].topics.some(
+    const recipientAddress = transaction.logs[0].topics.some(
       (topic) =>
         ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
     );
-    if (!recepientAddress) {
+    if (!recipientAddress) {
       this.logger.error(ErrorPayment.InvalidRecipient);
       throw new ConflictException(ErrorPayment.InvalidRecipient);
     }
 
-    const amount = BigNumber.from(transaction.logs[0].data);
+    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
@@ -210,13 +210,17 @@ export class PaymentService {
     );
     const tokenId = (await tokenContract.symbol()).toLowerCase();
 
-    if (!CoingeckoTokenId[tokenId]) {
+    if (
+      network?.tokens[tokenId] != tokenAddress ||
+      !CoingeckoTokenId[tokenId]
+    ) {
       this.logger.log(ErrorPayment.UnsupportedToken, PaymentRepository.name);
       throw new ConflictException(ErrorPayment.UnsupportedToken);
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
       transaction: transaction.transactionHash,
+      chainId: dto.chainId,
     });
 
     if (paymentEntity) {
@@ -227,14 +231,14 @@ export class PaymentService {
       throw new BadRequestException(ErrorPayment.TransactionAlreadyExists);
     }
 
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(tokenId, Currency.USD);
 
     await this.paymentRepository.create({
       userId,
       source: PaymentSource.CRYPTO,
       type: PaymentType.DEPOSIT,
-      amount: amount.toString(),
-      currency: TokenId.HMT,
+      amount: amount,
+      currency: tokenId,
       rate,
       chainId: dto.chainId,
       transaction: dto.transactionHash,
@@ -244,29 +248,16 @@ export class PaymentService {
     return true;
   }
 
-  public async getUserBalance(userId: number): Promise<BigNumber> {
+  public async getUserBalance(userId: number): Promise<number> {
     const paymentEntities = await this.paymentRepository.find({
       userId,
       status: PaymentStatus.SUCCEEDED,
     });
 
-    let finalAmount = BigNumber.from(0);
+    const totalAmount = paymentEntities.reduce((total, payment) => {
+      return add(total, mul(payment.amount, payment.rate));
+    }, 0);
 
-    paymentEntities.forEach((payment) => {
-      const fixedAmount = FixedNumber.from(
-        ethers.utils.formatUnits(payment.amount, 18),
-      );
-      const rate = FixedNumber.from(payment.rate);
-
-      const amount = BigNumber.from(fixedAmount.mulUnsafe(rate));
-
-      if (payment.type === PaymentType.WITHDRAWAL) {
-        finalAmount = finalAmount.sub(amount);
-      } else {
-        finalAmount = finalAmount.add(amount);
-      }
-    });
-
-    return finalAmount;
+    return totalAmount;
   }
 }

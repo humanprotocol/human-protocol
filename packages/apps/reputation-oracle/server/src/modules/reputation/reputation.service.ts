@@ -6,7 +6,7 @@ import { ConfigNames } from '../../common/config';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { ReputationRepository } from './reputation.repository';
 import { IReputation } from '../../common/interfaces';
-import { ErrorReputation } from 'src/common/constants/errors';
+import { ErrorReputation } from '../../common/constants/errors';
 
 @Injectable()
 export class ReputationService {

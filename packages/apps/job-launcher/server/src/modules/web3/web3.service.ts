@@ -5,6 +5,7 @@ import { ConfigNames, networkMap } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
+import { ChainId } from '@human-protocol/sdk';
 
 @Injectable()
 export class Web3Service {
@@ -27,12 +28,25 @@ export class Web3Service {
 
   public validateChainId(chainId: number): void {
     const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
-    const validChainIds = currentWeb3Env === Web3Env.MAINNET ? MAINNET_CHAIN_IDS : TESTNET_CHAIN_IDS;
+    const validChainIds = this.getValidChains();
 
     if (!validChainIds.includes(chainId)) {
-      const errorType = currentWeb3Env === Web3Env.MAINNET ? ErrorWeb3.InvalidMainnetChainId : ErrorWeb3.InvalidTestnetChainId;
+      const errorType =
+        currentWeb3Env === Web3Env.MAINNET
+          ? ErrorWeb3.InvalidMainnetChainId
+          : ErrorWeb3.InvalidTestnetChainId;
       this.logger.log(errorType, Web3Service.name);
       throw new BadRequestException(errorType);
     }
+  }
+
+  public getValidChains(): ChainId[] {
+    const currentWeb3Env = this.configService.get(ConfigNames.WEB3_ENV);
+    const validChainIds =
+      currentWeb3Env === Web3Env.MAINNET
+        ? MAINNET_CHAIN_IDS
+        : TESTNET_CHAIN_IDS;
+
+    return validChainIds;
   }
 }

@@ -1,8 +1,13 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { PaymentSource, PaymentStatus, PaymentType } from '../../common/enums/payment';
+import {
+  PaymentSource,
+  PaymentStatus,
+  PaymentType,
+} from '../../common/enums/payment';
 import { UserEntity } from '../user/user.entity';
+import { JobEntity } from '../job/job.entity';
 
 @Entity({ schema: NS, name: 'payments' })
 @Index(['chainId', 'transaction'], {
@@ -20,10 +25,10 @@ export class PaymentEntity extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   public chainId: number;
 
-  @Column({ type: 'varchar' })
-  public amount: string;
+  @Column({ type: 'decimal', precision: 30, scale: 18 })
+  public amount: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  @Column({ type: 'decimal', precision: 30, scale: 18 })
   public rate: number;
 
   @Column({ type: 'varchar' })
@@ -53,4 +58,11 @@ export class PaymentEntity extends BaseEntity {
 
   @Column({ type: 'int' })
   public userId: number;
+
+  @JoinColumn()
+  @OneToOne(() => JobEntity, (job) => job.payment)
+  public job: JobEntity;
+
+  @Column({ type: 'int', nullable: true  })
+  public jobId: number;
 }

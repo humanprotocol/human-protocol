@@ -11,6 +11,7 @@ import { UserEntity } from '../modules/user/user.entity';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
+import { ConfigNames } from '../common/config';
 
 @Module({
   imports: [
@@ -48,13 +49,27 @@ import { PaymentEntity } from '../modules/payment/payment.entity';
           migrations: [path.join(__dirname, '/migrations/**/*{.ts,.js}')],
           //"migrations": ["dist/migrations/*{.ts,.js}"],
           logger: typeOrmLoggerService,
-          host: configService.get<string>('POSTGRES_HOST', 'localhost'),
-          port: configService.get<number>('POSTGRES_PORT', 5432),
-          username: configService.get<string>('POSTGRES_USER', 'operator'),
-          password: configService.get<string>('POSTGRES_PASSWORD', 'qwerty'),
-          database: configService.get<string>('POSTGRES_DB', 'job-launcher'),
-          keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
+          host: configService.get<string>(
+            ConfigNames.POSTGRES_HOST,
+            'localhost',
+          ),
+          port: configService.get<number>(ConfigNames.POSTGRES_PORT, 5432),
+          username: configService.get<string>(
+            ConfigNames.POSTGRES_USER,
+            'operator',
+          ),
+          password: configService.get<string>(
+            ConfigNames.POSTGRES_PASSWORD,
+            'qwerty',
+          ),
+          database: configService.get<string>(
+            ConfigNames.POSTGRES_DATABASE,
+            'job-launcher',
+          ),
+          keepConnectionAlive:
+            configService.get<string>(ConfigNames.NODE_ENV) === 'test',
           migrationsRun: false,
+          ssl: configService.get<string>(ConfigNames.POSTGRES_SSL)!.toLowerCase() === 'true',
         };
       },
     }),

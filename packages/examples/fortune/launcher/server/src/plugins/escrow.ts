@@ -117,13 +117,13 @@ class Escrow {
       factoryAddress
     );
     const gas = await escrowFactory.methods
-      .createEscrow(token, [])
+      .createEscrow(token, [], jobRequester)
       .estimateGas({ from: jobRequester });
     const gasPrice = await web3.eth.getGasPrice();
     const result = await escrowFactory.methods
-      .createEscrow(token, [])
+      .createEscrow(token, [], jobRequester)
       .send({ from: jobRequester, gas, gasPrice });
-    return result.events.Launched.returnValues.escrow;
+    return result.events.LaunchedV2.returnValues.escrow;
   }
 
   async fundEscrow(

@@ -13,9 +13,6 @@ import { UserStatus, UserType } from '../../common/enums/user';
 import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
-import * as bcrypt from 'bcrypt';
-
-const PASSWORD_SECRET = '$2b$10$EICgM2wYixoJisgqckU9gu';
 
 jest.mock('@human-protocol/sdk');
 
@@ -27,14 +24,7 @@ describe('UserService', () => {
   let httpService: HttpService;
 
   beforeAll(async () => {
-    const mockConfigService: Partial<ConfigService> = {
-      get: jest.fn((key: string, defaultValue?: any) => {
-        switch (key) {
-          case 'PASSWORD_SECRET':
-            return PASSWORD_SECRET;
-        }
-      }),
-    };
+    const mockConfigService: Partial<ConfigService> = {};
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -100,7 +90,6 @@ describe('UserService', () => {
       jest
         .spyOn(userRepository, 'create')
         .mockResolvedValue(createdUser as UserEntity);
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue(hashedPassword);
 
       const result = await userService.create(dto);
 
@@ -108,7 +97,7 @@ describe('UserService', () => {
       expect(userRepository.create).toHaveBeenCalledWith({
         ...dto,
         email: dto.email,
-        password: hashedPassword,
+        password: expect.any(String),
         type: UserType.REQUESTER,
         status: UserStatus.PENDING,
       });
@@ -178,13 +167,11 @@ describe('UserService', () => {
     it('should return the correct balance with currency for a user', async () => {
       const userId = 1;
       const expectedBalance: IUserBalance = {
-        amount: 10, // ETH
+        amount: 10,
         currency: Currency.USD,
       };
 
-      jest
-        .spyOn(paymentService, 'getUserBalance')
-        .mockResolvedValue(ethers.utils.parseUnits('10', 'ether'));
+      jest.spyOn(paymentService, 'getUserBalance').mockResolvedValue(10);
 
       const balance = await userService.getBalance(userId);
 
