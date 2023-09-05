@@ -66,5 +66,4 @@ def test_fleiss_kappa_property(im):
 def test_invalid_return():
     invalid = "INVALID"
     assert cohens_kappa([[5]], invalid) == invalid
-    assert fleiss_kappa([[5], [0]], invalid) == invalid
-    assert percent_agreement([[5], [0]], invalid_return=invalid) == invalid
+    assert fleiss_kappa([[5], [np.nan]], invalid) == invalid

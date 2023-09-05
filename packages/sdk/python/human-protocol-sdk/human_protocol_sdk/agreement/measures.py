@@ -31,7 +31,7 @@ def percent_agreement(
             n_raters = np.sum(data, 1)
             item_agreements = np.sum(data * data, 1) - n_raters
             max_item_agreements = n_raters * (n_raters - 1)
-            percent = (item_agreements / max_item_agreements).mean()
+            percent = item_agreements.sum() / max_item_agreements.sum()
 
     if np.isnan(percent):
         percent = invalid_return
