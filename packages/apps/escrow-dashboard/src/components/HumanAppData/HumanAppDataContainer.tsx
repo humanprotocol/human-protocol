@@ -1,5 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { FC } from 'react';
 
 import { NetworkSelect } from '../NetworkSelect';
@@ -7,10 +7,16 @@ import TimeRangeButtons from '../TimeRangeButtons';
 import { ViewTitle } from '../ViewTitle';
 import { HumanAppDataView } from './HumanAppDataView';
 import networkSvg from 'src/assets/network.svg';
-import { useHumanAppData } from 'src/state/humanAppData/hooks';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
+import {
+  useHumanAppData,
+  useHumanAppDataLoaded,
+} from 'src/state/humanAppData/hooks';
 
 export const HumanAppDataContainer: FC = () => {
   useHumanAppData();
+
+  const loaded = useHumanAppDataLoaded();
 
   return (
     <Box id="human-app-data" mt={{ xs: '44px', md: '51px' }}>
@@ -29,7 +35,7 @@ export const HumanAppDataContainer: FC = () => {
         <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '513px' } }}>
           <NetworkSelect
             value={ChainId.POLYGON_MUMBAI}
-            supportedChainIds={[ChainId.POLYGON_MUMBAI]}
+            supportedChainIds={V2_SUPPORTED_CHAIN_IDS}
             width="100%"
           />
         </Box>
@@ -37,7 +43,13 @@ export const HumanAppDataContainer: FC = () => {
           <TimeRangeButtons fullWidth />
         </Box>
       </Box>
-      <HumanAppDataView />
+      {loaded ? (
+        <HumanAppDataView />
+      ) : (
+        <Box display="flex" justifyContent="center" py={10}>
+          <CircularProgress size={36} />
+        </Box>
+      )}
     </Box>
   );
 };

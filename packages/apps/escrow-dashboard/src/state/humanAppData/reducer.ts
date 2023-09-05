@@ -1,6 +1,11 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { formatUnits } from '@ethersproject/units';
-import { ChainId } from '@human-protocol/sdk';
+import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import { ChainId, StatisticsClient, NETWORKS } from '@human-protocol/sdk';
+import {
+  EscrowStatistics,
+  HMTStatistics,
+  PaymentStatistics,
+  WorkerStatistics,
+} from '@human-protocol/sdk/dist/graphql';
 import {
   createAction,
   createAsyncThunk,
@@ -12,91 +17,92 @@ import {
   UnknownAsyncThunkPendingAction,
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
+import BigNumberJS from 'bignumber.js';
+import { Contract, providers, utils } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
-import { EventDayData } from './types';
-import { RAW_EVENT_DAY_DATA_V2_QUERY } from 'src/queries';
+import {
+  RPC_URLS,
+  V2_SUPPORTED_CHAIN_IDS,
+  HM_TOKEN_DECIMALS,
+} from 'src/constants';
 import { AppState } from 'src/state';
-import { gqlFetch } from 'src/utils/gqlFetch';
 
-type EventDayDatasType = { [chainId in ChainId]?: EventDayData[] };
+type HumanAppDataType = {
+  [chainId in ChainId]?: {
+    escrowStatistics: EscrowStatistics;
+    workerStatistics: WorkerStatistics;
+    paymentStatistics: PaymentStatistics;
+    hmtStatistics: HMTStatistics;
+    hmtTotalSupply: string;
+  };
+};
 
 type HumanAppDataState = {
   loadingKeys: Record<string, boolean>;
   chainId: ChainId;
   days: number;
 
-  eventDayDatas: EventDayDatasType;
-  eventDayDatasLoaded: boolean;
+  data: HumanAppDataType;
+  dataLoaded: boolean;
 };
 
 const initialState: HumanAppDataState = {
   loadingKeys: {},
   chainId: ChainId.POLYGON_MUMBAI,
   days: 30,
-  eventDayDatas: {},
-  eventDayDatasLoaded: false,
+  data: {},
+  dataLoaded: false,
 };
 
-const getEventDayDatas = async (subgraphUrl: string) => {
-  return await gqlFetch(subgraphUrl!, RAW_EVENT_DAY_DATA_V2_QUERY)
-    .then((res) => res.json())
-    .catch((err) => []);
+const fetchTotalSupply = async (chainId: ChainId) => {
+  const rpcUrl = RPC_URLS[chainId]!;
+  const hmtAddress = NETWORKS[chainId]?.hmtAddress!;
+  const provider = new providers.JsonRpcProvider(rpcUrl);
+  const contract = new Contract(hmtAddress, HMTokenABI, provider);
+  const totalSupplyBN = await contract.totalSupply();
+  return new BigNumberJS(
+    utils.formatUnits(totalSupplyBN, HM_TOKEN_DECIMALS)
+  ).toJSON();
 };
 
-export const fetchEventDayDatas = createAsyncThunk<
-  EventDayDatasType,
-  void,
-  { state: AppState }
->('humanAppData/fetchEventDayDatas', async () => {
-  const rawData = await getEventDayDatas(
-    'https://api.thegraph.com/subgraphs/name/leric7/mumbai-v2'
-  );
+const fetchStatistics = async (chainId: ChainId) => {
+  const network = NETWORKS[chainId];
+  const client = new StatisticsClient(network!);
+  const [escrowStatistics, workerStatistics, paymentStatistics, hmtStatistics] =
+    await Promise.all([
+      client.getEscrowStatistics(),
+      client.getWorkerStatistics(),
+      client.getPaymentStatistics(),
+      client.getHMTStatistics(),
+    ]);
 
-  const currentDayId = Math.floor(Date.now() / 1000 / 60 / 60 / 24);
-  const eventDayDatas: EventDayData[] = [];
-
-  let j = 0;
-  for (let i = currentDayId; i > currentDayId - 365; i--) {
-    if (Number(rawData.data.eventDayDatas[j]?.id) === i) {
-      const dayData = rawData.data.eventDayDatas[j++];
-      eventDayDatas.push({
-        ...dayData,
-        dailyPayoutAmount: formatUnits(
-          BigNumber.from(dayData.dailyPayoutAmount),
-          18
-        ),
-        dailyHMTTransferAmount: formatUnits(
-          BigNumber.from(dayData.dailyHMTTransferAmount),
-          18
-        ),
-      });
-    } else {
-      eventDayDatas.push({
-        id: i.toString(),
-        timestamp: i * 24 * 60 * 60,
-        dailyBulkPayoutEventCount: '0',
-        dailyCancelledStatusEventCount: '0',
-        dailyCompletedStatusEventCount: '0',
-        dailyEscrowCount: '0',
-        dailyFundEventCount: '0',
-        dailyHMTTransferAmount: '0',
-        dailyHMTTransferCount: '0',
-        dailyPaidStatusEventCount: '0',
-        dailyPartialStatusEventCount: '0',
-        dailyPayoutAmount: '0',
-        dailyPayoutCount: '0',
-        dailyPendingStatusEventCount: '0',
-        dailySetupEventCount: '0',
-        dailyStoreResultsEventCount: '0',
-        dailyTotalEventCount: '0',
-        dailyWorkerCount: '0',
-      });
-    }
-  }
+  const hmtTotalSupply = await fetchTotalSupply(chainId);
 
   return {
-    [ChainId.POLYGON_MUMBAI]: eventDayDatas,
+    escrowStatistics,
+    workerStatistics,
+    paymentStatistics,
+    hmtStatistics,
+    hmtTotalSupply,
   };
+};
+
+export const fetchHumanAppData = createAsyncThunk<
+  HumanAppDataType,
+  void,
+  { state: AppState }
+>('humanAppData/fetchHumanAppData', async () => {
+  const data: HumanAppDataType = {};
+
+  await Promise.all(
+    V2_SUPPORTED_CHAIN_IDS.map(async (chainId) => {
+      const statistics = await fetchStatistics(chainId);
+
+      data[chainId] = statistics;
+    })
+  );
+
+  return data;
 });
 
 export const setChainId = createAction<ChainId>('humanAppData/setChainId');
@@ -126,18 +132,18 @@ export default createReducer(initialState, (builder) => {
   builder.addCase(setDays, (state, action) => {
     state.days = action.payload;
   });
-  builder.addCase(fetchEventDayDatas.fulfilled, (state, action) => {
-    state.eventDayDatas = action.payload;
-    state.eventDayDatasLoaded = true;
+  builder.addCase(fetchHumanAppData.fulfilled, (state, action) => {
+    state.data = action.payload;
+    state.dataLoaded = true;
   });
 
-  builder.addMatcher(isAnyOf(fetchEventDayDatas.pending), (state, action) => {
+  builder.addMatcher(isAnyOf(fetchHumanAppData.pending), (state, action) => {
     state.loadingKeys[serializeLoadingKey(action, 'pending')] = true;
   });
-  builder.addMatcher(isAnyOf(fetchEventDayDatas.fulfilled), (state, action) => {
+  builder.addMatcher(isAnyOf(fetchHumanAppData.fulfilled), (state, action) => {
     state.loadingKeys[serializeLoadingKey(action, 'fulfilled')] = false;
   });
-  builder.addMatcher(isAnyOf(fetchEventDayDatas.rejected), (state, action) => {
+  builder.addMatcher(isAnyOf(fetchHumanAppData.rejected), (state, action) => {
     state.loadingKeys[serializeLoadingKey(action, 'rejected')] = false;
   });
 });

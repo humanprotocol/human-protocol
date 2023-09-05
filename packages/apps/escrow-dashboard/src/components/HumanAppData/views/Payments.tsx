@@ -1,9 +1,9 @@
+import { DailyPaymentData } from '@human-protocol/sdk/dist/graphql';
 import React, { useMemo, useState } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
-import { EventDayData } from 'src/state/humanAppData/types';
+import { usePaymentStatisticsByChainId } from 'src/state/humanAppData/hooks';
 
 enum PaymentStatus {
   HMT,
@@ -21,25 +21,23 @@ const PAYMENT_STATUS_ITEMS = [
 
 export const PaymentsView = () => {
   const [status, setStatus] = useState(PaymentStatus.HMT);
-  const eventDayDatas = useHumanAppDataByChainId();
+  const data = usePaymentStatisticsByChainId();
 
   const seriesData = useMemo(() => {
-    if (eventDayDatas) {
-      const VALUES_BY_TYPE: Record<PaymentStatus, keyof EventDayData> = {
-        [PaymentStatus.HMT]: 'dailyPayoutAmount',
-        [PaymentStatus.Count]: 'dailyPayoutCount',
-        [PaymentStatus.JobAverage]: 'dailyBulkPayoutEventCount',
-        [PaymentStatus.WorkerAverage]: 'dailyBulkPayoutEventCount',
+    if (data) {
+      const VALUES_BY_TYPE: Record<PaymentStatus, keyof DailyPaymentData> = {
+        [PaymentStatus.HMT]: 'totalAmountPaid',
+        [PaymentStatus.Count]: 'totalCount',
+        [PaymentStatus.JobAverage]: 'averageAmountPerJob',
+        [PaymentStatus.WorkerAverage]: 'averageAmountPerWorker',
       };
-      return eventDayDatas
-        .map((d) => ({
-          date: d.timestamp * 1000,
-          value: Number(d[VALUES_BY_TYPE[status]]),
-        }))
-        .reverse();
+      return data.map((d) => ({
+        date: d.timestamp,
+        value: Number(d[VALUES_BY_TYPE[status]]),
+      }));
     }
     return [];
-  }, [eventDayDatas, status]);
+  }, [data, status]);
 
   return (
     <ChartContainer

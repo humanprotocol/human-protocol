@@ -1,42 +1,37 @@
+import { DailyHMTData } from '@human-protocol/sdk/dist/graphql';
 import React, { useMemo, useState } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
-import { EventDayData } from 'src/state/humanAppData/types';
+import { useHMTStatisticsByChainId } from 'src/state/humanAppData/hooks';
 
 enum HMTStatus {
-  // Holders,
   Transactions,
   AmountTransfered,
 }
 
 const HMT_STATUS_ITEMS = [
-  // { label: 'Holders', value: HMTStatus.Holders },
   { label: 'Transactions', value: HMTStatus.Transactions },
   { label: 'Amount Transfered', value: HMTStatus.AmountTransfered },
 ];
 
 export const HMTView = () => {
   const [status, setStatus] = useState(HMTStatus.Transactions);
-  const eventDayDatas = useHumanAppDataByChainId();
+  const data = useHMTStatisticsByChainId();
 
   const seriesData = useMemo(() => {
-    if (eventDayDatas) {
-      const VALUES_BY_TYPE: Record<HMTStatus, keyof EventDayData> = {
-        // [HMTStatus.Holders]: 'dailyEscrowCount',
-        [HMTStatus.Transactions]: 'dailyHMTTransferCount',
-        [HMTStatus.AmountTransfered]: 'dailyHMTTransferAmount',
+    if (data) {
+      const VALUES_BY_TYPE: Record<HMTStatus, keyof DailyHMTData> = {
+        [HMTStatus.Transactions]: 'totalTransactionCount',
+        [HMTStatus.AmountTransfered]: 'totalTransactionAmount',
       };
-      return eventDayDatas
-        .map((d) => ({
-          date: d.timestamp * 1000,
-          value: Number(d[VALUES_BY_TYPE[status]]),
-        }))
-        .reverse();
+      return data.map((d) => ({
+        date: d.timestamp,
+        value: Number(d[VALUES_BY_TYPE[status]]),
+      }));
     }
     return [];
-  }, [eventDayDatas, status]);
+  }, [data, status]);
 
   return (
     <ChartContainer

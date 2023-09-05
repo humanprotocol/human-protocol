@@ -1,42 +1,40 @@
+import { DailyWorkerData } from '@human-protocol/sdk/dist/graphql';
 import React, { useMemo, useState } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
-import { EventDayData } from 'src/state/humanAppData/types';
+import { useWokerStatisticsByChainId } from 'src/state/humanAppData/hooks';
 
 enum WorkerStatus {
-  TotalWorkers,
+  // TotalWorkers,
   ActiveWorkers,
   AverageJobsSolved,
 }
 
 const WORKER_STATUS_ITEMS = [
-  { label: 'Total workers', value: WorkerStatus.TotalWorkers },
+  // { label: 'Total workers', value: WorkerStatus.TotalWorkers },
   { label: 'Active workers', value: WorkerStatus.ActiveWorkers },
   { label: 'Average jobs solved', value: WorkerStatus.AverageJobsSolved },
 ];
 
 export const WorkersView = () => {
-  const [status, setStatus] = useState(WorkerStatus.TotalWorkers);
-  const eventDayDatas = useHumanAppDataByChainId();
+  const [status, setStatus] = useState(WorkerStatus.ActiveWorkers);
+  const data = useWokerStatisticsByChainId();
 
   const seriesData = useMemo(() => {
-    if (eventDayDatas) {
-      const VALUES_BY_TYPE: Record<WorkerStatus, keyof EventDayData> = {
-        [WorkerStatus.TotalWorkers]: 'dailyWorkerCount',
-        [WorkerStatus.ActiveWorkers]: 'dailyPendingStatusEventCount',
-        [WorkerStatus.AverageJobsSolved]: 'dailyBulkPayoutEventCount',
+    if (data) {
+      const VALUES_BY_TYPE: Record<WorkerStatus, keyof DailyWorkerData> = {
+        // [WorkerStatus.TotalWorkers]: 'dailyWorkerCount',
+        [WorkerStatus.ActiveWorkers]: 'activeWorkers',
+        [WorkerStatus.AverageJobsSolved]: 'averageJobsSolved',
       };
-      return eventDayDatas
-        .map((d) => ({
-          date: d.timestamp * 1000,
-          value: Number(d[VALUES_BY_TYPE[status]]),
-        }))
-        .reverse();
+      return data.map((d) => ({
+        date: d.timestamp,
+        value: Number(d[VALUES_BY_TYPE[status]]),
+      }));
     }
     return [];
-  }, [eventDayDatas, status]);
+  }, [data, status]);
 
   return (
     <ChartContainer

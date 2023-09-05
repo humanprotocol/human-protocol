@@ -10,8 +10,8 @@ import lBankIcon from 'src/assets/exchanges/lbank.svg';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import {
   useTokenStatsByChainId,
-  useTokenStatsLoaded,
-} from 'src/state/token/hooks';
+  useHumanAppDataLoaded,
+} from 'src/state/humanAppData/hooks';
 
 const EXCHANGES = [
   { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
@@ -31,9 +31,8 @@ const EXCHANGES = [
 ];
 
 export const TokenView: FC = () => {
-  const { totalTransferEventCount, holders, totalSupply } =
-    useTokenStatsByChainId();
-  const loaded = useTokenStatsLoaded();
+  const tokenStats = useTokenStatsByChainId();
+  const loaded = useHumanAppDataLoaded();
 
   const totalSupplyComponent = (value: number) => {
     const formatter = new Intl.NumberFormat('en-US', {
@@ -83,16 +82,16 @@ export const TokenView: FC = () => {
           <Grid item xs={12} md={4}>
             <CardTextBlock
               title="Amount of transfers"
-              value={totalTransferEventCount}
+              value={tokenStats?.totalTransferAmount}
             />
           </Grid>
           <Grid item xs={12} md={4}>
-            <CardTextBlock title="Holders" value={holders} />
+            <CardTextBlock title="Holders" value={tokenStats?.holders} />
           </Grid>
           <Grid item xs={12} md={4}>
             <CardTextBlock
               title="Total Supply"
-              component={totalSupplyComponent(Number(totalSupply))}
+              component={totalSupplyComponent(Number(tokenStats?.totalSupply))}
             />
           </Grid>
         </Grid>

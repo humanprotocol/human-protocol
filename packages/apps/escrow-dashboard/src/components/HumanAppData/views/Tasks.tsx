@@ -1,9 +1,9 @@
+import { DailyEscrowData } from '@human-protocol/sdk/dist/graphql';
 import React, { useMemo, useState } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useHumanAppDataByChainId } from 'src/state/humanAppData/hooks';
-import { EventDayData } from 'src/state/humanAppData/types';
+import { useEscrowStatisticsByChainId } from 'src/state/humanAppData/hooks';
 
 enum TaskStatus {
   Total = 'Total',
@@ -23,26 +23,24 @@ const TASK_STATUS_ITEMS = [
 
 export const TasksView = () => {
   const [status, setStatus] = useState(TaskStatus.Total);
-  const eventDayDatas = useHumanAppDataByChainId();
+  const data = useEscrowStatisticsByChainId();
 
   const seriesData = useMemo(() => {
-    if (eventDayDatas) {
-      const VALUES_BY_TYPE: Record<TaskStatus, keyof EventDayData> = {
-        [TaskStatus.Total]: 'dailyEscrowCount',
-        [TaskStatus.Pending]: 'dailyPendingStatusEventCount',
-        [TaskStatus.Solved]: 'dailyBulkPayoutEventCount',
-        [TaskStatus.Paid]: 'dailyPaidStatusEventCount',
-        [TaskStatus.Cancelled]: 'dailyCancelledStatusEventCount',
+    if (data) {
+      const VALUES_BY_TYPE: Record<TaskStatus, keyof DailyEscrowData> = {
+        [TaskStatus.Total]: 'escrowsTotal',
+        [TaskStatus.Pending]: 'escrowsPending',
+        [TaskStatus.Solved]: 'escrowsSolved',
+        [TaskStatus.Paid]: 'escrowsPaid',
+        [TaskStatus.Cancelled]: 'escrowsCancelled',
       };
-      return eventDayDatas
-        .map((d) => ({
-          date: d.timestamp * 1000,
-          value: Number(d[VALUES_BY_TYPE[status]]),
-        }))
-        .reverse();
+      return data.map((d) => ({
+        date: d.timestamp,
+        value: Number(d[VALUES_BY_TYPE[status]]),
+      }));
     }
     return [];
-  }, [eventDayDatas, status]);
+  }, [data, status]);
 
   return (
     <ChartContainer
