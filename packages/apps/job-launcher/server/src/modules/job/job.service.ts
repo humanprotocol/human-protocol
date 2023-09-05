@@ -68,6 +68,15 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
+import {
+  Escrow,
+  Escrow__factory,
+  HMToken,
+  HMToken__factory,
+  Staking__factory,
+} from '@human-protocol/core/typechain-types';
+import { LogDescription } from 'ethers/lib/utils';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class JobService {
@@ -269,6 +278,7 @@ export class JobService {
     const escrowAddress = await escrowClient.createAndSetupEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
+      jobEntity.userId.toString(),
       escrowConfig,
     );
 
@@ -314,7 +324,7 @@ export class JobService {
     jobEntity.status = JobStatus.TO_CANCEL;
     jobEntity.retriesCount = 0;
     await jobEntity.save();
-
+    
     return true;
   }
 
@@ -530,7 +540,140 @@ export class JobService {
     }
   }
 
+  public async refundCronJob() {
+    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const jobEntity = await this.jobRepository.findOne(
+      {
+        status: JobStatus.TO_REFUND,
+        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date()),
+        updatedAt: LessThanOrEqual(fiveMinutesAgo)
+      },
+      {
+        order: {
+            waitUntil: SortDirection.ASC,
+        },
+      }
+    );
+    if (!jobEntity) return;
+
+    const { id, userId, chainId, escrowAddress, fundAmount } = jobEntity
+  
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    
+    let refundAmount = new Decimal(fundAmount);
+    if (escrowAddress) {
+      refundAmount = await this.calculateRefundAmount(chainId, tokenAddress, escrowAddress);
+    }
+    
+    await this.paymentService.createRefundPayment({ refundAmount: refundAmount.toNumber(), userId: userId, jobId: id });
+  
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+
+    return true;
+  }
+
   public async cancelCronJob() {
+    const jobEntity = await this.jobRepository.findOne(
+      {
+        status: JobStatus.TO_CANCEL,
+        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
+      {
+        order: {
+            waitUntil: SortDirection.ASC,
+        },
+      }
+    );
+    if (!jobEntity) return;
+
+    if (jobEntity.escrowAddress) {
+      await this.processEscrowCancellation(jobEntity);
+    }
+    await this.notifyWebhook(jobEntity);
+    
+    jobEntity.status = JobStatus.TO_REFUND;
+    await jobEntity.save();
+
+    return true;
+  }
+
+  public async processEscrowCancellation(jobEntity: JobEntity) {
+      const { chainId, escrowAddress } = jobEntity;
+
+      const signer = this.web3Service.getSigner(chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      
+      const escrowStatus = await escrowClient.getStatus(escrowAddress);
+      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid || escrowStatus === EscrowStatus.Cancelled) {
+          this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+          throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+      }
+
+      const balance = await escrowClient.getBalance(escrowAddress);
+      if (balance.eq(0)) {
+          this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+          throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+      }
+
+      await escrowClient.cancel(escrowAddress);
+  }
+
+  public async calculateRefundAmount(chainId: ChainId, tokenAddress: string, escrowAddress: string) {
+      const signer = this.web3Service.getSigner(chainId);
+      const tokenContract: HMToken = HMToken__factory.connect(tokenAddress, signer);
+
+      const currentBlockNumber = await signer.provider.getBlockNumber();
+      const filter = {
+          address: tokenAddress,
+          topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+          fromBlock: currentBlockNumber - 200,
+          toBlock: 'latest',
+      };
+
+      const logs = await signer.provider.getLogs(filter);
+      console.log(123, logs)
+      let refundAmount = new Decimal(0);
+
+      logs.forEach(log => {
+          const parsedLog = tokenContract.interface.parseLog(log);
+          const from = parsedLog.args[0];
+          const to = parsedLog.args[1];
+          const amount = parsedLog.args[2];
+
+          console.log(from, escrowAddress, to, signer.address)
+          console.log(from === escrowAddress && to === signer.address)
+
+          if (from === escrowAddress && to === signer.address) {
+              refundAmount = refundAmount.add(ethers.utils.formatEther(amount));
+          }
+      });
+
+      return refundAmount;
+  }
+
+  public async notifyWebhook(jobEntity: JobEntity) {
+      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
+                        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
+                        : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
+      
+      await this.sendWebhook(
+          this.configService.get<string>(configKey)!,
+          {
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CANCELED,
+          }
+      );
+  }
+
+  public async cancelCronJobOld() {
     // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
     const jobEntity = await this.jobRepository.findOne(
       {
@@ -547,11 +690,14 @@ export class JobService {
 
     if (!jobEntity) return;
 
+
+    let refundAmount = new Decimal(jobEntity.fundAmount);
     const { escrowAddress } = jobEntity;
+
     if (escrowAddress) {
       const signer = this.web3Service.getSigner(jobEntity.chainId);
       const escrowClient = await EscrowClient.build(signer);
-
+      
       const escrowStatus = await escrowClient.getStatus(escrowAddress);
       if (
         escrowStatus === EscrowStatus.Complete ||
@@ -572,6 +718,35 @@ export class JobService {
 
       await escrowClient.cancel(escrowAddress);
 
+      const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+      const tokenContract: HMToken = HMToken__factory.connect(
+        tokenAddress,
+        signer
+      );
+
+      const currentBlockNumber = await signer.provider.getBlockNumber();
+
+      const filter = {
+        address: tokenAddress,
+        topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+        fromBlock: currentBlockNumber - 100,
+        toBlock: 'latest',
+      };
+
+      const logs = await signer.provider.getLogs(filter);
+      refundAmount = new Decimal(0)
+
+      logs.forEach(log => {
+        const parsedLog = tokenContract.interface.parseLog(log);
+        const from = parsedLog.args[0];
+        const to = parsedLog.args[1];
+        const amount = parsedLog.args[2];
+
+        if (from === escrowAddress && to === signer.address) {
+          refundAmount = refundAmount.add(ethers.utils.formatEther(amount));
+        }
+      });
+      
       const manifest = await this.getManifest(jobEntity.manifestUrl);
       if (
         (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
@@ -599,20 +774,36 @@ export class JobService {
         );
       }
     }
-
-    const paymentEntity = await this.paymentRepository.findOne({
-      jobId: jobEntity.id,
-      type: PaymentType.WITHDRAWAL,
-      status: PaymentStatus.SUCCEEDED,
-    });
-    if (paymentEntity) {
-      paymentEntity.status = PaymentStatus.FAILED;
-      await paymentEntity.save();
+    
+    const rate = await getRate(Currency.USD, TokenId.HMT);
+    
+    try {
+      await this.paymentRepository.create({
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.REFUND,
+        amount: refundAmount.toNumber(),
+        currency: TokenId.HMT,
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
+        this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, JobService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
     }
 
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
-
+    
     return true;
   }
 

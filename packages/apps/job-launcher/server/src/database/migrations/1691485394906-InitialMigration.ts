@@ -30,7 +30,6 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 "status" "hmt"."payments_status_enum" NOT NULL,
                 "user_id" integer NOT NULL,
                 "job_id" integer,
-                CONSTRAINT "REL_f83af8ea8055b85bde0e095e40" UNIQUE ("job_id"),
                 CONSTRAINT "PK_197ab7af18c93fbb0c9b28b4a59" PRIMARY KEY ("id")
             )
         `);
@@ -55,6 +54,7 @@ export class InitialMigration1691485394906 implements MigrationInterface {
                 'LAUNCHED',
                 'FAILED',
                 'TO_CANCEL',
+                'TO_REFUND',
                 'CANCELED'
             )
         `);
