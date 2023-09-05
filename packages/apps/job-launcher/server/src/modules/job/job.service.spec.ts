@@ -4,6 +4,8 @@ import {
   EscrowClient,
   StorageClient,
   EscrowStatus,
+  StakingClient,
+  IAllocation,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import { BadGatewayException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
@@ -56,6 +58,7 @@ import {
   JobFortuneDto,
   JobCvatDto,
   CvatFinalResultDto,
+  JobDetailsDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -68,6 +71,7 @@ import { In } from 'typeorm';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
 import Decimal from 'decimal.js';
+import { BigNumber, ethers } from 'ethers';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -75,6 +79,11 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
       createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+    })),
+  },
+  StakingClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getAllocation: jest.fn(),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -1223,6 +1232,84 @@ describe('JobService', () => {
       expect(result).toBe(true);
       expect(mockJobEntity.status).toBe(JobStatus.FAILED);
       expect(mockJobEntity.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getDetails', () => {
+    it('should return job details successfully', async () => {
+      const allocationMock: IAllocation = {
+        escrowAddress: ethers.constants.AddressZero,
+        staker: ethers.constants.AddressZero,
+        tokens: BigNumber.from('1'),
+        createdAt: BigNumber.from('1'),
+        closedAt: BigNumber.from('1'),
+      };
+
+      const manifestMock: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      const jobEntityMock = { 
+        status: JobStatus.TO_CANCEL, 
+        fundAmount: 100, 
+        userId: 1, 
+        id: 1, 
+        manifestUrl: MOCK_FILE_URL, 
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS, 
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn(),
+      };
+
+      const expectedJobDetailsDto: JobDetailsDto = {
+        details: {
+          escrowAddess: MOCK_ADDRESS, 
+          manifestUrl: MOCK_FILE_URL,
+          manifestHash: MOCK_FILE_HASH,
+          balance: expect.any(Number),
+          paidOut: 0,
+        },
+        manifest: {
+          chainId: ChainId.LOCALHOST,
+          title: MOCK_REQUESTER_TITLE,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          submissionsRequired: 10,
+          tokenAddress: MOCK_ADDRESS,
+          fundAmount: 10,
+          requesterAddress: MOCK_ADDRESS,
+          requestType: JobRequestType.FORTUNE,
+          recordingOracleAddress: expect.any(String),
+          reputationOracleAddress: expect.any(String)
+        },
+        staking: {
+          staker: expect.any(String),
+          allocated: expect.any(Number),
+          slashed: 0 
+        }
+      }
+  
+      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getBalance: jest.fn().mockResolvedValue(BigNumber.from('1')),
+      }));
+      (StakingClient.build as any).mockImplementation(() => ({
+        getAllocation: jest.fn().mockResolvedValue(allocationMock),
+      }));
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
+
+      const result = await jobService.getDetails(1, 123);
+      expect(result).toMatchObject(expectedJobDetailsDto);
+    });
+
+    it('should throw not found exception when job not found', async () => {
+      jobService.jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
+
+      await expect(jobService.getDetails(1, 123)).rejects.toThrow(NotFoundException);
     });
   });
 });

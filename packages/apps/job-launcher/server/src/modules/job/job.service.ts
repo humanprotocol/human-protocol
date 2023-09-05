@@ -4,6 +4,7 @@ import {
   EscrowClient,
   EscrowStatus,
   NETWORKS,
+  StakingClient,
   StorageClient,
   StorageCredentials,
   StorageParams,
@@ -57,6 +58,7 @@ import {
   FortuneFinalResultDto,
   FortuneManifestDto,
   JobCvatDto,
+  JobDetailsDto,
   JobFortuneDto,
   JobListDto,
   SaveManifestDto,
@@ -68,6 +70,8 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
+import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class JobService {
@@ -642,5 +646,63 @@ export class JobService {
     await jobEntity.save()
 
     return true;
+  }
+
+  public async getDetails(userId: number, jobId: number): Promise<JobDetailsDto> {
+    const jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
+
+    if (!jobEntity) {
+        this.logger.log(ErrorJob.NotFound, JobService.name);
+        throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
+    const signer = this.web3Service.getSigner(chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+    const stakingClient = await StakingClient.build(signer);
+    
+    const [tokenAddress, balance, allocation, manifest] = await Promise.all([
+      escrowClient.getTokenAddress(escrowAddress),
+      escrowClient.getBalance(escrowAddress),
+      stakingClient.getAllocation(escrowAddress),
+      this.getManifest(manifestUrl) as Promise<FortuneManifestDto>
+    ]);
+
+    const requesterAddress = signer.address;
+
+    const recordingOracleAddress = this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!;
+    const reputationOracleAddress = this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!;
+
+    if (!manifest) {
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
+    }
+
+    return {
+      details: {
+        escrowAddess: escrowAddress,
+        manifestUrl,
+        manifestHash,
+        balance: Number(ethers.utils.formatEther(balance)),
+        paidOut: 0 // TODO: Implement paid out mechanism
+      },
+      manifest: {
+        chainId,
+        title: manifest.requesterTitle,
+        description: manifest.requesterDescription,
+        requestType: JobRequestType.FORTUNE,
+        submissionsRequired: manifest.submissionsRequired,
+        tokenAddress,
+        fundAmount: manifest.fundAmount,
+        requesterAddress,
+        recordingOracleAddress,
+        reputationOracleAddress
+      },
+      staking: {
+        staker: allocation.staker,
+        allocated: allocation.tokens.toNumber(),
+        slashed: 0, // TODO: Retrieve slash tokens 
+      }
+    }
   }
 }
