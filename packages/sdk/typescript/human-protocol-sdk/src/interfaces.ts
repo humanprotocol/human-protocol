@@ -51,4 +51,5 @@ export interface IKeyPair {
 export interface IStatisticsParams {
   from?: Date;
   to?: Date;
+  limit?: number;
 }
