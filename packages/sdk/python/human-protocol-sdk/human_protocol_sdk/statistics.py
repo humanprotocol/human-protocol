@@ -37,6 +37,7 @@ class StatisticsParam:
         self,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
+        limit: Optional[int] = None,
     ):
         """
         Initializes a StatisticsParam instance.
@@ -44,10 +45,12 @@ class StatisticsParam:
         Args:
             date_from (Optional[datetime.datetime]): Statistical data from date
             date_to (Optional[datetime.datetime]): Statistical data to date
+            limit (Optional[int]): Limit of statistical data
         """
 
         self.date_from = date_from
         self.date_to = date_to
+        self.limit = limit
 
 
 class StatisticsClient:
