@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers';
+import { EscrowStatus } from './types';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -21,14 +22,6 @@ export interface IStaker {
   tokensLockedUntil: BigNumber;
   tokensAvailable: BigNumber;
 }
-
-type EscrowStatus =
-  | 'Launched'
-  | 'Pending'
-  | 'Partial'
-  | 'Paid'
-  | 'Complete'
-  | 'Cancelled';
 
 export interface IEscrowsFilter {
   launcher?: string;
