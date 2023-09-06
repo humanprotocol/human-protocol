@@ -72,6 +72,7 @@ import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
 import Decimal from 'decimal.js';
 import { BigNumber, ethers } from 'ethers';
+import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -1237,6 +1238,7 @@ describe('JobService', () => {
 
   describe('getDetails', () => {
     it('should return job details successfully', async () => {
+      const balance = '1';
       const allocationMock: IAllocation = {
         escrowAddress: ethers.constants.AddressZero,
         staker: ethers.constants.AddressZero,
@@ -1270,8 +1272,8 @@ describe('JobService', () => {
           escrowAddess: MOCK_ADDRESS, 
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
-          balance: expect.any(Number),
-          paidOut: 0,
+          balance: Number(balance),
+          paidOut: 10,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -1295,12 +1297,13 @@ describe('JobService', () => {
       jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
       (EscrowClient.build as any).mockImplementation(() => ({
         getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest.fn().mockResolvedValue(BigNumber.from('1')),
+        getBalance: jest.fn().mockResolvedValue(ethers.utils.parseEther(balance)),
       }));
       (StakingClient.build as any).mockImplementation(() => ({
         getAllocation: jest.fn().mockResolvedValue(allocationMock),
       }));
       jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
+      jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
       const result = await jobService.getDetails(1, 123);
       expect(result).toMatchObject(expectedJobDetailsDto);
@@ -1310,6 +1313,71 @@ describe('JobService', () => {
       jobService.jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
 
       await expect(jobService.getDetails(1, 123)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getTransferLogs', () => {
+    it('should retrieve logs', async () => {
+      const chainId = ChainId.LOCALHOST;
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([{}]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
+      
+      await jobService.getTransferLogs(chainId, MOCK_ADDRESS, 0, 'latest');
+      expect(web3Service.getSigner(chainId).provider.getLogs).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPaidOutAmount', () => {
+    it('should calculate the paid out amount', async () => {
+      const chainId = ChainId.LOCALHOST;
+      const amount = ethers.utils.parseEther('1.5');
+      const mockLogs = [{
+        data: 'mockData',
+        topics: ['mockTopic'],
+      }];
+
+      const mockParsedLog = {
+        args: [
+          MOCK_ADDRESS,
+          MOCK_ADDRESS,
+          amount
+        ]
+      };
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue(mockLogs),
+        },
+      });
+
+      const mockHMTokenFactoryContract = {
+        interface: {
+          parseLog: jest.fn().mockReturnValue({
+            args: [
+              MOCK_ADDRESS,
+              MOCK_ADDRESS,
+              amount
+            ]
+          })
+        }
+      };
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
+        mockHMTokenFactoryContract as any
+      );
+
+      (ethers as any).Contract.prototype.interface = {
+        parseLog: jest.fn().mockReturnValue(mockParsedLog)
+      };
+
+      const result = await jobService.getPaidOutAmount(chainId, MOCK_ADDRESS, MOCK_ADDRESS);
+      expect(result).toBe(1.5);
     });
   });
 });

@@ -666,8 +666,10 @@ export class JobService {
       escrowClient.getTokenAddress(escrowAddress),
       escrowClient.getBalance(escrowAddress),
       stakingClient.getAllocation(escrowAddress),
-      this.getManifest(manifestUrl) as Promise<FortuneManifestDto>
+      this.getManifest(manifestUrl) as Promise<FortuneManifestDto>,
     ]);
+
+    const paidOut = await this.getPaidOutAmount(chainId, tokenAddress, escrowAddress)
 
     const requesterAddress = signer.address;
 
@@ -684,7 +686,7 @@ export class JobService {
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),
-        paidOut: 0 // TODO: Implement paid out mechanism
+        paidOut
       },
       manifest: {
         chainId,
@@ -705,4 +707,38 @@ export class JobService {
       }
     }
   }
+
+  public async getTransferLogs(chainId: ChainId, tokenAddress: string, fromBlock: number, toBlock: string | number) {
+    const signer = this.web3Service.getSigner(chainId);
+    const filter = {
+        address: tokenAddress,
+        topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+        fromBlock: fromBlock,
+        toBlock: toBlock,
+    };
+
+    return signer.provider.getLogs(filter);
+  }
+
+  public async getPaidOutAmount(chainId: ChainId, tokenAddress: string, escrowAddress: string): Promise<number> {
+      const signer = this.web3Service.getSigner(chainId);
+      const tokenContract: HMToken = HMToken__factory.connect(tokenAddress, signer);
+
+      const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
+      let paidOutAmount = new Decimal(0);
+
+      logs.forEach(log => {
+          const parsedLog = tokenContract.interface.parseLog(log);
+          const from = parsedLog.args[0];
+          const amount = parsedLog.args[2];
+
+          if (from === escrowAddress) {
+              paidOutAmount = paidOutAmount.add(ethers.utils.formatEther(amount));
+          }
+      });
+
+      return Number(paidOutAmount);
+  }
+
+
 }
