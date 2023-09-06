@@ -1,9 +1,11 @@
 import json
 import logging
 import time
+import re
 from typing import Tuple, Optional
 
 import requests
+from validators import url as URL
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt
@@ -239,3 +241,38 @@ def handle_transaction(w3: Web3, tx_name, tx, exception):
             raise exception(f"{tx_name} transaction failed: {message}")
         else:
             raise exception(f"{tx_name} transaction failed.")
+
+
+def validate_url(url: str) -> bool:
+    """Gets the url string.
+    Args:
+        url (str): Public or private url address
+    Returns:
+        bool: Returns True if url is valid
+    Raises:
+        ValidationFailure: If the url is invalid
+    """
+
+    # validators.url tracks docker network URL as ivalid
+    pattern = re.compile(
+        r"^"
+        # protocol identifier
+        r"(?:(?:http)://)"
+        # host name
+        r"(?:(?:(?:xn--[-]{0,2})|[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]-?)*"
+        r"[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]+)"
+        # port number
+        r"(?::\d{2,5})?"
+        # resource path
+        r"(?:/[-a-z\u00a1-\uffff\U00010000-\U0010ffff0-9._~%!$&'()*+,;=:@/]*)?"
+        # query string
+        r"(?:\?\S*)?" r"$",
+        re.UNICODE | re.IGNORECASE,
+    )
+
+    result = pattern.match(url)
+
+    if not result:
+        return URL(url)
+
+    return True
