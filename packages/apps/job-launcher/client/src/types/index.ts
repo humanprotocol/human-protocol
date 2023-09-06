@@ -104,3 +104,32 @@ export enum JobStatus {
   TO_CANCEL = 'TO_CANCEL',
   CANCELED = 'CANCELED',
 }
+
+export type JobDetailsResponse = {
+  details: {
+    escrowAddress: string;
+    manifestUrl: string;
+    manifestHash: string;
+    balance: number;
+    paidOut: number;
+    amountOfTasks: number;
+  };
+  manifest: {
+    chainId: number;
+    title: string;
+    description: string;
+    submissionsRequired: number;
+    tokenAddress: string;
+    fundAmount: number;
+    requesterAddress: string;
+    requestType: string;
+    exchangeOracleAddress: string;
+    recordingOracleAddress: string;
+    reputationOracleAddress: string;
+  };
+  staking: {
+    staker: string;
+    allocated: number;
+    slashed: number;
+  };
+};

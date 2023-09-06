@@ -7,8 +7,7 @@ import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
 import { SearchField } from '../../../components/SearchField';
 import { Table } from '../../../components/Table';
-import { useJob } from '../../../hooks/useJob';
-import { formatAmount } from '../../../utils/bignumber';
+import { useJobDetails } from '../../../hooks/useJobDetails';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -21,10 +20,12 @@ const CardContainer = styled(Card)(({ theme }) => ({
 }));
 
 export default function JobDetail() {
-  const { chainId, address } = useParams();
-  const { data, isLoading } = useJob({ chainId, address });
+  const { jobId } = useParams();
+  const { data, isLoading, error } = useJobDetails(Number(jobId));
 
-  if (!data || isLoading) return <>Loading...</>;
+  if (isLoading) return <>Loading...</>;
+
+  if (!data || error) return <>Failed to fetch job details. Try again later.</>;
 
   return (
     <Box>
@@ -33,7 +34,7 @@ export default function JobDetail() {
           <Typography variant="h4" fontWeight={600}>
             Job details
           </Typography>
-          <CopyAddressButton address={data?.address} ml={6} />
+          <CopyAddressButton address={data.details.escrowAddress} ml={6} />
           <Box sx={{ ml: 'auto' }}>
             <SearchField />
           </Box>
@@ -50,17 +51,26 @@ export default function JobDetail() {
                 Job details
               </Typography>
               <Stack spacing={2}>
-                <CardTextRow label="Manifest URL" value={data.manifestUrl} />
-                <CardTextRow label="Manifest Hash" value={data.manifestHash} />
+                <CardTextRow
+                  label="Manifest URL"
+                  value={data.details.manifestUrl}
+                />
+                <CardTextRow
+                  label="Manifest Hash"
+                  value={data.details.manifestHash}
+                />
                 <CardTextRow
                   label="Balance of"
-                  value={`${formatAmount(data.balance)} HMT`}
+                  value={`${data.details.balance} HMT`}
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${formatAmount(data.amountPaid)} HMT`}
+                  value={`${data.details.paidOut} HMT`}
                 />
-                <CardTextRow label="Amount of Jobs" value={data.count} />
+                <CardTextRow
+                  label="Amount of Jobs"
+                  value={data.details.amountOfTasks}
+                />
                 <CardTextRow label="Workers assigned" value="" />
               </Stack>
             </CardContainer>
@@ -76,9 +86,15 @@ export default function JobDetail() {
                 Stake details
               </Typography>
               <Stack spacing={2}>
-                <CardTextRow label="Staker" value="" />
-                <CardTextRow label="Staked HMT" value="" />
-                <CardTextRow label="Slashed HMT" value="" />
+                <CardTextRow label="Staker" value={data.staking.staker} />
+                <CardTextRow
+                  label="Staked HMT"
+                  value={`${data.staking.allocated} HMT`}
+                />
+                <CardTextRow
+                  label="Slashed HMT"
+                  value={`${data.staking.slashed} HMT`}
+                />
               </Stack>
             </CardContainer>
           </Grid>
@@ -95,29 +111,47 @@ export default function JobDetail() {
               <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
-                    <CardTextRow label="Chain Id" value={chainId} />
-                    <CardTextRow label="Title" value="" />
-                    <CardTextRow label="Description" value="" />
-                    <CardTextRow label="Fortune's request" value="" />
-                    <CardTextRow label="Token" value={data.token} />
+                    <CardTextRow
+                      label="Chain Id"
+                      value={data.manifest.chainId}
+                    />
+                    <CardTextRow label="Title" value={data.manifest.title} />
+                    <CardTextRow
+                      label="Description"
+                      value={data.manifest.description}
+                    />
+                    <CardTextRow
+                      label="Fortune's request"
+                      value={data.manifest.submissionsRequired}
+                    />
+                    <CardTextRow
+                      label="Token"
+                      value={data.manifest.tokenAddress}
+                    />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${formatAmount(data.totalFundedAmount)} HMT`}
+                      value={`${data.manifest.fundAmount} HMT`}
                     />
-                    <CardTextRow label="Job Requester" value={data.launcher} />
+                    <CardTextRow
+                      label="Job Requester"
+                      value={data.manifest.requesterAddress}
+                    />
                   </Stack>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
                     <CardTextRow
                       label="Recording Oracle"
-                      value={data.recordingOracle}
+                      value={data.manifest.recordingOracleAddress}
                     />
                     <CardTextRow
                       label="Reputation Oracle"
-                      value={data.reputationOracle}
+                      value={data.manifest.reputationOracleAddress}
                     />
-                    <CardTextRow label="Exchange Oracle" value="" />
+                    <CardTextRow
+                      label="Exchange Oracle"
+                      value={data.manifest.exchangeOracleAddress}
+                    />
                     <CardTextRow label="Recording URL" value="" />
                     <CardTextRow label="Reputation URL" value="" />
                     <CardTextRow label="Exchange URL" value="" />

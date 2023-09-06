@@ -72,9 +72,6 @@ export const AuthHeader = () => {
   };
 
   let segements = pathname.split('/').filter((s) => s);
-  if (pathname.includes('jobs/details')) {
-    segements = segements.slice(0, -2);
-  }
 
   return (
     <AppBar

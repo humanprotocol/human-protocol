@@ -40,7 +40,7 @@ export default function App() {
             }
           />
           <Route
-            path="jobs/details/:chainId/:address"
+            path="jobs/details/:jobId"
             element={
               <ProtectedRoute>
                 <JobDetail />

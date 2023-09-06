@@ -2,7 +2,6 @@ import { Box, Button, IconButton, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
-import { CHAIN_ID_BY_NAME } from '../../constants/chains';
 import { useJobs } from '../../hooks/useJobs';
 import { JobStatus } from '../../types';
 
@@ -40,10 +39,10 @@ export const JobTable = ({ status }: { status: JobStatus }) => {
         {
           id: 'action',
           label: '',
-          render: ({ network, address }) => (
+          render: ({ jobId }) => (
             <Link
               style={{ fontWeight: 600, textDecoration: 'underline' }}
-              to={`/jobs/details/${CHAIN_ID_BY_NAME[network]}/${address}`}
+              to={`/jobs/details/${jobId}`}
             >
               Details
             </Link>

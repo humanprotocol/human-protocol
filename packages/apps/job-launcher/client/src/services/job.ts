@@ -4,6 +4,7 @@ import {
   FortuneRequest,
   CvatRequest,
   JobStatus,
+  JobDetailsResponse,
 } from '../types';
 import api from '../utils/api';
 
@@ -47,5 +48,10 @@ export const getJobListByStatus = async (status: JobStatus) => {
 
 export const getJobResult = async (jobId: number) => {
   const { data } = await api.get(`/job/result`, { params: { jobId } });
+  return data;
+};
+
+export const getJobDetails = async (jobId: number) => {
+  const { data } = await api.get<JobDetailsResponse>(`/details/${jobId}`);
   return data;
 };

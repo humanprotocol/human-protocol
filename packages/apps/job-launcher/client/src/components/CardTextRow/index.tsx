@@ -3,7 +3,7 @@ import { FC } from 'react';
 
 type CardTextRowProps = {
   label?: string;
-  value?: string;
+  value?: string | number;
   minWidth?: number;
 };
 
