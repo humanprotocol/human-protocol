@@ -1284,6 +1284,7 @@ describe('JobService', () => {
           fundAmount: 10,
           requesterAddress: MOCK_ADDRESS,
           requestType: JobRequestType.FORTUNE,
+          exchangeOracleAddress: expect.any(String),
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String)
         },

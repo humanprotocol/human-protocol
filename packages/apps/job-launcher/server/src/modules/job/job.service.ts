@@ -661,23 +661,60 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
     const stakingClient = await StakingClient.build(signer);
-    
-    const [tokenAddress, balance, allocation, manifest] = await Promise.all([
-      escrowClient.getTokenAddress(escrowAddress),
+
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+
+    const [balance, allocation, manifestData, paidOut] = await Promise.all([
       escrowClient.getBalance(escrowAddress),
       stakingClient.getAllocation(escrowAddress),
-      this.getManifest(manifestUrl) as Promise<FortuneManifestDto>,
+      this.getManifest(manifestUrl),
+      this.getPaidOutAmount(chainId, tokenAddress, escrowAddress)
     ]);
 
-    const paidOut = await this.getPaidOutAmount(chainId, tokenAddress, escrowAddress)
+    if (!manifestData) {
+      throw new NotFoundException(ErrorJob.ManifestNotFound);
+    }
 
-    const requesterAddress = signer.address;
+    const manifest = (manifestData as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+           ? manifestData as FortuneManifestDto
+           : manifestData as CvatManifestDto;
+
+    const exchangeOracleAddress = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
+                         ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS 
+                         : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
 
     const recordingOracleAddress = this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!;
     const reputationOracleAddress = this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!;
 
-    if (!manifest) {
-      throw new NotFoundException(ErrorJob.ManifestNotFound);
+
+    let manifestDetails;
+ 
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE ) {
+      manifestDetails = {
+        chainId,
+        title: (manifest as FortuneManifestDto).requesterTitle,
+        description: (manifest as FortuneManifestDto).requesterDescription,
+        requestType: JobRequestType.FORTUNE,
+        submissionsRequired: (manifest as FortuneManifestDto).submissionsRequired,
+        tokenAddress,
+        fundAmount: (manifest as FortuneManifestDto).fundAmount,
+        requesterAddress: signer.address,
+        exchangeOracleAddress,
+        recordingOracleAddress,
+        reputationOracleAddress
+      }
+    } else {
+      manifestDetails = {
+        chainId,
+        requestType: (manifest as CvatManifestDto).annotation.type,
+        submissionsRequired: (manifest as CvatManifestDto).annotation.job_size,
+        tokenAddress,
+        fundAmount: Number((manifest as CvatManifestDto).job_bounty),
+        requesterAddress: signer.address,
+        exchangeOracleAddress,
+        recordingOracleAddress,
+        reputationOracleAddress
+      }
     }
 
     return {
@@ -688,18 +725,7 @@ export class JobService {
         balance: Number(ethers.utils.formatEther(balance)),
         paidOut
       },
-      manifest: {
-        chainId,
-        title: manifest.requesterTitle,
-        description: manifest.requesterDescription,
-        requestType: JobRequestType.FORTUNE,
-        submissionsRequired: manifest.submissionsRequired,
-        tokenAddress,
-        fundAmount: manifest.fundAmount,
-        requesterAddress,
-        recordingOracleAddress,
-        reputationOracleAddress
-      },
+      manifest: manifestDetails,
       staking: {
         staker: allocation.staker,
         allocated: allocation.tokens.toNumber(),

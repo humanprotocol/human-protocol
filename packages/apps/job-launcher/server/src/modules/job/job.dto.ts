@@ -137,7 +137,7 @@ export class ManifestDetails {
 
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description?: string;
 
   @IsNumber()
   submissionsRequired: number;
@@ -153,6 +153,10 @@ export class ManifestDetails {
 
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
+
+  @IsNotEmpty()
+  @IsString()
+  exchangeOracleAddress: string;
 
   @IsNotEmpty()
   @IsString()
@@ -183,9 +187,6 @@ export class CommonDetails {
 
   @IsNumber()
   amountOfTasks?: number;
-
-  @IsNumber()
-  workersAssigned?: number;
 }
 
 export class JobDetailsDto {
