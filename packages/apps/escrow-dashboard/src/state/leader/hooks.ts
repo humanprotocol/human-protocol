@@ -8,7 +8,7 @@ import {
   fetchLeadersAsync,
 } from './reducer';
 import { LeaderData } from './types';
-import { SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useSlowRefreshEffect } from 'src/hooks/useRefreshEffect';
 
 export const useLeadersData = () => {
@@ -43,7 +43,7 @@ export const useLeadersByChainID = (): Array<
   if (chainId === ChainId.ALL) {
     const allLeaders: LeaderData[] = [];
 
-    SUPPORTED_CHAIN_IDS.forEach((chainId) => {
+    V2_SUPPORTED_CHAIN_IDS.forEach((chainId) => {
       allLeaders.push(
         ...(leaders[chainId] || []).map((leader) => ({ ...leader, chainId }))
       );

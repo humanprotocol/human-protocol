@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { FC } from 'react';
 import { CHAIN_ICONS } from '../Icons/chains';
-import { SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 
 interface NetworkSelectProps extends SelectProps {
   showAllNetwork?: boolean;
@@ -49,7 +49,7 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
           All Networks
         </MenuItem>
       )}
-      {(props.supportedChainIds ?? SUPPORTED_CHAIN_IDS).map((chainId) => {
+      {(props.supportedChainIds ?? V2_SUPPORTED_CHAIN_IDS).map((chainId) => {
         const IconComponent = CHAIN_ICONS[chainId];
         return (
           <MenuItem value={chainId} key={chainId}>
