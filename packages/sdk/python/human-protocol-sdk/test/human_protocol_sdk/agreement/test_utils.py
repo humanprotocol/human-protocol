@@ -1,5 +1,8 @@
 import pytest
-from human_protocol_sdk.agreement.utils import confusion_matrix_from_sequence
+from human_protocol_sdk.agreement.utils import (
+    confusion_matrix_from_sequence,
+    label_counts,
+)
 import numpy as np
 
 
@@ -19,3 +22,25 @@ def test_confusion_matrix_from_sequence(
 
     with pytest.raises(ValueError, match="must have the same kind of dtype"):
         confusion_matrix_from_sequence(seq_values, seq_labels_nan)
+
+
+def test_label_counts_from_annotations(annotations, labels):
+    counts = label_counts(annotations, labels, False)
+
+    true_counts = np.asarray(
+        [
+            [2, 1],
+            [3, 0],
+            [0, 3],
+            [1, 1],
+        ]
+    )
+
+    assert np.all(counts == true_counts)
+
+    counts, labels = label_counts(annotations, None)
+
+    # empty label is now counted as well
+    true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
+
+    assert np.all(counts == true_counts)

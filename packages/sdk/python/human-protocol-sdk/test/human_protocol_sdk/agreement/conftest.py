@@ -4,6 +4,21 @@ from hypothesis.strategies import tuples, integers, builds, just
 
 
 @pytest.fixture
+def annotations():
+    return [
+        ["white", "black", "white"],
+        ["white", "white", "white"],
+        ["black", "black", "black"],
+        ["white", "", "black"],
+    ]
+
+
+@pytest.fixture
+def labels():
+    return ["white", "black"]
+
+
+@pytest.fixture
 def bin_2r_cm() -> np.ndarray:
     """
     Returns a confusion matrix (rater_a x rater_b) for a binary classification

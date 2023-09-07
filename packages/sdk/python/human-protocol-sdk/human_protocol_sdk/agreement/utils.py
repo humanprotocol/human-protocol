@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 from typing import Sequence, Optional
 
 from pyerf import erf, erfinv
@@ -8,6 +9,37 @@ from .validations import (
     validate_equal_shape,
     validate_same_dtype,
 )
+
+
+def label_counts(annotations: Sequence, labels=None, return_labels=False):
+    """Converts the given sequence of item annotations to an array of label counts per item.
+
+    Args:
+        annotations: A two-dimensional sequence. Rows represent items, columns represent annotators.
+        labels: List of labels to be counted. Entries not found in the list are omitted. If
+            omitted, all labels in the annotations are counted.
+        return_labels: Whether to return labels with the counts. Automatically set to true if labels are
+            inferred.
+
+    Returns:
+        A two-dimensional array of integers. Rows represent items, columns represent labels. If
+    """
+    annotations = np.asarray(annotations)
+
+    if labels is None:
+        labels = np.unique(annotations)
+        return_labels = True
+
+    def lcs(annotations, labels):
+        c = Counter(annotations)
+        return [c.get(label, 0) for label in labels]
+
+    counts = np.asarray([lcs(row, labels) for row in annotations])
+
+    if return_labels:
+        return counts, labels
+
+    return counts
 
 
 def confusion_matrix_from_sequence(
