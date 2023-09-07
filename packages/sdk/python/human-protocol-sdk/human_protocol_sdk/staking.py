@@ -34,6 +34,30 @@ class StakingClientError(Exception):
     pass
 
 
+class LeaderFilter:
+    """
+    A class used to filter leaders.
+    """
+
+    def __init__(
+        self,
+        role: Optional[str] = None,
+    ):
+        """
+        Initializes a LeaderFilter instance.
+
+        Args:
+            role (Optional[str]): Leader role
+            reputation_oracle (Optional[str]): Reputation oracle address
+            recording_oracle (Optional[str]): Recording oracle address
+            status (Optional[Status]): Escrow status
+            date_from (Optional[datetime.datetime]): Created from date
+            date_to (Optional[datetime.datetime]): Created to date
+        """
+
+        self.role = role
+
+
 class StakingClient:
     """
     A class used to manage staking, and allocation on the HUMAN network.
@@ -289,63 +313,84 @@ class StakingClient:
             StakingClientError,
         )
 
-    def get_all_stakers_info(self) -> List[dict]:
-        """Gets all stakers of the protocol
+    def get_leaders(self, filter: LeaderFilter = LeaderFilter()) -> List[dict]:
+        """Get leaders data of the protocol
 
         Returns:
-            List[dict]: List of stakers info
+            List[dict]: List of leaders data
         """
+        from human_protocol_sdk.gql.staking import get_leaders_query
 
-        [
-            stakers,
-            staker_info,
-        ] = self.staking_contract.functions.getListOfStakers().call()
+        leaders_data = get_data_from_subgraph(
+            self.network["subgraph_url"],
+            query=get_leaders_query(filter),
+            params={"role": filter.role},
+        )
+        leaders = leaders_data["data"]["leaders"]
 
         return [
             {
-                "staker": stakers[i],
-                "tokens_staked": staker_info[i][0],
-                "tokens_allocated": staker_info[i][1],
-                "tokens_locked": staker_info[i][2],
-                "tokens_locked_until": staker_info[i][3],
+                "id": leader["id"],
+                "address": leader["address"],
+                "amount_staked": leader["amountStaked"],
+                "amount_allocated": leader["amountAllocated"],
+                "amount_locked": leader["amountLocked"],
+                "locked_until_timestamp": leader["lockedUntilTimestamp"],
+                "amount_withdrawn": leader["amountWithdrawn"],
+                "amount_slashed": leader["amountSlashed"],
+                "reputation": leader["reputation"],
+                "reward": leader["reward"],
+                "amount_jobs_launched": leader["amountJobsLaunched"],
+                "role": leader["role"],
+                "fee": leader["fee"],
+                "public_key": leader["publicKey"],
+                "webhook_url": leader["webhookUrl"],
+                "url": leader["url"],
             }
-            for i in range(len(stakers))
+            for leader in leaders
         ]
 
-    def get_staker_info(self, staker_address: Optional[str] = None) -> Optional[dict]:
-        """Gets the staker info.
+    def get_leader(self, address: Optional[str] = None) -> dict:
+        """Get the leader details.
 
         Args:
-            staker_address (Optional[str]): Address of the staker, defaults to the default account
+            address (Optional[str]): Address of the leader, defaults to the default account
 
         Returns:
-            Optional[dict]: Staker info if staker exists, otherwise None
+            dict: Leader details
         """
+        from human_protocol_sdk.gql.staking import get_leader_query
 
-        if not staker_address:
-            staker_address = self.w3.eth.default_account
+        if not address:
+            if not self.w3.eth.default_account:
+                raise StakingClientError("No address provided")
 
-        [
-            tokens_staked,
-            tokens_allocated,
-            tokens_locked,
-            tokens_locked_until,
-        ] = self.staking_contract.functions.getStaker(staker_address).call()
+            address = self.w3.eth.default_account
 
-        if (
-            tokens_staked == 0
-            and tokens_allocated == 0
-            and tokens_locked == 0
-            and tokens_locked_until == 0
-        ):
-            return None
+        leader_data = get_data_from_subgraph(
+            self.network["subgraph_url"],
+            query=get_leader_query,
+            params={"address": address},
+        )
+        leader = leader_data["data"]["leader"]
 
         return {
-            "staker": staker_address,
-            "tokens_staked": tokens_staked,
-            "tokens_allocated": tokens_allocated,
-            "tokens_locked": tokens_locked,
-            "tokens_locked_until": tokens_locked_until,
+            "id": leader["id"],
+            "address": leader["address"],
+            "amount_staked": leader["amountStaked"],
+            "amount_allocated": leader["amountAllocated"],
+            "amount_locked": leader["amountLocked"],
+            "locked_until_timestamp": leader["lockedUntilTimestamp"],
+            "amount_withdrawn": leader["amountWithdrawn"],
+            "amount_slashed": leader["amountSlashed"],
+            "reputation": leader["reputation"],
+            "reward": leader["reward"],
+            "amount_jobs_launched": leader["amountJobsLaunched"],
+            "role": leader["role"],
+            "fee": leader["fee"],
+            "public_key": leader["publicKey"],
+            "webhook_url": leader["webhookUrl"],
+            "url": leader["url"],
         }
 
     def get_allocation(self, escrow_address: str) -> Optional[dict]:
