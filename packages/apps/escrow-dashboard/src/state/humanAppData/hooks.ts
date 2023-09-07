@@ -26,7 +26,8 @@ export const useEscrowStatisticsByChainId = () => {
   const { data, chainId, days } = humanAppData;
 
   return data[chainId]?.escrowStatistics?.dailyEscrowsData
-    .slice(-days)
+    .slice(0, days)
+    .reverse()
     .map((d) => ({
       ...d,
       timestamp: d.timestamp.getTime(),
@@ -38,7 +39,8 @@ export const useWokerStatisticsByChainId = () => {
   const { data, chainId, days } = humanAppData;
 
   return data[chainId]?.workerStatistics?.dailyWorkersData
-    .slice(-days)
+    .slice(0, days)
+    .reverse()
     .map((d) => ({
       ...d,
       timestamp: d.timestamp.getTime(),
@@ -50,7 +52,8 @@ export const usePaymentStatisticsByChainId = () => {
   const { data, chainId, days } = humanAppData;
 
   return data[chainId]?.paymentStatistics?.dailyPaymentsData
-    .slice(-days)
+    .slice(0, days)
+    .reverse()
     .map((d) => ({
       timestamp: d.timestamp.getTime(),
       totalAmountPaid: utils.formatUnits(d.totalAmountPaid, HM_TOKEN_DECIMALS),
@@ -70,14 +73,17 @@ export const useHMTStatisticsByChainId = () => {
   const { humanAppData } = useSelector((state: AppState) => state);
   const { data, chainId, days } = humanAppData;
 
-  return data[chainId]?.hmtStatistics?.dailyHMTData.slice(-days).map((d) => ({
-    timestamp: d.timestamp.getTime(),
-    totalTransactionCount: d.totalTransactionCount,
-    totalTransactionAmount: utils.formatUnits(
-      d.totalTransactionAmount,
-      HM_TOKEN_DECIMALS
-    ),
-  }));
+  return data[chainId]?.hmtStatistics?.dailyHMTData
+    .slice(0, days)
+    .reverse()
+    .map((d) => ({
+      timestamp: d.timestamp.getTime(),
+      totalTransactionCount: d.totalTransactionCount,
+      totalTransactionAmount: utils.formatUnits(
+        d.totalTransactionAmount,
+        HM_TOKEN_DECIMALS
+      ),
+    }));
 };
 
 export const useTokenStatsByChainId = () => {

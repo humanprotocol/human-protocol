@@ -106,6 +106,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiCardActionArea: {
+      styleOverrides: {
+        focusHighlight: {
+          backgroundColor: '#1406b2',
+        },
+      },
+    },
   },
 });
 

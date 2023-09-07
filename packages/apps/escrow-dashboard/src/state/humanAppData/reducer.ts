@@ -48,7 +48,7 @@ type HumanAppDataState = {
 
 const initialState: HumanAppDataState = {
   loadingKeys: {},
-  chainId: ChainId.POLYGON_MUMBAI,
+  chainId: ChainId.POLYGON,
   days: 30,
   data: {},
   dataLoaded: false,

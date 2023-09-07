@@ -1,4 +1,3 @@
-import { ChainId } from '@human-protocol/sdk';
 import { Box, CircularProgress } from '@mui/material';
 import { FC } from 'react';
 
@@ -8,15 +7,24 @@ import { ViewTitle } from '../ViewTitle';
 import { HumanAppDataView } from './HumanAppDataView';
 import networkSvg from 'src/assets/network.svg';
 import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { useAppDispatch } from 'src/state';
 import {
+  useChainId,
   useHumanAppData,
   useHumanAppDataLoaded,
 } from 'src/state/humanAppData/hooks';
+import { setChainId } from 'src/state/humanAppData/reducer';
 
 export const HumanAppDataContainer: FC = () => {
+  const dispatch = useAppDispatch();
   useHumanAppData();
 
   const loaded = useHumanAppDataLoaded();
+  const chainId = useChainId();
+
+  const handleNetworkChange = (e: any) => {
+    dispatch(setChainId(e.target.value));
+  };
 
   return (
     <Box id="human-app-data" mt={{ xs: '44px', md: '51px' }}>
@@ -34,9 +42,10 @@ export const HumanAppDataContainer: FC = () => {
         <ViewTitle title="HUMAN App data" iconUrl={networkSvg} />
         <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '513px' } }}>
           <NetworkSelect
-            value={ChainId.POLYGON_MUMBAI}
+            value={chainId}
             supportedChainIds={V2_SUPPORTED_CHAIN_IDS}
             width="100%"
+            onChange={handleNetworkChange}
           />
         </Box>
         <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '368px' } }}>
