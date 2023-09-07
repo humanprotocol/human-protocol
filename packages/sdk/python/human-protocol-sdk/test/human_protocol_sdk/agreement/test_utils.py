@@ -10,9 +10,9 @@ def test_confusion_matrix_from_sequence(
     seq_values, seq_labels, seq_labels_nan, seq_labels_long, bin_2r_cm
 ):
     assert np.all(confusion_matrix_from_sequence(seq_values, seq_values) == np.eye(4))
-    assert np.all(
-        confusion_matrix_from_sequence(seq_labels, seq_labels_nan) == np.eye(2)
-    )
+    res = np.eye(3)
+    res[0, 0] = 0
+    assert np.all(confusion_matrix_from_sequence(seq_labels, seq_labels_nan) == res)
 
     with pytest.raises(ValueError, match="same shape"):
         confusion_matrix_from_sequence(seq_labels_long, seq_labels_nan)

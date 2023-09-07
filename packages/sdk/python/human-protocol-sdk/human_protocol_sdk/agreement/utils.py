@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Counter
+from math import nan
 from typing import Sequence, Optional
 
 from pyerf import erf, erfinv
@@ -43,7 +44,11 @@ def label_counts(annotations: Sequence, labels=None, return_labels=False):
 
 
 def confusion_matrix_from_sequence(
-    a: Sequence, b: Sequence, labels: Optional[Sequence] = None
+    a: Sequence,
+    b: Sequence,
+    labels: Optional[Sequence] = None,
+    nan_values: Optional[Sequence] = None,
+    return_labels=False,
 ):
     """Generate an N X N confusion matrix from the given sequence of values
         a and b, where N is the number of unique labels.
@@ -51,9 +56,9 @@ def confusion_matrix_from_sequence(
     Args:
         a: A sequence of labels.
         b: Another sequence of labels.
-        labels: The labels contained in the records. Must contain all labels in
-            the given records and may contain labels that are not found in the
-            records.
+        labels: The to be included in the matrix.
+        nan_values: Values in the records to be counted as invalid.
+        return_labels: Whether to return labels used in the confusion matrix.
     """
     a = np.asarray(a)
     b = np.asarray(b)
@@ -63,29 +68,40 @@ def confusion_matrix_from_sequence(
     validate_nd(b, 1)
     validate_equal_shape(a, b)
 
-    # filter NaN values
-    M = np.vstack((a, b)).T  # 2 x N Matrix
-    if M.dtype.kind in "UO":  # string types
-        mask = M != "nan"
-    else:
-        mask = ~np.isnan(M)
-    a, b = M[np.all(mask, axis=1)].T
+    # define nan values if not explicitly passed
+    if nan_values is None:
+        if a.dtype.kind in "UO":
+            nan_values = [None, "", "None", "nan"]
+        else:
+            nan_values = [np.nan, None, nan]
 
     # create list of unique labels
     if labels is None:
-        labels = np.concatenate([a, b])
-    labels = np.unique(labels)
+        labels = np.unique(np.concatenate([a, b]))
+    else:
+        labels = np.asarray(labels)
 
-    # convert labels to indices
+    mask = ~np.isin(labels, nan_values)
+    labels = labels[mask]
+
+    # map labels to ids
     label_to_id = {label: i for i, label in enumerate(labels)}
-    map_fn = np.vectorize(lambda x: label_to_id[x])
+    map_fn = np.vectorize(lambda x: label_to_id.get(x, -1))
     a = map_fn(a)
     b = map_fn(b)
+
+    # filter NaN values
+    M = np.vstack((a, b)).T  # 2 x N Matrix
+    mask = M != -1
+    a, b = M[np.all(mask, axis=1)].T
 
     # get indices and counts to populate confusion matrix
     confusion_matrix = np.zeros((labels.size, labels.size), dtype=int)
     ijs, counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
     confusion_matrix[ijs[0], ijs[1]] = counts
+
+    if return_labels:
+        return confusion_matrix, labels
 
     return confusion_matrix
 
