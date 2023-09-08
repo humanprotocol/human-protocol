@@ -69,6 +69,7 @@ type InputFile = {
     content: any,
 };
 
+// TODO: Can be used for future implementaton in SDK Storage module
 /**
    * **Upload file to cloud storage**
    *
