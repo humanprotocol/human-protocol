@@ -27,4 +27,5 @@ export enum ErrorResults {
  */
 export enum ErrorManifest {
   ManifestUrlDoesNotExist = 'Manifest url does not exist',
+  UnsupportedManifestType = 'Unsupported manifest type'
 }

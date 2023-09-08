@@ -2,6 +2,9 @@ export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
 
+export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip'
+export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json'
+
 export const CURSE_WORDS = [
   '4r5e',
   '5h1t',
