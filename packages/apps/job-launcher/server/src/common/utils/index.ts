@@ -70,3 +70,27 @@ export const parseUrl = (
 
   throw new Error('Invalid URL');
 };
+
+export function parseMinioURL(url: string) {
+  const anchor = document.createElement('a');
+  anchor.href = url;
+
+  const useSSL = anchor.protocol === 'https:' ? true : false;
+
+  const host = anchor.hostname;
+  const port = Number(anchor.port);
+
+  const parts = anchor.pathname.split('/').filter(part => part);
+
+  const bucket = parts[0];
+
+  const filename = parts.length > 1 ? parts[1] : null;
+
+  return {
+      useSSL,
+      host,
+      port,
+      bucket,
+      filename
+  };
+}

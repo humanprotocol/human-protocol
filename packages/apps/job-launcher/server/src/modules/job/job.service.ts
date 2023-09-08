@@ -46,7 +46,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseUrl } from '../../common/utils';
+import { getRate, parseMinioURL, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -67,7 +67,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { CVAT_JOB_TYPES, JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
@@ -689,7 +689,7 @@ export class JobService {
 
     let manifestDetails;
  
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE ) {
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
       manifestDetails = {
         chainId,
         title: (manifest as FortuneManifestDto).requesterTitle,
@@ -697,19 +697,29 @@ export class JobService {
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: (manifest as FortuneManifestDto).submissionsRequired,
         tokenAddress,
-        fundAmount: (manifest as FortuneManifestDto).fundAmount,
+        fundAmount: jobEntity.fundAmount,
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
         reputationOracleAddress
       }
-    } else {
+    } else if (CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)) {
+      const { useSSL, host, port, bucket } = parseMinioURL((manifest as CvatManifestDto).data.data_url)
+
+      const storageClient = new StorageClient({
+        endPoint: host,
+        port,
+        useSSL,
+      });
+      
+      const dataset = await storageClient.listObjects(bucket)
+      
       manifestDetails = {
         chainId,
         requestType: (manifest as CvatManifestDto).annotation.type,
-        submissionsRequired: (manifest as CvatManifestDto).annotation.job_size,
+        submissionsRequired: dataset.length,
         tokenAddress,
-        fundAmount: Number((manifest as CvatManifestDto).job_bounty),
+        fundAmount: jobEntity.fundAmount,
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
@@ -725,7 +735,7 @@ export class JobService {
         balance: Number(ethers.utils.formatEther(balance)),
         paidOut
       },
-      manifest: manifestDetails,
+      manifest: manifestDetails!,
       staking: {
         staker: allocation.staker,
         allocated: allocation.tokens.toNumber(),
