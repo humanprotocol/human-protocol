@@ -2,6 +2,7 @@ import datetime
 from web3 import Web3
 
 from human_protocol_sdk.escrow import EscrowClient, EscrowFilter, Status
+from human_protocol_sdk.staking import StakingClient, LeaderFilter
 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
 if __name__ == "__main__":
@@ -62,3 +63,9 @@ if __name__ == "__main__":
             )
         )
     )
+
+    staking_client = StakingClient(w3)
+    leaders = staking_client.get_leaders()
+    print(leaders)
+    print(staking_client.get_leader(leaders[0]["address"]))
+    print(staking_client.get_leaders(LeaderFilter(role="Job Launcher")))

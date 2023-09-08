@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers';
+import { EscrowStatus } from './types';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -13,22 +14,28 @@ export interface IReward {
   amount: BigNumber;
 }
 
-export interface IStaker {
-  staker: string;
-  tokensStaked: BigNumber;
-  tokensAllocated: BigNumber;
-  tokensLocked: BigNumber;
-  tokensLockedUntil: BigNumber;
-  tokensAvailable: BigNumber;
+export interface ILeader {
+  id: string;
+  address: string;
+  amountStaked: BigNumber;
+  amountAllocated: BigNumber;
+  amountLocked: BigNumber;
+  lockedUntilTimestamp: BigNumber;
+  amountWithdrawn: BigNumber;
+  amountSlashed: BigNumber;
+  reputation: BigNumber;
+  reward: BigNumber;
+  amountJobsLaunched: BigNumber;
+  role?: string;
+  fee?: BigNumber;
+  publicKey?: string;
+  webhookUrl?: string;
+  url?: string;
 }
 
-type EscrowStatus =
-  | 'Launched'
-  | 'Pending'
-  | 'Partial'
-  | 'Paid'
-  | 'Complete'
-  | 'Cancelled';
+export interface ILeadersFilter {
+  role?: string;
+}
 
 export interface IEscrowsFilter {
   launcher?: string;
@@ -58,4 +65,5 @@ export interface IKeyPair {
 export interface IStatisticsParams {
   from?: Date;
   to?: Date;
+  limit?: number;
 }

@@ -24,14 +24,14 @@ import {
   ErrorInvalidStakingValueSign,
   ErrorInvalidStakingValueType,
   ErrorProviderDoesNotExist,
-  ErrorStakingGetStakers,
   ErrorUnsupportedChainID,
 } from './error';
-import { IAllocation, IReward, IStaker } from './interfaces';
+import { IAllocation, ILeader, ILeadersFilter, IReward } from './interfaces';
 import { NetworkData } from './types';
 import { throwError } from './utils';
 import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
 import { RewardAddedEventData } from './graphql';
+import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
 
 export class StakingClient {
   public signerOrProvider: Signer | Provider;
@@ -333,75 +333,45 @@ export class StakingClient {
   }
 
   /**
-   * **Returns the staking information about an staker address.*
+   * **Returns the leader details for a given address**
    *
-   * @param {string} staker - Address of the staker
-   * @returns {Promise<IStaker>} - Return staking information of the specified address
+   * @param {string} address - Leader address
+   * @returns {Promise<ILeader>} - Return leader details
    * @throws {Error} - An error object if an error occurred, result otherwise
    */
-  public async getStaker(staker: string): Promise<IStaker> {
-    if (!ethers.utils.isAddress(staker)) {
+  public async getLeader(address: string): Promise<ILeader> {
+    if (!ethers.utils.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
     }
 
     try {
-      const result = await this.stakingContract.getStaker(staker);
+      const { leader } = await gqlFetch<{
+        leader: ILeader;
+      }>(this.network.subgraphUrl, GET_LEADER_QUERY, {
+        address,
+      });
 
-      const tokensStaked = BigNumber.from(result.tokensStaked),
-        tokensAllocated = BigNumber.from(result.tokensAllocated),
-        tokensLocked = BigNumber.from(result.tokensLocked),
-        tokensLockedUntil = BigNumber.from(result.tokensLockedUntil);
-
-      const tokensAvailable = tokensStaked
-        .sub(tokensAllocated)
-        .sub(tokensLocked);
-
-      return {
-        staker,
-        tokensStaked,
-        tokensAllocated,
-        tokensLocked,
-        tokensLockedUntil,
-        tokensAvailable,
-      };
+      return leader;
     } catch (e) {
       return throwError(e);
     }
   }
 
   /**
-   * **Returns the staking information about all stakers of the protocol.*
+   * **Returns the leaders data **
    *
-   * @returns {Promise<IStaker[]>} - Return an array with all stakers information
+   * @returns {Promise<ILeader[]>} - Return an array with leaders data
    * @throws {Error} - An error object if an error occurred, results otherwise
    */
-  public async getAllStakers(): Promise<IStaker[]> {
+  public async getLeaders(filter: ILeadersFilter = {}): Promise<ILeader[]> {
     try {
-      const result = await this.stakingContract.getListOfStakers();
-
-      if (result[1].length === 0) {
-        throw ErrorStakingGetStakers;
-      }
-
-      return result[1].map((staker: any, index: number) => {
-        const tokensStaked = BigNumber.from(staker.tokensStaked),
-          tokensAllocated = BigNumber.from(staker.tokensAllocated),
-          tokensLocked = BigNumber.from(staker.tokensLocked),
-          tokensLockedUntil = BigNumber.from(staker.tokensLockedUntil);
-
-        const tokensAvailable = tokensStaked
-          .sub(tokensAllocated)
-          .sub(tokensLocked);
-
-        return {
-          staker: result[0][index],
-          tokensStaked,
-          tokensAllocated,
-          tokensLocked,
-          tokensLockedUntil,
-          tokensAvailable,
-        };
+      const { leaders } = await gqlFetch<{
+        leaders: ILeader[];
+      }>(this.network.subgraphUrl, GET_LEADERS_QUERY(filter), {
+        role: filter.role,
       });
+
+      return leaders;
     } catch (e) {
       return throwError(e);
     }
