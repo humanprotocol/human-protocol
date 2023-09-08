@@ -32,7 +32,7 @@ import { ConfigNames } from '../../common/config';
 import { WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
-import { copyFileFromURLToBucket, uploadFiles } from 'src/common/utils';
+import { copyFileFromURLToBucket } from 'src/common/utils';
 
 
 @Injectable()
@@ -81,16 +81,7 @@ export class WebhookService {
   public async createIncomingWebhook(
     dto: WebhookIncomingDto,
   ): Promise<boolean> {
-    try {      
-
-      await copyFileFromURLToBucket(
-        `http://127.0.0.1:9000/solution/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
-        this.bucket,
-        'newName.zip',
-        this.storageParams,
-        this.storageCredentials
-      )
-
+    try { 
       const webhookEntity = await this.webhookRepository.create({
         chainId: dto.chainId,
         escrowAddress: dto.escrowAddress,
@@ -118,24 +109,25 @@ export class WebhookService {
    */
   public async processPendingWebhook(webhookEntity: WebhookIncomingEntity): Promise<boolean> {
     try {
-      const signer = this.web3Service.getSigner(webhookEntity.chainId);
+      const { chainId, escrowAddress } = webhookEntity;
+      const signer = this.web3Service.getSigner(chainId);
       const escrowClient = await EscrowClient.build(signer);
   
-      const manifestUrl = await escrowClient.getManifestUrl(webhookEntity.escrowAddress);
+      const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
       if (!manifestUrl) {
         this.logger.log(ErrorManifest.ManifestUrlDoesNotExist, WebhookService.name);
         throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
       }
 
       const manifest: FortuneManifestDto | CvatManifestDto = await StorageClient.downloadFileFromUrl(manifestUrl);
-      const intermediateResultsUrl = await this.getIntermediateResultsUrl(webhookEntity.chainId, webhookEntity.escrowAddress);
+      const intermediateResultsUrl = await this.getIntermediateResultsUrl(chainId, escrowAddress);
   
       let results: { recipients: string[], amounts: BigNumber[], url: string, hash: string, checkPassed: boolean };
   
       if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
         results = await this.processFortune(manifest as FortuneManifestDto, intermediateResultsUrl);
       } else if ((manifest as CvatManifestDto).annotation.type === JobRequestType.IMAGE_LABEL_BINARY) {
-        results = await this.processImageLabelBinary(manifest as CvatManifestDto, intermediateResultsUrl);
+        results = await this.processCvat(manifest as CvatManifestDto, intermediateResultsUrl);
       } else {
         this.logger.log(ErrorManifest.UnsupportedManifestType, WebhookService.name);
         throw new Error(ErrorManifest.UnsupportedManifestType);
@@ -148,7 +140,7 @@ export class WebhookService {
         retriesCount: 0,
       });
   
-      await escrowClient.bulkPayOut(webhookEntity.escrowAddress, results.recipients, results.amounts, results.url, results.hash);
+      await escrowClient.bulkPayOut(escrowAddress, results.recipients, results.amounts, results.url, results.hash);
   
       return true;
     } catch (e) {
@@ -184,7 +176,7 @@ export class WebhookService {
    * @param intermediateResultsUrl The URL to retrieve intermediate results.
    * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
    */
-  private async processImageLabelBinary(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
+  private async processCvat(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
       const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, CVAT_RESULTS_ANNOTATIONS_FILENAME, this.bucket, this.storageParams, this.storageCredentials);
       const annotations: CvatAnnotationMeta = await StorageClient.downloadFileFromUrl(`${intermediateResultsUrl}${CVAT_VALIDATION_META_FILENAME}`);
       
