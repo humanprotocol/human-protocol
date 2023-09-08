@@ -23,16 +23,17 @@ import {
   ErrorWebhook,
 } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
-import { CVAT_RESULTS_ANNOTATIONS_FILENAME, CVAT_VALIDATION_META_FILENAME, RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { CVAT_JOB_TYPES, CVAT_RESULTS_ANNOTATIONS_FILENAME, CVAT_VALIDATION_META_FILENAME, RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { checkCurseWords } from '../../common/helpers/utils';
 import { ReputationService } from '../reputation/reputation.service';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import { WebhookStatus } from '../../common/enums';
+import { SortDirection, WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
 import { copyFileFromURLToBucket } from 'src/common/utils';
+import { LessThanOrEqual } from 'typeorm';
 
 
 @Injectable()
@@ -104,10 +105,24 @@ export class WebhookService {
    * Processes a pending webhook. Validates and processes incoming data, 
    * then sends payments based on the processing results.
    * @param webhookEntity The entity representing the webhook data.
-   * @returns {Promise<boolean>} Returns true if processing is successful, false otherwise.
    * @throws {Error} Will throw an error if processing fails at any step.
    */
-  public async processPendingWebhook(webhookEntity: WebhookIncomingEntity): Promise<boolean> {
+  public async processPendingCronJob(): Promise<boolean> {
+    const webhookEntity = await this.webhookRepository.findOne(
+      {
+        status: WebhookStatus.PENDING,
+        retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
+      {
+        order: {
+          waitUntil: SortDirection.ASC,
+        },
+      },
+    );
+
+    if (!webhookEntity) return false;
+
     try {
       const { chainId, escrowAddress } = webhookEntity;
       const signer = this.web3Service.getSigner(chainId);
@@ -126,12 +141,14 @@ export class WebhookService {
   
       if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
         results = await this.processFortune(manifest as FortuneManifestDto, intermediateResultsUrl);
-      } else if ((manifest as CvatManifestDto).annotation.type === JobRequestType.IMAGE_LABEL_BINARY) {
+      } else if (CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)) {
         results = await this.processCvat(manifest as CvatManifestDto, intermediateResultsUrl);
       } else {
         this.logger.log(ErrorManifest.UnsupportedManifestType, WebhookService.name);
         throw new Error(ErrorManifest.UnsupportedManifestType);
       }
+  
+      await escrowClient.bulkPayOut(escrowAddress, results.recipients, results.amounts, results.url, results.hash);
   
       await this.webhookRepository.updateOne({ id: webhookEntity.id }, {
         resultsUrl: results.url,
@@ -139,9 +156,7 @@ export class WebhookService {
         status: WebhookStatus.PAID,
         retriesCount: 0,
       });
-  
-      await escrowClient.bulkPayOut(escrowAddress, results.recipients, results.amounts, results.url, results.hash);
-  
+
       return true;
     } catch (e) {
       return await this.handleWebhookError(webhookEntity, e);
@@ -177,10 +192,10 @@ export class WebhookService {
    * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
    */
   private async processCvat(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
-      const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, CVAT_RESULTS_ANNOTATIONS_FILENAME, this.bucket, this.storageParams, this.storageCredentials);
-      const annotations: CvatAnnotationMeta = await StorageClient.downloadFileFromUrl(`${intermediateResultsUrl}${CVAT_VALIDATION_META_FILENAME}`);
+      const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, this.bucket, CVAT_RESULTS_ANNOTATIONS_FILENAME, this.storageParams, this.storageCredentials);
+      const annotations: CvatAnnotationMeta = await StorageClient.downloadFileFromUrl(`${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`);
       
-      const bountyValue = BigNumber.from(manifest.job_bounty);
+      const bountyValue = ethers.utils.parseUnits(manifest.job_bounty, 18);
       const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
           if (curr.annotation_quality >= manifest.validation.min_quality) {
               const existingValue = accMap.get(curr.annotator_wallet_address) || BigNumber.from(0);
@@ -231,9 +246,19 @@ export class WebhookService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    return escrowClient.getIntermediateResultsUrl(
-      escrowAddress,
-    );
+    const url = 'http://127.0.0.1:9010/solution'//await escrowClient.getIntermediateResultsUrl(
+    //  escrowAddress,
+    //);
+
+    if (!url) {
+      this.logger.log(
+        ErrorResults.IntermediateResultsURLNotSet,
+        WebhookService.name,
+      );
+      throw new Error(ErrorResults.IntermediateResultsURLNotSet);
+    }
+
+    return url;
   }
 
   /**
@@ -288,17 +313,29 @@ export class WebhookService {
 
   /**
    * Processing a webhook of an entity with a paid status.
-   * @param webhookEntity - The webhook is the entity to process.
    * @returns {Promise<boolean>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
-  public async processPaidWebhook(
-    webhookEntity: WebhookIncomingEntity,
-  ): Promise<boolean> {
-    const signer = this.web3Service.getSigner(webhookEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer);
+  public async processPaidCronJob(): Promise<boolean> {
+    const webhookEntity = await this.webhookRepository.findOne(
+      {
+        status: WebhookStatus.PAID,
+        retriesCount: LessThanOrEqual(RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date()),
+      },
+      {
+        order: {
+          waitUntil: SortDirection.ASC,
+        },
+      },
+    );
 
+    if (!webhookEntity) return false;
+    
     try {
+      const signer = this.web3Service.getSigner(webhookEntity.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+
       const finalResultsUrl = await escrowClient.getResultsUrl(
         webhookEntity.escrowAddress,
       );
@@ -327,11 +364,11 @@ export class WebhookService {
         throw new Error(ErrorManifest.ManifestUrlDoesNotExist);
       }
 
-      const manifest: ManifestDto = await StorageClient.downloadFileFromUrl(
+      const manifest: FortuneManifestDto | CvatManifestDto  = await StorageClient.downloadFileFromUrl(
         manifestUrl,
       );
 
-      if (manifest.requestType === JobRequestType.FORTUNE) {
+      if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
         await Promise.all(
           finalResults.map(async (result: FortuneFinalResult) => {
             await this.reputationService.increaseReputation(
@@ -371,32 +408,7 @@ export class WebhookService {
 
       return true;
     } catch (e) {
-      if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {
-        await this.webhookRepository.updateOne(
-          {
-            id: webhookEntity.id,
-          },
-          { status: WebhookStatus.FAILED },
-        );
-      } else {
-        await this.webhookRepository.updateOne(
-          {
-            id: webhookEntity.id,
-          },
-          {
-            retriesCount: webhookEntity.retriesCount + 1,
-            waitUntil: new Date(),
-          },
-        );
-      }
-
-      this.logger.log(
-        'An error occurred during webhook validation: ',
-        e,
-        WebhookService.name,
-      );
-
-      return false;
+      return await this.handleWebhookError(webhookEntity, e);
     }
   }
 }

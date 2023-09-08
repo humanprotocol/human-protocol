@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../../common/decorators';
 import { WebhookService } from './webhook.service';
@@ -16,5 +16,17 @@ export class WebhookController {
     @Body() data: WebhookIncomingDto,
   ): Promise<boolean> {
     return this.webhookService.createIncomingWebhook(data);
+  }
+
+  @Public()
+  @Get('/cron/pending')
+  public async processPendingCronJob(): Promise<any> {
+    return this.webhookService.processPendingCronJob();
+  }
+
+  @Public()
+  @Get('/cron/paid')
+  public async processPaidCronJob(): Promise<any> {
+    return this.webhookService.processPaidCronJob();
   }
 }

@@ -1,8 +1,9 @@
-import { StorageClient, StorageCredentials, StorageParams, UploadFile } from '@human-protocol/sdk';
+import { StorageCredentials, StorageParams, UploadFile } from '@human-protocol/sdk';
 import * as Minio from 'minio';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
+import axios from 'axios';
 
 /**
    * **Copy file from a URL to cloud storage**
@@ -28,10 +29,10 @@ export async function copyFileFromURLToBucket(
             secretKey: credentials?.secretKey ?? '',
         });
 
-        const data = await StorageClient.downloadFileFromUrl(url);
+        const { data } = await axios.get(url, { responseType: 'stream' });
 
-        const hash = crypto.createHash('sha1').update(data).digest('hex');
-        const key = `s3${hash}.json`;
+        const hash = await hashStream(data);
+        const key = `s3${hash}.zip`;
 
         const stream = new PassThrough();
         data.pipe(stream);
@@ -47,10 +48,10 @@ export async function copyFileFromURLToBucket(
 
         return {
             key,
-            url: `${this.clientParams.useSSL ? 'https' : 'http'}://${
-              this.clientParams.endPoint
+            url: `${clientParams.useSSL ? 'https' : 'http'}://${
+              clientParams.endPoint
             }${
-              this.clientParams.port ? `:${this.clientParams.port}` : ''
+              clientParams.port ? `:${clientParams.port}` : ''
             }/${destBucket}/${key}`,
             hash,
           };
@@ -58,6 +59,24 @@ export async function copyFileFromURLToBucket(
         console.error('Error copying file:', error);
         throw new Error('File not uploaded');
     }
+}
+
+function hashStream(stream: Readable): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const hash = crypto.createHash('sha1');
+        
+        stream.on('data', (chunk) => {
+            hash.update(chunk);
+        });
+
+        stream.on('end', () => {
+            resolve(hash.digest('hex'));
+        });
+
+        stream.on('error', (error) => {
+            reject(error);
+        });
+    });
 }
 
 

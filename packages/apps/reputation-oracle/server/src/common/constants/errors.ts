@@ -18,6 +18,7 @@ export enum ErrorReputation {
  * Represents error messages related to results.
  */
 export enum ErrorResults {
+  IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
   NoIntermediateResultsFound = 'No intermediate results found',
   NoResultsHaveBeenVerified = 'No results have been verified',
 }
