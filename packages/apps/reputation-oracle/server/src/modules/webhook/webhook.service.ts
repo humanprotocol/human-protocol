@@ -32,7 +32,7 @@ import { ConfigNames } from '../../common/config';
 import { SortDirection, WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
-import { copyFileFromURLToBucket } from 'src/common/utils';
+import { copyFileFromURLToBucket } from '../../common/utils';
 import { LessThanOrEqual } from 'typeorm';
 
 
@@ -170,7 +170,7 @@ export class WebhookService {
    * @param intermediateResultsUrl The URL to retrieve intermediate results.
    * @returns {Promise<ProcessingResultDto>} An object containing processing results including recipients, amounts, and storage data.
    */
-  private async processFortune(manifest: FortuneManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
+  public async processFortune(manifest: FortuneManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
       const intermediateResults = await this.getIntermediateResults(intermediateResultsUrl) as FortuneFinalResult[];
       const finalResults = await this.finalizeFortuneResults(intermediateResults);
       const checkPassed = intermediateResults.length <= finalResults.length;
@@ -191,7 +191,7 @@ export class WebhookService {
    * @param intermediateResultsUrl The URL to retrieve intermediate results.
    * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
    */
-  private async processCvat(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
+  public async processCvat(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
       const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, this.bucket, CVAT_RESULTS_ANNOTATIONS_FILENAME, this.storageParams, this.storageCredentials);
       const annotations: CvatAnnotationMeta = await StorageClient.downloadFileFromUrl(`${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`);
       
@@ -217,7 +217,7 @@ export class WebhookService {
    * @param error The error object thrown during processing.
    * @returns {Promise<boolean>} Returns false indicating that an error occurred.
    */
-  private async handleWebhookError(webhookEntity: WebhookIncomingEntity, error: any): Promise<boolean> {
+  public async handleWebhookError(webhookEntity: WebhookIncomingEntity, error: any): Promise<boolean> {
       if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {
           await this.webhookRepository.updateOne({ id: webhookEntity.id }, { status: WebhookStatus.FAILED });
       } else {
