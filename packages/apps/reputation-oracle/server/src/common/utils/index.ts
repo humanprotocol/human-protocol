@@ -10,7 +10,6 @@ import axios from 'axios';
    *
    * @param {string} url - URL of the source file
    * @param {string} destBucket - Destination bucket name
-   * @param {string} destObjectName - Name of the object/file in the destination bucket
    * @param {StorageParams} clientParams - Configuration parameters for cloud storage
    * @param {StorageCredentials} [credentials] - Optional. Cloud storage access data. If credentials are not provided, use anonymous access to the bucket
    * @returns {Promise<UploadFile>} - Uploaded file with key/hash
@@ -18,7 +17,6 @@ import axios from 'axios';
 export async function copyFileFromURLToBucket(
     url: string,
     destBucket: string,
-    destObjectName: string,
     clientParams: StorageParams,
     credentials?: StorageCredentials,
 ): Promise<UploadFile> {
@@ -38,13 +36,13 @@ export async function copyFileFromURLToBucket(
         data.pipe(stream);
 
         await new Promise((resolve, reject) => {
-            client.putObject(destBucket, destObjectName, stream, (err, etag) => {
+            client.putObject(destBucket, key, stream, (err, etag) => {
                 if (err) reject(err);
                 else resolve(etag);
             });
         });
 
-        console.log(`File from ${url} copied to ${destBucket}/${destObjectName}`);
+        console.log(`File from ${url} copied to ${destBucket}/${key}`);
 
         return {
             key,

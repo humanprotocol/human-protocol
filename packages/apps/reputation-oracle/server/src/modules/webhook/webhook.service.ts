@@ -192,7 +192,7 @@ export class WebhookService {
    * @returns {Promise<ProcessingResultDto>} Returns the processing results including recipients, amounts, and storage data.
    */
   public async processCvat(manifest: CvatManifestDto, intermediateResultsUrl: string): Promise<ProcessingResultDto> {
-      const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, this.bucket, CVAT_RESULTS_ANNOTATIONS_FILENAME, this.storageParams, this.storageCredentials);
+      const { url, hash } = await copyFileFromURLToBucket(`${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`, this.bucket, this.storageParams, this.storageCredentials);
       const annotations: CvatAnnotationMeta = await StorageClient.downloadFileFromUrl(`${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`);
       
       const bountyValue = ethers.utils.parseUnits(manifest.job_bounty, 18);
@@ -334,22 +334,6 @@ export class WebhookService {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
       const escrowClient = await EscrowClient.build(signer);
 
-      const finalResultsUrl = await escrowClient.getResultsUrl(
-        webhookEntity.escrowAddress,
-      );
-
-      const finalResults = await StorageClient.downloadFileFromUrl(
-        finalResultsUrl,
-      ).catch(() => []);
-
-      if (finalResults.length === 0) {
-        this.logger.log(
-          ErrorResults.NoResultsHaveBeenVerified,
-          WebhookService.name,
-        );
-        throw new Error(ErrorResults.NoResultsHaveBeenVerified);
-      }
-
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,
       );
@@ -367,6 +351,22 @@ export class WebhookService {
       );
 
       if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+        const finalResultsUrl = await escrowClient.getResultsUrl(
+          webhookEntity.escrowAddress,
+        );
+  
+        const finalResults = await StorageClient.downloadFileFromUrl(
+          finalResultsUrl,
+        ).catch(() => []);
+  
+        if (finalResults.length === 0) {
+          this.logger.log(
+            ErrorResults.NoResultsHaveBeenVerified,
+            WebhookService.name,
+          );
+          throw new Error(ErrorResults.NoResultsHaveBeenVerified);
+        }
+        
         await Promise.all(
           finalResults.map(async (result: FortuneFinalResult) => {
             await this.reputationService.increaseReputation(
