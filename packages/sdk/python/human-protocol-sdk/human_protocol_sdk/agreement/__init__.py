@@ -1,2 +1,2 @@
-from .measures import percent_agreement, cohens_kappa, fleiss_kappa
+from .measures import percentage, cohens_kappa, fleiss_kappa, agreement
 from .bootstrap import bootstrap_ci

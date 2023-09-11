@@ -1,14 +1,85 @@
 import numpy as np
 
+from warnings import warn
+
 from .validations import (
     validate_incidence_matrix,
     validate_confusion_matrix,
 )
 
+from .utils import label_counts, confusion_matrix_from_sequence
 
-def percent_agreement(
-    data: np.ndarray, data_format="im", invalid_return=np.nan
-) -> float:
+from typing import Sequence, Optional
+
+
+def agreement(
+    data: Sequence,
+    method="fleiss_kappa",
+    data_format="annotations",
+    labels: Optional[Sequence] = None,
+    nan_values: Optional[Sequence] = None,
+    invalid_return=np.nan,
+) -> dict:
+    """
+    Calculates agreement across the given data using the given method.
+
+    Args:
+        data: Annotated data.
+        method: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
+        data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
+        labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
+        nan_values: Values to be counted as invalid and filter out from the data. If omitted, sensible defaults will
+            be used based on the data type of the annotations.
+        invalid_return: The value to return in case the provided data is invalid for the given method.
+
+    Returns: Agreement score.
+    """
+    data = np.asarray(data)
+
+    # convert data
+    if data_format == "annotations":
+        if method == "cohens_kappa":
+            # input validation
+            if data.shape[1] < 2:  # only a single annotator present
+                raise ValueError(
+                    "Annotations contain only a single annotator. "
+                    "Must exactly contain two"
+                )
+            elif data.shape[1] > 2:
+                # TODO: add pairwise api
+                warn(
+                    "Annotations contain more than two annotators. Only first"
+                    ' two will be regarded. Consider using method "fleiss_kappa".'
+                )
+
+            data, labels = confusion_matrix_from_sequence(
+                data.T[0], data.T[1], labels, return_labels=True
+            )
+        else:
+            data, labels = label_counts(data, labels, True)
+
+    score = None
+    match method:
+        case "fleiss_kappa":
+            score = fleiss_kappa(data, invalid_return)
+        case "cohens_kappa":
+            score = cohens_kappa(data, invalid_return)
+        case "percentage":
+            score = percentage(data, invalid_return=invalid_return)
+        case _:
+            raise ValueError(f"Provided method {method} is not supported.")
+
+    return {
+        "name": method,
+        "score": score,
+        "labels": labels,
+        "nan_values": nan_values,
+        "data": data,
+        "data_format": data_format,
+    }
+
+
+def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> float:
     """
     Returns the overall agreement percentage observed across the data.
 
@@ -50,7 +121,7 @@ def cohens_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     """
     data = np.asarray(data)
 
-    agreement_observed = percent_agreement(data, "cm")
+    agreement_observed = percentage(data, "cm")
     agreement_expected = np.matmul(data.sum(0), data.sum(1)) / data.sum() ** 2
 
     kappa = (agreement_observed - agreement_expected) / (1 - agreement_expected)
@@ -72,7 +143,7 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     """
     data = np.asarray(data)
 
-    agreement_observed = percent_agreement(data, "im")
+    agreement_observed = percentage(data, "im")
 
     class_probabilities = data.sum(0) / data.sum()
     agreement_expected = np.power(class_probabilities, 2).sum()
