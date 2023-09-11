@@ -246,9 +246,7 @@ export class WebhookService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const url = 'http://127.0.0.1:9010/solution'//await escrowClient.getIntermediateResultsUrl(
-    //  escrowAddress,
-    //);
+    const url = await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
     if (!url) {
       this.logger.log(
