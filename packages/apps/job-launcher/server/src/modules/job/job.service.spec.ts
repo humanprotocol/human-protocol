@@ -792,6 +792,7 @@ describe('JobService', () => {
         annotation: {
           labels: [{ name: 'label1' }],
           description: MOCK_REQUESTER_DESCRIPTION,
+          user_guide: MOCK_FILE_URL,
           type: JobRequestType.IMAGE_LABEL_BINARY,
           job_size: 10,
           max_time: 300,

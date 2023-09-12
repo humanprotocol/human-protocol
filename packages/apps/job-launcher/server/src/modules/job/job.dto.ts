@@ -17,7 +17,7 @@ import {
   JobStatus,
   JobStatusFilter,
 } from '../../common/enums/job';
-import { EventType, OracleType } from '../../common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -75,6 +75,10 @@ export class JobCvatDto extends JobDto {
   @ApiProperty()
   @IsString()
   public gtUrl: string;
+
+  @ApiProperty()
+  @IsUrl()
+  public userGuide: string;
 
   @ApiProperty()
   @IsEnum(JobRequestType)
@@ -149,6 +153,9 @@ export class Annotation {
 
   @IsString()
   description: string;
+
+  @IsString()
+  user_guide: string;
 
   @IsEnum(JobRequestType)
   type: JobRequestType;

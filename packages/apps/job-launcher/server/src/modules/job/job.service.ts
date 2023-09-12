@@ -153,6 +153,7 @@ export class JobService {
         annotation: {
           labels: dto.labels.map((item) => ({ name: item })),
           description: dto.requesterDescription,
+          user_guide: dto.userGuide,
           type: requestType,
           job_size: Number(
             this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
