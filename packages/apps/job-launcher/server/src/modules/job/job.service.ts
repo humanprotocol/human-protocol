@@ -65,7 +65,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { FROM_BLOCK_DIFF, JOB_RETRIES_COUNT_THRESHOLD, _5_MINS } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -542,13 +542,12 @@ export class JobService {
 
   public async refundCronJob() {
     // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     const jobEntity = await this.jobRepository.findOne(
       {
         status: JobStatus.TO_REFUND,
         retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
         waitUntil: LessThanOrEqual(new Date()),
-        updatedAt: LessThanOrEqual(fiveMinutesAgo)
+        updatedAt: LessThanOrEqual(_5_MINS)
       },
       {
         order: {
@@ -632,12 +631,11 @@ export class JobService {
       const filter = {
           address: tokenAddress,
           topics: [ethers.utils.id('Transfer(address,address,uint256)')],
-          fromBlock: currentBlockNumber - 200,
+          fromBlock: currentBlockNumber - FROM_BLOCK_DIFF,
           toBlock: 'latest',
       };
 
-      const logs = await signer.provider.getLogs(filter);
-      console.log(123, logs)
+      const logs = await signer.provider.getLogs(filter);      
       let refundAmount = new Decimal(0);
 
       logs.forEach(log => {
@@ -671,140 +669,6 @@ export class JobService {
               eventType: EventType.ESCROW_CANCELED,
           }
       );
-  }
-
-  public async cancelCronJobOld() {
-    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-    const jobEntity = await this.jobRepository.findOne(
-      {
-        status: JobStatus.TO_CANCEL,
-        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-        waitUntil: LessThanOrEqual(new Date()),
-      },
-      {
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      },
-    );
-
-    if (!jobEntity) return;
-
-
-    let refundAmount = new Decimal(jobEntity.fundAmount);
-    const { escrowAddress } = jobEntity;
-
-    if (escrowAddress) {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      
-      const escrowStatus = await escrowClient.getStatus(escrowAddress);
-      if (
-        escrowStatus === EscrowStatus.Complete ||
-        escrowStatus === EscrowStatus.Paid
-      ) {
-        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
-        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
-      }
-
-      const balance = await escrowClient.getBalance(escrowAddress);
-      if (balance.eq(0)) {
-        this.logger.log(
-          ErrorEscrow.InvalidBalanceCancellation,
-          JobService.name,
-        );
-        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
-      }
-
-      await escrowClient.cancel(escrowAddress);
-
-      const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
-      const tokenContract: HMToken = HMToken__factory.connect(
-        tokenAddress,
-        signer
-      );
-
-      const currentBlockNumber = await signer.provider.getBlockNumber();
-
-      const filter = {
-        address: tokenAddress,
-        topics: [ethers.utils.id('Transfer(address,address,uint256)')],
-        fromBlock: currentBlockNumber - 100,
-        toBlock: 'latest',
-      };
-
-      const logs = await signer.provider.getLogs(filter);
-      refundAmount = new Decimal(0)
-
-      logs.forEach(log => {
-        const parsedLog = tokenContract.interface.parseLog(log);
-        const from = parsedLog.args[0];
-        const to = parsedLog.args[1];
-        const amount = parsedLog.args[2];
-
-        if (from === escrowAddress && to === signer.address) {
-          refundAmount = refundAmount.add(ethers.utils.formatEther(amount));
-        }
-      });
-      
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-      if (
-        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-      ) {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      } else {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      }
-    }
-    
-    const rate = await getRate(Currency.USD, TokenId.HMT);
-    
-    try {
-      await this.paymentRepository.create({
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-        source: PaymentSource.BALANCE,
-        type: PaymentType.REFUND,
-        amount: refundAmount.toNumber(),
-        currency: TokenId.HMT,
-        rate: div(1, rate),
-        status: PaymentStatus.SUCCEEDED,
-      });
-    } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
-      ) {
-        this.logger.log(ErrorPostgres.NumericFieldOverflow, JobService.name);
-        throw new ConflictException(ErrorPayment.IncorrectAmount);
-      } else {
-        this.logger.log(error, JobService.name);
-        throw new ConflictException(ErrorPayment.NotSuccess);
-      }
-    }
-
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
-    
-    return true;
   }
 
   public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
