@@ -21,6 +21,10 @@ export class WebhookIncomingDto {
   public chainId: ChainId;
 
   @ApiProperty()
+  @IsEnum(EventType)
+  public event_type: EventType;
+
+  @ApiProperty()
   @IsString()
   public escrowAddress: string;
 }
