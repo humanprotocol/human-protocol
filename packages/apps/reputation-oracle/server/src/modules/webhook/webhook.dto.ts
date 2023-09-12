@@ -10,7 +10,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { WebhookStatus } from '../../common/enums';
+import { EventType, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
 import { BigNumber } from 'ethers';
