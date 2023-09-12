@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { PassThrough, Readable } from 'stream';
 import axios from 'axios';
+import { Logger } from '@nestjs/common';
 
 /**
    * **Copy file from a URL to cloud storage**
@@ -41,7 +42,7 @@ export async function copyFileFromURLToBucket(
             });
         });
 
-        console.log(`File from ${url} copied to ${destBucket}/${key}`);
+        Logger.log(`File from ${url} copied to ${destBucket}/${key}`)
 
         return {
             key,
@@ -53,7 +54,7 @@ export async function copyFileFromURLToBucket(
             hash,
           };
     } catch (error) {
-        console.error('Error copying file:', error);
+        Logger.error('Error copying file:', error);
         throw new Error('File not uploaded');
     }
 }
