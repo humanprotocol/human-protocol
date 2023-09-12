@@ -154,7 +154,13 @@ export async function uploadFiles(
                     hash: fileHash,
                 };
             } catch (e) {
-                throw new Error('Error uploading file');
+                let message = '';
+                if (fileInput.type === 'path') {
+                    message = `Error uploading file from path: ${fileInput.path}`;
+                } else {
+                    message = `Error upload in-memory file. SHA1 hash: ${fileHash}`
+                }
+                throw new Error(message);
             }
         }),
     );
