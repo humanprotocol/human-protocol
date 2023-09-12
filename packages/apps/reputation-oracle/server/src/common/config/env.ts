@@ -25,6 +25,8 @@ export const ConfigNames = {
   S3_USE_SSL: 'S3_USE_SSL',
   REPUTATION_LEVEL_LOW: 'REPUTATION_LEVEL_LOW',
   REPUTATION_LEVEL_HIGH: 'REPUTATION_LEVEL_HIGH',
+  FORTUNE_RECORDING_ORACLE_ADDRESS: 'FORTUNE_RECORDING_ORACLE_ADDRESS',
+  CVAT_RECORDING_ORACLE_ADDRESS: 'CVAT_RECORDING_ORACLE_ADDRESS'
 };
 
 export const envValidator = Joi.object({
@@ -54,4 +56,7 @@ export const envValidator = Joi.object({
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),
   REPUTATION_LEVEL_HIGH: Joi.number().default(700),
+  // Oracles
+  FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
+  CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
 });

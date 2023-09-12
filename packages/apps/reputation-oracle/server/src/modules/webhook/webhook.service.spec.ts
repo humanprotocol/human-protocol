@@ -216,7 +216,7 @@ describe('WebhookService', () => {
   });
 
   describe('processFortune', () => {
-    it.only('should successfully process and return correct result values', async () => {
+    it('should successfully process and return correct result values', async () => {
       const manifest = {
         submissionsRequired: 1,
         requesterTitle: MOCK_REQUESTER_TITLE,
