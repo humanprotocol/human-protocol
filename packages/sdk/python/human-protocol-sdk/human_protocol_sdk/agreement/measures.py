@@ -56,7 +56,9 @@ def agreement(
                 data.T[0], data.T[1], labels, return_labels=True
             )
         else:
-            data, labels = label_counts(data, labels, True)
+            data, labels = label_counts(
+                data, labels, nan_values=nan_values, return_labels=True
+            )
 
     score = None
     match method:

@@ -25,7 +25,7 @@ def test_confusion_matrix_from_sequence(
 
 
 def test_label_counts_from_annotations(annotations, labels):
-    counts = label_counts(annotations, labels, False)
+    counts = label_counts(annotations, labels, return_labels=False)
 
     true_counts = np.asarray(
         [
@@ -38,7 +38,7 @@ def test_label_counts_from_annotations(annotations, labels):
 
     assert np.all(counts == true_counts)
 
-    counts, labels = label_counts(annotations, None)
+    counts, labels = label_counts(annotations, nan_values=[], return_labels=True)
 
     # empty label is now counted as well
     true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])

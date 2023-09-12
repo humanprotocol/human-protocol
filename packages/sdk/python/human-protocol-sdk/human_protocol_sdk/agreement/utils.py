@@ -11,14 +11,22 @@ from .validations import (
     validate_same_dtype,
 )
 
+_default_nan_values = {None, "", "None", "nan", np.nan, nan}
 
-def label_counts(annotations: Sequence, labels=None, return_labels=False):
+
+def label_counts(
+    annotations: Sequence,
+    labels=None,
+    nan_values: Optional[Sequence] = None,
+    return_labels=False,
+):
     """Converts the given sequence of item annotations to an array of label counts per item.
 
     Args:
         annotations: A two-dimensional sequence. Rows represent items, columns represent annotators.
         labels: List of labels to be counted. Entries not found in the list are omitted. If
             omitted, all labels in the annotations are counted.
+        nan_values: Values in the records to be counted as invalid.
         return_labels: Whether to return labels with the counts. Automatically set to true if labels are
             inferred.
 
@@ -29,7 +37,18 @@ def label_counts(annotations: Sequence, labels=None, return_labels=False):
 
     if labels is None:
         labels = np.unique(annotations)
-        return_labels = True
+
+    # map to preserve label order if user defined labels are passed
+    label_to_id = {label: i for i, label in enumerate(labels)}
+
+    if nan_values is None:
+        nan_values = set(_default_nan_values)
+    else:
+        nan_values = set(nan_values)
+
+    labels = sorted(
+        set(labels).difference(nan_values), key=lambda x: label_to_id.get(x, -1)
+    )
 
     def lcs(annotations, labels):
         c = Counter(annotations)
@@ -68,21 +87,18 @@ def confusion_matrix_from_sequence(
     validate_nd(b, 1)
     validate_equal_shape(a, b)
 
-    # define nan values if not explicitly passed
-    if nan_values is None:
-        if a.dtype.kind in "UO":
-            nan_values = [None, "", "None", "nan"]
-        else:
-            nan_values = [np.nan, None, nan]
-
     # create list of unique labels
     if labels is None:
         labels = np.unique(np.concatenate([a, b]))
-    else:
-        labels = np.asarray(labels)
+    label_to_id = {label: i for i, label in enumerate(labels)}
 
-    mask = ~np.isin(labels, nan_values)
-    labels = labels[mask]
+    if nan_values is None:
+        nan_values = set(_default_nan_values)
+
+    labels = sorted(
+        set(labels).difference(nan_values), key=lambda x: label_to_id.get(x, -1)
+    )
+    n_labels = len(labels)
 
     # map labels to ids
     label_to_id = {label: i for i, label in enumerate(labels)}
@@ -96,7 +112,7 @@ def confusion_matrix_from_sequence(
     a, b = M[np.all(mask, axis=1)].T
 
     # get indices and counts to populate confusion matrix
-    confusion_matrix = np.zeros((labels.size, labels.size), dtype=int)
+    confusion_matrix = np.zeros((n_labels, n_labels), dtype=int)
     ijs, counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
     confusion_matrix[ijs[0], ijs[1]] = counts
 
