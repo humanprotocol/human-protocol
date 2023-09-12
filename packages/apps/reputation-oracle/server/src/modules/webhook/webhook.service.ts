@@ -84,8 +84,9 @@ export class WebhookService {
   ): Promise<boolean> {
     try { 
       const webhookEntity = await this.webhookRepository.create({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
+        chainId: dto.chain_id,
+        eventType: dto.event_type,
+        escrowAddress: dto.escrow_address,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
       });
