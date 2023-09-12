@@ -28,12 +28,11 @@ export async function copyFileFromURLToBucket(
         });
 
         const { data } = await axios.get(url, { responseType: 'stream' });
-
-        const hash = await hashStream(data);
-        const key = `s3${hash}.zip`;
-
         const stream = new PassThrough();
         data.pipe(stream);
+        
+        const hash = await hashStream(data);
+        const key = `s3${hash}.zip`; 
 
         await new Promise((resolve, reject) => {
             client.putObject(destBucket, key, stream, (err, etag) => {
