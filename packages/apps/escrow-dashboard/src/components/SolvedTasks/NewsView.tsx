@@ -87,8 +87,6 @@ export const NewsView = () => {
                   borderRadius: '8px',
                   overflow: 'hidden',
                   width: { xs: 'calc(100% - 20px)', md: '100%' },
-                  height: { xs: '160px', lg: '183px', xl: '248px' },
-                  objectFit: 'cover',
                   mx: { xs: '10px', md: 0 },
                 }}
               />

@@ -65,7 +65,14 @@ export const ChartContainer = ({
           variant="contained"
           endIcon={<KeyboardArrowDownIcon />}
           fullWidth
-          sx={{ mt: 3, mb: 4 }}
+          sx={{
+            mt: 3,
+            mb: 4,
+            boxShadow:
+              '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
+            fontSize: 14,
+            justifyContent: 'space-between',
+          }}
           onClick={handleClick}
         >
           {items[menuValue].label}

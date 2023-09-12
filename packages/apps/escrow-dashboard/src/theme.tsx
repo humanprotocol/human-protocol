@@ -113,6 +113,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: 'rgba(20, 6, 178, 0.08)',
+          },
+        },
+      },
+    },
   },
 });
 
