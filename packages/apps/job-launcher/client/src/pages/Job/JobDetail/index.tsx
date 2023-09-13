@@ -1,12 +1,9 @@
-import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
-import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
-import { SearchField } from '../../../components/SearchField';
-import { Table } from '../../../components/Table';
 import { useJobDetails } from '../../../hooks/useJobDetails';
 
 const CardContainer = styled(Card)(({ theme }) => ({
@@ -34,10 +31,7 @@ export default function JobDetail() {
           <Typography variant="h4" fontWeight={600}>
             Job details
           </Typography>
-          <CopyAddressButton address={data.details.escrowAddress} ml={6} />
-          <Box sx={{ ml: 'auto' }}>
-            <SearchField />
-          </Box>
+          <CopyAddressButton address={data.details.escrowAddess} ml={6} />
         </Box>
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
@@ -162,7 +156,7 @@ export default function JobDetail() {
           </Grid>
         </Grid>
       </Box>
-      <Box sx={{ mt: 10 }}>
+      {/* <Box sx={{ mt: 10 }}>
         <Typography variant="h4" fontWeight={600}>
           Job solutions
         </Typography>
@@ -203,7 +197,7 @@ export default function JobDetail() {
             ]}
           />
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

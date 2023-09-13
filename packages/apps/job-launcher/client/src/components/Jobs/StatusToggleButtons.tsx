@@ -1,26 +1,21 @@
 import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import * as React from 'react';
+import ToggleButtonGroup, {
+  ToggleButtonGroupProps,
+} from '@mui/material/ToggleButtonGroup';
+import React, { FC } from 'react';
+import { JobStatus } from '../../types';
 
 const RANGE_BUTTONS = [
-  { label: 'All', value: 'All' },
-  { label: 'Launched', value: 'Launched' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Completed', value: 'Completed' },
-  { label: 'Cancelled', value: 'Cancelled' },
-  { label: 'Failed', value: 'Failed' },
+  { label: 'All', value: JobStatus.ALL },
+  { label: 'Launched', value: JobStatus.LAUNCHED },
+  { label: 'Pending', value: JobStatus.PENDING },
+  { label: 'Cancelled', value: JobStatus.CANCELED },
+  { label: 'Failed', value: JobStatus.FAILED },
 ];
 
-export function StatusToggleButtons() {
-  const handleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newValue: number
-  ) => {
-    console.log(newValue);
-  };
-
+export const StatusToggleButtons: FC<ToggleButtonGroupProps> = (props) => {
   return (
-    <ToggleButtonGroup value={'All'} exclusive onChange={handleChange}>
+    <ToggleButtonGroup {...props}>
       {RANGE_BUTTONS.map(({ label, value }) => (
         <ToggleButton
           key={label}
@@ -38,4 +33,4 @@ export function StatusToggleButtons() {
       ))}
     </ToggleButtonGroup>
   );
-}
+};

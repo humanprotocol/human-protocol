@@ -69,7 +69,6 @@ export enum JobType {
 }
 
 export enum CvatJobType {
-  IMAGE_LABEL_BINARY = 'IMAGE_LABEL_BINARY',
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
 }
@@ -86,6 +85,7 @@ export type CvatRequest = {
   description: string;
   dataUrl: string;
   groundTruthUrl: string;
+  userGuide: string;
   accuracyTarget: number;
 };
 
@@ -97,17 +97,18 @@ export type JobRequest = {
 };
 
 export enum JobStatus {
-  PENDING = 'PENDING',
-  PAID = 'PAID',
+  ALL = 'ALL',
   LAUNCHED = 'LAUNCHED',
-  FAILED = 'FAILED',
-  TO_CANCEL = 'TO_CANCEL',
+  PENDING = 'PENDING',
   CANCELED = 'CANCELED',
+  FAILED = 'FAILED',
+  PAID = 'PAID',
+  TO_CANCEL = 'TO_CANCEL',
 }
 
 export type JobDetailsResponse = {
   details: {
-    escrowAddress: string;
+    escrowAddess: string;
     manifestUrl: string;
     manifestHash: string;
     balance: number;

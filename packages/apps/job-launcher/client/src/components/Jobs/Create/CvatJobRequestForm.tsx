@@ -14,6 +14,7 @@ import { Formik } from 'formik';
 import React from 'react';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { CvatJobType } from '../../../types';
+import { CvatJobRequestValidationSchema } from './schema';
 
 export const CvatJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -21,11 +22,12 @@ export const CvatJobRequestForm = () => {
 
   const initialValues = {
     labels: [],
-    type: CvatJobType.IMAGE_LABEL_BINARY,
+    type: CvatJobType.IMAGE_POINTS,
     description: '',
     dataUrl: '',
     groundTruthUrl: '',
-    accuracyTarget: undefined,
+    userGuide: '',
+    accuracyTarget: 80,
   };
 
   const handleNext = ({
@@ -34,6 +36,7 @@ export const CvatJobRequestForm = () => {
     description,
     dataUrl,
     groundTruthUrl,
+    userGuide,
     accuracyTarget,
   }: any) => {
     updateJobRequest?.({
@@ -44,6 +47,7 @@ export const CvatJobRequestForm = () => {
         description,
         dataUrl,
         groundTruthUrl,
+        userGuide,
         accuracyTarget,
       },
     });
@@ -54,7 +58,7 @@ export const CvatJobRequestForm = () => {
     <Box>
       <Formik
         initialValues={initialValues}
-        // validationSchema={RegisterValidationSchema}
+        validationSchema={CvatJobRequestValidationSchema}
         onSubmit={handleNext}
       >
         {({
@@ -70,44 +74,10 @@ export const CvatJobRequestForm = () => {
           <form>
             <Grid container spacing={4} mb={4}>
               <Grid item xs={12} sm={12} md={6}>
-                <FormControl fullWidth sx={{ mb: 4 }}>
-                  <Autocomplete
-                    clearIcon={false}
-                    options={[]}
-                    freeSolo
-                    multiple
-                    renderTags={(value, props) =>
-                      value.map((option, index) => (
-                        <Chip label={option} {...props({ index })} />
-                      ))
-                    }
-                    renderInput={(params) => (
-                      <TextField label="Labels" {...params} />
-                    )}
-                    onChange={(e, value) => setFieldValue('labels', value)}
-                    onBlur={handleBlur}
-                    placeholder="Labels"
-                  />
-                </FormControl>
-                <FormControl fullWidth>
-                  <TextField
-                    name="description"
-                    value={values.description}
-                    onChange={(e) =>
-                      setFieldValue('description', e.target.value)
-                    }
-                    onBlur={handleBlur}
-                    placeholder="Description"
-                    error={touched.description && Boolean(errors.description)}
-                    helperText={errors.description}
-                    multiline
-                    rows={8}
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={12} md={6}>
-                <FormControl variant="standard" fullWidth sx={{ mb: 4 }}>
-                  <InputLabel id="cvat-job-type-select-label">Type</InputLabel>
+                <FormControl variant="standard" fullWidth sx={{ mb: 2 }}>
+                  <InputLabel id="cvat-job-type-select-label">
+                    Type of job
+                  </InputLabel>
                   <Select
                     labelId="cvat-job-type-select-label"
                     id="cvat-job-type-select"
@@ -129,16 +99,49 @@ export const CvatJobRequestForm = () => {
                     error={touched.type && Boolean(errors.type)}
                     onBlur={handleBlur}
                   >
-                    <MenuItem value={CvatJobType.IMAGE_LABEL_BINARY}>
-                      Binary Classification
-                    </MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
                     <MenuItem value={CvatJobType.IMAGE_BOXES}>
                       Bounding Boxes
                     </MenuItem>
                   </Select>
                 </FormControl>
-                <FormControl fullWidth sx={{ mb: 3 }}>
+                <FormControl fullWidth>
+                  <TextField
+                    name="description"
+                    value={values.description}
+                    onChange={(e) =>
+                      setFieldValue('description', e.target.value)
+                    }
+                    onBlur={handleBlur}
+                    placeholder="Description"
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={errors.description}
+                    multiline
+                    rows={11}
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={12} md={6}>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <Autocomplete
+                    clearIcon={false}
+                    options={[]}
+                    freeSolo
+                    multiple
+                    renderTags={(value, props) =>
+                      value.map((option, index) => (
+                        <Chip label={option} {...props({ index })} />
+                      ))
+                    }
+                    renderInput={(params) => (
+                      <TextField label="Labels" {...params} />
+                    )}
+                    onChange={(e, value) => setFieldValue('labels', value)}
+                    onBlur={handleBlur}
+                    placeholder="Labels"
+                  />
+                </FormControl>
+                <FormControl fullWidth sx={{ mb: 2 }}>
                   <TextField
                     name="dataUrl"
                     value={values.dataUrl}
@@ -149,7 +152,7 @@ export const CvatJobRequestForm = () => {
                     helperText={errors.dataUrl}
                   />
                 </FormControl>
-                <FormControl fullWidth sx={{ mb: 3 }}>
+                <FormControl fullWidth sx={{ mb: 2 }}>
                   <TextField
                     name="groundTruthUrl"
                     value={values.groundTruthUrl}
@@ -162,6 +165,17 @@ export const CvatJobRequestForm = () => {
                       touched.groundTruthUrl && Boolean(errors.groundTruthUrl)
                     }
                     helperText={errors.groundTruthUrl}
+                  />
+                </FormControl>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <TextField
+                    name="userGuide"
+                    value={values.userGuide}
+                    onChange={(e) => setFieldValue('userGuide', e.target.value)}
+                    onBlur={handleBlur}
+                    placeholder="User Guide"
+                    error={touched.userGuide && Boolean(errors.userGuide)}
+                    helperText={errors.userGuide}
                   />
                 </FormControl>
                 <FormControl fullWidth>
@@ -181,7 +195,6 @@ export const CvatJobRequestForm = () => {
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={12} md={6}></Grid>
             </Grid>
             <Box
               sx={{

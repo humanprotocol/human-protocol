@@ -2,6 +2,7 @@ import { Box, Button, FormControl, Grid, TextField } from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { FortuneJobRequestValidationSchema } from './schema';
 
 export const FortuneJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -29,7 +30,7 @@ export const FortuneJobRequestForm = () => {
     <Box>
       <Formik
         initialValues={initialValues}
-        // validationSchema={RegisterValidationSchema}
+        validationSchema={FortuneJobRequestValidationSchema}
         onSubmit={handleNext}
       >
         {({
@@ -43,7 +44,7 @@ export const FortuneJobRequestForm = () => {
           setFieldValue,
         }) => (
           <form>
-            <Grid container spacing={4} mb={4}>
+            <Grid container spacing={2} mb={4}>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
                   <TextField

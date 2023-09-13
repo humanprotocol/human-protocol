@@ -1,5 +1,6 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { JobsGraph } from '../../components/Dashboard/JobsGraph';
 import { LiquidityData } from '../../components/Dashboard/LiquidityData';
 import { OracleReputation } from '../../components/Dashboard/OracleRepuptation';
@@ -7,10 +8,12 @@ import { WorkersPerformance } from '../../components/Dashboard/WorkersPerformanc
 import { StatusToggleButtons } from '../../components/Jobs/StatusToggleButtons';
 import { JobTable } from '../../components/Jobs/Table';
 import { NetworkSelect } from '../../components/NetworkSelect';
-import { SearchField } from '../../components/SearchField';
 import { JobStatus } from '../../types';
 
 export default function Dashboard() {
+  const [chainId, setChainId] = useState<ChainId>();
+  const [status, setStatus] = useState<JobStatus>(JobStatus.ALL);
+
   return (
     <Box>
       <Box
@@ -25,8 +28,10 @@ export default function Dashboard() {
           Dashboard
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
-          <NetworkSelect />
-          <SearchField />
+          <NetworkSelect
+            value={chainId}
+            onChange={(e) => setChainId(e.target.value as ChainId)}
+          />
         </Box>
       </Box>
 
@@ -58,10 +63,14 @@ export default function Dashboard() {
           }}
         >
           <Typography variant="h4">Jobs</Typography>
-          <StatusToggleButtons />
+          <StatusToggleButtons
+            exclusive
+            value={status}
+            onChange={(e, value) => setStatus(value)}
+          />
         </Box>
       </Box>
-      <JobTable status={JobStatus.LAUNCHED} />
+      <JobTable status={status} chainId={chainId} />
     </Box>
   );
 }

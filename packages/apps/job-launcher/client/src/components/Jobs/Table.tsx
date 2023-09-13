@@ -1,13 +1,20 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
-import { useJobs } from '../../hooks/useJobs';
+import { useJobs } from '../../state/jobs/hooks';
 import { JobStatus } from '../../types';
 
-export const JobTable = ({ status }: { status: JobStatus }) => {
+export const JobTable = ({
+  status,
+  chainId,
+}: {
+  status: JobStatus;
+  chainId?: ChainId;
+}) => {
+  const { data, isLoading } = useJobs({ status, chainId });
   const navigate = useNavigate();
-  const { data, isLoading } = useJobs(status);
 
   return (
     <Table
