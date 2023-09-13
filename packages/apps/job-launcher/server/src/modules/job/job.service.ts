@@ -644,9 +644,6 @@ export class JobService {
           const to = parsedLog.args[1];
           const amount = parsedLog.args[2];
 
-          console.log(from, escrowAddress, to, signer.address)
-          console.log(from === escrowAddress && to === signer.address)
-
           if (from === escrowAddress && to === signer.address) {
               refundAmount = refundAmount.add(ethers.utils.formatEther(amount));
           }
