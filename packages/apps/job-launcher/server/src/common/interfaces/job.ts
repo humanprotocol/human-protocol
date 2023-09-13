@@ -1,4 +1,4 @@
-import { JobStatus } from '../enums/job';
+import { JobRequestType, JobStatus } from '../enums/job';
 import { IBase } from './base';
 
 export interface IJob extends IBase {

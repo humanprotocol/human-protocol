@@ -601,6 +601,33 @@ export class EscrowClient {
   }
 
   /**
+   * Returns the manifest file hash.
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<void>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getManifestHash(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.manifestHash();
+    } catch (e) {
+      return throwError(e);
+    }
+  }
+
+  /**
    * Returns the manifest file URL.
    *
    * @param {string} escrowAddress - Address of the escrow.
@@ -774,6 +801,11 @@ export class EscrowClient {
         GET_ESCROWS_QUERY(filter),
         {
           ...filter,
+          status: filter.status
+            ? Object.entries(EscrowStatus).find(
+                ([, value]) => value === filter.status
+              )?.[0]
+            : undefined,
           from: filter.from ? +filter.from.getTime() / 1000 : undefined,
           to: filter.to ? +filter.to.getTime() / 1000 : undefined,
         }
