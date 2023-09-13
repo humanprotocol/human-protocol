@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { WebhookStatus } from '../../common/enums';
+import { EventType, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook_incoming' })
@@ -12,6 +12,12 @@ export class WebhookIncomingEntity extends BaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   public oracleAddress: string;
+
+  @Column({
+    type: 'enum',
+    enum: EventType,
+  })
+  public eventType: string;
 
   @Column({ type: 'varchar' })
   public escrowAddress: string;
