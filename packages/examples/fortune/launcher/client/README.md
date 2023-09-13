@@ -43,7 +43,7 @@ $ yarn test
 4. Give to the project a name.
 5. Choose the root directory as `packages/examples/fortune/launcher/client`
 6. In Build and Output Settings section set these values:
-    - Build Command: `yarn workspace @human-protocol/job-launcher-client build`
+    - Build Command: `yarn workspace @human-protocol/fortune-job-launcher-client build`
     - Output Directory: `build`
     - Install Command: `yarn install`
 7. Set Environnment Variables:

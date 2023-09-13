@@ -82,6 +82,7 @@ describe('EscrowClient', () => {
       abort: vi.fn(),
       addTrustedHandlers: vi.fn(),
       getBalance: vi.fn(),
+      manifestHash: vi.fn(),
       manifestUrl: vi.fn(),
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
@@ -1155,6 +1156,54 @@ describe('EscrowClient', () => {
       await expect(escrowClient.getBalance(escrowAddress)).rejects.toThrow();
 
       expect(escrowClient.escrowContract.getBalance).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getManifestHash', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.getManifestHash(escrowAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.getManifestHash(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully getManifestHash', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.manifestHash.mockReturnValue(hash);
+
+      const manifestHash = await escrowClient.getManifestHash(escrowAddress);
+
+      expect(manifestHash).toEqual(hash);
+      expect(escrowClient.escrowContract.manifestHash).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getManifestHash fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.manifestHash.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getManifestHash(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.manifestHash).toHaveBeenCalledWith();
     });
   });
 

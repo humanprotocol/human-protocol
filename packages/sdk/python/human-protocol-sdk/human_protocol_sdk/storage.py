@@ -7,7 +7,8 @@ from typing import List, Optional
 
 import requests
 from minio import Minio
-from validators import url as URL
+
+from .utils import validate_url
 
 logging.getLogger("minio").setLevel(logging.INFO)
 
@@ -135,7 +136,7 @@ class StorageClient:
         Raises:
             StorageClientError: If an error occurs while downloading the file.
         """
-        if not URL(url):
+        if not validate_url(url):
             raise StorageClientError(f"Invalid URL: {url}")
 
         try:
