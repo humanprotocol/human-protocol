@@ -14,6 +14,17 @@ export class addWebhookIncomingTable1678011588667
         );
       `);
 
+    await queryRunner.query(`
+      CREATE TYPE ${NS}.webhook_incoming_event_type_enum AS ENUM (
+        'escrow_created',
+        'escrow_canceled',
+        'task_rejected',
+        'task_creation_failed',
+        'task_completed',
+        'task_finished'
+      );
+    `);
+
     const table = new Table({
       name: `${NS}.webhook_incoming`,
       columns: [
@@ -30,6 +41,10 @@ export class addWebhookIncomingTable1678011588667
           name: 'oracle_address',
           type: 'varchar',
           isNullable: true,
+        },
+        {
+          name: 'event_type',
+          type: `${NS}.webhook_incoming_event_type_enum`,
         },
         {
           name: 'escrow_address',
@@ -75,5 +90,6 @@ export class addWebhookIncomingTable1678011588667
   public async down(queryRunner: QueryRunner): Promise<any> {
     await queryRunner.dropTable(`${NS}.webhook_incoming`);
     await queryRunner.query(`DROP TYPE ${NS}.webhook_incoming_status_enum;`);
+    await queryRunner.query(`DROP TYPE ${NS}.webhook_incoming_event_type_enum;`);
   }
 }

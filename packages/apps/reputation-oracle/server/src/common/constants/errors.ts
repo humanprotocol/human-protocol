@@ -30,3 +30,11 @@ export enum ErrorManifest {
   ManifestUrlDoesNotExist = 'Manifest url does not exist',
   UnsupportedManifestType = 'Unsupported manifest type'
 }
+
+/**
+ * Represents error messages related to signature.
+ */
+export enum ErrorSignature {
+  SignatureNotVerified = 'Signature not verified',
+  InvalidSignature = 'Invalid signature',
+}

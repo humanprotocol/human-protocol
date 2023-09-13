@@ -22,7 +22,7 @@ import { ReputationRepository } from '../reputation/reputation.repository';
 import {
   ErrorWebhook,
 } from '../../common/constants/errors';
-import { JobRequestType } from '../../common/enums';
+import { EventType, JobRequestType } from '../../common/enums';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
@@ -145,15 +145,17 @@ describe('WebhookService', () => {
 
   describe('createIncomingWebhook', () => {
     const dto: WebhookIncomingDto = {
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
+      chain_id: ChainId.LOCALHOST,
+      event_type: EventType.TASK_FINISHED,
+      escrow_address: MOCK_ADDRESS,
     };
 
     it('should create an incoming webhook entity', async () => {
       const webhookEntity: Partial<WebhookIncomingEntity> = {
         id: 1,
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
+        chainId: dto.chain_id,
+        eventType: dto.event_type,
+        escrowAddress: dto.escrow_address,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
       };
@@ -165,8 +167,9 @@ describe('WebhookService', () => {
       const result = await webhookService.createIncomingWebhook(dto);
 
       expect(webhookRepository.create).toHaveBeenCalledWith({
-        chainId: dto.chainId,
-        escrowAddress: dto.escrowAddress,
+        chainId: dto.chain_id,
+        eventType: dto.event_type,
+        escrowAddress: dto.escrow_address,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
       });

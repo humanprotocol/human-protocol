@@ -10,7 +10,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { WebhookStatus } from '../../common/enums';
+import { EventType, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
 import { BigNumber } from 'ethers';
@@ -18,14 +18,27 @@ import { BigNumber } from 'ethers';
 export class WebhookIncomingDto {
   @ApiProperty()
   @IsEnum(ChainId)
-  public chainId: ChainId;
+  public chain_id: ChainId;
+
+  @ApiProperty()
+  @IsEnum(EventType)
+  public event_type: EventType;
 
   @ApiProperty()
   @IsString()
-  public escrowAddress: string;
+  public escrow_address: string;
 }
 
-export class WebhookIncomingCreateDto extends WebhookIncomingDto {
+export class WebhookIncomingCreateDto {
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @IsEnum(EventType)
+  public eventType: EventType;
+
+  @IsString()
+  public escrowAddress: string;
+
   @IsEnum(WebhookStatus)
   public status: WebhookStatus;
 
