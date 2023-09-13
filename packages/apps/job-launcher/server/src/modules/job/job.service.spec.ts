@@ -344,7 +344,8 @@ describe('JobService', () => {
       minQuality: 0.95,
       fundAmount: 10,
       gtUrl: '',
-      type: JobRequestType.IMAGE_LABEL_BINARY,
+      userGuide: MOCK_FILE_URL,
+      type: JobRequestType.IMAGE_POINTS,
     };
 
     let getUserBalanceMock: any;
@@ -382,7 +383,7 @@ describe('JobService', () => {
 
       await jobService.createJob(
         userId,
-        JobRequestType.IMAGE_LABEL_BINARY,
+        JobRequestType.IMAGE_POINTS,
         imageLabelBinaryJobDto,
       );
 
@@ -420,7 +421,7 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, {
+      await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
         chainId: undefined,
       });
@@ -446,7 +447,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
@@ -464,7 +465,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
@@ -480,7 +481,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotCreated);
@@ -772,7 +773,8 @@ describe('JobService', () => {
         annotation: {
           labels: [{ name: 'label1' }],
           description: MOCK_REQUESTER_DESCRIPTION,
-          type: JobRequestType.IMAGE_LABEL_BINARY,
+          user_guide: MOCK_FILE_URL,
+          type: JobRequestType.IMAGE_POINTS,
           job_size: 10,
           max_time: 300,
         },
@@ -1166,7 +1168,8 @@ describe('JobService', () => {
       annotation: {
         labels: [{ name: 'label1' }],
         description: MOCK_REQUESTER_DESCRIPTION,
-        type: JobRequestType.IMAGE_LABEL_BINARY,
+        user_guide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
         job_size: 10,
         max_time: 300,
       },
