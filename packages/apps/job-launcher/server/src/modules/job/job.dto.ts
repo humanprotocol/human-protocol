@@ -9,7 +9,12 @@ import {
   IsDate,
   IsOptional,
   IsObject,
-  IsNumberString
+  IsNumberString,
+  ArrayNotEmpty, 
+  Min, 
+  Max, 
+  IsNotEmpty, 
+  IsEthereumAddress
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import {
@@ -17,7 +22,7 @@ import {
   JobStatus,
   JobStatusFilter,
 } from '../../common/enums/job';
-import { EventType, OracleType } from '../../common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -87,6 +92,12 @@ export class JobCancelDto {
   public id: number;
 }
 
+export class JobIdDto {
+  @ApiProperty()
+  @IsNumberString()
+  public id: number;
+}
+
 export class JobUpdateDto {
   @ApiPropertyOptional({
     enum: JobStatus,
@@ -102,6 +113,93 @@ export class JobUpdateDataDto extends JobUpdateDto {
   @IsDate()
   public waitUntil: Date;
 }
+export class StakingDetails {
+  @IsEthereumAddress()
+  staker: string;
+
+  @IsNumber()
+  @Min(0)
+  allocated: number;
+
+  @IsNumber()
+  @Min(0)
+  slashed: number;
+}
+
+export class ManifestDetails {
+  @IsNumber()
+  @Min(1)
+  chainId: number;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  description?: string;
+
+  @IsNumber()
+  submissionsRequired: number;
+
+  @IsEthereumAddress()
+  tokenAddress: string;
+
+  @IsNumber()
+  fundAmount: number;
+
+  @IsEthereumAddress()
+  requesterAddress: string;
+
+  @IsEnum(JobRequestType)
+  requestType: JobRequestType;
+
+  @IsNotEmpty()
+  @IsString()
+  exchangeOracleAddress: string;
+
+  @IsNotEmpty()
+  @IsString()
+  recordingOracleAddress: string;
+
+  @IsNotEmpty()
+  @IsString()
+  reputationOracleAddress: string;
+}
+
+export class CommonDetails {
+  @IsEthereumAddress()
+  escrowAddess: string;
+
+  @IsUrl()
+  manifestUrl: string;
+
+  @IsString()
+  manifestHash: string;
+
+  @IsNumber()
+  @Min(0)
+  balance: number;
+
+  @IsNumber()
+  @Min(0)
+  paidOut: number;
+
+  @IsNumber()
+  amountOfTasks?: number;
+}
+
+export class JobDetailsDto {
+  @IsNotEmpty()
+  details: CommonDetails;
+
+  @IsNotEmpty()
+  manifest: ManifestDetails;
+
+  @IsNotEmpty()
+  staking: StakingDetails;
+}
+
 
 export class SaveManifestDto {
   public manifestUrl: string;

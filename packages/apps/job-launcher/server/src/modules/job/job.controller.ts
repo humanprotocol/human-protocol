@@ -14,11 +14,11 @@ import {
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhookDto } from './job.dto';
+import { JobFortuneDto, JobCvatDto, JobListDto, JobCancelDto, EscrowFailedWebhookDto, JobDetailsDto, JobIdDto } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -98,5 +98,13 @@ export class JobController {
     @Body() data: EscrowFailedWebhookDto,
   ): Promise<any> {
     return this.jobService.escrowFailedWebhook(data);
+  }
+
+  @Get('/details/:id')
+  public async getDetails(
+    @Request() req: RequestWithUser,
+    @Param() params: JobIdDto,
+  ): Promise<JobDetailsDto> {
+    return this.jobService.getDetails(req.user.id, params.id);
   }
 }

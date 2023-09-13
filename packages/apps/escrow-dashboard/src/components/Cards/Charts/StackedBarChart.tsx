@@ -113,7 +113,7 @@ export const StackedBarChart: FC<StackedBarChartProps> = ({
                   axisLine={false}
                   tickLine={false}
                   interval="preserveStartEnd"
-                  ticks={[series[0].date, series[series.length - 1].date]}
+                  ticks={[series[0]?.date, series[series.length - 1]?.date]}
                   tick={{
                     fill: '#320A8D',
                     fontSize: '12px',
