@@ -69,7 +69,10 @@ import { ConfigNames } from '../common/config';
           keepConnectionAlive:
             configService.get<string>(ConfigNames.NODE_ENV) === 'test',
           migrationsRun: false,
-          ssl: configService.get<string>(ConfigNames.POSTGRES_SSL)!.toLowerCase() === 'true',
+          ssl:
+            configService
+              .get<string>(ConfigNames.POSTGRES_SSL)!
+              .toLowerCase() === 'true',
         };
       },
     }),
