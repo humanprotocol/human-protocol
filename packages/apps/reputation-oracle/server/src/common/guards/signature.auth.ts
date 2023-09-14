@@ -17,10 +17,17 @@ export class SignatureAuthGuard implements CanActivate {
     
     const data = request.body;
     const signature = request.headers[HEADER_SIGNATURE_KEY]; 
-
+    const oracleAdresses = [
+      this.configService.get<string>(
+        ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS,
+      )!,
+      this.configService.get<string>(
+        ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
+      )!
+    ]
+    
     try {
-      const address = this.determineAddress(request);
-      const isVerified = verifySignature(data, signature, address)
+      const isVerified = verifySignature(data, signature, oracleAdresses)
 
       if (isVerified) {
         return true;
@@ -30,23 +37,5 @@ export class SignatureAuthGuard implements CanActivate {
     }
 
     throw new UnauthorizedException('Unauthorized');
-  }
-
-  public determineAddress(request: any): string {
-    const originalUrl = request.originalUrl;
-    const parts = originalUrl.split('/');
-    const oracleType = parts[2];
-
-    if (oracleType === OracleType.FORTUNE) {
-      return this.configService.get<string>(
-        ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS,
-      )!
-    } else if (oracleType === OracleType.CVAT) {
-      return this.configService.get<string>(
-        ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS,
-      )!
-    } else {
-      throw new BadRequestException('Unable to determine address from origin URL');
-    }
   }
 }

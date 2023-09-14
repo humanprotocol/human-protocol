@@ -18,15 +18,15 @@ import { BigNumber } from 'ethers';
 export class WebhookIncomingDto {
   @ApiProperty()
   @IsEnum(ChainId)
-  public chain_id: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty()
   @IsEnum(EventType)
-  public event_type: EventType;
+  public eventType: EventType;
 
   @ApiProperty()
   @IsString()
-  public escrow_address: string;
+  public escrowAddress: string;
 }
 
 export class WebhookIncomingCreateDto {

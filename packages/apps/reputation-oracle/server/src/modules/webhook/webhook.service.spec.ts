@@ -145,17 +145,17 @@ describe('WebhookService', () => {
 
   describe('createIncomingWebhook', () => {
     const dto: WebhookIncomingDto = {
-      chain_id: ChainId.LOCALHOST,
-      event_type: EventType.TASK_FINISHED,
-      escrow_address: MOCK_ADDRESS,
+      chainId: ChainId.LOCALHOST,
+      eventType: EventType.TASK_FINISHED,
+      escrowAddress: MOCK_ADDRESS,
     };
 
     it('should create an incoming webhook entity', async () => {
       const webhookEntity: Partial<WebhookIncomingEntity> = {
         id: 1,
-        chainId: dto.chain_id,
-        eventType: dto.event_type,
-        escrowAddress: dto.escrow_address,
+        chainId: dto.chainId,
+        eventType: dto.eventType,
+        escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
       };
@@ -167,9 +167,9 @@ describe('WebhookService', () => {
       const result = await webhookService.createIncomingWebhook(dto);
 
       expect(webhookRepository.create).toHaveBeenCalledWith({
-        chainId: dto.chain_id,
-        eventType: dto.event_type,
-        escrowAddress: dto.escrow_address,
+        chainId: dto.chainId,
+        eventType: dto.eventType,
+        escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
       });
