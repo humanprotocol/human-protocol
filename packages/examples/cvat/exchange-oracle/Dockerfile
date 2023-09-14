@@ -1,7 +1,5 @@
 FROM python:3.10
 
-COPY ../../../sdk/python/human-protocol-sdk /lib/human-protocol-sdk
-
 WORKDIR /app
 
 RUN apt-get update -y && \
