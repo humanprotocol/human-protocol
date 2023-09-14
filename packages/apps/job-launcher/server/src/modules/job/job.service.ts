@@ -157,6 +157,7 @@ export class JobService {
         annotation: {
           labels: dto.labels.map((item) => ({ name: item })),
           description: dto.requesterDescription,
+          user_guide: dto.userGuide,
           type: requestType,
           job_size: Number(
             this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
@@ -689,7 +690,7 @@ export class JobService {
 
     let manifestDetails;
  
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE ) {
       manifestDetails = {
         chainId,
         title: (manifest as FortuneManifestDto).requesterTitle,
@@ -697,29 +698,19 @@ export class JobService {
         requestType: JobRequestType.FORTUNE,
         submissionsRequired: (manifest as FortuneManifestDto).submissionsRequired,
         tokenAddress,
-        fundAmount: jobEntity.fundAmount,
+        fundAmount: (manifest as FortuneManifestDto).fundAmount,
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
         reputationOracleAddress
       }
-    } else if (CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)) {
-      const { useSSL, endPoint, port, bucket } = parseUrl((manifest as CvatManifestDto).data.data_url)
-
-      const storageClient = new StorageClient({
-        endPoint,
-        port,
-        useSSL,
-      });
-      
-      const dataset = await storageClient.listObjects(bucket)
-      
+    } else {
       manifestDetails = {
         chainId,
         requestType: (manifest as CvatManifestDto).annotation.type,
-        submissionsRequired: dataset.length,
+        submissionsRequired: (manifest as CvatManifestDto).annotation.job_size,
         tokenAddress,
-        fundAmount: jobEntity.fundAmount,
+        fundAmount: Number((manifest as CvatManifestDto).job_bounty),
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
@@ -735,7 +726,7 @@ export class JobService {
         balance: Number(ethers.utils.formatEther(balance)),
         paidOut
       },
-      manifest: manifestDetails!,
+      manifest: manifestDetails,
       staking: {
         staker: allocation.staker,
         allocated: allocation.tokens.toNumber(),

@@ -82,6 +82,10 @@ export class JobCvatDto extends JobDto {
   public gtUrl: string;
 
   @ApiProperty()
+  @IsUrl()
+  public userGuide: string;
+
+  @ApiProperty()
   @IsEnum(JobRequestType)
   type: JobRequestType;
 }
@@ -247,6 +251,9 @@ export class Annotation {
 
   @IsString()
   description: string;
+
+  @IsString()
+  user_guide: string;
 
   @IsEnum(JobRequestType)
   type: JobRequestType;

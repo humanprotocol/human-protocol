@@ -44,11 +44,13 @@ import { ReputationEntity } from '../modules/reputation/reputation.entity';
           username: configService.get<string>('POSTGRES_USER', 'operator'),
           password: configService.get<string>('POSTGRES_PASSWORD', 'qwerty'),
           database: configService.get<string>(
-            'POSTGRES_DB',
+            'POSTGRES_DATABASE',
             'reputation-oracle',
           ),
           keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
           migrationsRun: false,
+          ssl:
+            configService.get<string>('POSTGRES_SSL')!.toLowerCase() === 'true',
         };
       },
     }),

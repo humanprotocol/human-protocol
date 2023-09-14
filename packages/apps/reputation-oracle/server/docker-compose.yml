@@ -1,21 +1,21 @@
-version: '3.7'
+version: '3.8'
 
 services:
   postgres:
     image: postgres:latest
     restart: always
     environment:
-      - POSTGRES_HOST=0.0.0.0
-      - POSTGRES_USER=operator
-      - POSTGRES_PASSWORD=qwerty
-      - POSTGRES_DB=reputation-oracle
-      - POSTGRES_PORT=5432
-      - POSTGRES_SYNC=false
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_SYNC=${POSTGRES_SYNC}
     logging:
       options:
         max-size: 10m
         max-file: "3"
     ports:
-      - '5432:5432'
-    volumes: 
-      - ./db:/var/lib/postgresql/data
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    # volumes: 
+    #   - ./db:/var/lib/postgresql/data

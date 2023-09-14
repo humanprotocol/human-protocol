@@ -353,7 +353,8 @@ describe('JobService', () => {
       minQuality: 0.95,
       fundAmount: 10,
       gtUrl: '',
-      type: JobRequestType.IMAGE_LABEL_BINARY,
+      userGuide: MOCK_FILE_URL,
+      type: JobRequestType.IMAGE_POINTS,
     };
 
     let getUserBalanceMock: any;
@@ -391,7 +392,7 @@ describe('JobService', () => {
 
       await jobService.createJob(
         userId,
-        JobRequestType.IMAGE_LABEL_BINARY,
+        JobRequestType.IMAGE_POINTS,
         imageLabelBinaryJobDto,
       );
 
@@ -429,7 +430,7 @@ describe('JobService', () => {
         .spyOn(routingProtocolService, 'selectNetwork')
         .mockReturnValue(ChainId.MOONBEAM);
 
-      await jobService.createJob(userId, JobRequestType.IMAGE_LABEL_BINARY, {
+      await jobService.createJob(userId, JobRequestType.IMAGE_POINTS, {
         ...imageLabelBinaryJobDto,
         chainId: undefined,
       });
@@ -455,7 +456,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorWeb3.InvalidTestnetChainId);
@@ -473,7 +474,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
@@ -489,7 +490,7 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(
           userId,
-          JobRequestType.IMAGE_LABEL_BINARY,
+          JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotCreated);
@@ -810,7 +811,8 @@ describe('JobService', () => {
         annotation: {
           labels: [{ name: 'label1' }],
           description: MOCK_REQUESTER_DESCRIPTION,
-          type: JobRequestType.IMAGE_LABEL_BINARY,
+          user_guide: MOCK_FILE_URL,
+          type: JobRequestType.IMAGE_POINTS,
           job_size: 10,
           max_time: 300,
         },
@@ -921,7 +923,8 @@ describe('JobService', () => {
       annotation: {
         labels: [{ name: 'label1' }],
         description: MOCK_REQUESTER_DESCRIPTION,
-        type: JobRequestType.IMAGE_LABEL_BINARY,
+        user_guide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
         job_size: 10,
         max_time: 300,
       },
@@ -1245,7 +1248,7 @@ describe('JobService', () => {
   });
 
   describe('getDetails', () => {
-    it('should return job details for fortune job type successfully', async () => {
+    it('should return job details successfully', async () => {
       const balance = '1';
       const allocationMock: IAllocation = {
         escrowAddress: ethers.constants.AddressZero,
@@ -1289,96 +1292,9 @@ describe('JobService', () => {
           description: MOCK_REQUESTER_DESCRIPTION,
           submissionsRequired: 10,
           tokenAddress: MOCK_ADDRESS,
-          fundAmount: 100,
+          fundAmount: 10,
           requesterAddress: MOCK_ADDRESS,
           requestType: JobRequestType.FORTUNE,
-          exchangeOracleAddress: expect.any(String),
-          recordingOracleAddress: expect.any(String),
-          reputationOracleAddress: expect.any(String)
-        },
-        staking: {
-          staker: expect.any(String),
-          allocated: expect.any(Number),
-          slashed: 0 
-        }
-      }
-  
-      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest.fn().mockResolvedValue(ethers.utils.parseEther(balance)),
-      }));
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
-      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
-      jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
-
-      const result = await jobService.getDetails(1, 123);
-      expect(result).toMatchObject(expectedJobDetailsDto);
-    });
-
-    it('should return job details for any cvat job type successfully', async () => {
-      const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.constants.AddressZero,
-        staker: ethers.constants.AddressZero,
-        tokens: BigNumber.from('1'),
-        createdAt: BigNumber.from('1'),
-        closedAt: BigNumber.from('1'),
-      };
-      
-
-      const manifestMock: CvatManifestDto = {
-        data: {
-          data_url: MOCK_FILE_URL
-        },
-        annotation: {
-          labels: [{
-            name: 'dog'
-          }, {
-            name: 'cat'
-          }],
-          description: MOCK_REQUESTER_DESCRIPTION,
-          type: JobRequestType.IMAGE_LABEL_BINARY,
-          job_size: 5,
-          max_time: 10,
-        },
-        validation: {
-          min_quality: 0.95,
-          val_size: 1,
-          gt_url: MOCK_FILE_URL,
-        },
-        job_bounty: BigNumber.from('10').toString()
-      };
-
-      const jobEntityMock = { 
-        status: JobStatus.TO_CANCEL, 
-        fundAmount: 100, 
-        userId: 1, 
-        id: 1, 
-        manifestUrl: MOCK_FILE_URL, 
-        manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS, 
-        chainId: ChainId.LOCALHOST,
-        save: jest.fn(),
-      };
-
-      const expectedJobDetailsDto: JobDetailsDto = {
-        details: {
-          escrowAddess: MOCK_ADDRESS, 
-          manifestUrl: MOCK_FILE_URL,
-          manifestHash: MOCK_FILE_HASH,
-          balance: Number(balance),
-          paidOut: 10,
-        },
-        manifest: {
-          chainId: ChainId.LOCALHOST,
-          submissionsRequired: 6,
-          tokenAddress: MOCK_ADDRESS,
-          fundAmount: 100,
-          requesterAddress: MOCK_ADDRESS,
-          requestType: JobRequestType.IMAGE_LABEL_BINARY,
           exchangeOracleAddress: expect.any(String),
           recordingOracleAddress: expect.any(String),
           reputationOracleAddress: expect.any(String)

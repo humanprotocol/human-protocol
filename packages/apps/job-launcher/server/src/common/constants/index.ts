@@ -24,4 +24,4 @@ export const SENDGRID_API_KEY_REGEX =
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
-export const CVAT_JOB_TYPES = [JobRequestType.IMAGE_LABEL_BINARY, JobRequestType.IMAGE_BOXES, JobRequestType.IMAGE_POINTS]
+export const CVAT_JOB_TYPES = [JobRequestType.IMAGE_BOXES, JobRequestType.IMAGE_POINTS]
