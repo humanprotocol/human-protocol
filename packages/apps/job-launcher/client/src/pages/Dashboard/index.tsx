@@ -11,7 +11,7 @@ import { NetworkSelect } from '../../components/NetworkSelect';
 import { JobStatus } from '../../types';
 
 export default function Dashboard() {
-  const [chainId, setChainId] = useState<ChainId>();
+  const [chainId, setChainId] = useState<ChainId>(ChainId.ALL);
   const [status, setStatus] = useState<JobStatus>(JobStatus.ALL);
 
   return (
@@ -29,6 +29,7 @@ export default function Dashboard() {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
           <NetworkSelect
+            showAllNetwork
             value={chainId}
             onChange={(e) => setChainId(e.target.value as ChainId)}
           />

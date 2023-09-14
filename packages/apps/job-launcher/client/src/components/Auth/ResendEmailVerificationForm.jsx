@@ -22,7 +22,7 @@ export const ResendEmailVerificationForm = ({ onFinish }) => {
       await authService.resendEmailVerification(email);
       onFinish();
     } catch (err) {
-      setAlertMsg(err?.message);
+      setAlertMsg(err?.response?.data?.message ?? err?.message);
     }
     setIsLoading(false);
   };

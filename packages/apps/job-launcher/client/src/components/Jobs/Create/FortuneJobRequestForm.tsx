@@ -53,6 +53,7 @@ export const FortuneJobRequestForm = () => {
                     onChange={(e) => setFieldValue('title', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="Title"
+                    label="Title"
                     error={touched.title && Boolean(errors.title)}
                     helperText={errors.title}
                   />
@@ -68,6 +69,7 @@ export const FortuneJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Fortunes Requested"
+                    label="Fortunes Requested"
                     type="number"
                     inputProps={{ min: 0, step: 1 }}
                     error={
@@ -88,6 +90,7 @@ export const FortuneJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Description"
+                    label="Description"
                     error={touched.description && Boolean(errors.description)}
                     helperText={errors.description}
                   />
@@ -103,7 +106,13 @@ export const FortuneJobRequestForm = () => {
             >
               <Button
                 variant="outlined"
-                onClick={() => goToPrevStep?.()}
+                onClick={() => {
+                  goToPrevStep?.();
+                  updateJobRequest?.({
+                    ...jobRequest,
+                    chainId: undefined,
+                  });
+                }}
                 sx={{ width: '200px' }}
               >
                 Cancel
@@ -112,7 +121,7 @@ export const FortuneJobRequestForm = () => {
                 variant="contained"
                 sx={{ ml: 2.5, width: '200px' }}
                 onClick={() => handleSubmit()}
-                disabled={!(isValid && dirty)}
+                disabled={!(isValid && dirty) || !jobRequest.chainId}
               >
                 Next
               </Button>

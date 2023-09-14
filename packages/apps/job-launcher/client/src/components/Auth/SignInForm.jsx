@@ -37,7 +37,7 @@ export const SignInForm = ({ onError }) => {
       dispatch(fetchUserBalanceAsync());
       dispatch(fetchUserJobsAsync());
     } catch (err) {
-      onError(err?.response?.data?.message);
+      onError(err?.response?.data?.message ?? err.message);
     }
     setIsLoading(false);
   };

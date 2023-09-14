@@ -31,7 +31,7 @@ export default function JobDetail() {
           <Typography variant="h4" fontWeight={600}>
             Job details
           </Typography>
-          <CopyAddressButton address={data.details.escrowAddess} ml={6} />
+          <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
@@ -156,7 +156,9 @@ export default function JobDetail() {
           </Grid>
         </Grid>
       </Box>
-      {/* <Box sx={{ mt: 10 }}>
+      {/*
+      TODO: Add this back in when we have a way to fetch the job solution
+      <Box sx={{ mt: 10 }}>
         <Typography variant="h4" fontWeight={600}>
           Job solutions
         </Typography>

@@ -87,8 +87,8 @@ export const FiatTopUpForm = () => {
       dispatch(fetchUserBalanceAsync());
 
       setIsSuccess(true);
-    } catch (err) {
-      setErrorMessage(err.message);
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.message ?? err?.message);
       setIsSuccess(false);
     }
     setIsLoading(false);

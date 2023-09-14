@@ -11,7 +11,7 @@ export const JobTable = ({
   chainId,
 }: {
   status: JobStatus;
-  chainId?: ChainId;
+  chainId: ChainId;
 }) => {
   const { data, isLoading } = useJobs({ status, chainId });
   const navigate = useNavigate();

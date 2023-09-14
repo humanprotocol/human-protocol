@@ -91,7 +91,7 @@ export type CvatRequest = {
 
 export type JobRequest = {
   jobType: JobType;
-  chainId: ChainId;
+  chainId?: ChainId;
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
 };
@@ -108,7 +108,7 @@ export enum JobStatus {
 
 export type JobDetailsResponse = {
   details: {
-    escrowAddess: string;
+    escrowAddress: string;
     manifestUrl: string;
     manifestHash: string;
     balance: number;

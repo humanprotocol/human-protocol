@@ -114,6 +114,7 @@ export const CvatJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Description"
+                    label="Description"
                     error={touched.description && Boolean(errors.description)}
                     helperText={errors.description}
                     multiline
@@ -148,6 +149,7 @@ export const CvatJobRequestForm = () => {
                     onChange={(e) => setFieldValue('dataUrl', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="Data URL"
+                    label="Data URL"
                     error={touched.dataUrl && Boolean(errors.dataUrl)}
                     helperText={errors.dataUrl}
                   />
@@ -161,6 +163,7 @@ export const CvatJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Ground Truth URL"
+                    label="Ground Truth URL"
                     error={
                       touched.groundTruthUrl && Boolean(errors.groundTruthUrl)
                     }
@@ -174,6 +177,7 @@ export const CvatJobRequestForm = () => {
                     onChange={(e) => setFieldValue('userGuide', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="User Guide"
+                    label="User Guide URL"
                     error={touched.userGuide && Boolean(errors.userGuide)}
                     helperText={errors.userGuide}
                   />
@@ -188,6 +192,7 @@ export const CvatJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Accuracy target %"
+                    label="Accuracy target %"
                     error={
                       touched.accuracyTarget && Boolean(errors.accuracyTarget)
                     }
@@ -205,7 +210,13 @@ export const CvatJobRequestForm = () => {
             >
               <Button
                 variant="outlined"
-                onClick={() => goToPrevStep?.()}
+                onClick={() => {
+                  goToPrevStep?.();
+                  updateJobRequest?.({
+                    ...jobRequest,
+                    chainId: undefined,
+                  });
+                }}
                 sx={{ width: '200px' }}
               >
                 Cancel
@@ -214,7 +225,7 @@ export const CvatJobRequestForm = () => {
                 variant="contained"
                 sx={{ ml: 2.5, width: '200px' }}
                 onClick={() => handleSubmit()}
-                disabled={!(isValid && dirty)}
+                disabled={!(isValid && dirty) || !jobRequest.chainId}
               >
                 Next
               </Button>

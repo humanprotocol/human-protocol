@@ -27,7 +27,7 @@ export const SignUpForm = ({ onFinish, onError }) => {
 
       setIsSuccess(true);
     } catch (err) {
-      onError(err?.message);
+      onError(err?.response?.data?.message ?? err.message);
     }
     setIsLoading(false);
   };

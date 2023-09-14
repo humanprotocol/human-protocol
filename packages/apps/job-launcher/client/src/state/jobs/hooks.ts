@@ -7,9 +7,8 @@ export const useJobs = ({
   chainId,
 }: {
   status: JobStatus;
-  chainId?: ChainId;
+  chainId: ChainId;
 }) => {
-  const network = chainId ? NETWORKS[chainId] : null;
   const { jobs, dataLoaded, loadingFailed } = useAppSelector(
     (state) => state.jobs
   );
@@ -18,7 +17,7 @@ export const useJobs = ({
     data: jobs.filter(
       (job) =>
         (status === JobStatus.ALL || job.status === status) &&
-        (!network || network.title === job.network)
+        (chainId === ChainId.ALL || NETWORKS[chainId]?.title === job.network)
     ),
     isLoading: !dataLoaded && !loadingFailed,
     isError: loadingFailed,

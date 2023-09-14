@@ -29,7 +29,7 @@ export const VerifyEmailForm = () => {
       await authService.verifyEmail({ token });
       setIsSuccess(true);
     } catch (err) {
-      setAlertMsg(err?.response?.data?.message);
+      setAlertMsg(err?.response?.data?.message ?? err.message);
     }
     setIsLoading(false);
   };
