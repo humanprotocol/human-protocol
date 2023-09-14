@@ -14,7 +14,7 @@ export class WebhookController {
   
   @Public()
   @UseGuards(SignatureAuthGuard)
-  @Post('/')
+  @Post('/:oracleType')
   public async createIncomingWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Request() req: any,
