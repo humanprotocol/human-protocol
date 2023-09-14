@@ -16,7 +16,9 @@ import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowFailedWebhookDto, JobDetailsDto } from './job.dto';
-import { EventType } from 'src/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
+import { signMessage } from '../../common/utils/signature';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 
 @Injectable()
 export class JobService {
@@ -61,14 +63,20 @@ export class JobService {
         jobLauncherAddress,
         KVStoreKeys.webhook_url,
       );
+      const body: EscrowFailedWebhookDto = {
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        event_type: EventType.TASK_CREATION_FAILED,
+        reason: 'Unable to get manifest',
+      };
+      const signedBody = await signMessage(
+        body,
+        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      );
       await this.httpService.post(
-        jobLauncherWebhookUrl + 'fortune/escrow-failed-webhook',
-        {
-          escrow_address: escrowAddress,
-          chain_id: chainId,
-          event_type: EventType.TASK_CREATION_FAILED,
-          reason: 'Unable to get manifest',
-        } as EscrowFailedWebhookDto,
+        jobLauncherWebhookUrl + '/fortune/escrow-failed-webhook',
+        body,
+        { headers: { [HEADER_SIGNATURE_KEY]: signedBody } },
       );
       throw new NotFoundException('Unable to get manifest');
     }
