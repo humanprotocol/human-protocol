@@ -70,7 +70,10 @@ import { RoutingProtocolService } from './routing-protocol.service';
 import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
-import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
+import {
+  HMToken,
+  HMToken__factory,
+} from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 
 @Injectable()
@@ -622,7 +625,9 @@ export class JobService {
     return true;
   }
 
-  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
+  public async escrowFailedWebhook(
+    dto: EscrowFailedWebhookDto,
+  ): Promise<boolean> {
     if (dto.event_type !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -643,18 +648,21 @@ export class JobService {
       throw new ConflictException(ErrorJob.NotLaunched);
     }
 
-    jobEntity.status = JobStatus.FAILED
-    await jobEntity.save()
+    jobEntity.status = JobStatus.FAILED;
+    await jobEntity.save();
 
     return true;
   }
 
-  public async getDetails(userId: number, jobId: number): Promise<JobDetailsDto> {
+  public async getDetails(
+    userId: number,
+    jobId: number,
+  ): Promise<JobDetailsDto> {
     const jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
 
     if (!jobEntity) {
-        this.logger.log(ErrorJob.NotFound, JobService.name);
-        throw new NotFoundException(ErrorJob.NotFound);
+      this.logger.log(ErrorJob.NotFound, JobService.name);
+      throw new NotFoundException(ErrorJob.NotFound);
     }
 
     const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
@@ -669,41 +677,50 @@ export class JobService {
       escrowClient.getBalance(escrowAddress),
       stakingClient.getAllocation(escrowAddress),
       this.getManifest(manifestUrl),
-      this.getPaidOutAmount(chainId, tokenAddress, escrowAddress)
+      this.getPaidOutAmount(chainId, tokenAddress, escrowAddress),
     ]);
 
     if (!manifestData) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
 
-    const manifest = (manifestData as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-           ? manifestData as FortuneManifestDto
-           : manifestData as CvatManifestDto;
+    const manifest =
+      (manifestData as FortuneManifestDto).requestType ===
+      JobRequestType.FORTUNE
+        ? (manifestData as FortuneManifestDto)
+        : (manifestData as CvatManifestDto);
 
-    const exchangeOracleAddress = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
-                         ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS 
-                         : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    const exchangeOracleAddress =
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
+        : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
 
-    const recordingOracleAddress = this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS)!;
-    const reputationOracleAddress = this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!;
-
+    const recordingOracleAddress = this.configService.get<string>(
+      ConfigNames.RECORDING_ORACLE_ADDRESS,
+    )!;
+    const reputationOracleAddress = this.configService.get<string>(
+      ConfigNames.REPUTATION_ORACLE_ADDRESS,
+    )!;
 
     let manifestDetails;
- 
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE ) {
+
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
       manifestDetails = {
         chainId,
         title: (manifest as FortuneManifestDto).requesterTitle,
         description: (manifest as FortuneManifestDto).requesterDescription,
         requestType: JobRequestType.FORTUNE,
-        submissionsRequired: (manifest as FortuneManifestDto).submissionsRequired,
+        submissionsRequired: (manifest as FortuneManifestDto)
+          .submissionsRequired,
         tokenAddress,
         fundAmount: (manifest as FortuneManifestDto).fundAmount,
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
-        reputationOracleAddress
-      }
+        reputationOracleAddress,
+      };
     } else {
       manifestDetails = {
         chainId,
@@ -714,8 +731,8 @@ export class JobService {
         requesterAddress: signer.address,
         exchangeOracleAddress,
         recordingOracleAddress,
-        reputationOracleAddress
-      }
+        reputationOracleAddress,
+      };
     }
 
     return {
@@ -724,48 +741,58 @@ export class JobService {
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),
-        paidOut
+        paidOut,
       },
       manifest: manifestDetails,
       staking: {
         staker: allocation.staker,
         allocated: allocation.tokens.toNumber(),
-        slashed: 0, // TODO: Retrieve slash tokens 
-      }
-    }
+        slashed: 0, // TODO: Retrieve slash tokens
+      },
+    };
   }
 
-  public async getTransferLogs(chainId: ChainId, tokenAddress: string, fromBlock: number, toBlock: string | number) {
+  public async getTransferLogs(
+    chainId: ChainId,
+    tokenAddress: string,
+    fromBlock: number,
+    toBlock: string | number,
+  ) {
     const signer = this.web3Service.getSigner(chainId);
     const filter = {
-        address: tokenAddress,
-        topics: [ethers.utils.id('Transfer(address,address,uint256)')],
-        fromBlock: fromBlock,
-        toBlock: toBlock,
+      address: tokenAddress,
+      topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+      fromBlock: fromBlock,
+      toBlock: toBlock,
     };
 
     return signer.provider.getLogs(filter);
   }
 
-  public async getPaidOutAmount(chainId: ChainId, tokenAddress: string, escrowAddress: string): Promise<number> {
-      const signer = this.web3Service.getSigner(chainId);
-      const tokenContract: HMToken = HMToken__factory.connect(tokenAddress, signer);
+  public async getPaidOutAmount(
+    chainId: ChainId,
+    tokenAddress: string,
+    escrowAddress: string,
+  ): Promise<number> {
+    const signer = this.web3Service.getSigner(chainId);
+    const tokenContract: HMToken = HMToken__factory.connect(
+      tokenAddress,
+      signer,
+    );
 
-      const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
-      let paidOutAmount = new Decimal(0);
+    const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
+    let paidOutAmount = new Decimal(0);
 
-      logs.forEach(log => {
-          const parsedLog = tokenContract.interface.parseLog(log);
-          const from = parsedLog.args[0];
-          const amount = parsedLog.args[2];
+    logs.forEach((log) => {
+      const parsedLog = tokenContract.interface.parseLog(log);
+      const from = parsedLog.args[0];
+      const amount = parsedLog.args[2];
 
-          if (from === escrowAddress) {
-              paidOutAmount = paidOutAmount.add(ethers.utils.formatEther(amount));
-          }
-      });
+      if (from === escrowAddress) {
+        paidOutAmount = paidOutAmount.add(ethers.utils.formatEther(amount));
+      }
+    });
 
-      return Number(paidOutAmount);
+    return Number(paidOutAmount);
   }
-
-
 }
