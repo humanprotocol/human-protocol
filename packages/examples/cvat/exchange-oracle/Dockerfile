@@ -13,4 +13,6 @@ RUN poetry config virtualenvs.create false \
 
 COPY . .
 
+COPY ../../../sdk/python/human-protocol-sdk /lib/human-protocol-sdk
+
 CMD ["sh", "./bin/start_dev.sh"]

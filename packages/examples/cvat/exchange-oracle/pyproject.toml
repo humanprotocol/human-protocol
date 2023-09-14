@@ -19,7 +19,7 @@ pytest = "^7.2.2"
 cvat-sdk = "^2.4.4"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
-human-protocol-sdk = { path = "../../../sdk/python/human-protocol-sdk" }
+human-protocol-sdk = { path = "/lib/human-protocol-sdk" }
 xmltodict = "^0.13.0"
 
 
