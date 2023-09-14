@@ -100,7 +100,7 @@ jest.mock('@human-protocol/sdk', () => ({
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
   getRate: jest.fn().mockImplementation(() => rate),
-  parseMinioURL: jest.fn().mockImplementation(() => {
+  parseUrl: jest.fn().mockImplementation(() => {
     return {
       useSSL: false,
       host: '127.0.0.1',

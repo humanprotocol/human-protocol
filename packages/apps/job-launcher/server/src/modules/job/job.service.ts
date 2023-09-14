@@ -46,7 +46,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseMinioURL, parseUrl } from '../../common/utils';
+import { getRate, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -228,7 +228,7 @@ export class JobService {
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
     const storageClient = new StorageClient({
-      endPoint: storageData.endpoint,
+      endPoint: storageData.endPoint,
       port: storageData.port,
       useSSL: false,
     });
@@ -704,10 +704,10 @@ export class JobService {
         reputationOracleAddress
       }
     } else if (CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)) {
-      const { useSSL, host, port, bucket } = parseMinioURL((manifest as CvatManifestDto).data.data_url)
+      const { useSSL, endPoint, port, bucket } = parseUrl((manifest as CvatManifestDto).data.data_url)
 
       const storageClient = new StorageClient({
-        endPoint: host,
+        endPoint,
         port,
         useSSL,
       });
