@@ -1,5 +1,7 @@
 FROM python:3.10
 
+COPY ../../../sdk/python/human-protocol-sdk /lib/human-protocol-sdk
+
 WORKDIR /app
 
 RUN apt-get update -y && \
@@ -12,7 +14,5 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root
 
 COPY . .
-
-COPY ../../../sdk/python/human-protocol-sdk /lib/human-protocol-sdk
 
 CMD ["sh", "./bin/start_dev.sh"]
