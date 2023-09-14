@@ -227,15 +227,15 @@ export class EscrowFailedWebhookDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chain_id: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty()
   @IsString()
-  public escrow_address: string;
+  public escrowAddress: string;
 
   @ApiProperty()
   @IsEnum(EventType)
-  public event_type: EventType;
+  public eventType: EventType;
 
   @ApiProperty()
   @IsString()
