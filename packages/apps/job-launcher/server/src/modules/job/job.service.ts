@@ -720,7 +720,7 @@ export class JobService {
 
     return {
       details: {
-        escrowAddess: escrowAddress,
+        escrowAddress: escrowAddress,
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),

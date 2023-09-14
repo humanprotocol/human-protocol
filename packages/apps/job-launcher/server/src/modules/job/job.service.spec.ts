@@ -1280,7 +1280,7 @@ describe('JobService', () => {
 
       const expectedJobDetailsDto: JobDetailsDto = {
         details: {
-          escrowAddess: MOCK_ADDRESS, 
+          escrowAddress: MOCK_ADDRESS, 
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
           balance: Number(balance),
