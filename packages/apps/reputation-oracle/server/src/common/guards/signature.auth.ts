@@ -1,10 +1,9 @@
 
-import { BadRequestException, CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../config';
-import { OracleType } from '../enums/webhook';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
