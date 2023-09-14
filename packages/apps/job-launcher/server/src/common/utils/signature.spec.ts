@@ -2,7 +2,6 @@ import { verifySignature, recoverSigner, signMessage } from './signature';
 import { MOCK_ADDRESS, MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { ErrorSignature } from '../constants/errors';
 
-//ethers.utils.verifyMessage = jest.fn().mockResolvedValue(true);
 jest.doMock('ethers', () => {
   return {
     utils: {
@@ -25,7 +24,7 @@ describe('Signature utility', () => {
       const message = 'Hello, this is a signed message!';
       const signature = await signMessage(message, MOCK_PRIVATE_KEY);
 
-      const result = verifySignature(message, signature, MOCK_ADDRESS);
+      const result = verifySignature(message, signature, [MOCK_ADDRESS]);
 
       expect(result).toBe(true);
     });
@@ -37,7 +36,7 @@ describe('Signature utility', () => {
       const invalidAddress = '0x1234567890123456789012345678901234567892';
 
       expect(() => {
-        verifySignature(message, invalidSignature, invalidAddress);
+        verifySignature(message, invalidSignature, [invalidAddress]);
       }).toThrow(ErrorSignature.SignatureNotVerified);
     });
 
@@ -46,7 +45,7 @@ describe('Signature utility', () => {
       const invalidSignature = '0xInvalidSignature';
 
       expect(() => {
-        verifySignature(message, invalidSignature, MOCK_ADDRESS);
+        verifySignature(message, invalidSignature, [MOCK_ADDRESS]);
       }).toThrow(ErrorSignature.InvalidSignature);
     });
   });

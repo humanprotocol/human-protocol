@@ -1194,20 +1194,20 @@ describe('JobService', () => {
 
   describe('escrowFailedWebhook', () => {
     it('should throw BadRequestException for invalid event type', async () => {
-      const dto = { event_type: 'ANOTHER_EVENT' as EventType, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = { eventType: 'ANOTHER_EVENT' as EventType, chainId: 1, escrowAddress: 'address', reason: 'invalid manifest' };
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFoundException if jobEntity is not found', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = { eventType: EventType.TASK_CREATION_FAILED, chainId: 1, escrowAddress: 'address', reason: 'invalid manifest' };
       jobRepository.findOne = jest.fn().mockResolvedValue(null);
 
       await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = { eventType: EventType.TASK_CREATION_FAILED, chainId: 1, escrowAddress: 'address', reason: 'invalid manifest' };
       const mockJobEntity = { status: 'ANOTHER_STATUS' as JobStatus, save: jest.fn() };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -1215,7 +1215,7 @@ describe('JobService', () => {
     });
 
     it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = { eventType: EventType.TASK_CREATION_FAILED, chainId: 1, escrowAddress: 'address', reason: 'invalid manifest' };
       const mockJobEntity = { status: JobStatus.LAUNCHED, save: jest.fn() };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
