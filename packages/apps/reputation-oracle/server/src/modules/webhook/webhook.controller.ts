@@ -1,17 +1,26 @@
-import { Body, Controller, Get, Headers, Param, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Public } from '../../common/decorators';
-import { WebhookService } from './webhook.service';
-import { WebhookIncomingDto } from './webhook.dto';
-import { SignatureAuthGuard } from 'src/common/guards';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { SignatureAuthGuard } from 'src/common/guards';
+import { JwtAuthGuard } from 'src/common/guards/jwt.auth';
+import { Public } from '../../common/decorators';
+import { WebhookIncomingDto } from './webhook.dto';
+import { WebhookService } from './webhook.service';
 
-@Public()
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
-  
+
   @Public()
   @UseGuards(SignatureAuthGuard)
   @Post('/')

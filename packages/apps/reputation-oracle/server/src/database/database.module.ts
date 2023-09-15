@@ -8,6 +8,9 @@ import { NS } from '../common/constants';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
+import { AuthEntity } from 'src/modules/auth/auth.entity';
+import { TokenEntity } from 'src/modules/auth/token.entity';
+import { UserEntity } from 'src/modules/user/user.entity';
 
 @Module({
   imports: [
@@ -22,7 +25,13 @@ import { ReputationEntity } from '../modules/reputation/reputation.entity';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [WebhookIncomingEntity, ReputationEntity],
+          entities: [
+            WebhookIncomingEntity,
+            ReputationEntity,
+            AuthEntity,
+            TokenEntity,
+            UserEntity,
+          ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
