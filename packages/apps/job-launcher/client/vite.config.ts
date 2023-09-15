@@ -30,11 +30,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['@human-protocol/sdk'],
+    include: ['@human-protocol/core', '@human-protocol/sdk'],
   },
   build: {
     commonjsOptions: {
-      include: [/human-protocol-sdk/, /node_modules/],
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
     },
   },
   server: {
