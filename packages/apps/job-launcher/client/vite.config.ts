@@ -30,7 +30,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['@human-protocol/core', '@human-protocol/sdk'],
+    include: ['@human-protocol/sdk'],
   },
   build: {
     commonjsOptions: {
