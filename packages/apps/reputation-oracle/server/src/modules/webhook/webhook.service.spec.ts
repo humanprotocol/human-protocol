@@ -146,6 +146,7 @@ describe('WebhookService', () => {
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
+        retriesCount: 0,
       });
       expect(result).toBe(true);
     });
