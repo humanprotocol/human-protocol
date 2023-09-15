@@ -147,6 +147,7 @@ describe('WebhookService', () => {
         retriesCount: 0,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
+        retriesCount: 0,
       });
       expect(result).toBe(true);
     });
