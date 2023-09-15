@@ -779,6 +779,11 @@ export class EscrowClient {
         GET_ESCROWS_QUERY(filter),
         {
           ...filter,
+          status: filter.status
+            ? Object.entries(EscrowStatus).find(
+                ([, value]) => value === filter.status
+              )?.[0]
+            : undefined,
           from: filter.from ? +filter.from.getTime() / 1000 : undefined,
           to: filter.to ? +filter.to.getTime() / 1000 : undefined,
         }

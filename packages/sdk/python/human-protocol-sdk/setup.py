@@ -17,4 +17,5 @@ setuptools.setup(
     packages=setuptools.find_packages() + ["artifacts"],
     setup_requires="setuptools-pipfile",
     use_pipfile=True,
+    extras_require={"agreement": ["numpy", "pyerf"]},
 )

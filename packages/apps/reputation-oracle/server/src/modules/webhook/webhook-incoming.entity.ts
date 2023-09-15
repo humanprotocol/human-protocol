@@ -13,12 +13,6 @@ export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   public oracleAddress: string;
 
-  @Column({
-    type: 'enum',
-    enum: EventType,
-  })
-  public eventType: string;
-
   @Column({ type: 'varchar' })
   public escrowAddress: string;
 

@@ -79,8 +79,10 @@ query GetEscrowDayData($from: Int, $to: Int) {{
         where: {{
             {from_clause}
             {to_clause}
-
-        }}
+        }},
+        orderBy: timestamp,
+        orderDirection: desc,
+        {limit_clause}
     ) {{
       ...EventDayDataFields
     }}
@@ -90,4 +92,5 @@ query GetEscrowDayData($from: Int, $to: Int) {{
         event_day_data_fragment=event_day_data_fragment,
         from_clause="timestamp_gte: $from" if param.date_from else "",
         to_clause="timestamp_lte: $to" if param.date_to else "",
+        limit_clause="first: $limit" if param.limit else "first: 1000",
     )

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import * as gqlFetch from 'graphql-request';
 import { BigNumber, Signer, ethers } from 'ethers';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { ChainId } from '../src/enums';
@@ -11,7 +12,7 @@ import {
   ErrorProviderDoesNotExist,
   ErrorUnsupportedChainID,
 } from '../src/error';
-import { IAllocation, IReward, IStaker } from '../src/interfaces';
+import { IAllocation, IReward, ILeader } from '../src/interfaces';
 import { StakingClient } from '../src/staking';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
@@ -21,6 +22,16 @@ import {
   FAKE_TRANSACTION_CONFIRMATIONS,
   FAKE_TRANSACTION_HASH,
 } from './utils/constants';
+import {
+  GET_LEADERS_QUERY,
+  GET_LEADER_QUERY,
+} from '../src/graphql/queries/staking';
+
+vi.mock('graphql-request', () => {
+  return {
+    default: vi.fn(),
+  };
+});
 
 vi.mock('../src/init');
 
@@ -36,7 +47,7 @@ describe('StakingClient', () => {
   beforeEach(async () => {
     mockProvider = {
       ...provider,
-      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.MAINNET }),
     };
     mockSigner = {
       ...provider.getSigner(),
@@ -517,77 +528,98 @@ describe('StakingClient', () => {
     });
   });
 
-  describe('getStaker', () => {
+  describe('getLeader', () => {
     const stakerAddress = ethers.constants.AddressZero;
     const invalidAddress = 'InvalidAddress';
 
-    test('should return staker information', async () => {
-      const mockStaker: Omit<IStaker, 'staker'> = {
-        tokensStaked: ethers.utils.parseEther('100'),
-        tokensAllocated: ethers.utils.parseEther('50'),
-        tokensLocked: ethers.utils.parseEther('25'),
-        tokensLockedUntil: ethers.BigNumber.from(0),
-        tokensAvailable: ethers.utils.parseEther('25'),
-      };
-      mockStakingContract.getStaker.mockResolvedValueOnce(mockStaker);
+    const mockLeader: ILeader = {
+      id: stakerAddress,
+      address: stakerAddress,
+      amountStaked: ethers.utils.parseEther('100'),
+      amountAllocated: ethers.utils.parseEther('50'),
+      amountLocked: ethers.utils.parseEther('25'),
+      lockedUntilTimestamp: ethers.BigNumber.from(0),
+      amountWithdrawn: ethers.utils.parseEther('25'),
+      amountSlashed: ethers.utils.parseEther('25'),
+      reputation: ethers.utils.parseEther('25'),
+      reward: ethers.utils.parseEther('25'),
+      amountJobsLaunched: ethers.utils.parseEther('25'),
+    };
 
-      const result = await stakingClient.getStaker(stakerAddress);
-      expect(result).toEqual({ ...mockStaker, staker: stakerAddress });
-      expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
-      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
+    test('should return staker information', async () => {
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leader: mockLeader,
+      });
+
+      const result = await stakingClient.getLeader(stakerAddress);
+
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        GET_LEADER_QUERY,
+        {
+          address: stakerAddress,
+        }
+      );
+      expect(result).toEqual(mockLeader);
     });
 
     test('should throw an error for an invalid staker address', async () => {
-      await expect(stakingClient.getStaker(invalidAddress)).rejects.toThrow(
+      await expect(stakingClient.getLeader(invalidAddress)).rejects.toThrow(
         ErrorInvalidStakerAddressProvided
       );
       expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(0);
     });
 
-    test('should throw an error if the staking contract call fails', async () => {
-      mockStakingContract.getStaker.mockRejectedValue(new Error());
+    test('should throw an error if the gql fetch fails', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
 
-      await expect(stakingClient.getStaker(stakerAddress)).rejects.toThrow();
-      expect(mockStakingContract.getStaker).toHaveBeenCalledWith(stakerAddress);
-      expect(mockStakingContract.getStaker).toHaveBeenCalledTimes(1);
+      await expect(stakingClient.getLeader(stakerAddress)).rejects.toThrow();
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('getAllStakers()', () => {
-    const mockStaker: Omit<IStaker, 'staker'> = {
-      tokensStaked: ethers.utils.parseEther('100'),
-      tokensAllocated: ethers.utils.parseEther('50'),
-      tokensLocked: ethers.utils.parseEther('25'),
-      tokensLockedUntil: ethers.BigNumber.from(0),
-      tokensAvailable: ethers.utils.parseEther('25'),
-    };
+  describe('getLeaders', () => {
     const stakerAddress = ethers.constants.AddressZero;
 
+    const mockLeader: ILeader = {
+      id: stakerAddress,
+      address: stakerAddress,
+      amountStaked: ethers.utils.parseEther('100'),
+      amountAllocated: ethers.utils.parseEther('50'),
+      amountLocked: ethers.utils.parseEther('25'),
+      lockedUntilTimestamp: ethers.BigNumber.from(0),
+      amountWithdrawn: ethers.utils.parseEther('25'),
+      amountSlashed: ethers.utils.parseEther('25'),
+      reputation: ethers.utils.parseEther('25'),
+      reward: ethers.utils.parseEther('25'),
+      amountJobsLaunched: ethers.utils.parseEther('25'),
+    };
+
     test('should return an array of stakers', async () => {
-      mockStakingContract.getListOfStakers.mockResolvedValueOnce([
-        [stakerAddress, stakerAddress],
-        [mockStaker, mockStaker],
-      ]);
+      const gqlFetchSpy = vi.spyOn(gqlFetch, 'default').mockResolvedValueOnce({
+        leaders: [mockLeader, mockLeader],
+      });
+      const filter = { role: 'role' };
 
-      const stakers = await stakingClient.getAllStakers();
+      const result = await stakingClient.getLeaders(filter);
 
-      expect(stakers).toEqual([
-        { ...mockStaker, staker: stakerAddress },
-        { ...mockStaker, staker: stakerAddress },
-      ]);
-      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        GET_LEADERS_QUERY(filter),
+        filter
+      );
+      expect(result).toEqual([mockLeader, mockLeader]);
     });
 
-    test('should throw an error if no stakers are found', async () => {
-      mockStakingContract.getListOfStakers.mockResolvedValue([[], []]);
-      await expect(stakingClient.getAllStakers()).rejects.toThrow();
-      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
-    });
+    test('should throw an error if gql fetch fails', async () => {
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockRejectedValueOnce(new Error('Error'));
 
-    test('should throw an error if there is an error in getting stakers', async () => {
-      mockStakingContract.getListOfStakers.mockRejectedValueOnce(new Error());
-      await expect(stakingClient.getAllStakers()).rejects.toThrow();
-      expect(mockStakingContract.getListOfStakers).toHaveBeenCalledTimes(1);
+      await expect(stakingClient.getLeaders()).rejects.toThrow();
+      expect(gqlFetchSpy).toHaveBeenCalledTimes(1);
     });
   });
 
