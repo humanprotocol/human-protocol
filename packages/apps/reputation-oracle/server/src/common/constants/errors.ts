@@ -4,6 +4,7 @@
 export enum ErrorWebhook {
   NotFound = 'Webhook not found',
   NotCreated = 'Webhook has not been created',
+  InvalidEventType = 'Invalid event type',
 }
 
 /**

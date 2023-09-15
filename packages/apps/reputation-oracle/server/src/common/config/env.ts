@@ -43,8 +43,8 @@ export const envValidator = Joi.object({
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
-  POSTGRES_SYNC: Joi.string().default(false),
-  POSTGRES_SSL: Joi.string().default(false),
+  POSTGRES_SYNC: Joi.string().default('false'),
+  POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_PRIVATE_KEY: Joi.string().required(),
   // S3
@@ -53,7 +53,7 @@ export const envValidator = Joi.object({
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string().default('launcher'),
-  S3_USE_SSL: Joi.string().default(false),
+  S3_USE_SSL: Joi.string().default('false'),
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),
   REPUTATION_LEVEL_HIGH: Joi.number().default(700),

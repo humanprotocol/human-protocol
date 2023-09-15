@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   ChainId,
@@ -29,7 +29,7 @@ import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber, ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import { SortDirection, WebhookStatus } from '../../common/enums';
+import { EventType, SortDirection, WebhookStatus } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
 import { copyFileFromURLToBucket } from '../../common/utils';
@@ -83,9 +83,13 @@ export class WebhookService {
     dto: WebhookIncomingDto,
   ): Promise<boolean> {
     try { 
+      if (dto.eventType !== EventType.TASK_FINISHED) {
+        this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
+        throw new BadRequestException(ErrorWebhook.InvalidEventType);
+      }
+
       const webhookEntity = await this.webhookRepository.create({
         chainId: dto.chainId,
-        eventType: dto.eventType,
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),

@@ -66,8 +66,8 @@ export const envValidator = Joi.object({
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
-  POSTGRES_SYNC: Joi.string().default(false),
-  POSTGRES_SSL: Joi.string().default(false),
+  POSTGRES_SYNC: Joi.string().default('false'),
+  POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
@@ -86,7 +86,7 @@ export const envValidator = Joi.object({
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string().default('launcher'),
-  S3_USE_SSL: Joi.string().default(false),
+  S3_USE_SSL: Joi.string().default('false'),
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_API_VERSION: Joi.string().default('2022-11-15'),

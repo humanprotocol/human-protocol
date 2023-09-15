@@ -33,9 +33,6 @@ export class WebhookIncomingCreateDto {
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @IsEnum(EventType)
-  public eventType: EventType;
-
   @IsString()
   public escrowAddress: string;
 

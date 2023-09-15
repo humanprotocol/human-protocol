@@ -29,7 +29,6 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_FEE,
@@ -154,7 +153,6 @@ describe('WebhookService', () => {
       const webhookEntity: Partial<WebhookIncomingEntity> = {
         id: 1,
         chainId: dto.chainId,
-        eventType: dto.eventType,
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
@@ -168,7 +166,6 @@ describe('WebhookService', () => {
 
       expect(webhookRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
-        eventType: dto.eventType,
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
