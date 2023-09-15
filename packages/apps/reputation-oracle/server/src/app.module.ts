@@ -11,6 +11,7 @@ import { ReputationModule } from './modules/reputation/reputation.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   providers: [
@@ -33,6 +34,7 @@ import { envValidator } from './common/config';
     ReputationModule,
     WebhookModule,
     Web3Module,
+    AuthModule,
   ],
   controllers: [AppController],
 })

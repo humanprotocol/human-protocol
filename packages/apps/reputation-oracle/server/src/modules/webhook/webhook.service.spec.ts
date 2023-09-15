@@ -11,12 +11,7 @@ import {
   ManifestDto,
   WebhookIncomingDto,
 } from './webhook.dto';
-import {
-  ChainId,
-  EscrowClient,
-  NETWORKS,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { BigNumber, ethers } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
@@ -31,9 +26,11 @@ import {
   MOCK_BUCKET_NAME,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
-  MOCK_FILE_URL, MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS,
+  MOCK_FILE_URL,
+  MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS,
   MOCK_JOB_LAUNCHER_FEE,
-  MOCK_LABEL, MOCK_LABEL_NEGATIVE,
+  MOCK_LABEL,
+  MOCK_LABEL_NEGATIVE,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_FEE,
   MOCK_REPUTATION_ORACLE_FEE,
@@ -86,7 +83,7 @@ describe('WebhookService', () => {
           case 'WEB3_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME
+            return MOCK_BUCKET_NAME;
         }
       }),
     };
@@ -176,8 +173,8 @@ describe('WebhookService', () => {
 
   describe('call processPendingWebhook on job request type fortune', () => {
     let manifest: ManifestDto,
-        webhookEntity: Partial<WebhookIncomingEntity>,
-        intermediateResults: FortuneFinalResult[];
+      webhookEntity: Partial<WebhookIncomingEntity>,
+      intermediateResults: FortuneFinalResult[];
 
     beforeEach(async () => {
       manifest = {
@@ -188,7 +185,7 @@ describe('WebhookService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
       };
-  
+
       webhookEntity = {
         id: 1,
         chainId: ChainId.LOCALHOST,
@@ -196,7 +193,7 @@ describe('WebhookService', () => {
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
       };
-  
+
       intermediateResults = [
         {
           exchangeAddress: 'string',
@@ -216,17 +213,11 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce([
           { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
         ]);
-      
+
       (EscrowClient.build as any).mockImplementation(() => ({
-        storeResults: jest
-          .fn()
-          .mockResolvedValueOnce(undefined),
-        bulkPayOut: jest
-          .fn()
-          .mockResolvedValueOnce(undefined),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL),
+        storeResults: jest.fn().mockResolvedValueOnce(undefined),
+        bulkPayOut: jest.fn().mockResolvedValueOnce(undefined),
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
       }));
 
       jest
@@ -275,9 +266,7 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(undefined as any);
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest
-          .fn()
-          .mockRejectedValueOnce(new Error())
+        getManifestUrl: jest.fn().mockRejectedValueOnce(new Error()),
       }));
 
       const result = await webhookService.processPendingWebhook(
@@ -299,7 +288,9 @@ describe('WebhookService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
-          .mockRejectedValueOnce(new Error(ErrorManifest.ManifestUrlDoesNotExist))
+          .mockRejectedValueOnce(
+            new Error(ErrorManifest.ManifestUrlDoesNotExist),
+          ),
       }));
 
       const result = await webhookService.processPendingWebhook(
@@ -318,9 +309,7 @@ describe('WebhookService', () => {
 
     it('should throw an error if no intermediate results are found', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL)
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
       }));
 
       jest
@@ -333,10 +322,12 @@ describe('WebhookService', () => {
         .mockRejectedValueOnce(
           new Error(ErrorResults.NoIntermediateResultsFound),
         );
-      
+
       jest
         .spyOn(webhookService, 'getIntermediateResults')
-        .mockRejectedValueOnce(new Error(ErrorResults.NoIntermediateResultsFound));
+        .mockRejectedValueOnce(
+          new Error(ErrorResults.NoIntermediateResultsFound),
+        );
 
       const result = await webhookService.processPendingWebhook(
         webhookEntity as WebhookIncomingEntity,
@@ -347,8 +338,8 @@ describe('WebhookService', () => {
 
   describe.skip('call processPendingWebhook on job request type image label binary', () => {
     let manifest: ManifestDto,
-        webhookEntity: Partial<WebhookIncomingEntity>,
-        intermediateResults: ImageLabelBinaryJobResults;
+      webhookEntity: Partial<WebhookIncomingEntity>,
+      intermediateResults: ImageLabelBinaryJobResults;
 
     beforeEach(async () => {
       manifest = {
@@ -361,7 +352,7 @@ describe('WebhookService', () => {
         fee: totalFee.toString(),
         fundAmount: totalAmount.toString(),
       };
-  
+
       webhookEntity = {
         id: 1,
         chainId: ChainId.LOCALHOST,
@@ -369,7 +360,7 @@ describe('WebhookService', () => {
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
       };
-  
+
       intermediateResults = MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS;
     });
 
@@ -378,21 +369,16 @@ describe('WebhookService', () => {
     });
 
     it('should process a pending webhook and return true', async () => {
-      const uploadFilesSpy = jest.spyOn(webhookService.storageClient, 'uploadFiles')
-          .mockResolvedValueOnce([
-            { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-          ]);
+      const uploadFilesSpy = jest
+        .spyOn(webhookService.storageClient, 'uploadFiles')
+        .mockResolvedValueOnce([
+          { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+        ]);
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        storeResults: jest
-          .fn()
-          .mockResolvedValueOnce(undefined),
-        bulkPayOut: jest
-          .fn()
-          .mockResolvedValueOnce(undefined),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL),
+        storeResults: jest.fn().mockResolvedValueOnce(undefined),
+        bulkPayOut: jest.fn().mockResolvedValueOnce(undefined),
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
       }));
 
       jest
@@ -402,7 +388,7 @@ describe('WebhookService', () => {
       const updateOneSpy = jest
         .spyOn(webhookRepository, 'updateOne')
         .mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
-  
+
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce(manifest);
@@ -415,7 +401,7 @@ describe('WebhookService', () => {
         [intermediateResults],
         webhookService.bucket,
       );
-  
+
       expect(updateOneSpy).toHaveBeenCalledWith(
         { id: webhookEntity.id },
         {
@@ -436,9 +422,7 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(undefined as any);
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest
-          .fn()
-          .mockRejectedValueOnce(new Error())
+        getManifestUrl: jest.fn().mockRejectedValueOnce(new Error()),
       }));
 
       const result = await webhookService.processPendingWebhook(
@@ -461,7 +445,9 @@ describe('WebhookService', () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest
           .fn()
-          .mockRejectedValueOnce(new Error(ErrorManifest.ManifestUrlDoesNotExist))
+          .mockRejectedValueOnce(
+            new Error(ErrorManifest.ManifestUrlDoesNotExist),
+          ),
       }));
 
       const result = await webhookService.processPendingWebhook(
@@ -480,15 +466,15 @@ describe('WebhookService', () => {
 
     it('should throw an error if no intermediate results are found', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL)
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
       }));
 
       jest
         .spyOn(webhookService, 'getIntermediateResults')
-        .mockRejectedValueOnce(new Error(ErrorResults.NoIntermediateResultsFound));
-        
+        .mockRejectedValueOnce(
+          new Error(ErrorResults.NoIntermediateResultsFound),
+        );
+
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
         .mockResolvedValueOnce({} as any)
@@ -532,12 +518,8 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(undefined as any);
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest
-          .fn()
-          .mockResolvedValueOnce(finalResultsUrl),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValueOnce(finalResultsUrl),
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValueOnce('recording-oracle-address'),
@@ -589,12 +571,8 @@ describe('WebhookService', () => {
         .mockResolvedValueOnce(undefined as any);
 
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest
-          .fn()
-          .mockResolvedValueOnce(finalResultsUrl),
-        getManifestUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValueOnce(finalResultsUrl),
+        getManifestUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValueOnce('recording-oracle-address'),
@@ -625,11 +603,9 @@ describe('WebhookService', () => {
       const updateOneSpy = jest
         .spyOn(webhookRepository, 'updateOne')
         .mockResolvedValueOnce(undefined as any);
-      
+
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest
-          .fn()
-          .mockRejectedValueOnce(new Error())
+        getResultsUrl: jest.fn().mockRejectedValueOnce(new Error()),
       }));
 
       const result = await webhookService.processPaidWebhook(
@@ -651,11 +627,9 @@ describe('WebhookService', () => {
       const updateOneSpy = jest
         .spyOn(webhookRepository, 'updateOne')
         .mockResolvedValueOnce(undefined as any);
-      
+
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest
-          .fn()
-          .mockRejectedValueOnce(new Error('Some error'))
+        getResultsUrl: jest.fn().mockRejectedValueOnce(new Error('Some error')),
       }));
 
       const result = await webhookService.processPaidWebhook(
@@ -671,9 +645,7 @@ describe('WebhookService', () => {
 
     it('should throw an error if no final results are found and return false', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
-        getResultsUrl: jest
-          .fn()
-          .mockResolvedValueOnce(MOCK_FILE_URL)
+        getResultsUrl: jest.fn().mockResolvedValueOnce(MOCK_FILE_URL),
       }));
       jest
         .spyOn(StorageClient, 'downloadFileFromUrl')
