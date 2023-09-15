@@ -5,7 +5,6 @@ import { WebhookService } from './webhook.service';
 import { WebhookIncomingDto } from './webhook.dto';
 import { SignatureAuthGuard } from 'src/common/guards';
 import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
-import { OracleType } from 'src/common/enums';
 
 @Public()
 @ApiTags('Webhook')
@@ -15,11 +14,9 @@ export class WebhookController {
   
   @Public()
   @UseGuards(SignatureAuthGuard)
-  @Post('/:oracleType')
+  @Post('/')
   public async createIncomingWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Param('oracleType') oracleType: OracleType,
-    @Request() req: any,
     @Body() data: WebhookIncomingDto,
   ): Promise<boolean> {
     return this.webhookService.createIncomingWebhook(data);

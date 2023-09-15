@@ -623,14 +623,14 @@ export class JobService {
   }
 
   public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
-    if (dto.event_type !== EventType.TASK_CREATION_FAILED) {
+    if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
     }
 
     const jobEntity = await this.jobRepository.findOne({
-      chainId: dto.chain_id,
-      escrowAddress: dto.escrow_address,
+      chainId: dto.chainId,
+      escrowAddress: dto.escrowAddress,
     });
 
     if (!jobEntity) {
