@@ -25,7 +25,7 @@ import {
 } from '../../../test/constants';
 import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
-import { UserStatus } from '../../common/enums/user';
+import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 
@@ -150,6 +150,7 @@ describe('AuthService', () => {
       email: MOCK_EMAIL,
       password: MOCK_PASSWORD,
       confirm: MOCK_PASSWORD,
+      type: UserType.WORKER,
     };
 
     const userEntity: Partial<UserEntity> = {

@@ -9,10 +9,15 @@ export class UserCreateDto extends ValidatePasswordDto {
   @IsEmail()
   @Transform(({ value }: { value: string }) => value.toLowerCase())
   public email: string;
+
+  @ApiProperty({
+    enum: UserStatus,
+  })
+  @IsEnum(UserType)
+  public type: UserType;
 }
 
 export class UserDto extends UserCreateDto {
-  public type: UserType;
   public status: UserStatus;
 }
 
