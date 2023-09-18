@@ -67,7 +67,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { CVAT_JOB_TYPES, JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import { HMToken, HMToken__factory } from '@human-protocol/core/typechain-types';
@@ -229,7 +229,7 @@ export class JobService {
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
     const storageClient = new StorageClient({
-      endPoint: storageData.endpoint,
+      endPoint: storageData.endPoint,
       port: storageData.port,
       useSSL: false,
     });
@@ -720,7 +720,7 @@ export class JobService {
 
     return {
       details: {
-        escrowAddess: escrowAddress,
+        escrowAddress: escrowAddress,
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),
