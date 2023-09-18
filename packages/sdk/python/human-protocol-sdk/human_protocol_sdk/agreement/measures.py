@@ -7,7 +7,7 @@ from .validations import (
     validate_confusion_matrix,
 )
 
-from .bootstrap import bootstrap_ci
+from .bootstrap import confidence_intervals
 
 from .utils import label_counts, confusion_matrix_from_sequence
 
@@ -103,11 +103,11 @@ def agreement(
             if bootstrap_kwargs is None:
                 bootstrap_kwargs = {}
 
-            ci, _ = bootstrap_ci(
+            ci, _ = confidence_intervals(
                 data, statistic_fn=fn, algorithm=bootstrap_method, **bootstrap_kwargs
             )
             confidence_level = bootstrap_kwargs.get(
-                "confidence_level", bootstrap_ci.__defaults__[2]
+                "confidence_level", confidence_intervals.__defaults__[2]
             )
 
     return {

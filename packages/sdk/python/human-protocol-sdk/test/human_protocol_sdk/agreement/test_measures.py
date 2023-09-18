@@ -37,7 +37,7 @@ def test_agreement(annotations, labels):
         assert res["results"]["confidence_level"] == -100.0
 
     measure_kwargs = {"invalid_return": None}
-    bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "ci": 0.9}
+    bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "confidence_level": 0.9}
     res = agreement(
         annotations,
         measure="fleiss_kappa",

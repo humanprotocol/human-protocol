@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from typing import Sequence, Callable, Optional, Tuple
 from warnings import warn
@@ -5,13 +7,14 @@ from warnings import warn
 from human_protocol_sdk.agreement.utils import NormalDistribution
 
 
-def bootstrap_ci(
+def confidence_intervals(
     data: Sequence,
     statistic_fn: Callable,
     n_iterations: int = 1000,
     n_sample: Optional[int] = None,
-    ci=0.95,
+    confidence_level=0.95,
     algorithm="bca",
+    seed=None,
 ) -> Tuple[Tuple[float], Sequence[float]]:
     """Returns the confidence interval for the boostrap estimate of the given
     statistic.
@@ -24,12 +27,17 @@ def bootstrap_ci(
         n_sample: If provided, determines the size of each bootstrap sample
             drawn from the data. If omitted, is equal to the length of the
             data.
-        ci: Size of the confidence interval.
+        confidence_level: Size of the confidence interval.
         algorithm: Which algorithm to use for the confidence interval
             estimation. "bca" uses the "Bias Corrected Bootstrap with
             Acceleration", "percentile" simply takes the appropriate
             percentiles from the bootstrap distribution.
     """
+    # set random seed for reproducibility
+    if seed is not None:
+        np.random.seed(seed)
+        random.seed(seed)
+
     data = np.asarray(data)
 
     if n_iterations < 1:
@@ -48,8 +56,10 @@ def bootstrap_ci(
     elif n_sample < 1:
         raise ValueError(f"n_sample must be a positive integer, but was {n_sample}")
 
-    if not (0.0 <= ci <= 1.0):
-        raise ValueError(f"ci must be a float within [0.0, 1.0], but was {ci}")
+    if not (0.0 <= confidence_level <= 1.0):
+        raise ValueError(
+            f"ci must be a float within [0.0, 1.0], but was {confidence_level}"
+        )
 
     # bootstrap estimates
     theta_b = np.empty(n_iterations, dtype=float)
@@ -60,7 +70,7 @@ def bootstrap_ci(
 
     match algorithm:
         case "percentile":
-            alpha = 1.0 - ci
+            alpha = 1.0 - confidence_level
             alpha /= 2.0
             q = np.asarray([alpha, 1.0 - alpha])
         case "bca":
@@ -75,7 +85,7 @@ def bootstrap_ci(
 
             a = (np.sum(theta_jn**3) / np.sum(theta_jn**2, axis=-1) ** 1.5) / 6
 
-            alpha = 1.0 - ci
+            alpha = 1.0 - confidence_level
             alpha /= 2
             q = np.asarray([alpha, 1.0 - alpha])
 
