@@ -60,6 +60,7 @@ describe('UserService', () => {
         email: 'test@example.com',
         password: 'password123',
         confirm: 'password123',
+        type: UserType.WORKER,
       };
       const hashedPassword =
         '$2b$12$Z02o9/Ay7CT0n99icApZYORH8iJI9VGtl3mju7d0c4SdDDujhSzOa';
@@ -81,7 +82,7 @@ describe('UserService', () => {
         ...dto,
         email: dto.email,
         password: expect.any(String),
-        type: UserType.REQUESTER,
+        type: UserType.WORKER,
         status: UserStatus.PENDING,
       });
       expect(result).toBe(createdUser);
@@ -92,6 +93,7 @@ describe('UserService', () => {
         email: 'test@example.com',
         password: 'password123',
         confirm: 'password123',
+        type: UserType.WORKER,
       };
 
       jest

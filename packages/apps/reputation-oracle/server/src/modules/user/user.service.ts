@@ -33,7 +33,6 @@ export class UserService {
       ...rest,
       email,
       password: bcrypt.hashSync(password, this.HASH_ROUNDS),
-      type: UserType.REQUESTER,
       status: UserStatus.PENDING,
     });
   }
