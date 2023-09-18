@@ -11,7 +11,30 @@ from .validations import (
     validate_same_dtype,
 )
 
-_default_nan_values = {None, "", "None", "nan", np.nan, nan}
+
+def _filter_labels(labels: Sequence, exclude=None):
+    """
+    Filters the given sequence of labels, based on the given exclusion values.
+
+    Args:
+        labels: The labels to filter.
+        exclude: The list of labels to exclude.
+
+    Returns: A list of labels without the given list of labels to exclude.
+
+    """
+    if exclude is None:
+        return np.asarray(labels)
+
+    # map to preserve label order if user defined labels are passed
+    label_to_id = {label: i for i, label in enumerate(labels)}
+    exclude = set(exclude)
+
+    labels = sorted(
+        set(labels).difference(exclude), key=lambda x: label_to_id.get(x, -1)
+    )
+
+    return np.asarray(labels)
 
 
 def label_counts(
@@ -38,17 +61,7 @@ def label_counts(
     if labels is None:
         labels = np.unique(annotations)
 
-    # map to preserve label order if user defined labels are passed
-    label_to_id = {label: i for i, label in enumerate(labels)}
-
-    if nan_values is None:
-        nan_values = set(_default_nan_values)
-    else:
-        nan_values = set(nan_values)
-
-    labels = sorted(
-        set(labels).difference(nan_values), key=lambda x: label_to_id.get(x, -1)
-    )
+    labels = _filter_labels(labels, nan_values)
 
     def lcs(annotations, labels):
         c = Counter(annotations)
@@ -90,14 +103,8 @@ def confusion_matrix_from_sequence(
     # create list of unique labels
     if labels is None:
         labels = np.unique(np.concatenate([a, b]))
-    label_to_id = {label: i for i, label in enumerate(labels)}
 
-    if nan_values is None:
-        nan_values = set(_default_nan_values)
-
-    labels = sorted(
-        set(labels).difference(nan_values), key=lambda x: label_to_id.get(x, -1)
-    )
+    labels = _filter_labels(labels, exclude=nan_values)
     n_labels = len(labels)
 
     # map labels to ids
@@ -113,8 +120,8 @@ def confusion_matrix_from_sequence(
 
     # get indices and counts to populate confusion matrix
     confusion_matrix = np.zeros((n_labels, n_labels), dtype=int)
-    ijs, counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
-    confusion_matrix[ijs[0], ijs[1]] = counts
+    (i, j), counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
+    confusion_matrix[i, j] = counts
 
     if return_labels:
         return confusion_matrix, labels

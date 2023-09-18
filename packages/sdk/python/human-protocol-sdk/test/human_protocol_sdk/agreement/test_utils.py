@@ -12,7 +12,10 @@ def test_confusion_matrix_from_sequence(
     assert np.all(confusion_matrix_from_sequence(seq_values, seq_values) == np.eye(4))
     res = np.eye(3)
     res[0, 0] = 0
-    assert np.all(confusion_matrix_from_sequence(seq_labels, seq_labels_nan) == res)
+    assert np.all(
+        confusion_matrix_from_sequence(seq_labels, seq_labels_nan, nan_values=["nan"])
+        == res
+    )
 
     with pytest.raises(ValueError, match="same shape"):
         confusion_matrix_from_sequence(seq_labels_long, seq_labels_nan)
