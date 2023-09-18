@@ -45,7 +45,7 @@
     "@types/cookie-parser": "^1.4.3",
     "@types/express-session": "^1.17.7",
     "@types/passport-jwt": "^3.0.8",
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "cookie-parser": "^1.4.6",
     "decimal.js": "^10.4.3",
