@@ -29,7 +29,7 @@ jobs:
       ETH_BSC_TESTNET_URL: ${{ secrets.ETH_BSC_TESTNET_URL }}
       ETH_MOONBEAM_URL: ${{ secrets.ETH_MOONBEAM_URL }}
       ETH_MOONBASE_ALPHA_URL: ${{ secrets.ETH_MOONBASE_ALPHA_URL }}
-      ETH_MAINNET_TESTNET_URL: ${{ secrets.ETH_MAINNET_TESTNET_URL }}
+      ETH_MAINNET_URL: ${{ secrets.ETH_MAINNET_URL }}
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
       POLYGONSCAN_API_KEY: ${{ secrets.POLYGONSCAN_API_KEY }}
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
@@ -134,5 +134,44 @@ jobs:
         if: always() && github.event.inputs.rewardPool== 'true'
         run: npx hardhat verify --network ${{ github.event.inputs.network }} ${{ steps.networks.outputs.reward_pool }}
         working-directory: ./packages/core
+        #Commit changes to develop
+      - name: Check for Changes
+        if: always()
+        id: check_changes
+        run: |
+          git fetch
+          if [[ -n "$(git diff --name-only)" ]]; then
+            echo "Changes detected."
+            echo "::set-output name=changes::true"
+          else
+            echo "No changes detected."
+            echo "::set-output name=changes::false"
+          fi
+
+      - name: stash
+        if: always() && steps.check_changes.outputs.changes == 'true'
+        run: |
+          git status
+          git stash --include-untracked
+      - name: Checkout develop
+        if: always() && steps.check_changes.outputs.changes == 'true'
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+          token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
+      - name: pop
+        if: always() && steps.check_changes.outputs.changes == 'true'
+        run: |
+          git stash pop
+          git status
+      - name: Commit changes
+        if: always() && steps.check_changes.outputs.changes == 'true'
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "['./packages/core/.openzeppelin']"
+          message: 'Update upgrade file from CD'
+          default_author: github_actions
+          tag_push: '--force'
+          github_token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
 
 

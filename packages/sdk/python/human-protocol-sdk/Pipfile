@@ -8,6 +8,9 @@ black = "*"
 pylint = "*"
 pytest = "*"
 setuptools-pipfile = "*"
+hypothesis = "*"
+numpy = "*"
+pyerf = "*"
 
 [packages]
 cryptography = "*"

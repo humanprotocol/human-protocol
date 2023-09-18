@@ -17,6 +17,7 @@ import {
   ErrorHashIsEmptyString,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
+  ErrorInvalidExchangeOracleAddressProvided,
   ErrorInvalidRecordingOracleAddressProvided,
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
@@ -92,6 +93,7 @@ describe('EscrowClient', () => {
       canceler: vi.fn(),
       recordingOracle: vi.fn(),
       reputationOracle: vi.fn(),
+      exchangeOracle: vi.fn(),
       intermediateResultsUrl: vi.fn(),
       launcher: vi.fn(),
       escrowFactory: vi.fn(),
@@ -243,8 +245,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: FAKE_ADDRESS,
         reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
@@ -258,8 +262,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: FAKE_ADDRESS,
+        exchangeOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
@@ -269,12 +275,31 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorInvalidReputationOracleAddressProvided);
     });
 
-    test('should throw an error if reputationOracle is an invalid address', async () => {
+    test('should throw an error if exchangeOracle is an invalid address', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: FAKE_ADDRESS,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidExchangeOracleAddressProvided);
+    });
+
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
@@ -288,8 +313,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(10),
         reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         manifestHash: FAKE_HASH,
       };
@@ -301,12 +328,14 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
     });
 
-    test('should throw an error if 0 <= recordingOracleFee or 0 <= reputationOracleFee', async () => {
+    test('should throw an error if 0 <= recordingOracleFee', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
         recordingOracleFee: BigNumber.from(0),
-        reputationOracleFee: BigNumber.from(0),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
@@ -318,12 +347,52 @@ describe('EscrowClient', () => {
       ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
     });
 
-    test('should throw an error if recordingOracleFee > 100 or reputationOracleFee > 100', async () => {
+    test('should throw an error if 0 <= reputationOracleFee', async () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(100),
-        reputationOracleFee: BigNumber.from(100),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(0),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if 0 <= exchangeOracleFee', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(0),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if total fee is greater than 100', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(40),
+        reputationOracleFee: BigNumber.from(40),
+        exchangeOracleFee: BigNumber.from(40),
         manifestUrl: VALID_URL,
         hash: FAKE_HASH,
       };
@@ -339,8 +408,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: '',
         hash: FAKE_HASH,
       };
@@ -356,8 +427,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: FAKE_URL,
         hash: FAKE_HASH,
       };
@@ -373,8 +446,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         hash: '',
       };
@@ -390,8 +465,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         manifestHash: FAKE_HASH,
       };
@@ -404,8 +481,10 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        BigNumber.from(50),
-        BigNumber.from(50),
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
         VALID_URL,
         FAKE_HASH
       );
@@ -415,8 +494,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         manifestHash: FAKE_HASH,
       };
@@ -431,8 +512,10 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        BigNumber.from(50),
-        BigNumber.from(50),
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
         VALID_URL,
         FAKE_HASH
       );
@@ -449,8 +532,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         manifestHash: FAKE_HASH,
       };
@@ -474,8 +559,10 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        BigNumber.from(50),
-        BigNumber.from(50),
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
         VALID_URL,
         FAKE_HASH
       );
@@ -485,8 +572,10 @@ describe('EscrowClient', () => {
       const escrowConfig = {
         recordingOracle: ethers.constants.AddressZero,
         reputationOracle: ethers.constants.AddressZero,
-        recordingOracleFee: BigNumber.from(50),
-        reputationOracleFee: BigNumber.from(50),
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
         manifestUrl: VALID_URL,
         manifestHash: FAKE_HASH,
       };
@@ -501,8 +590,10 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        BigNumber.from(50),
-        BigNumber.from(50),
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
         VALID_URL,
         FAKE_HASH
       );
@@ -1649,6 +1740,57 @@ describe('EscrowClient', () => {
       expect(
         escrowClient.escrowContract.reputationOracle
       ).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getExchangeOracleAddress', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.getExchangeOracleAddress(escrowAddress)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.getExchangeOracleAddress(escrowAddress)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should successfully getExchangeOracleAddress', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.exchangeOracle.mockReturnValue(
+        ethers.constants.AddressZero
+      );
+
+      const exchangeOracleAddress = await escrowClient.getExchangeOracleAddress(
+        escrowAddress
+      );
+
+      expect(exchangeOracleAddress).toEqual(ethers.constants.AddressZero);
+      expect(escrowClient.escrowContract.exchangeOracle).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if getExchangeOracleAddress fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.exchangeOracle.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.getExchangeOracleAddress(escrowAddress)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.exchangeOracle).toHaveBeenCalledWith();
     });
   });
 
