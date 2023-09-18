@@ -11,7 +11,7 @@ export class UserCreateDto extends ValidatePasswordDto {
   public email: string;
 
   @ApiProperty({
-    enum: UserStatus,
+    enum: UserType,
   })
   @IsEnum(UserType)
   public type: UserType;
