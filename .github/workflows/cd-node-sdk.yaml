@@ -24,7 +24,7 @@ jobs:
       - run: yarn build
         name: Build SDK package
         working-directory: ./packages/sdk/typescript/human-protocol-sdk
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v2
         name: Publish
         with:
           package: ./packages/sdk/typescript/human-protocol-sdk/package.json
