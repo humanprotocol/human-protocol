@@ -2,6 +2,7 @@ import { Box, Button, FormControl, Grid, TextField } from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { FortuneJobRequestValidationSchema } from './schema';
 
 export const FortuneJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -29,7 +30,7 @@ export const FortuneJobRequestForm = () => {
     <Box>
       <Formik
         initialValues={initialValues}
-        // validationSchema={RegisterValidationSchema}
+        validationSchema={FortuneJobRequestValidationSchema}
         onSubmit={handleNext}
       >
         {({
@@ -43,7 +44,7 @@ export const FortuneJobRequestForm = () => {
           setFieldValue,
         }) => (
           <form>
-            <Grid container spacing={4} mb={4}>
+            <Grid container spacing={2} mb={4}>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
                   <TextField
@@ -52,6 +53,7 @@ export const FortuneJobRequestForm = () => {
                     onChange={(e) => setFieldValue('title', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="Title"
+                    label="Title"
                     error={touched.title && Boolean(errors.title)}
                     helperText={errors.title}
                   />
@@ -67,6 +69,7 @@ export const FortuneJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Fortunes Requested"
+                    label="Fortunes Requested"
                     type="number"
                     inputProps={{ min: 0, step: 1 }}
                     error={
@@ -87,6 +90,7 @@ export const FortuneJobRequestForm = () => {
                     }
                     onBlur={handleBlur}
                     placeholder="Description"
+                    label="Description"
                     error={touched.description && Boolean(errors.description)}
                     helperText={errors.description}
                   />
@@ -102,7 +106,13 @@ export const FortuneJobRequestForm = () => {
             >
               <Button
                 variant="outlined"
-                onClick={() => goToPrevStep?.()}
+                onClick={() => {
+                  goToPrevStep?.();
+                  updateJobRequest?.({
+                    ...jobRequest,
+                    chainId: undefined,
+                  });
+                }}
                 sx={{ width: '200px' }}
               >
                 Cancel
@@ -111,7 +121,7 @@ export const FortuneJobRequestForm = () => {
                 variant="contained"
                 sx={{ ml: 2.5, width: '200px' }}
                 onClick={() => handleSubmit()}
-                disabled={!(isValid && dirty)}
+                disabled={!(isValid && dirty) || !jobRequest.chainId}
               >
                 Next
               </Button>

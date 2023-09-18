@@ -63,12 +63,16 @@ export const AuthHeader = () => {
   };
 
   const handleLogOut = async () => {
-    if (refreshToken) {
-      setIsLoggingOut(true);
-      await authServices.signOut(refreshToken);
-      dispatch(signOut());
-      setIsLoggingOut(false);
+    setIsLoggingOut(true);
+    try {
+      if (refreshToken) {
+        await authServices.signOut(refreshToken);
+      }
+    } catch (err) {
+      console.log(err);
     }
+    dispatch(signOut());
+    setIsLoggingOut(false);
   };
 
   let segements = pathname.split('/').filter((s) => s);

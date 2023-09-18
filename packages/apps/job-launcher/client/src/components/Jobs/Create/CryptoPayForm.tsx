@@ -1,4 +1,5 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
+import { NETWORKS } from '@human-protocol/sdk';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -18,7 +19,6 @@ import React, { useMemo, useState } from 'react';
 import { useAccount, useNetwork, useSigner } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
 import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
-import { SUPPORTED_CHAIN_IDS } from '../../../constants/chains';
 import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -71,7 +71,7 @@ export const CryptoPayForm = ({
   }, [payWithAccountBalance, totalAmount, accountAmount]);
 
   const handlePay = async () => {
-    if (signer && tokenAddress && amount) {
+    if (signer && tokenAddress && amount && jobRequest.chainId) {
       setIsLoading(true);
       try {
         if (walletPayAmount > 0) {
@@ -117,13 +117,16 @@ export const CryptoPayForm = ({
     }
   };
 
-  if (!chain || chain.unsupported || !SUPPORTED_CHAIN_IDS.includes(chain.id))
+  if (!chain || chain.unsupported || chain.id !== jobRequest.chainId)
     return (
-      <Box>
-        <Typography>
-          You are on wrong network, please switch to one of the supported
-          networks.
+      <Box textAlign="center">
+        <Typography textAlign="center">
+          You are on wrong network, please switch to{' '}
+          {NETWORKS[jobRequest.chainId!]?.title}.
         </Typography>
+        <Button variant="outlined" onClick={() => goToPrevStep?.()}>
+          Back
+        </Button>
       </Box>
     );
 

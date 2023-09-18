@@ -34,7 +34,7 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
-      include: [/human-protocol-sdk/, /node_modules/],
+      include: [/core/, /human-protocol-sdk/, /node_modules/],
     },
   },
   server: {

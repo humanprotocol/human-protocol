@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import * as authService from '../../services/auth';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync, signIn } from '../../state/auth/reducer';
+import { fetchUserJobsAsync } from '../../state/jobs/reducer';
 import { Password } from './Password';
 import { LoginValidationSchema } from './schema';
 
@@ -34,8 +35,9 @@ export const SignInForm = ({ onError }) => {
       });
       dispatch(signIn(data));
       dispatch(fetchUserBalanceAsync());
+      dispatch(fetchUserJobsAsync());
     } catch (err) {
-      onError(err?.response?.data?.message);
+      onError(err?.response?.data?.message ?? err.message);
     }
     setIsLoading(false);
   };
