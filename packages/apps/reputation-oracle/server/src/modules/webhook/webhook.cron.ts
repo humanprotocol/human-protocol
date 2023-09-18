@@ -16,7 +16,7 @@ export class WebhookCron {
     private readonly webhookRepository: WebhookRepository,
   ) {}
 
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   public async processPendingWebhook() {
     try {
       const webhookEntity = await this.webhookRepository.findOne(
@@ -40,7 +40,7 @@ export class WebhookCron {
     }
   }
 
-  // @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   public async processPaidWebhook() {
     try {
       const webhookEntity = await this.webhookRepository.findOne(

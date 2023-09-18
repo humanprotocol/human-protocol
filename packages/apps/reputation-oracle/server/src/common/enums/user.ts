@@ -6,5 +6,7 @@ export enum UserStatus {
 
 export enum UserType {
   OPERATOR = 'OPERATOR',
-  REQUESTER = 'REQUESTER',
+  EXCHANGE_ORACLE = 'EXCHANGE_ORACLE',
+  RECORDING_ORACLE = 'RECORDING_ORACLE',
+  WORKER = 'WORKER',
 }
