@@ -50,7 +50,7 @@
     "nestjs-minio-client": "^2.0.0",
     "@nestjs/swagger": "^7.0.6",
     "class-transformer": "^0.5.1",
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "@nestjs/config": "^3.0.0",
     "express-session": "^1.17.3",
     "class-validator": "^0.14.0",
