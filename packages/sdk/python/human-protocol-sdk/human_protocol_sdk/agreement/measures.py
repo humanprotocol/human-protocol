@@ -7,38 +7,47 @@ from .validations import (
     validate_confusion_matrix,
 )
 
+from .bootstrap import bootstrap_ci
+
 from .utils import label_counts, confusion_matrix_from_sequence
 
+from functools import partial
 from typing import Sequence, Optional
 
 
 def agreement(
     data: Sequence,
-    method="fleiss_kappa",
+    measure="fleiss_kappa",
     data_format="annotations",
     labels: Optional[Sequence] = None,
     nan_values: Optional[Sequence] = None,
-    invalid_return=np.nan,
+    bootstrap_method: Optional[str] = None,
+    bootstrap_kwargs: Optional[dict] = None,
+    measure_kwargs: Optional[dict] = None,
 ) -> dict:
     """
     Calculates agreement across the given data using the given method.
 
     Args:
         data: Annotated data.
-        method: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
+        measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
         data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
         labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
         nan_values: Values to be counted as invalid and filter out from the data. If omitted, sensible defaults will
             be used based on the data type of the annotations.
-        invalid_return: The value to return in case the provided data is invalid for the given method.
+        bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
+            must be one of 'percentile' or 'bca'.
+        bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
+        measure_kwargs: Dictionary of keyword arguments to be passed to the measure function.
 
-    Returns: Agreement score.
+    Returns: A dictionary containing the keys "results" and "config". Results contains the scores, while config contains parameters that produced the results.
     """
+    orig_data = np.array(data)  # copy of original data for config
     data = np.asarray(data)
 
     # convert data
     if data_format == "annotations":
-        if method == "cohens_kappa":
+        if measure == "cohens_kappa":
             # input validation
             if data.shape[1] < 2:  # only a single annotator present
                 raise ValueError(
@@ -53,31 +62,71 @@ def agreement(
                 )
 
             data, labels = confusion_matrix_from_sequence(
-                data.T[0], data.T[1], labels, return_labels=True
+                data.T[0],
+                data.T[1],
+                labels=labels,
+                nan_values=nan_values,
+                return_labels=True,
             )
         else:
             data, labels = label_counts(
-                data, labels, nan_values=nan_values, return_labels=True
+                data, labels=labels, nan_values=nan_values, return_labels=True
             )
 
-    score = None
-    match method:
+    match measure:
         case "fleiss_kappa":
-            score = fleiss_kappa(data, invalid_return)
+            fn = fleiss_kappa
         case "cohens_kappa":
-            score = cohens_kappa(data, invalid_return)
+            fn = cohens_kappa
         case "percentage":
-            score = percentage(data, invalid_return=invalid_return)
+            fn = percentage
         case _:
-            raise ValueError(f"Provided method {method} is not supported.")
+            raise ValueError(f"Provided method {measure} is not supported.")
+
+    # calculate score
+    if measure_kwargs is None:
+        measure_kwargs = {}
+
+    fn = partial(fn, **measure_kwargs)
+    score = fn(data)
+
+    # calculate bootstrap
+    if bootstrap_method is None:
+        ci = None
+        confidence_level = None
+    else:
+        if measure == "cohens_kappa":
+            warn("Bootstrapping is currently not supported for Cohen's Kappa.")
+            ci = (-100.0, -100.0)
+            confidence_level = -100.0
+        else:
+            if bootstrap_kwargs is None:
+                bootstrap_kwargs = {}
+
+            ci, _ = bootstrap_ci(
+                data, statistic_fn=fn, algorithm=bootstrap_method, **bootstrap_kwargs
+            )
+            confidence_level = bootstrap_kwargs.get(
+                "confidence_level", bootstrap_ci.__defaults__[2]
+            )
 
     return {
-        "name": method,
-        "score": score,
-        "labels": labels,
-        "nan_values": nan_values,
-        "data": data,
-        "data_format": data_format,
+        "results": {
+            "measure": measure,
+            "score": score,
+            "ci": ci,
+            "confidence_level": confidence_level,
+        },
+        "config": {
+            "measure": measure,
+            "labels": labels,
+            "nan_values": nan_values,
+            "data": orig_data,
+            "data_format": data_format,
+            "bootstrap_method": bootstrap_method,
+            "bootstrap_kwargs": bootstrap_kwargs,
+            "measure_kwargs": measure_kwargs,
+        },
     }
 
 

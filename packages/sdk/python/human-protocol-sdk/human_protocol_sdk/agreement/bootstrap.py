@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Sequence, Callable, Optional
+from typing import Sequence, Callable, Optional, Tuple
 from warnings import warn
 
 from human_protocol_sdk.agreement.utils import NormalDistribution
@@ -12,7 +12,7 @@ def bootstrap_ci(
     n_sample: Optional[int] = None,
     ci=0.95,
     algorithm="bca",
-) -> tuple:
+) -> Tuple[Tuple[float], Sequence[float]]:
     """Returns the confidence interval for the boostrap estimate of the given
     statistic.
 

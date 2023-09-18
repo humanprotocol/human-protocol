@@ -19,12 +19,36 @@ from .conftest import (
 
 
 def test_agreement(annotations, labels):
-    k_agree = agreement(annotations, method="fleiss_kappa", labels=labels)["score"]
+    k_agree = agreement(annotations, measure="fleiss_kappa", labels=labels)["results"][
+        "score"
+    ]
     k_fleiss = fleiss_kappa(label_counts(annotations, labels))
 
     assert _eq_rounded(k_agree, k_fleiss)
 
-    agreement(annotations, method="cohens_kappa", labels=labels)
+    with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
+        res = agreement(
+            annotations,
+            measure="cohens_kappa",
+            labels=labels,
+            bootstrap_method="percentile",
+        )
+        assert res["results"]["ci"] == (-100.0, -100.0)
+        assert res["results"]["confidence_level"] == -100.0
+
+    measure_kwargs = {"invalid_return": None}
+    bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "ci": 0.9}
+    res = agreement(
+        annotations,
+        measure="fleiss_kappa",
+        labels=labels,
+        bootstrap_method="percentile",
+        measure_kwargs=measure_kwargs,
+        bootstrap_kwargs=bootstrap_kwargs,
+    )
+
+    assert res["results"]["ci"] != (-100.0, -100.0)
+    assert res["results"]["confidence_level"] != -100.0
 
 
 def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):
