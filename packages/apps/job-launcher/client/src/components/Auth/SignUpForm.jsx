@@ -42,10 +42,10 @@ export const SignUpForm = ({ onFinish, onError }) => {
   if (isSuccess) {
     return (
       <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
-        <Box>
+        <Box sx={{ textAlign: 'center' }}>
           <CheckFilledIcon />
         </Box>
-        <Typography variant="h6" fontWeight={500} mt={4}>
+        <Typography variant="h6" fontWeight={500} mt={4} textAlign="center">
           Success!
         </Typography>
         <Typography variant="body2" mt={5}>
