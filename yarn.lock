@@ -18825,21 +18825,6 @@ tar@^6.1.0, tar@^6.1.11:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
-tenderly@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/tenderly/-/tenderly-0.4.0.tgz#681e2efdec48f4617117ddfce9612fe1b57fdf78"
-  integrity sha512-wZgQ8Z1utc/QoAfVvMHO/ONLXJ3Vw3yjzJzpMmMUR4kvUu861mI7+mL9R1aeUuXI06cv81LZH96Vh+AOseIYoA==
-  dependencies:
-    axios "^0.27.2"
-    cli-table3 "^0.6.2"
-    commander "^9.4.0"
-    express "^4.18.1"
-    hyperlinker "^1.0.0"
-    js-yaml "^4.1.0"
-    open "^8.4.0"
-    prompts "^2.4.2"
-    tslog "^4.4.0"
-
 tenderly@^0.5.3:
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/tenderly/-/tenderly-0.5.3.tgz#115653ff33fc33e3be41ab7dd669fdbe0f28a6fb"
