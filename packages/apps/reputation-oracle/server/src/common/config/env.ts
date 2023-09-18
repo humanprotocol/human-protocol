@@ -50,7 +50,7 @@ export const envValidator = Joi.object({
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
-  POSTGRES_DATABASE: Joi.string().default('job-launcher'),
+  POSTGRES_DATABASE: Joi.string().default('reputation-oracle'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SYNC: Joi.string().default('false'),
   POSTGRES_SSL: Joi.string().default('false'),
@@ -65,8 +65,8 @@ export const envValidator = Joi.object({
   S3_USE_SSL: Joi.string().default(false),
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
-  SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
-  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
+  SENDGRID_FROM_EMAIL: Joi.string().default('reputation-oracle@hmt.ai'),
+  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Exchange Oracle'),
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),
   REPUTATION_LEVEL_HIGH: Joi.number().default(700),

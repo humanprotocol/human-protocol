@@ -85,9 +85,9 @@ export class AuthService {
     await this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
+      html: `Welcome to the Reputation Oracle Service.<br />
 Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
+      text: `Welcome to the Reputation Oracle Service.
 Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     });
 
@@ -209,9 +209,9 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
+      html: `Welcome to the Reputation Oracle Service.<br />
 Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
+      text: `Welcome to the Reputation Oracles Service.
 Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     });
   }

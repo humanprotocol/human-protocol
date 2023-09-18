@@ -6,16 +6,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
 import { SignatureAuthGuard } from 'src/common/guards';
-import { JwtAuthGuard } from 'src/common/guards/jwt.auth';
 import { Public } from '../../common/decorators';
 import { WebhookIncomingDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+Public();
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
