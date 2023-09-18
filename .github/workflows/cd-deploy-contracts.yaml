@@ -168,8 +168,8 @@ jobs:
         if: always() && steps.check_changes.outputs.changes == 'true'
         uses: EndBug/add-and-commit@v9
         with:
-          add: "['./packages/core/.openzeppelin', './packages/sdk/typescript/subgraph/config']"
-          message: 'Update grafting and upgrade file from CD'
+          add: "['./packages/core/.openzeppelin']"
+          message: 'Update upgrade file from CD'
           default_author: github_actions
           tag_push: '--force'
           github_token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
