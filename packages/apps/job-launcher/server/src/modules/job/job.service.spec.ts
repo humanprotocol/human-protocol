@@ -33,6 +33,7 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
+  MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -72,7 +73,7 @@ import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
 import Decimal from 'decimal.js';
 import { EscrowFactory__factory, HMToken__factory } from '@human-protocol/core/typechain-types';
-import { BigNumber } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -133,6 +134,8 @@ describe('JobService', () => {
             return MOCK_RECORDING_ORACLE_FEE;
           case 'REPUTATION_ORACLE_FEE':
             return MOCK_REPUTATION_ORACLE_FEE;
+          case 'EXCHANGE_ORACLE_FEE':
+            return MOCK_EXCHANGE_ORACLE_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'RECORDING_ORACLE_ADDRESS':
@@ -543,7 +546,6 @@ describe('JobService', () => {
         fundAmount,
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
-        userId: 1,
       };
 
       const jobEntityResult = await jobService.launchJob(
@@ -961,7 +963,7 @@ describe('JobService', () => {
       findOneJobMock.mockResolvedValue(jobEntityMock as any);
   
       jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined);
-      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(undefined);
+      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(true);
   
       const result = await jobService.cancelCronJob();
   
@@ -979,7 +981,7 @@ describe('JobService', () => {
 
       jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityWithoutEscrow as any);
       jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined);
-      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValueOnce(undefined);
+      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValueOnce(true);
 
       expect(await jobService.cancelCronJob()).toBe(true);
       expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(0);
@@ -1086,7 +1088,7 @@ describe('JobService', () => {
 
     it('should notify the IMAGE_LABEL_BINARY webhook', async () => {
       const manifestMock = {
-        requestType: JobRequestType.IMAGE_LABEL_BINARY,
+        requestType: JobRequestType.IMAGE_BOXES,
       };
       jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
       sendWebhookMock.mockResolvedValue(true);
