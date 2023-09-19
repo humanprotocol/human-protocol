@@ -93,7 +93,7 @@ def agreement(
         case "percentage":
             fn = percentage
         case _:
-            raise ValueError(f"Provided method {measure} is not supported.")
+            raise ValueError(f"Provided measure {measure} is not supported.")
 
     # calculate score
     if measure_kwargs is None:

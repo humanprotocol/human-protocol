@@ -19,23 +19,23 @@ from .conftest import (
 
 
 def test_agreement(annotations, labels):
+
+    # test if both interfaces match
     k_agree = agreement(annotations, measure="fleiss_kappa", labels=labels)["results"][
         "score"
     ]
     k_fleiss = fleiss_kappa(label_counts(annotations, labels))
-
     assert _eq_rounded(k_agree, k_fleiss)
 
-    with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
-        res = agreement(
-            annotations,
-            measure="cohens_kappa",
-            labels=labels,
-            bootstrap_method="percentile",
-        )
-        assert res["results"]["ci"] == (-100.0, -100.0)
-        assert res["results"]["confidence_level"] == -100.0
+    k_agree2 = agreement(
+        label_counts(annotations, labels),
+        measure="fleiss_kappa",
+        data_format="label_counts",
+        labels=labels,
+    )["results"]["score"]
+    assert _eq_rounded(k_agree, k_agree2)
 
+    # test bootstrapping
     measure_kwargs = {"invalid_return": None}
     bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "confidence_level": 0.9}
     res = agreement(
@@ -46,9 +46,38 @@ def test_agreement(annotations, labels):
         measure_kwargs=measure_kwargs,
         bootstrap_kwargs=bootstrap_kwargs,
     )
-
     assert res["results"]["ci"] != (-100.0, -100.0)
     assert res["results"]["confidence_level"] != -100.0
+
+    # test warnings
+    with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
+        res = agreement(
+            annotations,
+            measure="cohens_kappa",
+            labels=labels,
+            bootstrap_method="percentile",
+        )
+        assert res["results"]["ci"] == (-100.0, -100.0)
+        assert res["results"]["confidence_level"] == -100.0
+
+    with pytest.warns(UserWarning, match="more than two annotators"):
+        agreement(annotations, measure="cohens_kappa")
+
+    # test errors
+    with pytest.raises(ValueError, match="single annotator"):
+        annos = np.asarray(annotations).reshape(-1, 1)
+        agreement(annos, measure="cohens_kappa")
+
+    with pytest.raises(ValueError, match="Combination of"):
+        agreement(
+            label_counts(annos), measure="cohens_kappa", data_format="label_counts"
+        )
+
+    with pytest.raises(ValueError, match="data format"):
+        agreement(annos, data_format="foo")
+
+    with pytest.raises(ValueError, match="Provided measure"):
+        agreement(annos, measure="foo")
 
 
 def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):
