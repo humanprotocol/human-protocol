@@ -33,8 +33,7 @@ def agreement(
         measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
         data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
         labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
-        nan_values: Values to be counted as invalid and filter out from the data. If omitted, sensible defaults will
-            be used based on the data type of the annotations.
+        nan_values: Values to be counted as invalid and filter out from the data.
         bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
             must be one of 'percentile' or 'bca'.
         bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
@@ -46,31 +45,44 @@ def agreement(
     data = np.asarray(data)
 
     # convert data
-    if data_format == "annotations":
-        if measure == "cohens_kappa":
-            # input validation
-            if data.shape[1] < 2:  # only a single annotator present
-                raise ValueError(
-                    "Annotations contain only a single annotator. "
-                    "Must exactly contain two"
-                )
-            elif data.shape[1] > 2:
-                # TODO: add pairwise api
-                warn(
-                    "Annotations contain more than two annotators. Only first"
-                    ' two will be regarded. Consider using method "fleiss_kappa".'
-                )
+    match data_format:
+        case "annotations":
+            if measure == "cohens_kappa":
+                # input validation
+                if data.shape[1] < 2:  # only a single annotator present
+                    raise ValueError(
+                        "Annotations contain only a single annotator. "
+                        "Must exactly contain two"
+                    )
+                elif data.shape[1] > 2:
+                    warn(
+                        "Annotations contain more than two annotators. Only first"
+                        ' two will be regarded. Consider using method "fleiss_kappa".'
+                    )
 
-            data, labels = confusion_matrix_from_sequence(
-                data.T[0],
-                data.T[1],
-                labels=labels,
-                nan_values=nan_values,
-                return_labels=True,
-            )
-        else:
-            data, labels = label_counts(
-                data, labels=labels, nan_values=nan_values, return_labels=True
+                data, labels = confusion_matrix_from_sequence(
+                    data.T[0],
+                    data.T[1],
+                    labels=labels,
+                    nan_values=nan_values,
+                    return_labels=True,
+                )
+            else:
+                data, labels = label_counts(
+                    data, labels=labels, nan_values=nan_values, return_labels=True
+                )
+        case "label_counts":
+            validate_incidence_matrix(data)
+
+            if measure == "cohens_kappa":
+                raise ValueError(
+                    f"Combination of measure='label_counts' and "
+                    f"measure='cohens_kappa' is not supported."
+                )
+        case _:
+            raise ValueError(
+                f"data format '{data_format}' is not supported."
+                f"Must be either 'annotations' or 'label_counts'."
             )
 
     match measure:
