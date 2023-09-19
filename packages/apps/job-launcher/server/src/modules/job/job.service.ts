@@ -67,7 +67,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { FROM_BLOCK_DIFF, JOB_RETRIES_COUNT_THRESHOLD, _5_MINS } from '../../common/constants';
+import { FROM_BLOCK_DIFF, JOB_RETRIES_COUNT_THRESHOLD, _5_MINS, CVAT_JOB_TYPES } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -236,7 +236,7 @@ export class JobService {
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
     const storageClient = new StorageClient({
-      endPoint: storageData.endpoint,
+      endPoint: storageData.endPoint,
       port: storageData.port,
       useSSL: false,
     });
@@ -268,11 +268,17 @@ export class JobService {
       reputationOracle: this.configService.get<string>(
         ConfigNames.REPUTATION_ORACLE_ADDRESS,
       )!,
+      exchangeOracle: this.configService.get<string>(
+        ConfigNames.EXCHANGE_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
       reputationOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      exchangeOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
@@ -660,7 +666,7 @@ export class JobService {
     const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
                       ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
                       : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
-    
+               
     await this.sendWebhook(
         this.configService.get<string>(configKey)!,
         {
@@ -669,6 +675,21 @@ export class JobService {
             eventType: EventType.ESCROW_CANCELED,
         }
     );
+
+    const paymentEntity = await this.paymentRepository.findOne({
+      jobId: jobEntity.id,
+      type: PaymentType.WITHDRAWAL,
+      status: PaymentStatus.SUCCEEDED,
+    });
+    if (paymentEntity) {
+      paymentEntity.status = PaymentStatus.FAILED;
+      await paymentEntity.save();
+    }
+
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+
+    return true;
   }
 
   public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<boolean> {
@@ -769,7 +790,7 @@ export class JobService {
 
     return {
       details: {
-        escrowAddess: escrowAddress,
+        escrowAddress: escrowAddress,
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),

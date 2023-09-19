@@ -1,4 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
+import { JobRequestType } from '../enums/job';
 
 export const NS = 'hmt';
 export const COINGECKO_API_URL =
@@ -23,6 +24,7 @@ export const SENDGRID_API_KEY_REGEX =
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
+export const CVAT_JOB_TYPES = [JobRequestType.IMAGE_BOXES, JobRequestType.IMAGE_POINTS]
 export const _5_MINS = new Date(Date.now() - 5 * 60 * 1000);
 
 export const FROM_BLOCK_DIFF= 200;

@@ -9,7 +9,7 @@ jobs:
     name: Node.js SDK NPM Publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: yarn --ignore-scripts
         name: Install dependencies
       - run: yarn build
@@ -24,7 +24,7 @@ jobs:
       - run: yarn build
         name: Build SDK package
         working-directory: ./packages/sdk/typescript/human-protocol-sdk
-      - uses: JS-DevTools/npm-publish@v1
+      - uses: JS-DevTools/npm-publish@v2
         name: Publish
         with:
           package: ./packages/sdk/typescript/human-protocol-sdk/package.json
