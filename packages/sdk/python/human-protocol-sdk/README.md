@@ -128,8 +128,10 @@ from human_protocol_sdk import EscrowConfig
 escrow_config = EscrowConfig(
     recording_oracle_address = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
     reputation_oracle_address = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    exchange_oracle_address = "0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809",
     recording_oracle_fee = 10,
     reputation_oracle_fee = 10,
+    exchange_oracle_fee = 10,
     manifest_url = "http://localhost:9000/manifests/manifest.json",
     hash = "s3ca3basd132bafcdas234243.json"
 )

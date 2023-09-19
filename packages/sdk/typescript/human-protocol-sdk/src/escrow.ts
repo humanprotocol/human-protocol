@@ -35,6 +35,7 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
+  ErrorInvalidExchangeOracleAddressProvided,
 } from './error';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowStatus, NetworkData } from './types';
@@ -155,8 +156,10 @@ export class EscrowClient {
     const {
       recordingOracle,
       reputationOracle,
+      exchangeOracle,
       recordingOracleFee,
       reputationOracleFee,
+      exchangeOracleFee,
       manifestUrl,
       manifestHash,
     } = escrowConfig;
@@ -169,15 +172,25 @@ export class EscrowClient {
       throw ErrorInvalidReputationOracleAddressProvided;
     }
 
+    if (!ethers.utils.isAddress(exchangeOracle)) {
+      throw ErrorInvalidExchangeOracleAddressProvided;
+    }
+
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (recordingOracleFee.lte(0) || reputationOracleFee.lte(0)) {
+    if (
+      recordingOracleFee.lte(0) ||
+      reputationOracleFee.lte(0) ||
+      exchangeOracleFee.lte(0)
+    ) {
       throw ErrorAmountMustBeGreaterThanZero;
     }
 
-    if (recordingOracleFee.add(reputationOracleFee).gt(100)) {
+    if (
+      recordingOracleFee.add(reputationOracleFee).add(exchangeOracleFee).gt(100)
+    ) {
       throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
@@ -205,8 +218,10 @@ export class EscrowClient {
       await this.escrowContract.setup(
         reputationOracle,
         recordingOracle,
+        exchangeOracle,
         reputationOracleFee,
         recordingOracleFee,
+        exchangeOracleFee,
         manifestUrl,
         manifestHash
       );
@@ -773,6 +788,13 @@ export class EscrowClient {
       throw ErrorInvalidAddress;
     }
 
+    if (
+      filter.exchangeOracle &&
+      !ethers.utils.isAddress(filter.exchangeOracle)
+    ) {
+      throw ErrorInvalidAddress;
+    }
+
     try {
       const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
         this.network.subgraphUrl,
@@ -871,6 +893,33 @@ export class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.reputationOracle();
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the reputation oracle address of given escrow
+   *
+   * @param {string} escrowAddress - Address of the escrow.
+   * @returns {Promise<string>} - Address of the reputation oracle.
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getExchangeOracleAddress(escrowAddress: string): Promise<string> {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+
+    try {
+      this.escrowContract = Escrow__factory.connect(
+        escrowAddress,
+        this.signerOrProvider
+      );
+      return this.escrowContract.exchangeOracle();
     } catch (e: any) {
       return throwError(e);
     }

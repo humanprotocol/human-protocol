@@ -911,6 +911,8 @@ describe('Staking', function () {
         .setup(
           await reputationOracle.getAddress(),
           await recordingOracle.getAddress(),
+          await exchangeOracle.getAddress(),
+          10,
           10,
           10,
           MOCK_URL,

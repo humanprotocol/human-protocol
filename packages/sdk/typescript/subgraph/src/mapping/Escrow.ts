@@ -155,6 +155,18 @@ export function handlePending(event: Pending): void {
       escrowEntity.recordingOracleFee = recordingOracleStake.value;
     }
 
+    const exchangeOracle = escrowContract.try_exchangeOracle();
+    if (!exchangeOracle.reverted) {
+      escrowEntity.exchangeOracle = exchangeOracle.value;
+    }
+    const exchangeOracleFeePercentage =
+      escrowContract.try_exchangeOracleFeePercentage();
+    if (!exchangeOracleFeePercentage.reverted) {
+      escrowEntity.exchangeOracleFee = BigInt.fromI32(
+        exchangeOracleFeePercentage.value
+      );
+    }
+
     escrowEntity.save();
   }
 }
