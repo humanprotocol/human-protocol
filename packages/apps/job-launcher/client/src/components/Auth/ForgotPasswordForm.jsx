@@ -42,10 +42,10 @@ export const ForgotPasswordForm = () => {
 
   return isSuccess ? (
     <Box sx={{ maxWidth: '368px', mx: 'auto', pt: 15 }}>
-      <Box sx={{ textAlign: 'center' }}>
+      <Box>
         <CheckFilledIcon />
       </Box>
-      <Typography variant="h6" fontWeight={500} mt={4} textAlign="center">
+      <Typography variant="h6" fontWeight={500} mt={4}>
         Success!
       </Typography>
       <Typography variant="body2" mt={5}>

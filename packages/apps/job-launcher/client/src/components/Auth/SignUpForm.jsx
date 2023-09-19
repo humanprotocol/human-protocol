@@ -1,16 +1,18 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
 import {
+  Alert,
+  AlertTitle,
   Box,
   Button,
   FormHelperText,
+  Grid,
   Link,
   TextField,
   Typography,
 } from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
-import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
 import * as authService from '../../services/auth';
 import { Password } from './Password';
 import { RegisterValidationSchema } from './schema';
@@ -19,15 +21,28 @@ export const SignUpForm = ({ onFinish, onError }) => {
   const captchaRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [email, setEmail] = useState('');
+  const [alertMsg, setAlertMsg] = useState('');
 
   const handleRegister = async ({ email, password, confirm }) => {
     setIsLoading(true);
     try {
       await authService.signUp({ email, password, confirm });
-
+      setEmail(email);
       setIsSuccess(true);
     } catch (err) {
       onError(err?.response?.data?.message ?? err.message);
+    }
+    setIsLoading(false);
+  };
+
+  const handleResend = async () => {
+    setIsLoading(true);
+    try {
+      await authService.resendEmailVerification(email);
+      onFinish();
+    } catch (err) {
+      setAlertMsg(err?.response?.data?.message ?? err?.message);
     }
     setIsLoading(false);
   };
@@ -42,39 +57,56 @@ export const SignUpForm = ({ onFinish, onError }) => {
   if (isSuccess) {
     return (
       <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
-        <Box sx={{ textAlign: 'center' }}>
-          <CheckFilledIcon />
-        </Box>
-        <Typography variant="h6" fontWeight={500} mt={4} textAlign="center">
-          Success!
-        </Typography>
-        <Typography variant="body2" mt={5}>
-          Please check your email box for the link to verify email.
-        </Typography>
-        <Box mt={13}>
-          <Button
-            size="large"
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={onFinish}
+        {alertMsg && alertMsg.length && (
+          <Alert
+            severity="error"
+            onClose={() => setAlertMsg('')}
+            sx={{ my: 2 }}
           >
-            Sign in
-          </Button>
+            <AlertTitle>Send email failed!</AlertTitle>
+            {alertMsg}
+          </Alert>
+        )}
+        <Typography variant="h4" fontWeight={600}>
+          Verify email
+        </Typography>
+        <Typography variant="body1" lineHeight={1.5} mt={6}>
+          Hi,
+          <br />
+          <br />
+          We’ve sent an email to {email}, please check your inbox and verify
+          your email. If you can’t find our email, please check junk junk/spam
+          email folder.
+        </Typography>
+        <Box mt={6}>
+          <LoadingButton
+            variant="outlined"
+            size="large"
+            fullWidth
+            onClick={handleResend}
+            loading={isLoading}
+          >
+            Resend verification email
+          </LoadingButton>
         </Box>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-          sx={{
-            fontSize: '12px',
-            textAlign: 'center',
-            display: 'block',
-            width: '100%',
-            mt: 3,
-          }}
-        >
-          Terms & conditions
-        </Link>
+        <Grid container mt={5} spacing={1}>
+          <Grid item xs={12} sm={6}>
+            <Button
+              size="large"
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={onFinish}
+            >
+              Cancel
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Button size="large" variant="contained" color="primary" fullWidth>
+              Sign in
+            </Button>
+          </Grid>
+        </Grid>
       </Box>
     );
   }
