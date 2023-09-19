@@ -12,7 +12,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import SOLVED_TASKS from '../../history-data/sovled_tasks.json';
+import SOLVED_TASKS from '../../history-data/solved_tasks.json';
 import { CardContainer } from '../Cards';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -66,7 +66,7 @@ export const SolvedTasksView: FC = () => {
               fontWeight={800}
               lineHeight={1.125}
             >
-              {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
+              {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
             </Typography>
           </Box>
           <Box>
