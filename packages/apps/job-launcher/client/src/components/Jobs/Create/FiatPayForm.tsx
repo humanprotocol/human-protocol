@@ -232,6 +232,7 @@ export const FiatPayForm = ({
                 onChange={(e) =>
                   handlePaymentDataFormFieldChange('name', e.target.value)
                 }
+                disabled={cardElementsDisabled}
               />
             </Grid>
             <Grid item xs={12}>
