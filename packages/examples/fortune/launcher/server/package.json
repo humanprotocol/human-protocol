@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "pino-pretty": "^9.1.1",
-    "vitest": "^0.28.1"
+    "vitest": "^0.30.1"
   },
   "scripts": {
     "build": "tsc",
