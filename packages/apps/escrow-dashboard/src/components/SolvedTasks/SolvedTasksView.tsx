@@ -1,7 +1,7 @@
 import { Box, Grid, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import {
   AreaChart,
   Area,
@@ -39,12 +39,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export const SolvedTasksView: FC = () => {
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
 
-  const qoqGrowth = useMemo(() => {
-    const currentTasks = SOLVED_TASKS[SOLVED_TASKS.length - 1].value;
-    const previousTasks = SOLVED_TASKS[SOLVED_TASKS.length - 4].value;
-    return numeral((currentTasks - previousTasks) / previousTasks).format('0%');
-  }, []);
-
   return (
     <CardContainer>
       <Grid container sx={{ height: '100%' }} spacing={3}>
@@ -67,24 +61,6 @@ export const SolvedTasksView: FC = () => {
               lineHeight={1.125}
             >
               {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography
-              variant="body2"
-              color="secondary"
-              fontWeight={600}
-              mb="8px"
-            >
-              QoQ Growth
-            </Typography>
-            <Typography
-              variant="h2"
-              color="secondary"
-              fontWeight={800}
-              lineHeight={1.125}
-            >
-              {qoqGrowth}
             </Typography>
           </Box>
         </Grid>
