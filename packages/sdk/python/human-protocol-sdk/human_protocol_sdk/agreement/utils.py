@@ -180,3 +180,82 @@ class NormalDistribution:
             raise ValueError(f"p must be a float within [0.0, 1.0], but was {p}")
 
         return self.location + self.scale * 2**0.5 * erfinv(2 * p - 1.0)
+
+
+def distance_matrix(values, distance_fn, dtype=np.float64):
+    """
+    Calculates a matrix containing the distances between each pair of given
+    values using the given distance function.
+
+    Args:
+        values: A sequence of values to compute distances between. Assumed to be
+            unique.
+        distance_fn: Function to calculate distance between two values. Calling
+            `distance_fn(values[i], values[j])` must return a number.
+        dtype: The datatype of the returned ndarray.
+
+    Returns: The distance matrix as a 2d ndarray.
+    """
+    n = len(values)
+    dist_matrix = np.zeros((n, n), dtype)
+    i, j = np.triu_indices(n, k=1)
+    distances = np.vectorize(distance_fn)(values[i], values[j])
+    dist_matrix[i, j] = distances
+    dist_matrix[j, i] = distances
+    return dist_matrix
+
+
+# TODO: terrible name, terrible explanation.
+def pair_indices(items):
+    """
+    Returns a tuple containing indices of pairs of identical items and
+    non-identical items. Indices are represented as a numpy ndarray, where the
+    first row contains indices for the first parts of the pairs and the second
+    row contains the second pair index.
+
+    Args:
+        items: The items for which to generate pair indices.
+
+    Returns: A tuple of numpy ndarrays, containing indices for pairs of identical
+        and non-identical items.
+    """
+    items = np.asarray(items)
+
+    # elementwise comparison of each item.
+    # triu to eliminate diagonal and duplicates from lower part of n x n matrix
+    same_item_pairs = np.triu(items[np.newaxis, ...] == items[..., np.newaxis], 1)
+
+    same_item_pair_indices = np.vstack(np.where(same_item_pairs))
+    different_item_pair_indices = np.vstack(np.where(~same_item_pairs))
+    return same_item_pair_indices, different_item_pair_indices
+
+
+def observed_and_expected_differences(items, values, distance_function):
+    """
+    Returns observed and expected differences for given annotations (item-value
+    pairs), as used in Krippendorff's alpha agreement measure and the Sigma
+    agreement measure.
+
+    Args:
+        items: Item Ids, identifying items of an annotation.
+        values: Annotation value for a given item id. values[i] was assigned to
+            items[i].
+        distance_function: Function to calculate distance between two values.
+            Calling `distance_fn(values[i], values[j])` must return a number.
+
+    Returns: A tuple consisting of numpy ndarrays, containing the observed and
+        expected differences in annotations.
+
+    """
+    items = np.asarray(items)
+    values = np.asarray(values)
+
+    unique_values, value_ids = np.unique(values, return_inverse=True)
+    dist_matrix = distance_matrix(unique_values, distance_function)
+
+    intra_item_pairs, inter_item_pairs = pair_indices(items)
+
+    observed_differences = dist_matrix[value_ids[intra_item_pairs]]
+    expected_differences = dist_matrix[value_ids[inter_item_pairs]]
+
+    return observed_differences, expected_differences

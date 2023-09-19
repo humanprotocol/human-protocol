@@ -9,7 +9,11 @@ from .validations import (
 
 from .bootstrap import confidence_intervals
 
-from .utils import label_counts, confusion_matrix_from_sequence
+from .utils import (
+    label_counts,
+    confusion_matrix_from_sequence,
+    observed_and_expected_differences,
+)
 
 from functools import partial
 from typing import Sequence, Optional
@@ -221,3 +225,25 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
         kappa = invalid_return
 
     return kappa
+
+
+# TODO: align interface to take annotations
+def krippendorffs_alpha(items, values, distance_function):
+    """
+    Calculates Krippendorff's Alpha for the given annotations (item-value pairs),
+    using the given distance function.
+
+    Args:
+        items: Item Ids, identifying items of an annotation.
+        values: Annotation value for a given item id. values[i] was assigned to
+            items[i].
+        distance_function: Function to calculate distance between two values.
+            Calling `distance_fn(values[i], values[j])` must return a number.
+
+    Returns: Krippendorff's Alpha score.
+
+    """
+    difference_observed, difference_expected = observed_and_expected_differences(
+        items, values, distance_function
+    )
+    return 1 - difference_observed.mean() / difference_expected.mean()
