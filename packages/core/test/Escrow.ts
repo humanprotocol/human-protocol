@@ -21,6 +21,7 @@ let owner: Signer,
   launcher: Signer,
   reputationOracle: Signer,
   recordingOracle: Signer,
+  exchangeOracle: Signer,
   externalAddress: Signer,
   restAccounts: Signer[],
   trustedHandlers: Signer[];
@@ -47,6 +48,8 @@ async function setupEscrow() {
     .setup(
       await reputationOracle.getAddress(),
       await recordingOracle.getAddress(),
+      await exchangeOracle.getAddress(),
+      10,
       10,
       10,
       MOCK_URL,
@@ -66,6 +69,7 @@ describe('Escrow', function () {
       launcher,
       reputationOracle,
       recordingOracle,
+      exchangeOracle,
       externalAddress,
       ...restAccounts
     ] = await ethers.getSigners();
@@ -131,8 +135,6 @@ describe('Escrow', function () {
       });
 
       it('Should revert when aborting with not trusted address', async function () {
-        // const tx = await escrow.connect(externalAddress).abort()
-        // console.log(`Abort costs: ${tx.receipt.gasUsed} wei.`);
         await expect(
           escrow.connect(externalAddress).abort()
         ).to.be.revertedWith('Address calling not trusted');
@@ -339,6 +341,8 @@ describe('Escrow', function () {
             .setup(
               await reputationOracle.getAddress(),
               await recordingOracle.getAddress(),
+              await exchangeOracle.getAddress(),
+              10,
               10,
               10,
               MOCK_URL,
@@ -347,34 +351,55 @@ describe('Escrow', function () {
         ).to.be.revertedWith('Address calling not trusted');
       });
 
-      it('Should revert with the right error if set invalid or missing recording oracle address', async function () {
+      it('Should revert with the right error if set invalid or missing reputation oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
             .setup(
               ethers.constants.AddressZero,
               await recordingOracle.getAddress(),
+              await exchangeOracle.getAddress(),
+              10,
               10,
               10,
               MOCK_URL,
               MOCK_HASH
             )
-        ).to.be.revertedWith('Invalid or missing token spender');
+        ).to.be.revertedWith('Invalid reputation oracle address');
       });
 
-      it('Should revert with the right error if set invalid or missing reputation oracle address', async function () {
+      it('Should revert with the right error if set invalid or missing recording oracle address', async function () {
         await expect(
           escrow
             .connect(owner)
             .setup(
               await reputationOracle.getAddress(),
               ethers.constants.AddressZero,
+              await exchangeOracle.getAddress(),
+              10,
               10,
               10,
               MOCK_URL,
               MOCK_HASH
             )
-        ).to.be.revertedWith('Invalid or missing token spender');
+        ).to.be.revertedWith('Invalid recording oracle address');
+      });
+
+      it('Should revert with the right error if set invalid or missing exchange oracle address', async function () {
+        await expect(
+          escrow
+            .connect(owner)
+            .setup(
+              await reputationOracle.getAddress(),
+              await reputationOracle.getAddress(),
+              ethers.constants.AddressZero,
+              10,
+              10,
+              10,
+              MOCK_URL,
+              MOCK_HASH
+            )
+        ).to.be.revertedWith('Invalid exchange oracle address');
       });
 
       it('Should revert with the right error if fee percentage out of bounds and too high', async function () {
@@ -384,8 +409,10 @@ describe('Escrow', function () {
             .setup(
               await reputationOracle.getAddress(),
               await recordingOracle.getAddress(),
-              80,
-              80,
+              await exchangeOracle.getAddress(),
+              40,
+              40,
+              40,
               MOCK_URL,
               MOCK_HASH
             )
@@ -405,6 +432,8 @@ describe('Escrow', function () {
             .setup(
               await reputationOracle.getAddress(),
               await recordingOracle.getAddress(),
+              await exchangeOracle.getAddress(),
+              10,
               10,
               10,
               MOCK_URL,
@@ -428,6 +457,8 @@ describe('Escrow', function () {
           .setup(
             await reputationOracle.getAddress(),
             await recordingOracle.getAddress(),
+            await exchangeOracle.getAddress(),
+            10,
             10,
             10,
             MOCK_URL,
@@ -439,6 +470,9 @@ describe('Escrow', function () {
         );
         expect(await escrow.recordingOracle()).to.equal(
           await recordingOracle.getAddress()
+        );
+        expect(await escrow.exchangeOracle()).to.equal(
+          await exchangeOracle.getAddress()
         );
         expect(await escrow.manifestUrl()).to.equal(MOCK_URL);
         expect(await escrow.manifestHash()).to.equal(MOCK_HASH);
@@ -451,6 +485,8 @@ describe('Escrow', function () {
           .setup(
             await reputationOracle.getAddress(),
             await recordingOracle.getAddress(),
+            await exchangeOracle.getAddress(),
+            10,
             10,
             10,
             MOCK_URL,
@@ -462,6 +498,9 @@ describe('Escrow', function () {
         );
         expect(await escrow.recordingOracle()).to.equal(
           await recordingOracle.getAddress()
+        );
+        expect(await escrow.exchangeOracle()).to.equal(
+          await exchangeOracle.getAddress()
         );
         expect(await escrow.manifestUrl()).to.equal(MOCK_URL);
         expect(await escrow.manifestHash()).to.equal(MOCK_HASH);
@@ -629,7 +668,7 @@ describe('Escrow', function () {
             .bulkPayOut(recepients, amounts, MOCK_URL, MOCK_HASH, '000')
         )
           .to.emit(escrow, 'BulkTransfer')
-          .withArgs(anyValue, recepients, [8], true);
+          .withArgs(anyValue, recepients, [7], true);
       });
     });
 
@@ -660,6 +699,9 @@ describe('Escrow', function () {
         const initialBalanceReputationOracle = await token
           .connect(owner)
           .balanceOf(await reputationOracle.getAddress());
+        const initialBalanceExchangeOracle = await token
+          .connect(owner)
+          .balanceOf(await exchangeOracle.getAddress());
 
         const recepients = [account1, account2, account3];
         const amounts = [10, 20, 30];
@@ -683,22 +725,25 @@ describe('Escrow', function () {
         const finalBalanceReputationOracle = await token
           .connect(owner)
           .balanceOf(await reputationOracle.getAddress());
+        const finalBalanceExchangeOracle = await token
+          .connect(owner)
+          .balanceOf(await exchangeOracle.getAddress());
 
         expect(
           (
             finalBalanceAccount1.toNumber() - initialBalanceAccount1.toNumber()
           ).toString()
-        ).to.equal('8');
+        ).to.equal('7');
         expect(
           (
             finalBalanceAccount2.toNumber() - initialBalanceAccount2.toNumber()
           ).toString()
-        ).to.equal('16');
+        ).to.equal('14');
         expect(
           (
             finalBalanceAccount3.toNumber() - initialBalanceAccount3.toNumber()
           ).toString()
-        ).to.equal('24');
+        ).to.equal('21');
         expect(
           (
             finalBalanceRecordingOracle.toNumber() -
@@ -714,8 +759,8 @@ describe('Escrow', function () {
 
         expect(
           (
-            finalBalanceReputationOracle.toNumber() -
-            initialBalanceReputationOracle.toNumber()
+            finalBalanceExchangeOracle.toNumber() -
+            initialBalanceExchangeOracle.toNumber()
           ).toString()
         ).to.equal('6');
       });

@@ -76,6 +76,13 @@ export const ErrorInvalidReputationOracleAddressProvided = new Error(
 );
 
 /**
+ * @constant {Error} - Invalid reputation oracle address provided.
+ */
+export const ErrorInvalidExchangeOracleAddressProvided = new Error(
+  'Invalid exchange oracle address provided'
+);
+
+/**
  * @constant {Error} - The Staking value must be positive.
  */
 export const ErrorStakingValueMustBePositive = new Error(

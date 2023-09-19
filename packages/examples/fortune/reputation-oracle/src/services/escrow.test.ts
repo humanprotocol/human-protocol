@@ -139,6 +139,8 @@ describe('Fortune', () => {
       .setup(
         '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
         '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+        '0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809',
+        10,
         10,
         10,
         'manifestUrl',
@@ -201,13 +203,13 @@ describe('Fortune', () => {
     );
 
     expect(await token.methods.balanceOf(worker1).call()).toBe(
-      web3.utils.toWei('8', 'ether')
+      web3.utils.toWei('7', 'ether')
     );
     expect(await token.methods.balanceOf(worker2).call()).toBe(
-      web3.utils.toWei('8', 'ether')
+      web3.utils.toWei('7', 'ether')
     );
     expect(await token.methods.balanceOf(worker3).call()).toBe(
-      web3.utils.toWei('8', 'ether')
+      web3.utils.toWei('7', 'ether')
     );
   }, 10000);
 });

@@ -261,11 +261,17 @@ export class JobService {
       reputationOracle: this.configService.get<string>(
         ConfigNames.REPUTATION_ORACLE_ADDRESS,
       )!,
+      exchangeOracle: this.configService.get<string>(
+        ConfigNames.EXCHANGE_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
       reputationOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      exchangeOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,

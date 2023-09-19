@@ -15,10 +15,10 @@ export const TopUpSuccess = () => {
         alignItems: 'center',
       }}
     >
-      <Box>
+      <Box sx={{ textAlign: 'center' }}>
         <CheckFilledIcon />
       </Box>
-      <Typography variant="h6" fontWeight={500}>
+      <Typography variant="h6" fontWeight={500} mt={4} textAlign="center">
         Success!
       </Typography>
       <Typography variant="body2" mt={2}>

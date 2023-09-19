@@ -52,6 +52,8 @@ type Escrow @entity {
   reputationOracleFee: BigInt
   recordingOracle: Bytes # address
   recordingOracleFee: BigInt
+  exchangeOracle: Bytes # address
+  exchangeOracleFee: BigInt
   intermediateResultsUrl: String # string
   finalResultsUrl: String # string
   jobRequesterId: String # string

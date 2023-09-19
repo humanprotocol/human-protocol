@@ -1,116 +1,111 @@
-import { LoadingButton } from '@mui/lab';
 import {
   Alert,
   AlertTitle,
   Box,
   Button,
-  Link,
+  CircularProgress,
+  Grid,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckFilledIcon } from '../../components/Icons/CheckFilledIcon';
+import { CheckCircleFilledIcon } from '../../components/Icons/CheckCircleFilledIcon';
 import * as authService from '../../services/auth';
-import { ResendEmailVerificationForm } from './ResendEmailVerificationForm';
 
 export const VerifyEmailForm = () => {
   const [alertMsg, setAlertMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isResend, setIsResend] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const token = new URLSearchParams(window.location.search).get('token');
   const navigate = useNavigate();
 
-  const handleVerify = async () => {
+  useEffect(() => {
     if (!token) return;
 
     setIsLoading(true);
-    try {
-      await authService.verifyEmail({ token });
-      setIsSuccess(true);
-    } catch (err) {
-      setAlertMsg(err?.response?.data?.message ?? err.message);
-    }
-    setIsLoading(false);
-  };
+
+    authService
+      .verifyEmail({ token })
+      .then(() => {
+        setIsSuccess(true);
+        setIsLoading(false);
+      })
+      .catch((err: any) => {
+        setAlertMsg(err?.response?.data?.message ?? err.message);
+        setIsLoading(false);
+      });
+  }, [token]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (isSuccess) {
     return (
-      <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
-        <Box>
-          <CheckFilledIcon />
-        </Box>
-        <Typography variant="h6" fontWeight={500} mt={4}>
-          Success!
+      <Box sx={{ maxWidth: '368px', mx: 'auto', mt: 10, mb: 8 }}>
+        <Typography variant="h4" fontWeight={600} sx={{ mb: 6 }}>
+          Verify email
         </Typography>
-        <Box mt={13}>
-          <Button
-            size="large"
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={() => navigate('/')}
-          >
-            Sign in
-          </Button>
+        <Box sx={{ textAlign: 'center' }}>
+          <CheckCircleFilledIcon sx={{ fontSize: 128 }} />
         </Box>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-          sx={{
-            fontSize: '12px',
-            textAlign: 'center',
-            display: 'block',
-            width: '100%',
-            mt: 3,
-          }}
-        >
-          Terms & conditions
-        </Link>
+        <Typography sx={{ mt: 6 }}>
+          You are ready to go. Your email has been successfully verified!
+        </Typography>
+        <Grid container spacing={1} mt={5}>
+          <Grid item xs={12} sm={6}>
+            <Button
+              size="large"
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={() => navigate('/')}
+            >
+              Cancel
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Button
+              size="large"
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => navigate('/')}
+            >
+              Sign in
+            </Button>
+          </Grid>
+        </Grid>
       </Box>
     );
   }
 
   return (
     <Box sx={{ minWidth: '303px', mx: 'auto', height: '100%' }}>
+      <Typography variant="h4" fontWeight={600} sx={{ mb: 6 }}>
+        Verify email
+      </Typography>
       {alertMsg && alertMsg.length && (
         <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ mb: 2 }}>
           <AlertTitle>Verify email failed!</AlertTitle>
           {alertMsg}
         </Alert>
       )}
-      {!isResend ? (
-        <Box sx={{ textAlign: 'center', width: '100%' }}>
-          <LoadingButton
-            variant="contained"
-            onClick={handleVerify}
-            loading={isLoading}
-            fullWidth
-            size="large"
-            sx={{ mb: 4 }}
-          >
-            Verify
-          </LoadingButton>
-          <LoadingButton
-            variant="outlined"
-            onClick={() => setIsResend(true)}
-            fullWidth
-            size="large"
-            sx={{ mb: 4 }}
-          >
-            Re-send
-          </LoadingButton>
-          <Link
-            href="https://humanprotocol.org/app/terms-and-conditions"
-            target="_blank"
-            sx={{ fontSize: '12px', textAlign: 'center' }}
-          >
-            Terms & conditions
-          </Link>
-        </Box>
-      ) : (
-        <ResendEmailVerificationForm onFinish={() => setIsSuccess(true)} />
-      )}
+      <Box sx={{ textAlign: 'center', width: '100%', mt: 4 }}>
+        <Button
+          size="large"
+          variant="outlined"
+          color="primary"
+          fullWidth
+          onClick={() => navigate('/')}
+        >
+          Cancel
+        </Button>
+      </Box>
     </Box>
   );
 };

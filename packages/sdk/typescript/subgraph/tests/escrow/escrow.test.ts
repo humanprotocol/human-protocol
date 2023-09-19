@@ -50,6 +50,9 @@ const reputationOracleAddress = Address.fromString(
 const recordingOracleAddressString =
   '0x70997970c51812dc3a010c7d01b50e0d17dc79c0';
 const recordingOracleAddress = Address.fromString(recordingOracleAddressString);
+const exchangeOracleAddressString =
+  '0x70997970c51812dc3a010c7d01b50e0d17dc79cb';
+const exchangeOracleAddress = Address.fromString(exchangeOracleAddressString);
 
 describe('Escrow', () => {
   beforeAll(() => {
@@ -120,6 +123,17 @@ describe('Escrow', () => {
       'recordingOracleFeePercentage():(uint8)'
     ).reverts();
 
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracle',
+      'exchangeOracle():(address)'
+    ).reverts();
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracleFeePercentage',
+      'exchangeOracleFeePercentage():(uint8)'
+    ).reverts();
+
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
 
     handlePending(newPending1);
@@ -212,7 +226,7 @@ describe('Escrow', () => {
     );
   });
 
-  test('Should properly handle Pending event', () => {
+  test('Should properly handle Pending event for new contract, without exchange oracle', () => {
     const URL = 'test.com';
     const HASH = 'is_hash_1';
 
@@ -236,6 +250,17 @@ describe('Escrow', () => {
       'recordingOracleFeePercentage',
       'recordingOracleFeePercentage():(uint8)'
     ).returns([ethereum.Value.fromI32(20)]);
+
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracle',
+      'exchangeOracle():(address)'
+    ).reverts();
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracleFeePercentage',
+      'exchangeOracleFeePercentage():(uint8)'
+    ).reverts();
 
     const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
 
@@ -326,6 +351,146 @@ describe('Escrow', () => {
       escrowAddress.toHex(),
       'recordingOracleFee',
       '20'
+    );
+  });
+
+  test('Should properly handle Pending event for new contract, with exchange oracle', () => {
+    const URL = 'test.com';
+    const HASH = 'is_hash_1';
+
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracleStake',
+      'reputationOracleStake():(uint256)'
+    ).reverts();
+    createMockedFunction(
+      escrowAddress,
+      'reputationOracleFeePercentage',
+      'reputationOracleFeePercentage():(uint8)'
+    ).returns([ethereum.Value.fromI32(10)]);
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracleStake',
+      'recordingOracleStake():(uint256)'
+    ).reverts();
+    createMockedFunction(
+      escrowAddress,
+      'recordingOracleFeePercentage',
+      'recordingOracleFeePercentage():(uint8)'
+    ).returns([ethereum.Value.fromI32(20)]);
+
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracle',
+      'exchangeOracle():(address)'
+    ).returns([ethereum.Value.fromAddress(exchangeOracleAddress)]);
+    createMockedFunction(
+      escrowAddress,
+      'exchangeOracleFeePercentage',
+      'exchangeOracleFeePercentage():(uint8)'
+    ).returns([ethereum.Value.fromI32(30)]);
+
+    const newPending1 = createPendingEvent(operatorAddress, URL, HASH);
+
+    handlePending(newPending1);
+
+    const id = `${newPending1.transaction.hash.toHex()}-${newPending1.logIndex.toString()}-${
+      newPending1.block.timestamp
+    }`;
+
+    // SetupEvent
+    assert.fieldEquals(
+      'SetupEvent',
+      id,
+      'block',
+      newPending1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'SetupEvent',
+      id,
+      'timestamp',
+      newPending1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'SetupEvent',
+      id,
+      'txHash',
+      newPending1.transaction.hash.toHex()
+    );
+    assert.fieldEquals('SetupEvent', id, 'escrowAddress', escrowAddressString);
+    assert.fieldEquals('SetupEvent', id, 'sender', operatorAddressString);
+
+    // PendingStatusEvent
+    assert.fieldEquals(
+      'PendingStatusEvent',
+      id,
+      'block',
+      newPending1.block.number.toString()
+    );
+    assert.fieldEquals(
+      'PendingStatusEvent',
+      id,
+      'timestamp',
+      newPending1.block.timestamp.toString()
+    );
+    assert.fieldEquals(
+      'PendingStatusEvent',
+      id,
+      'txHash',
+      newPending1.transaction.hash.toHex()
+    );
+    assert.fieldEquals(
+      'PendingStatusEvent',
+      id,
+      'escrowAddress',
+      escrowAddressString
+    );
+    assert.fieldEquals(
+      'PendingStatusEvent',
+      id,
+      'sender',
+      operatorAddressString
+    );
+
+    // Escrow
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Pending');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestUrl', URL);
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'manifestHash', HASH);
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracle',
+      reputationOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'reputationOracleFee',
+      '10'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracle',
+      recordingOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'recordingOracleFee',
+      '20'
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'exchangeOracle',
+      exchangeOracleAddressString
+    );
+    assert.fieldEquals(
+      'Escrow',
+      escrowAddress.toHex(),
+      'exchangeOracleFee',
+      '30'
     );
   });
 
