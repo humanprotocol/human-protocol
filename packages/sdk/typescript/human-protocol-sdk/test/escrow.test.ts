@@ -40,7 +40,7 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
-import { GET_ESCROWS_QUERY } from '../src/graphql';
+import { GET_ESCROWS_QUERY, GET_ESCROW_BY_ADDRESS_QUERY } from '../src/graphql';
 
 vi.mock('graphql-request', () => {
   return {
@@ -88,6 +88,7 @@ describe('EscrowClient', () => {
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
       status: vi.fn(),
+      getEscrow: vi.fn(),
       getEscrows: vi.fn(),
       address: ethers.constants.AddressZero,
       canceler: vi.fn(),
@@ -1536,6 +1537,43 @@ describe('EscrowClient', () => {
       await expect(escrowClient.getStatus(escrowAddress)).rejects.toThrow();
 
       expect(escrowClient.escrowContract.status).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('getEscrow', () => {
+    test('should throw an error if escrow address is an invalid address', async () => {
+      const escrowAddress = '0x0';
+
+      await expect(escrowClient.getEscrow(escrowAddress)).rejects.toThrow(
+        ErrorInvalidAddress
+      );
+    });
+
+    test('should successfully getEscrow for the filter', async () => {
+      const escrow = {
+        id: '1',
+        address: ethers.constants.AddressZero,
+        amountPaid: '3',
+        balance: '0',
+        count: '1',
+        factoryAddress: '0x0',
+        launcher: '0x0',
+        status: 'Completed',
+        token: '0x0',
+        totalFundedAmount: '3',
+      };
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrow });
+
+      const result = await escrowClient.getEscrow(ethers.constants.AddressZero);
+
+      expect(result).toEqual(escrow);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        '',
+        GET_ESCROW_BY_ADDRESS_QUERY(),
+        { escrowAddress: escrow.address }
+      );
     });
   });
 
