@@ -31,7 +31,7 @@ export const CreateJob = () => {
           '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <FormControl variant="standard" sx={{ minWidth: 220 }}>
           <InputLabel id="job-type-select-label">Job Type</InputLabel>
           <Select

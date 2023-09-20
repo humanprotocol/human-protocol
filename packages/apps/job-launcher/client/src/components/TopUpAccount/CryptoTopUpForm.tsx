@@ -9,6 +9,7 @@ import {
   Stack,
   TextField,
   Typography,
+  Snackbar,
 } from '@mui/material';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
@@ -30,6 +31,7 @@ export const CryptoTopUpForm = () => {
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { data: signer } = useSigner();
   const { data: rate } = useTokenRate('hmt', 'usd');
 
@@ -66,8 +68,8 @@ export const CryptoTopUpForm = () => {
       dispatch(fetchUserBalanceAsync());
 
       setIsSuccess(true);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setErrorMessage(err?.response?.data?.message ?? err?.message);
       setIsSuccess(false);
     }
 
@@ -190,6 +192,16 @@ export const CryptoTopUpForm = () => {
           </Typography>
         </Link>
       </Box>
+      <Snackbar
+        open={errorMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setErrorMessage(null)} severity="error">
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

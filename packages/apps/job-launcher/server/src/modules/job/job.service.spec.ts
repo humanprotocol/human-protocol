@@ -105,6 +105,14 @@ jest.mock('@human-protocol/sdk', () => ({
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
   getRate: jest.fn().mockImplementation(() => rate),
+  parseUrl: jest.fn().mockImplementation(() => {
+    return {
+      useSSL: false,
+      host: '127.0.0.1',
+      port: 9000,
+      bucket: MOCK_BUCKET_NAME
+    }
+  }),
 }));
 
 describe('JobService', () => {
@@ -1306,7 +1314,7 @@ describe('JobService', () => {
 
       const expectedJobDetailsDto: JobDetailsDto = {
         details: {
-          escrowAddess: MOCK_ADDRESS,
+          escrowAddress: MOCK_ADDRESS, 
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
           balance: Number(balance),

@@ -67,7 +67,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { CVAT_JOB_TYPES, JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -232,7 +232,7 @@ export class JobService {
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
     const storageClient = new StorageClient({
-      endPoint: storageData.endpoint,
+      endPoint: storageData.endPoint,
       port: storageData.port,
       useSSL: false,
     });
@@ -264,11 +264,17 @@ export class JobService {
       reputationOracle: this.configService.get<string>(
         ConfigNames.REPUTATION_ORACLE_ADDRESS,
       )!,
+      exchangeOracle: this.configService.get<string>(
+        ConfigNames.EXCHANGE_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
       reputationOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      exchangeOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
@@ -737,7 +743,7 @@ export class JobService {
 
     return {
       details: {
-        escrowAddess: escrowAddress,
+        escrowAddress: escrowAddress,
         manifestUrl,
         manifestHash,
         balance: Number(ethers.utils.formatEther(balance)),

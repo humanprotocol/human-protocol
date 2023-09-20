@@ -86,8 +86,10 @@ const setupEscrow = async (
   escrowAddress,
   repOracleAddress,
   recOracleAddress,
+  exOracleAddress,
   reoOracleStake,
   recOracleStake,
+  exOracleStake,
   escrow
 ) => {
   const Escrow = escrow || new web3.eth.Contract(escrowAbi, escrowAddress);
@@ -96,8 +98,10 @@ const setupEscrow = async (
       .setup(
         repOracleAddress || addresses.repOracle,
         recOracleAddress || addresses.recOracle,
+        exOracleAddress || addresses.exchangeOracle,
         reoOracleStake || stakes.repOracle,
         recOracleStake || stakes.recOracle,
+        exOracleStake || stakes.exOracle,
         urls.manifestUrl,
         urls.manifestUrl
       )

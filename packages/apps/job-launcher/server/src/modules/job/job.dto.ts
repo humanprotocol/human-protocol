@@ -171,7 +171,7 @@ export class ManifestDetails {
 
 export class CommonDetails {
   @IsEthereumAddress()
-  escrowAddess: string;
+  escrowAddress: string;
 
   @IsUrl()
   manifestUrl: string;

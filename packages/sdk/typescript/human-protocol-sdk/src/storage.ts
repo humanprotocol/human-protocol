@@ -13,6 +13,9 @@ import { UploadFile, StorageCredentials, StorageParams } from './types';
 import { isValidUrl } from './utils';
 import { HttpStatus } from './constants';
 
+/**
+ * @deprecated StorageClient is deprecated. Use Minio.Client directly.
+ */
 export class StorageClient {
   private client: Minio.Client;
   private clientParams: StorageParams;

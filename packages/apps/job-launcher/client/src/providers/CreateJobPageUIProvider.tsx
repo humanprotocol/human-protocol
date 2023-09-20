@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from 'react';
-import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
 
 export type CreateJobPageUIType = {
@@ -21,7 +20,7 @@ const initialData: Omit<
   payMethod: PayMethod.Crypto,
   jobRequest: {
     jobType: JobType.Fortune,
-    chainId: SUPPORTED_CHAIN_IDS[0],
+    chainId: undefined,
   },
 };
 
@@ -39,7 +38,6 @@ export const CreateJobPageUIProvider = ({
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
     jobType: JobType.Fortune,
-    chainId: SUPPORTED_CHAIN_IDS[0],
   });
 
   const goToPrevStep = () => {
@@ -60,7 +58,6 @@ export const CreateJobPageUIProvider = ({
     setPayMethod(PayMethod.Crypto);
     setJobRequest({
       jobType: JobType.Fortune,
-      chainId: SUPPORTED_CHAIN_IDS[0],
     });
   };
 

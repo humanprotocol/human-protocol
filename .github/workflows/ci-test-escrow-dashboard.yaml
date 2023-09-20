@@ -18,7 +18,7 @@ jobs:
     name: Escrow Dashboard Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
       - run: yarn build

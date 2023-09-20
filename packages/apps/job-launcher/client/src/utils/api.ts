@@ -18,8 +18,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.log(error.response.status);
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
       localStorage.removeItem('HUMAN_JOB_LAUNCHER_REFRESH_TOKEN');
       localStorage.removeItem('HUMAN_JOB_LAUNCHER_ACCESS_TOKEN');
       window.location.href = '/';
