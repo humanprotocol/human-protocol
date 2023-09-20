@@ -10,8 +10,6 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
-import { createWriteStream } from 'fs';
-import { get } from 'http';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -69,33 +67,6 @@ async function bootstrap() {
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });
-
-  //Download files to serve them as static files when the app is deployed on vercel
-  if (process.env.NODE_ENV === 'development') {
-    // write swagger ui files
-    get(
-      `http://${host}:${port}/swagger/swagger-ui-bundle.js`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(createWriteStream('swagger-static/swagger-ui-bundle.js'));
-      },
-    );
-
-    get(
-      `http://${host}:${port}/swagger/swagger-ui-standalone-preset.js`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(
-          createWriteStream('swagger-static/swagger-ui-standalone-preset.js'),
-        );
-      },
-    );
-
-    get(
-      `http://${host}:${port}/swagger/swagger-ui.css`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(createWriteStream('swagger-static/swagger-ui.css'));
-      },
-    );
-  }
 }
 
 void bootstrap();

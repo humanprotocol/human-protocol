@@ -45,15 +45,9 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
-      cookie:
-        process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'staging'
-          ? {
-              httpOnly: true,
-            }
-          : {
-              secure: true,
-            },
+      cookie: {
+        secure: true,
+      },
     }),
   );
   app.use(json({ limit: '5mb' }));
