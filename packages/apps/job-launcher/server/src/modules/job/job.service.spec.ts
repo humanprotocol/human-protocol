@@ -8,7 +8,12 @@ import {
   IAllocation,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { BadGatewayException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -1215,28 +1220,57 @@ describe('JobService', () => {
 
   describe('escrowFailedWebhook', () => {
     it('should throw BadRequestException for invalid event type', async () => {
-      const dto = { event_type: 'ANOTHER_EVENT' as EventType, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = {
+        event_type: 'ANOTHER_EVENT' as EventType,
+        chain_id: 1,
+        escrow_address: 'address',
+        reason: 'invalid manifest',
+      };
 
-      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(BadRequestException);
+      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw NotFoundException if jobEntity is not found', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = {
+        event_type: EventType.TASK_CREATION_FAILED,
+        chain_id: 1,
+        escrow_address: 'address',
+        reason: 'invalid manifest',
+      };
       jobRepository.findOne = jest.fn().mockResolvedValue(null);
 
-      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(NotFoundException);
+      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ConflictException if jobEntity status is not LAUNCHED', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
-      const mockJobEntity = { status: 'ANOTHER_STATUS' as JobStatus, save: jest.fn() };
+      const dto = {
+        event_type: EventType.TASK_CREATION_FAILED,
+        chain_id: 1,
+        escrow_address: 'address',
+        reason: 'invalid manifest',
+      };
+      const mockJobEntity = {
+        status: 'ANOTHER_STATUS' as JobStatus,
+        save: jest.fn(),
+      };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
-      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(ConflictException);
+      await expect(jobService.escrowFailedWebhook(dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should update jobEntity status to FAILED and return true if all checks pass', async () => {
-      const dto = { event_type: EventType.TASK_CREATION_FAILED, chain_id: 1, escrow_address: 'address', reason: 'invalid manifest' };
+      const dto = {
+        event_type: EventType.TASK_CREATION_FAILED,
+        chain_id: 1,
+        escrow_address: 'address',
+        reason: 'invalid manifest',
+      };
       const mockJobEntity = { status: JobStatus.LAUNCHED, save: jest.fn() };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -1266,14 +1300,14 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
 
-      const jobEntityMock = { 
-        status: JobStatus.TO_CANCEL, 
-        fundAmount: 100, 
-        userId: 1, 
-        id: 1, 
-        manifestUrl: MOCK_FILE_URL, 
+      const jobEntityMock = {
+        status: JobStatus.TO_CANCEL,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        escrowAddress: MOCK_ADDRESS, 
+        escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
         save: jest.fn(),
       };
@@ -1297,19 +1331,21 @@ describe('JobService', () => {
           requestType: JobRequestType.FORTUNE,
           exchangeOracleAddress: expect.any(String),
           recordingOracleAddress: expect.any(String),
-          reputationOracleAddress: expect.any(String)
+          reputationOracleAddress: expect.any(String),
         },
         staking: {
           staker: expect.any(String),
           allocated: expect.any(Number),
-          slashed: 0 
-        }
-      }
-  
+          slashed: 0,
+        },
+      };
+
       jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
       (EscrowClient.build as any).mockImplementation(() => ({
         getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest.fn().mockResolvedValue(ethers.utils.parseEther(balance)),
+        getBalance: jest
+          .fn()
+          .mockResolvedValue(ethers.utils.parseEther(balance)),
       }));
       (StakingClient.build as any).mockImplementation(() => ({
         getAllocation: jest.fn().mockResolvedValue(allocationMock),
@@ -1324,7 +1360,9 @@ describe('JobService', () => {
     it('should throw not found exception when job not found', async () => {
       jobService.jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
 
-      await expect(jobService.getDetails(1, 123)).rejects.toThrow(NotFoundException);
+      await expect(jobService.getDetails(1, 123)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -1338,9 +1376,11 @@ describe('JobService', () => {
           getBlockNumber: jest.fn().mockResolvedValue(100),
         },
       });
-      
+
       await jobService.getTransferLogs(chainId, MOCK_ADDRESS, 0, 'latest');
-      expect(web3Service.getSigner(chainId).provider.getLogs).toHaveBeenCalled();
+      expect(
+        web3Service.getSigner(chainId).provider.getLogs,
+      ).toHaveBeenCalled();
     });
   });
 
@@ -1348,17 +1388,15 @@ describe('JobService', () => {
     it('should calculate the paid out amount', async () => {
       const chainId = ChainId.LOCALHOST;
       const amount = ethers.utils.parseEther('1.5');
-      const mockLogs = [{
-        data: 'mockData',
-        topics: ['mockTopic'],
-      }];
+      const mockLogs = [
+        {
+          data: 'mockData',
+          topics: ['mockTopic'],
+        },
+      ];
 
       const mockParsedLog = {
-        args: [
-          MOCK_ADDRESS,
-          MOCK_ADDRESS,
-          amount
-        ]
+        args: [MOCK_ADDRESS, MOCK_ADDRESS, amount],
       };
 
       web3Service.getSigner = jest.fn().mockReturnValue({
@@ -1371,24 +1409,24 @@ describe('JobService', () => {
       const mockHMTokenFactoryContract = {
         interface: {
           parseLog: jest.fn().mockReturnValue({
-            args: [
-              MOCK_ADDRESS,
-              MOCK_ADDRESS,
-              amount
-            ]
-          })
-        }
+            args: [MOCK_ADDRESS, MOCK_ADDRESS, amount],
+          }),
+        },
       };
 
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
+      jest
+        .spyOn(HMToken__factory, 'connect')
+        .mockReturnValue(mockHMTokenFactoryContract as any);
 
       (ethers as any).Contract.prototype.interface = {
-        parseLog: jest.fn().mockReturnValue(mockParsedLog)
+        parseLog: jest.fn().mockReturnValue(mockParsedLog),
       };
 
-      const result = await jobService.getPaidOutAmount(chainId, MOCK_ADDRESS, MOCK_ADDRESS);
+      const result = await jobService.getPaidOutAmount(
+        chainId,
+        MOCK_ADDRESS,
+        MOCK_ADDRESS,
+      );
       expect(result).toBe(1.5);
     });
   });

@@ -37,7 +37,7 @@ export function recoverSigner(
   if (typeof message !== 'string') {
     message = JSON.stringify(message);
   }
-  
+
   try {
     return ethers.utils.verifyMessage(message, signature);
   } catch (e) {
