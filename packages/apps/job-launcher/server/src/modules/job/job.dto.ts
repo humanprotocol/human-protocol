@@ -160,15 +160,15 @@ export class ManifestDetails {
 
   @IsNotEmpty()
   @IsString()
-  exchangeOracleAddress: string;
+  exchangeOracleAddress?: string;
 
   @IsNotEmpty()
   @IsString()
-  recordingOracleAddress: string;
+  recordingOracleAddress?: string;
 
   @IsNotEmpty()
   @IsString()
-  reputationOracleAddress: string;
+  reputationOracleAddress?: string;
 }
 
 export class CommonDetails {
