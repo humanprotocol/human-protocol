@@ -247,3 +247,26 @@ def krippendorffs_alpha(items, values, distance_function):
         items, values, distance_function
     )
     return 1 - difference_observed.mean() / difference_expected.mean()
+
+
+def sigma(items, values, distance_function, p=0.05):
+    """
+    Calculates the Sigma Agreement Measure for the given annotations (item-value pairs),
+    using the given distance function.
+    For details, see https://dl.acm.org/doi/fullHtml/10.1145/3485447.3512242.
+
+    Args:
+        items: Item Ids, identifying items of an annotation.
+        values: Annotation value for a given item id. values[i] was assigned to
+            items[i].
+        distance_function: Function to calculate distance between two values.
+            Calling `distance_fn(values[i], values[j])` must return a number.
+        p: probability threshold determining statistical significance.
+
+    Returns: Sigma.
+    """
+    difference_observed, difference_expected = observed_and_expected_differences(
+        items, values, distance_function
+    )
+    difference_crit = np.quantile(difference_expected, p)
+    return np.mean(difference_observed < difference_crit)
