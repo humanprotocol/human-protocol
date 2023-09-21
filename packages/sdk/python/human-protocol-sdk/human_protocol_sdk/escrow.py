@@ -120,6 +120,7 @@ class EscrowFilter:
             launcher (Optional[str]): Launcher address
             reputation_oracle (Optional[str]): Reputation oracle address
             recording_oracle (Optional[str]): Recording oracle address
+            exchange_oracle (Optional[str]): Exchange oracle address
             status (Optional[Status]): Escrow status
             date_from (Optional[datetime.datetime]): Created from date
             date_to (Optional[datetime.datetime]): Created to date
