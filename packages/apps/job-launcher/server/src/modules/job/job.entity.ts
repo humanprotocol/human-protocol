@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';
@@ -40,7 +40,7 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'int' })
   public userId: number;
 
-  @OneToOne(() => PaymentEntity, (payment) => payment.job)
+  @OneToMany(() => PaymentEntity, (payment) => payment.job)
   public payment: PaymentEntity;
 
   @Column({ type: 'int', default: 0 })

@@ -85,6 +85,12 @@ export class JobController {
   }
 
   @Public()
+  @Get('/cron/refund')
+  public async refundCronJob(): Promise<any> {
+    return this.jobService.refundCronJob();
+  }
+
+  @Public()
   @UseGuards(SignatureAuthGuard)
   @Post('/:oracleType/escrow-failed-webhook')
   public async (

@@ -39,6 +39,17 @@ export class PaymentCryptoCreateDto {
   public transactionHash: string;
 }
 
+export class PaymentRefundCreateDto {
+  @IsNumber()
+  public refundAmount: number
+
+  @IsNumber()
+  public userId: number;
+
+  @IsNumber()
+  public jobId: number;
+}
+
 export class PaymentCreateDto {
   public transaction?: string;
   public amount?: number;

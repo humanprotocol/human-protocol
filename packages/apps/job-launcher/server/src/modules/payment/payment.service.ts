@@ -8,12 +8,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { ethers, providers } from 'ethers';
-import { ErrorPayment } from '../../common/constants/errors';
+import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
+  PaymentRefundCreateDto,
 } from './payment.dto';
 import {
   Currency,
@@ -21,6 +22,7 @@ import {
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
+  TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ConfigNames, networkMap } from '../../common/config';
@@ -32,6 +34,7 @@ import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class PaymentService {
@@ -259,5 +262,30 @@ export class PaymentService {
     }, 0);
 
     return totalAmount;
+  }
+
+  public async createRefundPayment(dto: PaymentRefundCreateDto) {
+    const rate = await getRate(Currency.USD, TokenId.HMT);
+
+    try {
+        await this.paymentRepository.create({
+            userId: dto.userId,
+            jobId: dto.jobId,
+            source: PaymentSource.BALANCE,
+            type: PaymentType.REFUND,
+            amount: dto.refundAmount,
+            currency: TokenId.HMT,
+            rate: div(1, rate),
+            status: PaymentStatus.SUCCEEDED,
+        });
+    } catch (error) {
+        if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
+            this.logger.log(ErrorPostgres.NumericFieldOverflow, PaymentService.name);
+            throw new ConflictException(ErrorPayment.IncorrectAmount);
+        } else {
+            this.logger.log(error, PaymentService.name);
+            throw new ConflictException(ErrorPayment.NotSuccess);
+        }
+    }
   }
 }

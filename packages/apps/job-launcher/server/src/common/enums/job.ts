@@ -4,6 +4,7 @@ export enum JobStatus {
   LAUNCHED = 'LAUNCHED',
   FAILED = 'FAILED',
   TO_CANCEL = 'TO_CANCEL',
+  TO_REFUND = 'TO_REFUND',
   CANCELED = 'CANCELED',
 }
 
@@ -13,6 +14,7 @@ export enum JobStatusFilter {
   LAUNCHED = 'LAUNCHED',
   FAILED = 'FAILED',
   TO_CANCEL = 'TO_CANCEL',
+  TO_REFUND = 'TO_REFUND',
   CANCELED = 'CANCELED',
 }
 
