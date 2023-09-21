@@ -1,7 +1,7 @@
 import datetime
 from web3 import Web3
 
-from human_protocol_sdk.escrow import EscrowClient, EscrowFilter, EscrowUtils, Status
+from human_protocol_sdk.escrow import EscrowFilter, EscrowUtils, Status
 from human_protocol_sdk.staking import StakingClient, LeaderFilter
 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 
