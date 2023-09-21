@@ -103,6 +103,7 @@ class EscrowFilter:
 
     def __init__(
         self,
+        networks: [List[ChainId]],
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
@@ -110,20 +111,26 @@ class EscrowFilter:
         status: Optional[Status] = None,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
-        networks: Optional[List[ChainId]] = [80001],
     ):
         """
         Initializes a EscrowFilter instance.
 
         Args:
+            networks (List[ChainId]): Networks to request data
             launcher (Optional[str]): Launcher address
             reputation_oracle (Optional[str]): Reputation oracle address
             recording_oracle (Optional[str]): Recording oracle address
             status (Optional[Status]): Escrow status
             date_from (Optional[datetime.datetime]): Created from date
             date_to (Optional[datetime.datetime]): Created to date
-            networks (Optional[List[ChainId]]): Networks to request data
         """
+
+        if not networks or any(
+            network not in set(chain_id.value for chain_id in ChainId)
+            for network in networks
+        ):
+            raise EscrowClientError(f"Invalid ChainId")
+
         if launcher and not Web3.is_address(launcher):
             raise EscrowClientError(f"Invalid address: {launcher}")
 
@@ -140,12 +147,6 @@ class EscrowFilter:
             raise EscrowClientError(
                 f"Invalid dates: {date_from} must be earlier than {date_to}"
             )
-
-        if networks is not None and any(
-            network not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise EscrowClientError(f"Invalid ChainId")
 
         self.launcher = launcher
         self.reputation_oracle = reputation_oracle
@@ -774,7 +775,9 @@ class EscrowUtils:
     """
 
     @staticmethod
-    def get_escrows(filter: EscrowFilter = EscrowFilter()) -> List[dict]:
+    def get_escrows(
+        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI.value]),
+    ) -> List[dict]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         Args:

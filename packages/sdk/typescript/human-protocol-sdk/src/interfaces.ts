@@ -46,7 +46,7 @@ export interface IEscrowsFilter {
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
-  networks?: ChainId[];
+  networks: ChainId[];
 }
 
 export interface IEscrowConfig {

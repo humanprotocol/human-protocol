@@ -907,8 +907,11 @@ export class EscrowUtils {
    * @throws {Error} - An error object if an error occurred.
    */
   public static async getEscrows(
-    filter: IEscrowsFilter = {}
+    filter: IEscrowsFilter
   ): Promise<EscrowData[]> {
+    if (!filter?.networks?.length) {
+      throw ErrorUnsupportedChainID;
+    }
     if (filter.launcher && !ethers.utils.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
     }
@@ -936,7 +939,7 @@ export class EscrowUtils {
 
     try {
       const escrowAddresses: EscrowData[] = [];
-      for (const chainId of filter.networks || [ChainId.POLYGON_MUMBAI]) {
+      for (const chainId of filter.networks) {
         const networkData = NETWORKS[chainId];
 
         if (!networkData) {

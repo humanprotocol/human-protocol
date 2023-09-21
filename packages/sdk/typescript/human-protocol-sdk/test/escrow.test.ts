@@ -29,6 +29,7 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
+  EthereumError,
   InvalidEthereumAddressError,
 } from '../src/error';
 import { EscrowClient, EscrowUtils } from '../src/escrow';
@@ -1801,27 +1802,44 @@ describe('EscrowClient', () => {
 
 describe('EscrowUtils', () => {
   describe('getEscrows', () => {
+    test('should throw an error if chainId is empty', async () => {
+      await expect(EscrowUtils.getEscrows({ networks: [] })).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(EscrowUtils.getEscrows({ networks: [123] })).rejects.toThrow(
+        new EthereumError(ErrorUnsupportedChainID.message)
+      );
+    });
     test('should throw an error if launcher is an invalid address', async () => {
       const launcher = FAKE_ADDRESS;
 
-      await expect(EscrowUtils.getEscrows({ launcher })).rejects.toThrow(
-        ErrorInvalidAddress
-      );
+      await expect(
+        EscrowUtils.getEscrows({ networks: [ChainId.POLYGON_MUMBAI], launcher })
+      ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should throw an error if recordingOracle is an invalid address', async () => {
       const recordingOracle = FAKE_ADDRESS;
 
-      await expect(EscrowUtils.getEscrows({ recordingOracle })).rejects.toThrow(
-        ErrorInvalidAddress
-      );
+      await expect(
+        EscrowUtils.getEscrows({
+          networks: [ChainId.POLYGON_MUMBAI],
+          recordingOracle,
+        })
+      ).rejects.toThrow(ErrorInvalidAddress);
     });
 
     test('should throw an error if reputationOracle is an invalid address', async () => {
       const reputationOracle = FAKE_ADDRESS;
 
       await expect(
-        EscrowUtils.getEscrows({ reputationOracle })
+        EscrowUtils.getEscrows({
+          networks: [ChainId.POLYGON_MUMBAI],
+          reputationOracle,
+        })
       ).rejects.toThrow(ErrorInvalidAddress);
     });
 
@@ -1856,12 +1874,16 @@ describe('EscrowUtils', () => {
         .spyOn(gqlFetch, 'default')
         .mockResolvedValue({ escrows });
 
-      const result = await EscrowUtils.getEscrows();
+      const filter = {
+        networks: [ChainId.POLYGON_MUMBAI],
+      };
+
+      const result = await EscrowUtils.getEscrows(filter);
       expect(result).toEqual(escrows);
       expect(gqlFetchSpy).toHaveBeenCalledWith(
         'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
-        GET_ESCROWS_QUERY({}),
-        {}
+        GET_ESCROWS_QUERY(filter),
+        filter
       );
     });
 
@@ -1885,6 +1907,7 @@ describe('EscrowUtils', () => {
         .mockResolvedValue({ escrows });
 
       const result = await EscrowUtils.getEscrows({
+        networks: [ChainId.POLYGON_MUMBAI],
         launcher: ethers.constants.AddressZero,
       });
 
