@@ -1,7 +1,7 @@
 import session from 'express-session';
+import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
@@ -12,13 +12,16 @@ import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
   });
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>(ConfigNames.FE_URL)!;
+  const baseUrl = configService.get<string>(
+    ConfigNames.FE_URL,
+    'http://localhost:3005',
+  );
 
   app.enableCors({
     origin:
@@ -39,7 +42,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const sessionSecret = configService.get<string>(ConfigNames.SESSION_SECRET)!;
+  const sessionSecret = configService.get<string>(
+    ConfigNames.SESSION_SECRET,
+    'session-secret',
+  );
 
   app.use(
     session({
@@ -60,8 +66,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  const host = configService.get<string>(ConfigNames.HOST)!;
-  const port = configService.get<string>(ConfigNames.PORT)!;
+  const host = configService.get<string>(ConfigNames.HOST, 'localhost');
+  const port = +configService.get<string>(ConfigNames.PORT, '5000');
 
   app.use(helmet());
   await app.listen(port, host, async () => {

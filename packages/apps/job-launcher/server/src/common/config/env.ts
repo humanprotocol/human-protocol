@@ -68,8 +68,8 @@ export const envValidator = Joi.object({
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
-  POSTGRES_SYNC: Joi.string().default(false),
-  POSTGRES_SSL: Joi.string().default(false),
+  POSTGRES_SYNC: Joi.string().default('false'),
+  POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
@@ -78,8 +78,12 @@ export const envValidator = Joi.object({
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3004'),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3004',
+  ),
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3005',
+  ),
   RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
   // S3
