@@ -3,8 +3,3 @@ export enum EventType {
   ESCROW_CANCELED = 'escrow_canceled',
   TASK_CREATION_FAILED = 'task_creation_failed',
 }
-
-export enum OracleType {
-  FORTUNE = 'fortune',
-  CVAT = 'cvat',
-}

@@ -5,11 +5,20 @@ import {
   KVStoreKeys,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
-import { JobDetailsDto } from './job.dto';
+import { EscrowFailedWebhookDto, JobDetailsDto } from './job.dto';
+import { EventType } from '../../common/enums/webhook';
+import { signMessage } from '../../common/utils/signature';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 
 @Injectable()
 export class JobService {
@@ -43,6 +52,35 @@ export class JobService {
       )
       .then((res) => res.data);
 
+    if (!manifest) {
+      const signer = this.web3Service.getSigner(chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
+        escrowAddress,
+      );
+      const kvstore = await KVStoreClient.build(signer);
+      const jobLauncherWebhookUrl = await kvstore.get(
+        jobLauncherAddress,
+        KVStoreKeys.webhook_url,
+      );
+      const body: EscrowFailedWebhookDto = {
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        event_type: EventType.TASK_CREATION_FAILED,
+        reason: 'Unable to get manifest',
+      };
+      const signedBody = await signMessage(
+        body,
+        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      );
+      await this.httpService.post(
+        jobLauncherWebhookUrl + '/fortune/escrow-failed-webhook',
+        body,
+        { headers: { [HEADER_SIGNATURE_KEY]: signedBody } },
+      );
+      throw new NotFoundException('Unable to get manifest');
+    }
+
     return {
       escrowAddress,
       chainId,
@@ -61,13 +99,15 @@ export class JobService {
   ): Promise<string[]> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
-    const escrows = await escrowClient.getEscrowsFiltered({
+    const escrows = await escrowClient.getEscrows({
       status: EscrowStatus.Pending,
     });
 
-    return escrows.filter(
-      (escrow: string) => !this.storage[escrow]?.includes(workerAddress),
-    );
+    return escrows
+      .filter(
+        (escrow) => !this.storage[escrow.address]?.includes(workerAddress),
+      )
+      .map((escrow) => escrow.address);
   }
 
   public async solveJob(
@@ -108,7 +148,7 @@ export class JobService {
       exchangeAddress: signer.address,
       workerAddress: workerAddress,
       solution: solution,
-    })
+    });
 
     return true;
   }
