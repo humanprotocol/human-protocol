@@ -814,3 +814,39 @@ class EscrowUtils:
                 escrow[0]["chain_id"] = chain_id
             escrow_addresses.extend(escrows)
         return escrow_addresses
+
+    @staticmethod
+    def get_escrow(
+        chain_id: ChainId,
+        escrow_address: str,
+    ) -> dict:
+        """Returns the escrow for a given address.
+
+        Args:
+            chain_id (ChainId): Network in which the escrow has been deployed
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            dict: Escrow data
+        """
+        from human_protocol_sdk.gql.escrow import (
+            get_escrow_query,
+        )
+
+        if chain_id not in set(chain_id.value for chain_id in ChainId):
+            raise EscrowClientError(f"Invalid ChainId")
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        network = NETWORKS[ChainId(chain_id)]
+
+        escrow = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_escrow_query(),
+            params={
+                "escrowAddress": escrow_address,
+            },
+        )
+
+        return escrow["data"]["escrow"]
