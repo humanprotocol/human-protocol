@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { Web3Service } from '../web3/web3.service';
 import { JobService } from './job.service';
-import { EscrowClient, KVStoreClient } from '@human-protocol/sdk';
+import { EscrowClient, KVStoreClient, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_PRIVATE_KEY } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
@@ -163,14 +163,12 @@ describe('JobService', () => {
 
   describe('getPendingJobs', () => {
     it('should return an array of pending jobs', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrows: jest
-          .fn()
-          .mockResolvedValue([
-            { address: '0x1234567890123456789012345678901234567893' },
-            { address: '0x1234567890123456789012345678901234567894' },
-          ]),
-      }));
+      EscrowUtils.getEscrows = jest
+        .fn()
+        .mockReturnValue([
+          { address: '0x1234567890123456789012345678901234567893' },
+          { address: '0x1234567890123456789012345678901234567894' },
+        ]);
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
@@ -182,14 +180,12 @@ describe('JobService', () => {
     });
 
     it('should return an array of pending jobs removing jobs already submitted by worker', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrows: jest
-          .fn()
-          .mockResolvedValue([
-            { address: '0x1234567890123456789012345678901234567893' },
-            { address: '0x1234567890123456789012345678901234567894' },
-          ]),
-      }));
+      EscrowUtils.getEscrows = jest
+        .fn()
+        .mockReturnValue([
+          { address: '0x1234567890123456789012345678901234567893' },
+          { address: '0x1234567890123456789012345678901234567894' },
+        ]);
 
       jobService['storage']['0x1234567890123456789012345678901234567893'] = [
         workerAddress,
@@ -202,9 +198,7 @@ describe('JobService', () => {
     });
 
     it('should return an empty array if there are no pending jobs', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrows: jest.fn().mockResolvedValue([]),
-      }));
+      EscrowUtils.getEscrows = jest.fn().mockReturnValue([]);
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 

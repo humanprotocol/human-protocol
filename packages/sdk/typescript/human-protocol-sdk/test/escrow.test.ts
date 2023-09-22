@@ -7,7 +7,7 @@ import {
 import { BigNumber, ethers } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { DEFAULT_TX_ID } from '../src/constants';
+import { DEFAULT_TX_ID, NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 import {
   ErrorAmountMustBeGreaterThanZero,
@@ -29,9 +29,10 @@ import {
   ErrorTotalFeeMustBeLessThanHundred,
   ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
+  EthereumError,
   InvalidEthereumAddressError,
 } from '../src/error';
-import { EscrowClient } from '../src/escrow';
+import { EscrowClient, EscrowUtils } from '../src/escrow';
 import { EscrowStatus } from '../src/types';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
@@ -1539,102 +1540,6 @@ describe('EscrowClient', () => {
     });
   });
 
-  describe('getEscrows', () => {
-    test('should throw an error if launcher is an invalid address', async () => {
-      const launcher = FAKE_ADDRESS;
-
-      await expect(escrowClient.getEscrows({ launcher })).rejects.toThrow(
-        ErrorInvalidAddress
-      );
-    });
-
-    test('should throw an error if recordingOracle is an invalid address', async () => {
-      const recordingOracle = FAKE_ADDRESS;
-
-      await expect(
-        escrowClient.getEscrows({ recordingOracle })
-      ).rejects.toThrow(ErrorInvalidAddress);
-    });
-
-    test('should throw an error if reputationOracle is an invalid address', async () => {
-      const reputationOracle = FAKE_ADDRESS;
-
-      await expect(
-        escrowClient.getEscrows({ reputationOracle })
-      ).rejects.toThrow(ErrorInvalidAddress);
-    });
-
-    test('should successfully getEscrows', async () => {
-      const escrows = [
-        {
-          id: '1',
-          address: '0x0',
-          amountPaid: '3',
-          balance: '0',
-          count: '1',
-          factoryAddress: '0x0',
-          launcher: '0x0',
-          status: 'Completed',
-          token: '0x0',
-          totalFundedAmount: '3',
-        },
-        {
-          id: '2',
-          address: '0x0',
-          amountPaid: '0',
-          balance: '3',
-          count: '2',
-          factoryAddress: '0x0',
-          launcher: '0x0',
-          status: 'Pending',
-          token: '0x0',
-          totalFundedAmount: '3',
-        },
-      ];
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockResolvedValue({ escrows });
-
-      const result = await escrowClient.getEscrows();
-
-      expect(result).toEqual(escrows);
-      expect(gqlFetchSpy).toHaveBeenCalledWith('', GET_ESCROWS_QUERY({}), {});
-    });
-
-    test('should successfully getEscrows for the filter', async () => {
-      const escrows = [
-        {
-          id: '1',
-          address: '0x0',
-          amountPaid: '3',
-          balance: '0',
-          count: '1',
-          factoryAddress: '0x0',
-          launcher: '0x0',
-          status: 'Completed',
-          token: '0x0',
-          totalFundedAmount: '3',
-        },
-      ];
-      const gqlFetchSpy = vi
-        .spyOn(gqlFetch, 'default')
-        .mockResolvedValue({ escrows });
-
-      const result = await escrowClient.getEscrows({
-        launcher: ethers.constants.AddressZero,
-      });
-
-      expect(result).toEqual(escrows);
-      expect(gqlFetchSpy).toHaveBeenCalledWith(
-        '',
-        GET_ESCROWS_QUERY({ launcher: ethers.constants.AddressZero }),
-        {
-          launcher: ethers.constants.AddressZero,
-        }
-      );
-    });
-  });
-
   describe('getRecordingOracleAddress', () => {
     test('should throw an error if escrowAddress is an invalid address', async () => {
       const escrowAddress = FAKE_ADDRESS;
@@ -1891,6 +1796,168 @@ describe('EscrowClient', () => {
       ).rejects.toThrow();
 
       expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();
+    });
+  });
+});
+
+describe('EscrowUtils', () => {
+  describe('getEscrows', () => {
+    test('should throw an error if chainId is empty', async () => {
+      await expect(EscrowUtils.getEscrows({ networks: [] })).rejects.toThrow(
+        ErrorUnsupportedChainID
+      );
+    });
+
+    test('should throw an error if chainId is invalid', async () => {
+      await expect(EscrowUtils.getEscrows({ networks: [123] })).rejects.toThrow(
+        new EthereumError(ErrorUnsupportedChainID.message)
+      );
+    });
+    test('should throw an error if launcher is an invalid address', async () => {
+      const launcher = FAKE_ADDRESS;
+
+      await expect(
+        EscrowUtils.getEscrows({ networks: [ChainId.POLYGON_MUMBAI], launcher })
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should throw an error if recordingOracle is an invalid address', async () => {
+      const recordingOracle = FAKE_ADDRESS;
+
+      await expect(
+        EscrowUtils.getEscrows({
+          networks: [ChainId.POLYGON_MUMBAI],
+          recordingOracle,
+        })
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should throw an error if reputationOracle is an invalid address', async () => {
+      const reputationOracle = FAKE_ADDRESS;
+
+      await expect(
+        EscrowUtils.getEscrows({
+          networks: [ChainId.POLYGON_MUMBAI],
+          reputationOracle,
+        })
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should successfully getEscrows', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+        {
+          id: '2',
+          address: '0x0',
+          amountPaid: '0',
+          balance: '3',
+          count: '2',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Pending',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const filter = {
+        networks: [ChainId.POLYGON_MUMBAI],
+      };
+
+      const result = await EscrowUtils.getEscrows(filter);
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
+        GET_ESCROWS_QUERY(filter),
+        filter
+      );
+    });
+
+    test('should successfully getEscrows for the filter', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await EscrowUtils.getEscrows({
+        networks: [ChainId.POLYGON_MUMBAI],
+        launcher: ethers.constants.AddressZero,
+      });
+
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getEscrows from two different networks', async () => {
+      const polygonEscrow = {
+        id: '1',
+        address: '0x0',
+        amountPaid: '3',
+        balance: '0',
+        count: '1',
+        factoryAddress: '0x0',
+        launcher: '0x0',
+        status: 'Completed',
+        token: '0x0',
+        totalFundedAmount: '3',
+      };
+      const mumbaiEscrow = {
+        id: '2',
+        address: '0x0',
+        amountPaid: '0',
+        balance: '3',
+        count: '2',
+        factoryAddress: '0x0',
+        launcher: '0x0',
+        status: 'Pending',
+        token: '0x0',
+        totalFundedAmount: '3',
+      };
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockImplementation((url) => {
+          if (url === NETWORKS[ChainId.POLYGON]?.subgraphUrl) {
+            return Promise.resolve({ escrows: [polygonEscrow] });
+          } else {
+            return Promise.resolve({ escrows: [mumbaiEscrow] });
+          }
+        });
+
+      const result = await EscrowUtils.getEscrows({
+        networks: [ChainId.POLYGON, ChainId.POLYGON_MUMBAI],
+      });
+      expect(result[0]).toEqual(polygonEscrow);
+      expect(result[1]).toEqual(mumbaiEscrow);
+      expect(result[0].chainId).toEqual(ChainId.POLYGON);
+      expect(result[1].chainId).toEqual(ChainId.POLYGON_MUMBAI);
+      expect(gqlFetchSpy).toHaveBeenCalled();
     });
   });
 });

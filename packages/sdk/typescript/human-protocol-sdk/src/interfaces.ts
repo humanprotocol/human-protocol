@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { EscrowStatus } from './types';
+import { ChainId } from './enums';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -45,6 +46,7 @@ export interface IEscrowsFilter {
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
+  networks: ChainId[];
 }
 
 export interface IEscrowConfig {

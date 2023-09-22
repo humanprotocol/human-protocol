@@ -1,6 +1,7 @@
 import {
   EscrowClient,
   EscrowStatus,
+  EscrowUtils,
   KVStoreClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
@@ -97,10 +98,9 @@ export class JobService {
     chainId: number,
     workerAddress: string,
   ): Promise<string[]> {
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const escrows = await escrowClient.getEscrows({
+    const escrows = await EscrowUtils.getEscrows({
       status: EscrowStatus.Pending,
+      networks: [chainId],
     });
 
     return escrows
