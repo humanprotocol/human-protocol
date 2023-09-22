@@ -67,7 +67,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { CVAT_JOB_TYPES, FROM_BLOCK_DIFF, JOB_RETRIES_COUNT_THRESHOLD, _5_MINS } from '../../common/constants';
+import { FROM_BLOCK_DIFF, JOB_RETRIES_COUNT_THRESHOLD, TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -714,43 +714,6 @@ export class JobService {
     return Number(paidOutAmount);
   }
 
-
-  public async refundCronJob() {
-    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-    const jobEntity = await this.jobRepository.findOne(
-      {
-        status: JobStatus.TO_REFUND,
-        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-        waitUntil: LessThanOrEqual(new Date()),
-        updatedAt: LessThanOrEqual(_5_MINS)
-      },
-      {
-        order: {
-            waitUntil: SortDirection.ASC,
-        },
-      }
-    );
-    if (!jobEntity) return;
-
-    const { id, userId, chainId, escrowAddress, fundAmount } = jobEntity
-  
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
-    
-    let refundAmount = new Decimal(fundAmount);
-    if (escrowAddress) {
-      refundAmount = await this.calculateRefundAmount(chainId, tokenAddress, escrowAddress);
-    }
-    
-    await this.paymentService.createRefundPayment({ refundAmount: refundAmount.toNumber(), userId: userId, jobId: id });
-  
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
-
-    return true;
-  }
-
   public async cancelCronJob() {
     const jobEntity = await this.jobRepository.findOne(
       {
@@ -767,7 +730,8 @@ export class JobService {
     if (!jobEntity) return;
 
     if (jobEntity.escrowAddress) {
-      await this.processEscrowCancellation(jobEntity);
+      const transactionHash = await this.processEscrowCancellation(jobEntity);
+      jobEntity.latestTransactionHash = transactionHash;
     }
     await this.notifyWebhook(jobEntity);
     
@@ -777,7 +741,7 @@ export class JobService {
     return true;
   }
 
-  public async processEscrowCancellation(jobEntity: JobEntity) {
+  public async processEscrowCancellation(jobEntity: JobEntity): Promise<string> {
       const { chainId, escrowAddress } = jobEntity;
 
       const signer = this.web3Service.getSigner(chainId);
@@ -795,7 +759,56 @@ export class JobService {
           throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
       }
 
-      await escrowClient.cancel(escrowAddress);
+      const transactionHash = await escrowClient.cancel(escrowAddress);
+      return transactionHash;
+  }
+
+  public async refundCronJob() {
+    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
+    const jobEntity = await this.jobRepository.findOne(
+      {
+        status: JobStatus.TO_REFUND,
+        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+        waitUntil: LessThanOrEqual(new Date())
+      },
+      {
+        order: {
+            waitUntil: SortDirection.ASC,
+        },
+      }
+    );
+    if (!jobEntity) return;
+
+    const { id, userId, chainId, escrowAddress, fundAmount, latestTransactionHash } = jobEntity
+
+    const signer = this.web3Service.getSigner(chainId);
+
+    const transactionReceipt = await signer.provider.getTransactionReceipt(latestTransactionHash);
+
+    if (!transactionReceipt) {
+      this.logger.log(ErrorJob.TransactionNotFound, JobService.name);
+      throw new BadRequestException(ErrorJob.TransactionNotFound);
+    }
+
+    if (transactionReceipt.confirmations < TX_CONFIRMATION_TRESHOLD) {
+      this.logger.log(ErrorJob.TransactionHasNotEnoughAmountOfConfirmations, JobService.name);
+      throw new BadRequestException(ErrorJob.TransactionHasNotEnoughAmountOfConfirmations);
+    }
+
+    const escrowClient = await EscrowClient.build(signer);
+    const tokenAddress = await escrowClient.getTokenAddress(escrowAddress);
+    
+    let refundAmount = new Decimal(fundAmount);
+    if (escrowAddress) {
+      refundAmount = await this.calculateRefundAmount(chainId, tokenAddress, escrowAddress);
+    }
+    
+    await this.paymentService.createRefundPayment({ refundAmount: refundAmount.toNumber(), userId: userId, jobId: id });
+  
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+
+    return true;
   }
 
   public async calculateRefundAmount(chainId: ChainId, tokenAddress: string, escrowAddress: string) {

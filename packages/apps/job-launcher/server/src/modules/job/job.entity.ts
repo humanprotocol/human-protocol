@@ -28,6 +28,9 @@ export class JobEntity extends BaseEntity implements IJob {
   @Column({ type: 'varchar' })
   public manifestHash: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  public latestTransactionHash: string;
+
   @Column({
     type: 'enum',
     enum: JobStatus,

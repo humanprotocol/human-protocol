@@ -14,6 +14,8 @@ export enum ErrorJob {
   JobParamsValidationFailed = 'Job parameters validation failed',
   InvalidEventType = 'Invalid event type',
   NotLaunched = 'Not launched',
+  TransactionHasNotEnoughAmountOfConfirmations = 'Transaction has not enough amount of confirmations',
+  TransactionNotFound = 'Transaction not found'
 }
 
 /**
