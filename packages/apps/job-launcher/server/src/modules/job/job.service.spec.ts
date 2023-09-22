@@ -6,6 +6,7 @@ import {
   EscrowStatus,
   StakingClient,
   IAllocation,
+  KVStoreClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -38,6 +39,8 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
+  MOCK_EXCHANGE_ORACLE_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -100,6 +103,11 @@ jest.mock('@human-protocol/sdk', () => ({
       ]),
     listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
   })),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      get: jest.fn(),
+    })),
+  },
 }));
 
 jest.mock('../../common/utils', () => ({
@@ -110,8 +118,8 @@ jest.mock('../../common/utils', () => ({
       useSSL: false,
       host: '127.0.0.1',
       port: 9000,
-      bucket: MOCK_BUCKET_NAME
-    }
+      bucket: MOCK_BUCKET_NAME,
+    };
   }),
 }));
 
@@ -139,6 +147,8 @@ describe('JobService', () => {
             return MOCK_RECORDING_ORACLE_FEE;
           case 'REPUTATION_ORACLE_FEE':
             return MOCK_REPUTATION_ORACLE_FEE;
+          case 'EXCHANGE_ORACLE_FEE':
+            return MOCK_EXCHANGE_ORACLE_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'RECORDING_ORACLE_ADDRESS':
@@ -701,6 +711,7 @@ describe('JobService', () => {
       findOnePaymentMock: any,
       buildMock: any,
       sendWebhookMock: any,
+      getExchangeOracleWebhookUrlMock: any,
       jobEntityMock: Partial<JobEntity>,
       paymentEntityMock: Partial<PaymentEntity>;
 
@@ -736,6 +747,10 @@ describe('JobService', () => {
       findOneJobMock.mockResolvedValueOnce(jobEntityMock as JobCvatDto);
       findOnePaymentMock.mockResolvedValueOnce(
         paymentEntityMock as PaymentEntity,
+      );
+      getExchangeOracleWebhookUrlMock = jest.spyOn(
+        jobService as any,
+        'getExchangeOracleWebhookUrl',
       );
     });
 
@@ -791,6 +806,9 @@ describe('JobService', () => {
 
       jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
       getManifestMock.mockResolvedValue(manifest);
+      getExchangeOracleWebhookUrlMock.mockResolvedValue(
+        MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
+      );
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
 
@@ -833,6 +851,9 @@ describe('JobService', () => {
       getManifestMock.mockResolvedValue(manifest);
       buildMock.mockResolvedValue(escrowClientMock as any);
       sendWebhookMock.mockResolvedValue(true);
+      getExchangeOracleWebhookUrlMock.mockResolvedValue(
+        MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
+      );
 
       const result = await jobService.cancelCronJob();
 
@@ -1314,7 +1335,7 @@ describe('JobService', () => {
 
       const expectedJobDetailsDto: JobDetailsDto = {
         details: {
-          escrowAddress: MOCK_ADDRESS, 
+          escrowAddress: MOCK_ADDRESS,
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
           balance: Number(balance),
@@ -1428,6 +1449,29 @@ describe('JobService', () => {
         MOCK_ADDRESS,
       );
       expect(result).toBe(1.5);
+    });
+  });
+
+  describe('getExchangeOracleWebhookUrl', () => {
+    it('should get the exchange oracle webhook URL', async () => {
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([{}]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      }));
+
+      const result = await (jobService as any).getExchangeOracleWebhookUrl(
+        MOCK_EXCHANGE_ORACLE_ADDRESS,
+        ChainId.LOCALHOST,
+      );
+
+      expect(result).toBe(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
     });
   });
 });
