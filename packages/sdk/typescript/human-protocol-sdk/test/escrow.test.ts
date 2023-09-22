@@ -56,7 +56,8 @@ describe('EscrowClient', () => {
     mockSigner: any,
     mockEscrowContract: any,
     mockEscrowFactoryContract: any,
-    mockTokenContract: any;
+    mockTokenContract: any,
+    mockTx: any;
 
   beforeEach(async () => {
     mockProvider = {
@@ -121,6 +122,10 @@ describe('EscrowClient', () => {
 
     // Mock HMToken__factory.connect to return the mock HMToken
     vi.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+    mockTx = {
+      wait: vi.fn(),
+    };
 
     escrowClient = await EscrowClient.build(mockSigner);
     escrowClient.escrowContract = mockEscrowContract;
@@ -1069,9 +1074,12 @@ describe('EscrowClient', () => {
     });
 
     test('should successfully cancel escrow', async () => {
+      mockTx.wait.mockResolvedValueOnce({ transactionHash: FAKE_HASH });
+
       const escrowAddress = ethers.constants.AddressZero;
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
 
       await escrowClient.cancel(escrowAddress);
 
@@ -1083,6 +1091,17 @@ describe('EscrowClient', () => {
 
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.cancel.mockRejectedValueOnce(new Error());
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if the wait fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      mockTx.wait.mockRejectedValueOnce(new Error());
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
 
       await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
 

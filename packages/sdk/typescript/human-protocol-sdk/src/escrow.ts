@@ -480,7 +480,7 @@ export class EscrowClient {
    * @throws {Error} - An error object if an error occurred.
    */
   @requiresSigner
-  async cancel(escrowAddress: string): Promise<void> {
+  async cancel(escrowAddress: string): Promise<string> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -494,8 +494,10 @@ export class EscrowClient {
         escrowAddress,
         this.signerOrProvider
       );
-      await this.escrowContract.cancel();
-      return;
+      const tx = await this.escrowContract.cancel();
+      const { transactionHash } = await tx.wait();
+
+      return transactionHash;
     } catch (e) {
       return throwError(e);
     }
