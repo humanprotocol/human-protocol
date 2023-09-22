@@ -767,86 +767,6 @@ export class EscrowClient {
   }
 
   /**
-   * Returns the escrow for a given address
-   *
-   * @param {string} escrowAddress - Escrow address.
-   * @returns {Promise<EscrowData>}
-   * @throws {Error} - An error object if an error occurred.
-   */
-  async getEscrow(escrowAddress: string): Promise<EscrowData> {
-    if (escrowAddress && !ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidAddress;
-    }
-
-    try {
-      const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
-        this.network.subgraphUrl,
-        GET_ESCROW_BY_ADDRESS_QUERY(),
-        { escrowAddress }
-      );
-
-      return escrow || null;
-    } catch (e: any) {
-      return throwError(e);
-    }
-  }
-
-  /**
-   * Returns the list of escrows for given filter
-   *
-   * @param {IEscrowsFilter} filter - Filter parameters.
-   * @returns {Promise<EscrowData[]>}
-   * @throws {Error} - An error object if an error occurred.
-   */
-  async getEscrows(filter: IEscrowsFilter = {}): Promise<EscrowData[]> {
-    if (filter.launcher && !ethers.utils.isAddress(filter.launcher)) {
-      throw ErrorInvalidAddress;
-    }
-
-    if (
-      filter.recordingOracle &&
-      !ethers.utils.isAddress(filter.recordingOracle)
-    ) {
-      throw ErrorInvalidAddress;
-    }
-
-    if (
-      filter.reputationOracle &&
-      !ethers.utils.isAddress(filter.reputationOracle)
-    ) {
-      throw ErrorInvalidAddress;
-    }
-
-    if (
-      filter.exchangeOracle &&
-      !ethers.utils.isAddress(filter.exchangeOracle)
-    ) {
-      throw ErrorInvalidAddress;
-    }
-
-    try {
-      const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
-        this.network.subgraphUrl,
-        GET_ESCROWS_QUERY(filter),
-        {
-          ...filter,
-          status: filter.status
-            ? Object.entries(EscrowStatus).find(
-                ([, value]) => value === filter.status
-              )?.[0]
-            : undefined,
-          from: filter.from ? +filter.from.getTime() / 1000 : undefined,
-          to: filter.to ? +filter.to.getTime() / 1000 : undefined,
-        }
-      );
-
-      return escrows;
-    } catch (e: any) {
-      return throwError(e);
-    }
-  }
-
-  /**
    * Returns the recording oracle address of given escrow
    *
    * @param {string} escrowAddress - Address of the escrow.
@@ -976,6 +896,114 @@ export class EscrowClient {
         this.signerOrProvider
       );
       return this.escrowContract.escrowFactory();
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+}
+
+export class EscrowUtils {
+  /**
+   * Returns the list of escrows for given filter
+   *
+   * @param {IEscrowsFilter} filter - Filter parameters.
+   * @returns {Promise<EscrowData[]>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  public static async getEscrows(
+    filter: IEscrowsFilter
+  ): Promise<EscrowData[]> {
+    if (!filter?.networks?.length) {
+      throw ErrorUnsupportedChainID;
+    }
+    if (filter.launcher && !ethers.utils.isAddress(filter.launcher)) {
+      throw ErrorInvalidAddress;
+    }
+
+    if (
+      filter.recordingOracle &&
+      !ethers.utils.isAddress(filter.recordingOracle)
+    ) {
+      throw ErrorInvalidAddress;
+    }
+
+    if (
+      filter.reputationOracle &&
+      !ethers.utils.isAddress(filter.reputationOracle)
+    ) {
+      throw ErrorInvalidAddress;
+    }
+
+    if (
+      filter.exchangeOracle &&
+      !ethers.utils.isAddress(filter.exchangeOracle)
+    ) {
+      throw ErrorInvalidAddress;
+    }
+
+    try {
+      const escrowAddresses: EscrowData[] = [];
+      for (const chainId of filter.networks) {
+        const networkData = NETWORKS[chainId];
+
+        if (!networkData) {
+          throw ErrorUnsupportedChainID;
+        }
+
+        const { escrows } = await gqlFetch<{ escrows: EscrowData[] }>(
+          networkData.subgraphUrl,
+          GET_ESCROWS_QUERY(filter),
+          {
+            ...filter,
+            status: filter.status
+              ? Object.entries(EscrowStatus).find(
+                  ([, value]) => value === filter.status
+                )?.[0]
+              : undefined,
+            from: filter.from ? +filter.from.getTime() / 1000 : undefined,
+            to: filter.to ? +filter.to.getTime() / 1000 : undefined,
+          }
+        );
+        escrows.map((escrow) => (escrow.chainId = networkData.chainId));
+        escrowAddresses.push(...escrows);
+      }
+      escrowAddresses.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+      return escrowAddresses;
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the escrow for a given address
+   *
+   * @param {string} escrowAddress - Escrow address.
+   * @param {ChainId} chainId - Chain id.
+   * @returns {Promise<EscrowData>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  async getEscrow(
+    chainId: ChainId,
+    escrowAddress: string
+  ): Promise<EscrowData> {
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    if (escrowAddress && !ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidAddress;
+    }
+
+    try {
+      const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
+        networkData.subgraphUrl,
+        GET_ESCROW_BY_ADDRESS_QUERY(),
+        { escrowAddress }
+      );
+
+      return escrow || null;
     } catch (e: any) {
       return throwError(e);
     }
