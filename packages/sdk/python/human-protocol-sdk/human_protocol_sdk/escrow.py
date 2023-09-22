@@ -6,7 +6,7 @@ import os
 from decimal import Decimal
 from typing import List, Optional
 
-from human_protocol_sdk.constants import NETWORKS, ChainId, Role, Status
+from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
@@ -103,6 +103,7 @@ class EscrowFilter:
 
     def __init__(
         self,
+        networks: [List[ChainId]],
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
@@ -115,13 +116,22 @@ class EscrowFilter:
         Initializes a EscrowFilter instance.
 
         Args:
+            networks (List[ChainId]): Networks to request data
             launcher (Optional[str]): Launcher address
             reputation_oracle (Optional[str]): Reputation oracle address
             recording_oracle (Optional[str]): Recording oracle address
+            exchange_oracle (Optional[str]): Exchange oracle address
             status (Optional[Status]): Escrow status
             date_from (Optional[datetime.datetime]): Created from date
             date_to (Optional[datetime.datetime]): Created to date
         """
+
+        if not networks or any(
+            network not in set(chain_id.value for chain_id in ChainId)
+            for network in networks
+        ):
+            raise EscrowClientError(f"Invalid ChainId")
+
         if launcher and not Web3.is_address(launcher):
             raise EscrowClientError(f"Invalid address: {launcher}")
 
@@ -146,6 +156,7 @@ class EscrowFilter:
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
+        self.networks = networks
 
 
 class EscrowClient:
@@ -641,36 +652,6 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.status().call()
         )
 
-    def get_escrows(self, filter: EscrowFilter = EscrowFilter()) -> List[dict]:
-        """Get an array of escrow addresses based on the specified filter parameters.
-
-        Args:
-            filter (EscrowFilter): Object containing all the necessary parameters to filter
-
-        Returns:
-            List[dict]: List of escrows
-        """
-        from human_protocol_sdk.gql.escrow import (
-            get_escrows_query,
-        )
-
-        escrows_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
-            query=get_escrows_query(filter),
-            params={
-                "launcher": filter.launcher,
-                "reputationOracle": filter.reputation_oracle,
-                "recordingOracle": filter.recording_oracle,
-                "exchangeOracle": filter.exchange_oracle,
-                "status": filter.status.name if filter.status else None,
-                "from": int(filter.date_from.timestamp()) if filter.date_from else None,
-                "to": int(filter.date_to.timestamp()) if filter.date_to else None,
-            },
-        )
-        escrows = escrows_data["data"]["escrows"]
-
-        return escrows
-
     def get_recording_oracle_address(self, escrow_address: str) -> str:
         """Gets the recording oracle address of the escrow.
 
@@ -787,3 +768,49 @@ class EscrowClient:
         # Initialize contract instance
         escrow_interface = get_escrow_interface()
         return self.w3.eth.contract(address=address, abi=escrow_interface["abi"])
+
+
+class EscrowUtils:
+    """
+    A utility class that provides additional escrow-related functionalities.
+    """
+
+    @staticmethod
+    def get_escrows(
+        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI.value]),
+    ) -> List[dict]:
+        """Get an array of escrow addresses based on the specified filter parameters.
+
+        Args:
+            filter (EscrowFilter): Object containing all the necessary parameters to filter
+
+        Returns:
+            List[dict]: List of escrows
+        """
+        from human_protocol_sdk.gql.escrow import (
+            get_escrows_query,
+        )
+
+        escrow_addresses = []
+        for chain_id in filter.networks:
+            network = NETWORKS[ChainId(chain_id)]
+            escrows_data = get_data_from_subgraph(
+                network["subgraph_url"],
+                query=get_escrows_query(filter),
+                params={
+                    "launcher": filter.launcher,
+                    "reputationOracle": filter.reputation_oracle,
+                    "recordingOracle": filter.recording_oracle,
+                    "exchangeOracle": filter.exchange_oracle,
+                    "status": filter.status.name if filter.status else None,
+                    "from": int(filter.date_from.timestamp())
+                    if filter.date_from
+                    else None,
+                    "to": int(filter.date_to.timestamp()) if filter.date_to else None,
+                },
+            )
+            escrows = escrows_data["data"]["escrows"]
+            for escrow in escrows:
+                escrow[0]["chain_id"] = chain_id
+            escrow_addresses.extend(escrows)
+        return escrow_addresses

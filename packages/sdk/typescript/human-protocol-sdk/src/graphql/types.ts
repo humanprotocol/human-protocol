@@ -22,6 +22,7 @@ export type EscrowData = {
   token: string;
   totalFundedAmount: string;
   createdAt: string;
+  chainId: number;
 };
 
 export type HMTStatisticsData = {
