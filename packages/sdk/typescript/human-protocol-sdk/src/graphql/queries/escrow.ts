@@ -29,7 +29,7 @@ const ESCROW_FRAGMENT = gql`
 
 export const GET_ESCROW_BY_ADDRESS_QUERY = () => gql`
   query getEscrowByAddress($escrowAddress: String!) {
-    escrow(where: { address: $escrowAddress }) {
+    escrow(id: $escrowAddress) {
       ...EscrowFields
     }
   }

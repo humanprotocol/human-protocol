@@ -982,7 +982,7 @@ export class EscrowUtils {
    * @returns {Promise<EscrowData>}
    * @throws {Error} - An error object if an error occurred.
    */
-  async getEscrow(
+  public static async getEscrow(
     chainId: ChainId,
     escrowAddress: string
   ): Promise<EscrowData> {
