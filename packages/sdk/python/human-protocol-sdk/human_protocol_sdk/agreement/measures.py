@@ -1,3 +1,5 @@
+"""Module containing Inter Rater Agreement Measures."""
+
 import numpy as np
 
 from warnings import warn
@@ -7,9 +9,9 @@ from .validations import (
     validate_confusion_matrix,
 )
 
-from .bootstrap import confidence_intervals
+from .bootstrap import confidence_interval
 
-from .utils import label_counts, confusion_matrix_from_sequence
+from .utils import label_counts, confusion_matrix
 
 from functools import partial
 from typing import Sequence, Optional
@@ -31,13 +33,15 @@ def agreement(
     Args:
         data: Annotated data.
         measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
-        data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
+        data_format: The format that the data is in. Must be one of 'annotations' or 'label_counts'.
         labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
-        nan_values: Values to be counted as invalid and filter out from the data.
-        bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
-            must be one of 'percentile' or 'bca'.
+        nan_values: Values to be counted as invalid and filter from the data.
+        bootstrap_method: Name of the bootstrap method to use for calculating confidence intervals. If omitted, no bootstrapping is performed. If provided, must be one of 'percentile' or 'bca'.
+            If set to None, no confidence intervals are calculated.
         bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
+            If set to None, default arguments are used.
         measure_kwargs: Dictionary of keyword arguments to be passed to the measure function.
+            If set to None, default arguments are used.
 
     Returns: A dictionary containing the keys "results" and "config". Results contains the scores, while config contains parameters that produced the results.
     """
@@ -60,7 +64,7 @@ def agreement(
                         ' two will be regarded. Consider using method "fleiss_kappa".'
                     )
 
-                data, labels = confusion_matrix_from_sequence(
+                data, labels = confusion_matrix(
                     data.T[0],
                     data.T[1],
                     labels=labels,
@@ -115,11 +119,11 @@ def agreement(
             if bootstrap_kwargs is None:
                 bootstrap_kwargs = {}
 
-            ci, _ = confidence_intervals(
+            ci, _ = confidence_interval(
                 data, statistic_fn=fn, algorithm=bootstrap_method, **bootstrap_kwargs
             )
             confidence_level = bootstrap_kwargs.get(
-                "confidence_level", confidence_intervals.__defaults__[2]
+                "confidence_level", confidence_interval.__defaults__[2]
             )
 
     return {
@@ -142,15 +146,18 @@ def agreement(
     }
 
 
-def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> float:
+def percentage(data: Sequence, data_format="im", invalid_return=np.nan) -> float:
     """
     Returns the overall agreement percentage observed across the data.
 
     Args:
         data: Annotation data.
-        data_format: The format of data. Options are 'im' for an incidence
-            matrix and 'cm' for a confusion matrix. Defaults to 'im'.
-        invalid_return: value to return if result is np.nan. Defaults to np.nan.
+        data_format: The format that the data is in. Must be one of 'im'
+            (incidence matrix) or 'cm' (confusion matrix). Defaults to 'im'.
+        invalid_return: Value between 0.0 and 1.0, indicating the percentage of agreement.
+
+    Returns:
+        Value between 0.0 and 1.0, indicating the percentage of agreement.
     """
     data = np.asarray(data)
 
@@ -173,14 +180,16 @@ def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> flo
     return percent
 
 
-def cohens_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
+def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
     """
     Returns Cohen's Kappa for the provided annotations.
 
     Args:
-         data: Annotation data, provided as K x K confusion matrix, with K =
-            number of labels.
+        data: Annotation data, provided as K x K confusion matrix, with K = number of labels.
         invalid_return: value to return if result is np.nan. Defaults to np.nan.
+
+    Returns:
+        Value between -1.0 and 1.0, indicating the degree of agreement between both raters.
     """
     data = np.asarray(data)
 
@@ -195,7 +204,7 @@ def cohens_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     return kappa
 
 
-def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
+def fleiss_kappa(data: Sequence, invalid_return=np.nan) -> float:
     """
     Returns Fleisss' Kappa for the provided annotations.
 
@@ -203,6 +212,9 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
          data: Annotation data, provided as I x K incidence matrix, with
             I = number of items and K = number of labels.
         invalid_return: value to return if result is np.nan. Defaults to np.nan.
+
+    Returns:
+        Value between -1.0 and 1.0, indicating the degree of agreement between all raters.
     """
     data = np.asarray(data)
 

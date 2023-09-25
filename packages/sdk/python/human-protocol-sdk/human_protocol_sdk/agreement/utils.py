@@ -1,6 +1,7 @@
+"""Module containing helper functions for calculating agreement measures."""
+
 import numpy as np
 from collections import Counter
-from math import nan
 from typing import Sequence, Optional
 
 from pyerf import erf, erfinv
@@ -39,22 +40,20 @@ def _filter_labels(labels: Sequence, exclude=None):
 
 def label_counts(
     annotations: Sequence,
-    labels=None,
+    labels: Optional[Sequence] = None,
     nan_values: Optional[Sequence] = None,
     return_labels=False,
 ):
     """Converts the given sequence of item annotations to an array of label counts per item.
 
     Args:
-        annotations: A two-dimensional sequence. Rows represent items, columns represent annotators.
-        labels: List of labels to be counted. Entries not found in the list are omitted. If
-            omitted, all labels in the annotations are counted.
-        nan_values: Values in the records to be counted as invalid.
-        return_labels: Whether to return labels with the counts. Automatically set to true if labels are
-            inferred.
+        annotations: A two-dimensional sequence. Rows represent items, columns represent annotators. Each row must be of the same size.
+        labels: Sequence of labels to be counted. Entries not found in the list are omitted. No labels are provided, the list of labels is inferred from the given annotations.
+        nan_values: Value to return if input data is invalid. Invalid values will not be counted.
+        return_labels: Whether to return labels as well.
 
     Returns:
-        A two-dimensional array of integers. Rows represent items, columns represent labels. If
+        A two-dimensional array of integers. Rows represent items, columns represent labels.
     """
     annotations = np.asarray(annotations)
 
@@ -75,22 +74,24 @@ def label_counts(
     return counts
 
 
-def confusion_matrix_from_sequence(
+def confusion_matrix(
     a: Sequence,
     b: Sequence,
     labels: Optional[Sequence] = None,
     nan_values: Optional[Sequence] = None,
     return_labels=False,
-):
-    """Generate an N X N confusion matrix from the given sequence of values
-        a and b, where N is the number of unique labels.
+) -> np.ndarray:
+    """Generate an N X N confusion matrix from the given sequence of values a and b, where N is the number of unique labels.
 
     Args:
         a: A sequence of labels.
         b: Another sequence of labels.
-        labels: The to be included in the matrix.
-        nan_values: Values in the records to be counted as invalid.
-        return_labels: Whether to return labels used in the confusion matrix.
+        labels: Sequence of labels to be counted. Entries not found in the list are omitted. No labels are provided, the list of labels is inferred from the given annotations.
+        nan_values: Value to return if input data is invalid. Invalid values will not be counted.
+        return_labels: Whether to return labels with the counts.
+
+    Returns:
+        A confusion matrix. Rows represent labels assigned by b, columns represent labels assigned by a.
     """
     a = np.asarray(a)
     b = np.asarray(b)
