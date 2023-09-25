@@ -72,7 +72,7 @@
     "solidity-coverage": "^0.8.2",
     "tenderly": "^0.5.3",
     "typechain": "^8.1.1",
-    "xdeployer": "1.1.20"
+    "xdeployer": "1.2.7"
   },
   "lint-staged": {
     "*.sol": [
