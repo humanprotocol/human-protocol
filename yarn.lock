@@ -18491,10 +18491,10 @@ strip-literal@^1.0.1:
   dependencies:
     acorn "^8.8.2"
 
-stripe@^11.10.0:
-  version "11.18.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-11.18.0.tgz#2b99ac712e81a5232f88568327d001960b454465"
-  integrity sha512-OUA32uhNoSoM6wOodyFbV+3IBCoO140uzdXmBArQ0S88D4EbH91xl2v+Ml1sKalcFKUBadHLeHfU/p9AbsOfGw==
+stripe@^13.7.0:
+  version "13.7.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-13.7.0.tgz#0876e56eb25e019fbed1ff3f017ac7f8fee889ae"
+  integrity sha512-0cbUNl5aDwt5rIZeE/WgyTxZN/PtwyeA5KcVJrHj260tjN4IOo2BZikN+dxhKoeBfI4aSRAd3E5vHRKmjjaSbA==
   dependencies:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
