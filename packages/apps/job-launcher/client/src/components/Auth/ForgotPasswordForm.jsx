@@ -30,7 +30,7 @@ export const ForgotPasswordForm = () => {
       await authService.forgotPassword(email);
       setIsSuccess(true);
     } catch (err) {
-      setAlertMsg(err?.message);
+      setAlertMsg(err?.response?.data?.message ?? err?.message);
     }
     setIsLoading(false);
   };

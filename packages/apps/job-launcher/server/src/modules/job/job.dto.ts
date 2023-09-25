@@ -10,11 +10,9 @@ import {
   IsOptional,
   IsObject,
   IsNumberString,
-  ArrayNotEmpty, 
-  Min, 
-  Max, 
-  IsNotEmpty, 
-  IsEthereumAddress
+  Min,
+  IsNotEmpty,
+  IsEthereumAddress,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
 import {
@@ -173,7 +171,7 @@ export class ManifestDetails {
 
 export class CommonDetails {
   @IsEthereumAddress()
-  escrowAddess: string;
+  escrowAddress: string;
 
   @IsUrl()
   manifestUrl: string;
@@ -203,7 +201,6 @@ export class JobDetailsDto {
   @IsNotEmpty()
   staking: StakingDetails;
 }
-
 
 export class SaveManifestDto {
   public manifestUrl: string;

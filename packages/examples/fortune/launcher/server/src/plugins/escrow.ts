@@ -39,6 +39,7 @@ class Escrow {
   private exOracleUrl = process.env.EX_ORACLE_URL as string;
   private recOracleFee = Number(process.env.REC_ORACLE_PERCENTAGE_FEE);
   private repOracleFee = Number(process.env.REP_ORACLE_PERCENTAGE_FEE);
+  private exOracleFee = Number(process.env.EX_ORACLE_PERCENTAGE_FEE);
   async setupEscrow(
     web3: Web3,
     escrowAddress: string,
@@ -53,8 +54,10 @@ class Escrow {
       .setup(
         this.repOracleAddress,
         this.recOracleAddress,
+        this.exOracleAddress,
         this.repOracleFee,
         this.recOracleFee,
+        this.exOracleFee,
         url,
         url
       )
@@ -64,8 +67,10 @@ class Escrow {
       .setup(
         this.repOracleAddress,
         this.recOracleAddress,
+        this.exOracleAddress,
         this.repOracleFee,
         this.recOracleFee,
+        this.exOracleFee,
         url,
         url
       )

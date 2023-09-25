@@ -28,7 +28,7 @@ export const PayJob = () => {
     ) {
       setErrorMessage(err.code);
     } else {
-      setErrorMessage(err.message);
+      setErrorMessage(err?.response?.data?.message ?? err?.message);
     }
   };
 

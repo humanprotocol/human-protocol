@@ -82,6 +82,15 @@ export const FiatPayForm = ({
     return totalAmount - accountAmount;
   }, [payWithAccountBalance, totalAmount, accountAmount]);
 
+  const cardElementsDisabled = useMemo(() => {
+    if (paymentData.amount) {
+      return creditCardPayAmount <= 0;
+    } else {
+      if (payWithAccountBalance) return true;
+      return false;
+    }
+  }, [paymentData, payWithAccountBalance, creditCardPayAmount]);
+
   const handlePaymentDataFormFieldChange = (
     fieldName: string,
     fieldValue: any
@@ -155,6 +164,8 @@ export const FiatPayForm = ({
 
       // create job
       const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
+      if (!chainId) return;
+
       if (jobType === JobType.Fortune && fortuneRequest) {
         await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
       } else if (jobType === JobType.CVAT && cvatRequest) {
@@ -198,17 +209,17 @@ export const FiatPayForm = ({
               </Box>
             </Grid>
             <Grid item xs={12}>
-              <StripeElement disabled={creditCardPayAmount <= 0}>
+              <StripeElement disabled={cardElementsDisabled}>
                 <CardNumberElement id="card-number" />
               </StripeElement>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <StripeElement disabled={creditCardPayAmount <= 0}>
+              <StripeElement disabled={cardElementsDisabled}>
                 <CardExpiryElement id="card-expiry" />
               </StripeElement>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <StripeElement disabled={creditCardPayAmount <= 0}>
+              <StripeElement disabled={cardElementsDisabled}>
                 <CardCvcElement id="card-cvc" />
               </StripeElement>
             </Grid>
@@ -221,6 +232,7 @@ export const FiatPayForm = ({
                 onChange={(e) =>
                   handlePaymentDataFormFieldChange('name', e.target.value)
                 }
+                disabled={cardElementsDisabled}
               />
             </Grid>
             <Grid item xs={12}>
