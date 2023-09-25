@@ -1809,9 +1809,9 @@ describe('EscrowUtils', () => {
     });
 
     test('should throw an error if chainId is invalid', async () => {
-      await expect(EscrowUtils.getEscrows({ networks: [123] })).rejects.toThrow(
-        new EthereumError(ErrorUnsupportedChainID.message)
-      );
+      await expect(
+        EscrowUtils.getEscrows({ networks: [123] } as any)
+      ).rejects.toThrow(new EthereumError(ErrorUnsupportedChainID.message));
     });
     test('should throw an error if launcher is an invalid address', async () => {
       const launcher = FAKE_ADDRESS;
@@ -1851,6 +1851,7 @@ describe('EscrowUtils', () => {
           amountPaid: '3',
           balance: '0',
           count: '1',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -1863,6 +1864,7 @@ describe('EscrowUtils', () => {
           amountPaid: '0',
           balance: '3',
           count: '2',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -1895,6 +1897,7 @@ describe('EscrowUtils', () => {
           amountPaid: '3',
           balance: '0',
           count: '1',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -1922,6 +1925,7 @@ describe('EscrowUtils', () => {
         amountPaid: '3',
         balance: '0',
         count: '1',
+        jobRequesterId: '1',
         factoryAddress: '0x0',
         launcher: '0x0',
         status: 'Completed',
@@ -1934,6 +1938,7 @@ describe('EscrowUtils', () => {
         amountPaid: '0',
         balance: '3',
         count: '2',
+        jobRequesterId: '1',
         factoryAddress: '0x0',
         launcher: '0x0',
         status: 'Pending',
@@ -1957,6 +1962,35 @@ describe('EscrowUtils', () => {
       expect(result[1]).toEqual(mumbaiEscrow);
       expect(result[0].chainId).toEqual(ChainId.POLYGON);
       expect(result[1].chainId).toEqual(ChainId.POLYGON_MUMBAI);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getEscrows created by a specific job requester', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          jobRequesterId: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await EscrowUtils.getEscrows({
+        networks: [ChainId.POLYGON_MUMBAI],
+        jobRequesterId: '1',
+      });
+
+      expect(result).toEqual(escrows);
       expect(gqlFetchSpy).toHaveBeenCalled();
     });
   });
