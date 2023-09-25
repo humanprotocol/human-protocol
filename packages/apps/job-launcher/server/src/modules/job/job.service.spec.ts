@@ -6,6 +6,7 @@ import {
   EscrowStatus,
   StakingClient,
   IAllocation,
+  EscrowUtils
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -87,8 +88,10 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
       createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      getEscrow: jest.fn(),
     })),
+  },
+  EscrowUtils: {
+    getEscrow: jest.fn(),
   },
   StakingClient: {
     build: jest.fn().mockImplementation(() => ({
@@ -1369,11 +1372,7 @@ describe('JobService', () => {
       }
 
       jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest.fn().mockResolvedValue(ethers.utils.parseEther(balance)),
-        getEscrow: jest.fn().mockResolvedValue(getEscrowData),
-      }));
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
       (StakingClient.build as any).mockImplementation(() => ({
         getAllocation: jest.fn().mockResolvedValue(allocationMock),
       }));
@@ -1385,15 +1384,6 @@ describe('JobService', () => {
     });
 
     it('should return job details without escrow address successfully', async () => {
-      const balance = '1';
-      const allocationMock: IAllocation = {
-        escrowAddress: ethers.constants.AddressZero,
-        staker: ethers.constants.AddressZero,
-        tokens: BigNumber.from('1'),
-        createdAt: BigNumber.from('1'),
-        closedAt: BigNumber.from('1'),
-      };
-
       const manifestMock: FortuneManifestDto = {
         submissionsRequired: 10,
         requesterTitle: MOCK_REQUESTER_TITLE,
@@ -1441,26 +1431,8 @@ describe('JobService', () => {
           slashed: 0 
         }
       }
-      
-      const getEscrowData = {
-        token: MOCK_ADDRESS,
-        totalFundedAmount: '100',
-        balance: Number(balance),
-        amountPaid: '10',
-        exchangeOracle: MOCK_ADDRESS,
-        recordingOracle: MOCK_ADDRESS,
-        reputationOracle: MOCK_ADDRESS,
-      }
 
       jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest.fn().mockResolvedValue(ethers.utils.parseEther(balance)),
-        getEscrow: jest.fn().mockResolvedValue(getEscrowData),
-      }));
-      (StakingClient.build as any).mockImplementation(() => ({
-        getAllocation: jest.fn().mockResolvedValue(allocationMock),
-      }));
       jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 

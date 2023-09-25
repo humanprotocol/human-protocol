@@ -156,14 +156,17 @@ export class ManifestDetails {
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   exchangeOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   recordingOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
   reputationOracleAddress?: string;

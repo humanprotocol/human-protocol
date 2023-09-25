@@ -75,6 +75,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
+import { EscrowUtils } from '@human-protocol/sdk';
 
 @Injectable()
 export class JobService {
@@ -683,10 +684,9 @@ export class JobService {
     let escrow, allocation;
 
     if (escrowAddress) {
-        const escrowClient = await EscrowClient.build(signer);
         const stakingClient = await StakingClient.build(signer);
 
-        escrow = await escrowClient.getEscrow(escrowAddress);
+        escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
         allocation = await stakingClient.getAllocation(escrowAddress);
     }
 
@@ -749,8 +749,8 @@ export class JobService {
           escrowAddress,
           manifestUrl,
           manifestHash,
-          balance: Number(ethers.utils.formatEther(escrow?.balance!)),
-          paidOut: Number(escrow?.amountPaid),
+          balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
+          paidOut: Number(escrow?.amountPaid || 0),
       },
       manifest: manifestDetails,
       staking: {
