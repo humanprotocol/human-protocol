@@ -1,3 +1,5 @@
+"""Module containing methods to calculate confidence intervals using bootstrapping."""
+
 import random
 
 import numpy as np
@@ -7,7 +9,7 @@ from warnings import warn
 from human_protocol_sdk.agreement.utils import NormalDistribution
 
 
-def confidence_intervals(
+def confidence_interval(
     data: Sequence,
     statistic_fn: Callable,
     n_iterations: int = 1000,
@@ -15,23 +17,23 @@ def confidence_intervals(
     confidence_level=0.95,
     algorithm="bca",
     seed=None,
-) -> Tuple[Tuple[float], Sequence[float]]:
-    """Returns the confidence interval for the boostrap estimate of the given
-    statistic.
+) -> Tuple[Tuple[float, float], np.ndarray]:
+    """Returns a tuple, containing the confidence interval for the boostrap estimates of the given statistic and statistics of the bootstrap samples.
 
     Args:
         data: Data to estimate the statistic.
-        statistic_fn: Function to calculate the statistic. `f(data)` must
-            return the statistic.
+        statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
         n_iterations: Number of bootstrap samples to use for the estimate.
-        n_sample: If provided, determines the size of each bootstrap sample
-            drawn from the data. If omitted, is equal to the length of the
-            data.
-        confidence_level: Size of the confidence interval.
+        n_sample: If provided, determines the size of each bootstrap sample drawn from the data. If omitted, is equal to the length of data.
+        confidence_level: Size of the confidence interval. Must be a number between 0.0 and 1.0.
         algorithm: Which algorithm to use for the confidence interval
             estimation. "bca" uses the "Bias Corrected Bootstrap with
             Acceleration", "percentile" simply takes the appropriate
             percentiles from the bootstrap distribution.
+        seed: Random seed to use.
+
+    Returns:
+        Confidence interval and bootstrap distribution.
     """
     # set random seed for reproducibility
     if seed is not None:
