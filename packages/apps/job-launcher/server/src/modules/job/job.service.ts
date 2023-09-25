@@ -782,7 +782,6 @@ export class JobService {
     const { id, userId, chainId, escrowAddress, fundAmount, latestTransactionHash } = jobEntity
 
     const signer = this.web3Service.getSigner(chainId);
-
     const transactionReceipt = await signer.provider.getTransactionReceipt(latestTransactionHash);
 
     if (!transactionReceipt) {

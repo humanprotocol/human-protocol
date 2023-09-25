@@ -53,6 +53,7 @@ import {
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
+  MOCK_TX_CONFIRMATION_TRESHOLD,
   MOCK_USER_ID,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
@@ -154,6 +155,8 @@ describe('JobService', () => {
             return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
           case 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL':
             return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
+          case 'TX_CONFIRMATION_TRESHOLD':
+            return MOCK_TX_CONFIRMATION_TRESHOLD;
           case 'HOST':
             return '127.0.0.1';
           case 'PORT':
@@ -567,6 +570,13 @@ describe('JobService', () => {
       jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(100));
       jest.spyOn(paymentService, 'createRefundPayment').mockResolvedValueOnce(undefined);
 
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
+      });
+
       await expect(jobService.refundCronJob()).resolves.toBeTruthy();
       expect(jobEntityMock.status).toBe(JobStatus.CANCELED);
       expect(jobEntityMock.save).toHaveBeenCalled();
@@ -583,15 +593,63 @@ describe('JobService', () => {
       jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
       jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
 
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
+      });
+
       await jobService.refundCronJob();
 
       expect(jobService.calculateRefundAmount).toHaveBeenCalledTimes(0);
+    });
+
+    it('should handle error during get transaction receipt call', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(jobEntityMock, 'save').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue(undefined),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
+    });
+
+    it('should handle error transaction has not enough amount of confirmations', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(jobEntityMock, 'save').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: 0 }),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
     });
 
     it('should handle error during refund calculation', async () => {
       jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
       jest.spyOn(jobService, 'calculateRefundAmount').mockImplementationOnce(() => {
         throw new Error('Refund calculation error');
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
       });
 
       await expect(jobService.refundCronJob()).rejects.toThrow('Refund calculation error');
@@ -615,7 +673,6 @@ describe('JobService', () => {
       });
 
       await expect(jobService.refundCronJob()).rejects.toThrow();
-
     });
   });
 
@@ -681,7 +738,7 @@ describe('JobService', () => {
     it('should return true when the job is successfully canceled', async () => {
       findOneJobMock.mockResolvedValue(jobEntityMock as any);
 
-      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined);
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
       jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(true);
 
       const result = await jobService.cancelCronJob();
@@ -699,7 +756,7 @@ describe('JobService', () => {
       };
 
       jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityWithoutEscrow as any);
-      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined);
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
       jest.spyOn(jobService, 'notifyWebhook').mockResolvedValueOnce(true);
 
       expect(await jobService.cancelCronJob()).toBe(true);

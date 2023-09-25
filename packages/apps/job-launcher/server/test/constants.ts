@@ -45,3 +45,4 @@ export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
 export const MOCK_SENDGRID_FROM_NAME = 'John Doe';
+export const MOCK_TX_CONFIRMATION_TRESHOLD = 5;
