@@ -1,6 +1,6 @@
+from abc import ABC, abstractmethod
 import numpy as np
 from collections import Counter
-from math import nan
 from typing import Sequence, Optional
 
 from pyerf import erf, erfinv
@@ -206,28 +206,20 @@ def distance_matrix(values, distance_fn, dtype=np.float64):
 
 
 # TODO: terrible name, terrible explanation.
-def pair_indices(items):
+def pair_indices(items: np.ndarray):
     """
-    Returns a tuple containing indices of pairs of identical items and
-    non-identical items. Indices are represented as a numpy ndarray, where the
-    first row contains indices for the first parts of the pairs and the second
-    row contains the second pair index.
+    Returns indices of pairs of identical items. Indices are represented as a numpy ndarray, where the first row contains indices for the first parts of the pairs and the second row contains the second pair index.
 
     Args:
         items: The items for which to generate pair indices.
 
-    Returns: A tuple of numpy ndarrays, containing indices for pairs of identical
-        and non-identical items.
+    Returns: A numpy ndarray, containing indices for pairs of identical items.
     """
     items = np.asarray(items)
-
-    # elementwise comparison of each item.
-    # triu to eliminate diagonal and duplicates from lower part of n x n matrix
-    same_item_pairs = np.triu(items[np.newaxis, ...] == items[..., np.newaxis], 1)
-
-    same_item_pair_indices = np.vstack(np.where(same_item_pairs))
-    different_item_pair_indices = np.vstack(np.where(~same_item_pairs))
-    return same_item_pair_indices, different_item_pair_indices
+    identical = (
+        items[np.newaxis, ...] == items[..., np.newaxis]
+    )  # elementwise comparison of each item. returns n*n indicator matrix
+    return np.vstack(np.where(np.triu(identical, 1)))
 
 
 def observed_and_expected_differences(items, values, distance_function):
@@ -253,9 +245,12 @@ def observed_and_expected_differences(items, values, distance_function):
     unique_values, value_ids = np.unique(values, return_inverse=True)
     dist_matrix = distance_matrix(unique_values, distance_function)
 
-    intra_item_pairs, inter_item_pairs = pair_indices(items)
+    intra_item_pairs = pair_indices(items)
+    i, j = value_ids[intra_item_pairs]
+    observed_differences = dist_matrix[i, j]
 
-    observed_differences = dist_matrix[value_ids[intra_item_pairs]]
-    expected_differences = dist_matrix[value_ids[inter_item_pairs]]
+    all_item_pairs = np.vstack(np.triu_indices(n=items.size, k=1))
+    i, j = value_ids[all_item_pairs]
+    expected_differences = dist_matrix[i, j]
 
     return observed_differences, expected_differences
