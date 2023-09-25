@@ -11433,9 +11433,9 @@ globby@^13.1.3:
     slash "^4.0.0"
 
 gluegun@5.1.2, gluegun@^5.0.0:
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/gluegun/-/gluegun-5.1.3.tgz#c484df1abdcd55c7815a1c72ebbec4488445e755"
-  integrity sha512-8NlY98DYrKQLeC8zLAmJoTCuDagGJnKX748fpeWu6kuQYp4QPsLJiaW07Rl1q//qJhFhBqqegoEJKa/qPFVCng==
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/gluegun/-/gluegun-5.1.4.tgz#54a105fb0048ca1de86b3d0ea9cd427951b1ac4f"
+  integrity sha512-n5CcWR+nZpcPHVSkYv2KVkD03LHsw00dcRJMggQNAAajiONkxpbEjFrFo0kwJEu8YZ7Jb76xvfGiQkzSz8P9bA==
   dependencies:
     apisauce "^2.1.5"
     app-module-path "^2.2.0"
@@ -18491,10 +18491,10 @@ strip-literal@^1.0.1:
   dependencies:
     acorn "^8.8.2"
 
-stripe@^11.10.0:
-  version "11.18.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-11.18.0.tgz#2b99ac712e81a5232f88568327d001960b454465"
-  integrity sha512-OUA32uhNoSoM6wOodyFbV+3IBCoO140uzdXmBArQ0S88D4EbH91xl2v+Ml1sKalcFKUBadHLeHfU/p9AbsOfGw==
+stripe@^13.7.0:
+  version "13.7.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-13.7.0.tgz#0876e56eb25e019fbed1ff3f017ac7f8fee889ae"
+  integrity sha512-0cbUNl5aDwt5rIZeE/WgyTxZN/PtwyeA5KcVJrHj260tjN4IOo2BZikN+dxhKoeBfI4aSRAd3E5vHRKmjjaSbA==
   dependencies:
     "@types/node" ">=8.1.0"
     qs "^6.11.0"
