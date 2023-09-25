@@ -1,10 +1,15 @@
-from human_protocol_sdk.agreement import (
+from human_protocol_sdk.agreement.measures import (
     percentage,
     cohens_kappa,
     fleiss_kappa,
     agreement,
+    krippendorffs_alpha,
+    sigma,
 )
-from human_protocol_sdk.agreement.utils import label_counts
+from human_protocol_sdk.agreement.utils import (
+    label_counts,
+    observed_and_expected_differences,
+)
 import pytest
 
 import numpy as np
@@ -135,3 +140,10 @@ def test_invalid_return():
     invalid = "INVALID"
     assert cohens_kappa([[5]], invalid) == invalid
     assert fleiss_kappa([[5], [np.nan]], invalid) == invalid
+
+
+def test_krippendorff():
+    items = np.asarray(["a", "a", "a", "b", "b", "b"])
+    values = np.asarray(["foo", "foo", "foo", "foo", "bar", "bar"])
+    d = lambda a, b: float(a != b)
+    assert 0.375 == krippendorffs_alpha(items, values, distance_function=d)
