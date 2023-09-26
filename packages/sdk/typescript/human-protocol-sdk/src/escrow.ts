@@ -476,7 +476,7 @@ export class EscrowClient {
    * Cancels the specified escrow and sends the balance to the canceler.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<string>}
    * @throws {Error} - An error object if an error occurred.
    */
   @requiresSigner
