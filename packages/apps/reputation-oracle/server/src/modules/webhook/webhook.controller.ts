@@ -4,7 +4,7 @@ import { Public } from '../../common/decorators';
 import { WebhookIncomingDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';
 
-Public();
+@Public()
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
