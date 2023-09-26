@@ -13,6 +13,7 @@ from human_protocol_sdk.escrow import (
     EscrowClientError,
     EscrowConfig,
     EscrowFilter,
+    EscrowUtils,
 )
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
@@ -1851,6 +1852,7 @@ class EscrowTestCase(unittest.TestCase):
         date_from = datetime.fromtimestamp(1683811973)
         date_to = datetime.fromtimestamp(1683812007)
         escrow_filter = EscrowFilter(
+            networks=[ChainId.POLYGON_MUMBAI.value],
             launcher=launcher,
             reputation_oracle=reputation_oracle,
             recording_oracle=recording_oracle,
@@ -1866,24 +1868,43 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_filter.date_from, date_from)
         self.assertEqual(escrow_filter.date_to, date_to)
 
+    def test_escrow_filter_empty_chain_id(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            EscrowFilter(networks=[])
+        self.assertEqual("Invalid ChainId", str(cm.exception))
+
+    def test_escrow_filter_invalid_chain_id(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            EscrowFilter(networks=[123])
+        self.assertEqual("Invalid ChainId", str(cm.exception))
+
     def test_escrow_filter_invalid_address_launcher(self):
         with self.assertRaises(EscrowClientError) as cm:
-            EscrowFilter(launcher="invalid_address")
+            EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI.value], launcher="invalid_address"
+            )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_reputation_oracle(self):
         with self.assertRaises(EscrowClientError) as cm:
-            EscrowFilter(reputation_oracle="invalid_address")
+            EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI.value],
+                reputation_oracle="invalid_address",
+            )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_recording_oracle(self):
         with self.assertRaises(EscrowClientError) as cm:
-            EscrowFilter(recording_oracle="invalid_address")
+            EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI.value],
+                recording_oracle="invalid_address",
+            )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_dates(self):
         with self.assertRaises(EscrowClientError) as cm:
             EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI.value],
                 date_from=datetime.fromtimestamp(1683812007),
                 date_to=datetime.fromtimestamp(1683811973),
             )
@@ -1893,12 +1914,6 @@ class EscrowTestCase(unittest.TestCase):
         )
 
     def test_get_escrows(self):
-        filter = EscrowFilter(
-            launcher="0x1234567890123456789012345678901234567891",
-            status=Status.Pending,
-            date_from=datetime.fromtimestamp(1683811973),
-            date_to=datetime.fromtimestamp(1683812007),
-        )
         mock_function = MagicMock()
         with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
             mock_escrow_1 = (
@@ -1949,18 +1964,26 @@ class EscrowTestCase(unittest.TestCase):
                     "totalFundedAmount": "1000000000000000000",
                 },
             )
-            mock_function.return_value = {
-                "data": {
-                    "escrows": [
-                        mock_escrow_1,
-                        mock_escrow_2,
-                    ]
-                }
-            }
-            filtered = self.escrow.get_escrows(filter)
+
+            def side_effect(subgraph_url, query, params):
+                if subgraph_url == NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"]:
+                    return {"data": {"escrows": [mock_escrow_1]}}
+                else:
+                    return {"data": {"escrows": [mock_escrow_2]}}
+
+            mock_function.side_effect = side_effect
+
+            filter = EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI.value],
+                launcher="0x1234567890123456789012345678901234567891",
+                status=Status.Pending,
+                date_from=datetime.fromtimestamp(1683811973),
+                date_to=datetime.fromtimestamp(1683812007),
+            )
+            filtered = EscrowUtils.get_escrows(filter)
 
             mock_function.assert_called_once_with(
-                "subgraph_url",
+                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
                     "launcher": "0x1234567890123456789012345678901234567891",
@@ -1972,10 +1995,31 @@ class EscrowTestCase(unittest.TestCase):
                     "to": 1683812007,
                 },
             )
-
-            self.assertEqual(len(filtered), 2)
+            self.assertEqual(len(filtered), 1)
             self.assertEqual(filtered[0], mock_escrow_1)
-            self.assertEqual(filtered[1], mock_escrow_2)
+
+            filter = EscrowFilter(
+                networks=[ChainId.POLYGON.value, ChainId.POLYGON_MUMBAI.value]
+            )
+
+            filtered = EscrowUtils.get_escrows(filter)
+
+            mock_function.assert_called_with(
+                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                query=get_escrows_query(filter),
+                params={
+                    "launcher": None,
+                    "reputationOracle": None,
+                    "recordingOracle": None,
+                    "exchangeOracle": None,
+                    "status": None,
+                    "from": None,
+                    "to": None,
+                },
+            )
+            self.assertEqual(len(filtered), 2)
+            self.assertEqual(filtered[0][0]["chain_id"], ChainId.POLYGON.value)
+            self.assertEqual(filtered[1][0]["chain_id"], ChainId.POLYGON_MUMBAI.value)
 
     def test_get_recording_oracle_address(self):
         mock_contract = MagicMock()
