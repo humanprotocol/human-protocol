@@ -40,7 +40,11 @@ import {
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowStatus, NetworkData } from './types';
 import { isValidUrl, throwError } from './utils';
-import { EscrowData, GET_ESCROWS_QUERY } from './graphql';
+import {
+  EscrowData,
+  GET_ESCROWS_QUERY,
+  GET_ESCROW_BY_ADDRESS_QUERY,
+} from './graphql';
 
 export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
@@ -965,6 +969,41 @@ export class EscrowUtils {
       }
       escrowAddresses.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
       return escrowAddresses;
+    } catch (e: any) {
+      return throwError(e);
+    }
+  }
+
+  /**
+   * Returns the escrow for a given address
+   *
+   * @param {string} escrowAddress - Escrow address.
+   * @param {ChainId} chainId - Chain id.
+   * @returns {Promise<EscrowData>}
+   * @throws {Error} - An error object if an error occurred.
+   */
+  public static async getEscrow(
+    chainId: ChainId,
+    escrowAddress: string
+  ): Promise<EscrowData> {
+    const networkData = NETWORKS[chainId];
+
+    if (!networkData) {
+      throw ErrorUnsupportedChainID;
+    }
+
+    if (escrowAddress && !ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidAddress;
+    }
+
+    try {
+      const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
+        networkData.subgraphUrl,
+        GET_ESCROW_BY_ADDRESS_QUERY(),
+        { escrowAddress }
+      );
+
+      return escrow || null;
     } catch (e: any) {
       return throwError(e);
     }

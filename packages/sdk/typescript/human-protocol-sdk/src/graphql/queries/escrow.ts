@@ -28,6 +28,15 @@ const ESCROW_FRAGMENT = gql`
   }
 `;
 
+export const GET_ESCROW_BY_ADDRESS_QUERY = () => gql`
+  query getEscrowByAddress($escrowAddress: String!) {
+    escrow(id: $escrowAddress) {
+      ...EscrowFields
+    }
+  }
+  ${ESCROW_FRAGMENT}
+`;
+
 export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
   const {
     launcher,
