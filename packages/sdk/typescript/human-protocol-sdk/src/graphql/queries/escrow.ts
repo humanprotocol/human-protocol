@@ -11,6 +11,7 @@ const ESCROW_FRAGMENT = gql`
     finalResultsUrl
     id
     intermediateResultsUrl
+    jobRequesterId
     launcher
     manifestHash
     manifestUrl
@@ -39,6 +40,7 @@ export const GET_ESCROW_BY_ADDRESS_QUERY = () => gql`
 export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
   const {
     launcher,
+    jobRequesterId,
     reputationOracle,
     recordingOracle,
     exchangeOracle,
@@ -50,6 +52,7 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
   const WHERE_CLAUSE = `
     where: {
       ${launcher ? `launcher: $launcher` : ''}
+      ${jobRequesterId ? `jobRequesterId: $jobRequesterId` : ''}
       ${reputationOracle ? `reputationOracle: $reputationOracle` : ''}
       ${recordingOracle ? `recordingOracle: $recordingOracle` : ''}
       ${exchangeOracle ? `exchangeOracle: $exchangeOracle` : ''}
@@ -62,6 +65,7 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
   return gql`
     query getEscrows(
       $launcher: String
+      $jobRequesterId: String
       $reputationOracle: String
       $recordingOracle: String
       $exchangeOracle: String

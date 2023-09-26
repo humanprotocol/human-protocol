@@ -108,6 +108,7 @@ class EscrowFilter:
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
+        job_requester_id: Optional[str] = None,
         status: Optional[Status] = None,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
@@ -121,6 +122,7 @@ class EscrowFilter:
             reputation_oracle (Optional[str]): Reputation oracle address
             recording_oracle (Optional[str]): Recording oracle address
             exchange_oracle (Optional[str]): Exchange oracle address
+            job_requester_id (Optional[str]): Job requester id
             status (Optional[Status]): Escrow status
             date_from (Optional[datetime.datetime]): Created from date
             date_to (Optional[datetime.datetime]): Created to date
@@ -153,6 +155,7 @@ class EscrowFilter:
         self.reputation_oracle = reputation_oracle
         self.recording_oracle = recording_oracle
         self.exchange_oracle = exchange_oracle
+        self.job_requester_id = job_requester_id
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
@@ -802,6 +805,7 @@ class EscrowUtils:
                     "reputationOracle": filter.reputation_oracle,
                     "recordingOracle": filter.recording_oracle,
                     "exchangeOracle": filter.exchange_oracle,
+                    "jobRequesterId": filter.job_requester_id,
                     "status": filter.status.name if filter.status else None,
                     "from": int(filter.date_from.timestamp())
                     if filter.date_from
@@ -811,6 +815,6 @@ class EscrowUtils:
             )
             escrows = escrows_data["data"]["escrows"]
             for escrow in escrows:
-                escrow[0]["chain_id"] = chain_id
+                escrow["chain_id"] = chain_id
             escrow_addresses.extend(escrows)
         return escrow_addresses
