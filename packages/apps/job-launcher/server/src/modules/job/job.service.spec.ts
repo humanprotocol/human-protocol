@@ -6,6 +6,7 @@ import {
   EscrowStatus,
   StakingClient,
   IAllocation,
+  EscrowUtils
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -38,6 +39,8 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
+  MOCK_EXCHANGE_ORACLE_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -87,6 +90,9 @@ jest.mock('@human-protocol/sdk', () => ({
       createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     })),
   },
+  EscrowUtils: {
+    getEscrow: jest.fn(),
+  },
   StakingClient: {
     build: jest.fn().mockImplementation(() => ({
       getAllocation: jest.fn(),
@@ -135,19 +141,24 @@ describe('JobService', () => {
         switch (key) {
           case 'JOB_LAUNCHER_FEE':
             return MOCK_JOB_LAUNCHER_FEE;
+          case 'EXCHANGE_ORACLE_FEE':
+            return MOCK_EXCHANGE_ORACLE_FEE;
           case 'RECORDING_ORACLE_FEE':
             return MOCK_RECORDING_ORACLE_FEE;
           case 'REPUTATION_ORACLE_FEE':
             return MOCK_REPUTATION_ORACLE_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
-          case 'RECORDING_ORACLE_ADDRESS':
+          case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
+            return MOCK_EXCHANGE_ORACLE_ADDRESS;
+          case 'FORTUNE_RECORDING_ORACLE_ADDRESS':
+            return MOCK_RECORDING_ORACLE_ADDRESS;
+          case 'CVAT_EXCHANGE_ORACLE_ADDRESS':
+            return MOCK_EXCHANGE_ORACLE_ADDRESS;
+          case 'CVAT_RECORDING_ORACLE_ADDRESS':
             return MOCK_RECORDING_ORACLE_ADDRESS;
           case 'REPUTATION_ORACLE_ADDRESS':
             return MOCK_REPUTATION_ORACLE_ADDRESS;
-          case 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL':
-            return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
-          case 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL':
           case 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL':
             return MOCK_EXCHANGE_ORACLE_WEBHOOK_URL;
           case 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL':
@@ -581,6 +592,16 @@ describe('JobService', () => {
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
+
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValue(manifest);
 
       const jobEntityResult = await jobService.launchJob(
         mockJobEntity as JobEntity,
@@ -1282,7 +1303,7 @@ describe('JobService', () => {
   });
 
   describe('getDetails', () => {
-    it('should return job details successfully', async () => {
+    it('should return job details with escrow address successfully', async () => {
       const balance = '1';
       const allocationMock: IAllocation = {
         escrowAddress: ethers.constants.AddressZero,
@@ -1317,16 +1338,16 @@ describe('JobService', () => {
           escrowAddress: MOCK_ADDRESS, 
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
-          balance: Number(balance),
-          paidOut: 10,
+          balance: expect.any(Number),
+          paidOut: expect.any(Number),
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
           title: MOCK_REQUESTER_TITLE,
           description: MOCK_REQUESTER_DESCRIPTION,
-          submissionsRequired: 10,
+          submissionsRequired: expect.any(Number),
           tokenAddress: MOCK_ADDRESS,
-          fundAmount: 10,
+          fundAmount: expect.any(Number),
           requesterAddress: MOCK_ADDRESS,
           requestType: JobRequestType.FORTUNE,
           exchangeOracleAddress: expect.any(String),
@@ -1336,20 +1357,82 @@ describe('JobService', () => {
         staking: {
           staker: expect.any(String),
           allocated: expect.any(Number),
-          slashed: 0,
-        },
-      };
+          slashed: 0 
+        }
+      }
+      
+      const getEscrowData = {
+        token: MOCK_ADDRESS,
+        totalFundedAmount: '100',
+        balance: Number(balance),
+        amountPaid: '10',
+        exchangeOracle: MOCK_ADDRESS,
+        recordingOracle: MOCK_ADDRESS,
+        reputationOracle: MOCK_ADDRESS,
+      }
 
       jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-        getBalance: jest
-          .fn()
-          .mockResolvedValue(ethers.utils.parseEther(balance)),
-      }));
+      EscrowUtils.getEscrow = jest.fn().mockResolvedValue(getEscrowData);
       (StakingClient.build as any).mockImplementation(() => ({
         getAllocation: jest.fn().mockResolvedValue(allocationMock),
       }));
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
+      jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
+
+      const result = await jobService.getDetails(1, 123);
+      expect(result).toMatchObject(expectedJobDetailsDto);
+    });
+
+    it('should return job details without escrow address successfully', async () => {
+      const manifestMock: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      const jobEntityMock = { 
+        status: JobStatus.TO_CANCEL, 
+        fundAmount: 100, 
+        userId: 1, 
+        id: 1, 
+        manifestUrl: MOCK_FILE_URL, 
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: null, 
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn(),
+      };
+
+      const expectedJobDetailsDto: JobDetailsDto = {
+        details: {
+          escrowAddress: ethers.constants.AddressZero, 
+          manifestUrl: MOCK_FILE_URL,
+          manifestHash: MOCK_FILE_HASH,
+          balance: 0,
+          paidOut: 0,
+        },
+        manifest: {
+          chainId: ChainId.LOCALHOST,
+          title: MOCK_REQUESTER_TITLE,
+          description: MOCK_REQUESTER_DESCRIPTION,
+          submissionsRequired: expect.any(Number),
+          tokenAddress: ethers.constants.AddressZero,
+          fundAmount: expect.any(Number),
+          requesterAddress: MOCK_ADDRESS,
+          requestType: JobRequestType.FORTUNE,
+          exchangeOracleAddress: undefined,
+          recordingOracleAddress: undefined,
+          reputationOracleAddress: undefined
+        },
+        staking: {
+          staker: expect.any(String),
+          allocated: 0,
+          slashed: 0 
+        }
+      }
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock as any);
       jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
       jobService.getPaidOutAmount = jest.fn().mockResolvedValue(10);
 
