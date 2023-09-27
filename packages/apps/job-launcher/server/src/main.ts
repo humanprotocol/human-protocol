@@ -1,4 +1,5 @@
 import session from 'express-session';
+import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -9,9 +10,6 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
-import { createWriteStream } from 'fs';
-import { get } from 'http';
-import { INestApplication } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -20,7 +18,10 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>(ConfigNames.FE_URL)!;
+  const baseUrl = configService.get<string>(
+    ConfigNames.FE_URL,
+    'http://localhost:3005',
+  );
 
   app.enableCors({
     origin:
@@ -41,7 +42,10 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  const sessionSecret = configService.get<string>(ConfigNames.SESSION_SECRET)!;
+  const sessionSecret = configService.get<string>(
+    ConfigNames.SESSION_SECRET,
+    'session-secret',
+  );
 
   app.use(
     session({
@@ -60,42 +64,23 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+  SwaggerModule.setup('swagger', app, document, {
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui-bundle.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui-standalone-preset.min.js',
+    ],
+    customCssUrl: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui.min.css',
+    ],
+  });
 
-  const host = configService.get<string>(ConfigNames.HOST)!;
-  const port = configService.get<string>(ConfigNames.PORT)!;
+  const host = configService.get<string>(ConfigNames.HOST, 'localhost');
+  const port = +configService.get<string>(ConfigNames.PORT, '5000');
 
   app.use(helmet());
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
   });
-
-  //Download files to serve them as static files when the app is deployed on vercel
-  if (process.env.NODE_ENV === 'development') {
-    // write swagger ui files
-    get(
-      `http://${host}:${port}/swagger/swagger-ui-bundle.js`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(createWriteStream('swagger-static/swagger-ui-bundle.js'));
-      },
-    );
-
-    get(
-      `http://${host}:${port}/swagger/swagger-ui-standalone-preset.js`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(
-          createWriteStream('swagger-static/swagger-ui-standalone-preset.js'),
-        );
-      },
-    );
-
-    get(
-      `http://${host}:${port}/swagger/swagger-ui.css`,
-      function (response: { pipe: (arg0: any) => void }) {
-        response.pipe(createWriteStream('swagger-static/swagger-ui.css'));
-      },
-    );
-  }
 }
 
 void bootstrap();
