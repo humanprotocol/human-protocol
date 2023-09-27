@@ -20,5 +20,5 @@
       "destination": "/index.html"
     }
   ],
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./packages/core/contracts ./packages/sdk/typescript ./packages/apps/escrow-dashboard"
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet ./packages/core/contracts ./packages/sdk/typescript ./packages/apps/escrow-dashboard"
 }
