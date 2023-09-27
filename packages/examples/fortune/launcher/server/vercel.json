@@ -11,5 +11,6 @@
       "src": "/(.*)",
       "dest": "src/index.ts"
     }
-  ]
+  ],
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./packages/core/contracts ./packages/sdk/typescript ./packages/examples/fortune/launcher/server"
 }

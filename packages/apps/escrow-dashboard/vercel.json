@@ -19,5 +19,6 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./packages/core/contracts ./packages/sdk/typescript ./packages/apps/escrow-dashboard"
 }
