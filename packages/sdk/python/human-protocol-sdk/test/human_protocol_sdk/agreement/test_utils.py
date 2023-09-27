@@ -2,6 +2,7 @@ import pytest
 from human_protocol_sdk.agreement.utils import (
     confusion_matrix_from_sequence,
     label_counts,
+    records_from_annotations,
 )
 import numpy as np
 
@@ -47,3 +48,16 @@ def test_label_counts_from_annotations(annotations, labels):
     true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
 
     assert np.all(counts == true_counts)
+
+
+def test_records_from_annotations(annotations):
+    values, items, annotators = records_from_annotations(annotations)
+    assert len(values) == len(items) == len(annotators)
+
+    n_unfiltered = len(values)
+    values, _, _ = records_from_annotations(annotations, nan_values=[""])
+    assert len(values) == n_unfiltered - 1
+
+    annotations[-2] = np.nan
+    values, _, _ = records_from_annotations(annotations, nan_values=np.nan)
+    assert len(values) == n_unfiltered - 1

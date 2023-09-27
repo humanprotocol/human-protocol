@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
 import numpy as np
 from collections import Counter
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Tuple, Callable
 
 from pyerf import erf, erfinv
 
@@ -35,6 +34,21 @@ def _filter_labels(labels: Sequence, exclude=None):
     )
 
     return np.asarray(labels)
+
+
+def _is_nan(data: np.ndarray, nan_values: Optional[Sequence] = None):
+    """Returns a logical index of to filter nan in the given np.ndarray.
+
+    Args:
+        data: The values to filter.
+        nan_values: If provided, defines which values to count as invalid. If omitted, returns identity index.
+    """
+    if nan_values is None:
+        return np.ones_like(data, dtype=bool)
+    else:
+        return ~np.isin(
+            data, np.unique(nan_values).astype(data.dtype.kind), assume_unique=True
+        )
 
 
 def label_counts(
@@ -235,8 +249,8 @@ def observed_and_expected_differences(items, values, distance_function):
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
 
-    Returns: A tuple consisting of numpy ndarrays, containing the observed and
-        expected differences in annotations.
+    Returns:
+        A tuple consisting of numpy ndarrays, containing the observed and expected differences in annotations.
 
     """
     items = np.asarray(items)
@@ -254,3 +268,48 @@ def observed_and_expected_differences(items, values, distance_function):
     expected_differences = dist_matrix[i, j]
 
     return observed_differences, expected_differences
+
+
+def records_from_annotations(
+    annotations: np.ndarray, annotators=None, items=None, labels=None, nan_values=None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Turns given annotations into sequences of records.
+
+    Args:
+        annotations: Annotation matrix (2d array) to convert. Columns represent
+        annotators: List of annotator ids. Must be the same length as columns in annotations.
+        items: List of item ids. Must be the same length as rows in annotations.
+        labels: The to be included in the matrix.
+        nan_values: Values in the records to be counted as invalid.
+    Returns:
+        Tuple containing arrays of item value ids, item ids and annotator ids
+    """
+    annotations = np.asarray(annotations)
+    n_items, n_annotators = annotations.shape
+
+    if items is None:
+        items = np.arange(n_items)
+    else:
+        items = np.asarray(items)
+        if len(items) != n_items:
+            raise ValueError(
+                "Number of items does not correspond to number of rows in annotations."
+            )
+
+    if annotators is None:
+        annotators = np.arange(n_annotators)
+    else:
+        annotators = np.asarray(annotators)
+        if len(annotators) != n_annotators:
+            raise ValueError(
+                "Number of annotators does not correspond to number of columns in annotations."
+            )
+
+    values = annotations.ravel()
+    items = np.tile(items, n_annotators)
+    annotators = np.tile(annotators, n_items)
+
+    mask = _is_nan(values, nan_values)
+
+    return values[mask], items[mask], annotators[mask]
