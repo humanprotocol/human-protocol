@@ -27,5 +27,5 @@
       "schedule": "* * * * *"
     }
   ],
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ./packages/core/contracts ./packages/sdk/typescript ./packages/apps/job-launcher/server"
 }
