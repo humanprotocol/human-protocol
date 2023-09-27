@@ -13,7 +13,7 @@ export enum ErrorJob {
   InvalidRequestType = 'Invalid job type',
   JobParamsValidationFailed = 'Job parameters validation failed',
   InvalidEventType = 'Invalid event type',
-  NotLaunched = 'Not launched' 
+  NotLaunched = 'Not launched',
 }
 
 /**
@@ -24,7 +24,7 @@ export enum ErrorEscrow {
   NotCreated = 'Escrow has not been created',
   NotLaunched = 'Escrow has not been launched',
   InvalidStatusCancellation = 'Escrow has an invalid status for cancellation',
-  InvalidBalanceCancellation = 'Escrow has an invalid balance for cancellation'
+  InvalidBalanceCancellation = 'Escrow has an invalid balance for cancellation',
 }
 
 /**

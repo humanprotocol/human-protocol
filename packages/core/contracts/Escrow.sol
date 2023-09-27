@@ -36,12 +36,14 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     address public reputationOracle;
     address public recordingOracle;
+    address public exchangeOracle;
     address public launcher;
     address payable public canceler;
     address public escrowFactory;
 
     uint8 public reputationOracleFeePercentage;
     uint8 public recordingOracleFeePercentage;
+    uint8 public exchangeOracleFeePercentage;
 
     address public token;
 
@@ -108,21 +110,28 @@ contract Escrow is IEscrow, ReentrancyGuard {
     function setup(
         address _reputationOracle,
         address _recordingOracle,
+        address _exchangeOracle,
         uint8 _reputationOracleFeePercentage,
         uint8 _recordingOracleFeePercentage,
+        uint8 _exchangeOracleFeePercentage,
         string memory _url,
         string memory _hash
     ) external override trusted notExpired {
         require(
             _reputationOracle != address(0),
-            'Invalid or missing token spender'
+            'Invalid reputation oracle address'
         );
         require(
             _recordingOracle != address(0),
-            'Invalid or missing token spender'
+            'Invalid recording oracle address'
+        );
+        require(
+            _exchangeOracle != address(0),
+            'Invalid exchange oracle address'
         );
         uint256 _totalFeePercentage = uint256(_reputationOracleFeePercentage) +
-            uint256(_recordingOracleFeePercentage);
+            uint256(_recordingOracleFeePercentage) +
+            uint256(_exchangeOracleFeePercentage);
         require(_totalFeePercentage <= 100, 'Percentage out of bounds');
 
         require(
@@ -132,9 +141,11 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
         reputationOracle = _reputationOracle;
         recordingOracle = _recordingOracle;
+        exchangeOracle = _exchangeOracle;
 
         reputationOracleFeePercentage = _reputationOracleFeePercentage;
         recordingOracleFeePercentage = _recordingOracleFeePercentage;
+        exchangeOracleFeePercentage = _exchangeOracleFeePercentage;
 
         manifestUrl = _url;
         manifestHash = _hash;
@@ -251,7 +262,8 @@ contract Escrow is IEscrow, ReentrancyGuard {
         (
             uint256[] memory finalAmounts,
             uint256 reputationOracleFee,
-            uint256 recordingOracleFee
+            uint256 recordingOracleFee,
+            uint256 exchangeOracleFee
         ) = finalizePayouts(_amounts);
 
         for (uint256 i = 0; i < _recipients.length; ++i) {
@@ -265,6 +277,9 @@ contract Escrow is IEscrow, ReentrancyGuard {
         }
         if (recordingOracleFee > 0) {
             _safeTransfer(recordingOracle, recordingOracleFee);
+        }
+        if (exchangeOracleFee > 0) {
+            _safeTransfer(exchangeOracle, exchangeOracleFee);
         }
 
         balance = getBalance();
@@ -283,29 +298,53 @@ contract Escrow is IEscrow, ReentrancyGuard {
 
     function finalizePayouts(
         uint256[] memory _amounts
-    ) internal view returns (uint256[] memory, uint256, uint256) {
+    ) internal view returns (uint256[] memory, uint256, uint256, uint256) {
         uint256[] memory finalAmounts = new uint256[](_amounts.length);
         uint256 reputationOracleFee = 0;
         uint256 recordingOracleFee = 0;
+        uint256 exchangeOracleFee = 0;
         for (uint256 j; j < _amounts.length; j++) {
-            uint256 singleReputationOracleFee = uint256(
-                reputationOracleFeePercentage
-            ).mul(_amounts[j]).div(100);
-            uint256 singleRecordingOracleFee = uint256(
-                recordingOracleFeePercentage
-            ).mul(_amounts[j]).div(100);
-            uint256 amount = _amounts[j].sub(singleReputationOracleFee).sub(
-                singleRecordingOracleFee
-            );
-            reputationOracleFee = reputationOracleFee.add(
-                singleReputationOracleFee
-            );
-            recordingOracleFee = recordingOracleFee.add(
-                singleRecordingOracleFee
-            );
-            finalAmounts[j] = amount;
+            uint256 amount = _amounts[j];
+            uint256 amountFee = 0;
+
+            {
+                uint256 singleReputationOracleFee = uint256(
+                    reputationOracleFeePercentage
+                ).mul(amount).div(100);
+                reputationOracleFee = reputationOracleFee.add(
+                    singleReputationOracleFee
+                );
+                amountFee = amountFee.add(singleReputationOracleFee);
+            }
+
+            {
+                uint256 singleRecordingOracleFee = uint256(
+                    recordingOracleFeePercentage
+                ).mul(_amounts[j]).div(100);
+                recordingOracleFee = recordingOracleFee.add(
+                    singleRecordingOracleFee
+                );
+                amountFee = amountFee.add(singleRecordingOracleFee);
+            }
+
+            {
+                uint256 singleExchangeOracleFee = uint256(
+                    exchangeOracleFeePercentage
+                ).mul(_amounts[j]).div(100);
+                exchangeOracleFee = exchangeOracleFee.add(
+                    singleExchangeOracleFee
+                );
+                amountFee = amountFee.add(singleExchangeOracleFee);
+            }
+
+            finalAmounts[j] = amount.sub(amountFee);
         }
-        return (finalAmounts, reputationOracleFee, recordingOracleFee);
+        return (
+            finalAmounts,
+            reputationOracleFee,
+            recordingOracleFee,
+            exchangeOracleFee
+        );
     }
 
     function _safeTransfer(address to, uint256 value) internal {

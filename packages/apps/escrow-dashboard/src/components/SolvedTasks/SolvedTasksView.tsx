@@ -1,7 +1,7 @@
 import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import {
   AreaChart,
   Area,
@@ -12,7 +12,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 
-import SOLVED_TASKS from '../../history-data/sovled_tasks.json';
+import SOLVED_TASKS from '../../history-data/solved_tasks.json';
 import { CardContainer } from '../Cards';
 import { TooltipIcon } from '../TooltipIcon';
 
@@ -42,12 +42,6 @@ export const SolvedTasksView: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const qoqGrowth = useMemo(() => {
-    const currentTasks = SOLVED_TASKS[SOLVED_TASKS.length - 1].value;
-    const previousTasks = SOLVED_TASKS[SOLVED_TASKS.length - 4].value;
-    return numeral((currentTasks - previousTasks) / previousTasks).format('0%');
-  }, []);
-
   return (
     <CardContainer
       sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
@@ -73,27 +67,7 @@ export const SolvedTasksView: FC = () => {
               sx={{ whiteSpace: 'nowrap' }}
               fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
             >
-              {numeral(solvedTasksCount).format('0.000 a').toUpperCase()}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography
-              variant="body2"
-              color="secondary"
-              fontWeight={600}
-              mb="8px"
-            >
-              QoQ Growth
-            </Typography>
-            <Typography
-              variant="h2"
-              color="secondary"
-              fontWeight={800}
-              lineHeight={1.125}
-              sx={{ whiteSpace: 'nowrap' }}
-              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
-            >
-              {qoqGrowth}
+              {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
             </Typography>
           </Box>
         </Grid>

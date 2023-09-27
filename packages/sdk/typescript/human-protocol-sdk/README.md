@@ -79,8 +79,10 @@ const { ethers } = require('ethers');
   await escrowClient.setup(escrowAddress, {
     recordingOracle: '0x90F79bf6EB2c4f870365E785982E1f101E93b906',
     reputationOracle: '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65',
+    exchangeOracle: '0x6b7E3C31F34cF38d1DFC1D9A8A59482028395809',
     recordingOracleFee: ethers.BigNumber.from(1),
     reputationOracleFee: ethers.BigNumber.from(1),
+    exchangeOracleFee: ethers.BigNumber.from(1),
     manifestUrl: 'http://example.com',
     hash: 'test',
   });

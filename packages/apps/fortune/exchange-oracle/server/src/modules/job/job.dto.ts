@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnum, IsString } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
+import { EventType } from 'src/common/enums/webhook';
 
 export class ManifestDto {
   title: string;
@@ -36,4 +37,11 @@ export class SolveJobDto {
   @ApiProperty()
   @IsString()
   public solution: string;
+}
+
+export class EscrowFailedWebhookDto {
+  public chain_id: ChainId;
+  public escrow_address: string;
+  public event_type: EventType;
+  public reason: string;
 }

@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { EscrowStatus } from './types';
+import { ChainId } from './enums';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -41,16 +42,21 @@ export interface IEscrowsFilter {
   launcher?: string;
   reputationOracle?: string;
   recordingOracle?: string;
+  exchangeOracle?: string;
+  jobRequesterId?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
+  networks: ChainId[];
 }
 
 export interface IEscrowConfig {
   recordingOracle: string;
   reputationOracle: string;
+  exchangeOracle: string;
   recordingOracleFee: BigNumber;
   reputationOracleFee: BigNumber;
+  exchangeOracleFee: BigNumber;
   manifestUrl: string;
   manifestHash: string;
 }
