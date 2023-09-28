@@ -1,6 +1,15 @@
+import { JobRequestType } from "../enums";
+
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
+
+export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip'
+export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json'
+
+export const CVAT_JOB_TYPES = [JobRequestType.IMAGE_LABEL_BINARY, JobRequestType.IMAGE_BOXES, JobRequestType.IMAGE_POINTS]
+
+export const HEADER_SIGNATURE_KEY = 'human-signature';
 
 export const CURSE_WORDS = [
   '4r5e',
