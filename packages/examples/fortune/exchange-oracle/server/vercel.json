@@ -26,5 +26,6 @@
         "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
       }
     }
-  ]
+  ],
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ./packages/core/contracts ./packages/sdk/typescript ./packages/examples/fortune/exchange-oracle/server"
 }
