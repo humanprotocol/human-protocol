@@ -20,5 +20,5 @@
       "destination": "/index.html"
     }
   ],
-  "ignoreCommand": "pwd && git diff HEAD^ HEAD -- ."
+  "ignoreCommand": "pwd && git diff HEAD^ HEAD --quiet ."
 }
