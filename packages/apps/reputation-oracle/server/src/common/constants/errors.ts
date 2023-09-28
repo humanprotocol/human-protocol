@@ -4,6 +4,7 @@
 export enum ErrorWebhook {
   NotFound = 'Webhook not found',
   NotCreated = 'Webhook has not been created',
+  InvalidEventType = 'Invalid event type',
 }
 
 /**
@@ -18,6 +19,7 @@ export enum ErrorReputation {
  * Represents error messages related to results.
  */
 export enum ErrorResults {
+  IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
   NoIntermediateResultsFound = 'No intermediate results found',
   NoResultsHaveBeenVerified = 'No results have been verified',
 }
@@ -27,4 +29,13 @@ export enum ErrorResults {
  */
 export enum ErrorManifest {
   ManifestUrlDoesNotExist = 'Manifest url does not exist',
+  UnsupportedManifestType = 'Unsupported manifest type'
+}
+
+/**
+ * Represents error messages related to signature.
+ */
+export enum ErrorSignature {
+  SignatureNotVerified = 'Signature not verified',
+  InvalidSignature = 'Invalid signature',
 }
