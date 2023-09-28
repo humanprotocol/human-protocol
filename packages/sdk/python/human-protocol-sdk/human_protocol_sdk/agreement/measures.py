@@ -227,7 +227,6 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     return kappa
 
 
-# TODO: align interface to take annotations
 def krippendorffs_alpha(items, values, distance_function):
     """
     Calculates Krippendorff's Alpha for the given annotations (item-value pairs),

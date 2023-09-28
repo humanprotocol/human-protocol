@@ -147,3 +147,45 @@ def test_krippendorff():
     values = np.asarray(["foo", "foo", "foo", "foo", "bar", "bar"])
     d = lambda a, b: float(a != b)
     assert 0.375 == krippendorffs_alpha(items, values, distance_function=d)
+
+
+def test_sigma():
+    np.random.seed(42)
+    n_items = 500
+    n_annotators = 5
+    d = lambda x, y: (x - y) ** 2
+
+    # best case, should be 1.0. difference for same items is identical, but between very high.
+    annotations = np.ones((n_items, n_annotators))
+    means = np.arange(n_items)[..., np.newaxis] * 5
+    scales = np.arange(n_items)[..., np.newaxis] * 3
+    annotations = annotations * scales + means
+    values = annotations.ravel()
+    items = np.repeat(np.arange(n_items), n_annotators)
+    assert 1.0 == sigma(items, values, d)
+
+    # worst case, no better than chance, should be 0.0, within difference is no different than between.
+    annotations = np.ones((n_items, n_annotators))
+    means = np.arange(n_annotators)[np.newaxis, ...]
+    scales = np.arange(n_annotators)[np.newaxis, ...] * 3
+    annotations = annotations * scales + means
+    values = annotations.ravel()
+    items = np.repeat(np.arange(n_items), n_annotators)
+    assert 0.0 == sigma(items, values, d)
+
+    # somewhere inbetween
+    annotations = np.random.rand(n_items, n_annotators)
+    means = np.random.rand(n_items, 1) * 100
+    scales = np.random.randn(n_items, 1) * 10
+    annotations = annotations * scales + means
+    values = annotations.ravel()
+    items = np.repeat(np.arange(n_items), n_annotators)
+
+    assert 0.0 <= sigma(items, values, d) <= 1.0
+
+    # p is the criterion for significant difference. as it goes up, it becomes more lenient, so sigma value should increase
+    previous = 0.0
+    for p in np.arange(1, 10) * 0.1:
+        s = sigma(items, values, d, p)
+        assert s >= previous
+        previous = s
