@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
-import { EventType, WebhookStatus } from '../../common/enums';
+import { WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook_incoming' })
