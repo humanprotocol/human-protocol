@@ -79,7 +79,7 @@ export const HumanAppDataView: FC = () => {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Box mt={3}>
+      <Box mt={3} sx={{ overflow: 'auto' }}>
         {viewButton === ViewButton.Tasks && <TasksView />}
         {viewButton === ViewButton.Workers && <WorkersView />}
         {viewButton === ViewButton.Payments && <PaymentsView />}
