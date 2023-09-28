@@ -1,4 +1,10 @@
-from human_protocol_sdk.agreement import percent_agreement, cohens_kappa, fleiss_kappa
+from human_protocol_sdk.agreement import (
+    percentage,
+    cohens_kappa,
+    fleiss_kappa,
+    agreement,
+)
+from human_protocol_sdk.agreement.utils import label_counts
 import pytest
 
 import numpy as np
@@ -12,28 +18,90 @@ from .conftest import (
 )
 
 
-def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):
-    percentage = percent_agreement(bin_2r_cm, "cm")
-    assert _eq_rounded(percentage, 0.7)
+def test_agreement(annotations, labels):
 
-    percentage_incidence = percent_agreement(bin_2r_im, "im")
-    assert _eq_rounded(percentage, percentage_incidence)
+    # test if both interfaces match
+    k_agree = agreement(annotations, measure="fleiss_kappa", labels=labels)["results"][
+        "score"
+    ]
+    k_fleiss = fleiss_kappa(label_counts(annotations, labels))
+    assert _eq_rounded(k_agree, k_fleiss)
+
+    k_agree2 = agreement(
+        label_counts(annotations, labels),
+        measure="fleiss_kappa",
+        data_format="label_counts",
+        labels=labels,
+    )["results"]["score"]
+    assert _eq_rounded(k_agree, k_agree2)
+
+    # test bootstrapping
+    measure_kwargs = {"invalid_return": None}
+    bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "confidence_level": 0.9}
+    res = agreement(
+        annotations,
+        measure="fleiss_kappa",
+        labels=labels,
+        bootstrap_method="percentile",
+        measure_kwargs=measure_kwargs,
+        bootstrap_kwargs=bootstrap_kwargs,
+    )
+    assert res["results"]["ci"] != (-100.0, -100.0)
+    assert res["results"]["confidence_level"] != -100.0
+
+    # test warnings
+    with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
+        res = agreement(
+            annotations,
+            measure="cohens_kappa",
+            labels=labels,
+            bootstrap_method="percentile",
+        )
+        assert res["results"]["ci"] == (-100.0, -100.0)
+        assert res["results"]["confidence_level"] == -100.0
+
+    with pytest.warns(UserWarning, match="more than two annotators"):
+        agreement(annotations, measure="cohens_kappa")
+
+    # test errors
+    with pytest.raises(ValueError, match="single annotator"):
+        annos = np.asarray(annotations).reshape(-1, 1)
+        agreement(annos, measure="cohens_kappa")
+
+    with pytest.raises(ValueError, match="Combination of"):
+        agreement(
+            label_counts(annos), measure="cohens_kappa", data_format="label_counts"
+        )
+
+    with pytest.raises(ValueError, match="data format"):
+        agreement(annos, data_format="foo")
+
+    with pytest.raises(ValueError, match="Provided measure"):
+        agreement(annos, measure="foo")
+
+
+def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):
+    percent = percentage(bin_2r_cm, "cm")
+    assert _eq_rounded(percent, 0.7)
+
+    percentage_incidence = percentage(bin_2r_im, "im")
+    assert _eq_rounded(percent, percentage_incidence)
 
     with pytest.raises(ValueError, match="have more than 1 annotation"):
-        percent_agreement(single_anno_cm, "cm")
+        percentage(single_anno_cm, "cm")
 
     with pytest.raises(ValueError, match="must be a square"):
-        percent_agreement(bin_2r_im, "cm")
+        percentage(bin_2r_im, "cm")
 
     with pytest.raises(ValueError, match="must be a numeric"):
-        percent_agreement(wrong_dtype_cm)
+        percentage(wrong_dtype_cm)
 
 
 @given(im=_incidence_matrix_generator)
 @settings(max_examples=5_000)
 def test_percent_agreement_property(im):
     note(f"Example incidence matrix: {im}")
-    result = percent_agreement(im, "im")
+    result = percentage(im, "im")
     assert -1.0 <= result <= 1.0 or np.isnan(result)
 
 
