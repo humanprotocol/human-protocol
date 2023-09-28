@@ -41,7 +41,7 @@ import {
   FAKE_URL,
   VALID_URL,
 } from './utils/constants';
-import { GET_ESCROWS_QUERY } from '../src/graphql';
+import { GET_ESCROWS_QUERY, GET_ESCROW_BY_ADDRESS_QUERY } from '../src/graphql';
 
 vi.mock('graphql-request', () => {
   return {
@@ -90,6 +90,7 @@ describe('EscrowClient', () => {
       finalResultsUrl: vi.fn(),
       token: vi.fn(),
       status: vi.fn(),
+      getEscrow: vi.fn(),
       getEscrows: vi.fn(),
       address: ethers.constants.AddressZero,
       canceler: vi.fn(),
@@ -1828,9 +1829,9 @@ describe('EscrowUtils', () => {
     });
 
     test('should throw an error if chainId is invalid', async () => {
-      await expect(EscrowUtils.getEscrows({ networks: [123] })).rejects.toThrow(
-        new EthereumError(ErrorUnsupportedChainID.message)
-      );
+      await expect(
+        EscrowUtils.getEscrows({ networks: [123] } as any)
+      ).rejects.toThrow(new EthereumError(ErrorUnsupportedChainID.message));
     });
     test('should throw an error if launcher is an invalid address', async () => {
       const launcher = FAKE_ADDRESS;
@@ -1870,6 +1871,7 @@ describe('EscrowUtils', () => {
           amountPaid: '3',
           balance: '0',
           count: '1',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -1882,6 +1884,7 @@ describe('EscrowUtils', () => {
           amountPaid: '0',
           balance: '3',
           count: '2',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Pending',
@@ -1914,6 +1917,7 @@ describe('EscrowUtils', () => {
           amountPaid: '3',
           balance: '0',
           count: '1',
+          jobRequesterId: '1',
           factoryAddress: '0x0',
           launcher: '0x0',
           status: 'Completed',
@@ -1941,6 +1945,7 @@ describe('EscrowUtils', () => {
         amountPaid: '3',
         balance: '0',
         count: '1',
+        jobRequesterId: '1',
         factoryAddress: '0x0',
         launcher: '0x0',
         status: 'Completed',
@@ -1953,6 +1958,7 @@ describe('EscrowUtils', () => {
         amountPaid: '0',
         balance: '3',
         count: '2',
+        jobRequesterId: '1',
         factoryAddress: '0x0',
         launcher: '0x0',
         status: 'Pending',
@@ -1977,6 +1983,86 @@ describe('EscrowUtils', () => {
       expect(result[0].chainId).toEqual(ChainId.POLYGON);
       expect(result[1].chainId).toEqual(ChainId.POLYGON_MUMBAI);
       expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+
+    test('should successfully getEscrows created by a specific job requester', async () => {
+      const escrows = [
+        {
+          id: '1',
+          address: '0x0',
+          amountPaid: '3',
+          balance: '0',
+          count: '1',
+          jobRequesterId: '1',
+          factoryAddress: '0x0',
+          launcher: '0x0',
+          status: 'Completed',
+          token: '0x0',
+          totalFundedAmount: '3',
+        },
+      ];
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrows });
+
+      const result = await EscrowUtils.getEscrows({
+        networks: [ChainId.POLYGON_MUMBAI],
+        jobRequesterId: '1',
+      });
+
+      expect(result).toEqual(escrows);
+      expect(gqlFetchSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('getEscrow', () => {
+    test('should throw an error if chain id is an unsupported id', async () => {
+      const chainId = -1;
+      const escrowAddress = ethers.constants.AddressZero;
+
+      await expect(
+        EscrowUtils.getEscrow(chainId, escrowAddress)
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+
+    test('should throw an error if escrow address is an invalid address', async () => {
+      const chainId = ChainId.LOCALHOST;
+      const escrowAddress = '0x0';
+
+      await expect(
+        EscrowUtils.getEscrow(chainId, escrowAddress)
+      ).rejects.toThrow(ErrorInvalidAddress);
+    });
+
+    test('should successfully getEscrow for the filter', async () => {
+      const chainId = ChainId.LOCALHOST;
+      const escrow = {
+        id: '1',
+        address: ethers.constants.AddressZero,
+        amountPaid: '3',
+        balance: '0',
+        count: '1',
+        factoryAddress: '0x0',
+        launcher: '0x0',
+        status: 'Completed',
+        token: '0x0',
+        totalFundedAmount: '3',
+      };
+      const gqlFetchSpy = vi
+        .spyOn(gqlFetch, 'default')
+        .mockResolvedValue({ escrow });
+
+      const result = await EscrowUtils.getEscrow(
+        chainId,
+        ethers.constants.AddressZero
+      );
+
+      expect(result).toEqual(escrow);
+      expect(gqlFetchSpy).toHaveBeenCalledWith(
+        '',
+        GET_ESCROW_BY_ADDRESS_QUERY(),
+        { escrowAddress: escrow.address }
+      );
     });
   });
 });

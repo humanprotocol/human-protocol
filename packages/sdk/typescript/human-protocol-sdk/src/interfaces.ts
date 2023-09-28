@@ -43,6 +43,7 @@ export interface IEscrowsFilter {
   reputationOracle?: string;
   recordingOracle?: string;
   exchangeOracle?: string;
+  jobRequesterId?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;

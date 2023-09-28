@@ -11,5 +11,6 @@
       "src": "/(.*)",
       "dest": "src/index.ts"
     }
-  ]
+  ],
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- ./packages/core/contracts ./packages/sdk/typescript ./packages/apps/faucet-server"
 }

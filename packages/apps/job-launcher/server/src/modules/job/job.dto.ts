@@ -156,17 +156,20 @@ export class ManifestDetails {
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  exchangeOracleAddress: string;
+  exchangeOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  recordingOracleAddress: string;
+  recordingOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  reputationOracleAddress: string;
+  reputationOracleAddress?: string;
 }
 
 export class CommonDetails {
@@ -329,15 +332,15 @@ export class EscrowFailedWebhookDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chain_id: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty()
   @IsString()
-  public escrow_address: string;
+  public escrowAddress: string;
 
   @ApiProperty()
   @IsEnum(EventType)
-  public event_type: EventType;
+  public eventType: EventType;
 
   @ApiProperty()
   @IsString()

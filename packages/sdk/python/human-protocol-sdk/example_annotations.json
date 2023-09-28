@@ -1,0 +1,34 @@
+{
+  "labels": ["no_fire", "fire"],
+  "nan_values": ["NA"],
+  "data_format": "annotations",
+  "annotators": [
+    "0x0755D4d722a4a201c1C5A4B5E614D913e7747b36",
+    "0x0755D4d722a4a201c1C5A4B5E614D913e7747b37",
+    "0x0755D4d722a4a201c1C5A4B5E614D913e7747b38"
+  ],
+  "items": [
+    "https://test.storage.googleapis.com/1.png",
+    "https://test.storage.googleapis.com/2.png",
+    "https://test.storage.googleapis.com/3.png",
+    "https://test.storage.googleapis.com/4.png",
+    "https://test.storage.googleapis.com/5.png",
+    "https://test.storage.googleapis.com/6.png",
+    "https://test.storage.googleapis.com/7.png",
+    "https://test.storage.googleapis.com/8.png",
+    "https://test.storage.googleapis.com/9.png",
+    "https://test.storage.googleapis.com/10.png"
+  ],
+  "data": [
+    ["no_fire", "no_fire", "no_fire"],
+    ["fire", "fire", "fire"],
+    ["fire", "NA", "no_fire"],
+    ["no_fire", "fire", "no_fire"],
+    ["no_fire", "no_fire", "no_fire"],
+    ["no_fire", "no_fire", "no_fire"],
+    ["fire", "fire", "fire"],
+    ["NA", "fire", "fire"],
+    ["no_fire", "fire", "no_fire"],
+    ["fire", "no_fire", "fire"]
+  ]
+}
