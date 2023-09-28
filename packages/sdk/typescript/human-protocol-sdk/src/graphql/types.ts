@@ -16,10 +16,13 @@ export type EscrowData = {
   recordingOracleFee?: string;
   reputationOracle?: string;
   reputationOracleFee?: string;
+  exchangeOracle?: string;
+  exchangeOracleFee?: string;
   status: string;
   token: string;
   totalFundedAmount: string;
   createdAt: string;
+  chainId: number;
 };
 
 export type HMTStatisticsData = {

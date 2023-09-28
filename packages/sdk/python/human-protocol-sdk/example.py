@@ -2,7 +2,8 @@ import datetime
 import json
 from web3 import Web3
 
-from human_protocol_sdk.escrow import EscrowClient, EscrowFilter, Status
+from human_protocol_sdk.escrow import EscrowFilter, EscrowUtils, Status
+from human_protocol_sdk.staking import StakingClient, LeaderFilter
 from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 from human_protocol_sdk.storage import StorageClient
 from human_protocol_sdk.agreement import agreement
@@ -13,14 +14,13 @@ if __name__ == "__main__":
     )
     w3 = Web3(Web3.HTTPProvider(alchemy_url))
 
-    escrow_client = EscrowClient(w3)
-
     print(
-        escrow_client.get_escrows(
+        EscrowUtils.get_escrows(
             EscrowFilter(
                 status=Status.Pending,
                 date_from=datetime.datetime(2023, 5, 8),
                 date_to=datetime.datetime(2023, 6, 8),
+                networks=[80001],
             )
         )
     )
@@ -66,6 +66,7 @@ if __name__ == "__main__":
         )
     )
 
+
     # process annotation data and get quality estimates
     url = "https://raw.githubusercontent.com/humanprotocol/human-protocol/efa8d3789ac35915b42435011cd0a8d36507564c/packages/sdk/python/human-protocol-sdk/example_annotations.json"
     annotations = json.loads(StorageClient.download_file_from_url(url))
@@ -82,3 +83,9 @@ if __name__ == "__main__":
     )
     print(report["results"])
     print(report["config"])
+
+    staking_client = StakingClient(w3)
+    leaders = staking_client.get_leaders()
+    print(leaders)
+    print(staking_client.get_leader(leaders[0]["address"]))
+    print(staking_client.get_leaders(LeaderFilter(role="Job Launcher")))

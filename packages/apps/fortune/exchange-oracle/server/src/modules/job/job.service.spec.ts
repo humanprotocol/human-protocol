@@ -4,7 +4,11 @@ import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { Web3Service } from '../web3/web3.service';
 import { JobService } from './job.service';
-import { EscrowClient, KVStoreClient } from '@human-protocol/sdk';
+import { EscrowClient, KVStoreClient, EscrowUtils } from '@human-protocol/sdk';
+import { MOCK_PRIVATE_KEY } from '../../../test/constants';
+import { EventType } from '../../common/enums/webhook';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
+import { signMessage } from '../../common/utils/signature';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -39,8 +43,15 @@ describe('JobService', () => {
   };
 
   const reputationOracleURL = 'https://example.com/reputationoracle';
-  const configServiceMock = {
-    get: jest.fn().mockReturnValue(reputationOracleURL),
+  const configServiceMock: Partial<ConfigService> = {
+    get: jest.fn((key: string) => {
+      switch (key) {
+        case 'REPUTATION_ORACLE_URL':
+          return reputationOracleURL;
+        case 'WEB3_PRIVATE_KEY':
+          return MOCK_PRIVATE_KEY;
+      }
+    }),
   };
 
   const httpServicePostMock = jest
@@ -102,6 +113,45 @@ describe('JobService', () => {
       });
     });
 
+    it('should call job launcher webhook if manifest is empty', async () => {
+      const jobLauncherWebhookUrl = 'https://example.com/reputationoracle';
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      }));
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(jobLauncherWebhookUrl),
+      }));
+
+      httpService.axiosRef.get = jest.fn().mockResolvedValue({
+        status: 200,
+        data: null,
+      });
+      await expect(
+        jobService.getDetails(chainId, escrowAddress),
+      ).rejects.toThrow('Unable to get manifest');
+
+      const expectedBody = {
+        escrow_address: escrowAddress,
+        chain_id: chainId,
+        event_type: EventType.TASK_CREATION_FAILED,
+        reason: 'Unable to get manifest',
+      };
+      expect(httpServicePostMock).toHaveBeenCalledWith(
+        jobLauncherWebhookUrl + '/fortune/escrow-failed-webhook',
+        expectedBody,
+        {
+          headers: {
+            [HEADER_SIGNATURE_KEY]: await signMessage(
+              expectedBody,
+              MOCK_PRIVATE_KEY,
+            ),
+          },
+        },
+      );
+    });
+
     it('should fail if reputation oracle url is empty', async () => {
       configService.get = jest.fn().mockReturnValue('');
 
@@ -113,14 +163,12 @@ describe('JobService', () => {
 
   describe('getPendingJobs', () => {
     it('should return an array of pending jobs', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrowsFiltered: jest
-          .fn()
-          .mockResolvedValue([
-            '0x1234567890123456789012345678901234567893',
-            '0x1234567890123456789012345678901234567894',
-          ]),
-      }));
+      EscrowUtils.getEscrows = jest
+        .fn()
+        .mockReturnValue([
+          { address: '0x1234567890123456789012345678901234567893' },
+          { address: '0x1234567890123456789012345678901234567894' },
+        ]);
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
@@ -132,14 +180,12 @@ describe('JobService', () => {
     });
 
     it('should return an array of pending jobs removing jobs already submitted by worker', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrowsFiltered: jest
-          .fn()
-          .mockResolvedValue([
-            '0x1234567890123456789012345678901234567893',
-            '0x1234567890123456789012345678901234567894',
-          ]),
-      }));
+      EscrowUtils.getEscrows = jest
+        .fn()
+        .mockReturnValue([
+          { address: '0x1234567890123456789012345678901234567893' },
+          { address: '0x1234567890123456789012345678901234567894' },
+        ]);
 
       jobService['storage']['0x1234567890123456789012345678901234567893'] = [
         workerAddress,
@@ -152,9 +198,7 @@ describe('JobService', () => {
     });
 
     it('should return an empty array if there are no pending jobs', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getEscrowsFiltered: jest.fn().mockResolvedValue([]),
-      }));
+      EscrowUtils.getEscrows = jest.fn().mockReturnValue([]);
 
       const result = await jobService.getPendingJobs(chainId, workerAddress);
 
@@ -188,7 +232,7 @@ describe('JobService', () => {
       expect(result).toBe(true);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
-        recordingOracleURLMock + '/job/solve',
+        recordingOracleURLMock,
         expect.objectContaining({
           escrowAddress,
           chainId,
@@ -228,7 +272,7 @@ describe('JobService', () => {
 
       await expect(
         jobService.solveJob(chainId, escrowAddress, workerAddress, solution),
-      ).rejects.toThrow('Unable to get Recording Oracle URL');
+      ).rejects.toThrow('Unable to get Recording Oracle webhook URL');
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 

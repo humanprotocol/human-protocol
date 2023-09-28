@@ -7,21 +7,28 @@ from src.core.constants import CvatLabelTypes, JobTypes, Providers
 
 type_mapping = {JobTypes.image_label_binary: CvatLabelTypes.tag.value}
 
+AWS_S3_PROVIDER = "s3.amazonaws.com"
+GCS_PROVIDER = "storage.googleapis.com"
+
 
 def parse_data_url(data_url: str) -> tuple:
     parsed_url = urlparse(data_url)
 
-    if parsed_url.netloc.endswith("s3.amazonaws.com"):
+    url_parts = parsed_url.netloc.split(".")
+    bucket = url_parts[0]
+    provider_url = ".".join(url_parts[1:])
+
+    if provider_url == AWS_S3_PROVIDER:
         # AWS S3 bucket
         return {
             "provider": Providers.aws.value,
-            "bucket": parsed_url.netloc.split(".")[0],
+            "bucket": bucket,
         }
-    elif parsed_url.netloc.endswith("storage.googleapis.com"):
+    elif provider_url == GCS_PROVIDER:
         # Google Cloud Storage (GCS) bucket
         return {
             "provider": Providers.gcs.value,
-            "bucket": parsed_url.netloc.split(".")[0],
+            "bucket": bucket,
         }
     else:
         raise ValueError(f"{parsed_url.netloc} cloud provider is not supported by CVAT")

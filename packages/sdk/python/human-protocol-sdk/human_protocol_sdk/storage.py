@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from typing import List, Optional
+from warnings import warn
 
 import requests
 from minio import Minio
@@ -15,6 +16,9 @@ logging.getLogger("minio").setLevel(logging.INFO)
 DEBUG = "true" in os.getenv("DEBUG", "false").lower()
 LOG = logging.getLogger("human_protocol_sdk.storage")
 LOG.setLevel(logging.DEBUG if DEBUG else logging.INFO)
+
+
+warn(f"The module {__name__} is deprecated.", DeprecationWarning, stacklevel=2)
 
 
 class StorageClientError(Exception):

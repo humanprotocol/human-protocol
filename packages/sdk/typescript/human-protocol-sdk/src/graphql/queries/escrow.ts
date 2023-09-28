@@ -11,6 +11,7 @@ const ESCROW_FRAGMENT = gql`
     finalResultsUrl
     id
     intermediateResultsUrl
+    jobRequesterId
     launcher
     manifestHash
     manifestUrl
@@ -18,6 +19,8 @@ const ESCROW_FRAGMENT = gql`
     recordingOracleFee
     reputationOracle
     reputationOracleFee
+    exchangeOracle
+    exchangeOracleFee
     status
     token
     totalFundedAmount
@@ -25,15 +28,34 @@ const ESCROW_FRAGMENT = gql`
   }
 `;
 
+export const GET_ESCROW_BY_ADDRESS_QUERY = () => gql`
+  query getEscrowByAddress($escrowAddress: String!) {
+    escrow(id: $escrowAddress) {
+      ...EscrowFields
+    }
+  }
+  ${ESCROW_FRAGMENT}
+`;
+
 export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
-  const { launcher, reputationOracle, recordingOracle, status, from, to } =
-    filter;
+  const {
+    launcher,
+    jobRequesterId,
+    reputationOracle,
+    recordingOracle,
+    exchangeOracle,
+    status,
+    from,
+    to,
+  } = filter;
 
   const WHERE_CLAUSE = `
     where: {
       ${launcher ? `launcher: $launcher` : ''}
+      ${jobRequesterId ? `jobRequesterId: $jobRequesterId` : ''}
       ${reputationOracle ? `reputationOracle: $reputationOracle` : ''}
       ${recordingOracle ? `recordingOracle: $recordingOracle` : ''}
+      ${exchangeOracle ? `exchangeOracle: $exchangeOracle` : ''}
       ${status ? `status: $status` : ''}
       ${from ? `createdAt_gte: $from` : ''}
       ${to ? `createdAt_lte: $to` : ''}
@@ -43,8 +65,10 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
   return gql`
     query getEscrows(
       $launcher: String
+      $jobRequesterId: String
       $reputationOracle: String
       $recordingOracle: String
+      $exchangeOracle: String
       $status: String
       $from: Int
       $to: Int

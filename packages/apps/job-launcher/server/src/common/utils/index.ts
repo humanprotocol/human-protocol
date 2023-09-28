@@ -33,37 +33,42 @@ export async function getRate(from: string, to: string): Promise<number> {
   return reversed ? 1 / rate : rate;
 }
 
-export const parseUrl = (
-  url: string,
-): {
-  endpoint: string;
-  bucket: string;
-  port?: number;
+export const parseUrl = (url: string): {
+  endPoint: string,
+  bucket: string,
+  useSSL: boolean,
+  filename?: string,
+  port?: number,
 } => {
   const patterns = [
     {
       regex: /^https:\/\/storage\.googleapis\.com\/([^/]+)\/?$/,
-      endpoint: 'storage.googleapis.com',
+      endPoint: 'storage.googleapis.com',
     },
     {
       regex: /^https:\/\/([^\.]+)\.storage\.googleapis\.com\/?$/,
-      endpoint: 'storage.googleapis.com',
+      endPoint: 'storage.googleapis.com',
     },
     {
       regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
-      endpoint: '$1',
+      endPoint: '$1',
       port: '$2',
     },
   ];
 
-  for (const { regex, endpoint, port } of patterns) {
+  for (const { regex, endPoint, port } of patterns) {
     const match = url.match(regex);
     if (match) {
-      const bucket = match[3] ? match[3].split('/')[1] : '';
+      const parts = match[3] ? match[3].split('/').filter(part => part) : [];
+      const bucket = parts[0] || '';
+      const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
+
       return {
-        endpoint: endpoint.replace('$1', match[1]),
+        useSSL: url.startsWith('https:'),
+        endPoint: endPoint.replace('$1', match[1]),
+        port: port && match[2] ? Number(match[2]) : undefined,
         bucket,
-        port: port ? Number(match[2]) : undefined,
+        filename,
       };
     }
   }
