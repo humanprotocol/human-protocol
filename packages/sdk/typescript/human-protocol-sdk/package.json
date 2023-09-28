@@ -13,7 +13,7 @@
     "clean:doc": "rm -rf ./docs",
     "prebuild": "yarn workspace @human-protocol/core build",
     "build": "npm run clean && tsc",
-    "build:doc": "npm run clean:doc && npx typedoc ./src",
+    "build:doc": "npm run clean:doc && npx typedoc",
     "prepublish": "npm run build",
     "test": "vitest -u",
     "lint": "eslint .",
@@ -54,5 +54,10 @@
   },
   "devDependencies": {
     "typedoc": "^0.25.1"
+  },
+  "typedocOptions": {
+    "entryPoints": [
+      "./src/escrow.ts"
+    ]
   }
 }
