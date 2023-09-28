@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { WebhookService } from './webhook.service';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { WebhookController } from './webhook.controller';
-import { WebhookCron } from './webhook.cron';
 import { WebhookRepository } from './webhook.repository';
 import { ReputationModule } from '../reputation/reputation.module';
 import { Web3Module } from '../web3/web3.module';
@@ -18,7 +17,7 @@ import { Web3Module } from '../web3/web3.module';
     Web3Module,
   ],
   controllers: [WebhookController],
-  providers: [Logger, WebhookService, WebhookRepository, WebhookCron],
+  providers: [Logger, WebhookService, WebhookRepository],
   exports: [WebhookService],
 })
 export class WebhookModule {}

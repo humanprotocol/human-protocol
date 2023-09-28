@@ -90,7 +90,7 @@ export const envValidator = Joi.object({
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string().default('launcher'),
-  S3_USE_SSL: Joi.string().default(false),
+  S3_USE_SSL: Joi.string().default('false'),
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_API_VERSION: Joi.string().default('2022-11-15'),
