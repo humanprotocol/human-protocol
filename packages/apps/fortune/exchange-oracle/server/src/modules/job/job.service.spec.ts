@@ -4,11 +4,25 @@ import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 import { Web3Service } from '../web3/web3.service';
 import { JobService } from './job.service';
-import { EscrowClient, KVStoreClient, EscrowUtils } from '@human-protocol/sdk';
-import { MOCK_PRIVATE_KEY } from '../../../test/constants';
+import {
+  EscrowClient,
+  KVStoreClient,
+  StorageClient,
+  EscrowUtils,
+} from '@human-protocol/sdk';
+import {
+  MOCK_PRIVATE_KEY,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+} from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { signMessage } from '../../common/utils/signature';
+import { ConfigModule, registerAs } from '@nestjs/config';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -22,13 +36,21 @@ jest.mock('@human-protocol/sdk', () => ({
     downloadFileFromUrl: jest.fn(),
   },
 }));
+jest.mock('minio', () => {
+  class Client {
+    putObject = jest.fn();
+    bucketExists = jest.fn().mockResolvedValue(true);
+    constructor() {
+      (this as any).protocol = 'http:';
+      (this as any).host = 'localhost';
+      (this as any).port = 9000;
+    }
+  }
 
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}));
+  return { Client };
+});
 
 describe('JobService', () => {
-  let configService: ConfigService;
   let jobService: JobService;
   let web3Service: Web3Service;
   let httpService: HttpService;
@@ -60,6 +82,18 @@ describe('JobService', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+      ],
       providers: [
         JobService,
         {
@@ -84,7 +118,6 @@ describe('JobService', () => {
       ],
     }).compile();
 
-    configService = moduleRef.get<ConfigService>(ConfigService);
     jobService = moduleRef.get<JobService>(JobService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
@@ -153,7 +186,11 @@ describe('JobService', () => {
     });
 
     it('should fail if reputation oracle url is empty', async () => {
-      configService.get = jest.fn().mockReturnValue('');
+      (configServiceMock as any).get.mockImplementation((key: string) => {
+        if (key === 'REPUTATION_ORACLE_URL') {
+          return '';
+        }
+      });
 
       await expect(
         jobService.getDetails(chainId, escrowAddress),
@@ -209,7 +246,8 @@ describe('JobService', () => {
 
   describe('solveJob', () => {
     it('should solve a job', async () => {
-      const solution = 'job-solution';
+      const solutionUrl =
+        'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
@@ -222,11 +260,13 @@ describe('JobService', () => {
         get: jest.fn().mockResolvedValue(recordingOracleURLMock),
       }));
 
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([]);
+
       const result = await jobService.solveJob(
         chainId,
         escrowAddress,
         workerAddress,
-        solution,
+        'solution',
       );
 
       expect(result).toBe(true);
@@ -238,7 +278,7 @@ describe('JobService', () => {
           chainId,
           exchangeAddress: signerMock.address,
           workerAddress,
-          solution,
+          solutionUrl,
         }),
       );
     });
@@ -287,6 +327,14 @@ describe('JobService', () => {
       (KVStoreClient.build as any).mockImplementation(() => ({
         get: jest.fn().mockResolvedValue('https://example.com/recordingoracle'),
       }));
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567891',
+          solution: 'test',
+        },
+      ]);
 
       jobService['storage'][escrowAddress] = [workerAddress];
 

@@ -6,34 +6,41 @@ import {
   KVStoreKeys,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
+import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
 import { EscrowFailedWebhookDto, JobDetailsDto } from './job.dto';
 import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
+import * as Minio from 'minio';
+import { uploadJobSolutions } from '../../common/utils/storage';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
+  public readonly minioClient: Minio.Client;
   private storage: {
     [key: string]: string[];
   } = {};
 
   constructor(
+    @Inject(s3ConfigKey)
+    private s3Config: S3ConfigType,
     private readonly configService: ConfigService,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.minioClient = new Minio.Client({
+      endPoint: this.s3Config.endPoint,
+      port: this.s3Config.port,
+      accessKey: this.s3Config.accessKey,
+      secretKey: this.s3Config.secretKey,
+      useSSL: this.s3Config.useSSL,
+    });
+  }
 
   public async getDetails(
     chainId: number,
@@ -131,23 +138,22 @@ export class JobService {
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
-    if (
-      this.storage[escrowAddress] &&
-      this.storage[escrowAddress].includes(workerAddress)
-    )
-      throw new BadRequestException('User has already submitted a solution');
-
-    if (!this.storage[escrowAddress]) {
-      this.storage[escrowAddress] = [];
-    }
-    this.storage[escrowAddress].push(workerAddress);
+    const solutionUrl = await uploadJobSolutions(
+      this.minioClient,
+      chainId,
+      escrowAddress,
+      workerAddress,
+      signer.address,
+      solution,
+      this.s3Config.bucket,
+    );
 
     await this.httpService.post(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
       chainId: chainId,
       exchangeAddress: signer.address,
       workerAddress: workerAddress,
-      solution: solution,
+      solutionUrl: solutionUrl,
     });
 
     return true;

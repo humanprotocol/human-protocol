@@ -6,6 +6,16 @@ import { JobDetailsDto, SolveJobDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
+import { ConfigModule, registerAs } from '@nestjs/config';
+import {
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+} from '../../../test/constants';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -22,6 +32,23 @@ describe('JobController', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('server', () => ({
+            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+          })),
+        ),
+      ],
       controllers: [JobController],
       providers: [
         JobService,
