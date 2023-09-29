@@ -75,7 +75,7 @@ import {
  * yarn install @human-protocol/sdk
  * ```
  *
- * ## Usage
+ * ## Code example
  *
  * ### Signer
  *
@@ -115,7 +115,6 @@ import {
  * const escrowClient = await EscrowClient.build(provider);
  * ```
  */
-
 export class EscrowClient {
   private escrowFactoryContract: EscrowFactory;
   private escrowContract?: Escrow;

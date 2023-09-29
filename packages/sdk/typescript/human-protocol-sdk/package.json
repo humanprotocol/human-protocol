@@ -57,7 +57,11 @@
   },
   "typedocOptions": {
     "entryPoints": [
-      "./src/escrow.ts"
+      "./src/encryption.ts",
+      "./src/escrow.ts",
+      "./src/kvstore.ts",
+      "./src/staking.ts",
+      "./src/statistics.ts"
     ]
   }
 }
