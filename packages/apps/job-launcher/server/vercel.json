@@ -26,5 +26,6 @@
       "path": "/job/cron/cancel",
       "schedule": "* * * * *"
     }
-  ]
+  ],
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
 }

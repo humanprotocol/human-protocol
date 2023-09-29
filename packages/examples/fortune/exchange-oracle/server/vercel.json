@@ -26,5 +26,6 @@
         "Access-Control-Allow-Headers": "X-Requested-With,Content-Type,Accept"
       }
     }
-  ]
+  ],
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
 }

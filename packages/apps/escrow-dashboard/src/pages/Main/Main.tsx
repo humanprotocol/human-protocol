@@ -2,6 +2,7 @@ import { FC } from 'react';
 
 import {
   HumanAppDataContainer,
+  // LeaderboardContainer,
   TokenContainer,
   SolvedTasksContainer,
   PageWrapper,
@@ -13,6 +14,7 @@ export const Main: FC = () => {
       <SolvedTasksContainer />
       <HumanAppDataContainer />
       <TokenContainer />
+      {/* <LeaderboardContainer showAll={false} /> */}
     </PageWrapper>
   );
 };
