@@ -26,7 +26,7 @@ import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
-import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
@@ -76,6 +76,7 @@ import {
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
+import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 
 @Injectable()
 export class JobService {
@@ -422,81 +423,97 @@ export class JobService {
     limit = 10,
   ): Promise<JobListDto[] | BadRequestException> {
     try {
-      let transformedJobs: JobListDto[] = [];
-      let jobs;
+      let jobs: JobEntity[] = [];
+      let escrows: EscrowData[] | undefined;
 
       switch (status) {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
-          let statusFilter: any;
-          if (status) {
-            statusFilter = In([status]);
-            if (status === JobStatusFilter.PENDING)
-              statusFilter = In([JobStatus.PENDING, JobStatus.PAID]);
-          }
-
-          jobs = await this.jobRepository.find(
-            {
-              userId,
-              status: statusFilter,
-            },
-            { skip: skip, take: limit },
+          jobs = await this.jobRepository.findJobsByStatusFilter(
+            networks,
+            userId,
+            status,
+            skip,
+            limit,
           );
-          transformedJobs = jobs.map((original) => ({
-            jobId: original.id,
-            address: original.escrowAddress,
-            network: NETWORKS[original.chainId as ChainId]!.title,
-            fundAmount: original.fundAmount,
-            status:
-              original.status === JobStatus.PAID
-                ? JobStatusFilter.PENDING
-                : (original.status as any),
-          }));
           break;
         case JobStatusFilter.CANCELED:
         case JobStatusFilter.LAUNCHED:
         case JobStatusFilter.COMPLETED:
-          const escrows = (
-            await EscrowUtils.getEscrows({
-              networks: networks,
-              jobRequesterId: userId.toString(),
-              status:
-                status === JobStatusFilter.LAUNCHED
-                  ? EscrowStatus.Launched
-                  : status === JobStatusFilter.COMPLETED
-                  ? EscrowStatus.Complete
-                  : EscrowStatus.Cancelled,
-            })
-          ).slice(skip, limit);
-
+          const escrows = await this.findEscrowsByStatus(
+            networks,
+            userId,
+            status,
+            skip,
+            limit,
+          );
           const escrowAddresses = escrows.map((escrow) => escrow.address);
 
-          jobs = await this.jobRepository.find({
+          jobs = await this.jobRepository.findJobsByEscrowAddresses(
             userId,
-            escrowAddress: In(escrowAddresses),
-          });
-
-          transformedJobs = jobs.map((original) => ({
-            jobId: original.id,
-            address: original.escrowAddress,
-            network: NETWORKS[original.chainId as ChainId]!.title,
-            fundAmount: original.fundAmount,
-            status:
-              original.status === JobStatus.TO_CANCEL
-                ? JobStatus.TO_CANCEL
-                : (escrows
-                    .find((escrow) => escrow.address === original.escrowAddress)
-                    ?.status.toUpperCase() as any),
-          }));
+            escrowAddresses,
+          );
           break;
       }
-      console.log('transformedJobs', transformedJobs);
 
-      return transformedJobs;
+      return this.transformJobs(jobs, escrows);
     } catch (error) {
       console.error(error);
       throw new BadRequestException(error.message);
     }
+  }
+
+  private async findEscrowsByStatus(
+    networks: ChainId[],
+    userId: number,
+    status: JobStatusFilter,
+    skip: number,
+    limit: number,
+  ): Promise<EscrowData[]> {
+    const escrowStatus =
+      status === JobStatusFilter.LAUNCHED
+        ? EscrowStatus.Launched
+        : status === JobStatusFilter.COMPLETED
+        ? EscrowStatus.Complete
+        : EscrowStatus.Cancelled;
+
+    const escrows = await EscrowUtils.getEscrows({
+      networks,
+      jobRequesterId: userId.toString(),
+      status: escrowStatus,
+    });
+
+    return escrows.slice(skip, limit);
+  }
+
+  private transformJobs(
+    jobs: JobEntity[],
+    escrows: EscrowData[] | undefined,
+  ): JobListDto[] {
+    return jobs.map((job) => ({
+      jobId: job.id,
+      escrowAddress: job.escrowAddress,
+      network: NETWORKS[job.chainId as ChainId]!.title,
+      fundAmount: job.fundAmount,
+      status: this.mapJobStatus(job, escrows),
+    }));
+  }
+
+  private mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
+    if (job.status === JobStatus.PAID) {
+      return JobStatus.PENDING;
+    }
+
+    if (escrows) {
+      const escrow = escrows.find(
+        (escrow) => escrow.address === job.escrowAddress,
+      );
+      if (escrow) {
+        return (<any>JobStatus)[escrow.status.toUpperCase()];
+      }
+    }
+
+    return job.status;
   }
 
   public async getResult(

@@ -76,7 +76,6 @@ import { JobService } from './job.service';
 import { div, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { In } from 'typeorm';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
 import Decimal from 'decimal.js';
@@ -1190,40 +1189,34 @@ describe('JobService', () => {
 
     it('should call the database with PENDING status', async () => {
       jobService.getJobsByStatus(
-        [ChainId.POLYGON_MUMBAI],
+        [ChainId.LOCALHOST],
         userId,
         JobStatusFilter.PENDING,
         skip,
         limit,
       );
-      expect(jobRepository.find).toHaveBeenCalledWith(
-        {
-          status: In([JobStatus.PENDING, JobStatus.PAID]),
-          userId: userId,
-        },
-        {
-          skip: skip,
-          take: limit,
-        },
+      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+        [ChainId.LOCALHOST],
+        userId,
+        JobStatusFilter.PENDING,
+        skip,
+        limit,
       );
     });
     it('should call the database with FAILED status', async () => {
       jobService.getJobsByStatus(
-        [ChainId.POLYGON_MUMBAI],
+        [ChainId.LOCALHOST],
         userId,
         JobStatusFilter.FAILED,
         skip,
         limit,
       );
-      expect(jobRepository.find).toHaveBeenCalledWith(
-        {
-          status: In([JobStatus.FAILED]),
-          userId: userId,
-        },
-        {
-          skip: skip,
-          take: limit,
-        },
+      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+        [ChainId.LOCALHOST],
+        userId,
+        JobStatusFilter.FAILED,
+        skip,
+        limit,
       );
     });
     it('should call subgraph and database with LAUNCHED status', async () => {
@@ -1243,7 +1236,9 @@ describe('JobService', () => {
           status: EscrowStatus[EscrowStatus.Launched],
         },
       ];
-      jobRepository.find = jest.fn().mockResolvedValue(jobEntityMock as any);
+      jobRepository.findJobsByEscrowAddresses = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock as any);
       EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
 
       const results = await jobService.getJobsByStatus(
@@ -1259,14 +1254,14 @@ describe('JobService', () => {
           status: JobStatus.LAUNCHED,
           fundAmount: 100,
           jobId: 1,
-          address: MOCK_ADDRESS,
+          escrowAddress: MOCK_ADDRESS,
           network: NETWORKS[ChainId.LOCALHOST]?.title,
         },
       ]);
-      expect(jobRepository.find).toHaveBeenCalledWith({
-        userId: userId,
-        escrowAddress: In([MOCK_ADDRESS]),
-      });
+      expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
+        userId,
+        [MOCK_ADDRESS],
+      );
     });
   });
 
