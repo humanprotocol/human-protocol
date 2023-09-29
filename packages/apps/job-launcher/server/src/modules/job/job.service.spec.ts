@@ -1263,6 +1263,50 @@ describe('JobService', () => {
         [MOCK_ADDRESS],
       );
     });
+    it('should call subgraph and database with CANCELLED status', async () => {
+      const jobEntityMock = [
+        {
+          status: JobStatus.CANCELED,
+          fundAmount: 100,
+          userId: 1,
+          id: 1,
+          escrowAddress: MOCK_ADDRESS,
+          chainId: ChainId.LOCALHOST,
+        },
+      ];
+      const getEscrowsData = [
+        {
+          address: MOCK_ADDRESS,
+          status: EscrowStatus[EscrowStatus.Cancelled],
+        },
+      ];
+      jobRepository.findJobsByEscrowAddresses = jest
+        .fn()
+        .mockResolvedValue(jobEntityMock as any);
+      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
+
+      const results = await jobService.getJobsByStatus(
+        [ChainId.LOCALHOST],
+        userId,
+        JobStatusFilter.CANCELED,
+        skip,
+        limit,
+      );
+
+      expect(results).toMatchObject([
+        {
+          status: JobStatus.CANCELED,
+          fundAmount: 100,
+          jobId: 1,
+          escrowAddress: MOCK_ADDRESS,
+          network: NETWORKS[ChainId.LOCALHOST]?.title,
+        },
+      ]);
+      expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
+        userId,
+        [MOCK_ADDRESS],
+      );
+    });
   });
 
   describe('escrowFailedWebhook', () => {

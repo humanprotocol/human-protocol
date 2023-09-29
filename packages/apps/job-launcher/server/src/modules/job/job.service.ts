@@ -77,6 +77,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
+import { filterToEscrowStatus } from '../../common/utils/status';
 
 @Injectable()
 export class JobService {
@@ -470,17 +471,10 @@ export class JobService {
     skip: number,
     limit: number,
   ): Promise<EscrowData[]> {
-    const escrowStatus =
-      status === JobStatusFilter.LAUNCHED
-        ? EscrowStatus.Launched
-        : status === JobStatusFilter.COMPLETED
-        ? EscrowStatus.Complete
-        : EscrowStatus.Cancelled;
-
     const escrows = await EscrowUtils.getEscrows({
       networks,
       jobRequesterId: userId.toString(),
-      status: escrowStatus,
+      status: filterToEscrowStatus(status),
     });
 
     return escrows.slice(skip, limit);
