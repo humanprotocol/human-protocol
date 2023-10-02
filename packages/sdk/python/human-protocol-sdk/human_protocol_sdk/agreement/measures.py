@@ -13,7 +13,7 @@ from .bootstrap import confidence_intervals
 
 from .utils import (
     label_counts,
-    confusion_matrix_from_sequence,
+    confusion_matrix,
     observed_and_expected_differences,
 )
 
@@ -66,7 +66,7 @@ def agreement(
                         ' two will be regarded. Consider using method "fleiss_kappa".'
                     )
 
-                data, labels = confusion_matrix_from_sequence(
+                data, labels = confusion_matrix(
                     data.T[0],
                     data.T[1],
                     labels=labels,

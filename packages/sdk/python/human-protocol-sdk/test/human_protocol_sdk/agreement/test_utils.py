@@ -79,6 +79,6 @@ def test_records_from_annotations(annotations):
     values, _, _ = records_from_annotations(annotations, nan_values=[""])
     assert len(values) == n_unfiltered - 1
 
-    annotations[-2] = np.nan
+    annotations[-1][-2] = np.nan
     values, _, _ = records_from_annotations(annotations, nan_values=np.nan)
     assert len(values) == n_unfiltered - 1
