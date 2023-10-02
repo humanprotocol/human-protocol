@@ -3,7 +3,7 @@
 import logging
 import os
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.filter import EscrowFilter
