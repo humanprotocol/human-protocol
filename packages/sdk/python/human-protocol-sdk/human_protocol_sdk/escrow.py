@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import datetime
 import logging
 import os
 from decimal import Decimal
-from typing import List, Optional
+from typing import List
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
@@ -94,72 +94,6 @@ class EscrowConfig:
         self.exchange_oracle_fee = exchange_oracle_fee
         self.manifest_url = manifest_url
         self.hash = hash
-
-
-class EscrowFilter:
-    """
-    A class used to filter escrow requests.
-    """
-
-    def __init__(
-        self,
-        networks: [List[ChainId]],
-        launcher: Optional[str] = None,
-        reputation_oracle: Optional[str] = None,
-        recording_oracle: Optional[str] = None,
-        exchange_oracle: Optional[str] = None,
-        job_requester_id: Optional[str] = None,
-        status: Optional[Status] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
-    ):
-        """
-        Initializes a EscrowFilter instance.
-
-        Args:
-            networks (List[ChainId]): Networks to request data
-            launcher (Optional[str]): Launcher address
-            reputation_oracle (Optional[str]): Reputation oracle address
-            recording_oracle (Optional[str]): Recording oracle address
-            exchange_oracle (Optional[str]): Exchange oracle address
-            job_requester_id (Optional[str]): Job requester id
-            status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
-        """
-
-        if not networks or any(
-            network not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise EscrowClientError(f"Invalid ChainId")
-
-        if launcher and not Web3.is_address(launcher):
-            raise EscrowClientError(f"Invalid address: {launcher}")
-
-        if reputation_oracle and not Web3.is_address(reputation_oracle):
-            raise EscrowClientError(f"Invalid address: {reputation_oracle}")
-
-        if recording_oracle and not Web3.is_address(recording_oracle):
-            raise EscrowClientError(f"Invalid address: {recording_oracle}")
-
-        if exchange_oracle and not Web3.is_address(exchange_oracle):
-            raise EscrowClientError(f"Invalid address: {exchange_oracle}")
-
-        if date_from and date_to and date_from > date_to:
-            raise EscrowClientError(
-                f"Invalid dates: {date_from} must be earlier than {date_to}"
-            )
-
-        self.launcher = launcher
-        self.reputation_oracle = reputation_oracle
-        self.recording_oracle = recording_oracle
-        self.exchange_oracle = exchange_oracle
-        self.job_requester_id = job_requester_id
-        self.status = status
-        self.date_from = date_from
-        self.date_to = date_to
-        self.networks = networks
 
 
 class EscrowClient:

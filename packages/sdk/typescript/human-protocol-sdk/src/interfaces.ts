@@ -73,3 +73,10 @@ export interface IStatisticsParams {
   to?: Date;
   limit?: number;
 }
+
+export interface IPayoutFilter {
+  escrowAddress?: string;
+  recipient?: string;
+  from?: Date;
+  to?: Date;
+}

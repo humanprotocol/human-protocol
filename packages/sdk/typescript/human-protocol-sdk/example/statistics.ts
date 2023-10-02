@@ -3,15 +3,22 @@ import { StatisticsClient } from '../src/statistics';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 
-export const getStatistics = async () => {
-  if (!NETWORKS[ChainId.POLYGON_MUMBAI]) {
-    return;
-  }
+// Replace with your own API key
+const IM_API_KEY = '';
 
-  const statisticsClient = new StatisticsClient(
-    NETWORKS[ChainId.POLYGON_MUMBAI]
+const getTaskStatistics = async (statisticsClient: StatisticsClient) => {
+  console.log('Task statistics:', await statisticsClient.getTaskStatistics());
+
+  console.log(
+    'Task statistics from 5/8 - 6/8:',
+    await statisticsClient.getTaskStatistics({
+      from: new Date(2023, 4, 8),
+      to: new Date(2023, 5, 8),
+    })
   );
+};
 
+const getEscrowStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Escrow statistics:',
     await statisticsClient.getEscrowStatistics()
@@ -24,7 +31,9 @@ export const getStatistics = async () => {
       to: new Date(2023, 5, 8),
     })
   );
+};
 
+const getWorkerStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Worker statistics:',
     await statisticsClient.getWorkerStatistics()
@@ -37,7 +46,9 @@ export const getStatistics = async () => {
       to: new Date(2023, 5, 8),
     })
   );
+};
 
+const getPaymentStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Payment statistics:',
     (await statisticsClient.getPaymentStatistics()).dailyPaymentsData.map(
@@ -64,7 +75,9 @@ export const getStatistics = async () => {
       averageAmountPerWorker: p.averageAmountPerWorker.toString(),
     }))
   );
+};
 
+const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   const hmtStatistics = await statisticsClient.getHMTStatistics();
 
   console.log('HMT statistics:', {
@@ -100,5 +113,18 @@ export const getStatistics = async () => {
 };
 
 (async () => {
-  getStatistics();
+  if (!NETWORKS[ChainId.POLYGON]) {
+    return;
+  }
+
+  const statisticsClient = new StatisticsClient(
+    NETWORKS[ChainId.POLYGON],
+    IM_API_KEY
+  );
+
+  await getTaskStatistics(statisticsClient);
+  await getEscrowStatistics(statisticsClient);
+  await getWorkerStatistics(statisticsClient);
+  await getPaymentStatistics(statisticsClient);
+  await getHMTStatistics(statisticsClient);
 })();
