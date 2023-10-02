@@ -238,6 +238,8 @@ def krippendorffs_alpha(items, values, distance_function):
             items[i].
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
+            Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
+            default functions pertaining to the level of measurement of the data.
 
     Returns: Krippendorff's Alpha score.
 
@@ -260,6 +262,8 @@ def sigma(items, values, distance_function, p=0.05):
             items[i].
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
+            Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
+            default functions pertaining to the level of measurement of the data.
         p: probability threshold determining statistical significance.
 
     Returns: Sigma.

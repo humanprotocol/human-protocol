@@ -196,7 +196,7 @@ class NormalDistribution:
         return self.location + self.scale * 2**0.5 * erfinv(2 * p - 1.0)
 
 
-def distance_matrix(values, distance_fn, dtype=np.float64):
+def _distance_matrix(values, distance_fn, dtype=np.float64):
     """
     Calculates a matrix containing the distances between each pair of given
     values using the given distance function.
@@ -219,8 +219,7 @@ def distance_matrix(values, distance_fn, dtype=np.float64):
     return dist_matrix
 
 
-# TODO: terrible name, terrible explanation.
-def pair_indices(items: np.ndarray):
+def _pair_indices(items: np.ndarray):
     """
     Returns indices of pairs of identical items. Indices are represented as a numpy ndarray, where the first row contains indices for the first parts of the pairs and the second row contains the second pair index.
 
@@ -248,6 +247,8 @@ def observed_and_expected_differences(items, values, distance_function):
             items[i].
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
+            Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
+            default functions pertaining to the level of measurement of the data.
 
     Returns:
         A tuple consisting of numpy ndarrays, containing the observed and expected differences in annotations.
@@ -256,10 +257,25 @@ def observed_and_expected_differences(items, values, distance_function):
     items = np.asarray(items)
     values = np.asarray(values)
 
-    unique_values, value_ids = np.unique(values, return_inverse=True)
-    dist_matrix = distance_matrix(unique_values, distance_function)
+    if isinstance(distance_function, str):
+        match distance_function:
+            case "nominal":
+                distance_function = lambda a, b: a != b
+            case "ordinal":
+                distance_function = lambda a, b: (a - b) ** 2
+            case "interval":
+                distance_function = lambda a, b: (a - b) ** 2
+            case "ratio":
+                distance_function = lambda a, b: ((a - b) / (a + b)) ** 2
+            case _:
+                raise ValueError(
+                    f"Distance function '{distance_function}' not supported."
+                )
 
-    intra_item_pairs = pair_indices(items)
+    unique_values, value_ids = np.unique(values, return_inverse=True)
+    dist_matrix = _distance_matrix(unique_values, distance_function)
+
+    intra_item_pairs = _pair_indices(items)
     i, j = value_ids[intra_item_pairs]
     observed_differences = dist_matrix[i, j]
 
