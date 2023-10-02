@@ -16,7 +16,7 @@ from .utils import (
 )
 
 from functools import partial
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Callable, Union
 
 
 def agreement(
@@ -227,21 +227,22 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     return kappa
 
 
-def krippendorffs_alpha(items, values, distance_function):
+def krippendorffs_alpha(
+    items: Sequence, values: Sequence, distance_function: Union[Callable, str]
+) -> float:
     """
     Calculates Krippendorff's Alpha for the given annotations (item-value pairs),
     using the given distance function.
 
     Args:
         items: Item Ids, identifying items of an annotation.
-        values: Annotation value for a given item id. values[i] was assigned to
-            items[i].
+        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
             default functions pertaining to the level of measurement of the data.
 
-    Returns: Krippendorff's Alpha score.
+    Returns: Value between -1.0 and 1.0, indicating the degree of agreement.
 
     """
     difference_observed, difference_expected = observed_and_expected_differences(
@@ -250,7 +251,9 @@ def krippendorffs_alpha(items, values, distance_function):
     return 1 - difference_observed.mean() / difference_expected.mean()
 
 
-def sigma(items, values, distance_function, p=0.05):
+def sigma(
+    items: Sequence, values: Sequence, distance_function: Union[Callable, str], p=0.05
+) -> float:
     """
     Calculates the Sigma Agreement Measure for the given annotations (item-value pairs),
     using the given distance function.
@@ -258,15 +261,14 @@ def sigma(items, values, distance_function, p=0.05):
 
     Args:
         items: Item Ids, identifying items of an annotation.
-        values: Annotation value for a given item id. values[i] was assigned to
-            items[i].
+        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(values[i], values[j])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
             default functions pertaining to the level of measurement of the data.
-        p: probability threshold determining statistical significance.
+        p: Probability threshold between 0.0 and 1.0 determining statistical significant difference. The lower, the stricter.
 
-    Returns: Sigma.
+    Returns: Value between 0.0 and 1.0, indicating the degree of agreement.
     """
     difference_observed, difference_expected = observed_and_expected_differences(
         items, values, distance_function
