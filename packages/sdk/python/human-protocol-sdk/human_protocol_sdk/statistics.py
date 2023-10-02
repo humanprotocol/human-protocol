@@ -86,6 +86,10 @@ class StatisticsClient:
         self.im_api_key = im_api_key
 
     def get_data_from_im_api(self, param: StatisticsParam):
+        # TODO: Remove this when IM API supports other networks
+        if self.network["name"] != "Polygon":
+            return {}
+
         if param.date_from:
             date_from = datetime.datetime.strftime(param.date_from, "%Y-%m-%d")
         else:
