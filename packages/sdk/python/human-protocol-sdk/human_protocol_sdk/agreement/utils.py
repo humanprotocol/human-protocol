@@ -1,3 +1,5 @@
+"""Module containing helper functions for calculating agreement measures."""
+
 import numpy as np
 from collections import Counter
 from typing import Sequence, Optional, Tuple, Callable
@@ -89,22 +91,24 @@ def label_counts(
     return counts
 
 
-def confusion_matrix_from_sequence(
+def confusion_matrix(
     a: Sequence,
     b: Sequence,
     labels: Optional[Sequence] = None,
     nan_values: Optional[Sequence] = None,
     return_labels=False,
 ):
-    """Generate an N X N confusion matrix from the given sequence of values
-        a and b, where N is the number of unique labels.
+    """Generate an N X N confusion matrix from the given sequence of values a and b, where N is the number of unique labels.
 
     Args:
         a: A sequence of labels.
         b: Another sequence of labels.
-        labels: The to be included in the matrix.
-        nan_values: Values in the records to be counted as invalid.
-        return_labels: Whether to return labels used in the confusion matrix.
+        labels: Sequence of labels to be counted. Entries not found in the list are omitted. No labels are provided, the list of labels is inferred from the given annotations.
+        nan_values: Value to return if input data is invalid. Invalid values will not be counted.
+        return_labels: Whether to return labels with the counts.
+
+    Returns:
+        A confusion matrix. Rows represent labels assigned by b, columns represent labels assigned by a.
     """
     a = np.asarray(a)
     b = np.asarray(b)
@@ -133,14 +137,14 @@ def confusion_matrix_from_sequence(
     a, b = M[np.all(mask, axis=1)].T
 
     # get indices and counts to populate confusion matrix
-    confusion_matrix = np.zeros((n_labels, n_labels), dtype=int)
+    cm = np.zeros((n_labels, n_labels), dtype=int)
     (i, j), counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
-    confusion_matrix[i, j] = counts
+    cm[i, j] = counts
 
     if return_labels:
-        return confusion_matrix, labels
+        return cm, labels
 
-    return confusion_matrix
+    return cm
 
 
 class NormalDistribution:

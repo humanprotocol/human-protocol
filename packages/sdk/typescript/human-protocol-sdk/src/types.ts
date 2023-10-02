@@ -33,6 +33,7 @@ export enum EscrowStatus {
 /**
  * AWS/GCP cloud storage access data
  * @readonly
+ * @deprecated StorageClient is deprecated. Use Minio.Client directly.
  */
 export type StorageCredentials = {
   /**
@@ -45,6 +46,9 @@ export type StorageCredentials = {
   secretKey: string;
 };
 
+/**
+ * @deprecated StorageClient is deprecated. Use Minio.Client directly.
+ */
 export type StorageParams = {
   /**
    * Request endPoint

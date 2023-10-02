@@ -24,14 +24,14 @@
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.4.3",
     "@nestjs/core": "^9.4.3",
-    "@nestjs/platform-express": "^9.4.3",
+    "@nestjs/platform-express": "^10.2.6",
     "ethers": "^5.7.2",
     "joi": "^17.9.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },
   "devDependencies": {
-    "@golevelup/ts-jest": "^0.3.7",
+    "@golevelup/ts-jest": "^0.4.0",
     "@nestjs/cli": "^9.4.3",
     "@nestjs/schematics": "^9.2.0",
     "@nestjs/testing": "^9.4.3",

@@ -9,14 +9,14 @@ jobs:
     name: Publish Python SDK
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: yarn --ignore-scripts
         name: Install dependencies
       - run: yarn build
         name: Build core package
         working-directory: ./packages/core
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.x"
       - name: Install dependencies

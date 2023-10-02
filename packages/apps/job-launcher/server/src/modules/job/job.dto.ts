@@ -9,15 +9,14 @@ import {
   IsDate,
   IsOptional,
   IsObject,
-  IsNumberString
+  IsNumberString,
+  Min,
+  IsNotEmpty,
+  IsEthereumAddress,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import {
-  JobRequestType,
-  JobStatus,
-  JobStatusFilter,
-} from '../../common/enums/job';
-import { EventType, OracleType } from '../../common/enums/webhook';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
+import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -77,11 +76,21 @@ export class JobCvatDto extends JobDto {
   public gtUrl: string;
 
   @ApiProperty()
+  @IsUrl()
+  public userGuide: string;
+
+  @ApiProperty()
   @IsEnum(JobRequestType)
   type: JobRequestType;
 }
 
 export class JobCancelDto {
+  @ApiProperty()
+  @IsNumberString()
+  public id: number;
+}
+
+export class JobIdDto {
   @ApiProperty()
   @IsNumberString()
   public id: number;
@@ -101,6 +110,95 @@ export class JobUpdateDataDto extends JobUpdateDto {
 
   @IsDate()
   public waitUntil: Date;
+}
+export class StakingDetails {
+  @IsEthereumAddress()
+  staker: string;
+
+  @IsNumber()
+  @Min(0)
+  allocated: number;
+
+  @IsNumber()
+  @Min(0)
+  slashed: number;
+}
+
+export class ManifestDetails {
+  @IsNumber()
+  @Min(1)
+  chainId: number;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  description?: string;
+
+  @IsNumber()
+  submissionsRequired: number;
+
+  @IsEthereumAddress()
+  tokenAddress: string;
+
+  @IsNumber()
+  fundAmount: number;
+
+  @IsEthereumAddress()
+  requesterAddress: string;
+
+  @IsEnum(JobRequestType)
+  requestType: JobRequestType;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  exchangeOracleAddress?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  recordingOracleAddress?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  reputationOracleAddress?: string;
+}
+
+export class CommonDetails {
+  @IsEthereumAddress()
+  escrowAddress: string;
+
+  @IsUrl()
+  manifestUrl: string;
+
+  @IsString()
+  manifestHash: string;
+
+  @IsNumber()
+  @Min(0)
+  balance: number;
+
+  @IsNumber()
+  @Min(0)
+  paidOut: number;
+
+  @IsNumber()
+  amountOfTasks?: number;
+}
+
+export class JobDetailsDto {
+  @IsNotEmpty()
+  details: CommonDetails;
+
+  @IsNotEmpty()
+  manifest: ManifestDetails;
+
+  @IsNotEmpty()
+  staking: StakingDetails;
 }
 
 export class SaveManifestDto {
@@ -149,6 +247,9 @@ export class Annotation {
 
   @IsString()
   description: string;
+
+  @IsString()
+  user_guide: string;
 
   @IsEnum(JobRequestType)
   type: JobRequestType;
@@ -219,7 +320,7 @@ export class JobListDto {
   escrowAddress?: string;
   network: string;
   fundAmount: number;
-  status: JobStatusFilter;
+  status: JobStatus;
 }
 
 export class EscrowFailedWebhookDto {
@@ -227,15 +328,15 @@ export class EscrowFailedWebhookDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chain_id: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty()
   @IsString()
-  public escrow_address: string;
+  public escrowAddress: string;
 
   @ApiProperty()
   @IsEnum(EventType)
-  public event_type: EventType;
+  public eventType: EventType;
 
   @ApiProperty()
   @IsString()

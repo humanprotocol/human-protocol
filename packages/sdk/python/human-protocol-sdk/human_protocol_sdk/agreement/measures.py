@@ -1,3 +1,5 @@
+"""Module containing Inter Rater Agreement Measures."""
+
 import numpy as np
 
 from warnings import warn
@@ -152,9 +154,12 @@ def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> flo
 
     Args:
         data: Annotation data.
-        data_format: The format of data. Options are 'im' for an incidence
-            matrix and 'cm' for a confusion matrix. Defaults to 'im'.
-        invalid_return: value to return if result is np.nan. Defaults to np.nan.
+        data_format: The format that the data is in. Must be one of 'im'
+            (incidence matrix) or 'cm' (confusion matrix). Defaults to 'im'.
+        invalid_return: Value between 0.0 and 1.0, indicating the percentage of agreement.
+
+    Returns:
+        Value between 0.0 and 1.0, indicating the percentage of agreement.
     """
     data = np.asarray(data)
 
@@ -177,14 +182,16 @@ def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> flo
     return percent
 
 
-def cohens_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
+def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
     """
     Returns Cohen's Kappa for the provided annotations.
 
     Args:
-         data: Annotation data, provided as K x K confusion matrix, with K =
-            number of labels.
+        data: Annotation data, provided as K x K confusion matrix, with K = number of labels.
         invalid_return: value to return if result is np.nan. Defaults to np.nan.
+
+    Returns:
+        Value between -1.0 and 1.0, indicating the degree of agreement between both raters.
     """
     data = np.asarray(data)
 
@@ -207,6 +214,9 @@ def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
          data: Annotation data, provided as I x K incidence matrix, with
             I = number of items and K = number of labels.
         invalid_return: value to return if result is np.nan. Defaults to np.nan.
+
+    Returns:
+        Value between -1.0 and 1.0, indicating the degree of agreement between all raters.
     """
     data = np.asarray(data)
 
