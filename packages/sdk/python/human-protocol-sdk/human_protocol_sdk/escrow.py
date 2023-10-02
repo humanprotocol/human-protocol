@@ -167,12 +167,13 @@ class EscrowClient:
     A class used to manage escrow on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3):
+    def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
         """
         Initializes a Escrow instance.
 
         Args:
             web3 (Web3): The Web3 object
+            gas_limit (int): Gas limit to be provided to transaction
         """
 
         # Initialize web3 instance
@@ -196,6 +197,7 @@ class EscrowClient:
         self.factory_contract = self.w3.eth.contract(
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
+        self.gas_limit = gas_limit
 
     def create_escrow(
         self, token_address: str, trusted_handlers: List[str], job_requester_id: str
@@ -228,6 +230,7 @@ class EscrowClient:
                 token_address, trusted_handlers, job_requester_id
             ),
             EscrowClientError,
+            self.gas_limit,
         )
         return next(
             (
@@ -270,6 +273,7 @@ class EscrowClient:
                 escrow_config.hash,
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def create_and_setup_escrow(
@@ -332,6 +336,7 @@ class EscrowClient:
             "Fund",
             token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def store_results(self, escrow_address: str, url: str, hash: str) -> None:
@@ -363,6 +368,7 @@ class EscrowClient:
             "Store Results",
             self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def complete(self, escrow_address: str) -> None:
@@ -386,6 +392,7 @@ class EscrowClient:
             "Complete",
             self._get_escrow_contract(escrow_address).functions.complete(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def bulk_payout(
@@ -445,6 +452,7 @@ class EscrowClient:
                 recipients, amounts, final_results_url, final_results_hash, txId
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def cancel(self, escrow_address: str) -> None:
@@ -468,6 +476,7 @@ class EscrowClient:
             "Cancel",
             self._get_escrow_contract(escrow_address).functions.cancel(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def abort(self, escrow_address: str) -> None:
@@ -491,6 +500,7 @@ class EscrowClient:
             "Abort",
             self._get_escrow_contract(escrow_address).functions.abort(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
@@ -519,6 +529,7 @@ class EscrowClient:
                 handlers
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def get_balance(self, escrow_address: str) -> Decimal:

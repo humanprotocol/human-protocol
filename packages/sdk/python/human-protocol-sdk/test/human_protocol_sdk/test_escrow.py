@@ -368,6 +368,7 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_escrow_invalid_token(self):
@@ -442,6 +443,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Setup",
                 mock_contract.functions.setup.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_setup_invalid_address(self):
@@ -595,12 +597,14 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
                 mock_function.assert_called_with(
                     self.w3,
                     "Setup",
                     mock_contract.functions.setup.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_and_setup_escrow_invalid_token(self):
@@ -742,6 +746,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Store Results",
                 mock_contract.functions.storeResults.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_store_results_invalid_address(self):
@@ -867,6 +872,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Bulk Payout",
                 mock_contract.functions.bulkPayOut.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_bulk_payout_invalid_address(self):
@@ -1219,6 +1225,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Complete",
                 mock_contract.functions.complete.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_complete_invalid_address(self):
@@ -1299,6 +1306,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Cancel",
                 mock_contract.functions.cancel.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_cancel_invalid_address(self):
@@ -1378,6 +1386,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Abort",
                 mock_contract.functions.abort.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_abort_invalid_address(self):
@@ -1461,6 +1470,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Add Trusted Handlers",
                 mock_contract.functions.addTrustedHandlers.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_add_trusted_handlers_invalid_address(self):
