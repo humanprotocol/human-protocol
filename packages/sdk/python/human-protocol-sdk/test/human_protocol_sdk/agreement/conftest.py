@@ -65,13 +65,20 @@ def bin_2r_im() -> np.ndarray:
 
 
 @pytest.fixture
-def bin_mr_im() -> np.ndarray:
-    """
-    Returns an incidence matrix (item x class) for a binary classification
-    problem with multiple raters.
-    """
+def bin_mr_annotations() -> np.ndarray:
     return np.asarray(
-        [[3, 0], [2, 1], [2, 1], [2, 1], [1, 2], [0, 3], [0, 3], [1, 2], [1, 2], [1, 2]]
+        [
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 0, 1],
+            [0, 0, 1],
+            [0, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 0],
+            [1, 1, 0],
+            [0, 1, 1],
+        ]
     )
 
 

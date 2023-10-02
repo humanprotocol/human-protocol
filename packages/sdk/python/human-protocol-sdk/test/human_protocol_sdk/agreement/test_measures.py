@@ -100,8 +100,8 @@ def test_percent_agreement_property(annos):
     assert -1.0 <= result <= 1.0
 
 
-def test_cohens_kappa(bin_2r_cm):
-    kappa = cohens_kappa(bin_2r_cm)
+def test_cohens_kappa(annotations_2_raters):
+    kappa = cohens_kappa(annotations_2_raters)
     assert _eq_rounded(kappa, 0.348)
 
 
@@ -110,33 +110,26 @@ def test_cohens_kappa(bin_2r_cm):
 def test_fleiss_kappa_property(cm):
     note(f"Example confusion matrix: {cm}")
     result = cohens_kappa(cm)
-    assert -1.0 <= result <= 1.0 or np.isnan(result)
+    assert -1.0 <= result <= 1.0
 
 
-def test_fleiss_kappa(bin_mr_im):
-    kappa = fleiss_kappa(bin_mr_im)
+def test_fleiss_kappa(bin_mr_annotations):
+    kappa = fleiss_kappa(bin_mr_annotations)
     assert _eq_rounded(kappa, 0.05)
 
 
-@given(im=_incidence_matrix_generator)
+@given(im=_annotation_generator)
 @settings(max_examples=5_000)
 def test_fleiss_kappa_property(im):
     note(f"Example incidence matrix: {im}")
     result = fleiss_kappa(im)
-    assert -1.0 <= result <= 1.0 or np.isnan(result)
-
-
-def test_invalid_return():
-    invalid = "INVALID"
-    assert cohens_kappa([[5]], invalid) == invalid
-    assert fleiss_kappa([[5], [np.nan]], invalid) == invalid
+    assert -1.0 <= result <= 1.0
 
 
 def test_krippendorff():
-    items = np.asarray(["a", "a", "a", "b", "b", "b"])
-    values = np.asarray(["foo", "foo", "foo", "foo", "bar", "bar"])
+    annotations = np.asarray([[0, 0, 0], [0, 1, 1]])
     d = lambda a, b: float(a != b)
-    assert 0.375 == krippendorffs_alpha(items, values, distance_function=d)
+    assert 0.375 == krippendorffs_alpha(annotations, distance_function=d)
 
 
 def test_sigma():
@@ -150,32 +143,25 @@ def test_sigma():
     means = np.arange(n_items)[..., np.newaxis] * 5
     scales = np.arange(n_items)[..., np.newaxis] * 3
     annotations = annotations * scales + means
-    values = annotations.ravel()
-    items = np.repeat(np.arange(n_items), n_annotators)
-    assert 1.0 == sigma(items, values, d)
+    assert 1.0 == sigma(annotations, d)
 
     # worst case, no better than chance, should be 0.0, within difference is no different than between.
     annotations = np.ones((n_items, n_annotators))
     means = np.arange(n_annotators)[np.newaxis, ...]
     scales = np.arange(n_annotators)[np.newaxis, ...] * 3
     annotations = annotations * scales + means
-    values = annotations.ravel()
-    items = np.repeat(np.arange(n_items), n_annotators)
-    assert 0.0 == sigma(items, values, d)
+    assert 0.0 == sigma(annotations, d)
 
     # somewhere inbetween
     annotations = np.random.rand(n_items, n_annotators)
     means = np.random.rand(n_items, 1) * 100
     scales = np.random.randn(n_items, 1) * 10
     annotations = annotations * scales + means
-    values = annotations.ravel()
-    items = np.repeat(np.arange(n_items), n_annotators)
-
-    assert 0.0 <= sigma(items, values, d) <= 1.0
+    assert 0.0 <= sigma(annotations, d)
 
     # p is the criterion for significant difference. as it goes up, it becomes more lenient, so sigma value should increase
     previous = 0.0
     for p in np.arange(1, 10) * 0.1:
-        s = sigma(items, values, d, p)
+        s = sigma(annotations, d, p)
         assert s >= previous
         previous = s

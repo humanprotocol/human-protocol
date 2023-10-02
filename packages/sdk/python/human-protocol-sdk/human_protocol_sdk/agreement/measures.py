@@ -15,6 +15,7 @@ from .utils import (
     label_counts,
     confusion_matrix,
     observed_and_expected_differences,
+    records_from_annotations,
 )
 
 from functools import partial
@@ -148,12 +149,12 @@ def agreement(
     }
 
 
-def percentage(data: np.ndarray) -> float:
+def percentage(annotations: np.ndarray) -> float:
     """
     Returns the overall agreement percentage observed across the data.
 
     Args:
-        data: Annotation data.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
         data_format: The format that the data is in. Must be one of 'im'
             (incidence matrix) or 'cm' (confusion matrix). Defaults to 'im'.
         invalid_return: Value between 0.0 and 1.0, indicating the percentage of agreement.
@@ -161,82 +162,67 @@ def percentage(data: np.ndarray) -> float:
     Returns:
         Value between 0.0 and 1.0, indicating the percentage of agreement.
     """
-    data = np.asarray(data)
-    incidence_matrix = label_counts(data)
+    annotations = np.asarray(annotations)
+    return _percentage_from_label_counts(label_counts(annotations))
 
-    n_raters = np.sum(incidence_matrix, 1)
-    item_agreements = np.sum(incidence_matrix * incidence_matrix, 1) - n_raters
+
+def _percentage_from_label_counts(label_counts):
+    n_raters = np.sum(label_counts, 1)
+    item_agreements = np.sum(label_counts * label_counts, 1) - n_raters
     max_item_agreements = n_raters * (n_raters - 1)
     return item_agreements.sum() / max_item_agreements.sum()
 
 
-def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
+def cohens_kappa(annotations: Sequence) -> float:
     """
     Returns Cohen's Kappa for the provided annotations.
 
     Args:
-        data: Annotation data, provided as K x K confusion matrix, with K = number of labels.
+        annotations: Annotation data, provided as K x K confusion matrix, with K = number of labels.
         invalid_return: value to return if result is np.nan. Defaults to np.nan.
 
     Returns:
         Value between -1.0 and 1.0, indicating the degree of agreement between both raters.
     """
-    data = np.asarray(data)
+    annotations = np.asarray(annotations)
+    cm = confusion_matrix(annotations)
 
-    agreement_observed = np.diag(data).sum() / data.sum()
-    agreement_expected = np.matmul(data.sum(0), data.sum(1)) / data.sum() ** 2
+    agreement_observed = np.diag(cm).sum() / cm.sum()
+    agreement_expected = np.matmul(cm.sum(0), cm.sum(1)) / cm.sum() ** 2
 
-    kappa = (agreement_observed - agreement_expected) / (1 - agreement_expected)
-
-    if np.isnan(kappa):
-        kappa = invalid_return
-
-    return kappa
+    return (agreement_observed - agreement_expected) / (1 - agreement_expected)
 
 
-def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
+def fleiss_kappa(annotations: np.ndarray) -> float:
     """
     Returns Fleisss' Kappa for the provided annotations.
 
     Args:
-         data: Annotation data, provided as I x K incidence matrix, with
-            I = number of items and K = number of labels.
-        invalid_return: value to return if result is np.nan. Defaults to np.nan.
-
+         annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
     Returns:
         Value between -1.0 and 1.0, indicating the degree of agreement between all raters.
     """
-    data = np.asarray(data)
+    annotations = np.asarray(annotations)
+    im = label_counts(annotations)
 
-    agreement_observed = percentage(data, "im")
-
-    class_probabilities = data.sum(0) / data.sum()
+    agreement_observed = _percentage_from_label_counts(im)
+    class_probabilities = im.sum(0) / im.sum()
     agreement_expected = np.power(class_probabilities, 2).sum()
 
-    # in case all votes have been for the same class return percentage
-    if agreement_expected == agreement_observed == 1.0:
-        return 1.0
-
-    kappa = (agreement_observed - agreement_expected) / (1 - agreement_expected)
-
-    if np.isnan(kappa):
-        kappa = invalid_return
-
-    return kappa
+    return (agreement_observed - agreement_expected) / (1 - agreement_expected)
 
 
 def krippendorffs_alpha(
-    items: Sequence, values: Sequence, distance_function: Union[Callable, str]
+    annotations: Sequence[Sequence], distance_function: Union[Callable, str]
 ) -> float:
     """
     Calculates Krippendorff's Alpha for the given annotations (item-value pairs),
     using the given distance function.
 
     Args:
-        items: Item Ids, identifying items of an annotation.
-        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
+        annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
         distance_function: Function to calculate distance between two values.
-            Calling `distance_fn(values[i], values[j])` must return a number.
+            Calling `distance_fn(annotations[i, j], annotations[p, q])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
             default functions pertaining to the level of measurement of the data.
 
@@ -244,13 +230,13 @@ def krippendorffs_alpha(
 
     """
     difference_observed, difference_expected = observed_and_expected_differences(
-        items, values, distance_function
+        annotations, distance_function
     )
     return 1 - difference_observed.mean() / difference_expected.mean()
 
 
 def sigma(
-    items: Sequence, values: Sequence, distance_function: Union[Callable, str], p=0.05
+    annotations: Sequence[Sequence], distance_function: Union[Callable, str], p=0.05
 ) -> float:
     """
     Calculates the Sigma Agreement Measure for the given annotations (item-value pairs),
@@ -258,10 +244,9 @@ def sigma(
     For details, see https://dl.acm.org/doi/fullHtml/10.1145/3485447.3512242.
 
     Args:
-        items: Item Ids, identifying items of an annotation.
-        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
+        annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
         distance_function: Function to calculate distance between two values.
-            Calling `distance_fn(values[i], values[j])` must return a number.
+            Calling `distance_fn(annotations[i, j], annotations[p, q])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
             default functions pertaining to the level of measurement of the data.
         p: Probability threshold between 0.0 and 1.0 determining statistical significant difference. The lower, the stricter.
@@ -269,7 +254,7 @@ def sigma(
     Returns: Value between 0.0 and 1.0, indicating the degree of agreement.
     """
     difference_observed, difference_expected = observed_and_expected_differences(
-        items, values, distance_function
+        annotations, distance_function
     )
     difference_crit = np.quantile(difference_expected, p)
     return np.mean(difference_observed < difference_crit)

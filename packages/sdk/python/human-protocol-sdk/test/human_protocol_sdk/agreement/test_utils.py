@@ -7,24 +7,12 @@ from human_protocol_sdk.agreement.utils import (
 import numpy as np
 
 
-def test_confusion_matrix_from_sequence(
-    seq_values, seq_labels, seq_labels_nan, seq_labels_long, bin_2r_cm
-):
-    assert np.all(confusion_matrix(seq_values, seq_values) == np.eye(4))
-    res = np.eye(3)
-    res[0, 0] = 0
-    assert np.all(
-        confusion_matrix(seq_labels, seq_labels_nan, nan_values=["nan"]) == res
-    )
+def test_confusion_matrix():
+    annotations = np.asarray([["a", "a"], ["b", "b"], ["c", "c"]])
+    assert np.all(confusion_matrix(annotations) == np.eye(3))
 
-    with pytest.raises(ValueError, match="same shape"):
-        confusion_matrix(seq_labels_long, seq_labels_nan)
-
-    with pytest.raises(ValueError, match="1-dimensional"):
-        confusion_matrix(seq_values, bin_2r_cm)
-
-    with pytest.raises(ValueError, match="must have the same kind of dtype"):
-        confusion_matrix(seq_values, seq_labels_nan)
+    annotations = np.asarray([["b", np.nan], ["b", "b"], ["c", "c"]])
+    assert np.all(confusion_matrix(annotations) == np.eye(2))
 
 
 def test_label_counts_from_annotations(annotations_nan, labels):
