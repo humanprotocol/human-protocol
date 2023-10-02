@@ -6,10 +6,36 @@ from hypothesis.strategies import tuples, integers, builds, just
 @pytest.fixture
 def annotations():
     return [
+        ["white", "black", "white"],  # 1 / 3
+        ["white", "white", "white"],  # 3 / 3
+        ["black", "black", "black"],  # 3 / 3
+        ["white", "white", "black"],  # 1 / 3
+    ]
+
+
+@pytest.fixture
+def annotations_nan():
+    return [
         ["white", "black", "white"],
         ["white", "white", "white"],
         ["black", "black", "black"],
-        ["white", "", "black"],
+        ["white", "nan", "black"],
+    ]
+
+
+@pytest.fixture
+def annotations_2_raters():
+    return [
+        ["white", "white"],
+        ["white", "white"],
+        ["black", "white"],
+        ["black", "white"],
+        ["white", "black"],
+        ["black", "black"],
+        ["black", "black"],
+        ["black", "black"],
+        ["black", "black"],
+        ["black", "black"],
     ]
 
 
@@ -95,6 +121,10 @@ _incidence_matrix_generator = tuples(integers(1, 500), integers(2, 50)).map(
 )
 _confusion_matrix_generator = integers(2).map(
     lambda x: np.random.randint(0, 100, size=(x, x))
+)
+
+_annotation_generator = tuples(integers(1, 500), integers(2, 10), integers(2, 5)).map(
+    lambda xs: np.random.randint(0, xs[2], size=(xs[0], xs[1]))
 )
 
 

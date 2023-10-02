@@ -27,8 +27,8 @@ def test_confusion_matrix_from_sequence(
         confusion_matrix(seq_values, seq_labels_nan)
 
 
-def test_label_counts_from_annotations(annotations, labels):
-    counts = label_counts(annotations, labels, return_labels=False)
+def test_label_counts_from_annotations(annotations_nan, labels):
+    counts = label_counts(annotations_nan, labels)
 
     true_counts = np.asarray(
         [
@@ -41,44 +41,28 @@ def test_label_counts_from_annotations(annotations, labels):
 
     assert np.all(counts == true_counts)
 
-    counts, labels = label_counts(annotations, nan_values=[], return_labels=True)
-
-    # empty label is now counted as well
-    true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
-
-    assert np.all(counts == true_counts)
-
-
-def test_label_counts_from_annotations(annotations, labels):
-    counts = label_counts(annotations, labels, return_labels=False)
-
+    # sorting is applied
     true_counts = np.asarray(
         [
-            [2, 1],
-            [3, 0],
+            [1, 2],
             [0, 3],
+            [3, 0],
             [1, 1],
         ]
     )
 
-    assert np.all(counts == true_counts)
-
-    counts, labels = label_counts(annotations, nan_values=[], return_labels=True)
-
-    # empty label is now counted as well
-    true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
-
+    counts = label_counts(annotations_nan)
     assert np.all(counts == true_counts)
 
 
-def test_records_from_annotations(annotations):
-    values, items, annotators = records_from_annotations(annotations)
+def test_records_from_annotations(annotations_nan):
+    values, items, annotators = records_from_annotations(annotations_nan)
     assert len(values) == len(items) == len(annotators)
 
     n_unfiltered = len(values)
-    values, _, _ = records_from_annotations(annotations, nan_values=[""])
+    values, _, _ = records_from_annotations(annotations_nan, nan_values=[""])
     assert len(values) == n_unfiltered - 1
 
-    annotations[-1][-2] = np.nan
-    values, _, _ = records_from_annotations(annotations, nan_values=np.nan)
+    annotations_nan[-1][-2] = np.nan
+    values, _, _ = records_from_annotations(annotations_nan, nan_values=np.nan)
     assert len(values) == n_unfiltered - 1

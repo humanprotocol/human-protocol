@@ -20,20 +20,21 @@ from .conftest import (
     _incidence_matrix_generator,
     _confusion_matrix_generator,
     _eq_rounded,
+    _annotation_generator,
 )
 
 
-def test_agreement(annotations, labels):
+def test_agreement(annotations_nan, labels):
 
     # test if both interfaces match
-    k_agree = agreement(annotations, measure="fleiss_kappa", labels=labels)["results"][
-        "score"
-    ]
-    k_fleiss = fleiss_kappa(label_counts(annotations, labels))
+    k_agree = agreement(annotations_nan, measure="fleiss_kappa", labels=labels)[
+        "results"
+    ]["score"]
+    k_fleiss = fleiss_kappa(label_counts(annotations_nan, labels))
     assert _eq_rounded(k_agree, k_fleiss)
 
     k_agree2 = agreement(
-        label_counts(annotations, labels),
+        label_counts(annotations_nan, labels),
         measure="fleiss_kappa",
         data_format="label_counts",
         labels=labels,
@@ -44,7 +45,7 @@ def test_agreement(annotations, labels):
     measure_kwargs = {"invalid_return": None}
     bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "confidence_level": 0.9}
     res = agreement(
-        annotations,
+        annotations_nan,
         measure="fleiss_kappa",
         labels=labels,
         bootstrap_method="percentile",
@@ -57,7 +58,7 @@ def test_agreement(annotations, labels):
     # test warnings
     with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
         res = agreement(
-            annotations,
+            annotations_nan,
             measure="cohens_kappa",
             labels=labels,
             bootstrap_method="percentile",
@@ -66,11 +67,11 @@ def test_agreement(annotations, labels):
         assert res["results"]["confidence_level"] == -100.0
 
     with pytest.warns(UserWarning, match="more than two annotators"):
-        agreement(annotations, measure="cohens_kappa")
+        agreement(annotations_nan, measure="cohens_kappa")
 
     # test errors
     with pytest.raises(ValueError, match="single annotator"):
-        annos = np.asarray(annotations).reshape(-1, 1)
+        annos = np.asarray(annotations_nan).reshape(-1, 1)
         agreement(annos, measure="cohens_kappa")
 
     with pytest.raises(ValueError, match="Combination of"):
@@ -85,29 +86,18 @@ def test_agreement(annotations, labels):
         agreement(annos, measure="foo")
 
 
-def test_percent_agreement(bin_2r_cm, bin_2r_im, single_anno_cm, wrong_dtype_cm):
-    percent = percentage(bin_2r_cm, "cm")
-    assert _eq_rounded(percent, 0.7)
-
-    percentage_incidence = percentage(bin_2r_im, "im")
-    assert _eq_rounded(percent, percentage_incidence)
-
-    with pytest.raises(ValueError, match="have more than 1 annotation"):
-        percentage(single_anno_cm, "cm")
-
-    with pytest.raises(ValueError, match="must be a square"):
-        percentage(bin_2r_im, "cm")
-
-    with pytest.raises(ValueError, match="must be a numeric"):
-        percentage(wrong_dtype_cm)
+def test_percent_agreement(annotations, annotations_nan, annotations_2_raters):
+    assert percentage(annotations_2_raters) == 0.7
+    assert _eq_rounded(percentage(annotations), 0.667, 3)
+    assert _eq_rounded(percentage(annotations_nan), 0.7, 3)
 
 
-@given(im=_incidence_matrix_generator)
+@given(annos=_annotation_generator)
 @settings(max_examples=5_000)
-def test_percent_agreement_property(im):
-    note(f"Example incidence matrix: {im}")
-    result = percentage(im, "im")
-    assert -1.0 <= result <= 1.0 or np.isnan(result)
+def test_percent_agreement_property(annos):
+    note(f"Example annotations: {annos}")
+    result = percentage(annos)
+    assert -1.0 <= result <= 1.0
 
 
 def test_cohens_kappa(bin_2r_cm):

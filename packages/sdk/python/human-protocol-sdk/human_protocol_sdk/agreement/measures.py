@@ -148,7 +148,7 @@ def agreement(
     }
 
 
-def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> float:
+def percentage(data: np.ndarray) -> float:
     """
     Returns the overall agreement percentage observed across the data.
 
@@ -162,24 +162,12 @@ def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> flo
         Value between 0.0 and 1.0, indicating the percentage of agreement.
     """
     data = np.asarray(data)
+    incidence_matrix = label_counts(data)
 
-    match data_format:
-        case "cm":
-            validate_confusion_matrix(data)
-            percent = np.diag(data).sum() / data.sum()
-        case _:
-            # implicitly assumes incidence matrix
-            validate_incidence_matrix(data)
-
-            n_raters = np.sum(data, 1)
-            item_agreements = np.sum(data * data, 1) - n_raters
-            max_item_agreements = n_raters * (n_raters - 1)
-            percent = item_agreements.sum() / max_item_agreements.sum()
-
-    if np.isnan(percent):
-        percent = invalid_return
-
-    return percent
+    n_raters = np.sum(incidence_matrix, 1)
+    item_agreements = np.sum(incidence_matrix * incidence_matrix, 1) - n_raters
+    max_item_agreements = n_raters * (n_raters - 1)
+    return item_agreements.sum() / max_item_agreements.sum()
 
 
 def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
@@ -195,7 +183,7 @@ def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
     """
     data = np.asarray(data)
 
-    agreement_observed = percentage(data, "cm")
+    agreement_observed = np.diag(data).sum() / data.sum()
     agreement_expected = np.matmul(data.sum(0), data.sum(1)) / data.sum() ** 2
 
     kappa = (agreement_observed - agreement_expected) / (1 - agreement_expected)

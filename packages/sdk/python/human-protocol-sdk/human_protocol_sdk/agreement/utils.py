@@ -3,6 +3,7 @@
 import numpy as np
 from collections import Counter
 from typing import Sequence, Optional, Tuple, Callable
+from math import nan, isnan
 
 from pyerf import erf, erfinv
 
@@ -13,29 +14,19 @@ from .validations import (
 )
 
 
-def _filter_labels(labels: Sequence, exclude=None):
+def _filter_labels(labels: Sequence):
     """
-    Filters the given sequence of labels, based on the given exclusion values.
+    Filters None and nan values from the given labels.
 
     Args:
         labels: The labels to filter.
-        exclude: The list of labels to exclude.
 
     Returns: A list of labels without the given list of labels to exclude.
 
     """
-    if exclude is None:
-        return np.asarray(labels)
-
     # map to preserve label order if user defined labels are passed
-    label_to_id = {label: i for i, label in enumerate(labels)}
-    exclude = set(exclude)
-
-    labels = sorted(
-        set(labels).difference(exclude), key=lambda x: label_to_id.get(x, -1)
-    )
-
-    return np.asarray(labels)
+    nan_values = {np.nan, nan, None, "nan"}
+    return np.asarray([label for label in labels if label not in nan_values])
 
 
 def _is_nan(data: np.ndarray, nan_values: Optional[Sequence] = None):
@@ -56,7 +47,6 @@ def _is_nan(data: np.ndarray, nan_values: Optional[Sequence] = None):
 def label_counts(
     annotations: Sequence,
     labels=None,
-    nan_values: Optional[Sequence] = None,
     return_labels=False,
 ):
     """Converts the given sequence of item annotations to an array of label counts per item.
@@ -77,7 +67,7 @@ def label_counts(
     if labels is None:
         labels = np.unique(annotations)
 
-    labels = _filter_labels(labels, nan_values)
+    labels = _filter_labels(labels)
 
     def lcs(annotations, labels):
         c = Counter(annotations)
