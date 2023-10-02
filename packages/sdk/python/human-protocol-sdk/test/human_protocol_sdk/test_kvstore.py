@@ -77,7 +77,11 @@ class KVStoreTestCase(unittest.TestCase):
 
             mock_function.assert_called_once_with(key, value)
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Set", mock_function.return_value, KVStoreClientError
+                self.w3,
+                "Set",
+                mock_function.return_value,
+                KVStoreClientError,
+                None,
             )
 
     def test_set_empty_key(self):
@@ -114,7 +118,11 @@ class KVStoreTestCase(unittest.TestCase):
 
             mock_function.assert_called_once_with(keys, values)
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Set Bulk", mock_function.return_value, KVStoreClientError
+                self.w3,
+                "Set Bulk",
+                mock_function.return_value,
+                KVStoreClientError,
+                None,
             )
 
     def test_set_bulk_empty_key(self):

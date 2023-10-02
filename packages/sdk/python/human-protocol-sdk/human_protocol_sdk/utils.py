@@ -10,7 +10,7 @@ from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt
 
-from human_protocol_sdk.constants import ARTIFACTS_FOLDER
+from human_protocol_sdk.constants import ARTIFACTS_FOLDER, GAS_LIMIT
 
 logger = logging.getLogger("human_protocol_sdk.utils")
 
@@ -208,7 +208,13 @@ def get_data_from_subgraph(url: str, query: str, params: dict = None):
         )
 
 
-def handle_transaction(w3: Web3, tx_name, tx, exception):
+def handle_transaction(
+    w3: Web3,
+    tx_name: str,
+    tx,
+    exception: Exception,
+    gas_limit: Optional[int] = None,
+):
     """Executes the transaction and waits for the receipt.
 
     Args:
@@ -231,7 +237,7 @@ def handle_transaction(w3: Web3, tx_name, tx, exception):
             "You must add construct_sign_and_send_raw_middleware middleware to Web3 instance"
         )
     try:
-        tx_hash = tx.transact()
+        tx_hash = tx.transact({"gas": gas_limit or GAS_LIMIT})
         return w3.eth.wait_for_transaction_receipt(tx_hash)
     except Exception as e:
         if "reverted with reason string" in e.args[0]:
