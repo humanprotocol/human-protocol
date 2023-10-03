@@ -4,7 +4,7 @@ import { ImageLabelBinaryJobResults } from '../src/modules/webhook/webhook.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
-export const MOCK_ADDRESS = '0x1234567890abcdef';
+export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_FILE_URL = 'mockedFileUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';

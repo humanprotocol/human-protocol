@@ -35,7 +35,7 @@
     "@nestjs/core": "^9.4.3",
     "@nestjs/jwt": "^10.0.3",
     "@nestjs/passport": "^10.0.0",
-    "@nestjs/platform-express": "^9.4.3",
+    "@nestjs/platform-express": "^10.2.6",
     "@nestjs/schedule": "^3.0.1",
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.0.6",
@@ -44,8 +44,8 @@
     "@sendgrid/mail": "^7.7.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/express-session": "^1.17.7",
-    "@types/passport-jwt": "^3.0.8",
-    "bcrypt": "^5.1.0",
+    "@types/passport-jwt": "^3.0.10",
+    "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "cookie-parser": "^1.4.6",
     "decimal.js": "^10.4.3",
@@ -63,7 +63,7 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
-    "@golevelup/ts-jest": "^0.3.7",
+    "@golevelup/ts-jest": "^0.4.0",
     "@nestjs/cli": "^9.4.3",
     "@nestjs/schematics": "^9.2.0",
     "@nestjs/testing": "^9.4.3",

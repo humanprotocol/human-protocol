@@ -5,10 +5,13 @@ import {
   FindManyOptions,
   FindOneOptions,
   Repository,
+  In,
 } from 'typeorm';
 import { JobEntity } from './job.entity';
 import { JobCreateDto, JobUpdateDataDto } from './job.dto';
 import { ErrorJob } from '../../common/constants/errors';
+import { JobStatus, JobStatusFilter } from '../../common/enums/job';
+import { ChainId } from '@human-protocol/sdk';
 
 @Injectable()
 export class JobRepository {
@@ -61,6 +64,34 @@ export class JobRepository {
         createdAt: 'DESC',
       },
       ...options,
+    });
+  }
+
+  public async findJobsByStatusFilter(
+    chainIds: ChainId[],
+    userId: number,
+    status: JobStatusFilter,
+    skip: number,
+    limit: number,
+  ): Promise<JobEntity[]> {
+    const statusFilter =
+      status === JobStatusFilter.PENDING
+        ? In([JobStatus.PENDING, JobStatus.PAID])
+        : In([status]);
+
+    return await this.find(
+      { userId, status: statusFilter, chainId: In(chainIds) },
+      { skip, take: limit },
+    );
+  }
+
+  public async findJobsByEscrowAddresses(
+    userId: number,
+    escrowAddresses: string[],
+  ): Promise<JobEntity[]> {
+    return await this.find({
+      userId,
+      escrowAddress: In(escrowAddresses),
     });
   }
 

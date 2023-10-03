@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { EscrowStatus } from './types';
+import { ChainId } from './enums';
 
 export interface IAllocation {
   escrowAddress: string;
@@ -42,9 +43,11 @@ export interface IEscrowsFilter {
   reputationOracle?: string;
   recordingOracle?: string;
   exchangeOracle?: string;
+  jobRequesterId?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
+  networks: ChainId[];
 }
 
 export interface IEscrowConfig {
@@ -69,4 +72,11 @@ export interface IStatisticsParams {
   from?: Date;
   to?: Date;
   limit?: number;
+}
+
+export interface IPayoutFilter {
+  escrowAddress?: string;
+  recipient?: string;
+  from?: Date;
+  to?: Date;
 }

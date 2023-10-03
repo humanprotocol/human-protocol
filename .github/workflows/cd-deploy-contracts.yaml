@@ -35,7 +35,7 @@ jobs:
       BSC_API_KEY: ${{ secrets.BSC_API_KEY }}
       MOONSCAN_API_KEY: ${{ secrets.MOONSCAN_API_KEY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}
       - name: Install dependencies
@@ -155,7 +155,7 @@ jobs:
           git stash --include-untracked
       - name: Checkout develop
         if: always() && steps.check_changes.outputs.changes == 'true'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: develop
           token: ${{ secrets.GH_TOKEN_CD_CONTRACTS }}

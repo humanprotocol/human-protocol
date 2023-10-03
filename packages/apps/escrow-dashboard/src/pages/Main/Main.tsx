@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import {
   EscrowContainer,
-  LeaderboardContainer,
+  // LeaderboardContainer,
   TokenContainer,
   SolvedTasksContainer,
   PageWrapper,
@@ -14,7 +14,7 @@ export const Main: FC = () => {
       <SolvedTasksContainer />
       <EscrowContainer />
       <TokenContainer />
-      <LeaderboardContainer showAll={false} />
+      {/* <LeaderboardContainer showAll={false} /> */}
     </PageWrapper>
   );
 };

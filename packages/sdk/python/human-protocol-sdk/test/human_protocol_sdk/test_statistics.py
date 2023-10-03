@@ -3,7 +3,9 @@ from datetime import datetime
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.filter import PayoutFilter
 from human_protocol_sdk.gql.hmtoken import get_holders_query
+from human_protocol_sdk.gql.payout import get_payouts_query
 from human_protocol_sdk.gql.statistics import (
     get_event_day_data_query,
     get_escrow_statistics_query,
@@ -18,6 +20,8 @@ from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
+MOCK_API_KEY = "mock_api_key"
+
 
 class StatisticsTestCase(unittest.TestCase):
     def setUp(self):
@@ -27,7 +31,7 @@ class StatisticsTestCase(unittest.TestCase):
         self.mock_chain_id = ChainId.LOCALHOST.value
         type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
 
-        self.statistics = StatisticsClient(self.w3)
+        self.statistics = StatisticsClient(self.w3, MOCK_API_KEY)
 
     def test_init_with_valid_inputs(self):
         mock_provider = MagicMock(spec=HTTPProvider)
@@ -36,7 +40,7 @@ class StatisticsTestCase(unittest.TestCase):
         mock_chain_id = ChainId.LOCALHOST.value
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
-        statistics = StatisticsClient(w3)
+        statistics = StatisticsClient(w3, MOCK_API_KEY)
 
         self.assertEqual(statistics.w3, w3)
         self.assertEqual(statistics.network, NETWORKS[ChainId(mock_chain_id)])
@@ -49,7 +53,7 @@ class StatisticsTestCase(unittest.TestCase):
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         with self.assertRaises(StatisticsClientError) as cm:
-            StatisticsClient(w3)
+            StatisticsClient(w3, MOCK_API_KEY)
         self.assertEqual(f"Invalid ChainId: {mock_chain_id}", str(cm.exception))
 
     def test_init_with_invalid_web3(self):
@@ -60,8 +64,54 @@ class StatisticsTestCase(unittest.TestCase):
         type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
 
         with self.assertRaises(StatisticsClientError) as cm:
-            StatisticsClient(w3)
+            StatisticsClient(w3, MOCK_API_KEY)
         self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
+
+    def test_get_task_statistics(self):
+        param = StatisticsParam(
+            date_from=datetime.fromtimestamp(1683811973),
+            date_to=datetime.fromtimestamp(1683812007),
+        )
+        mock_function = MagicMock()
+
+        with patch.object(
+            self.statistics,
+            "get_data_from_im_api",
+        ) as mock_function:
+            mock_function.side_effect = [
+                {
+                    "2023-09-30": {"served": 784983, "solved": 761730},
+                    "2023-10-01": {"served": 772217, "solved": 749837},
+                    "2023-10-02": {"served": 877682, "solved": 852250},
+                },
+            ]
+
+            task_statistics = self.statistics.get_task_statistics(param)
+
+            mock_function.assert_any_call(param)
+
+            self.assertEqual(
+                task_statistics,
+                {
+                    "daily_tasks_data": [
+                        {
+                            "timestamp": datetime.strptime("2023-09-30", "%Y-%m-%d"),
+                            "tasks_total": 784983,
+                            "tasks_solved": 761730,
+                        },
+                        {
+                            "timestamp": datetime.strptime("2023-10-01", "%Y-%m-%d"),
+                            "tasks_total": 772217,
+                            "tasks_solved": 749837,
+                        },
+                        {
+                            "timestamp": datetime.strptime("2023-10-02", "%Y-%m-%d"),
+                            "tasks_total": 877682,
+                            "tasks_solved": 852250,
+                        },
+                    ],
+                },
+            )
 
     def test_get_escrow_statistics(self):
         param = StatisticsParam(
@@ -138,31 +188,53 @@ class StatisticsTestCase(unittest.TestCase):
         )
         mock_function = MagicMock()
 
-        with patch(
-            "human_protocol_sdk.statistics.get_data_from_subgraph"
-        ) as mock_function:
+        mock_function_1 = MagicMock()
+
+        with (
+            patch.object(
+                self.statistics,
+                "get_data_from_im_api",
+            ) as mock_function,
+            patch(
+                "human_protocol_sdk.statistics.get_data_from_subgraph",
+            ) as mock_function_1,
+        ):
             mock_function.side_effect = [
                 {
-                    "data": {
-                        "eventDayDatas": [
-                            {
-                                "timestamp": 1,
-                                "dailyBulkPayoutEventCount": "1",
-                                "dailyWorkerCount": "2",
-                            },
-                        ],
-                    }
+                    "2023-09-30": {"served": 784983, "solved": 761730},
+                    "2023-10-01": {"served": 772217, "solved": 749837},
+                    "2023-10-02": {"served": 877682, "solved": 852250},
                 },
             ]
+            mock_function_1.return_value = {
+                "data": {
+                    "payouts": [
+                        {
+                            "timestamp": 1,
+                            "recipient": "0x123",
+                        },
+                    ],
+                }
+            }
 
             worker_statistics = self.statistics.get_worker_statistics(param)
 
-            mock_function.assert_any_call(
+            mock_function.assert_any_call(param)
+
+            payout_from = datetime.strptime("2023-09-30", "%Y-%m-%d")
+            payout_to = datetime.strptime("2023-10-01", "%Y-%m-%d")
+
+            mock_function_1.assert_any_call(
                 "subgraph_url",
-                query=get_event_day_data_query(param),
+                query=get_payouts_query(
+                    PayoutFilter(
+                        date_from=payout_from,
+                        date_to=payout_to,
+                    )
+                ),
                 params={
-                    "from": 1683811973,
-                    "to": 1683812007,
+                    "from": int(payout_from.timestamp()),
+                    "to": int(payout_to.timestamp()),
                 },
             )
 
@@ -171,9 +243,19 @@ class StatisticsTestCase(unittest.TestCase):
                 {
                     "daily_workers_data": [
                         {
-                            "timestamp": datetime.fromtimestamp(1),
-                            "active_workers": 2,
-                            "average_jobs_solved": 0.5,
+                            "timestamp": datetime.strptime("2023-09-30", "%Y-%m-%d"),
+                            "active_workers": 1,
+                            "average_jobs_solved": 761730,
+                        },
+                        {
+                            "timestamp": datetime.strptime("2023-10-01", "%Y-%m-%d"),
+                            "active_workers": 1,
+                            "average_jobs_solved": 749837,
+                        },
+                        {
+                            "timestamp": datetime.strptime("2023-10-02", "%Y-%m-%d"),
+                            "active_workers": 1,
+                            "average_jobs_solved": 852250,
                         },
                     ],
                 },

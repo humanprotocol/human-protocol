@@ -10,18 +10,12 @@ import {
   IsOptional,
   IsObject,
   IsNumberString,
-  ArrayNotEmpty, 
-  Min, 
-  Max, 
-  IsNotEmpty, 
-  IsEthereumAddress
+  Min,
+  IsNotEmpty,
+  IsEthereumAddress,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import {
-  JobRequestType,
-  JobStatus,
-  JobStatusFilter,
-} from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 
 export class JobCreateDto {
@@ -158,17 +152,20 @@ export class ManifestDetails {
   @IsEnum(JobRequestType)
   requestType: JobRequestType;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  exchangeOracleAddress: string;
+  exchangeOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  recordingOracleAddress: string;
+  recordingOracleAddress?: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  reputationOracleAddress: string;
+  reputationOracleAddress?: string;
 }
 
 export class CommonDetails {
@@ -203,7 +200,6 @@ export class JobDetailsDto {
   @IsNotEmpty()
   staking: StakingDetails;
 }
-
 
 export class SaveManifestDto {
   public manifestUrl: string;
@@ -324,7 +320,7 @@ export class JobListDto {
   escrowAddress?: string;
   network: string;
   fundAmount: number;
-  status: JobStatusFilter;
+  status: JobStatus;
 }
 
 export class EscrowFailedWebhookDto {
@@ -332,15 +328,15 @@ export class EscrowFailedWebhookDto {
     enum: ChainId,
   })
   @IsEnum(ChainId)
-  public chain_id: ChainId;
+  public chainId: ChainId;
 
   @ApiProperty()
   @IsString()
-  public escrow_address: string;
+  public escrowAddress: string;
 
   @ApiProperty()
   @IsEnum(EventType)
-  public event_type: EventType;
+  public eventType: EventType;
 
   @ApiProperty()
   @IsString()

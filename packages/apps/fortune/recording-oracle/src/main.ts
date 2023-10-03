@@ -50,6 +50,9 @@ async function bootstrap() {
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        secure: true,
+      },
     }),
   );
   app.use(json({ limit: '5mb' }));

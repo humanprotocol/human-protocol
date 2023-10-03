@@ -5,11 +5,11 @@ import { ErrorSignature } from '../constants/errors';
 export function verifySignature(
   message: object | string,
   signature: string,
-  address: string,
+  addresses: string[],
 ): boolean {
   const signer = recoverSigner(message, signature);
 
-  if (signer.toLowerCase() !== address.toLowerCase()) {
+  if (!addresses.some(address => address.toLowerCase() === signer.toLowerCase())) {
     throw new ConflictException(ErrorSignature.SignatureNotVerified);
   }
 
@@ -37,7 +37,7 @@ export function recoverSigner(
   if (typeof message !== 'string') {
     message = JSON.stringify(message);
   }
-  
+
   try {
     return ethers.utils.verifyMessage(message, signature);
   } catch (e) {

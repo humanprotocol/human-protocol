@@ -1,7 +1,7 @@
 import { StakingClient } from './staking';
 import { StorageClient } from './storage';
 import { KVStoreClient } from './kvstore';
-import { EscrowClient } from './escrow';
+import { EscrowClient, EscrowUtils } from './escrow';
 import { StatisticsClient } from './statistics';
 
 export * from './constants';
@@ -14,5 +14,6 @@ export {
   StorageClient,
   KVStoreClient,
   EscrowClient,
+  EscrowUtils,
   StatisticsClient,
 };
