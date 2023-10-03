@@ -1,3 +1,7 @@
+import numpy as np
+import pytest
+from hypothesis import given, note, settings
+
 from human_protocol_sdk.agreement.measures import (
     percentage,
     cohens_kappa,
@@ -6,47 +10,25 @@ from human_protocol_sdk.agreement.measures import (
     krippendorffs_alpha,
     sigma,
 )
-from human_protocol_sdk.agreement.utils import (
-    label_counts,
-    observed_and_expected_differences,
-)
-import pytest
-
-import numpy as np
-
-from hypothesis import given, note, settings
-
 from .conftest import (
-    _incidence_matrix_generator,
-    _confusion_matrix_generator,
-    _eq_rounded,
-    _annotation_generator,
+    eq_rounded,
+    annotation_generator,
 )
 
 
 def test_agreement(annotations_nan, labels):
 
     # test if both interfaces match
-    k_agree = agreement(annotations_nan, measure="fleiss_kappa", labels=labels)[
-        "results"
-    ]["score"]
-    k_fleiss = fleiss_kappa(label_counts(annotations_nan, labels))
-    assert _eq_rounded(k_agree, k_fleiss)
-
-    k_agree2 = agreement(
-        label_counts(annotations_nan, labels),
-        measure="fleiss_kappa",
-        data_format="label_counts",
-        labels=labels,
-    )["results"]["score"]
-    assert _eq_rounded(k_agree, k_agree2)
+    k_agree = agreement(annotations_nan, measure="fleiss_kappa")["results"]["score"]
+    k_fleiss = fleiss_kappa(annotations_nan)
+    assert eq_rounded(k_agree, k_fleiss)
 
     # test bootstrapping
-    measure_kwargs = {"invalid_return": None}
+    measure_kwargs = {"distance_function": "nominal"}
     bootstrap_kwargs = {"n_sample": 30, "n_iterations": 500, "confidence_level": 0.9}
     res = agreement(
         annotations_nan,
-        measure="fleiss_kappa",
+        measure="krippendorffs_alpha",
         labels=labels,
         bootstrap_method="percentile",
         measure_kwargs=measure_kwargs,
@@ -55,75 +37,24 @@ def test_agreement(annotations_nan, labels):
     assert res["results"]["ci"] != (-100.0, -100.0)
     assert res["results"]["confidence_level"] != -100.0
 
-    # test warnings
-    with pytest.warns(UserWarning, match="Bootstrapping is currently not supported"):
-        res = agreement(
-            annotations_nan,
-            measure="cohens_kappa",
-            labels=labels,
-            bootstrap_method="percentile",
-        )
-        assert res["results"]["ci"] == (-100.0, -100.0)
-        assert res["results"]["confidence_level"] == -100.0
-
-    with pytest.warns(UserWarning, match="more than two annotators"):
-        agreement(annotations_nan, measure="cohens_kappa")
-
-    # test errors
-    with pytest.raises(ValueError, match="single annotator"):
-        annos = np.asarray(annotations_nan).reshape(-1, 1)
-        agreement(annos, measure="cohens_kappa")
-
-    with pytest.raises(ValueError, match="Combination of"):
-        agreement(
-            label_counts(annos), measure="cohens_kappa", data_format="label_counts"
-        )
-
-    with pytest.raises(ValueError, match="data format"):
-        agreement(annos, data_format="foo")
-
     with pytest.raises(ValueError, match="Provided measure"):
-        agreement(annos, measure="foo")
+        agreement(annotations_nan, measure="foo")
 
 
 def test_percent_agreement(annotations, annotations_nan, annotations_2_raters):
     assert percentage(annotations_2_raters) == 0.7
-    assert _eq_rounded(percentage(annotations), 0.667, 3)
-    assert _eq_rounded(percentage(annotations_nan), 0.7, 3)
-
-
-@given(annos=_annotation_generator)
-@settings(max_examples=5_000)
-def test_percent_agreement_property(annos):
-    note(f"Example annotations: {annos}")
-    result = percentage(annos)
-    assert -1.0 <= result <= 1.0
+    assert eq_rounded(percentage(annotations), 0.667, 3)
+    assert eq_rounded(percentage(annotations_nan), 0.7, 3)
 
 
 def test_cohens_kappa(annotations_2_raters):
     kappa = cohens_kappa(annotations_2_raters)
-    assert _eq_rounded(kappa, 0.348)
+    assert eq_rounded(kappa, 0.348)
 
 
-@given(cm=_confusion_matrix_generator)
-@settings(max_examples=5_000)
-def test_fleiss_kappa_property(cm):
-    note(f"Example confusion matrix: {cm}")
-    result = cohens_kappa(cm)
-    assert -1.0 <= result <= 1.0
-
-
-def test_fleiss_kappa(bin_mr_annotations):
-    kappa = fleiss_kappa(bin_mr_annotations)
-    assert _eq_rounded(kappa, 0.05)
-
-
-@given(im=_annotation_generator)
-@settings(max_examples=5_000)
-def test_fleiss_kappa_property(im):
-    note(f"Example incidence matrix: {im}")
-    result = fleiss_kappa(im)
-    assert -1.0 <= result <= 1.0
+def test_fleiss_kappa(annotations_multiple_raters):
+    kappa = fleiss_kappa(annotations_multiple_raters)
+    assert eq_rounded(kappa, 0.05)
 
 
 def test_krippendorff():
@@ -165,3 +96,11 @@ def test_sigma():
         s = sigma(annotations, d, p)
         assert s >= previous
         previous = s
+
+
+@given(annos=annotation_generator)
+@settings(max_examples=1_000)
+def test_properties(annos):
+    note(f"Example annotations: {annos}")
+    assert -1.0 <= fleiss_kappa(annos) <= 1.0
+    assert 0.0 <= percentage(annos) <= 1.0

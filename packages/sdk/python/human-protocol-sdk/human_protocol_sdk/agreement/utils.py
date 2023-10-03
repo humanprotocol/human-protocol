@@ -1,17 +1,11 @@
 """Module containing helper functions for calculating agreement measures."""
 
-import numpy as np
 from collections import Counter
-from typing import Sequence, Optional, Tuple, Callable
-from math import nan, isnan
+from math import nan
+from typing import Sequence, Optional, Tuple
 
+import numpy as np
 from pyerf import erf, erfinv
-
-from .validations import (
-    validate_nd,
-    validate_equal_shape,
-    validate_same_dtype,
-)
 
 
 def _filter_labels(labels: Sequence):
@@ -30,12 +24,7 @@ def _filter_labels(labels: Sequence):
 
 
 def _is_nan(data: np.ndarray, axis=None):
-    """Returns a logical index of to filter nan in the given np.ndarray.
-
-    Args:
-        data: The values to filter.
-        axis: Over which axis to aggregate the resulting mask.
-    """
+    """np.isnan but for any data type."""
     try:
         mask = np.isnan(data)
     except TypeError:
@@ -45,6 +34,11 @@ def _is_nan(data: np.ndarray, axis=None):
         mask = np.any(mask, axis=axis)
 
     return mask
+
+
+def _is_in(data: np.ndarray, elements: np.ndarray):
+    """Checks if data is in elements. Faster than using np.isin."""
+    return data[..., np.newaxis] == elements
 
 
 def label_counts(

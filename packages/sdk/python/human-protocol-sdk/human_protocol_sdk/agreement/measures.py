@@ -1,33 +1,20 @@
 """Module containing Inter Rater Agreement Measures."""
 
-import numpy as np
-
-from warnings import warn
-
-from .validations import (
-    validate_incidence_matrix,
-    validate_confusion_matrix,
-)
-
-from .bootstrap import confidence_intervals
-
-from .utils import (
-    label_counts,
-    confusion_matrix,
-    observed_and_expected_differences,
-    records_from_annotations,
-)
-
+from copy import copy
 from functools import partial
 from typing import Sequence, Optional, Callable, Union
+from warnings import warn
+
+import numpy as np
+
+from .bootstrap import confidence_intervals
+from .utils import label_counts, confusion_matrix, observed_and_expected_differences
 
 
 def agreement(
-    data: Sequence,
-    measure="fleiss_kappa",
-    data_format="annotations",
+    annotations: Sequence,
+    measure="krippendorffs_alpha",
     labels: Optional[Sequence] = None,
-    nan_values: Optional[Sequence] = None,
     bootstrap_method: Optional[str] = None,
     bootstrap_kwargs: Optional[dict] = None,
     measure_kwargs: Optional[dict] = None,
@@ -36,11 +23,9 @@ def agreement(
     Calculates agreement across the given data using the given method.
 
     Args:
-        data: Annotated data.
+        annotations: Annotated data.
         measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
-        data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
         labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
-        nan_values: Values to be counted as invalid and filter out from the data.
         bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
             must be one of 'percentile' or 'bca'.
         bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
@@ -48,49 +33,18 @@ def agreement(
 
     Returns: A dictionary containing the keys "results" and "config". Results contains the scores, while config contains parameters that produced the results.
     """
-    orig_data = np.array(data)  # copy of original data for config
-    data = np.asarray(data)
+    orig_data = copy(annotations)  # copy of original data for config
+    annotations = np.asarray(annotations)
 
-    # convert data
-    match data_format:
-        case "annotations":
-            if measure == "cohens_kappa":
-                # input validation
-                if data.shape[1] < 2:  # only a single annotator present
-                    raise ValueError(
-                        "Annotations contain only a single annotator. "
-                        "Must exactly contain two"
-                    )
-                elif data.shape[1] > 2:
-                    warn(
-                        "Annotations contain more than two annotators. Only first"
-                        ' two will be regarded. Consider using method "fleiss_kappa".'
-                    )
+    # make sure, the string representation of nan fits in array
+    if annotations.dtype.kind == "U" and annotations.itemsize < 3:
+        annotations = annotations.astype("<U3")
 
-                data, labels = confusion_matrix(
-                    data.T[0],
-                    data.T[1],
-                    labels=labels,
-                    nan_values=nan_values,
-                    return_labels=True,
-                )
-            else:
-                data, labels = label_counts(
-                    data, labels=labels, nan_values=nan_values, return_labels=True
-                )
-        case "label_counts":
-            validate_incidence_matrix(data)
-
-            if measure == "cohens_kappa":
-                raise ValueError(
-                    f"Combination of measure='label_counts' and "
-                    f"measure='cohens_kappa' is not supported."
-                )
-        case _:
-            raise ValueError(
-                f"data format '{data_format}' is not supported."
-                f"Must be either 'annotations' or 'label_counts'."
-            )
+    # filter out labels not in given set
+    if labels is not None:
+        labels = np.asarray(labels)
+        nan_mask = ~np.any(annotations[..., np.newaxis] == labels, axis=-1)
+        annotations[nan_mask] = np.nan
 
     match measure:
         case "fleiss_kappa":
@@ -99,6 +53,10 @@ def agreement(
             fn = cohens_kappa
         case "percentage":
             fn = percentage
+        case "krippendorffs_alpha":
+            fn = krippendorffs_alpha
+        case "sigma":
+            fn = sigma
         case _:
             raise ValueError(f"Provided measure {measure} is not supported.")
 
@@ -107,7 +65,7 @@ def agreement(
         measure_kwargs = {}
 
     fn = partial(fn, **measure_kwargs)
-    score = fn(data)
+    score = fn(annotations)
 
     # calculate bootstrap
     if bootstrap_method is None:
@@ -123,10 +81,14 @@ def agreement(
                 bootstrap_kwargs = {}
 
             ci, _ = confidence_intervals(
-                data, statistic_fn=fn, algorithm=bootstrap_method, **bootstrap_kwargs
+                annotations,
+                statistic_fn=fn,
+                algorithm=bootstrap_method,
+                **bootstrap_kwargs,
             )
             confidence_level = bootstrap_kwargs.get(
-                "confidence_level", confidence_intervals.__defaults__[2]
+                "confidence_level",
+                confidence_intervals.__defaults__[2],
             )
 
     return {
@@ -139,9 +101,7 @@ def agreement(
         "config": {
             "measure": measure,
             "labels": labels,
-            "nan_values": nan_values,
-            "data": orig_data,
-            "data_format": data_format,
+            "annotations": orig_data,
             "bootstrap_method": bootstrap_method,
             "bootstrap_kwargs": bootstrap_kwargs,
             "measure_kwargs": measure_kwargs,

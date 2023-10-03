@@ -1,6 +1,6 @@
 import numpy as np
 from human_protocol_sdk.agreement.bootstrap import confidence_intervals
-from .conftest import _eq_rounded
+from .conftest import eq_rounded
 
 
 def test_bootstrap_percentage(normal_sample):
@@ -14,7 +14,7 @@ def test_bootstrap_percentage(normal_sample):
     )
 
     assert len(statistics_bootstrap) == 5_000
-    assert _eq_rounded(np.mean(statistics_bootstrap), 0.0, 1)
+    assert eq_rounded(np.mean(statistics_bootstrap), 0.0, 1)
 
     low, high = ci
     assert low < high
