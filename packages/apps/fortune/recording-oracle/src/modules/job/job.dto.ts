@@ -3,6 +3,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { IsEnum, IsString, IsUrl } from 'class-validator';
 
 import { IsValidEthereumAddress } from '@/common/validators';
+import { ISolution } from '@/common/interfaces/job';
 
 export class JobSolutionRequestDto {
   @ApiProperty()
@@ -35,6 +36,7 @@ export class JobSolutionRequestDto {
 export class SendWebhookDto {
   public escrowAddress: string;
   public chainId: number;
+  public solution?: ISolution;
 }
 
 export class SaveSolutionsDto {

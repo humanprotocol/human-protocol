@@ -12,6 +12,7 @@ export const MOCK_FILE_URL = 'mockedFileUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_REPUTATION_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
+export const MOCK_EXCHANGE_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
 export const MOCK_S3_ENDPOINT = 'localhost';
 export const MOCK_S3_PORT = 9000;
 export const MOCK_S3_ACCESS_KEY = 'access_key';

@@ -7,7 +7,12 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
+import {
+  EscrowClient,
+  EscrowStatus,
+  KVStoreClient,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
 import { uploadJobSolutions } from '../../common/utils/storage';
@@ -121,6 +126,7 @@ export class JobService {
   ): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
     const escrowClient = await EscrowClient.build(signer);
+    const kvstoreClient = await KVStoreClient.build(signer);
 
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
       jobSolution.escrowAddress,
@@ -223,8 +229,19 @@ export class JobService {
 
       return 'The requested job is completed.';
     }
-
-    // TODO: Call Exchange Oracle and Reputation Oracle with bad solutions contained in errorSolutions
+    if (errorSolutions.length) {
+      const exchangeOracleURL = (await kvstoreClient.get(
+        jobSolution.exchangeAddress,
+        'webhook_url',
+      )) as string;
+      for (const solution of errorSolutions) {
+        await this.sendWebhook(exchangeOracleURL + '/invalid-solution', {
+          chainId: jobSolution.chainId,
+          escrowAddress: jobSolution.escrowAddress,
+          solution,
+        });
+      }
+    }
 
     return 'Solution are recorded.';
   }

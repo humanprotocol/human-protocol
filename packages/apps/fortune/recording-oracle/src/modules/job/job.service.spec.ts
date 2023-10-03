@@ -1,4 +1,3 @@
-import { createMock } from '@golevelup/ts-jest';
 import { Test } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { JobService } from './job.service';
@@ -8,11 +7,13 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
+  KVStoreClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
+  MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_URL,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_REQUESTER_DESCRIPTION,
@@ -26,6 +27,7 @@ import {
 } from '../../../test/constants';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { IManifest, ISolution } from '../../common/interfaces/job';
+import { of } from 'rxjs';
 
 jest.mock('minio', () => {
   class Client {
@@ -54,6 +56,11 @@ jest.mock('@human-protocol/sdk', () => ({
       requestType: JobRequestType.FORTUNE,
     }),
   })),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      get: jest.fn(),
+    })),
+  },
 }));
 
 describe('JobService', () => {
@@ -64,6 +71,10 @@ describe('JobService', () => {
     getAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
+
+  const httpServicePostMock = jest
+    .fn()
+    .mockReturnValue(of({ status: 200, data: {} }));
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -92,7 +103,15 @@ describe('JobService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
-        { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: HttpService,
+          useValue: {
+            post: httpServicePostMock,
+            axiosRef: {
+              get: jest.fn(),
+            },
+          },
+        },
       ],
     }).compile();
 
@@ -328,7 +347,7 @@ describe('JobService', () => {
       ).rejects.toThrowError(ErrorJob.WebhookWasNotSent);
     });
 
-    it('should call send webhook method when solution is recorded', async () => {
+    it('should return solution are recorded when one solution is sent', async () => {
       const escrowClient = {
         getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
@@ -339,8 +358,6 @@ describe('JobService', () => {
         storeResults: jest.fn().mockResolvedValue(true),
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
-
-      jobService.sendWebhook = jest.fn().mockResolvedValue(true);
 
       const manifest: IManifest = {
         submissionsRequired: 3,
@@ -357,11 +374,19 @@ describe('JobService', () => {
           solution: 'Solution 1',
         },
       ];
+      const newJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: 'Solution 2',
+        },
+      ];
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(manifest)
-        .mockReturnValue(existingJobSolutions);
+        .mockReturnValueOnce(existingJobSolutions)
+        .mockReturnValue(newJobSolutions);
 
       const jobSolution = {
         escrowAddress: MOCK_ADDRESS,
@@ -373,6 +398,205 @@ describe('JobService', () => {
 
       const result = await jobService.processJobSolution(jobSolution);
       expect(result).toEqual('Solution are recorded.');
+      expect(httpServicePostMock).not.toHaveBeenCalled();
     });
+
+    it('should call send webhook method when all solutions are recorded', async () => {
+      const escrowClient = {
+        getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+        getManifestUrl: jest
+          .fn()
+          .mockResolvedValue('http://example.com/manifest'),
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+        storeResults: jest.fn().mockResolvedValue(true),
+      };
+      (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+
+      const manifest: IManifest = {
+        submissionsRequired: 2,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: '10',
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      const existingJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: 'Solution 1',
+        },
+      ];
+      const newJobSolutions: ISolution[] = [
+        {
+          exchangeAddress: MOCK_ADDRESS,
+          workerAddress: MOCK_ADDRESS,
+          solution: 'Solution 2',
+        },
+      ];
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockReturnValueOnce(manifest)
+        .mockReturnValueOnce(existingJobSolutions)
+        .mockReturnValue(newJobSolutions);
+
+      const jobSolution = {
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solutionUrl: MOCK_FILE_URL,
+      };
+
+      const result = await jobService.processJobSolution(jobSolution);
+      expect(result).toEqual('The requested job is completed.');
+      expect(httpServicePostMock).toHaveBeenCalledWith(
+        MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+        {
+          chainId: jobSolution.chainId,
+          escrowAddress: jobSolution.escrowAddress,
+        },
+      );
+    });
+  });
+
+  it('should call exchange oracle endpoint when solution is wrong', async () => {
+    const escrowClient = {
+      getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+      getManifestUrl: jest
+        .fn()
+        .mockResolvedValue('http://example.com/manifest'),
+      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      storeResults: jest.fn().mockResolvedValue(true),
+    };
+    (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+    (KVStoreClient.build as jest.Mock).mockResolvedValue({
+      get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+    });
+
+    const manifest: IManifest = {
+      submissionsRequired: 3,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: '10',
+      requestType: JobRequestType.FORTUNE,
+    };
+
+    const existingJobSolutions: ISolution[] = [
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution 1',
+      },
+    ];
+    const newJobSolutions: ISolution[] = [
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution 1',
+      },
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution 1',
+      },
+    ];
+
+    StorageClient.downloadFileFromUrl = jest
+      .fn()
+      .mockReturnValueOnce(manifest)
+      .mockReturnValueOnce(existingJobSolutions)
+      .mockReturnValue(newJobSolutions);
+
+    const jobSolution = {
+      escrowAddress: MOCK_ADDRESS,
+      chainId: ChainId.LOCALHOST,
+      exchangeAddress: MOCK_ADDRESS,
+      workerAddress: MOCK_ADDRESS,
+      solutionUrl: MOCK_FILE_URL,
+    };
+
+    const result = await jobService.processJobSolution(jobSolution);
+    expect(result).toEqual('Solution are recorded.');
+    expect(httpServicePostMock).toHaveBeenCalledWith(
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + '/invalid-solution',
+      {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress,
+        solution: newJobSolutions[0],
+      },
+    );
+  });
+
+  it('should call exchange oracle endpoint when solution contain bad words', async () => {
+    const escrowClient = {
+      getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+      getManifestUrl: jest
+        .fn()
+        .mockResolvedValue('http://example.com/manifest'),
+      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      storeResults: jest.fn().mockResolvedValue(true),
+    };
+    (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+    (KVStoreClient.build as jest.Mock).mockResolvedValue({
+      get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+    });
+
+    const manifest: IManifest = {
+      submissionsRequired: 3,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: '10',
+      requestType: JobRequestType.FORTUNE,
+    };
+
+    const existingJobSolutions: ISolution[] = [
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution 1',
+      },
+    ];
+    const newJobSolutions: ISolution[] = [
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'Solution 1',
+      },
+      {
+        exchangeAddress: MOCK_ADDRESS,
+        workerAddress: MOCK_ADDRESS,
+        solution: 'ass',
+      },
+    ];
+
+    StorageClient.downloadFileFromUrl = jest
+      .fn()
+      .mockReturnValueOnce(manifest)
+      .mockReturnValueOnce(existingJobSolutions)
+      .mockReturnValue(newJobSolutions);
+
+    const jobSolution = {
+      escrowAddress: MOCK_ADDRESS,
+      chainId: ChainId.LOCALHOST,
+      exchangeAddress: MOCK_ADDRESS,
+      workerAddress: MOCK_ADDRESS,
+      solutionUrl: MOCK_FILE_URL,
+    };
+
+    const result = await jobService.processJobSolution(jobSolution);
+    expect(result).toEqual('Solution are recorded.');
+    expect(httpServicePostMock).toHaveBeenCalledWith(
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + '/invalid-solution',
+      {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress,
+        solution: newJobSolutions[1],
+      },
+    );
   });
 });
