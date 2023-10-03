@@ -36,11 +36,11 @@ export const ChartContainer = ({
           boxShadow:
             '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA;',
           p: 4,
-          pb: 8,
+          pb: 6,
           position: 'relative',
         }}
       >
-        <Typography fontSize={24} color="primary">
+        <Typography fontSize={24} color="primary" mb={2}>
           {title}
         </Typography>
         {isNotSupportedChain ? (

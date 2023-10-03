@@ -52,7 +52,7 @@ export const TooltipIcon = ({
           position: 'absolute',
           top: position === 'topRight' ? '24px' : 'auto',
           right: position === 'topRight' ? { xs: '22px', md: '32px' } : 'auto',
-          bottom: position === 'bottomLeft' ? '20px' : 'auto',
+          bottom: position === 'bottomLeft' ? '16px' : 'auto',
           left: position === 'bottomLeft' ? { xs: '24px', md: '30px' } : 'auto',
         }}
       >

@@ -15,6 +15,7 @@ import {
 import SOLVED_TASKS from '../../history-data/solved_tasks.json';
 import { CardContainer } from '../Cards';
 import { TooltipIcon } from '../TooltipIcon';
+import { TOOLTIPS } from 'src/constants/tooltips';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -136,7 +137,7 @@ export const SolvedTasksView: FC = () => {
       </Grid>
       <TooltipIcon
         position={isMobile ? 'topRight' : 'bottomLeft'}
-        title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim."
+        title={TOOLTIPS.SOLVED_TASKS}
       />
     </CardContainer>
   );

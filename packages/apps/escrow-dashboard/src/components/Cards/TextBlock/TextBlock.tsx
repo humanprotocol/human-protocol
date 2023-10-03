@@ -12,6 +12,7 @@ type TextBlockProps = {
   component?: any;
   format?: string;
   changes?: number;
+  tooltipTitle?: string;
 };
 
 export const TextBlock: FC<TextBlockProps> = ({
@@ -20,6 +21,7 @@ export const TextBlock: FC<TextBlockProps> = ({
   component: ValueComponent,
   format = '0,0',
   changes,
+  tooltipTitle,
 }) => {
   return (
     <Container>
@@ -68,10 +70,7 @@ export const TextBlock: FC<TextBlockProps> = ({
           )}
         </Box>
       )}
-      <TooltipIcon
-        position="topRight"
-        title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim."
-      />
+      {tooltipTitle && <TooltipIcon position="topRight" title={tooltipTitle} />}
     </Container>
   );
 };

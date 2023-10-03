@@ -13,6 +13,7 @@ import { PaymentsView } from './views/Payments';
 import { TasksView } from './views/Tasks';
 import { TransactionsView } from './views/Transactions';
 import { WorkersView } from './views/Workers';
+import { TOOLTIPS } from 'src/constants/tooltips';
 
 enum ViewButton {
   Tasks = 'Tasks',
@@ -33,6 +34,19 @@ export const HumanAppDataView: FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down(600));
   const [viewButton, setViewButton] = useState(ViewButton.Tasks);
 
+  const getTooltipTitle = (button: ViewButton) => {
+    switch (button) {
+      case ViewButton.Tasks:
+        return TOOLTIPS.TASKS;
+      case ViewButton.Workers:
+        return TOOLTIPS.WORKERS;
+      case ViewButton.Payments:
+        return TOOLTIPS.PAYMENTS;
+      case ViewButton.Transactions:
+        return TOOLTIPS.TRANSACTIONS;
+    }
+  };
+
   if (isMobile) {
     return (
       <Stack spacing={4}>
@@ -51,8 +65,9 @@ export const HumanAppDataView: FC = () => {
         background: '#FFF',
         boxShadow:
           '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA;',
-        py: 5,
+        pt: 5,
         px: 4,
+        pb: 7,
         position: 'relative',
       }}
     >
@@ -60,7 +75,10 @@ export const HumanAppDataView: FC = () => {
         exclusive
         fullWidth
         value={viewButton}
-        onChange={(e, newButton) => setViewButton(newButton)}
+        onChange={(e, newButton) => {
+          if (newButton === null) return;
+          setViewButton(newButton);
+        }}
       >
         {VIEW_BUTTONS.map(({ label, value }) => (
           <ToggleButton
@@ -85,7 +103,7 @@ export const HumanAppDataView: FC = () => {
         {viewButton === ViewButton.Payments && <PaymentsView />}
         {viewButton === ViewButton.Transactions && <TransactionsView />}
       </Box>
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon title={getTooltipTitle(viewButton)} />
     </Box>
   );
 };

@@ -8,6 +8,7 @@ import coinlistProIcon from 'src/assets/exchanges/coinlist-pro.png';
 import gateIoIcon from 'src/assets/exchanges/gate-io.png';
 import lBankIcon from 'src/assets/exchanges/lbank.svg';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
+import { TOOLTIPS } from 'src/constants/tooltips';
 import { useHMTStats } from 'src/hooks/useHMTStats';
 
 const EXCHANGES = [
@@ -78,16 +79,22 @@ export const TokenView: FC = () => {
           <CardTextBlock
             title="Amount of transfers"
             value={data?.totalTransferAmount}
+            tooltipTitle={TOOLTIPS.AMOUNT_OF_TRANSFERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
-          <CardTextBlock title="Holders" value={data?.holders} />
+          <CardTextBlock
+            title="Holders"
+            value={data?.holders}
+            tooltipTitle={TOOLTIPS.AMOUNT_OF_TRANSFERS}
+          />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total Supply"
             value={data?.totalSupply}
             component={TotalSupplyComponent}
+            tooltipTitle={TOOLTIPS.TOTAL_SUPPLY}
           />
         </Grid>
       </Grid>

@@ -24,8 +24,9 @@ export default function TimeRangeButtons({
 
   const handleChange = (
     event: React.MouseEvent<HTMLElement>,
-    newValue: number
+    newValue: number | null
   ) => {
+    if (newValue === null) return;
     dispatch(setDays(newValue));
   };
 
