@@ -16,3 +16,6 @@ dist
 # ABIs
 artifacts
 contracts
+
+# Hypothesis
+.hypothesis

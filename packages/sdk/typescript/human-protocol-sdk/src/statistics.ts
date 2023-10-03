@@ -78,9 +78,9 @@ export class StatisticsClient {
     let start = from;
     while (start < to) {
       const end = new Date(start);
-      end.setDate(start.getDate() + 60);
-      chunks.push({ from: start, to: end.getDate() < to.getDate() ? end : to });
-      start = end;
+      end.setDate(end.getDate() + 60);
+      chunks.push({ from: start, to: end.getTime() < to.getTime() ? end : to });
+      start = new Date(end);
     }
 
     return await Promise.all(

@@ -10,9 +10,9 @@ const getTaskStatistics = async (statisticsClient: StatisticsClient) => {
   console.log('Task statistics:', await statisticsClient.getTaskStatistics());
 
   console.log(
-    'Task statistics from 5/8 - 6/8:',
+    'Task statistics from 1/8 - 6/8:',
     await statisticsClient.getTaskStatistics({
-      from: new Date(2023, 4, 8),
+      from: new Date(2023, 0, 8),
       to: new Date(2023, 5, 8),
     })
   );

@@ -31,7 +31,7 @@ def get_task_statistics(statistics_client: StatisticsClient):
     print(
         statistics_client.get_task_statistics(
             StatisticsParam(
-                date_from=datetime.datetime(2023, 5, 8),
+                date_from=datetime.datetime(2023, 1, 8),
                 date_to=datetime.datetime(2023, 6, 8),
             )
         )
