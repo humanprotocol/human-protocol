@@ -152,9 +152,10 @@ export class StorageClient {
    * **Checks if a bucket exists**
    *
    * @param {string} bucket - Name of the bucket
+   * @param {string} directory - Name of the directory
    * @returns {Promise<string[]>} - A list of filenames with their extensions in the bucket
    */
-  public async listObjects(bucket: string): Promise<string[]> {
+  public async listObjects(bucket: string, directory = ''): Promise<string[]> {
     const isBucketExists = await this.client.bucketExists(bucket);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
@@ -163,7 +164,7 @@ export class StorageClient {
     try {
       return new Promise((resolve, reject) => {
         const keys: string[] = [];
-        const stream = this.client.listObjectsV2(bucket, '', true, '');
+        const stream = this.client.listObjectsV2(bucket, directory, true, '');
 
         stream.on('data', (obj) => keys.push(obj.name));
         stream.on('error', reject);

@@ -228,7 +228,7 @@ describe('Storage tests', () => {
       );
     });
 
-    test('should return a list of objects with success', async () => {
+    test('should list objects without a directory prefix', async () => {
       const file1 = { key: STORAGE_TEST_FILE_VALUE };
       const hash1 = crypto
         .createHash('sha1')
@@ -243,12 +243,46 @@ describe('Storage tests', () => {
         .digest('hex');
       const key2 = `s3${hash2}.json`;
 
-      vi.spyOn(storageClient, 'listObjects').mockImplementation(() =>
-        Promise.resolve([key1, key2])
-      );
+      const mockListObject = vi
+        .spyOn(storageClient, 'listObjects')
+        .mockImplementation(() => Promise.resolve([key1, key2]));
 
       const results = await storageClient.listObjects(DEFAULT_PUBLIC_BUCKET);
 
+      expect(mockListObject).toHaveBeenCalledWith(DEFAULT_PUBLIC_BUCKET);
+      expect(results[0]).toEqual(key1);
+      expect(results[1]).toEqual(key2);
+    });
+
+    test('should list objects with a directory prefix', async () => {
+      const file1 = { key: STORAGE_TEST_FILE_VALUE };
+      const hash1 = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file1))
+        .digest('hex');
+      const key1 = `s3${hash1}.json`;
+
+      const file2 = { key: STORAGE_TEST_FILE_VALUE_2 };
+      const hash2 = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(file2))
+        .digest('hex');
+      const key2 = `s3${hash2}.json`;
+      const directory = 'folder';
+
+      const mockListObject = vi
+        .spyOn(storageClient, 'listObjects')
+        .mockImplementation(() => Promise.resolve([key1, key2]));
+
+      const results = await storageClient.listObjects(
+        DEFAULT_PUBLIC_BUCKET,
+        directory
+      );
+
+      expect(mockListObject).toHaveBeenCalledWith(
+        DEFAULT_PUBLIC_BUCKET,
+        directory
+      );
       expect(results[0]).toEqual(key1);
       expect(results[1]).toEqual(key2);
     });
