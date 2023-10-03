@@ -2,8 +2,16 @@ import { ChainId } from '@human-protocol/sdk';
 
 export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,
+  ChainId.GOERLI,
+  ChainId.BSC_MAINNET,
+  ChainId.BSC_TESTNET,
   ChainId.POLYGON,
   ChainId.POLYGON_MUMBAI,
+  ChainId.MOONBEAM,
+  ChainId.MOONBASE_ALPHA,
+  // ChainId.SKALE,
+  // ChainId.AVALANCHE,
+  // ChainId.AVALANCHE_TESTNET,
 ];
 
 export const SUPPORTED_CHAIN_IDS = [
