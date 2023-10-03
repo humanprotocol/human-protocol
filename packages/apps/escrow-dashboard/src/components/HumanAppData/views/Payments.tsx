@@ -20,7 +20,7 @@ export const PaymentsView = () => {
         }));
     }
     return [];
-  }, [data]);
+  }, [data, days]);
 
   return (
     <ChartContainer isLoading={isLoading} data={seriesData} title="Payments">

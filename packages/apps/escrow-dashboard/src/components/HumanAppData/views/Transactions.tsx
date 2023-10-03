@@ -20,7 +20,7 @@ export const TransactionsView = () => {
         }));
     }
     return [];
-  }, [data]);
+  }, [data, days]);
 
   return (
     <ChartContainer

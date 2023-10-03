@@ -4,21 +4,22 @@ import React, { useMemo } from 'react';
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
 import { useWorkerStats } from 'src/hooks/useWorkerStats';
-import { useChainId } from 'src/state/humanAppData/hooks';
+import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
 export const WorkersView = () => {
+  const days = useDays();
   const chainId = useChainId();
   const { data, isLoading } = useWorkerStats();
 
   const seriesData = useMemo(() => {
     if (data) {
-      return data.map((d) => ({
+      return [...data.dailyWorkersData].slice(-days).map((d: any) => ({
         date: d.timestamp,
         value: Number(d.activeWorkers),
       }));
     }
     return [];
-  }, [data]);
+  }, [data, days]);
 
   return (
     <ChartContainer
