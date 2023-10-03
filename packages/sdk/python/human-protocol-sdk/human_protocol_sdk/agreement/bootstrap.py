@@ -9,7 +9,7 @@ from warnings import warn
 from human_protocol_sdk.agreement.utils import NormalDistribution
 
 
-def confidence_interval(
+def confidence_intervals(
     data: Sequence,
     statistic_fn: Callable,
     n_iterations: int = 1000,
@@ -24,8 +24,10 @@ def confidence_interval(
         data: Data to estimate the statistic.
         statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
         n_iterations: Number of bootstrap samples to use for the estimate.
-        n_sample: If provided, determines the size of each bootstrap sample drawn from the data. If omitted, is equal to the length of data.
-        confidence_level: Size of the confidence interval. Must be a number between 0.0 and 1.0.
+        n_sample: If provided, determines the size of each bootstrap sample
+            drawn from the data. If omitted, is equal to the length of the
+            data.
+        confidence_level: Size of the confidence interval.
         algorithm: Which algorithm to use for the confidence interval
             estimation. "bca" uses the "Bias Corrected Bootstrap with
             Acceleration", "percentile" simply takes the appropriate

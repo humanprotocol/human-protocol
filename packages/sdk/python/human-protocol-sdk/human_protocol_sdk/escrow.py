@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import datetime
 import logging
 import os
 from decimal import Decimal
 from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
@@ -96,83 +96,18 @@ class EscrowConfig:
         self.hash = hash
 
 
-class EscrowFilter:
-    """
-    A class used to filter escrow requests.
-    """
-
-    def __init__(
-        self,
-        networks: [List[ChainId]],
-        launcher: Optional[str] = None,
-        reputation_oracle: Optional[str] = None,
-        recording_oracle: Optional[str] = None,
-        exchange_oracle: Optional[str] = None,
-        job_requester_id: Optional[str] = None,
-        status: Optional[Status] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
-    ):
-        """
-        Initializes a EscrowFilter instance.
-
-        Args:
-            networks (List[ChainId]): Networks to request data
-            launcher (Optional[str]): Launcher address
-            reputation_oracle (Optional[str]): Reputation oracle address
-            recording_oracle (Optional[str]): Recording oracle address
-            exchange_oracle (Optional[str]): Exchange oracle address
-            job_requester_id (Optional[str]): Job requester id
-            status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
-        """
-
-        if not networks or any(
-            network not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise EscrowClientError(f"Invalid ChainId")
-
-        if launcher and not Web3.is_address(launcher):
-            raise EscrowClientError(f"Invalid address: {launcher}")
-
-        if reputation_oracle and not Web3.is_address(reputation_oracle):
-            raise EscrowClientError(f"Invalid address: {reputation_oracle}")
-
-        if recording_oracle and not Web3.is_address(recording_oracle):
-            raise EscrowClientError(f"Invalid address: {recording_oracle}")
-
-        if exchange_oracle and not Web3.is_address(exchange_oracle):
-            raise EscrowClientError(f"Invalid address: {exchange_oracle}")
-
-        if date_from and date_to and date_from > date_to:
-            raise EscrowClientError(
-                f"Invalid dates: {date_from} must be earlier than {date_to}"
-            )
-
-        self.launcher = launcher
-        self.reputation_oracle = reputation_oracle
-        self.recording_oracle = recording_oracle
-        self.exchange_oracle = exchange_oracle
-        self.job_requester_id = job_requester_id
-        self.status = status
-        self.date_from = date_from
-        self.date_to = date_to
-        self.networks = networks
-
-
 class EscrowClient:
     """
     A class used to manage escrow on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3):
+    def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
         """
         Initializes a Escrow instance.
 
         Args:
             web3 (Web3): The Web3 object
+            gas_limit (int): Gas limit to be provided to transaction
         """
 
         # Initialize web3 instance
@@ -196,6 +131,7 @@ class EscrowClient:
         self.factory_contract = self.w3.eth.contract(
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
+        self.gas_limit = gas_limit
 
     def create_escrow(
         self, token_address: str, trusted_handlers: List[str], job_requester_id: str
@@ -228,6 +164,7 @@ class EscrowClient:
                 token_address, trusted_handlers, job_requester_id
             ),
             EscrowClientError,
+            self.gas_limit,
         )
         return next(
             (
@@ -270,6 +207,7 @@ class EscrowClient:
                 escrow_config.hash,
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def create_and_setup_escrow(
@@ -332,6 +270,7 @@ class EscrowClient:
             "Fund",
             token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def store_results(self, escrow_address: str, url: str, hash: str) -> None:
@@ -363,6 +302,7 @@ class EscrowClient:
             "Store Results",
             self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def complete(self, escrow_address: str) -> None:
@@ -386,6 +326,7 @@ class EscrowClient:
             "Complete",
             self._get_escrow_contract(escrow_address).functions.complete(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def bulk_payout(
@@ -445,6 +386,7 @@ class EscrowClient:
                 recipients, amounts, final_results_url, final_results_hash, txId
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def cancel(self, escrow_address: str) -> str:
@@ -468,6 +410,7 @@ class EscrowClient:
             "Cancel",
             self._get_escrow_contract(escrow_address).functions.cancel(),
             EscrowClientError,
+            self.gas_limit,
         )
 
         return transaction_receipt.transactionHash
@@ -493,6 +436,7 @@ class EscrowClient:
             "Abort",
             self._get_escrow_contract(escrow_address).functions.abort(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
@@ -521,6 +465,7 @@ class EscrowClient:
                 handlers
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def get_balance(self, escrow_address: str) -> Decimal:

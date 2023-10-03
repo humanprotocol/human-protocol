@@ -9,12 +9,16 @@ from .validations import (
     validate_confusion_matrix,
 )
 
-from .bootstrap import confidence_interval
+from .bootstrap import confidence_intervals
 
-from .utils import label_counts, confusion_matrix
+from .utils import (
+    label_counts,
+    confusion_matrix,
+    observed_and_expected_differences,
+)
 
 from functools import partial
-from typing import Sequence, Optional
+from typing import Sequence, Optional, Callable, Union
 
 
 def agreement(
@@ -33,15 +37,13 @@ def agreement(
     Args:
         data: Annotated data.
         measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
-        data_format: The format that the data is in. Must be one of 'annotations' or 'label_counts'.
+        data_format: The format that the annotations are in. Must be one of 'annotations' or 'label_counts'.
         labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
-        nan_values: Values to be counted as invalid and filter from the data.
-        bootstrap_method: Name of the bootstrap method to use for calculating confidence intervals. If omitted, no bootstrapping is performed. If provided, must be one of 'percentile' or 'bca'.
-            If set to None, no confidence intervals are calculated.
+        nan_values: Values to be counted as invalid and filter out from the data.
+        bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
+            must be one of 'percentile' or 'bca'.
         bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
-            If set to None, default arguments are used.
         measure_kwargs: Dictionary of keyword arguments to be passed to the measure function.
-            If set to None, default arguments are used.
 
     Returns: A dictionary containing the keys "results" and "config". Results contains the scores, while config contains parameters that produced the results.
     """
@@ -119,11 +121,11 @@ def agreement(
             if bootstrap_kwargs is None:
                 bootstrap_kwargs = {}
 
-            ci, _ = confidence_interval(
+            ci, _ = confidence_intervals(
                 data, statistic_fn=fn, algorithm=bootstrap_method, **bootstrap_kwargs
             )
             confidence_level = bootstrap_kwargs.get(
-                "confidence_level", confidence_interval.__defaults__[2]
+                "confidence_level", confidence_intervals.__defaults__[2]
             )
 
     return {
@@ -146,7 +148,7 @@ def agreement(
     }
 
 
-def percentage(data: Sequence, data_format="im", invalid_return=np.nan) -> float:
+def percentage(data: np.ndarray, data_format="im", invalid_return=np.nan) -> float:
     """
     Returns the overall agreement percentage observed across the data.
 
@@ -204,7 +206,7 @@ def cohens_kappa(data: Sequence, invalid_return=np.nan) -> float:
     return kappa
 
 
-def fleiss_kappa(data: Sequence, invalid_return=np.nan) -> float:
+def fleiss_kappa(data: np.ndarray, invalid_return=np.nan) -> float:
     """
     Returns Fleisss' Kappa for the provided annotations.
 
@@ -233,3 +235,53 @@ def fleiss_kappa(data: Sequence, invalid_return=np.nan) -> float:
         kappa = invalid_return
 
     return kappa
+
+
+def krippendorffs_alpha(
+    items: Sequence, values: Sequence, distance_function: Union[Callable, str]
+) -> float:
+    """
+    Calculates Krippendorff's Alpha for the given annotations (item-value pairs),
+    using the given distance function.
+
+    Args:
+        items: Item Ids, identifying items of an annotation.
+        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
+        distance_function: Function to calculate distance between two values.
+            Calling `distance_fn(values[i], values[j])` must return a number.
+            Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
+            default functions pertaining to the level of measurement of the data.
+
+    Returns: Value between -1.0 and 1.0, indicating the degree of agreement.
+
+    """
+    difference_observed, difference_expected = observed_and_expected_differences(
+        items, values, distance_function
+    )
+    return 1 - difference_observed.mean() / difference_expected.mean()
+
+
+def sigma(
+    items: Sequence, values: Sequence, distance_function: Union[Callable, str], p=0.05
+) -> float:
+    """
+    Calculates the Sigma Agreement Measure for the given annotations (item-value pairs),
+    using the given distance function.
+    For details, see https://dl.acm.org/doi/fullHtml/10.1145/3485447.3512242.
+
+    Args:
+        items: Item Ids, identifying items of an annotation.
+        values: Annotation value for a given item id. values[i] was assigned to items[i]. Assumes a single annotation per annotator.
+        distance_function: Function to calculate distance between two values.
+            Calling `distance_fn(values[i], values[j])` must return a number.
+            Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
+            default functions pertaining to the level of measurement of the data.
+        p: Probability threshold between 0.0 and 1.0 determining statistical significant difference. The lower, the stricter.
+
+    Returns: Value between 0.0 and 1.0, indicating the degree of agreement.
+    """
+    difference_observed, difference_expected = observed_and_expected_differences(
+        items, values, distance_function
+    )
+    difference_crit = np.quantile(difference_expected, p)
+    return np.mean(difference_observed < difference_crit)

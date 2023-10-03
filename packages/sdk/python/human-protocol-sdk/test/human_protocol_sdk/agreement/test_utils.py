@@ -2,6 +2,7 @@ import pytest
 from human_protocol_sdk.agreement.utils import (
     confusion_matrix,
     label_counts,
+    records_from_annotations,
 )
 import numpy as np
 
@@ -46,3 +47,38 @@ def test_label_counts_from_annotations(annotations, labels):
     true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
 
     assert np.all(counts == true_counts)
+
+
+def test_label_counts_from_annotations(annotations, labels):
+    counts = label_counts(annotations, labels, return_labels=False)
+
+    true_counts = np.asarray(
+        [
+            [2, 1],
+            [3, 0],
+            [0, 3],
+            [1, 1],
+        ]
+    )
+
+    assert np.all(counts == true_counts)
+
+    counts, labels = label_counts(annotations, nan_values=[], return_labels=True)
+
+    # empty label is now counted as well
+    true_counts = np.asarray([[0, 1, 2], [0, 0, 3], [0, 3, 0], [1, 1, 1]])
+
+    assert np.all(counts == true_counts)
+
+
+def test_records_from_annotations(annotations):
+    values, items, annotators = records_from_annotations(annotations)
+    assert len(values) == len(items) == len(annotators)
+
+    n_unfiltered = len(values)
+    values, _, _ = records_from_annotations(annotations, nan_values=[""])
+    assert len(values) == n_unfiltered - 1
+
+    annotations[-1][-2] = np.nan
+    values, _, _ = records_from_annotations(annotations, nan_values=np.nan)
+    assert len(values) == n_unfiltered - 1
