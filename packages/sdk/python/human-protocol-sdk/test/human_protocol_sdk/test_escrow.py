@@ -12,9 +12,9 @@ from human_protocol_sdk.escrow import (
     EscrowClient,
     EscrowClientError,
     EscrowConfig,
-    EscrowFilter,
     EscrowUtils,
 )
+from human_protocol_sdk.filter import EscrowFilter, FilterError
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
@@ -368,6 +368,7 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_escrow_invalid_token(self):
@@ -442,6 +443,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Setup",
                 mock_contract.functions.setup.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_setup_invalid_address(self):
@@ -595,12 +597,14 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
                 mock_function.assert_called_with(
                     self.w3,
                     "Setup",
                     mock_contract.functions.setup.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_and_setup_escrow_invalid_token(self):
@@ -742,6 +746,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Store Results",
                 mock_contract.functions.storeResults.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_store_results_invalid_address(self):
@@ -867,6 +872,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Bulk Payout",
                 mock_contract.functions.bulkPayOut.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_bulk_payout_invalid_address(self):
@@ -1219,6 +1225,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Complete",
                 mock_contract.functions.complete.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_complete_invalid_address(self):
@@ -1299,6 +1306,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Cancel",
                 mock_contract.functions.cancel.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_cancel_invalid_address(self):
@@ -1378,6 +1386,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Abort",
                 mock_contract.functions.abort.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_abort_invalid_address(self):
@@ -1461,6 +1470,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Add Trusted Handlers",
                 mock_contract.functions.addTrustedHandlers.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_add_trusted_handlers_invalid_address(self):
@@ -1869,24 +1879,24 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_filter.date_to, date_to)
 
     def test_escrow_filter_empty_chain_id(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(networks=[])
         self.assertEqual("Invalid ChainId", str(cm.exception))
 
     def test_escrow_filter_invalid_chain_id(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(networks=[123])
         self.assertEqual("Invalid ChainId", str(cm.exception))
 
     def test_escrow_filter_invalid_address_launcher(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value], launcher="invalid_address"
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_reputation_oracle(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 reputation_oracle="invalid_address",
@@ -1894,7 +1904,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_recording_oracle(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 recording_oracle="invalid_address",
@@ -1902,7 +1912,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_dates(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 date_from=datetime.fromtimestamp(1683812007),
