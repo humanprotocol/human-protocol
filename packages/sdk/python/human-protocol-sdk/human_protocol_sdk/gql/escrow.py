@@ -1,4 +1,4 @@
-from human_protocol_sdk.escrow import EscrowFilter
+from human_protocol_sdk.filter import EscrowFilter
 
 escrow_fragment = """
 fragment EscrowFields on Escrow {

@@ -28,7 +28,7 @@ class KVStoreClient:
     A class used to manage kvstore on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3):
+    def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
         """
         Initializes a KVStore instance.
 
@@ -57,6 +57,7 @@ class KVStoreClient:
         self.kvstore_contract = self.w3.eth.contract(
             address=self.network["kvstore_address"], abi=kvstore_interface["abi"]
         )
+        self.gas_limit = gas_limit
 
     def set(self, key: str, value: str) -> None:
         """
@@ -78,6 +79,7 @@ class KVStoreClient:
             "Set",
             self.kvstore_contract.functions.set(key, value),
             KVStoreClientError,
+            self.gas_limit,
         )
 
     def set_bulk(self, keys: List[str], values: List[str]) -> None:
@@ -104,6 +106,7 @@ class KVStoreClient:
             "Set Bulk",
             self.kvstore_contract.functions.setBulk(keys, values),
             KVStoreClientError,
+            self.gas_limit,
         )
 
     def get(self, address: str, key: str) -> str:
