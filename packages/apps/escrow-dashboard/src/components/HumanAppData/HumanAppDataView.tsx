@@ -12,34 +12,29 @@ import { TooltipIcon } from '../TooltipIcon';
 import { PaymentsView } from './views/Payments';
 import { TasksView } from './views/Tasks';
 import { TransactionsView } from './views/Transactions';
-import { WorkersView } from './views/Workers';
 import { TOOLTIPS } from 'src/constants/tooltips';
 
 enum ViewButton {
-  Tasks = 'Tasks',
-  Workers = 'Workers',
-  Payments = 'Payments',
   Transactions = 'Transactions',
+  Tasks = 'Tasks',
+  Payments = 'Payments',
 }
 
 const VIEW_BUTTONS = [
-  { label: 'Tasks', value: ViewButton.Tasks },
-  { label: 'Workers', value: ViewButton.Workers },
-  { label: 'Payments', value: ViewButton.Payments },
   { label: 'Transactions', value: ViewButton.Transactions },
+  { label: 'Tasks', value: ViewButton.Tasks },
+  { label: 'Payments', value: ViewButton.Payments },
 ];
 
 export const HumanAppDataView: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(600));
-  const [viewButton, setViewButton] = useState(ViewButton.Tasks);
+  const [viewButton, setViewButton] = useState(ViewButton.Transactions);
 
   const getTooltipTitle = (button: ViewButton) => {
     switch (button) {
       case ViewButton.Tasks:
         return TOOLTIPS.TASKS;
-      case ViewButton.Workers:
-        return TOOLTIPS.WORKERS;
       case ViewButton.Payments:
         return TOOLTIPS.PAYMENTS;
       case ViewButton.Transactions:
@@ -50,10 +45,9 @@ export const HumanAppDataView: FC = () => {
   if (isMobile) {
     return (
       <Stack spacing={4}>
-        <TasksView />
-        <WorkersView />
-        <PaymentsView />
         <TransactionsView />
+        <TasksView />
+        <PaymentsView />
       </Stack>
     );
   }
@@ -98,10 +92,9 @@ export const HumanAppDataView: FC = () => {
         ))}
       </ToggleButtonGroup>
       <Box mt={3} sx={{ overflow: 'auto' }}>
-        {viewButton === ViewButton.Tasks && <TasksView />}
-        {viewButton === ViewButton.Workers && <WorkersView />}
-        {viewButton === ViewButton.Payments && <PaymentsView />}
         {viewButton === ViewButton.Transactions && <TransactionsView />}
+        {viewButton === ViewButton.Tasks && <TasksView />}
+        {viewButton === ViewButton.Payments && <PaymentsView />}
       </Box>
       <TooltipIcon title={getTooltipTitle(viewButton)} />
     </Box>
