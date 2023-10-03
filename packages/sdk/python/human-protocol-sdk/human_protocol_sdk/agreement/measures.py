@@ -23,11 +23,11 @@ def agreement(
     Calculates agreement across the given data using the given method.
 
     Args:
-        annotations: Annotated data.
-        measure: Specifies the method to use. Must be one of 'percent_agreement', 'fleiss_kappa' or 'cohens_kappa'.
-        labels: A list of labels to use for the annotation. If set to None, labels are inferred from the data.
-        bootstrap_method: Name of the bootstrap method to use. If omitted, no bootstrapping is performed. If provided,
-            must be one of 'percentile' or 'bca'.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of annotated items and M is the number of annotators. Missing values must be indicated by nan.
+        measure: Specifies the method to use. Must be one of 'cohens_kappa', 'percentage', 'fleiss_kappa', 'sigma' or 'krippendorffs_alpha'.
+        labels: List of labels to use for the annotation. If set to None, labels are inferred from the data. If provided, values not in the labels are set to nan.
+        bootstrap_method: Name of the bootstrap method to use for calculating confidence intervals.
+            If set to None, no confidence intervals are calculated.  If provided, must be one of 'percentile' or 'bca'.
         bootstrap_kwargs: Dictionary of keyword arguments to be passed to the bootstrap function.
         measure_kwargs: Dictionary of keyword arguments to be passed to the measure function.
 
@@ -72,24 +72,19 @@ def agreement(
         ci = None
         confidence_level = None
     else:
-        if measure == "cohens_kappa":
-            warn("Bootstrapping is currently not supported for Cohen's Kappa.")
-            ci = (-100.0, -100.0)
-            confidence_level = -100.0
-        else:
-            if bootstrap_kwargs is None:
-                bootstrap_kwargs = {}
+        if bootstrap_kwargs is None:
+            bootstrap_kwargs = {}
 
-            ci, _ = confidence_intervals(
-                annotations,
-                statistic_fn=fn,
-                algorithm=bootstrap_method,
-                **bootstrap_kwargs,
-            )
-            confidence_level = bootstrap_kwargs.get(
-                "confidence_level",
-                confidence_intervals.__defaults__[2],
-            )
+        ci, _ = confidence_intervals(
+            annotations,
+            statistic_fn=fn,
+            algorithm=bootstrap_method,
+            **bootstrap_kwargs,
+        )
+        confidence_level = bootstrap_kwargs.get(
+            "confidence_level",
+            confidence_intervals.__defaults__[2],
+        )
 
     return {
         "results": {
@@ -114,10 +109,7 @@ def percentage(annotations: np.ndarray) -> float:
     Returns the overall agreement percentage observed across the data.
 
     Args:
-        annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
-        data_format: The format that the data is in. Must be one of 'im'
-            (incidence matrix) or 'cm' (confusion matrix). Defaults to 'im'.
-        invalid_return: Value between 0.0 and 1.0, indicating the percentage of agreement.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of annotated items and M is the number of annotators. Missing values must be indicated by nan.
 
     Returns:
         Value between 0.0 and 1.0, indicating the percentage of agreement.
@@ -133,13 +125,12 @@ def _percentage_from_label_counts(label_counts):
     return item_agreements.sum() / max_item_agreements.sum()
 
 
-def cohens_kappa(annotations: Sequence) -> float:
+def cohens_kappa(annotations: np.ndarray) -> float:
     """
     Returns Cohen's Kappa for the provided annotations.
 
     Args:
-        annotations: Annotation data, provided as K x K confusion matrix, with K = number of labels.
-        invalid_return: value to return if result is np.nan. Defaults to np.nan.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of annotated items and M is the number of annotators. Missing values must be indicated by nan.
 
     Returns:
         Value between -1.0 and 1.0, indicating the degree of agreement between both raters.
@@ -159,6 +150,7 @@ def fleiss_kappa(annotations: np.ndarray) -> float:
 
     Args:
          annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
+
     Returns:
         Value between -1.0 and 1.0, indicating the degree of agreement between all raters.
     """
@@ -173,14 +165,14 @@ def fleiss_kappa(annotations: np.ndarray) -> float:
 
 
 def krippendorffs_alpha(
-    annotations: Sequence[Sequence], distance_function: Union[Callable, str]
+    annotations: np.ndarray, distance_function: Union[Callable, str]
 ) -> float:
     """
     Calculates Krippendorff's Alpha for the given annotations (item-value pairs),
     using the given distance function.
 
     Args:
-        annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of annotated items and M is the number of annotators. Missing values must be indicated by nan.
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(annotations[i, j], annotations[p, q])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
@@ -196,7 +188,7 @@ def krippendorffs_alpha(
 
 
 def sigma(
-    annotations: Sequence[Sequence], distance_function: Union[Callable, str], p=0.05
+    annotations: np.ndarray, distance_function: Union[Callable, str], p=0.05
 ) -> float:
     """
     Calculates the Sigma Agreement Measure for the given annotations (item-value pairs),
@@ -204,7 +196,7 @@ def sigma(
     For details, see https://dl.acm.org/doi/fullHtml/10.1145/3485447.3512242.
 
     Args:
-        annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
+        annotations: Annotation data. Must be a N x M Matrix, where N is the number of annotated items and M is the number of annotators. Missing values must be indicated by nan.
         distance_function: Function to calculate distance between two values.
             Calling `distance_fn(annotations[i, j], annotations[p, q])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
@@ -213,6 +205,9 @@ def sigma(
 
     Returns: Value between 0.0 and 1.0, indicating the degree of agreement.
     """
+    if p < 0.0 or p > 1.0:
+        raise ValueError(f"Parameter 'p' must be between 0.0 and 1.0")
+
     difference_observed, difference_expected = observed_and_expected_differences(
         annotations, distance_function
     )
