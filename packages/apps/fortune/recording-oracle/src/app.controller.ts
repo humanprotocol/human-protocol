@@ -1,5 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Redirect } from '@nestjs/common';
 
 import { Public } from '@/common/decorators';
 
@@ -7,7 +6,7 @@ import { Public } from '@/common/decorators';
 export class AppController {
   @Public()
   @Get('/')
-  @ApiTags('Health Check')
+  @Redirect('/swagger', 301)
   public health(): string {
     return 'OK';
   }

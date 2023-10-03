@@ -7,15 +7,10 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  EscrowClient,
-  EscrowStatus,
-  StorageClient,
-  StorageCredentials,
-  StorageParams,
-  UploadFile,
-} from '@human-protocol/sdk';
+import { EscrowClient, EscrowStatus, StorageClient } from '@human-protocol/sdk';
 import { ethers } from 'ethers';
+import * as Minio from 'minio';
+import { uploadJobSolutions } from '../../common/utils/storage';
 
 import {
   ServerConfigType,
@@ -23,22 +18,18 @@ import {
   serverConfigKey,
   s3ConfigKey,
 } from '../../common/config';
-import {
-  JobSolutionRequestDto,
-  SaveSoulutionsDto,
-  SendWebhookDto,
-} from './job.dto';
+import { JobSolutionRequestDto, SendWebhookDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
-import { ErrorBucket, ErrorJob } from '../../common/constants/errors';
+import { ErrorJob } from '../../common/constants/errors';
 import { firstValueFrom } from 'rxjs';
 import { JobRequestType } from '../../common/enums/job';
 import { IManifest, ISolution } from '../../common/interfaces/job';
+import { checkCurseWords } from '@/common/utils/curseWords';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  public readonly storageClient: StorageClient;
-  public readonly storageParams: StorageParams;
+  public readonly minioClient: Minio.Client;
 
   constructor(
     @Inject(s3ConfigKey)
@@ -49,21 +40,80 @@ export class JobService {
     private readonly web3Service: Web3Service,
     private readonly httpService: HttpService,
   ) {
-    const storageCredentials: StorageCredentials = {
+    this.minioClient = new Minio.Client({
+      endPoint: this.s3Config.endPoint,
+      port: this.s3Config.port,
       accessKey: this.s3Config.accessKey,
       secretKey: this.s3Config.secretKey,
-    };
-
-    this.storageParams = {
-      endPoint: this.s3Config.accessKey,
-      port: this.s3Config.port,
       useSSL: this.s3Config.useSSL,
-    };
+    });
+  }
 
-    this.storageClient = new StorageClient(
-      this.storageParams,
-      storageCredentials,
+  private getUniqueSolutions(
+    listA: ISolution[],
+    listB: ISolution[],
+  ): ISolution[] {
+    return listA.filter(
+      (solution) =>
+        !listB.some((compareSolution) =>
+          Object.keys(solution).every(
+            (key) =>
+              solution[key as keyof ISolution] ===
+              compareSolution[key as keyof ISolution],
+          ),
+        ),
     );
+  }
+
+  private processSolutions(
+    exchangeSolutions: ISolution[],
+    recordingSolutions: ISolution[],
+  ) {
+    const errorSolutions: ISolution[] = [];
+    let uniqueSolutions: ISolution[] = exchangeSolutions;
+
+    const duplicatedInExchange = exchangeSolutions.filter((solution, index) =>
+      exchangeSolutions
+        .slice(index + 1)
+        .some(
+          (compareSolution) =>
+            solution.exchangeAddress === compareSolution.exchangeAddress &&
+            solution.workerAddress === compareSolution.workerAddress &&
+            solution.solution === compareSolution.solution,
+        ),
+    );
+
+    if (duplicatedInExchange) errorSolutions.push(...duplicatedInExchange);
+
+    uniqueSolutions = this.getUniqueSolutions(
+      exchangeSolutions,
+      duplicatedInExchange,
+    );
+    uniqueSolutions.push(...errorSolutions);
+
+    const duplicatedInRecording = uniqueSolutions.filter((solution) =>
+      recordingSolutions.some(
+        (compareSolution) =>
+          solution.exchangeAddress === compareSolution.exchangeAddress &&
+          solution.workerAddress === compareSolution.workerAddress &&
+          solution.solution === compareSolution.solution,
+      ),
+    );
+
+    uniqueSolutions = this.getUniqueSolutions(
+      uniqueSolutions,
+      duplicatedInRecording,
+    );
+
+    uniqueSolutions = uniqueSolutions.filter((solution) => {
+      if (checkCurseWords(solution.solution)) {
+        errorSolutions.push(solution);
+        return false;
+      }
+      return true;
+    });
+
+    return { errorSolutions, uniqueSolutions };
   }
 
   async processJobSolution(
@@ -86,7 +136,10 @@ export class JobService {
     const escrowStatus = await escrowClient.getStatus(
       jobSolution.escrowAddress,
     );
-    if (escrowStatus !== EscrowStatus.Pending) {
+    if (
+      escrowStatus !== EscrowStatus.Pending &&
+      escrowStatus !== EscrowStatus.Partial
+    ) {
       this.logger.log(ErrorJob.InvalidStatus, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidStatus);
     }
@@ -107,28 +160,29 @@ export class JobService {
       throw new BadRequestException(ErrorJob.InvalidJobType);
     }
 
-    // TODO: Develop a generic error handler for ethereum errors
     const existingJobSolutionsURL =
       await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
-    const existingJobSolutions: ISolution[] =
-      await StorageClient.downloadFileFromUrl(existingJobSolutionsURL);
 
-    if (
-      existingJobSolutions.find(
-        ({ solution }) => solution === jobSolution.solution,
-      )
-    ) {
-      this.logger.log(ErrorJob.SolutionAlreadyExists, JobService.name);
-      throw new BadRequestException(ErrorJob.SolutionAlreadyExists);
+    let existingJobSolutions: ISolution[];
+    try {
+      existingJobSolutions = await StorageClient.downloadFileFromUrl(
+        `http://127.0.0.1:9000/solution/${jobSolution.escrowAddress}-${jobSolution.chainId}.json`,
+      );
+    } catch {
+      existingJobSolutions = [];
     }
+
+    const exchangeJobSolutions: ISolution[] =
+      await StorageClient.downloadFileFromUrl(jobSolution.solutionUrl);
+
+    const { errorSolutions, uniqueSolutions } = this.processSolutions(
+      exchangeJobSolutions,
+      existingJobSolutions,
+    );
 
     const newJobSolutions: ISolution[] = [
       ...existingJobSolutions,
-      {
-        exchangeAddress: jobSolution.exchangeAddress,
-        workerAddress: jobSolution.workerAddress,
-        solution: jobSolution.solution,
-      },
+      ...uniqueSolutions,
     ];
 
     if (newJobSolutions.length > submissionsRequired) {
@@ -139,7 +193,10 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
-    const jobSolutionUploaded = await this.uploadJobSolutions(
+    const jobSolutionUploaded = await uploadJobSolutions(
+      this.minioClient,
+      jobSolution.chainId,
+      jobSolution.escrowAddress,
       newJobSolutions,
       this.s3Config.bucket,
     );
@@ -157,6 +214,7 @@ export class JobService {
     // const reputationOracleURL = (await kvstoreClient.get(reputationOracleAddress, "url")) as string;
 
     // TODO: Remove this when KVStore is used
+
     if (newJobSolutions.length === submissionsRequired) {
       await this.sendWebhook(this.serverConfig.reputationOracleWebhookUrl, {
         chainId: jobSolution.chainId,
@@ -166,24 +224,9 @@ export class JobService {
       return 'The requested job is completed.';
     }
 
-    return 'Solution is recorded.';
-  }
+    // TODO: Call Exchange Oracle and Reputation Oracle with bad solutions contained in errorSolutions
 
-  private async uploadJobSolutions(
-    jobSolutions: any[],
-    bucket: string,
-  ): Promise<SaveSoulutionsDto> {
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      jobSolutions,
-      bucket,
-    );
-
-    if (!uploadedFiles[0]) {
-      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
-    }
-
-    return uploadedFiles[0];
+    return 'Solution are recorded.';
   }
 
   public async sendWebhook(

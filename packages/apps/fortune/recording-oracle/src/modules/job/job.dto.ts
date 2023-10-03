@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString, IsUrl } from 'class-validator';
 
 import { IsValidEthereumAddress } from '@/common/validators';
 
@@ -28,7 +28,8 @@ export class JobSolutionRequestDto {
 
   @ApiProperty()
   @IsString()
-  public solution: string;
+  @IsUrl()
+  public solutionUrl: string;
 }
 
 export class SendWebhookDto {
@@ -36,7 +37,7 @@ export class SendWebhookDto {
   public chainId: number;
 }
 
-export class SaveSoulutionsDto {
+export class SaveSolutionsDto {
   public url: string;
   public hash: string;
 }
