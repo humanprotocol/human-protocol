@@ -1,4 +1,10 @@
-import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import React from 'react';
 
 import { HumanAppDataChart } from '../chart';
@@ -6,17 +12,17 @@ import { HumanAppDataChart } from '../chart';
 type ChartContainerProps = {
   data: any;
   title: string;
-  items: Array<{ label: string; value: any }>;
-  onChange: (value: any) => void;
+  isLoading?: boolean;
+  isNotSupportedChain?: boolean;
   children?: React.ReactNode;
 };
 
 export const ChartContainer = ({
   data,
   title,
-  items,
-  onChange,
   children,
+  isLoading,
+  isNotSupportedChain = false,
 }: ChartContainerProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(600));
@@ -37,7 +43,43 @@ export const ChartContainer = ({
         <Typography fontSize={24} color="primary">
           {title}
         </Typography>
-        {data && <HumanAppDataChart data={data} minHeight={250} />}
+        {isNotSupportedChain ? (
+          <Box
+            sx={{
+              minHeight: 250,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography
+              color="textPrimary"
+              sx={{
+                fontSize: '20px',
+                lineHeight: 1.6,
+                textAlign: 'center',
+                fontWeight: 500,
+              }}
+            >
+              At the moment there is no data available.
+            </Typography>
+          </Box>
+        ) : isLoading ? (
+          <Box
+            sx={{
+              minHeight: 250,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : data ? (
+          <HumanAppDataChart data={data} minHeight={250} />
+        ) : (
+          <></>
+        )}
         {children}
       </Box>
     );
@@ -62,8 +104,37 @@ export const ChartContainer = ({
           minHeight: 400,
         }}
       >
-        {data && (
+        {isNotSupportedChain ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}
+          >
+            <Typography
+              color="textPrimary"
+              sx={{ fontSize: '24px', lineHeight: 1.5, textAlign: 'center' }}
+            >
+              At the moment there is no data available.
+            </Typography>
+          </Box>
+        ) : isLoading ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : data ? (
           <HumanAppDataChart data={data} minHeight={300} minWidth={800} />
+        ) : (
+          <></>
         )}
       </Box>
     </Box>

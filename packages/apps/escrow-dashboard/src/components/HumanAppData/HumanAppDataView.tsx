@@ -9,23 +9,23 @@ import {
 import { FC, useState } from 'react';
 
 import { TooltipIcon } from '../TooltipIcon';
-import { HMTView } from './views/HMT';
 import { PaymentsView } from './views/Payments';
 import { TasksView } from './views/Tasks';
+import { TransactionsView } from './views/Transactions';
 import { WorkersView } from './views/Workers';
 
 enum ViewButton {
   Tasks = 'Tasks',
   Workers = 'Workers',
   Payments = 'Payments',
-  HMT = 'HMT',
+  Transactions = 'Transactions',
 }
 
 const VIEW_BUTTONS = [
   { label: 'Tasks', value: ViewButton.Tasks },
   { label: 'Workers', value: ViewButton.Workers },
   { label: 'Payments', value: ViewButton.Payments },
-  { label: 'HMT', value: ViewButton.HMT },
+  { label: 'Transactions', value: ViewButton.Transactions },
 ];
 
 export const HumanAppDataView: FC = () => {
@@ -39,7 +39,7 @@ export const HumanAppDataView: FC = () => {
         <TasksView />
         <WorkersView />
         <PaymentsView />
-        <HMTView />
+        <TransactionsView />
       </Stack>
     );
   }
@@ -83,7 +83,7 @@ export const HumanAppDataView: FC = () => {
         {viewButton === ViewButton.Tasks && <TasksView />}
         {viewButton === ViewButton.Workers && <WorkersView />}
         {viewButton === ViewButton.Payments && <PaymentsView />}
-        {viewButton === ViewButton.HMT && <HMTView />}
+        {viewButton === ViewButton.Transactions && <TransactionsView />}
       </Box>
       <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
     </Box>

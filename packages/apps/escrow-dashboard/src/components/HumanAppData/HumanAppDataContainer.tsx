@@ -1,4 +1,4 @@
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { FC } from 'react';
 
 import { NetworkSelect } from '../NetworkSelect';
@@ -8,18 +8,12 @@ import { HumanAppDataView } from './HumanAppDataView';
 import networkSvg from 'src/assets/network.svg';
 import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useAppDispatch } from 'src/state';
-import {
-  useChainId,
-  useHumanAppData,
-  useHumanAppDataLoaded,
-} from 'src/state/humanAppData/hooks';
+import { useChainId } from 'src/state/humanAppData/hooks';
 import { setChainId } from 'src/state/humanAppData/reducer';
 
 export const HumanAppDataContainer: FC = () => {
   const dispatch = useAppDispatch();
-  useHumanAppData();
 
-  const loaded = useHumanAppDataLoaded();
   const chainId = useChainId();
 
   const handleNetworkChange = (e: any) => {
@@ -52,13 +46,7 @@ export const HumanAppDataContainer: FC = () => {
           <TimeRangeButtons fullWidth />
         </Box>
       </Box>
-      {loaded ? (
-        <HumanAppDataView />
-      ) : (
-        <Box display="flex" justifyContent="center" py={10}>
-          <CircularProgress size={36} />
-        </Box>
-      )}
+      <HumanAppDataView />
     </Box>
   );
 };

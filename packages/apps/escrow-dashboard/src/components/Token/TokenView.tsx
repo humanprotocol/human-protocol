@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Link, Grid, Typography } from '@mui/material';
+import { Box, Link, Grid, Typography } from '@mui/material';
 import { FC } from 'react';
 
 import { CardTextBlock } from '../Cards';
@@ -8,10 +8,7 @@ import coinlistProIcon from 'src/assets/exchanges/coinlist-pro.png';
 import gateIoIcon from 'src/assets/exchanges/gate-io.png';
 import lBankIcon from 'src/assets/exchanges/lbank.svg';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
-import {
-  useTokenStatsByChainId,
-  useHumanAppDataLoaded,
-} from 'src/state/humanAppData/hooks';
+import { useHMTStats } from 'src/hooks/useHMTStats';
 
 const EXCHANGES = [
   { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
@@ -30,76 +27,70 @@ const EXCHANGES = [
   { icon: lBankIcon, href: 'https://www.lbank.com/', name: 'LBank' },
 ];
 
-export const TokenView: FC = () => {
-  const tokenStats = useTokenStatsByChainId();
-  const loaded = useHumanAppDataLoaded();
+const TotalSupplyComponent = ({ value }: { value: number }) => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'long',
+  });
+  const compactNumber = formatter.format(value);
+  const [number, unit] = compactNumber.split(' ');
 
-  const totalSupplyComponent = (value: number) => {
-    const formatter = new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      compactDisplay: 'long',
-    });
-    const compactNumber = formatter.format(value);
-    const [number, unit] = compactNumber.split(' ');
-
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'baseline',
-          mt: 3,
-          overflow: 'hidden',
-        }}
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'baseline',
+        mt: 3,
+        overflow: 'hidden',
+      }}
+    >
+      <Typography
+        variant="h2"
+        color="primary"
+        lineHeight={1}
+        sx={{ fontSize: { xs: 40, xl: 60 } }}
       >
-        <Typography
-          variant="h2"
-          color="primary"
-          lineHeight={1}
-          sx={{ fontSize: { xs: 40, xl: 60 } }}
-        >
-          {number}
-        </Typography>
-        <Typography
-          variant="h4"
-          color="primary"
-          sx={{
-            fontSize: { xs: 28, xl: 34 },
-            textTransform: 'capitalize',
-            ml: 2,
-          }}
-          lineHeight={1}
-        >
-          {unit}
-        </Typography>
-      </Box>
-    );
-  };
+        {number}
+      </Typography>
+      <Typography
+        variant="h4"
+        color="primary"
+        sx={{
+          fontSize: { xs: 28, xl: 34 },
+          textTransform: 'capitalize',
+          ml: 2,
+        }}
+        lineHeight={1}
+      >
+        {unit}
+      </Typography>
+    </Box>
+  );
+};
+
+export const TokenView: FC = () => {
+  const { data } = useHMTStats();
 
   return (
     <Box>
-      {loaded ? (
-        <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
-          <Grid item xs={12} md={4}>
-            <CardTextBlock
-              title="Amount of transfers"
-              value={tokenStats?.totalTransferAmount}
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <CardTextBlock title="Holders" value={tokenStats?.holders} />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <CardTextBlock
-              title="Total Supply"
-              component={totalSupplyComponent(Number(tokenStats?.totalSupply))}
-            />
-          </Grid>
+      <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
+        <Grid item xs={12} md={4}>
+          <CardTextBlock
+            title="Amount of transfers"
+            value={data?.totalTransferAmount}
+          />
         </Grid>
-      ) : (
-        <Box display="flex" justifyContent="center" py={10}>
-          <CircularProgress size={36} />
-        </Box>
-      )}
+        <Grid item xs={12} md={4}>
+          <CardTextBlock title="Holders" value={data?.holders} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <CardTextBlock
+            title="Total Supply"
+            value={data?.totalSupply}
+            component={TotalSupplyComponent}
+          />
+        </Grid>
+      </Grid>
       <Box
         sx={{
           display: 'flex',

@@ -1,21 +1,23 @@
-import { ChainId } from '@human-protocol/sdk';
 import React, { useMemo } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useWorkerStats } from 'src/hooks/useWorkerStats';
-import { useChainId } from 'src/state/humanAppData/hooks';
+import { useHMTStats } from 'src/hooks/useHMTStats';
+import { useDays } from 'src/state/humanAppData/hooks';
 
-export const WorkersView = () => {
-  const chainId = useChainId();
-  const { data, isLoading } = useWorkerStats();
+export const TransactionsView = () => {
+  const days = useDays();
+  const { data, isLoading } = useHMTStats();
 
   const seriesData = useMemo(() => {
     if (data) {
-      return data.map((d) => ({
-        date: d.timestamp,
-        value: Number(d.activeWorkers),
-      }));
+      return data.dailyHMTData
+        .slice(0, days)
+        .reverse()
+        .map((d) => ({
+          date: d.timestamp,
+          value: Number(d.totalTransactionCount),
+        }));
     }
     return [];
   }, [data]);
@@ -24,8 +26,7 @@ export const WorkersView = () => {
     <ChartContainer
       isLoading={isLoading}
       data={seriesData}
-      title="Workers"
-      isNotSupportedChain={chainId !== ChainId.POLYGON}
+      title="Transactions"
     >
       <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
     </ChartContainer>

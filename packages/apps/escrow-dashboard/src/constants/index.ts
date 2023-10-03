@@ -1,6 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const V2_SUPPORTED_CHAIN_IDS = [ChainId.POLYGON, ChainId.POLYGON_MUMBAI];
+export const V2_SUPPORTED_CHAIN_IDS = [ChainId.POLYGON];
 
 export const SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,

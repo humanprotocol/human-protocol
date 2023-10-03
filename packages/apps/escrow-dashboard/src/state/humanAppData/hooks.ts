@@ -13,12 +13,17 @@ export const useHumanAppData = () => {
 
   useEffect(() => {
     dispatch(fetchHumanAppData());
-  }, [dispatch]);
+  }, []);
 };
 
 export const useChainId = () => {
   const { chainId } = useSelector((state: AppState) => state.humanAppData);
   return chainId;
+};
+
+export const useDays = () => {
+  const { days } = useSelector((state: AppState) => state.humanAppData);
+  return days;
 };
 
 export const useEscrowStatisticsByChainId = () => {
