@@ -1083,8 +1083,9 @@ describe('EscrowClient', () => {
       escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
       escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
 
-      await escrowClient.cancel(escrowAddress);
+      const result = await escrowClient.cancel(escrowAddress);
 
+      expect(result).toBe(FAKE_HASH);
       expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
     });
 
