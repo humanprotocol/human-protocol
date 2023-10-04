@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           {tab Value} Tasks
         </Typography> */}
         <Typography color="text.primary" variant="h6" fontWeight={500}>
-          {numeral(payload[0].value).format('0a').toUpperCase()}
+          {numeral(payload[0].value).format('0.0a').toUpperCase()}
         </Typography>
       </Box>
     );
