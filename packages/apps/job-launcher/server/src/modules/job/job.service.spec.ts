@@ -536,35 +536,20 @@ describe('JobService', () => {
       expect(mockJobEntity.save).toHaveBeenCalled();
     });
 
-    it('should throw not found exception if job not found', async () => {
-      jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
-
-      await expect(
-        jobService.requestToCancelJob(userId, jobId),
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('requestToCancelJob', () => {
-    const jobId = 1;
-    const userId = 123;
-
-    it('should cancel the job', async () => {
+    it('should throw invalid status cancellation', async () => {
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
         userId,
-        status: JobStatus.LAUNCHED,
+        status: JobStatus.CANCELED,
         chainId: ChainId.LOCALHOST,
         save: jest.fn().mockResolvedValue(true),
       };
 
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
-
-      const result = await jobService.requestToCancelJob(userId, jobId);
-
-      expect(result).toEqual(true);
-      expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
-      expect(mockJobEntity.save).toHaveBeenCalled();
+    
+      await expect(
+        jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw not found exception if job not found', async () => {

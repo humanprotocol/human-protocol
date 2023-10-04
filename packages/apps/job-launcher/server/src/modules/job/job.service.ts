@@ -68,7 +68,7 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import { CANCEL_JOB_STATUSES, JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -337,6 +337,11 @@ export class JobService {
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
       throw new NotFoundException(ErrorJob.NotFound);
+    }
+
+    if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
+      this.logger.log(ErrorJob.InvalidStatusCancellation, JobService.name);
+      throw new ConflictException(ErrorJob.InvalidStatusCancellation);
     }
 
     jobEntity.status = JobStatus.TO_CANCEL;
