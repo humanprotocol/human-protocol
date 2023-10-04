@@ -22,7 +22,7 @@ import { FC, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAccount } from 'wagmi';
-import { ConnectButton } from '../ConnectButton';
+// import { ConnectButton } from '../ConnectButton';
 import { SearchBox } from '../SearchBox';
 import { SocialIcons } from '../SocialIcons';
 import logoSvg from 'src/assets/logo.svg';
@@ -242,7 +242,7 @@ export const Header: FC = () => {
                         </IconButton>
                       )} */}
                       {renderNavLinks()}
-                      <ConnectButton />
+                      {/* <ConnectButton /> */}
                       {address && <MyHMTButton href="/staking" />}
                     </Box>
                   )}
@@ -285,9 +285,9 @@ export const Header: FC = () => {
       >
         <Box height="100%" position="relative">
           {renderMobileLinks()}
-          <Box px={4} py="26px">
+          {/* <Box px={4} py="26px">
             <ConnectButton />
-          </Box>
+          </Box> */}
           {address && (
             <Box px={4} py="26px">
               <MyHMTButton href="/staking" />
