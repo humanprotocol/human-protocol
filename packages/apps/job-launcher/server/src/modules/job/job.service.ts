@@ -728,6 +728,7 @@ export class JobService {
     }
 
     jobEntity.status = JobStatus.FAILED;
+    jobEntity.failedReason = dto.reason;
     await jobEntity.save();
 
     return true;
