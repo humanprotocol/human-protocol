@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JobService } from './job.service';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
 
 @ApiTags('Job')
 @Controller('job')
@@ -30,6 +30,15 @@ export class JobController {
       body.chainId,
       body.escrowAddress,
       body.workerAddress,
+      body.solution,
+    );
+  }
+
+  @Patch('invalid-solution')
+  invalidJobSolution(@Body() body: InvalidJobDto): Promise<any> {
+    return this.jobService.processInvalidJobSolution(
+      body.chainId,
+      body.escrowAddress,
       body.solution,
     );
   }

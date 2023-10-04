@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString, IsObject } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from 'src/common/enums/webhook';
 
@@ -37,6 +37,39 @@ export class SolveJobDto {
   @ApiProperty()
   @IsString()
   public solution: string;
+}
+
+export class Solution {
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  exchangeAddress: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  workerAddress: string;
+
+  @ApiProperty()
+  @IsString()
+  solution: string;
+}
+
+export class InvalidJobDto {
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public escrowAddress: string;
+
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
+  @IsObject()
+  public solution: Solution;
 }
 
 export class EscrowFailedWebhookDto {

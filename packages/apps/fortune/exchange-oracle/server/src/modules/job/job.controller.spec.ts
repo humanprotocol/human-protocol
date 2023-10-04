@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
@@ -24,6 +24,7 @@ describe('JobController', () => {
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
+  const exchangeAddress = '0x1234567890123456789012345678901234567892';
 
   const reputationOracleURL = 'https://example.com/reputationoracle';
   const configServiceMock = {
@@ -142,6 +143,35 @@ describe('JobController', () => {
         solveJobDto.chainId,
         solveJobDto.escrowAddress,
         solveJobDto.workerAddress,
+        solveJobDto.solution,
+      );
+    });
+  });
+
+  describe('invalidJobSolution-solution', () => {
+    it('should mark a job solution as invalid', async () => {
+      const solution = 'job-solution';
+      const solveJobDto: InvalidJobDto = {
+        chainId,
+        escrowAddress,
+        solution: {
+          workerAddress,
+          solution,
+          exchangeAddress,
+        },
+      };
+      const expectedResult = true;
+
+      jest
+        .spyOn(jobService, 'processInvalidJobSolution')
+        .mockResolvedValue(expectedResult);
+
+      const result = await jobController.invalidJobSolution(solveJobDto);
+
+      expect(result).toBe(expectedResult);
+      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
+        solveJobDto.chainId,
+        solveJobDto.escrowAddress,
         solveJobDto.solution,
       );
     });

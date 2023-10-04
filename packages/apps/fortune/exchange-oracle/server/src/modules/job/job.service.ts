@@ -6,16 +6,26 @@ import {
   KVStoreKeys,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { Web3Service } from '../web3/web3.service';
-import { EscrowFailedWebhookDto, JobDetailsDto } from './job.dto';
+import { EscrowFailedWebhookDto, JobDetailsDto, Solution } from './job.dto';
 import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import * as Minio from 'minio';
-import { uploadJobSolutions } from '../../common/utils/storage';
+import {
+  downloadJobSolutions,
+  uploadJobSolutions,
+} from '../../common/utils/storage';
+import { ISolution } from 'src/common/interfaces/job';
 
 @Injectable()
 export class JobService {
@@ -138,14 +148,12 @@ export class JobService {
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
-    const solutionUrl = await uploadJobSolutions(
-      this.minioClient,
+    const solutionUrl = await this.uploadJobSolutions(
       chainId,
       escrowAddress,
       workerAddress,
       signer.address,
       solution,
-      this.s3Config.bucket,
     );
 
     await this.httpService.post(recordingOracleWebhookUrl, {
@@ -157,5 +165,80 @@ export class JobService {
     });
 
     return true;
+  }
+
+  private async uploadJobSolutions(
+    chainId: number,
+    escrowAddress: string,
+    workerAddress: string,
+    exchangeAddress: string,
+    solution: string,
+  ) {
+    const key = `${escrowAddress}-${chainId}.json`;
+    const url = `${this.s3Config.useSSL ? 'https' : 'http'}://${
+      this.s3Config.endPoint
+    }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
+
+    const existingJobSolutions = await downloadJobSolutions(url);
+
+    if (
+      existingJobSolutions.find(
+        (solution) => solution.workerAddress === workerAddress,
+      )
+    ) {
+      throw new BadRequestException('User has already submitted a solution');
+    }
+
+    const newJobSolutions: ISolution[] = [
+      ...existingJobSolutions,
+      {
+        exchangeAddress: exchangeAddress,
+        workerAddress: workerAddress,
+        solution: solution,
+      },
+    ];
+
+    uploadJobSolutions(
+      this.minioClient,
+      this.s3Config.bucket,
+      key,
+      newJobSolutions,
+    );
+
+    return url;
+  }
+
+  public async processInvalidJobSolution(
+    chainId: number,
+    escrowAddress: string,
+    solution: Solution,
+  ): Promise<boolean> {
+    const key = `${escrowAddress}-${chainId}.json`;
+    const url = `${this.s3Config.useSSL ? 'https' : 'http'}://${
+      this.s3Config.endPoint
+    }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
+
+    const existingJobSolutions = await downloadJobSolutions(url);
+
+    const foundSolution = existingJobSolutions.find(
+      (sol) =>
+        sol.workerAddress === solution.workerAddress &&
+        sol.solution === solution.solution,
+    );
+
+    if (foundSolution) {
+      foundSolution.invalid = true;
+    } else {
+      throw new BadRequestException(
+        `Solution not found in Escrow: ${escrowAddress}`,
+      );
+    }
+
+    return uploadJobSolutions(
+      this.minioClient,
+      this.s3Config.bucket,
+      key,
+      existingJobSolutions,
+    );
   }
 }

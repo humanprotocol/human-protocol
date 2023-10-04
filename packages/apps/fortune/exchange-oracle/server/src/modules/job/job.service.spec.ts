@@ -344,4 +344,74 @@ describe('JobService', () => {
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
   });
+
+  describe('processInvalidJob', () => {
+    it('should mark a job solution as invalid', async () => {
+      const exchangeAddress = '0x1234567890123456789012345678901234567892';
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const solution = 'test';
+
+      const jobSolution = {
+        exchangeAddress,
+        workerAddress,
+        solution,
+      };
+      const existingJobSolutions = [jobSolution];
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValue(existingJobSolutions);
+      const result = await jobService.processInvalidJobSolution(
+        chainId,
+        escrowAddress,
+        jobSolution,
+      );
+
+      expect(result).toBe(true);
+      expect(jobService.minioClient.putObject).toHaveBeenCalledWith(
+        MOCK_S3_BUCKET,
+        `${escrowAddress}-${chainId}.json`,
+        JSON.stringify([
+          {
+            exchangeAddress,
+            workerAddress,
+            solution,
+            invalid: true,
+          },
+        ]),
+
+        {
+          'Content-Type': 'application/json',
+        },
+      );
+    });
+
+    it('should throw an error if solution was not previously in S3', async () => {
+      const exchangeAddress = '0x1234567890123456789012345678901234567892';
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+
+      const jobSolution = {
+        exchangeAddress,
+        workerAddress,
+        solution: 'test',
+      };
+      const existingJobSolutions = [
+        {
+          exchangeAddress,
+          workerAddress,
+          solution: 'invalid',
+        },
+      ];
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValue(existingJobSolutions);
+
+      await expect(
+        jobService.processInvalidJobSolution(
+          chainId,
+          escrowAddress,
+          jobSolution,
+        ),
+      ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
+    });
+  });
 });
