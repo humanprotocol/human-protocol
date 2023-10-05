@@ -55,6 +55,12 @@ def test_fleiss_kappa(annotations_multiple_raters):
     kappa = fleiss_kappa(annotations_multiple_raters)
     assert eq_rounded(kappa, 0.05)
 
+    single_class_annos = np.zeros((10, 3))  # all annotators gave the same labels
+    assert ~np.isnan(fleiss_kappa(single_class_annos))
+
+    single_annotator_annos = np.random.randint(0, 2, size=(10, 1))
+    assert ~np.isnan(fleiss_kappa(single_annotator_annos))
+
 
 def test_krippendorff():
     annotations = np.asarray([[0, 0, 0], [0, 1, 1]])
