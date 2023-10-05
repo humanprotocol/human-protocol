@@ -32,6 +32,10 @@ jobs:
             graph: moonbase-alpha-v2
           - name: mainnet
             graph: mainnet-v2
+          - name: fuji
+            graph: fuji-v2
+          - name: avalanche
+            graph: avalanche-v2
       fail-fast: true
       max-parallel: 3
     steps:
