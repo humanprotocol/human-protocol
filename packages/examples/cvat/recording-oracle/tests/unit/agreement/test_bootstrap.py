@@ -1,5 +1,7 @@
 import numpy as np
+
 from src.agreement.bootstrap import bootstrap_ci
+
 from tests.unit.agreement.conftest import _eq_rounded
 
 
