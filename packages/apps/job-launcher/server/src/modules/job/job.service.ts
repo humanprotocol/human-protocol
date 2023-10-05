@@ -11,6 +11,7 @@ import {
   StorageParams,
   UploadFile,
 } from '@human-protocol/sdk';
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
@@ -55,6 +56,7 @@ import { Web3Service } from '../web3/web3.service';
 import {
   CvatFinalResultDto,
   CvatManifestDto,
+  EscrowCancelDto,
   EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
@@ -624,7 +626,6 @@ export class JobService {
   }
 
   public async cancelCronJob() {
-    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
     const jobEntity = await this.jobRepository.findOne(
       {
         status: JobStatus.TO_CANCEL,
@@ -633,65 +634,62 @@ export class JobService {
       },
       {
         order: {
-          waitUntil: SortDirection.ASC,
+            waitUntil: SortDirection.ASC,
         },
-      },
+      }
     );
-
     if (!jobEntity) return;
 
-    const { escrowAddress } = jobEntity;
-    if (escrowAddress) {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
+    if (jobEntity.escrowAddress) {
+      const { amountRefunded } = await this.processEscrowCancellation(jobEntity);
+      await this.paymentService.createRefundPayment({ refundAmount: amountRefunded.toNumber(), userId: jobEntity.userId, jobId: jobEntity.id });
+    } else {
+      await this.paymentService.createRefundPayment({ refundAmount: jobEntity.fundAmount, userId: jobEntity.userId, jobId: jobEntity.id });
+    }
+
+    await this.notifyWebhook(jobEntity);
+
+    jobEntity.status = JobStatus.CANCELED;
+    await jobEntity.save();
+
+    return true;
+  }
+
+  public async processEscrowCancellation(jobEntity: JobEntity): Promise<EscrowCancelDto> {
+      const { chainId, escrowAddress } = jobEntity;
+
+      const signer = this.web3Service.getSigner(chainId);
       const escrowClient = await EscrowClient.build(signer);
 
       const escrowStatus = await escrowClient.getStatus(escrowAddress);
-      if (
-        escrowStatus === EscrowStatus.Complete ||
-        escrowStatus === EscrowStatus.Paid
-      ) {
-        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
-        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid || escrowStatus === EscrowStatus.Cancelled) {
+          this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+          throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
       }
 
       const balance = await escrowClient.getBalance(escrowAddress);
       if (balance.eq(0)) {
-        this.logger.log(
-          ErrorEscrow.InvalidBalanceCancellation,
-          JobService.name,
-        );
-        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+          this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+          throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
       }
 
-      await escrowClient.cancel(escrowAddress);
+      return escrowClient.cancel(escrowAddress);
+  }
 
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-      if (
-        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-      ) {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
+  public async notifyWebhook(jobEntity: JobEntity) {
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
+                      ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
+                      : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
+
+    await this.sendWebhook(
+        this.configService.get<string>(configKey)!,
+        {
+            escrowAddress: jobEntity.escrowAddress,
             chainId: jobEntity.chainId,
             eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      } else {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      }
-    }
+        }
+    );
 
     const paymentEntity = await this.paymentRepository.findOne({
       jobId: jobEntity.id,

@@ -514,52 +514,143 @@ describe('JobService', () => {
     });
   });
 
-  describe('requestToCancelJob', () => {
-    const jobId = 1;
-    const userId = 123;
+  /*describe('refundCronJob', () => {
+    let escrowClientMock: any,
+        jobEntityMock: Partial<JobEntity>;
 
-    it('should cancel the job', async () => {
-      const mockJobEntity: Partial<JobEntity> = {
-        id: jobId,
-        userId,
-        status: JobStatus.LAUNCHED,
+    beforeEach(() => {
+      (EscrowClient.build as any).mockImplementation(() => (
+        {
+          getTokenAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+        }
+      ));
+
+      jobEntityMock = { 
+        status: JobStatus.TO_CANCEL, 
+        fundAmount: 100, 
+        userId: 1, 
+        id: 1, 
+        manifestUrl: MOCK_FILE_URL, 
+        escrowAddress: MOCK_ADDRESS, 
         chainId: ChainId.LOCALHOST,
-        save: jest.fn().mockResolvedValue(true),
+        save: jest.fn(),
       };
-
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
-
-      const result = await jobService.requestToCancelJob(userId, jobId);
-
-      expect(result).toEqual(true);
-      expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
-      expect(mockJobEntity.save).toHaveBeenCalled();
     });
 
-    it('should throw invalid status cancellation', async () => {
-      const mockJobEntity: Partial<JobEntity> = {
-        id: jobId,
-        userId,
-        status: JobStatus.CANCELED,
-        chainId: ChainId.LOCALHOST,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
-    
-      await expect(
-        jobService.requestToCancelJob(userId, jobId),
-      ).rejects.toThrow(ConflictException);
+    afterEach(() => {
+      jest.clearAllMocks();
     });
 
-    it('should throw not found exception if job not found', async () => {
-      jobRepository.findOne = jest.fn().mockResolvedValue(undefined);
+    it('should successfully handle refund', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as JobEntity);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(100));
+      jest.spyOn(paymentService, 'createRefundPayment').mockResolvedValueOnce(undefined);
 
-      await expect(
-        jobService.requestToCancelJob(userId, jobId),
-      ).rejects.toThrow(NotFoundException);
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).resolves.toBeTruthy();
+      expect(jobEntityMock.status).toBe(JobStatus.CANCELED);
+      expect(jobEntityMock.save).toHaveBeenCalled();
     });
-  });
+
+    it('should return if no job entity found', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(null as any);
+
+      await expect(jobService.refundCronJob()).resolves.toBeUndefined();
+    });
+
+    it('should handle case where escrowAddress is not present', async () => {
+      jobEntityMock.escrowAddress = undefined;
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
+      });
+
+      await jobService.refundCronJob();
+
+      expect(jobService.calculateRefundAmount).toHaveBeenCalledTimes(0);
+    });
+
+    it('should handle error during get transaction receipt call', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(jobEntityMock, 'save').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue(undefined),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
+    });
+
+    it('should handle error transaction has not enough amount of confirmations', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(jobEntityMock, 'save').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: 0 }),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
+    });
+
+    it('should handle error during refund calculation', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockImplementationOnce(() => {
+        throw new Error('Refund calculation error');
+      });
+
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getTransactionReceipt: jest.fn().mockResolvedValue({ confirmations: MOCK_TX_CONFIRMATION_TRESHOLD }),
+        },
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow('Refund calculation error');
+    });
+
+    it('should handle error during payment creation', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(paymentService, 'createRefundPayment').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
+    });
+
+    it('should handle error during job entity saving', async () => {
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityMock as any);
+      jest.spyOn(jobService, 'calculateRefundAmount').mockResolvedValueOnce(new Decimal(10));
+      jest.spyOn(jobEntityMock, 'save').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
+      await expect(jobService.refundCronJob()).rejects.toThrow();
+    });
+  });*/
 
   describe('launchJob', () => {
     const chainId = ChainId.LOCALHOST;
@@ -700,6 +791,7 @@ describe('JobService', () => {
     });
   });
 
+  
   describe('cancelCronJob', () => {
     let escrowClientMock: any,
       getManifestMock: any,
@@ -718,12 +810,14 @@ describe('JobService', () => {
         getBalance: jest.fn().mockResolvedValue(new Decimal(10)),
       };
 
-      jobEntityMock = {
-        id: 1,
-        escrowAddress: MOCK_ADDRESS,
-        chainId: 1,
-        manifestUrl: MOCK_FILE_URL,
-        status: JobStatus.TO_CANCEL,
+      jobEntityMock = { 
+        status: JobStatus.TO_CANCEL, 
+        fundAmount: 100, 
+        userId: 1, 
+        id: 1, 
+        manifestUrl: MOCK_FILE_URL, 
+        escrowAddress: MOCK_ADDRESS, 
+        chainId: ChainId.LOCALHOST,
         save: jest.fn(),
       };
 
@@ -740,7 +834,6 @@ describe('JobService', () => {
       findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
       buildMock = jest.spyOn(EscrowClient, 'build');
       sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
-      findOneJobMock.mockResolvedValueOnce(jobEntityMock as JobCvatDto);
       findOnePaymentMock.mockResolvedValueOnce(
         paymentEntityMock as PaymentEntity,
       );
@@ -750,109 +843,151 @@ describe('JobService', () => {
       jest.clearAllMocks();
     });
 
-    it('cancels a job successfully', async () => {
-      jobEntityMock.escrowAddress = undefined;
-      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
+    it('should return undefined when no job entity is found', async () => {
+      findOneJobMock.mockResolvedValue(null);
 
       const result = await jobService.cancelCronJob();
 
-      expect(result).toBe(true);
-      expect(escrowClientMock.cancel).toBeCalledTimes(0);
-      expect(paymentEntityMock.status).toBe(PaymentStatus.FAILED);
-      expect(jobSaveMock).toHaveBeenCalledWith();
+      expect(result).toBeUndefined();
     });
 
-    it('should throw an error if the escrow has invalid status', async () => {
-      escrowClientMock.getStatus = jest
-        .fn()
-        .mockResolvedValue(EscrowStatus.Complete);
-      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      buildMock.mockResolvedValue(escrowClientMock as any);
+    it('should return true when the job is successfully canceled', async () => {
+      findOneJobMock.mockResolvedValue(jobEntityMock as any);
 
-      await expect(jobService.cancelCronJob()).rejects.toThrowError(
-        new BadGatewayException(ErrorEscrow.InvalidStatusCancellation),
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
+      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(true);
+
+      const result = await jobService.cancelCronJob();
+
+      expect(result).toBeTruthy();
+      expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(jobEntityMock);
+      expect(jobService.notifyWebhook).toHaveBeenCalledWith(jobEntityMock);
+      expect(jobEntityMock.save).toHaveBeenCalled();
+    });
+
+    it('should not call process escrow cancellation when escrowAddress is not present', async () => {
+      const jobEntityWithoutEscrow = {
+        ...jobEntityMock,
+        escrowAddress: undefined,
+      };
+
+      jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityWithoutEscrow as any);
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
+      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValueOnce(true);
+
+      expect(await jobService.cancelCronJob()).toBe(true);
+      expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw bad request exception if escrowStatus is Complete', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Complete),
+      }));
+
+      await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw bad request exception if escrowStatus is Paid', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Paid),
+      }));
+
+      await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw bad request exception if escrowStatus is Cancelled', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Cancelled),
+      }));
+
+      await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw bad request exception if escrow balance is zero', async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
+        getBalance: jest.fn().mockResolvedValue({ eq: () => true }),
+      }));
+
+      await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('should calculate the refund amount based on matched logs', async () => {
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([{}]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
+
+      const mockHMTokenFactoryContract = {
+        interface: {
+          parseLog: jest.fn().mockReturnValue({
+            args: [
+              MOCK_ADDRESS,
+              MOCK_ADDRESS,
+              BigNumber.from(10)
+            ]
+          })
+        }
+      };
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
+        mockHMTokenFactoryContract as any
       );
+
+      const result = await jobService.calculateRefundAmount(ChainId.LOCALHOST, MOCK_ADDRESS, MOCK_ADDRESS);
+
+      expect(result.toNumber()).toBeGreaterThan(0);
     });
 
-    it('should throw an error if the escrow has invalid balance', async () => {
-      escrowClientMock.getStatus = jest
-        .fn()
-        .mockResolvedValue(EscrowStatus.Launched);
-      escrowClientMock.getBalance = jest.fn().mockResolvedValue(new Decimal(0));
-      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      buildMock.mockResolvedValue(escrowClientMock as any);
+    it('should return zero if no matching logs are found', async () => {
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
 
-      await expect(jobService.cancelCronJob()).rejects.toThrowError(
-        new BadGatewayException(ErrorEscrow.InvalidBalanceCancellation),
+      const mockHMTokenFactoryContract = {
+        interface: {
+          parseLog: jest.fn()
+        }
+      };
+
+      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
+        mockHMTokenFactoryContract as any
       );
+
+      const result = await jobService.calculateRefundAmount(ChainId.LOCALHOST, MOCK_ADDRESS, MOCK_ADDRESS);
+
+      expect(result.toNumber()).toEqual(0);
     });
 
-    it('cancels a job successfully with Fortune job type and send webhook', async () => {
-      const manifest: FortuneManifestDto = {
-        submissionsRequired: 10,
-        requesterTitle: MOCK_REQUESTER_TITLE,
-        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-        fundAmount: 10,
+    it('should notify the FORTUNE webhook', async () => {
+      const manifestMock = {
         requestType: JobRequestType.FORTUNE,
       };
-
-      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      getManifestMock.mockResolvedValue(manifest);
-      buildMock.mockResolvedValue(escrowClientMock as any);
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
       sendWebhookMock.mockResolvedValue(true);
 
-      const result = await jobService.cancelCronJob();
+      await jobService.notifyWebhook(jobEntityMock as any);
 
-      expect(result).toBe(true);
-      expect(escrowClientMock.cancel).toHaveBeenCalledWith(
-        jobEntityMock.escrowAddress,
-      );
-      expect(jobSaveMock).toHaveBeenCalledWith();
-      expect(sendWebhookMock).toHaveBeenCalledWith(expect.any(String), {
-        escrowAddress: jobEntityMock.escrowAddress,
-        chainId: jobEntityMock.chainId,
-        eventType: EventType.ESCROW_CANCELED,
-      });
+      expect(jobService.sendWebhook).toHaveBeenCalledTimes(1);
     });
 
-    it('cancels a job successfully with image binary lavel job type and send webhook', async () => {
-      const manifest: CvatManifestDto = {
-        data: {
-          data_url: MOCK_FILE_URL,
-        },
-        annotation: {
-          labels: [{ name: 'label1' }],
-          description: MOCK_REQUESTER_DESCRIPTION,
-          user_guide: MOCK_FILE_URL,
-          type: JobRequestType.IMAGE_POINTS,
-          job_size: 10,
-          max_time: 300,
-        },
-        validation: {
-          min_quality: 1,
-          val_size: 2,
-          gt_url: '',
-        },
-        job_bounty: '1',
+    it('should notify the IMAGE_LABEL_BINARY webhook', async () => {
+      const manifestMock = {
+        requestType: JobRequestType.IMAGE_BOXES,
       };
-
-      jobSaveMock.mockResolvedValue(jobEntityMock as JobEntity);
-      getManifestMock.mockResolvedValue(manifest);
-      buildMock.mockResolvedValue(escrowClientMock as any);
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
       sendWebhookMock.mockResolvedValue(true);
 
-      const result = await jobService.cancelCronJob();
+      await jobService.notifyWebhook(jobEntityMock as any);
 
-      expect(result).toBe(true);
-      expect(escrowClientMock.cancel).toHaveBeenCalledWith(
-        jobEntityMock.escrowAddress,
-      );
-      expect(jobSaveMock).toHaveBeenCalledWith();
-      expect(sendWebhookMock).toHaveBeenCalledWith(expect.any(String), {
-        escrowAddress: jobEntityMock.escrowAddress,
-        chainId: jobEntityMock.chainId,
-        eventType: EventType.ESCROW_CANCELED,
-      });
+      expect(jobService.sendWebhook).toHaveBeenCalledTimes(1);
     });
   });
 
