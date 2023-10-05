@@ -77,16 +77,16 @@ export const TokenView: FC = () => {
       <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
         <Grid item xs={12} md={4}>
           <CardTextBlock
-            title="Amount of transfers"
+            title="Total transfers"
             value={data?.totalTransferCount}
-            tooltipTitle={TOOLTIPS.AMOUNT_OF_TRANSFERS}
+            tooltipTitle={TOOLTIPS.TOTAL_TRANSFERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Holders"
             value={data?.holders}
-            tooltipTitle={TOOLTIPS.AMOUNT_OF_TRANSFERS}
+            tooltipTitle={TOOLTIPS.HOLDERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
