@@ -78,7 +78,7 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Amount of transfers"
-            value={data?.totalTransferAmount}
+            value={data?.totalTransferCount}
             tooltipTitle={TOOLTIPS.AMOUNT_OF_TRANSFERS}
           />
         </Grid>

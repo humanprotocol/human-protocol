@@ -33,6 +33,7 @@ export function useHMTStats() {
         stats.totalTransferAmount,
         HM_TOKEN_DECIMALS
       ),
+      totalTransferCount: stats.totalTransferCount,
       holders: stats.totalHolders,
       totalSupply,
     };
