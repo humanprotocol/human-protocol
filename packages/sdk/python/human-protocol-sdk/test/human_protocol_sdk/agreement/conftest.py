@@ -62,7 +62,7 @@ def annotations_multiple_raters() -> np.ndarray:
     )
 
 
-annotation_generator = tuples(integers(1, 500), integers(2, 10), integers(2, 5)).map(
+annotation_generator = tuples(integers(1, 500), integers(1, 10), integers(1, 5)).map(
     lambda xs: np.random.randint(0, xs[2], size=(xs[0], xs[1]))
 )
 
