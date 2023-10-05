@@ -1,10 +1,6 @@
-from src.handlers.annotation import (
-    process_image_label_binary_raw_annotations,
-)
-from tests.unit.helpers.predefined_annotations import (
-    raw_binary_annotations,
-    binary_annotations,
-)
+from src.handlers.annotation import process_image_label_binary_raw_annotations
+
+from tests.unit.helpers.predefined_annotations import binary_annotations, raw_binary_annotations
 
 
 def test_process_image_label_binary_annotations():
@@ -29,9 +25,7 @@ def test_process_image_label_binary_annotations():
     ]
     assert annotations == annotations_check
 
-    new_annotations = handler(
-        binary_annotations, raw_binary_annotations, bucket_url, assignee
-    )
+    new_annotations = handler(binary_annotations, raw_binary_annotations, bucket_url, assignee)
 
     annotations_check = [
         {

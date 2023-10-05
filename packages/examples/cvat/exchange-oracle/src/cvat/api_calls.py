@@ -1,30 +1,115 @@
 import io
-import zipfile
-import xmltodict
 import logging
+import zipfile
+from datetime import timedelta
+from enum import Enum
 from http import HTTPStatus
-from typing import Dict, List
+from time import sleep
+from typing import List, Optional, Tuple
+
+from cvat_sdk.api_client import ApiClient, Configuration, exceptions, models
+from cvat_sdk.api_client.api_client import Endpoint
+from cvat_sdk.core.helpers import get_paginated_collection
 
 from src.core.config import Config
-from cvat_sdk.api_client import Configuration, ApiClient, models, exceptions
+from src.utils.enums import BetterEnumMeta
+from src.utils.time import utcnow
 
-configuration = Configuration(
-    host=Config.cvat_config.cvat_url,
-    username=Config.cvat_config.cvat_admin,
-    password=Config.cvat_config.cvat_admin_pass,
-)
+_NOTSET = object()
 
 
-def create_cloudstorage(provider: str, bucket_name: str) -> Dict:
+def _request_annotations(endpoint: Endpoint, cvat_id: int, format_name: str) -> bool:
+    """
+    Requests annotations export.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not _request_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    _get_annotations(...)
+    """
+
+    (_, response) = endpoint.call_with_http_info(
+        id=cvat_id,
+        format=format_name,
+        _parse_response=False,
+    )
+
+    assert response.status in [HTTPStatus.ACCEPTED, HTTPStatus.CREATED]
+    return response.status == HTTPStatus.CREATED
+
+
+def _get_annotations(
+    endpoint: Endpoint,
+    *,
+    cvat_id: int,
+    format_name: str,
+    attempt_interval: int = 5,
+    timeout: Optional[int] = _NOTSET,
+) -> io.RawIOBase:
+    """
+    Downloads annotations.
+    The dataset preparation can take some time (e.g. 10 min), so it should be used like this:
+
+    while not _request_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    _get_annotations(...)
+
+
+    It still can be used as 1 call, but the result can be unreliable.
+    """
+
+    time_begin = utcnow()
+
+    if timeout is _NOTSET:
+        timeout = Config.features.default_export_timeout
+
+    while True:
+        (_, response) = endpoint.call_with_http_info(
+            id=cvat_id,
+            action="download",
+            format=format_name,
+            _parse_response=False,
+        )
+        if response.status == HTTPStatus.OK:
+            break
+
+        if timeout is not None and timedelta(seconds=timeout) < (utcnow() - time_begin):
+            raise Exception("Failed to retrieve the dataset from CVAT within the timeout interval")
+
+        sleep(attempt_interval)
+
+    file_buffer = io.BytesIO(response.data)
+    assert zipfile.is_zipfile(file_buffer)
+    file_buffer.seek(0)
+    return file_buffer
+
+
+def get_api_client() -> ApiClient:
+    configuration = Configuration(
+        host=Config.cvat_config.cvat_url,
+        username=Config.cvat_config.cvat_admin,
+        password=Config.cvat_config.cvat_admin_pass,
+    )
+
+    return ApiClient(configuration=configuration)
+
+
+def create_cloudstorage(
+    provider: str, bucket_host: str, bucket_name: str
+) -> models.CloudStorageRead:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         cloud_storage_write_request = models.CloudStorageWriteRequest(
             provider_type=models.ProviderTypeEnum(provider),
             resource=bucket_name,
             display_name=bucket_name,
             credentials_type=models.CredentialsTypeEnum("ANONYMOUS_ACCESS"),
             description=bucket_name,
-            manifests=["manifest.jsonl"],
+            specific_attributes=f"endpoint_url={bucket_host}",
         )  # CloudStorageWriteRequest
         try:
             (data, response) = api_client.cloudstorages_api.create(
@@ -33,30 +118,99 @@ def create_cloudstorage(provider: str, bucket_name: str) -> Dict:
 
             return data
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling CloudstoragesApi.create(): {e}\n")
+            logger.exception(f"Exception when calling CloudstoragesApi.create(): {e}\n")
+            raise
 
 
-def create_project(escrow_address: str, labels: list) -> Dict:
+def create_project(
+    escrow_address: str, labels: list, *, user_guide: str = ""
+) -> models.ProjectRead:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
-        project_write_request = models.ProjectWriteRequest(
-            name=escrow_address,
-            labels=labels,
-            owner_id=Config.cvat_config.cvat_admin_user_id,
-        )
+    with get_api_client() as api_client:
         try:
-            (data, response) = api_client.projects_api.create(project_write_request)
-            return data
+            (project, response) = api_client.projects_api.create(
+                models.ProjectWriteRequest(
+                    name=escrow_address,
+                    labels=labels,
+                    owner_id=Config.cvat_config.cvat_admin_user_id,
+                )
+            )
+            if user_guide:
+                api_client.guides_api.create(
+                    annotation_guide_write_request=models.AnnotationGuideWriteRequest(
+                        project_id=project.id,
+                        markdown=user_guide,
+                    )
+                )
+
+            return project
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling ProjectsApi.create: {e}\n")
+            logger.exception(f"Exception when calling ProjectsApi.create: {e}\n")
+            raise
 
 
-def setup_cvat_webhooks(project_id: int) -> Dict:
+def request_project_annotations(cvat_id: int, format_name: str) -> bool:
+    """
+    Requests annotations export.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not request_project_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_project_annotations(...)
+    """
+
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
+        try:
+            return _request_annotations(
+                api_client.projects_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling ProjectApi.retrieve_annotations: {e}\n")
+            raise
+
+
+def get_project_annotations(
+    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+) -> io.RawIOBase:
+    """
+    Downloads annotations.
+    The dataset preparation can take some time (e.g. 10 min), so it should be used like this:
+
+    while not request_project_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_project_annotations(...)
+
+
+    It still can be used as 1 call, but the result can be unreliable.
+    """
+
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            return _get_annotations(
+                api_client.projects_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+                timeout=timeout,
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling ProjectApi.retrieve_annotations: {e}\n")
+            raise
+
+
+def create_cvat_webhook(project_id: int) -> models.WebhookRead:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
         webhook_write_request = models.WebhookWriteRequest(
             target_url=Config.cvat_config.cvat_incoming_webhooks_url,
-            description="Update",
+            description="Exchange Oracle notification",
             type=models.WebhookType("project"),
             content_type=models.WebhookContentType("application/json"),
             secret=Config.cvat_config.cvat_webhook_secret,
@@ -74,17 +228,18 @@ def setup_cvat_webhooks(project_id: int) -> Dict:
             )
             return data
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling WebhooksApi.create(): {e}\n")
+            logger.exception(f"Exception when calling WebhooksApi.create(): {e}\n")
+            raise
 
 
-def create_task(project_id: int, escrow_address: str) -> Dict:
+def create_task(project_id: int, escrow_address: str) -> models.TaskRead:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         task_write_request = models.TaskWriteRequest(
             name=escrow_address,
             project_id=project_id,
             owner_id=Config.cvat_config.cvat_admin_user_id,
-            overlap=Config.cvat_config.cvat_job_overlap,
+            overlap=0,
             segment_size=Config.cvat_config.cvat_job_segment_size,
         )
         try:
@@ -92,90 +247,317 @@ def create_task(project_id: int, escrow_address: str) -> Dict:
             return task_info
 
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling tasks_api.create: {e}\n")
+            logger.exception(f"Exception when calling tasks_api.create: {e}\n")
+            raise
 
 
-def get_cloudstorage_content(cloudstorage_id: int) -> List[str]:
+def get_cloudstorage_contents(cloudstorage_id: int) -> List[str]:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         try:
-            (content_data, response) = api_client.cloudstorages_api.retrieve_content(
-                cloudstorage_id
-            )
-            # (data, response) = api_client.cloudstorages_api.retrieve(cloudstorage_id) Not working in SDK
-            return content_data + ["manifest.jsonl"]
+            (
+                content_data,
+                response,
+            ) = api_client.cloudstorages_api.retrieve_content(cloudstorage_id)
+            return content_data
         except exceptions.ApiException as e:
-            logger.error(
-                f"Exception when calling cloudstorages_api.retrieve_content: {e}\n"
-            )
+            logger.exception(f"Exception when calling cloudstorages_api.retrieve_content: {e}\n")
+            raise
 
 
-def put_task_data(task_id: int, cloudstorage_id: int) -> None:
+def put_task_data(
+    task_id: int,
+    cloudstorage_id: int,
+    *,
+    filenames: Optional[list[str]] = None,
+    sort_images: bool = True,
+) -> None:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
-        content = get_cloudstorage_content(cloudstorage_id)
+
+    with get_api_client() as api_client:
+        kwargs = {}
+        if filenames:
+            kwargs["server_files"] = filenames
+        else:
+            kwargs["filename_pattern"] = "*"
+
         data_request = models.DataRequest(
             chunk_size=Config.cvat_config.cvat_job_segment_size,
             cloud_storage_id=cloudstorage_id,
             image_quality=Config.cvat_config.cvat_default_image_quality,
-            server_files=content,
             use_cache=True,
             use_zip_chunks=True,
-            sorting_method="lexicographical",
+            sorting_method="lexicographical" if sort_images else "predefined",
+            **kwargs,
         )
         try:
-            (_, response) = api_client.tasks_api.create_data(task_id, data_request)
+            (_, response) = api_client.tasks_api.create_data(task_id, data_request=data_request)
             return None
 
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling ProjectsApi.put_task_data: {e}\n")
+            logger.exception(f"Exception when calling ProjectsApi.put_task_data: {e}\n")
+            raise
 
 
-def fetch_task_jobs(task_id: int) -> List[Dict]:
+def request_task_annotations(cvat_id: int, format_name: str) -> bool:
+    """
+    Requests annotations export.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not request_task_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_task_annotations(...)
+    """
+
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         try:
-            (data, response) = api_client.jobs_api.list(task_id=task_id)
+            return _request_annotations(
+                api_client.tasks_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling TasksApi.retrieve_annotations: {e}\n")
+            raise
+
+
+def get_task_annotations(
+    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+) -> io.RawIOBase:
+    """
+    Downloads annotations.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not request_task_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_task_annotations(...)
+
+
+    It still can be used as 1 call, but the result can be unreliable.
+    """
+
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            return _get_annotations(
+                api_client.tasks_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+                timeout=timeout,
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling TasksApi.retrieve_annotations: {e}\n")
+            raise
+
+
+def fetch_task_jobs(task_id: int) -> List[models.JobRead]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            data = get_paginated_collection(
+                api_client.jobs_api.list_endpoint,
+                task_id=task_id,
+                type="annotation",
+            )
             return data
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling JobsApi.list: {e}\n")
+            logger.exception(f"Exception when calling JobsApi.list: {e}\n")
+            raise
 
 
-def get_job_annotations(cvat_project_id: int) -> Dict:
+def request_job_annotations(cvat_id: int, format_name: str) -> bool:
+    """
+    Requests annotations export.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not request_job_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_job_annotations(...)
+    """
+
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         try:
-            for _ in range(5):
-                (_, response) = api_client.jobs_api.retrieve_annotations(
-                    id=cvat_project_id,
-                    action="download",
-                    format="CVAT for images 1.1",
-                    _parse_response=False,
-                )
-                if response.status == HTTPStatus.OK:
-                    break
-            buffer = io.BytesIO(response.data)
-            with zipfile.ZipFile(buffer, "r") as zip_file:
-                xml_content = zip_file.read("annotations.xml").decode("utf-8")
-            annotations = xmltodict.parse(xml_content, attr_prefix="")
-            return annotations["annotations"]
+            return _request_annotations(
+                api_client.jobs_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+            )
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
+            logger.exception(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
+            raise
+
+
+def get_job_annotations(
+    cvat_id: int, format_name: str, *, timeout: Optional[int] = _NOTSET
+) -> io.RawIOBase:
+    """
+    Downloads annotations.
+    The dataset preparation can take some time (e.g. 10 min), so it must be used like this:
+
+    while not request_job_annotations(...):
+        # some waiting like
+        sleep(1)
+
+    get_job_annotations(...)
+
+
+    It still can be used as 1 call, but the result can be unreliable.
+    """
+
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            return _get_annotations(
+                api_client.jobs_api.retrieve_annotations_endpoint,
+                cvat_id=cvat_id,
+                format_name=format_name,
+                timeout=timeout,
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling JobsApi.retrieve_annotations: {e}\n")
+            raise
 
 
 def delete_project(cvat_id: int) -> None:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         try:
             api_client.projects_api.destroy(cvat_id)
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling ProjectsApi.destroy(): {e}\n")
+            logger.exception(f"Exception when calling ProjectsApi.destroy(): {e}\n")
+            raise
 
 
-def delete_cloustorage(cvat_id: int) -> None:
+def delete_cloudstorage(cvat_id: int) -> None:
     logger = logging.getLogger("app")
-    with ApiClient(configuration) as api_client:
+    with get_api_client() as api_client:
         try:
             api_client.cloudstorages_api.destroy(cvat_id)
         except exceptions.ApiException as e:
-            logger.error(f"Exception when calling CloudstoragesApi.destroy(): {e}\n")
+            logger.exception(f"Exception when calling CloudstoragesApi.destroy(): {e}\n")
+            raise
+
+
+def fetch_projects(assignee: str = "") -> List[models.ProjectRead]:
+    logger = logging.getLogger("app")
+    with get_api_client() as api_client:
+        try:
+            return get_paginated_collection(
+                api_client.projects_api.list_endpoint,
+                **(dict(assignee=assignee) if assignee else {}),
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
+            raise
+
+
+class UploadStatus(str, Enum, metaclass=BetterEnumMeta):
+    QUEUED = "Queued"
+    STARTED = "Started"
+    FINISHED = "Finished"
+    FAILED = "Failed"
+
+
+def get_task_upload_status(cvat_id: int) -> Tuple[Optional[UploadStatus], str]:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            (status, _) = api_client.tasks_api.retrieve_status(cvat_id)
+            return UploadStatus(status.state.value), status.message
+        except exceptions.ApiException as e:
+            if e.status == 404:
+                return None, e.body
+
+            logger.exception(f"Exception when calling ProjectsApi.list(): {e}\n")
+            raise
+
+
+def clear_job_annotations(job_id: int) -> None:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            api_client.jobs_api.update_annotations(
+                id=job_id,
+                job_annotations_update_request=models.JobAnnotationsUpdateRequest(
+                    tags=[], shapes=[], tracks=[]
+                ),
+            )
+        except exceptions.ApiException as e:
+            if e.status == 404:
+                return None
+
+            logger.exception(f"Exception when calling JobsApi.partial_update_annotations(): {e}\n")
+            raise
+
+
+def update_job_assignee(id: str, assignee_id: Optional[int]):
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            api_client.jobs_api.partial_update(
+                id=id,
+                patched_job_write_request=models.PatchedJobWriteRequest(assignee=assignee_id),
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling JobsApi.partial_update(): {e}\n")
+            raise
+
+
+def restart_job(id: str):
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            api_client.jobs_api.partial_update(
+                id=id,
+                patched_job_write_request=models.PatchedJobWriteRequest(
+                    stage="annotation", state="new"
+                ),
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling JobsApi.partial_update(): {e}\n")
+            raise
+
+
+def invite_user_into_org(user_email: str):
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            api_client.invitations_api.create(
+                models.InvitationWriteRequest(role="worker", email=user_email)
+            )
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling InvitationsApi.create(): {e}\n")
+            raise
+
+
+def get_user_id(user_email: str) -> int:
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            (invitation, _) = api_client.invitations_api.create(
+                models.InvitationWriteRequest(role="worker", email=user_email),
+                org=Config.cvat_config.cvat_org_slug,
+            )
+
+            (page, _) = api_client.memberships_api.list(user=invitation.user.username)
+            membership = page.results[0]
+            api_client.memberships_api.destroy(membership.id)
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling InvitationsApi.create(): {e}\n")
+            raise
+
+        return invitation.user.id

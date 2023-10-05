@@ -16,16 +16,29 @@ sqlalchemy-utils = "^0.41.1"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 pytest = "^7.2.2"
-cvat-sdk = "^2.4.4"
+cvat-sdk = "2.6.0"
 sqlalchemy = "^2.0.16"
 apscheduler = "^3.10.1"
 human-protocol-sdk = "^1.1.7"
 xmltodict = "^0.13.0"
+datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
+boto3 = "^1.28.33"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
 pre-commit = "^3.0.4"
+isort = "^5.12.0"
+
+[tool.isort]
+profile = "black"
+forced_separate = ["tests"]
+line_length = 100
+skip_gitignore = true # align tool behavior with Black
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
 
 [build-system]
 requires = ["poetry-core"]
