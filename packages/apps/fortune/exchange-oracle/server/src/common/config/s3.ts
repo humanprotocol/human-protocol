@@ -5,7 +5,7 @@ export const s3Config = registerAs('s3', () => ({
   port: +process.env.S3_PORT!,
   accessKey: process.env.S3_ACCESS_KEY!,
   secretKey: process.env.S3_SECRET_KEY!,
-  bucket: process.env.S3_BACKET!,
+  bucket: process.env.S3_BUCKET!,
   useSSL: process.env.S3_USE_SSL === 'true',
 }));
 

@@ -1,4 +1,5 @@
 import {
+  ChainId,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
@@ -14,43 +15,34 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
-import { Web3Service } from '../web3/web3.service';
-import { EscrowFailedWebhookDto, JobDetailsDto, Solution } from './job.dto';
+import { ISolution } from 'src/common/interfaces/job';
+import { ConfigNames } from '../../common/config';
+import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
-import { HEADER_SIGNATURE_KEY } from '../../common/constant';
-import * as Minio from 'minio';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
 import {
-  downloadJobSolutions,
-  uploadJobSolutions,
-} from '../../common/utils/storage';
-import { ISolution } from 'src/common/interfaces/job';
+  EscrowFailedWebhookDto,
+  InvalidJobDto,
+  JobDetailsDto,
+} from './job.dto';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  public readonly minioClient: Minio.Client;
   private storage: {
     [key: string]: string[];
   } = {};
 
   constructor(
-    @Inject(s3ConfigKey)
-    private s3Config: S3ConfigType,
     private readonly configService: ConfigService,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
+    @Inject(StorageService)
+    private readonly storageService: StorageService,
     private readonly httpService: HttpService,
-  ) {
-    this.minioClient = new Minio.Client({
-      endPoint: this.s3Config.endPoint,
-      port: this.s3Config.port,
-      accessKey: this.s3Config.accessKey,
-      secretKey: this.s3Config.secretKey,
-      useSSL: this.s3Config.useSSL,
-    });
-  }
+  ) {}
 
   public async getDetails(
     chainId: number,
@@ -148,7 +140,7 @@ export class JobService {
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
-    const solutionUrl = await this.uploadJobSolutions(
+    const solutionsUrl = await this.addSolution(
       chainId,
       escrowAddress,
       workerAddress,
@@ -159,27 +151,23 @@ export class JobService {
     await this.httpService.post(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
       chainId: chainId,
-      exchangeAddress: signer.address,
-      workerAddress: workerAddress,
-      solutionUrl: solutionUrl,
+      solutionsUrl: solutionsUrl,
     });
 
     return true;
   }
 
-  private async uploadJobSolutions(
-    chainId: number,
+  private async addSolution(
+    chainId: ChainId,
     escrowAddress: string,
     workerAddress: string,
     exchangeAddress: string,
     solution: string,
   ) {
-    const key = `${escrowAddress}-${chainId}.json`;
-    const url = `${this.s3Config.useSSL ? 'https' : 'http'}://${
-      this.s3Config.endPoint
-    }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
-
-    const existingJobSolutions = await downloadJobSolutions(url);
+    const existingJobSolutions = await this.storageService.downloadJobSolutions(
+      escrowAddress,
+      chainId,
+    );
 
     if (
       existingJobSolutions.find(
@@ -192,16 +180,15 @@ export class JobService {
     const newJobSolutions: ISolution[] = [
       ...existingJobSolutions,
       {
-        exchangeAddress: exchangeAddress,
         workerAddress: workerAddress,
         solution: solution,
       },
     ];
 
-    uploadJobSolutions(
-      this.minioClient,
-      this.s3Config.bucket,
-      key,
+    const url = await this.storageService.uploadJobSolutions(
+      exchangeAddress,
+      escrowAddress,
+      chainId,
       newJobSolutions,
     );
 
@@ -209,36 +196,32 @@ export class JobService {
   }
 
   public async processInvalidJobSolution(
-    chainId: number,
-    escrowAddress: string,
-    solution: Solution,
+    invalidJobSolution: InvalidJobDto,
   ): Promise<boolean> {
-    const key = `${escrowAddress}-${chainId}.json`;
-    const url = `${this.s3Config.useSSL ? 'https' : 'http'}://${
-      this.s3Config.endPoint
-    }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
-
-    const existingJobSolutions = await downloadJobSolutions(url);
+    const existingJobSolutions = await this.storageService.downloadJobSolutions(
+      invalidJobSolution.escrowAddress,
+      invalidJobSolution.chainId,
+    );
 
     const foundSolution = existingJobSolutions.find(
-      (sol) =>
-        sol.workerAddress === solution.workerAddress &&
-        sol.solution === solution.solution,
+      (sol) => sol.workerAddress === invalidJobSolution.workerAddress,
     );
 
     if (foundSolution) {
       foundSolution.invalid = true;
     } else {
       throw new BadRequestException(
-        `Solution not found in Escrow: ${escrowAddress}`,
+        `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
       );
     }
 
-    return uploadJobSolutions(
-      this.minioClient,
-      this.s3Config.bucket,
-      key,
+    await this.storageService.uploadJobSolutions(
+      this.web3Service.getSigner(invalidJobSolution.chainId).address,
+      invalidJobSolution.escrowAddress,
+      invalidJobSolution.chainId,
       existingJobSolutions,
     );
+
+    return true;
   }
 }

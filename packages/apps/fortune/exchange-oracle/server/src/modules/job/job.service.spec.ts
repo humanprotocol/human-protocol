@@ -23,6 +23,7 @@ import { EventType } from '../../common/enums/webhook';
 import { HEADER_SIGNATURE_KEY } from '../../common/constant';
 import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
+import { StorageService } from '../storage/storage.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -54,6 +55,7 @@ describe('JobService', () => {
   let jobService: JobService;
   let web3Service: Web3Service;
   let httpService: HttpService;
+  let storageService: StorageService;
 
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -96,6 +98,7 @@ describe('JobService', () => {
       ],
       providers: [
         JobService,
+        StorageService,
         {
           provide: ConfigService,
           useValue: configServiceMock,
@@ -121,6 +124,7 @@ describe('JobService', () => {
     jobService = moduleRef.get<JobService>(JobService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
+    storageService = moduleRef.get<StorageService>(StorageService);
   });
 
   describe('getDetails', () => {
@@ -246,7 +250,7 @@ describe('JobService', () => {
 
   describe('solveJob', () => {
     it('should solve a job', async () => {
-      const solutionUrl =
+      const solutionsUrl =
         'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
@@ -276,9 +280,7 @@ describe('JobService', () => {
         expect.objectContaining({
           escrowAddress,
           chainId,
-          exchangeAddress: signerMock.address,
-          workerAddress,
-          solutionUrl,
+          solutionsUrl,
         }),
       );
     });
@@ -352,7 +354,6 @@ describe('JobService', () => {
       const solution = 'test';
 
       const jobSolution = {
-        exchangeAddress,
         workerAddress,
         solution,
       };
@@ -360,24 +361,26 @@ describe('JobService', () => {
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
-      const result = await jobService.processInvalidJobSolution(
+      const result = await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
-        jobSolution,
-      );
+        workerAddress,
+      });
 
       expect(result).toBe(true);
-      expect(jobService.minioClient.putObject).toHaveBeenCalledWith(
+      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify([
-          {
-            exchangeAddress,
-            workerAddress,
-            solution,
-            invalid: true,
-          },
-        ]),
+        JSON.stringify({
+          exchangeAddress,
+          solutions: [
+            {
+              workerAddress,
+              solution,
+              invalid: true,
+            },
+          ],
+        }),
 
         {
           'Content-Type': 'application/json',
@@ -389,16 +392,11 @@ describe('JobService', () => {
       const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
 
-      const jobSolution = {
-        exchangeAddress,
-        workerAddress,
-        solution: 'test',
-      };
       const existingJobSolutions = [
         {
           exchangeAddress,
-          workerAddress,
-          solution: 'invalid',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
         },
       ];
       StorageClient.downloadFileFromUrl = jest
@@ -406,11 +404,11 @@ describe('JobService', () => {
         .mockResolvedValue(existingJobSolutions);
 
       await expect(
-        jobService.processInvalidJobSolution(
+        jobService.processInvalidJobSolution({
           chainId,
           escrowAddress,
-          jobSolution,
-        ),
+          workerAddress,
+        }),
       ).rejects.toThrow(`Solution not found in Escrow: ${escrowAddress}`);
     });
   });

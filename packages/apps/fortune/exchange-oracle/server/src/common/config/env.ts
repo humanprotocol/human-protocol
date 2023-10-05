@@ -9,7 +9,7 @@ export const ConfigNames = {
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
   S3_SECRET_KEY: 'S3_SECRET_KEY',
-  S3_BACKET: 'S3_BACKET',
+  S3_BUCKET: 'S3_BUCKET',
   S3_USE_SSL: 'S3_USE_SSL',
 };
 
@@ -22,6 +22,6 @@ export const envValidator = Joi.object({
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
-  S3_BACKET: Joi.string().default('solution'),
+  S3_BUCKET: Joi.string().default('solution'),
   S3_USE_SSL: Joi.string().default(false),
 });

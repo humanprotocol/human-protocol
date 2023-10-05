@@ -16,6 +16,7 @@ import {
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
+import { StorageService } from '../storage/storage.service';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -24,7 +25,6 @@ describe('JobController', () => {
   const chainId = 1;
   const escrowAddress = '0x1234567890123456789012345678901234567890';
   const workerAddress = '0x1234567890123456789012345678901234567891';
-  const exchangeAddress = '0x1234567890123456789012345678901234567892';
 
   const reputationOracleURL = 'https://example.com/reputationoracle';
   const configServiceMock = {
@@ -66,6 +66,7 @@ describe('JobController', () => {
             }),
           },
         },
+        StorageService,
         {
           provide: HttpService,
           useValue: {
@@ -150,15 +151,10 @@ describe('JobController', () => {
 
   describe('invalidJobSolution-solution', () => {
     it('should mark a job solution as invalid', async () => {
-      const solution = 'job-solution';
       const solveJobDto: InvalidJobDto = {
         chainId,
         escrowAddress,
-        solution: {
-          workerAddress,
-          solution,
-          exchangeAddress,
-        },
+        workerAddress,
       };
       const expectedResult = true;
 
@@ -170,9 +166,7 @@ describe('JobController', () => {
 
       expect(result).toBe(expectedResult);
       expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
-        solveJobDto.chainId,
-        solveJobDto.escrowAddress,
-        solveJobDto.solution,
+        solveJobDto,
       );
     });
   });

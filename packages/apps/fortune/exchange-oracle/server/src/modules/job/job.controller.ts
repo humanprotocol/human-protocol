@@ -36,10 +36,6 @@ export class JobController {
 
   @Patch('invalid-solution')
   invalidJobSolution(@Body() body: InvalidJobDto): Promise<any> {
-    return this.jobService.processInvalidJobSolution(
-      body.chainId,
-      body.escrowAddress,
-      body.solution,
-    );
+    return this.jobService.processInvalidJobSolution(body);
   }
 }
