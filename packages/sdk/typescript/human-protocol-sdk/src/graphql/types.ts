@@ -137,6 +137,7 @@ export type DailyHMTData = {
 
 export type HMTStatistics = {
   totalTransferAmount: BigNumber;
+  totalTransferCount: number;
   totalHolders: number;
   holders: HMTHolder[];
   dailyHMTData: DailyHMTData[];
