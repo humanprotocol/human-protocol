@@ -360,6 +360,7 @@ class StatisticsClient:
 
         return {
             "total_transfer_amount": int(hmtoken_statistics["totalValueTransfered"]),
+            "total_transfer_count": int(hmtoken_statistics["totalTransferEventCount"]),
             "total_holders": int(hmtoken_statistics["holders"]),
             "holders": [
                 {

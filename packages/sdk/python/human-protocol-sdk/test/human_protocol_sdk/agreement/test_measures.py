@@ -17,7 +17,6 @@ from .conftest import (
 
 
 def test_agreement(annotations_nan, labels):
-
     # test if both interfaces match
     k_agree = agreement(annotations_nan, measure="fleiss_kappa")["results"]["score"]
     k_fleiss = fleiss_kappa(annotations_nan)

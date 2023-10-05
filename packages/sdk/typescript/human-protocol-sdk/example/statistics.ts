@@ -83,6 +83,7 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   console.log('HMT statistics:', {
     ...hmtStatistics,
     totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatistics.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
@@ -101,6 +102,7 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   console.log('HMT statistics from 5/8 - 6/8:', {
     ...hmtStatisticsRange,
     totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatisticsRange.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
