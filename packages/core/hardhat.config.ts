@@ -130,17 +130,17 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-    avalancheTestnet: {
+    avalancheFujiTestnet: {
       chainId: 43113,
       timeout: 2000000,
-      url: 'https://api.avax-test.network/ext/C/rpc',
+      url: process.env.ETH_FUJI_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     avalanche: {
       chainId: 43114,
       timeout: 2000000,
-      url: 'https://api.avax.network/ext/bc/C/rpc',
+      url: process.env.ETH_AVALANCHE_URL || '',
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
@@ -196,6 +196,8 @@ const config: HardhatUserConfig = {
       moonbeam: process.env.MOONSCAN_API_KEY || '',
       moonbaseAlpha: process.env.MOONSCAN_API_KEY || '',
       skale: process.env.SKALE_API_KEY || '',
+      avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
+      avalanche: process.env.AVALANCHE_API_KEY || '',
     },
     customChains: [
       {

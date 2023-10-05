@@ -328,6 +328,7 @@ class StatisticsTestCase(unittest.TestCase):
                     "data": {
                         "hmtokenStatistics": {
                             "totalValueTransfered": "100",
+                            "totalTransferEventCount": "4",
                             "holders": "2",
                         },
                     }
@@ -380,6 +381,7 @@ class StatisticsTestCase(unittest.TestCase):
                 hmt_statistics,
                 {
                     "total_transfer_amount": 100,
+                    "total_transfer_count": 4,
                     "total_holders": 2,
                     "holders": [
                         {

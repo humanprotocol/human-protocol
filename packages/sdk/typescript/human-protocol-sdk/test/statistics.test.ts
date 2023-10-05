@@ -341,6 +341,7 @@ describe('StatisticsClient', () => {
         .mockResolvedValueOnce({
           hmtokenStatistics: {
             totalValueTransfered: '100',
+            totalTransferEventCount: '4',
             holders: '2',
           },
         })
@@ -381,6 +382,7 @@ describe('StatisticsClient', () => {
 
       expect(result).toEqual({
         totalTransferAmount: BigNumber.from(100),
+        totalTransferCount: 4,
         totalHolders: 2,
         holders: [
           {

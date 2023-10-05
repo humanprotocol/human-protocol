@@ -292,6 +292,7 @@ export class StatisticsClient {
         totalTransferAmount: BigNumber.from(
           hmtokenStatistics.totalValueTransfered
         ),
+        totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
         totalHolders: +hmtokenStatistics.holders,
         holders: holders.map((holder) => ({
           address: holder.address,
