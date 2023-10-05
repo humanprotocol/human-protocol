@@ -159,6 +159,84 @@ class EscrowFilter:
         self.networks = networks
 
 
+class EscrowData:
+    def __init__(
+        self,
+        id: str,
+        address: str,
+        amountPaid: str,
+        balance: str,
+        count: str,
+        factoryAddress: str,
+        launcher: str,
+        status: str,
+        token: str,
+        totalFundedAmount: str,
+        createdAt: str,
+        chainId: int,
+        finalResultsUrl: str = None,
+        intermediateResultsUrl: str = None,
+        manifestHash: str = None,
+        manifestUrl: str = None,
+        recordingOracle: str = None,
+        recordingOracleFee: str = None,
+        reputationOracle: str = None,
+        reputationOracleFee: str = None,
+        exchangeOracle: str = None,
+        exchangeOracleFee: str = None,
+    ):
+        """
+        Initializes an EscrowData instance.
+
+        Args:
+            id (str): Identifier
+            address (str): Address
+            amountPaid (str): Amount paid
+            balance (str): Balance
+            count (str): Count
+            factoryAddress (str): Factory address
+            launcher (str): Launcher
+            status (str): Status
+            token (str): Token
+            totalFundedAmount (str): Total funded amount
+            createdAt (str): Creation date
+            chainId (int): Chain identifier
+            finalResultsUrl (str, optional): Optional URL for final results.
+            intermediateResultsUrl (str, optional): Optional URL for intermediate results.
+            manifestHash (str, optional): Optional manifest hash.
+            manifestUrl (str, optional): Optional manifest URL.
+            recordingOracle (str, optional): Optional recording Oracle address.
+            recordingOracleFee (str, optional): Optional recording Oracle fee.
+            reputationOracle (str, optional): Optional reputation Oracle address.
+            reputationOracleFee (str, optional): Optional reputation Oracle fee.
+            exchangeOracle (str, optional): Optional exchange Oracle address.
+            exchangeOracleFee (str, optional): Optional exchange Oracle fee.
+        """
+
+        self.id = id
+        self.address = address
+        self.amountPaid = amountPaid
+        self.balance = balance
+        self.count = count
+        self.factoryAddress = factoryAddress
+        self.finalResultsUrl = finalResultsUrl
+        self.intermediateResultsUrl = intermediateResultsUrl
+        self.launcher = launcher
+        self.manifestHash = manifestHash
+        self.manifestUrl = manifestUrl
+        self.recordingOracle = recordingOracle
+        self.recordingOracleFee = recordingOracleFee
+        self.reputationOracle = reputationOracle
+        self.reputationOracleFee = reputationOracleFee
+        self.exchangeOracle = exchangeOracle
+        self.exchangeOracleFee = exchangeOracleFee
+        self.status = status
+        self.token = token
+        self.totalFundedAmount = totalFundedAmount
+        self.createdAt = createdAt
+        self.chainId = chainId
+
+
 class EscrowClient:
     """
     A class used to manage escrow on the HUMAN network.
@@ -778,14 +856,14 @@ class EscrowUtils:
     @staticmethod
     def get_escrows(
         filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI.value]),
-    ) -> List[dict]:
+    ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         Args:
             filter (EscrowFilter): Object containing all the necessary parameters to filter
 
         Returns:
-            List[dict]: List of escrows
+            List[EscrowData]: List of escrows
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrows_query,
@@ -819,7 +897,7 @@ class EscrowUtils:
     def get_escrow(
         chain_id: ChainId,
         escrow_address: str,
-    ) -> dict:
+    ) -> Optional[EscrowData]:
         """Returns the escrow for a given address.
 
         Args:
@@ -827,7 +905,7 @@ class EscrowUtils:
             escrow_address (str): Address of the escrow
 
         Returns:
-            dict: Escrow data
+            Optional[EscrowData]: Escrow data
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrow_query,

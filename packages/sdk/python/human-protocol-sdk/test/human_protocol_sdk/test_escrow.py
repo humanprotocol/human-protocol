@@ -2321,6 +2321,27 @@ class EscrowTestCase(unittest.TestCase):
             )
             self.assertEqual(escrow, mock_escrow)
 
+    def test_get_escrow_empty_data(self):
+        with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
+            mock_function.return_value = {
+                "data": {
+                    "escrow": None,
+                }
+            }
+
+            escrow = EscrowUtils.get_escrow(
+                ChainId.POLYGON_MUMBAI.value,
+                "0x1234567890123456789012345678901234567890",
+            )
+            mock_function.assert_called_once_with(
+                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                query=get_escrow_query(),
+                params={
+                    "escrowAddress": "0x1234567890123456789012345678901234567890",
+                },
+            )
+            self.assertEqual(escrow, None)
+
     def test_get_escrow_invalid_chain_id(self):
         with self.assertRaises(EscrowClientError) as cm:
             EscrowUtils.get_escrow(123, "0x1234567890123456789012345678901234567890")
