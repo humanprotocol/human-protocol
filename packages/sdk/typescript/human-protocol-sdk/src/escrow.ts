@@ -36,6 +36,7 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
   ErrorInvalidExchangeOracleAddressProvided,
+  ErrorTransferEventNotFoundInTransactionLogs,
 } from './error';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
 import { EscrowCancel, EscrowStatus, NetworkData } from './types';
@@ -512,6 +513,7 @@ export class EscrowClient {
       for (const log of transactionReceipt.logs) {
         if (log.address === tokenAddress) {
           const parsedLog = tokenContract.interface.parseLog(log);
+
           const from = parsedLog.args[0];
           if (parsedLog.name === 'Transfer' && from === escrowAddress) {
             amountTransferred = parsedLog.args[2];
@@ -521,7 +523,7 @@ export class EscrowClient {
       }
 
       if (amountTransferred === undefined) {
-        throw new Error('Transfer event not found in transaction logs');
+        throw ErrorTransferEventNotFoundInTransactionLogs;
       }
 
       const escrowCancelData: EscrowCancel = {
