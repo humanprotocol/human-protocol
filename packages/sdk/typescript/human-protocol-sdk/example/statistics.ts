@@ -102,8 +102,8 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
 
   const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON]);
 
-  // await getEscrowStatistics(statisticsClient);
+  await getEscrowStatistics(statisticsClient);
   await getWorkerStatistics(statisticsClient);
-  // await getPaymentStatistics(statisticsClient);
-  // await getHMTStatistics(statisticsClient);
+  await getPaymentStatistics(statisticsClient);
+  await getHMTStatistics(statisticsClient);
 })();
