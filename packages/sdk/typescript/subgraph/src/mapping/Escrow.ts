@@ -281,11 +281,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       eventDayData.dailyTotalEventCount.plus(ONE_BI);
   }
 
-  // Update Daily worker count
-  eventDayData.dailyWorkerCount = eventDayData.dailyWorkerCount.plus(
-    BigInt.fromI32(event.params._recipients.length)
-  );
-
   // Save statistics, and event day data
   statsEntity.save();
   eventDayData.save();
