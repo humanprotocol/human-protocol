@@ -113,21 +113,18 @@ class StatisticsTestCase(unittest.TestCase):
                 },
             )
 
+            self.assertEqual(escrow_statistics.total_escrows, 1)
+            self.assertEqual(len(escrow_statistics.daily_escrows_data), 1)
             self.assertEqual(
-                escrow_statistics,
-                {
-                    "total_escrows": 1,
-                    "daily_escrows_data": [
-                        {
-                            "timestamp": datetime.fromtimestamp(1),
-                            "escrows_total": 1,
-                            "escrows_pending": 1,
-                            "escrows_solved": 1,
-                            "escrows_paid": 1,
-                            "escrows_cancelled": 1,
-                        },
-                    ],
-                },
+                escrow_statistics.daily_escrows_data[0].timestamp,
+                datetime.fromtimestamp(1),
+            )
+            self.assertEqual(escrow_statistics.daily_escrows_data[0].escrows_total, 1)
+            self.assertEqual(escrow_statistics.daily_escrows_data[0].escrows_pending, 1)
+            self.assertEqual(escrow_statistics.daily_escrows_data[0].escrows_solved, 1)
+            self.assertEqual(escrow_statistics.daily_escrows_data[0].escrows_paid, 1)
+            self.assertEqual(
+                escrow_statistics.daily_escrows_data[0].escrows_cancelled, 1
             )
 
     def test_get_worker_statistics(self):
@@ -164,16 +161,10 @@ class StatisticsTestCase(unittest.TestCase):
                 },
             )
 
+            self.assertEqual(len(payment_statistics.daily_workers_data), 1)
             self.assertEqual(
-                payment_statistics,
-                {
-                    "daily_workers_data": [
-                        {
-                            "timestamp": datetime.fromtimestamp(1),
-                            "active_workers": 4,
-                        },
-                    ],
-                },
+                payment_statistics.daily_workers_data[0].timestamp,
+                datetime.fromtimestamp(1),
             )
 
     def test_get_payment_statistics(self):
@@ -212,18 +203,17 @@ class StatisticsTestCase(unittest.TestCase):
                 },
             )
 
+            self.assertEqual(len(payment_statistics.daily_payments_data), 1)
             self.assertEqual(
-                payment_statistics,
-                {
-                    "daily_payments_data": [
-                        {
-                            "timestamp": datetime.fromtimestamp(1),
-                            "total_amount_paid": 100,
-                            "total_count": 4,
-                            "average_amount_per_worker": 25,
-                        },
-                    ],
-                },
+                payment_statistics.daily_payments_data[0].timestamp,
+                datetime.fromtimestamp(1),
+            )
+            self.assertEqual(
+                payment_statistics.daily_payments_data[0].total_amount_paid, 100
+            )
+            self.assertEqual(payment_statistics.daily_payments_data[0].total_count, 4)
+            self.assertEqual(
+                payment_statistics.daily_payments_data[0].average_amount_per_worker, 25
             )
 
     def test_get_hmt_statistics(self):
@@ -290,26 +280,21 @@ class StatisticsTestCase(unittest.TestCase):
                 },
             )
 
+            self.assertEqual(hmt_statistics.total_transfer_amount, 100)
+            self.assertEqual(hmt_statistics.total_transfer_count, 4)
+            self.assertEqual(hmt_statistics.total_holders, 2)
+            self.assertEqual(len(hmt_statistics.holders), 1)
+            self.assertEqual(hmt_statistics.holders[0].address, "0x123")
+            self.assertEqual(hmt_statistics.holders[0].balance, 10)
+            self.assertEqual(len(hmt_statistics.daily_hmt_data), 1)
             self.assertEqual(
-                hmt_statistics,
-                {
-                    "total_transfer_amount": 100,
-                    "total_transfer_count": 4,
-                    "total_holders": 2,
-                    "holders": [
-                        {
-                            "address": "0x123",
-                            "balance": 10,
-                        },
-                    ],
-                    "daily_hmt_data": [
-                        {
-                            "timestamp": datetime.fromtimestamp(1),
-                            "total_transaction_amount": 100,
-                            "total_transaction_count": 4,
-                        },
-                    ],
-                },
+                hmt_statistics.daily_hmt_data[0].timestamp, datetime.fromtimestamp(1)
+            )
+            self.assertEqual(
+                hmt_statistics.daily_hmt_data[0].total_transaction_amount, 100
+            )
+            self.assertEqual(
+                hmt_statistics.daily_hmt_data[0].total_transaction_count, 4
             )
 
 
