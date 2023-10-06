@@ -1,14 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import escrow from './escrow/reducer';
+import humanAppData from './humanAppData/reducer';
 import leader from './leader/reducer';
-import token from './token/reducer';
+// import token from './token/reducer';
 
 export const store = configureStore({
   reducer: {
-    escrow,
-    token,
+    humanAppData,
+    // token,
     leader,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({ thunk: true }),
