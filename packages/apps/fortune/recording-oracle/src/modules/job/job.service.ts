@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
 import {
-  BadGatewayException,
   BadRequestException,
   Inject,
   Injectable,
@@ -28,7 +27,11 @@ import { Web3Service } from '../web3/web3.service';
 import { ErrorJob } from '../../common/constants/errors';
 import { firstValueFrom } from 'rxjs';
 import { JobRequestType } from '../../common/enums/job';
-import { IManifest, ISolution } from '../../common/interfaces/job';
+import {
+  IManifest,
+  ISolution,
+  ISolutionsFile,
+} from '../../common/interfaces/job';
 import { checkCurseWords } from '@/common/utils/curseWords';
 
 @Injectable()
@@ -75,16 +78,13 @@ export class JobService {
     recordingSolutions: ISolution[],
   ) {
     const errorSolutions: ISolution[] = [];
-    let uniqueSolutions: ISolution[] = exchangeSolutions;
-
+    let uniqueSolutions: ISolution[] = [];
     const duplicatedInExchange = exchangeSolutions.filter((solution, index) =>
       exchangeSolutions
         .slice(index + 1)
         .some(
           (compareSolution) =>
-            solution.exchangeAddress === compareSolution.exchangeAddress &&
-            solution.workerAddress === compareSolution.workerAddress &&
-            solution.solution === compareSolution.solution,
+            solution.workerAddress === compareSolution.workerAddress,
         ),
     );
 
@@ -93,15 +93,13 @@ export class JobService {
     uniqueSolutions = this.getUniqueSolutions(
       exchangeSolutions,
       duplicatedInExchange,
-    );
+    ).filter((solution) => solution.invalid !== true);
     uniqueSolutions.push(...errorSolutions);
 
     const duplicatedInRecording = uniqueSolutions.filter((solution) =>
       recordingSolutions.some(
         (compareSolution) =>
-          solution.exchangeAddress === compareSolution.exchangeAddress &&
-          solution.workerAddress === compareSolution.workerAddress &&
-          solution.solution === compareSolution.solution,
+          solution.workerAddress === compareSolution.workerAddress,
       ),
     );
 
@@ -178,11 +176,11 @@ export class JobService {
       existingJobSolutions = [];
     }
 
-    const exchangeJobSolutions: ISolution[] =
+    const exchangeJobSolutionsFile: ISolutionsFile =
       await StorageClient.downloadFileFromUrl(jobSolution.solutionUrl);
 
     const { errorSolutions, uniqueSolutions } = this.processSolutions(
-      exchangeJobSolutions,
+      exchangeJobSolutionsFile.solutions,
       existingJobSolutions,
     );
 
@@ -231,7 +229,7 @@ export class JobService {
     }
     if (errorSolutions.length) {
       const exchangeOracleURL = (await kvstoreClient.get(
-        jobSolution.exchangeAddress,
+        exchangeJobSolutionsFile.exchangeAddress,
         'webhook_url',
       )) as string;
       for (const solution of errorSolutions) {

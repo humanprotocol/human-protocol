@@ -19,16 +19,6 @@ export class JobSolutionRequestDto {
 
   @ApiProperty()
   @IsString()
-  @IsValidEthereumAddress()
-  public exchangeAddress: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsValidEthereumAddress()
-  public workerAddress: string;
-
-  @ApiProperty()
-  @IsString()
   @IsUrl()
   public solutionUrl: string;
 }

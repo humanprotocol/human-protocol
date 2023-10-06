@@ -26,8 +26,13 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { ConfigModule, registerAs } from '@nestjs/config';
-import { IManifest, ISolution } from '../../common/interfaces/job';
+import {
+  IManifest,
+  ISolution,
+  ISolutionsFile,
+} from '../../common/interfaces/job';
 import { of } from 'rxjs';
+import { JobSolutionRequestDto } from './job.dto';
 
 jest.mock('minio', () => {
   class Client {
@@ -131,11 +136,9 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -151,11 +154,9 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -181,11 +182,9 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(invalidManifest);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -212,11 +211,9 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(invalidManifest);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -248,38 +245,44 @@ describe('JobService', () => {
 
       const existingJobSolutions: ISolution[] = [
         {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
+          workerAddress: '0x0000000000000000000000000000000000000000',
           solution: 'Solution 1',
         },
         {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
+          workerAddress: '0x0000000000000000000000000000000000000001',
           solution: 'Solution 2',
         },
       ];
 
-      const newJobSolutions: ISolution[] = [
-        {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solution: 'Solution 3',
-        },
-      ];
+      const exchangeJobSolutions: ISolutionsFile = {
+        exchangeAddress: MOCK_ADDRESS,
+        solutions: [
+          {
+            workerAddress: '0x0000000000000000000000000000000000000000',
+            solution: 'Solution 1',
+          },
+          {
+            workerAddress: '0x0000000000000000000000000000000000000001',
+            solution: 'Solution 2',
+          },
+          {
+            workerAddress: '0x0000000000000000000000000000000000000002',
+            solution: 'Solution 3',
+          },
+        ],
+      };
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(manifest)
         .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(newJobSolutions);
+        .mockReturnValue(exchangeJobSolutions);
 
       jobService.sendWebhook = jest.fn().mockRejectedValue(new Error());
 
-      const newSolution = {
+      const newSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -311,34 +314,38 @@ describe('JobService', () => {
 
       const existingJobSolutions: ISolution[] = [
         {
-          exchangeAddress: MOCK_ADDRESS,
           workerAddress: MOCK_ADDRESS,
           solution: 'Solution 1',
         },
       ];
-      const newJobSolutions: ISolution[] = [
-        {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solution: 'Solution 2',
-        },
-      ];
+
+      const exchangeJobSolutions: ISolutionsFile = {
+        exchangeAddress: MOCK_ADDRESS,
+        solutions: [
+          {
+            workerAddress: '0x0000000000000000000000000000000000000000',
+            solution: 'Solution 1',
+          },
+          {
+            workerAddress: '0x0000000000000000000000000000000000000001',
+            solution: 'Solution 2',
+          },
+        ],
+      };
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(manifest)
         .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(newJobSolutions);
+        .mockReturnValue(exchangeJobSolutions);
 
       jest
         .spyOn(jobService, 'sendWebhook')
         .mockRejectedValue(new Error(ErrorJob.WebhookWasNotSent));
 
-      const newSolution = {
+      const newSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -369,30 +376,33 @@ describe('JobService', () => {
 
       const existingJobSolutions: ISolution[] = [
         {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
+          workerAddress: '0x0000000000000000000000000000000000000000',
           solution: 'Solution 1',
         },
       ];
-      const newJobSolutions: ISolution[] = [
-        {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solution: 'Solution 2',
-        },
-      ];
+      const exchangeJobSolutions: ISolutionsFile = {
+        exchangeAddress: MOCK_ADDRESS,
+        solutions: [
+          {
+            workerAddress: '0x0000000000000000000000000000000000000000',
+            solution: 'Solution 1',
+          },
+          {
+            workerAddress: '0x0000000000000000000000000000000000000001',
+            solution: 'Solution 2',
+          },
+        ],
+      };
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(manifest)
         .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(newJobSolutions);
+        .mockReturnValue(exchangeJobSolutions);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -423,30 +433,33 @@ describe('JobService', () => {
 
       const existingJobSolutions: ISolution[] = [
         {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
+          workerAddress: '0x0000000000000000000000000000000000000000',
           solution: 'Solution 1',
         },
       ];
-      const newJobSolutions: ISolution[] = [
-        {
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solution: 'Solution 2',
-        },
-      ];
+      const exchangeJobSolutions: ISolutionsFile = {
+        exchangeAddress: MOCK_ADDRESS,
+        solutions: [
+          {
+            workerAddress: '0x0000000000000000000000000000000000000000',
+            solution: 'Solution 1',
+          },
+          {
+            workerAddress: '0x0000000000000000000000000000000000000001',
+            solution: 'Solution 2',
+          },
+        ],
+      };
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(manifest)
         .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(newJobSolutions);
+        .mockReturnValue(exchangeJobSolutions);
 
-      const jobSolution = {
+      const jobSolution: JobSolutionRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
         solutionUrl: MOCK_FILE_URL,
       };
 
@@ -460,6 +473,74 @@ describe('JobService', () => {
         },
       );
     });
+  });
+
+  it('should take one solution more when one is marked as invalid', async () => {
+    const escrowClient = {
+      getRecordingOracleAddress: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      getStatus: jest.fn().mockResolvedValue(EscrowStatus.Pending),
+      getManifestUrl: jest
+        .fn()
+        .mockResolvedValue('http://example.com/manifest'),
+      getIntermediateResultsUrl: jest.fn().mockResolvedValue(''),
+      storeResults: jest.fn().mockResolvedValue(true),
+    };
+    (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
+
+    const manifest: IManifest = {
+      submissionsRequired: 2,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: '10',
+      requestType: JobRequestType.FORTUNE,
+    };
+
+    const existingJobSolutions: ISolution[] = [
+      {
+        workerAddress: '0x0000000000000000000000000000000000000000',
+        solution: 'Solution 1',
+      },
+    ];
+    const exchangeJobSolutions: ISolutionsFile = {
+      exchangeAddress: MOCK_ADDRESS,
+      solutions: [
+        {
+          workerAddress: '0x0000000000000000000000000000000000000000',
+          solution: 'Solution 1',
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000001',
+          solution: 'Solution 2',
+          invalid: true,
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000002',
+          solution: 'Solution 2',
+        },
+      ],
+    };
+
+    StorageClient.downloadFileFromUrl = jest
+      .fn()
+      .mockReturnValueOnce(manifest)
+      .mockReturnValueOnce(existingJobSolutions)
+      .mockReturnValue(exchangeJobSolutions);
+
+    const jobSolution: JobSolutionRequestDto = {
+      escrowAddress: MOCK_ADDRESS,
+      chainId: ChainId.LOCALHOST,
+      solutionUrl: MOCK_FILE_URL,
+    };
+
+    const result = await jobService.processJobSolution(jobSolution);
+    expect(result).toEqual('The requested job is completed.');
+    expect(httpServicePostMock).toHaveBeenCalledWith(
+      MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+      {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress,
+      },
+    );
   });
 
   it('should call exchange oracle endpoint when solution is wrong', async () => {
@@ -487,35 +568,33 @@ describe('JobService', () => {
 
     const existingJobSolutions: ISolution[] = [
       {
-        exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
         solution: 'Solution 1',
       },
     ];
-    const newJobSolutions: ISolution[] = [
-      {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 1',
-      },
-      {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 1',
-      },
-    ];
+    const exchangeJobSolutions: ISolutionsFile = {
+      exchangeAddress: MOCK_ADDRESS,
+      solutions: [
+        {
+          workerAddress: '0x0000000000000000000000000000000000000000',
+          solution: 'Solution 1',
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000000',
+          solution: 'Solution 2',
+        },
+      ],
+    };
 
     StorageClient.downloadFileFromUrl = jest
       .fn()
       .mockReturnValueOnce(manifest)
       .mockReturnValueOnce(existingJobSolutions)
-      .mockReturnValue(newJobSolutions);
+      .mockReturnValue(exchangeJobSolutions);
 
-    const jobSolution = {
+    const jobSolution: JobSolutionRequestDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      exchangeAddress: MOCK_ADDRESS,
-      workerAddress: MOCK_ADDRESS,
       solutionUrl: MOCK_FILE_URL,
     };
 
@@ -526,7 +605,7 @@ describe('JobService', () => {
       {
         chainId: jobSolution.chainId,
         escrowAddress: jobSolution.escrowAddress,
-        solution: newJobSolutions[0],
+        solution: exchangeJobSolutions.solutions[0],
       },
     );
   });
@@ -556,35 +635,33 @@ describe('JobService', () => {
 
     const existingJobSolutions: ISolution[] = [
       {
-        exchangeAddress: MOCK_ADDRESS,
         workerAddress: MOCK_ADDRESS,
         solution: 'Solution 1',
       },
     ];
-    const newJobSolutions: ISolution[] = [
-      {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: 'Solution 1',
-      },
-      {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: 'ass',
-      },
-    ];
+    const exchangeJobSolutions: ISolutionsFile = {
+      exchangeAddress: MOCK_ADDRESS,
+      solutions: [
+        {
+          workerAddress: '0x0000000000000000000000000000000000000000',
+          solution: 'Solution 1',
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000001',
+          solution: 'ass',
+        },
+      ],
+    };
 
     StorageClient.downloadFileFromUrl = jest
       .fn()
       .mockReturnValueOnce(manifest)
       .mockReturnValueOnce(existingJobSolutions)
-      .mockReturnValue(newJobSolutions);
+      .mockReturnValue(exchangeJobSolutions);
 
-    const jobSolution = {
+    const jobSolution: JobSolutionRequestDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      exchangeAddress: MOCK_ADDRESS,
-      workerAddress: MOCK_ADDRESS,
       solutionUrl: MOCK_FILE_URL,
     };
 
@@ -595,7 +672,7 @@ describe('JobService', () => {
       {
         chainId: jobSolution.chainId,
         escrowAddress: jobSolution.escrowAddress,
-        solution: newJobSolutions[1],
+        solution: exchangeJobSolutions.solutions[1],
       },
     );
   });

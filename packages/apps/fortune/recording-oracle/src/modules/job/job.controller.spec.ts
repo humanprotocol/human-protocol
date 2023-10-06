@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { ChainId } from '@human-protocol/sdk';
 import {
   MOCK_ADDRESS,
+  MOCK_FILE_URL,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
@@ -87,9 +88,7 @@ describe('JobController', () => {
         await jobController.solve({
           escrowAddress: MOCK_ADDRESS,
           chainId: ChainId.LOCALHOST,
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solutionUrl: 'Solution',
+          solutionUrl: MOCK_FILE_URL,
         }),
       ).toBe('OK');
     });
