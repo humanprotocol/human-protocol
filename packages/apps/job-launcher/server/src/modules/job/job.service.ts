@@ -642,15 +642,15 @@ export class JobService {
 
     if (jobEntity.escrowAddress) {
       const { amountRefunded } = await this.processEscrowCancellation(jobEntity);
-      await this.paymentService.createRefundPayment({ refundAmount: amountRefunded.toNumber(), userId: jobEntity.userId, jobId: jobEntity.id });
+      await this.paymentService.createRefundPayment({ refundAmount: Number(ethers.utils.formatEther(amountRefunded)), userId: jobEntity.userId, jobId: jobEntity.id });
     } else {
       await this.paymentService.createRefundPayment({ refundAmount: jobEntity.fundAmount, userId: jobEntity.userId, jobId: jobEntity.id });
     }
 
-    await this.notifyWebhook(jobEntity);
-
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
+
+    this.notifyWebhook(jobEntity);
 
     return true;
   }

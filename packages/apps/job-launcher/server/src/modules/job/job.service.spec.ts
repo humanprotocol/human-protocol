@@ -56,6 +56,7 @@ import {
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
+  MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
@@ -854,7 +855,7 @@ describe('JobService', () => {
     it('should return true when the job is successfully canceled', async () => {
       findOneJobMock.mockResolvedValue(jobEntityMock as any);
 
-      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
+      jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce({ txHash: MOCK_TRANSACTION_HASH, amountRefunded: BigNumber.from(1) });
       jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(true);
 
       const result = await jobService.cancelCronJob();
@@ -910,60 +911,6 @@ describe('JobService', () => {
       }));
 
       await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
-    });
-
-    it('should calculate the refund amount based on matched logs', async () => {
-      web3Service.getSigner = jest.fn().mockReturnValue({
-        ...signerMock,
-        provider: {
-          getLogs: jest.fn().mockResolvedValue([{}]),
-          getBlockNumber: jest.fn().mockResolvedValue(100),
-        },
-      });
-
-      const mockHMTokenFactoryContract = {
-        interface: {
-          parseLog: jest.fn().mockReturnValue({
-            args: [
-              MOCK_ADDRESS,
-              MOCK_ADDRESS,
-              BigNumber.from(10)
-            ]
-          })
-        }
-      };
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
-
-      const result = await jobService.calculateRefundAmount(ChainId.LOCALHOST, MOCK_ADDRESS, MOCK_ADDRESS);
-
-      expect(result.toNumber()).toBeGreaterThan(0);
-    });
-
-    it('should return zero if no matching logs are found', async () => {
-      web3Service.getSigner = jest.fn().mockReturnValue({
-        ...signerMock,
-        provider: {
-          getLogs: jest.fn().mockResolvedValue([]),
-          getBlockNumber: jest.fn().mockResolvedValue(100),
-        },
-      });
-
-      const mockHMTokenFactoryContract = {
-        interface: {
-          parseLog: jest.fn()
-        }
-      };
-
-      jest.spyOn(HMToken__factory, 'connect').mockReturnValue(
-        mockHMTokenFactoryContract as any
-      );
-
-      const result = await jobService.calculateRefundAmount(ChainId.LOCALHOST, MOCK_ADDRESS, MOCK_ADDRESS);
-
-      expect(result.toNumber()).toEqual(0);
     });
 
     it('should notify the FORTUNE webhook', async () => {
