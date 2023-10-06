@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
@@ -16,6 +16,7 @@ import {
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
+import { StorageService } from '../storage/storage.service';
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -65,6 +66,7 @@ describe('JobController', () => {
             }),
           },
         },
+        StorageService,
         {
           provide: HttpService,
           useValue: {
@@ -143,6 +145,28 @@ describe('JobController', () => {
         solveJobDto.escrowAddress,
         solveJobDto.workerAddress,
         solveJobDto.solution,
+      );
+    });
+  });
+
+  describe('invalidJobSolution-solution', () => {
+    it('should mark a job solution as invalid', async () => {
+      const solveJobDto: InvalidJobDto = {
+        chainId,
+        escrowAddress,
+        workerAddress,
+      };
+      const expectedResult = true;
+
+      jest
+        .spyOn(jobService, 'processInvalidJobSolution')
+        .mockResolvedValue(expectedResult);
+
+      const result = await jobController.invalidJobSolution(solveJobDto);
+
+      expect(result).toBe(expectedResult);
+      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
+        solveJobDto,
       );
     });
   });
