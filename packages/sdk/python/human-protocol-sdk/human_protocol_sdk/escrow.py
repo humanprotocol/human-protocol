@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 import logging
 import os
 from decimal import Decimal
@@ -95,7 +96,7 @@ class EscrowConfig:
         self.manifest_url = manifest_url
         self.hash = hash
 
-        
+
 class EscrowFilter:
     """
     A class used to filter escrow requests.
@@ -109,8 +110,8 @@ class EscrowFilter:
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
         status: Optional[Status] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
     ):
         """
         Initializes a EscrowFilter instance.
@@ -122,8 +123,8 @@ class EscrowFilter:
             recording_oracle (Optional[str]): Recording oracle address
             exchange_oracle (Optional[str]): Exchange oracle address
             status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
+            date_from (Optional[datetime]): Created from date
+            date_to (Optional[datetime]): Created to date
         """
 
         if not networks or any(
