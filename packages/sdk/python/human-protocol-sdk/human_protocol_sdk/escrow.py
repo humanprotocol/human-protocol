@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import datetime
 import logging
 import os
 from decimal import Decimal
 from typing import List, Optional
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
+from human_protocol_sdk.filter import EscrowFilter
 from human_protocol_sdk.utils import (
     get_data_from_subgraph,
     get_escrow_interface,
@@ -95,7 +95,7 @@ class EscrowConfig:
         self.manifest_url = manifest_url
         self.hash = hash
 
-
+        
 class EscrowFilter:
     """
     A class used to filter escrow requests.
@@ -108,7 +108,6 @@ class EscrowFilter:
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
-        job_requester_id: Optional[str] = None,
         status: Optional[Status] = None,
         date_from: Optional[datetime.datetime] = None,
         date_to: Optional[datetime.datetime] = None,
@@ -122,7 +121,6 @@ class EscrowFilter:
             reputation_oracle (Optional[str]): Reputation oracle address
             recording_oracle (Optional[str]): Recording oracle address
             exchange_oracle (Optional[str]): Exchange oracle address
-            job_requester_id (Optional[str]): Job requester id
             status (Optional[Status]): Escrow status
             date_from (Optional[datetime.datetime]): Created from date
             date_to (Optional[datetime.datetime]): Created to date
@@ -155,11 +153,88 @@ class EscrowFilter:
         self.reputation_oracle = reputation_oracle
         self.recording_oracle = recording_oracle
         self.exchange_oracle = exchange_oracle
-        self.job_requester_id = job_requester_id
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
         self.networks = networks
+
+
+class EscrowData:
+    def __init__(
+        self,
+        id: str,
+        address: str,
+        amountPaid: str,
+        balance: str,
+        count: str,
+        factoryAddress: str,
+        launcher: str,
+        status: str,
+        token: str,
+        totalFundedAmount: str,
+        createdAt: str,
+        chainId: int,
+        finalResultsUrl: Optional[str] = None,
+        intermediateResultsUrl: Optional[str] = None,
+        manifestHash: Optional[str] = None,
+        manifestUrl: Optional[str] = None,
+        recordingOracle: Optional[str] = None,
+        recordingOracleFee: Optional[str] = None,
+        reputationOracle: Optional[str] = None,
+        reputationOracleFee: Optional[str] = None,
+        exchangeOracle: Optional[str] = None,
+        exchangeOracleFee: Optional[str] = None,
+    ):
+        """
+        Initializes an EscrowData instance.
+
+        Args:
+            id (str): Identifier
+            address (str): Address
+            amountPaid (str): Amount paid
+            balance (str): Balance
+            count (str): Count
+            factoryAddress (str): Factory address
+            launcher (str): Launcher
+            status (str): Status
+            token (str): Token
+            totalFundedAmount (str): Total funded amount
+            createdAt (str): Creation date
+            chainId (int): Chain identifier
+            finalResultsUrl (str, optional): Optional URL for final results.
+            intermediateResultsUrl (str, optional): Optional URL for intermediate results.
+            manifestHash (str, optional): Optional manifest hash.
+            manifestUrl (str, optional): Optional manifest URL.
+            recordingOracle (str, optional): Optional recording Oracle address.
+            recordingOracleFee (str, optional): Optional recording Oracle fee.
+            reputationOracle (str, optional): Optional reputation Oracle address.
+            reputationOracleFee (str, optional): Optional reputation Oracle fee.
+            exchangeOracle (str, optional): Optional exchange Oracle address.
+            exchangeOracleFee (str, optional): Optional exchange Oracle fee.
+        """
+
+        self.id = id
+        self.address = address
+        self.amountPaid = amountPaid
+        self.balance = balance
+        self.count = count
+        self.factoryAddress = factoryAddress
+        self.finalResultsUrl = finalResultsUrl
+        self.intermediateResultsUrl = intermediateResultsUrl
+        self.launcher = launcher
+        self.manifestHash = manifestHash
+        self.manifestUrl = manifestUrl
+        self.recordingOracle = recordingOracle
+        self.recordingOracleFee = recordingOracleFee
+        self.reputationOracle = reputationOracle
+        self.reputationOracleFee = reputationOracleFee
+        self.exchangeOracle = exchangeOracle
+        self.exchangeOracleFee = exchangeOracleFee
+        self.status = status
+        self.token = token
+        self.totalFundedAmount = totalFundedAmount
+        self.createdAt = createdAt
+        self.chainId = chainId
 
 
 class EscrowClient:
@@ -167,12 +242,13 @@ class EscrowClient:
     A class used to manage escrow on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3):
+    def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
         """
         Initializes a Escrow instance.
 
         Args:
             web3 (Web3): The Web3 object
+            gas_limit (int): Gas limit to be provided to transaction
         """
 
         # Initialize web3 instance
@@ -196,6 +272,7 @@ class EscrowClient:
         self.factory_contract = self.w3.eth.contract(
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
+        self.gas_limit = gas_limit
 
     def create_escrow(
         self, token_address: str, trusted_handlers: List[str], job_requester_id: str
@@ -228,6 +305,7 @@ class EscrowClient:
                 token_address, trusted_handlers, job_requester_id
             ),
             EscrowClientError,
+            self.gas_limit,
         )
         return next(
             (
@@ -270,6 +348,7 @@ class EscrowClient:
                 escrow_config.hash,
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def create_and_setup_escrow(
@@ -332,6 +411,7 @@ class EscrowClient:
             "Fund",
             token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def store_results(self, escrow_address: str, url: str, hash: str) -> None:
@@ -363,6 +443,7 @@ class EscrowClient:
             "Store Results",
             self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def complete(self, escrow_address: str) -> None:
@@ -386,6 +467,7 @@ class EscrowClient:
             "Complete",
             self._get_escrow_contract(escrow_address).functions.complete(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def bulk_payout(
@@ -445,6 +527,7 @@ class EscrowClient:
                 recipients, amounts, final_results_url, final_results_hash, txId
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def cancel(self, escrow_address: str) -> None:
@@ -468,6 +551,7 @@ class EscrowClient:
             "Cancel",
             self._get_escrow_contract(escrow_address).functions.cancel(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def abort(self, escrow_address: str) -> None:
@@ -491,6 +575,7 @@ class EscrowClient:
             "Abort",
             self._get_escrow_contract(escrow_address).functions.abort(),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
@@ -519,6 +604,7 @@ class EscrowClient:
                 handlers
             ),
             EscrowClientError,
+            self.gas_limit,
         )
 
     def get_balance(self, escrow_address: str) -> Decimal:
@@ -781,14 +867,14 @@ class EscrowUtils:
     @staticmethod
     def get_escrows(
         filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI.value]),
-    ) -> List[dict]:
+    ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
         Args:
             filter (EscrowFilter): Object containing all the necessary parameters to filter
 
         Returns:
-            List[dict]: List of escrows
+            List[EscrowData]: List of escrows
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrows_query,
@@ -818,3 +904,39 @@ class EscrowUtils:
                 escrow["chain_id"] = chain_id
             escrow_addresses.extend(escrows)
         return escrow_addresses
+
+    @staticmethod
+    def get_escrow(
+        chain_id: ChainId,
+        escrow_address: str,
+    ) -> Optional[EscrowData]:
+        """Returns the escrow for a given address.
+
+        Args:
+            chain_id (ChainId): Network in which the escrow has been deployed
+            escrow_address (str): Address of the escrow
+
+        Returns:
+            Optional[EscrowData]: Escrow data
+        """
+        from human_protocol_sdk.gql.escrow import (
+            get_escrow_query,
+        )
+
+        if chain_id not in set(chain_id.value for chain_id in ChainId):
+            raise EscrowClientError(f"Invalid ChainId")
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        network = NETWORKS[ChainId(chain_id)]
+
+        escrow = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_escrow_query(),
+            params={
+                "escrowAddress": escrow_address,
+            },
+        )
+
+        return escrow["data"]["escrow"]

@@ -29,10 +29,8 @@ def create_escrow(web3: Web3):
         EscrowConfig(
             RECORDING_ORACLE_ADDRESS,
             REPUTATION_ORACLE_ADDRESS,
-            EXCHANGE_ORACLE_ADDRESS,
             RECORDING_ORACLE_FEE,
             REPUTATION_ORACLE_FEE,
-            EXCHANGE_ORACLE_FEE,
             DEFAULT_URL,
             DEFAULT_HASH,
         ),

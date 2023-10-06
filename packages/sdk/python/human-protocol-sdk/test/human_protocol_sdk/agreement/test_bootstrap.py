@@ -1,10 +1,10 @@
 import numpy as np
-from human_protocol_sdk.agreement.bootstrap import confidence_interval
-from .conftest import _eq_rounded
+from human_protocol_sdk.agreement.bootstrap import confidence_intervals
+from .conftest import eq_rounded
 
 
 def test_bootstrap_percentage(normal_sample):
-    ci, statistics_bootstrap = confidence_interval(
+    ci, statistics_bootstrap = confidence_intervals(
         data=normal_sample,
         statistic_fn=np.mean,
         n_iterations=5_000,
@@ -14,7 +14,7 @@ def test_bootstrap_percentage(normal_sample):
     )
 
     assert len(statistics_bootstrap) == 5_000
-    assert _eq_rounded(np.mean(statistics_bootstrap), 0.0, 1)
+    assert eq_rounded(np.mean(statistics_bootstrap), 0.0, 1)
 
     low, high = ci
     assert low < high
@@ -23,7 +23,7 @@ def test_bootstrap_percentage(normal_sample):
 def test_bootstrap_bca(normal_sample):
     fn = lambda s: np.var(s) / np.mean(s) ** 2 - 1 / np.mean(s)
 
-    ci, statistics_bootstrap = confidence_interval(
+    ci, statistics_bootstrap = confidence_intervals(
         data=normal_sample,
         statistic_fn=fn,
         n_iterations=5_000,
@@ -47,7 +47,7 @@ def test_seed(normal_sample):
         "seed": 4690451,
     }
 
-    ci_1, statistics_bootstrap_1 = confidence_interval(**kwargs)
-    ci_2, statistics_bootstrap_2 = confidence_interval(**kwargs)
+    ci_1, statistics_bootstrap_1 = confidence_intervals(**kwargs)
+    ci_2, statistics_bootstrap_2 = confidence_intervals(**kwargs)
 
     assert np.all(statistics_bootstrap_1 == statistics_bootstrap_2)

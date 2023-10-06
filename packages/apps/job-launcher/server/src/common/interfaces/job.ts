@@ -10,6 +10,7 @@ export interface IJob extends IBase {
   manifestUrl: string;
   manifestHash: string;
   status: JobStatus;
+  failedReason?: string;
   retriesCount?: number;
   waitUntil: Date;
 }
