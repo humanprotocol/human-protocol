@@ -8,3 +8,4 @@ export * from './Owner';
 export * from './Profile';
 export * from './MyHMT';
 export * from './ConfigureOracle';
+export * from './HowToHuman';

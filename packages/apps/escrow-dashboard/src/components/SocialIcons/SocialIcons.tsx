@@ -1,4 +1,4 @@
-import { IconButton, Stack } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import { FC } from 'react';
 
 import { DiscordIcon, GithubIcon, LinkedinIcon, TwitterIcon } from '../Icons';
@@ -8,18 +8,34 @@ type SocialIconProps = {
 };
 
 export const SocialIcons: FC<SocialIconProps> = ({ direction = 'row' }) => (
-  <Stack direction={direction} spacing={4}>
-    <IconButton href="http://hmt.ai/github" target="_blank">
+  <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: direction }}>
+    <Link
+      href="http://hmt.ai/github"
+      target="_blank"
+      sx={{ m: direction === 'row' ? '0px 15px' : '15px 0px' }}
+    >
       <GithubIcon />
-    </IconButton>
-    <IconButton href="http://hmt.ai/discord" target="_blank">
+    </Link>
+    <Link
+      href="http://hmt.ai/discord"
+      target="_blank"
+      sx={{ m: direction === 'row' ? '0px 15px' : '15px 0px' }}
+    >
       <DiscordIcon />
-    </IconButton>
-    <IconButton href="http://hmt.ai/twitter" target="_blank">
+    </Link>
+    <Link
+      href="http://hmt.ai/twitter"
+      target="_blank"
+      sx={{ m: direction === 'row' ? '0px 15px' : '15px 0px' }}
+    >
       <TwitterIcon />
-    </IconButton>
-    <IconButton href="http://hmt.ai/linkedin" target="_blank">
+    </Link>
+    <Link
+      href="http://hmt.ai/linkedin"
+      target="_blank"
+      sx={{ m: direction === 'row' ? '0px 15px' : '15px 0px' }}
+    >
       <LinkedinIcon />
-    </IconButton>
-  </Stack>
+    </Link>
+  </Box>
 );

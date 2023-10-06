@@ -9,14 +9,19 @@ import {
 } from '@mui/material';
 import { FC } from 'react';
 import { CHAIN_ICONS } from '../Icons/chains';
-import { SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 
 interface NetworkSelectProps extends SelectProps {
   showAllNetwork?: boolean;
+  supportedChainIds?: ChainId[];
+  width?: number | string;
 }
 
 export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
-  <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
+  <FormControl
+    variant="standard"
+    sx={{ m: { xs: 0, md: 1 }, minWidth: 220, width: props.width }}
+  >
     <InputLabel id="newtork-select-label">Network</InputLabel>
     <Select
       labelId="network-select-label"
@@ -44,7 +49,7 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
           All Networks
         </MenuItem>
       )}
-      {SUPPORTED_CHAIN_IDS.map((chainId) => {
+      {(props.supportedChainIds ?? V2_SUPPORTED_CHAIN_IDS).map((chainId) => {
         const IconComponent = CHAIN_ICONS[chainId];
         return (
           <MenuItem value={chainId} key={chainId}>

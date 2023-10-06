@@ -3,15 +3,13 @@ import { FC } from 'react';
 
 import { SocialIcons } from '../SocialIcons';
 
-import smallLogoSvg from 'src/assets/small-logo.svg';
-
 export const Footer: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   return isMobile ? (
-    <Box px={4} py={6}>
+    <Box px="28px" py={6}>
       <SocialIcons />
-      <Box display="flex" flexDirection="column" ml={1} mt={2}>
+      <Box display="flex" flexDirection="column" ml={2} mt={4}>
         <Typography color="text.secondary" variant="caption" lineHeight={1}>
           Terms and conditions
         </Typography>
@@ -25,8 +23,7 @@ export const Footer: FC = () => {
     <Box
       sx={{
         px: 12,
-        pt: '12px',
-        pb: '32px',
+        py: 5,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -34,14 +31,11 @@ export const Footer: FC = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <img src={smallLogoSvg} alt="logo" />
-        <Link href="https://www.humanprotocol.org/privacy-policy">
-          <Typography
-            color="text.secondary"
-            variant="caption"
-            ml={2.5}
-            lineHeight={1}
-          >
+        <Link
+          href="https://www.humanprotocol.org/privacy-policy"
+          sx={{ textDecoration: 'none' }}
+        >
+          <Typography color="text.secondary" variant="caption" lineHeight={1}>
             Terms and conditions
           </Typography>
         </Link>

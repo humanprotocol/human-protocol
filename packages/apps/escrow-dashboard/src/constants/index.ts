@@ -1,11 +1,18 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const HMT_ADDRESSES: { [chainId in ChainId]?: string } = {
-  [ChainId.MAINNET]: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
-  [ChainId.POLYGON]: '0xc748b2a084f8efc47e086ccddd9b7e67aeb571bf',
-  [ChainId.AVALANCHE]: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
-  [ChainId.SKALE]: '0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd',
-};
+export const V2_SUPPORTED_CHAIN_IDS = [
+  ChainId.MAINNET,
+  ChainId.GOERLI,
+  ChainId.BSC_MAINNET,
+  ChainId.BSC_TESTNET,
+  ChainId.POLYGON,
+  ChainId.POLYGON_MUMBAI,
+  ChainId.MOONBEAM,
+  ChainId.MOONBASE_ALPHA,
+  // ChainId.SKALE,
+  // ChainId.AVALANCHE,
+  // ChainId.AVALANCHE_TESTNET,
+];
 
 export const SUPPORTED_CHAIN_IDS = [
   ChainId.MAINNET,

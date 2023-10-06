@@ -71,6 +71,7 @@ def confidence_intervals(
         idx = np.random.randint(n_data - 1, size=(n_sample,))
         sample = data[idx]
         theta_b[i] = statistic_fn(sample)
+    theta_b = theta_b[~np.isnan(theta_b)]
 
     match algorithm:
         case "percentile":
@@ -86,6 +87,7 @@ def confidence_intervals(
                 theta_jn[i] = (n_data - 1) * (
                     theta_hat - statistic_fn(data[jn_idxs[i]])
                 )
+            theta_jn = theta_jn[~np.isnan(theta_jn)]
 
             a = (np.sum(theta_jn**3) / np.sum(theta_jn**2, axis=-1) ** 1.5) / 6
 
