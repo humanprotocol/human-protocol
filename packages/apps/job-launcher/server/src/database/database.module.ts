@@ -71,8 +71,8 @@ import { ConfigNames } from '../common/config';
           migrationsRun: false,
           ssl:
             configService
-              .get<string>(ConfigNames.POSTGRES_SSL)!
-              .toLowerCase() === 'true',
+              .get<string>(ConfigNames.POSTGRES_SSL)
+              ?.toLowerCase() === 'true',
         };
       },
     }),

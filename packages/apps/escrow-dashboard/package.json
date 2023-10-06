@@ -21,7 +21,7 @@
     "jszip": "^3.10.1",
     "nft.storage": "^7.0.0",
     "numeral": "^2.0.6",
-    "openpgp": "^5.5.0",
+    "openpgp": "^5.10.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.3",
     "@testing-library/react": "^14.0.0",
-    "@types/crypto-js": "^4.1.1",
+    "@types/crypto-js": "^4.1.2",
     "@types/file-saver": "^2.0.5",
     "@types/glob": "^8.1.0",
     "@types/numeral": "^2.0.2",

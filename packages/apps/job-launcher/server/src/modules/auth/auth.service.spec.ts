@@ -387,6 +387,27 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
+    it('should remove existing token if it exists', async () => {
+      const userEntity = {
+        id: 1,
+        status: UserStatus.ACTIVE,
+      } as UserEntity;
+
+      userService.getByEmail = jest.fn().mockResolvedValue(userEntity);
+  
+      const existingToken = {
+        id: 2,
+        userId: userEntity.id,
+        tokenType: TokenType.PASSWORD,
+        remove: jest.fn(),
+      };
+      tokenRepository.findOne = jest.fn().mockResolvedValue(existingToken);
+  
+      await authService.forgotPassword({ email: 'user@example.com' });
+  
+      expect(existingToken.remove).toHaveBeenCalled();
+    });
+
     it('should create a new token and send email', async () => {
       userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
 

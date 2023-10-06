@@ -34,6 +34,9 @@ export class JobEntity extends BaseEntity implements IJob {
   })
   public status: JobStatus;
 
+  @Column({ type: 'varchar', nullable: true })
+  public failedReason: string;
+
   @ManyToOne(() => UserEntity, (user) => user.jobs, { eager: true })
   user: UserEntity;
 

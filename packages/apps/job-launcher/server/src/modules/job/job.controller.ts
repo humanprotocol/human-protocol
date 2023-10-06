@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   Headers,
   Param,
@@ -27,6 +27,7 @@ import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { ChainId } from '@human-protocol/sdk';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -52,16 +53,31 @@ export class JobController {
   }
 
   @Get('/list')
+  @ApiQuery({
+    name: 'networks',
+    required: true,
+    enum: ChainId,
+    type: [String],
+    isArray: true,
+  })
   @ApiQuery({ name: 'status', required: false, enum: JobStatusFilter })
   @ApiQuery({ name: 'skip', required: false })
   @ApiQuery({ name: 'limit', required: false })
   public async getJobList(
     @Request() req: RequestWithUser,
+    @Query('networks') networks: ChainId[],
     @Query('status') status: JobStatusFilter,
-    @Query('skip', new DefaultValuePipe(null)) skip?: number,
-    @Query('limit', new DefaultValuePipe(null)) limit?: number,
-  ): Promise<JobListDto[]> {
-    return this.jobService.getJobsByStatus(req.user.id, status, skip, limit);
+    @Query('skip') skip = 0,
+    @Query('limit') limit = 10,
+  ): Promise<JobListDto[] | BadRequestException> {
+    networks = !Array.isArray(networks) ? [networks] : networks;
+    return this.jobService.getJobsByStatus(
+      networks,
+      req.user.id,
+      status,
+      skip,
+      limit,
+    );
   }
 
   @Get('/result')
@@ -94,8 +110,8 @@ export class JobController {
 
   @Public()
   @UseGuards(SignatureAuthGuard)
-  @Post('/:oracleType/escrow-failed-webhook')
-  public async(
+  @Post('/escrow-failed-webhook')
+  public async (
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: EscrowFailedWebhookDto,
   ): Promise<any> {

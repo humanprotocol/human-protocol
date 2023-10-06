@@ -1,4 +1,4 @@
-from human_protocol_sdk.escrow import EscrowFilter
+from human_protocol_sdk.filter import EscrowFilter
 
 escrow_fragment = """
 fragment EscrowFields on Escrow {
@@ -11,6 +11,7 @@ fragment EscrowFields on Escrow {
     id
     intermediateResultsUrl
     launcher
+    jobRequesterId
     manifestHash
     manifestUrl
     recordingOracle
@@ -34,6 +35,7 @@ query GetEscrows(
     $reputationOracle: String
     $recordingOracle: String
     $exchangeOracle: String
+    $jobRequesterId: String
     $status: String
     $from: Int
     $to: Int
@@ -44,6 +46,7 @@ query GetEscrows(
         {reputation_oracle_clause}
         {recording_oracle_clause}
         {exchange_oracle_clause}
+        {job_requester_clause}
         {status_clause}
         {from_clause}
         {to_clause}
@@ -64,6 +67,9 @@ query GetEscrows(
         else "",
         exchange_oracle_clause="exchangeOracle: $exchangeOracle"
         if filter.exchange_oracle
+        else "",
+        job_requester_clause="jobRequesterId: $jobRequesterId"
+        if filter.job_requester_id
         else "",
         status_clause="status: $status" if filter.status else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
