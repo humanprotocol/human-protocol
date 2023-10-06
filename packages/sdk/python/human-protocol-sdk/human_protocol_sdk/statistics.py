@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import datetime
+from datetime import datetime
 import logging
 import os
 
@@ -33,16 +33,16 @@ class StatisticsParam:
 
     def __init__(
         self,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
         limit: Optional[int] = None,
     ):
         """
         Initializes a StatisticsParam instance.
 
         Args:
-            date_from (Optional[datetime.datetime]): Statistical data from date
-            date_to (Optional[datetime.datetime]): Statistical data to date
+            date_from (Optional[datetime]): Statistical data from date
+            date_to (Optional[datetime]): Statistical data to date
             limit (Optional[int]): Limit of statistical data
         """
 
@@ -58,7 +58,7 @@ class DailyEscrowData:
 
     def __init__(
         self,
-        timestamp: datetime.datetime,
+        timestamp: datetime,
         escrows_total: int,
         escrows_pending: int,
         escrows_solved: int,
@@ -69,7 +69,7 @@ class DailyEscrowData:
         Initializes a DailyEscrowData instance.
 
         Args:
-            timestamp (datetime.datetime): Timestamp
+            timestamp (datetime): Timestamp
             escrows_total (int): Total escrows
             escrows_pending (int): Pending escrows
             escrows_solved (int): Solved escrows
@@ -114,14 +114,14 @@ class DailyWorkerData:
 
     def __init__(
         self,
-        timestamp: datetime.datetime,
+        timestamp: datetime,
         active_workers: int,
     ):
         """
         Initializes a DailyWorkerData instance.
 
         Args:
-            timestamp (datetime.datetime): Timestamp
+            timestamp (datetime): Timestamp
             active_workers (int): Active workers
         """
 
@@ -155,7 +155,7 @@ class DailyPaymentData:
 
     def __init__(
         self,
-        timestamp: datetime.datetime,
+        timestamp: datetime,
         total_amount_paid: int,
         total_count: int,
         average_amount_per_worker: int,
@@ -164,7 +164,7 @@ class DailyPaymentData:
         Initializes a DailyPaymentData instance.
 
         Args:
-            timestamp (datetime.datetime): Timestamp
+            timestamp (datetime): Timestamp
             total_amount_paid (int): Total amount paid
             total_count (int): Total count
             average_amount_per_worker (int): Average amount per worker
@@ -224,7 +224,7 @@ class DailyHMTData:
 
     def __init__(
         self,
-        timestamp: datetime.datetime,
+        timestamp: datetime,
         total_transaction_amount: int,
         total_transaction_count: int,
     ):
@@ -232,7 +232,7 @@ class DailyHMTData:
         Initializes a DailyHMTData instance.
 
         Args:
-            timestamp (datetime.datetime): Timestamp
+            timestamp (datetime): Timestamp
             total_transaction_amount (int): Total transaction amount
             total_transaction_count (int): Total transaction count
         """
@@ -338,9 +338,7 @@ class StatisticsClient:
             total_escrows=int(escrow_statistics["totalEscrowCount"]),
             daily_escrows_data=[
                 DailyEscrowData(
-                    timestamp=datetime.datetime.fromtimestamp(
-                        int(event_day_data["timestamp"])
-                    ),
+                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
                     escrows_total=int(event_day_data["dailyEscrowCount"]),
                     escrows_pending=int(event_day_data["dailyPendingStatusEventCount"]),
                     escrows_solved=int(
@@ -383,9 +381,7 @@ class StatisticsClient:
         return WorkerStatistics(
             daily_workers_data=[
                 DailyWorkerData(
-                    timestamp=datetime.datetime.fromtimestamp(
-                        int(event_day_data["timestamp"])
-                    ),
+                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
                     active_workers=int(event_day_data["dailyWorkerCount"]),
                 )
                 for event_day_data in event_day_datas
@@ -422,9 +418,7 @@ class StatisticsClient:
         return PaymentStatistics(
             daily_payments_data=[
                 DailyPaymentData(
-                    timestamp=datetime.datetime.fromtimestamp(
-                        int(event_day_data["timestamp"])
-                    ),
+                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
                     total_amount_paid=int(event_day_data["dailyPayoutAmount"]),
                     total_count=int(event_day_data["dailyPayoutCount"]),
                     average_amount_per_worker=int(event_day_data["dailyPayoutAmount"])
@@ -487,9 +481,7 @@ class StatisticsClient:
             ],
             daily_hmt_data=[
                 DailyHMTData(
-                    timestamp=datetime.datetime.fromtimestamp(
-                        int(event_day_data["timestamp"])
-                    ),
+                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
                     total_transaction_amount=int(
                         event_day_data["dailyHMTTransferAmount"]
                     ),
