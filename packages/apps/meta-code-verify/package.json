@@ -36,7 +36,7 @@
     "prettier": "^2.3.2",
     "rollup": "^2.56.3",
     "sinon-chrome": "^3.0.1",
-    "ts-jest": "^27.1.0",
+    "ts-jest": "^29.1.1",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5",
     "vite": "^4.3.0",
