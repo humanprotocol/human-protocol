@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -18,18 +17,16 @@ export class SignatureAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const data = request.body;
-    const signature = request.headers[HEADER_SIGNATURE_KEY]; 
+    const signature = request.headers[HEADER_SIGNATURE_KEY];
     const oracleAdresses = [
       this.configService.get<string>(
         ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
       )!,
-      this.configService.get<string>(
-        ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-      )!
-    ]
-    
+      this.configService.get<string>(ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS)!,
+    ];
+
     try {
-      const isVerified = verifySignature(data, signature, oracleAdresses)
+      const isVerified = verifySignature(data, signature, oracleAdresses);
 
       if (isVerified) {
         return true;
