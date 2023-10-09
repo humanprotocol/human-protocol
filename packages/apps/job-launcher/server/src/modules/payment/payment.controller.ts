@@ -20,7 +20,7 @@ import {
 } from './payment.dto';
 import { PaymentService } from './payment.service';
 import { getRate } from '../../common/utils';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
