@@ -51,7 +51,6 @@ export class PaymentController {
     @Request() req: RequestWithUser,
     @Body() data: PaymentCryptoCreateDto,
   ): Promise<boolean> {
-    console.log(JSON.stringify(data));
     return this.paymentService.createCryptoPayment(
       req.user.id,
       data,
