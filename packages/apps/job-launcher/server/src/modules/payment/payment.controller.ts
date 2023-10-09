@@ -6,6 +6,7 @@ import {
   Query,
   Request,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
@@ -19,6 +20,7 @@ import {
 } from './payment.dto';
 import { PaymentService } from './payment.service';
 import { getRate } from '../../common/utils';
+import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -45,10 +47,15 @@ export class PaymentController {
 
   @Post('/crypto')
   public async createCryptoPayment(
-    @Request() req: any,
+    @Headers(HEADER_SIGNATURE_KEY) signature: string,
+    @Request() req: RequestWithUser,
     @Body() data: PaymentCryptoCreateDto,
   ): Promise<boolean> {
-    return this.paymentService.createCryptoPayment(req.user.id, data);
+    return this.paymentService.createCryptoPayment(
+      req.user.id,
+      data,
+      signature,
+    );
   }
 
   @Get('/rates')
