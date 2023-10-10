@@ -168,6 +168,13 @@ export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
 );
 
 /**
+ * @constant {Error} - Transfer event not found in transaction logs.
+ */
+export const ErrorTransferEventNotFoundInTransactionLogs = new Error(
+  'Transfer event not found in transaction logs'
+);
+
+/**
  * @constant {Error} - Manifest file does not exist.
  */
 export const ErrorManifestFileDoesNotExist = new Error(

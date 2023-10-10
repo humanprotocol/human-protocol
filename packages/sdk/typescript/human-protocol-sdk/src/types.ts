@@ -1,3 +1,5 @@
+import { BigNumber } from 'ethers';
+
 /**
  * Enum for escrow statuses.
  * @readonly
@@ -135,4 +137,18 @@ export type NetworkData = {
    * Old Escrow Factory contract address
    */
   oldFactoryAddress: string;
+};
+
+/**
+ * Represents the response data for an escrow cancellation.
+ */
+export type EscrowCancel = {
+  /**
+   * The hash of the transaction associated with the escrow cancellation.
+   */
+  txHash: string;
+  /**
+   * The amount refunded in the escrow cancellation.
+   */
+  amountRefunded: BigNumber;
 };
