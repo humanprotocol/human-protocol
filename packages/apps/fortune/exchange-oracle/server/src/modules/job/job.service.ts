@@ -124,7 +124,7 @@ export class JobService {
     escrowAddress: string,
     workerAddress: string,
     solution: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
@@ -153,8 +153,6 @@ export class JobService {
       chainId: chainId,
       solutionsUrl: solutionsUrl,
     });
-
-    return true;
   }
 
   private async addSolution(
@@ -163,7 +161,7 @@ export class JobService {
     workerAddress: string,
     exchangeAddress: string,
     solution: string,
-  ) {
+  ): Promise<string> {
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
       escrowAddress,
       chainId,
@@ -197,7 +195,7 @@ export class JobService {
 
   public async processInvalidJobSolution(
     invalidJobSolution: InvalidJobDto,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
       invalidJobSolution.escrowAddress,
       invalidJobSolution.chainId,
@@ -221,7 +219,5 @@ export class JobService {
       invalidJobSolution.chainId,
       existingJobSolutions,
     );
-
-    return true;
   }
 }

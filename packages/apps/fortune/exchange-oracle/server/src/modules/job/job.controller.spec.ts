@@ -133,13 +133,11 @@ describe('JobController', () => {
         workerAddress,
         solution,
       };
-      const expectedResult = true;
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue(expectedResult);
+      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
 
-      const result = await jobController.solveJob(solveJobDto);
+      await jobController.solveJob(solveJobDto);
 
-      expect(result).toBe(expectedResult);
       expect(jobService.solveJob).toHaveBeenCalledWith(
         solveJobDto.chainId,
         solveJobDto.escrowAddress,
@@ -156,15 +154,11 @@ describe('JobController', () => {
         escrowAddress,
         workerAddress,
       };
-      const expectedResult = true;
 
-      jest
-        .spyOn(jobService, 'processInvalidJobSolution')
-        .mockResolvedValue(expectedResult);
+      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
 
-      const result = await jobController.invalidJobSolution(solveJobDto);
+      await jobController.invalidJobSolution(solveJobDto);
 
-      expect(result).toBe(expectedResult);
       expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
         solveJobDto,
       );

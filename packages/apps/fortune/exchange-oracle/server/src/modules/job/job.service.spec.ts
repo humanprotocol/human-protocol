@@ -266,14 +266,13 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([]);
 
-      const result = await jobService.solveJob(
+      await jobService.solveJob(
         chainId,
         escrowAddress,
         workerAddress,
         'solution',
       );
 
-      expect(result).toBe(true);
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
         recordingOracleURLMock,
@@ -361,13 +360,12 @@ describe('JobService', () => {
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
-      const result = await jobService.processInvalidJobSolution({
+      await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
         workerAddress,
       });
 
-      expect(result).toBe(true);
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
