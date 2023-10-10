@@ -1,38 +1,33 @@
+import { EscrowClient, EscrowStatus, KVStoreClient } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Inject,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
-import {
-  EscrowClient,
-  EscrowStatus,
-  KVStoreClient,
-  StorageClient,
-} from '@human-protocol/sdk';
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
-import { uploadJobSolutions } from '../../common/utils/storage';
 
 import {
-  ServerConfigType,
   S3ConfigType,
-  serverConfigKey,
+  ServerConfigType,
   s3ConfigKey,
+  serverConfigKey,
 } from '../../common/config';
-import { JobSolutionRequestDto, SendWebhookDto } from './job.dto';
-import { Web3Service } from '../web3/web3.service';
 import { ErrorJob } from '../../common/constants/errors';
-import { firstValueFrom } from 'rxjs';
 import { JobRequestType } from '../../common/enums/job';
 import {
   IManifest,
   ISolution,
   ISolutionsFile,
 } from '../../common/interfaces/job';
-import { checkCurseWords } from '@/common/utils/curseWords';
+import { checkCurseWords } from '../../common/utils/curseWords';
+import { sendWebhook } from '../../common/utils/webhook';
+import { StorageService } from '../storage/storage.service';
+import { Web3Service } from '../web3/web3.service';
+import { JobSolutionsRequestDto } from './job.dto';
+import { EXCHANGE_INVALID_ENDPOINT } from '../../common/constants';
 
 @Injectable()
 export class JobService {
@@ -46,6 +41,8 @@ export class JobService {
     private serverConfig: ServerConfigType,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
+    @Inject(StorageService)
+    private readonly storageService: StorageService,
     private readonly httpService: HttpService,
   ) {
     this.minioClient = new Minio.Client({
@@ -57,70 +54,53 @@ export class JobService {
     });
   }
 
-  private getUniqueSolutions(
-    listA: ISolution[],
-    listB: ISolution[],
-  ): ISolution[] {
-    return listA.filter(
-      (solution) =>
-        !listB.some((compareSolution) =>
-          Object.keys(solution).every(
-            (key) =>
-              solution[key as keyof ISolution] ===
-              compareSolution[key as keyof ISolution],
-          ),
-        ),
-    );
-  }
-
   private processSolutions(
     exchangeSolutions: ISolution[],
     recordingSolutions: ISolution[],
   ) {
     const errorSolutions: ISolution[] = [];
-    let uniqueSolutions: ISolution[] = [];
-    const duplicatedInExchange = exchangeSolutions.filter((solution, index) =>
-      exchangeSolutions
-        .slice(index + 1)
-        .some(
-          (compareSolution) =>
-            solution.workerAddress === compareSolution.workerAddress,
-        ),
+    const uniqueSolutions: ISolution[] = [];
+
+    const filteredExchangeSolution = exchangeSolutions.filter(
+      (exchangeSolution) => !exchangeSolution.invalid,
     );
 
-    if (duplicatedInExchange) errorSolutions.push(...duplicatedInExchange);
-
-    uniqueSolutions = this.getUniqueSolutions(
-      exchangeSolutions,
-      duplicatedInExchange,
-    ).filter((solution) => solution.invalid !== true);
-    uniqueSolutions.push(...errorSolutions);
-
-    const duplicatedInRecording = uniqueSolutions.filter((solution) =>
-      recordingSolutions.some(
-        (compareSolution) =>
-          solution.workerAddress === compareSolution.workerAddress,
-      ),
-    );
-
-    uniqueSolutions = this.getUniqueSolutions(
-      uniqueSolutions,
-      duplicatedInRecording,
-    );
-
-    uniqueSolutions = uniqueSolutions.filter((solution) => {
-      if (checkCurseWords(solution.solution)) {
-        errorSolutions.push(solution);
-        return false;
+    filteredExchangeSolution.forEach((exchangeSolution) => {
+      if (errorSolutions.includes(exchangeSolution)) return;
+      const duplicatedInExchange = filteredExchangeSolution.filter(
+        (solution) =>
+          solution.workerAddress === exchangeSolution.workerAddress ||
+          solution.solution === exchangeSolution.solution,
+      );
+      if (duplicatedInExchange.length > 1) {
+        duplicatedInExchange.forEach((duplicated) => {
+          if (
+            (duplicated.solution !== exchangeSolution.solution ||
+              duplicated.workerAddress !== exchangeSolution.workerAddress) &&
+            !errorSolutions.includes(duplicated)
+          ) {
+            errorSolutions.push(duplicated);
+          }
+        });
       }
-      return true;
-    });
 
+      const duplicatedInRecording = recordingSolutions.filter(
+        (solution) =>
+          solution.workerAddress === exchangeSolution.workerAddress ||
+          solution.solution === exchangeSolution.solution,
+      );
+
+      if (duplicatedInRecording.length === 0) {
+        if (checkCurseWords(exchangeSolution.solution))
+          errorSolutions.push(exchangeSolution);
+        else uniqueSolutions.push(exchangeSolution);
+      }
+    });
     return { errorSolutions, uniqueSolutions };
   }
 
   async processJobSolution(
-    jobSolution: JobSolutionRequestDto,
+    jobSolution: JobSolutionsRequestDto,
   ): Promise<string> {
     const signer = this.web3Service.getSigner(jobSolution.chainId);
     const escrowClient = await EscrowClient.build(signer);
@@ -152,7 +132,7 @@ export class JobService {
       jobSolution.escrowAddress,
     );
     const { submissionsRequired, requestType }: IManifest =
-      await StorageClient.downloadFileFromUrl(manifestUrl);
+      await this.storageService.download(manifestUrl);
 
     if (!submissionsRequired || !requestType) {
       this.logger.log(ErrorJob.InvalidManifest, JobService.name);
@@ -167,17 +147,23 @@ export class JobService {
     const existingJobSolutionsURL =
       await escrowClient.getIntermediateResultsUrl(jobSolution.escrowAddress);
 
-    let existingJobSolutions: ISolution[];
-    try {
-      existingJobSolutions = await StorageClient.downloadFileFromUrl(
-        `http://127.0.0.1:9000/solution/${jobSolution.escrowAddress}-${jobSolution.chainId}.json`,
+    const existingJobSolutions = await this.storageService.download(
+      this.storageService.getJobUrl(
+        jobSolution.escrowAddress,
+        jobSolution.chainId,
+      ),
+    );
+
+    if (existingJobSolutions.length >= submissionsRequired) {
+      this.logger.log(
+        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
+        JobService.name,
       );
-    } catch {
-      existingJobSolutions = [];
+      throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
     const exchangeJobSolutionsFile: ISolutionsFile =
-      await StorageClient.downloadFileFromUrl(jobSolution.solutionUrl);
+      await this.storageService.download(jobSolution.solutionsUrl);
 
     const { errorSolutions, uniqueSolutions } = this.processSolutions(
       exchangeJobSolutionsFile.solutions,
@@ -189,20 +175,10 @@ export class JobService {
       ...uniqueSolutions,
     ];
 
-    if (newJobSolutions.length > submissionsRequired) {
-      this.logger.log(
-        ErrorJob.AllSolutionsHaveAlreadyBeenSent,
-        JobService.name,
-      );
-      throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
-    }
-
-    const jobSolutionUploaded = await uploadJobSolutions(
-      this.minioClient,
-      jobSolution.chainId,
+    const jobSolutionUploaded = await this.storageService.uploadJobSolutions(
       jobSolution.escrowAddress,
+      jobSolution.chainId,
       newJobSolutions,
-      this.s3Config.bucket,
     );
 
     if (!existingJobSolutionsURL) {
@@ -219,11 +195,16 @@ export class JobService {
 
     // TODO: Remove this when KVStore is used
 
-    if (newJobSolutions.length === submissionsRequired) {
-      await this.sendWebhook(this.serverConfig.reputationOracleWebhookUrl, {
-        chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress,
-      });
+    if (newJobSolutions.length >= submissionsRequired) {
+      await sendWebhook(
+        this.httpService,
+        this.logger,
+        this.serverConfig.reputationOracleWebhookUrl,
+        {
+          chainId: jobSolution.chainId,
+          escrowAddress: jobSolution.escrowAddress,
+        },
+      );
 
       return 'The requested job is completed.';
     }
@@ -233,30 +214,19 @@ export class JobService {
         'webhook_url',
       )) as string;
       for (const solution of errorSolutions) {
-        await this.sendWebhook(exchangeOracleURL + '/invalid-solution', {
-          chainId: jobSolution.chainId,
-          escrowAddress: jobSolution.escrowAddress,
-          solution,
-        });
+        await sendWebhook(
+          this.httpService,
+          this.logger,
+          exchangeOracleURL + EXCHANGE_INVALID_ENDPOINT,
+          {
+            chainId: jobSolution.chainId,
+            escrowAddress: jobSolution.escrowAddress,
+            workerAddress: solution.workerAddress,
+          },
+        );
       }
     }
 
     return 'Solution are recorded.';
-  }
-
-  public async sendWebhook(
-    webhookUrl: string,
-    webhookData: SendWebhookDto,
-  ): Promise<boolean> {
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData),
-    );
-
-    if (!data) {
-      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
-      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
-    }
-
-    return true;
   }
 }

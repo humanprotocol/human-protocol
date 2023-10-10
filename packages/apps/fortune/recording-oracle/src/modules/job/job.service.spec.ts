@@ -32,7 +32,8 @@ import {
   ISolutionsFile,
 } from '../../common/interfaces/job';
 import { of } from 'rxjs';
-import { JobSolutionRequestDto } from './job.dto';
+import { JobSolutionsRequestDto } from './job.dto';
+import { StorageService } from '../storage/storage.service';
 
 jest.mock('minio', () => {
   class Client {
@@ -102,6 +103,7 @@ describe('JobService', () => {
       ],
       providers: [
         JobService,
+        StorageService,
         {
           provide: Web3Service,
           useValue: {
@@ -125,7 +127,7 @@ describe('JobService', () => {
 
   describe('processJobSolution', () => {
     afterEach(() => {
-      jest.restoreAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should throw bad request exception when recording oracle address does not match', async () => {
@@ -136,10 +138,10 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -154,10 +156,10 @@ describe('JobService', () => {
       };
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -182,10 +184,10 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(invalidManifest);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -211,10 +213,10 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(invalidManifest);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -278,12 +280,10 @@ describe('JobService', () => {
         .mockReturnValueOnce(existingJobSolutions)
         .mockReturnValue(exchangeJobSolutions);
 
-      jobService.sendWebhook = jest.fn().mockRejectedValue(new Error());
-
-      const newSolution: JobSolutionRequestDto = {
+      const newSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -339,14 +339,14 @@ describe('JobService', () => {
         .mockReturnValueOnce(existingJobSolutions)
         .mockReturnValue(exchangeJobSolutions);
 
-      jest
-        .spyOn(jobService, 'sendWebhook')
-        .mockRejectedValue(new Error(ErrorJob.WebhookWasNotSent));
+      httpServicePostMock.mockRejectedValueOnce(
+        new Error(ErrorJob.WebhookWasNotSent),
+      );
 
-      const newSolution: JobSolutionRequestDto = {
+      const newSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       await expect(
@@ -400,10 +400,10 @@ describe('JobService', () => {
         .mockReturnValueOnce(existingJobSolutions)
         .mockReturnValue(exchangeJobSolutions);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       const result = await jobService.processJobSolution(jobSolution);
@@ -457,10 +457,10 @@ describe('JobService', () => {
         .mockReturnValueOnce(existingJobSolutions)
         .mockReturnValue(exchangeJobSolutions);
 
-      const jobSolution: JobSolutionRequestDto = {
+      const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
         chainId: ChainId.LOCALHOST,
-        solutionUrl: MOCK_FILE_URL,
+        solutionsUrl: MOCK_FILE_URL,
       };
 
       const result = await jobService.processJobSolution(jobSolution);
@@ -488,7 +488,7 @@ describe('JobService', () => {
     (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
 
     const manifest: IManifest = {
-      submissionsRequired: 2,
+      submissionsRequired: 4,
       requesterTitle: MOCK_REQUESTER_TITLE,
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       fundAmount: '10',
@@ -517,6 +517,18 @@ describe('JobService', () => {
           workerAddress: '0x0000000000000000000000000000000000000002',
           solution: 'Solution 2',
         },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000002',
+          solution: 'Solution 3',
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000003',
+          solution: 'Solution 3',
+        },
+        {
+          workerAddress: '0x0000000000000000000000000000000000000004',
+          solution: 'Solution 4',
+        },
       ],
     };
 
@@ -526,10 +538,10 @@ describe('JobService', () => {
       .mockReturnValueOnce(existingJobSolutions)
       .mockReturnValue(exchangeJobSolutions);
 
-    const jobSolution: JobSolutionRequestDto = {
+    const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionUrl: MOCK_FILE_URL,
+      solutionsUrl: MOCK_FILE_URL,
     };
 
     const result = await jobService.processJobSolution(jobSolution);
@@ -592,10 +604,10 @@ describe('JobService', () => {
       .mockReturnValueOnce(existingJobSolutions)
       .mockReturnValue(exchangeJobSolutions);
 
-    const jobSolution: JobSolutionRequestDto = {
+    const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionUrl: MOCK_FILE_URL,
+      solutionsUrl: MOCK_FILE_URL,
     };
 
     const result = await jobService.processJobSolution(jobSolution);
@@ -605,7 +617,7 @@ describe('JobService', () => {
       {
         chainId: jobSolution.chainId,
         escrowAddress: jobSolution.escrowAddress,
-        solution: exchangeJobSolutions.solutions[0],
+        workerAddress: exchangeJobSolutions.solutions[0].workerAddress,
       },
     );
   });
@@ -659,10 +671,10 @@ describe('JobService', () => {
       .mockReturnValueOnce(existingJobSolutions)
       .mockReturnValue(exchangeJobSolutions);
 
-    const jobSolution: JobSolutionRequestDto = {
+    const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,
       chainId: ChainId.LOCALHOST,
-      solutionUrl: MOCK_FILE_URL,
+      solutionsUrl: MOCK_FILE_URL,
     };
 
     const result = await jobService.processJobSolution(jobSolution);
@@ -672,7 +684,7 @@ describe('JobService', () => {
       {
         chainId: jobSolution.chainId,
         escrowAddress: jobSolution.escrowAddress,
-        solution: exchangeJobSolutions.solutions[1],
+        workerAddress: exchangeJobSolutions.solutions[1].workerAddress,
       },
     );
   });

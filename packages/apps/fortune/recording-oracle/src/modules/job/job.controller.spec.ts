@@ -18,6 +18,7 @@ import {
 import { Web3Service } from '../web3/web3.service';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
+import { StorageService } from '../storage/storage.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -59,6 +60,7 @@ describe('JobController', () => {
       ],
       providers: [
         JobService,
+        StorageService,
         {
           provide: Web3Service,
           useValue: {
@@ -88,7 +90,7 @@ describe('JobController', () => {
         await jobController.solve({
           escrowAddress: MOCK_ADDRESS,
           chainId: ChainId.LOCALHOST,
-          solutionUrl: MOCK_FILE_URL,
+          solutionsUrl: MOCK_FILE_URL,
         }),
       ).toBe('OK');
     });

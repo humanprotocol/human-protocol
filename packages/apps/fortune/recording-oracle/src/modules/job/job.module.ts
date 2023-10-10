@@ -5,6 +5,7 @@ import { JobController } from './job.controller';
 import { JobService } from './job.service';
 import { Web3Module } from '../web3/web3.module';
 import { serverConfig, s3Config } from '../../common/config';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { serverConfig, s3Config } from '../../common/config';
     ConfigModule.forFeature(serverConfig),
     HttpModule,
     Web3Module,
+    StorageModule,
   ],
   controllers: [JobController],
   providers: [Logger, JobService],
