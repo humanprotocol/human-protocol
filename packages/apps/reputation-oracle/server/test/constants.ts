@@ -174,3 +174,15 @@ export const MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS: ImageLabelBinaryJobResults = {
 export const MOCK_BUCKET_NAME = 'bucket-name';
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
+export const MOCK_EMAIL = 'test@example.com';
+export const MOCK_PASSWORD = 'password123';
+export const MOCK_HASHED_PASSWORD = 'hashedPassword';
+export const MOCK_ACCESS_TOKEN = 'access_token';
+export const MOCK_REFRESH_TOKEN = 'refresh_token';
+export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
+export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
+export const MOCK_EXPIRES_IN = 1000000000000000;
+export const MOCK_SENDGRID_API_KEY =
+  'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
+export const MOCK_SENDGRID_FROM_NAME = 'John Doe';

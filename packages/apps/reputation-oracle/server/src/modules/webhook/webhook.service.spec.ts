@@ -11,17 +11,11 @@ import {
   ProcessingResultDto,
   WebhookIncomingDto,
 } from './webhook.dto';
-import {
-  ChainId,
-  EscrowClient,
-  StorageClient,
-} from '@human-protocol/sdk';
+import { ChainId, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
-import {
-  ErrorWebhook,
-} from '../../common/constants/errors';
+import { ErrorWebhook } from '../../common/constants/errors';
 import { EventType, JobRequestType } from '../../common/enums';
 import {
   MOCK_ADDRESS,
@@ -29,17 +23,13 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_JOB_LAUNCHER_FEE,
   MOCK_PRIVATE_KEY,
-  MOCK_RECORDING_ORACLE_FEE,
-  MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
 import { WebhookStatus } from '../../common/enums';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
-
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -57,36 +47,24 @@ jest.mock('@human-protocol/sdk', () => ({
       .mockResolvedValue([
         { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
       ]),
-    downloadFileFromUrl: jest.fn()
+    downloadFileFromUrl: jest.fn(),
   })),
 }));
 
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
-  copyFileFromURLToBucket: jest.fn().mockImplementation(() => { return { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH } }),
+  copyFileFromURLToBucket: jest.fn().mockImplementation(() => {
+    return { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH };
+  }),
 }));
 
 describe('WebhookService', () => {
-  let webhookService: WebhookService,
-    reputationService: ReputationService,
-    webhookRepository: WebhookRepository;
+  let webhookService: WebhookService, webhookRepository: WebhookRepository;
 
   const signerMock = {
     address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
-
-  const fundAmountInWei = ethers.utils.parseUnits(
-    '10', // ETH
-    'ether',
-  );
-
-  const totalFeePercentage = BigNumber.from(MOCK_JOB_LAUNCHER_FEE)
-    .add(MOCK_RECORDING_ORACLE_FEE)
-    .add(MOCK_REPUTATION_ORACLE_FEE);
-  const totalFee = BigNumber.from(fundAmountInWei)
-    .mul(totalFeePercentage)
-    .div(100);
 
   beforeEach(async () => {
     const mockConfigService: Partial<ConfigService> = {
@@ -105,7 +83,7 @@ describe('WebhookService', () => {
           case 'WEB3_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME
+            return MOCK_BUCKET_NAME;
         }
       }),
     };
@@ -135,7 +113,6 @@ describe('WebhookService', () => {
 
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
-    reputationService = moduleRef.get<ReputationService>(ReputationService);
   });
 
   afterEach(() => {
@@ -167,6 +144,7 @@ describe('WebhookService', () => {
       expect(webhookRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
         escrowAddress: dto.escrowAddress,
+        retriesCount: 0,
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
       });
@@ -205,14 +183,14 @@ describe('WebhookService', () => {
 
     const cvatManifest: CvatManifestDto = {
       data: {
-        data_url: MOCK_FILE_URL
+        data_url: MOCK_FILE_URL,
       },
       annotation: {
         labels: [{ name: 'cat' }, { name: 'dog' }],
         description: 'Description',
         type: JobRequestType.IMAGE_BOXES,
         job_size: 10,
-        max_time: 10
+        max_time: 10,
       },
       validation: {
         min_quality: 0.95,
@@ -230,13 +208,13 @@ describe('WebhookService', () => {
       waitUntil: new Date(),
     };
 
-    const results: ProcessingResultDto = { 
+    const results: ProcessingResultDto = {
       recipients: [MOCK_ADDRESS],
       amounts: [BigNumber.from(10)],
       url: MOCK_FILE_URL,
       hash: MOCK_FILE_HASH,
-      checkPassed: true
-    }
+      checkPassed: true,
+    };
 
     it('should return false if no pending webhook is found', async () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(null);
@@ -247,11 +225,11 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest)
+        .mockReturnValueOnce(fortuneManifest);
       jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue(false);
 
       jest.spyOn(webhookService, 'processFortune').mockImplementation(() => {
-          throw new Error();
+        throw new Error();
       });
 
       expect(await webhookService.processPendingCronJob()).toBe(false);
@@ -262,8 +240,10 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest)
-      jest.spyOn(webhookService, 'processFortune').mockResolvedValue(results as any);
+        .mockReturnValueOnce(fortuneManifest);
+      jest
+        .spyOn(webhookService, 'processFortune')
+        .mockResolvedValue(results as any);
 
       expect(await webhookService.processPendingCronJob()).toBe(true);
     });
@@ -272,8 +252,10 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(cvatManifest);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(cvatManifest)
-      jest.spyOn(webhookService, 'processCvat').mockResolvedValue(results as any);
+        .mockReturnValueOnce(cvatManifest);
+      jest
+        .spyOn(webhookService, 'processCvat')
+        .mockResolvedValue(results as any);
 
       expect(await webhookService.processPendingCronJob()).toBe(true);
     });
@@ -281,16 +263,28 @@ describe('WebhookService', () => {
 
   describe('handleWebhookError', () => {
     it('should set webhook status to FAILED if retries exceed threshold', async () => {
-      await webhookService.handleWebhookError({ id: 1, retriesCount: RETRIES_COUNT_THRESHOLD } as any, new Error('Sample error'));
-      expect(webhookRepository.updateOne).toBeCalledWith({ id: 1 }, { status: WebhookStatus.FAILED });
+      await webhookService.handleWebhookError(
+        { id: 1, retriesCount: RETRIES_COUNT_THRESHOLD } as any,
+        new Error('Sample error'),
+      );
+      expect(webhookRepository.updateOne).toBeCalledWith(
+        { id: 1 },
+        { status: WebhookStatus.FAILED },
+      );
     });
 
     it('should increment retries count if below threshold', async () => {
-      await webhookService.handleWebhookError({ id: 1, retriesCount: 0 } as any, new Error('Sample error'));
-      expect(webhookRepository.updateOne).toBeCalledWith({ id: 1 }, {
-        retriesCount: 1,
-        waitUntil: expect.any(Date),
-      });
+      await webhookService.handleWebhookError(
+        { id: 1, retriesCount: 0 } as any,
+        new Error('Sample error'),
+      );
+      expect(webhookRepository.updateOne).toBeCalledWith(
+        { id: 1 },
+        {
+          retriesCount: 1,
+          waitUntil: expect.any(Date),
+        },
+      );
     });
   });
 
@@ -301,7 +295,7 @@ describe('WebhookService', () => {
         requesterTitle: MOCK_REQUESTER_TITLE,
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         fundAmount: 10,
-        requestType: JobRequestType.FORTUNE
+        requestType: JobRequestType.FORTUNE,
       };
 
       const intermediateResults = [
@@ -314,17 +308,28 @@ describe('WebhookService', () => {
 
       const intermediateResultsUrl = MOCK_FILE_URL;
 
-      jest.spyOn(webhookService, 'getIntermediateResults').mockResolvedValue(intermediateResults);
-      jest.spyOn(webhookService, 'finalizeFortuneResults').mockResolvedValue(intermediateResults);
-      jest.spyOn(webhookService.storageClient, 'uploadFiles').mockResolvedValue([{ url: MOCK_FILE_URL, hash: MOCK_FILE_HASH }] as any);
+      jest
+        .spyOn(webhookService, 'getIntermediateResults')
+        .mockResolvedValue(intermediateResults);
+      jest
+        .spyOn(webhookService, 'finalizeFortuneResults')
+        .mockResolvedValue(intermediateResults);
+      jest
+        .spyOn(webhookService.storageClient, 'uploadFiles')
+        .mockResolvedValue([
+          { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+        ] as any);
 
-      const result = await webhookService.processFortune(manifest, intermediateResultsUrl);
+      const result = await webhookService.processFortune(
+        manifest,
+        intermediateResultsUrl,
+      );
       expect(result).toEqual({
         recipients: expect.any(Array),
         amounts: expect.any(Array),
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
-        checkPassed: expect.any(Boolean)
+        checkPassed: expect.any(Boolean),
       });
     });
   });
@@ -332,14 +337,14 @@ describe('WebhookService', () => {
   describe('processCvat', () => {
     const manifest = {
       data: {
-        data_url: MOCK_FILE_URL
+        data_url: MOCK_FILE_URL,
       },
       annotation: {
         labels: [{ name: 'cat' }, { name: 'dog' }],
         description: 'Description',
         type: JobRequestType.IMAGE_BOXES,
         job_size: 10,
-        max_time: 10
+        max_time: 10,
       },
       validation: {
         min_quality: 0.95,
@@ -347,36 +352,40 @@ describe('WebhookService', () => {
         gt_url: MOCK_FILE_URL,
       },
       job_bounty: '10',
-    }
+    };
 
     it('should successfully process and return correct result values', async () => {
       const intermediateResultsUrl = MOCK_FILE_URL;
-      StorageClient.downloadFileFromUrl = jest
-        .fn()
-        .mockReturnValueOnce({ 
-            jobs: [{ 
-              id: 1,
-              job_id: 1,
-              annotator_wallet_address: MOCK_ADDRESS,
-              annotation_quality: 0.96,
-            }],
-            results: [{ 
-              id: 2,
-              job_id: 2,
-              annotator_wallet_address: MOCK_ADDRESS,
-              annotation_quality: 0.96,
-            }]
-          })
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce({
+        jobs: [
+          {
+            id: 1,
+            job_id: 1,
+            annotator_wallet_address: MOCK_ADDRESS,
+            annotation_quality: 0.96,
+          },
+        ],
+        results: [
+          {
+            id: 2,
+            job_id: 2,
+            annotator_wallet_address: MOCK_ADDRESS,
+            annotation_quality: 0.96,
+          },
+        ],
+      });
 
-
-      const result = await webhookService.processCvat(manifest as any, intermediateResultsUrl);
+      const result = await webhookService.processCvat(
+        manifest as any,
+        intermediateResultsUrl,
+      );
       expect(result).toEqual({
         recipients: expect.any(Array),
         amounts: expect.any(Array),
         url: expect.any(String),
         hash: expect.any(String),
-        checkPassed: true
+        checkPassed: true,
       });
     });
-});
+  });
 });

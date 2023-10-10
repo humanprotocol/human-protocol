@@ -75,3 +75,18 @@ query GetEscrows(
         from_clause="createdAt_gte: $from" if filter.date_from else "",
         to_clause="createdAt_lte: $to" if filter.date_from else "",
     )
+
+
+def get_escrow_query():
+    return """
+query GetEscrow(
+    $escrowAddress: String!
+) {{
+    escrow(id: $escrowAddress) {{
+      ...EscrowFields
+    }}
+}}
+{escrow_fragment}
+""".format(
+        escrow_fragment=escrow_fragment
+    )

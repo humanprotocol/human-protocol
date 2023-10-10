@@ -68,6 +68,13 @@ type Payout @entity {
   createdAt: BigInt!
 }
 
+type DailyWorker @entity {
+  id: ID!
+  timestamp: BigInt!
+  address: Bytes! # address
+  escrowAddress: Bytes! # address
+}
+
 ##################################################
 #                     Events                     #
 ##################################################

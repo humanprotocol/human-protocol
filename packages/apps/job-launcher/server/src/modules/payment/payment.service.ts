@@ -35,6 +35,7 @@ import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
 import { QueryFailedError } from 'typeorm';
+import { verifySignature } from '../../common/utils/signature';
 
 @Injectable()
 export class PaymentService {
@@ -163,6 +164,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
+    signature: string,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
     const network = Object.values(networkMap).find(
@@ -178,6 +180,8 @@ export class PaymentService {
       this.logger.error(ErrorPayment.TransactionNotFoundByHash);
       throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
     }
+
+    verifySignature(dto, signature, [transaction.from]);
 
     if (!transaction.logs[0] || !transaction.logs[0].data) {
       this.logger.error(ErrorPayment.InvalidTransactionData);

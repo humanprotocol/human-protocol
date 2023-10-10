@@ -1,62 +1,49 @@
 """Module containing helper functions for calculating agreement measures."""
 
-import numpy as np
 from collections import Counter
-from typing import Sequence, Optional, Tuple, Callable
+from math import nan
+from typing import Sequence, Optional, Tuple
 
+import numpy as np
 from pyerf import erf, erfinv
 
-from .validations import (
-    validate_nd,
-    validate_equal_shape,
-    validate_same_dtype,
-)
 
-
-def _filter_labels(labels: Sequence, exclude=None):
+def _filter_labels(labels: Sequence):
     """
-    Filters the given sequence of labels, based on the given exclusion values.
+    Filters None and nan values from the given labels.
 
     Args:
         labels: The labels to filter.
-        exclude: The list of labels to exclude.
 
     Returns: A list of labels without the given list of labels to exclude.
 
     """
-    if exclude is None:
-        return np.asarray(labels)
-
     # map to preserve label order if user defined labels are passed
-    label_to_id = {label: i for i, label in enumerate(labels)}
-    exclude = set(exclude)
-
-    labels = sorted(
-        set(labels).difference(exclude), key=lambda x: label_to_id.get(x, -1)
-    )
-
-    return np.asarray(labels)
+    nan_values = {np.nan, nan, None, "nan"}
+    return np.asarray([label for label in labels if label not in nan_values])
 
 
-def _is_nan(data: np.ndarray, nan_values: Optional[Sequence] = None):
-    """Returns a logical index of to filter nan in the given np.ndarray.
+def _is_nan(data: np.ndarray, axis=None):
+    """np.isnan but for any data type."""
+    try:
+        mask = np.isnan(data)
+    except TypeError:
+        mask = data == "nan"
 
-    Args:
-        data: The values to filter.
-        nan_values: If provided, defines which values to count as invalid. If omitted, returns identity index.
-    """
-    if nan_values is None:
-        return np.ones_like(data, dtype=bool)
-    else:
-        return ~np.isin(
-            data, np.unique(nan_values).astype(data.dtype.kind), assume_unique=True
-        )
+    if axis is not None:
+        mask = np.any(mask, axis=axis)
+
+    return mask
+
+
+def _is_in(data: np.ndarray, elements: np.ndarray):
+    """Checks if data is in elements. Faster than using np.isin."""
+    return data[..., np.newaxis] == elements
 
 
 def label_counts(
     annotations: Sequence,
     labels=None,
-    nan_values: Optional[Sequence] = None,
     return_labels=False,
 ):
     """Converts the given sequence of item annotations to an array of label counts per item.
@@ -77,7 +64,7 @@ def label_counts(
     if labels is None:
         labels = np.unique(annotations)
 
-    labels = _filter_labels(labels, nan_values)
+    labels = _filter_labels(labels)
 
     def lcs(annotations, labels):
         c = Counter(annotations)
@@ -92,53 +79,40 @@ def label_counts(
 
 
 def confusion_matrix(
-    a: Sequence,
-    b: Sequence,
+    annotations: np.ndarray,
     labels: Optional[Sequence] = None,
-    nan_values: Optional[Sequence] = None,
     return_labels=False,
 ):
     """Generate an N X N confusion matrix from the given sequence of values a and b, where N is the number of unique labels.
 
     Args:
-        a: A sequence of labels.
-        b: Another sequence of labels.
+        annotations: Annotation data to be converted into confusion matrix. Must be a N x 2 Matrix, where N is the number of items and 2 is the number of annotators.
         labels: Sequence of labels to be counted. Entries not found in the list are omitted. No labels are provided, the list of labels is inferred from the given annotations.
-        nan_values: Value to return if input data is invalid. Invalid values will not be counted.
         return_labels: Whether to return labels with the counts.
 
     Returns:
         A confusion matrix. Rows represent labels assigned by b, columns represent labels assigned by a.
     """
-    a = np.asarray(a)
-    b = np.asarray(b)
-
-    validate_same_dtype(a, b)
-    validate_nd(a, 1)
-    validate_nd(b, 1)
-    validate_equal_shape(a, b)
+    annotations = np.asarray(annotations)
 
     # create list of unique labels
     if labels is None:
-        labels = np.unique(np.concatenate([a, b]))
+        labels = np.unique(annotations)
 
-    labels = _filter_labels(labels, exclude=nan_values)
+    labels = _filter_labels(labels)
     n_labels = len(labels)
 
     # map labels to ids
     label_to_id = {label: i for i, label in enumerate(labels)}
     map_fn = np.vectorize(lambda x: label_to_id.get(x, -1))
-    a = map_fn(a)
-    b = map_fn(b)
+    M = map_fn(annotations)
 
     # filter NaN values
-    M = np.vstack((a, b)).T  # 2 x N Matrix
-    mask = M != -1
-    a, b = M[np.all(mask, axis=1)].T
+    mask = np.all(M != -1, axis=1)
 
     # get indices and counts to populate confusion matrix
     cm = np.zeros((n_labels, n_labels), dtype=int)
-    (i, j), counts = np.unique(np.vstack([a, b]), axis=1, return_counts=True)
+    (i, j), counts = np.unique(M[mask].T, axis=1, return_counts=True)
     cm[i, j] = counts
 
     if return_labels:
@@ -239,18 +213,16 @@ def _pair_indices(items: np.ndarray):
     return np.vstack(np.where(np.triu(identical, 1)))
 
 
-def observed_and_expected_differences(items, values, distance_function):
+def observed_and_expected_differences(annotations, distance_function):
     """
     Returns observed and expected differences for given annotations (item-value
     pairs), as used in Krippendorff's alpha agreement measure and the Sigma
     agreement measure.
 
     Args:
-        items: Item Ids, identifying items of an annotation.
-        values: Annotation value for a given item id. values[i] was assigned to
-            items[i].
+        annotations: annotations: Annotation data. Must be a N x M Matrix, where N is the number of items and M is the number of annotators.
         distance_function: Function to calculate distance between two values.
-            Calling `distance_fn(values[i], values[j])` must return a number.
+            Calling `distance_fn(annotations[i, j], annotations[p, q])` must return a number.
             Can also be one of 'nominal', 'ordinal', 'interval' or 'ratio' for
             default functions pertaining to the level of measurement of the data.
 
@@ -258,8 +230,7 @@ def observed_and_expected_differences(items, values, distance_function):
         A tuple consisting of numpy ndarrays, containing the observed and expected differences in annotations.
 
     """
-    items = np.asarray(items)
-    values = np.asarray(values)
+    values, items, _ = records_from_annotations(annotations)
 
     if isinstance(distance_function, str):
         match distance_function:
@@ -291,7 +262,7 @@ def observed_and_expected_differences(items, values, distance_function):
 
 
 def records_from_annotations(
-    annotations: np.ndarray, annotators=None, items=None, labels=None, nan_values=None
+    annotations: np.ndarray, annotators=None, items=None, labels=None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Turns given annotations into sequences of records.
@@ -301,7 +272,6 @@ def records_from_annotations(
         annotators: List of annotator ids. Must be the same length as columns in annotations.
         items: List of item ids. Must be the same length as rows in annotations.
         labels: The to be included in the matrix.
-        nan_values: Values in the records to be counted as invalid.
     Returns:
         Tuple containing arrays of item value ids, item ids and annotator ids
     """
@@ -327,9 +297,9 @@ def records_from_annotations(
             )
 
     values = annotations.ravel()
-    items = np.tile(items, n_annotators)
+    items = np.repeat(items, n_annotators)
     annotators = np.tile(annotators, n_items)
 
-    mask = _is_nan(values, nan_values)
+    mask = ~_is_nan(values)
 
     return values[mask], items[mask], annotators[mask]

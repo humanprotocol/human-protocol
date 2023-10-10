@@ -3,7 +3,7 @@ import { ChainId } from '@human-protocol/sdk';
 export type LeaderData = {
   chainId: ChainId;
   address: string;
-  role: string;
+  role?: string;
   amountStaked: number;
   amountAllocated: number;
   amountLocked: number;

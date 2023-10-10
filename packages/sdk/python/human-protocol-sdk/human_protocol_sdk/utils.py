@@ -240,6 +240,7 @@ def handle_transaction(
         tx_hash = tx.transact({"gas": gas_limit or GAS_LIMIT})
         return w3.eth.wait_for_transaction_receipt(tx_hash)
     except Exception as e:
+        logger.exception(f"Handle transaction error: {e}")
         if "reverted with reason string" in e.args[0]:
             start_index = e.args[0].find("'") + 1
             end_index = e.args[0].rfind("'")

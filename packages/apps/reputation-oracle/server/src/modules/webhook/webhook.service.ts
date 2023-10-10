@@ -93,6 +93,7 @@ export class WebhookService {
         escrowAddress: dto.escrowAddress,
         status: WebhookStatus.PENDING,
         waitUntil: new Date(),
+        retriesCount: 0,
       });
 
       if (!webhookEntity) {

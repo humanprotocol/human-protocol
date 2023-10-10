@@ -6,7 +6,7 @@ import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
+import { ErrorPayment, ErrorPostgres, ErrorSignature } from '../../common/constants/errors';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
@@ -20,19 +20,25 @@ import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import {
   MOCK_ADDRESS,
   MOCK_PAYMENT_ID,
+  MOCK_SIGNATURE,
   MOCK_TRANSACTION_HASH,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
-import { ConflictException } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
+import { verifySignature } from '../../common/utils/signature';
+import { ConflictException } from '@nestjs/common';
 
 jest.mock('@human-protocol/sdk');
 
 jest.mock('../../common/utils', () => ({
   getRate: jest.fn().mockImplementation(() => 1.5),
+}));
+
+jest.mock('../../common/utils/signature', () => ({
+  verifySignature: jest.fn().mockReturnValue(true),
 }));
 
 describe('PaymentService', () => {
@@ -322,6 +328,7 @@ describe('PaymentService', () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+      (verifySignature as jest.Mock).mockRestore();
     });
 
     it('should create a crypto payment successfully', async () => {
@@ -334,6 +341,7 @@ describe('PaymentService', () => {
       const token = 'hmt';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [
           {
             data: ethers.utils.parseUnits('10').toString(),
@@ -359,7 +367,11 @@ describe('PaymentService', () => {
       findOneMock.mockResolvedValue(null);
       createPaymentMock.mockResolvedValue(true);
 
-      const result = await paymentService.createCryptoPayment(userId, dto);
+      const result = await paymentService.createCryptoPayment(
+        userId,
+        dto,
+        MOCK_SIGNATURE,
+      );
 
       expect(paymentRepository.findOne).toHaveBeenCalledWith({
         transaction: dto.transactionHash,
@@ -389,6 +401,7 @@ describe('PaymentService', () => {
       const token = 'hmt';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [
           {
             data: ethers.utils.parseUnits('10').toString(),
@@ -413,7 +426,7 @@ describe('PaymentService', () => {
       mockTokenContract.symbol.mockResolvedValue(token);
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
     });
 
@@ -427,6 +440,7 @@ describe('PaymentService', () => {
       const unsupportedToken = 'doge';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [
           {
             data: ethers.utils.parseUnits('10').toString(),
@@ -451,8 +465,33 @@ describe('PaymentService', () => {
       mockTokenContract.symbol.mockResolvedValue(unsupportedToken);
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(ErrorPayment.UnsupportedToken);
+    });
+
+    it('should throw a signature error if the signature is wrong', async () => {
+      const userId = 1;
+      const dto = {
+        chainId: ChainId.POLYGON_MUMBAI,
+        transactionHash: MOCK_TRANSACTION_HASH,
+      };
+      (verifySignature as jest.Mock).mockImplementation(() => {
+        throw new ConflictException(ErrorSignature.SignatureNotVerified);
+      });
+
+      const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
+        logs: [],
+        confirmations: TX_CONFIRMATION_TRESHOLD,
+      };
+
+      jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
+        transactionReceipt,
+      );
+
+      await expect(
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
+      ).rejects.toThrowError(ErrorSignature.SignatureNotVerified);
     });
 
     it('should throw a not found exception if the transaction is not found by hash', async () => {
@@ -465,7 +504,7 @@ describe('PaymentService', () => {
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(null);
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(ErrorPayment.TransactionNotFoundByHash);
     });
 
@@ -477,6 +516,7 @@ describe('PaymentService', () => {
       };
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [],
         confirmations: TX_CONFIRMATION_TRESHOLD,
       };
@@ -486,7 +526,7 @@ describe('PaymentService', () => {
       );
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(ErrorPayment.InvalidTransactionData);
     });
 
@@ -498,6 +538,7 @@ describe('PaymentService', () => {
       };
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [
           {
             data: ethers.utils.parseUnits('10').toString(),
@@ -520,7 +561,7 @@ describe('PaymentService', () => {
       );
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(
         ErrorPayment.TransactionHasNotEnoughAmountOfConfirmations,
       );
@@ -536,6 +577,7 @@ describe('PaymentService', () => {
       const token = 'hmt';
 
       const transactionReceipt: Partial<TransactionReceipt> = {
+        from: MOCK_ADDRESS,
         logs: [
           {
             data: ethers.utils.parseUnits('10').toString(),
@@ -562,7 +604,7 @@ describe('PaymentService', () => {
       findOneMock.mockResolvedValue({} as any);
 
       await expect(
-        paymentService.createCryptoPayment(userId, dto),
+        paymentService.createCryptoPayment(userId, dto, MOCK_SIGNATURE),
       ).rejects.toThrowError(ErrorPayment.TransactionAlreadyExists);
     });
   });

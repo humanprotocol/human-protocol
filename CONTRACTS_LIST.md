@@ -76,20 +76,20 @@
 |🟢 Avalanche (Mainnet)      | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/09/29                  | HMToken        | 0x12365293cb6477d4fc2686e46bb97e3fb64f1550 | N/A                                        |
-|2022/12/03                  | EscrowFactory  | 0x9767a578ba7a5FA1563c8229943cB01cd8446BB4 |                                            |
-|                            | Staking        |                                            |                                            |
-|                            | RewardPool     |                                            |                                            |
-|2022/11/17                  | EthKVStore     | 0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df | N/A                                        |
+|2023/10/05                  | EscrowFactory  | 0xe44D7eb960f24797D36FAdD8a8FfF29C76375Ef0 | 0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a |
+|2023/10/05                  | Staking        | 0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c | 0x05398211bA2046E296fBc9a9D3EB49e3F15C3123 |
+|2023/10/05                  | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0x4A5963Dd6792692e9147EdC7659936b96251917a |
+|2023/10/05                  | EthKVStore     | 0x70671167176C4934204B1C7e97F5e86695857ef2 | N/A                                        |
 
 |🟠 Avalanche Fuji (Testnet) | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2022/10/23                  | HMToken        | 0x9406d5c635AD22b0d76c75E52De57A2177919ca3 | N/A                                        |
-|2022/10/24                  | EscrowFactory  | 0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88 |                                            |
-|                            | Staking        |                                            |                                            |
-|                            | RewardPool     |                                            |                                            |
-|2022/10/24                  | EthKVStore     | 0xd232c1426CF0653cE8a71DC98bCfDf10c471c114 | N/A                                        |
+|2023/10/05                  | EscrowFactory  | 0xD8c35adC3b386d092846a93015220b7Fe8efD938 | 0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92 |
+|2023/10/05                  | Staking        | 0x854EC65E9e5e973C458FC2c92F6E0CbD403f5b95 | 0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3 |
+|2023/10/05                  | RewardPool     | 0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d | 0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18 |
+|2023/10/05                  | EthKVStore     | 0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB | N/A                                        |
 
-|🟢 SKALE Human Protocol Chain (Mainnet)        | Contract       | Address                                    | Proxy                                      |
+|🟢 SKALE Human Protocol Chain (Mainnet)      | Contract       | Address                                    | Proxy                                      |
 |----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2023/03/21                  | HMToken        | 0x6E5FF61Ea88270F6142E0E0eC8cbe9d67476CbCd | N/A                                        |
 |2023/03/21                  | EscrowFactory  | 0xB217a23b77D8E9587609293F3F0570D90bC3793c | 0x319070b49C8d1cC015915D1E7Eb5fd8e22833885 |
@@ -166,6 +166,23 @@
 |2023/02/08                  | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0x4A5963Dd6792692e9147EdC7659936b96251917a |
 
 |🟢 Ethereum (Mainnet)       | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
 |2023/03/28                  | EscrowFactory  | 0xe44D7eb960f24797D36FAdD8a8FfF29C76375Ef0 | 0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a |
 |2023/03/28                  | Staking        | 0xC2163A0928034e020f0d31e1171Ba0D6d9AfFB6c | 0x05398211bA2046E296fBc9a9D3EB49e3F15C3123 |
 |2023/04/03                  | RewardPool     | 0x25E53A6D48A2744273C082e55bA5CCFCfD80f9e1 | 0x4A5963Dd6792692e9147EdC7659936b96251917a |
+
+|🟢 Avalanche (Mainnet)      | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/09/29                  | HMToken        | 0x12365293cb6477d4fc2686e46bb97e3fb64f1550 | N/A                                        |
+|2022/12/03                  | EscrowFactory  | 0x9767a578ba7a5FA1563c8229943cB01cd8446BB4 |                                            |
+|                            | Staking        |                                            |                                            |
+|                            | RewardPool     |                                            |                                            |
+|2022/11/17                  | EthKVStore     | 0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df | N/A                                        |
+
+|🟠 Avalanche Fuji (Testnet) | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2022/10/23                  | HMToken        | 0x9406d5c635AD22b0d76c75E52De57A2177919ca3 | N/A                                        |
+|2022/10/24                  | EscrowFactory  | 0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88 |                                            |
+|                            | Staking        |                                            |                                            |
+|                            | RewardPool     |                                            |                                            |
+|2022/10/24                  | EthKVStore     | 0xd232c1426CF0653cE8a71DC98bCfDf10c471c114 | N/A                                        |

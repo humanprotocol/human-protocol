@@ -6,6 +6,8 @@ import { App } from './components';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 
+import 'react-loading-skeleton/dist/skeleton.css';
+
 const container = document.getElementById('root');
 
 const root = createRoot(container!);

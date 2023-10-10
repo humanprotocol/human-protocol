@@ -217,11 +217,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
     escrowEntity.save();
   }
 
-  // Update Daily worker count
-  eventDayData.dailyWorkerCount = eventDayData.dailyWorkerCount.plus(
-    event.params._bulkCount
-  );
-
   // Save statistics, and event day data
   statsEntity.save();
   eventDayData.save();

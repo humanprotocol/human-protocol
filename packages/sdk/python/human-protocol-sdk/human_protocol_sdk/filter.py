@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import datetime
+from datetime import datetime
 
 from typing import List, Optional
 
@@ -31,8 +31,8 @@ class EscrowFilter:
         exchange_oracle: Optional[str] = None,
         job_requester_id: Optional[str] = None,
         status: Optional[Status] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
     ):
         """
         Initializes a EscrowFilter instance.
@@ -45,8 +45,8 @@ class EscrowFilter:
             exchange_oracle (Optional[str]): Exchange oracle address
             job_requester_id (Optional[str]): Job requester id
             status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
+            date_from (Optional[datetime]): Created from date
+            date_to (Optional[datetime]): Created to date
         """
 
         if not networks or any(
@@ -92,8 +92,8 @@ class PayoutFilter:
         self,
         escrow_address: Optional[str] = None,
         recipient: Optional[str] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
     ):
         """
         Initializes a PayoutFilter instance.
@@ -101,8 +101,8 @@ class PayoutFilter:
         Args:
             escrow_address (Optional[str]): Escrow address
             recipient (Optional[str]): Recipient address
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
+            date_from (Optional[datetime]): Created from date
+            date_to (Optional[datetime]): Created to date
         """
 
         if escrow_address and not Web3.is_address(escrow_address):
