@@ -5,7 +5,6 @@ export enum JobStatus {
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
   TO_CANCEL = 'TO_CANCEL',
-  TO_REFUND = 'TO_REFUND',
   CANCELED = 'CANCELED',
 }
 
