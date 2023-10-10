@@ -186,3 +186,11 @@
 |                            | Staking        |                                            |                                            |
 |                            | RewardPool     |                                            |                                            |
 |2022/10/24                  | EthKVStore     | 0xd232c1426CF0653cE8a71DC98bCfDf10c471c114 | N/A                                        |
+
+|🟢 Polygon (Mainnet/Human)        | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2021/10/13                  | HMToken        | 0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF | N/A                                        |
+|2023/06/01                  | EscrowFactory  | 0xF4bd48BD6400e715c46743a1AC7E7D78515471d3 | 0xbd4EFb759b1a4F2f1c847c50a5169E7766c3B9e2 |
+|2023/06/01                  | Staking        | 0x005dfb4DeA0d1B826644f6684f493611a665b7a8 | 0xEbE9F80Bd7360B6159d322a086eFB09B7b22b215 |
+|2023/06/01                  | RewardPool     | 0x85b7e5BeB5627972EC00B5c966F8Aaf69095e3A9 | 0x35393E85AA4242e43dF00cC1E78F2e78aBd07300 |
+|2023/02/03                  | EthKVStore     | 0xbd621862891AdD7DF701501d11f04019db51c3BA | N/A                                        |
