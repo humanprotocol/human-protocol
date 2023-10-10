@@ -24,6 +24,19 @@ GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
 
+class EscrowCancel:
+    def __init__(self, tx_hash: str, amount_refunded: any):
+        """
+        Represents the result of an escrow cancellation transaction.
+
+        Args:
+            tx_hash (str): The hash of the transaction that cancelled the escrow.
+            amount_refunded (Any): The amount refunded during the escrow cancellation.
+        """
+        self.txHash = tx_hash
+        self.amountRefunded = amount_refunded
+
+
 class EscrowClientError(Exception):
     """
     Raises when some error happens when interacting with escrow.
@@ -414,6 +427,65 @@ class EscrowClient:
         )
 
         return transaction_receipt.transactionHash
+
+    def cancel(self, escrow_address: str) -> EscrowCancel:
+        """
+        Cancels the specified escrow and sends the balance to the canceler.
+
+        This method initiates the cancellation of an escrow by interacting with the Ethereum blockchain.
+        It verifies the validity of the escrow address, initiates the cancellation transaction, and
+        retrieves information about the refunded amount.
+
+        Args:
+            escrow_address (str): The Ethereum address of the escrow contract to be cancelled.
+
+        Returns:
+            EscrowCancel: An instance of the EscrowCancel class containing details of the cancellation transaction,
+                         including the transaction hash and the amount refunded.
+
+        Raises:
+            EscrowClientError: If an error occurs while checking the parameters
+            EscrowClientError: If the transfer event associated with the cancellation is not found in the transaction logs
+        """
+
+        if not Web3.is_address(escrow_address):
+            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
+
+        transaction_receipt = handle_transaction(
+            self.w3,
+            "Cancel",
+            self._get_escrow_contract(escrow_address).functions.cancel(),
+            EscrowClientError,
+            self.gas_limit,
+        )
+
+        amount_transferred = None
+        token_address = self.get_token_address(escrow_address)
+
+        erc20_interface = get_erc20_interface()
+        token_contract = self.w3.eth.contract(token_address, abi=erc20_interface["abi"])
+
+        for log in transaction_receipt["logs"]:
+            if log["address"] == token_address:
+                parsed_log = token_contract.events.Transfer().processLog(log)
+
+                from_address = parsed_log[0]["args"]["from"]
+                if (
+                    parsed_log[0]["event"] == "Transfer"
+                    and from_address == escrow_address
+                ):
+                    amount_transferred = parsed_log[0]["args"]["value"]
+                    break
+
+        if amount_transferred is None:
+            raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
+
+        escrow_cancel_data = EscrowCancel(
+            tx_hash=transaction_receipt["transactionHash"],
+            amount_refunded=amount_transferred,
+        )
+
+        return escrow_cancel_data
 
     def abort(self, escrow_address: str) -> None:
         """Cancels the specified escrow, sends the balance to the canceler and selfdestructs the escrow contract.
