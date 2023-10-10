@@ -402,32 +402,6 @@ class EscrowClient:
             self.gas_limit,
         )
 
-    def cancel(self, escrow_address: str) -> str:
-        """Cancels the specified escrow and sends the balance to the canceler.
-
-        Args:
-            escrow_address (str): Address of the escrow to cancel
-
-        Returns:
-            str
-
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
-        """
-
-        if not Web3.is_address(escrow_address):
-            raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
-
-        transaction_receipt = handle_transaction(
-            self.w3,
-            "Cancel",
-            self._get_escrow_contract(escrow_address).functions.cancel(),
-            EscrowClientError,
-            self.gas_limit,
-        )
-
-        return transaction_receipt.transactionHash
-
     def cancel(self, escrow_address: str) -> EscrowCancel:
         """
         Cancels the specified escrow and sends the balance to the canceler.
