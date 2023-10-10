@@ -856,13 +856,16 @@ describe('JobService', () => {
       findOneJobMock.mockResolvedValue(jobEntityMock as any);
 
       jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce({ txHash: MOCK_TRANSACTION_HASH, amountRefunded: BigNumber.from(1) });
-      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValue(true);
+      const manifestMock = {
+        requestType: JobRequestType.FORTUNE,
+      };
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
+      sendWebhookMock.mockResolvedValue(true);
 
       const result = await jobService.cancelCronJob();
 
       expect(result).toBeTruthy();
       expect(jobService.processEscrowCancellation).toHaveBeenCalledWith(jobEntityMock);
-      expect(jobService.notifyWebhook).toHaveBeenCalledWith(jobEntityMock);
       expect(jobEntityMock.save).toHaveBeenCalled();
     });
 
@@ -874,7 +877,11 @@ describe('JobService', () => {
 
       jest.spyOn(jobRepository, 'findOne').mockResolvedValueOnce(jobEntityWithoutEscrow as any);
       jest.spyOn(jobService, 'processEscrowCancellation').mockResolvedValueOnce(undefined as any);
-      jest.spyOn(jobService, 'notifyWebhook').mockResolvedValueOnce(true);
+      const manifestMock = {
+        requestType: JobRequestType.FORTUNE,
+      };
+      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
+      sendWebhookMock.mockResolvedValue(true);
 
       expect(await jobService.cancelCronJob()).toBe(true);
       expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(0);
@@ -911,30 +918,6 @@ describe('JobService', () => {
       }));
 
       await expect(jobService.processEscrowCancellation(jobEntityMock as any)).rejects.toThrow(BadRequestException);
-    });
-
-    it('should notify the FORTUNE webhook', async () => {
-      const manifestMock = {
-        requestType: JobRequestType.FORTUNE,
-      };
-      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
-      sendWebhookMock.mockResolvedValue(true);
-
-      await jobService.notifyWebhook(jobEntityMock as any);
-
-      expect(jobService.sendWebhook).toHaveBeenCalledTimes(1);
-    });
-
-    it('should notify the IMAGE_LABEL_BINARY webhook', async () => {
-      const manifestMock = {
-        requestType: JobRequestType.IMAGE_BOXES,
-      };
-      jobService.getManifest = jest.fn().mockResolvedValue(manifestMock);
-      sendWebhookMock.mockResolvedValue(true);
-
-      await jobService.notifyWebhook(jobEntityMock as any);
-
-      expect(jobService.sendWebhook).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -265,7 +265,7 @@ export class PaymentService {
   }
 
   public async createRefundPayment(dto: PaymentRefundCreateDto) {
-    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const rate = await getRate(TokenId.HMT, Currency.USD);
 
     try {
         await this.paymentRepository.create({
@@ -275,7 +275,7 @@ export class PaymentService {
             type: PaymentType.REFUND,
             amount: dto.refundAmount,
             currency: TokenId.HMT,
-            rate: div(1, rate),
+            rate,
             status: PaymentStatus.SUCCEEDED,
         });
     } catch (error) {

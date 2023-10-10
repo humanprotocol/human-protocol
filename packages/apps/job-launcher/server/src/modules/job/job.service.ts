@@ -650,7 +650,19 @@ export class JobService {
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
-    this.notifyWebhook(jobEntity);
+    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
+                      ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
+                      : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
+
+    await this.sendWebhook(
+        this.configService.get<string>(configKey)!,
+        {
+            escrowAddress: jobEntity.escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.ESCROW_CANCELED,
+        }
+    );
 
     return true;
   }
@@ -674,37 +686,6 @@ export class JobService {
       }
 
       return escrowClient.cancel(escrowAddress);
-  }
-
-  public async notifyWebhook(jobEntity: JobEntity) {
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
-    const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
-                      ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
-                      : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
-
-    await this.sendWebhook(
-        this.configService.get<string>(configKey)!,
-        {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-        }
-    );
-
-    const paymentEntity = await this.paymentRepository.findOne({
-      jobId: jobEntity.id,
-      type: PaymentType.WITHDRAWAL,
-      status: PaymentStatus.SUCCEEDED,
-    });
-    if (paymentEntity) {
-      paymentEntity.status = PaymentStatus.FAILED;
-      await paymentEntity.save();
-    }
-
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
-
-    return true;
   }
 
   public async escrowFailedWebhook(
