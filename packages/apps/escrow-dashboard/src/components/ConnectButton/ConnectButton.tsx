@@ -64,7 +64,16 @@ export const ConnectButton: FC = () => {
   if (!address) {
     return (
       <>
-        <Button variant="outlined" color="primary" onClick={toggleWalletModal}>
+        <Button
+          sx={{
+            borderRadius: '4px',
+            padding: '6px 16px',
+            lineHeight: '24px',
+          }}
+          variant="outlined"
+          color="primary"
+          onClick={toggleWalletModal}
+        >
           Connect Wallet
         </Button>
         <WalletModal open={modalOpen} onClose={toggleWalletModal} />

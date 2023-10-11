@@ -8,12 +8,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { ethers, providers } from 'ethers';
-import { ErrorPayment } from '../../common/constants/errors';
+import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
+  PaymentRefundCreateDto,
 } from './payment.dto';
 import {
   Currency,
@@ -21,6 +22,7 @@ import {
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
+  TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ConfigNames, networkMap } from '../../common/config';
@@ -32,6 +34,8 @@ import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
+import { QueryFailedError } from 'typeorm';
+import { verifySignature } from '../../common/utils/signature';
 
 @Injectable()
 export class PaymentService {
@@ -160,6 +164,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
+    signature: string,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
     const network = Object.values(networkMap).find(
@@ -175,6 +180,8 @@ export class PaymentService {
       this.logger.error(ErrorPayment.TransactionNotFoundByHash);
       throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
     }
+
+    verifySignature(dto, signature, [transaction.from]);
 
     if (!transaction.logs[0] || !transaction.logs[0].data) {
       this.logger.error(ErrorPayment.InvalidTransactionData);
@@ -259,5 +266,30 @@ export class PaymentService {
     }, 0);
 
     return totalAmount;
+  }
+
+  public async createRefundPayment(dto: PaymentRefundCreateDto) {
+    const rate = await getRate(TokenId.HMT, Currency.USD);
+
+    try {
+        await this.paymentRepository.create({
+            userId: dto.userId,
+            jobId: dto.jobId,
+            source: PaymentSource.BALANCE,
+            type: PaymentType.REFUND,
+            amount: dto.refundAmount,
+            currency: TokenId.HMT,
+            rate,
+            status: PaymentStatus.SUCCEEDED,
+        });
+    } catch (error) {
+        if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
+            this.logger.log(ErrorPostgres.NumericFieldOverflow, PaymentService.name);
+            throw new ConflictException(ErrorPayment.IncorrectAmount);
+        } else {
+            this.logger.log(error, PaymentService.name);
+            throw new ConflictException(ErrorPayment.NotSuccess);
+        }
+    }
   }
 }

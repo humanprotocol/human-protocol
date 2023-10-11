@@ -1,4 +1,4 @@
-import { ChainId, NETWORKS } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StakingClient } from '@human-protocol/sdk';
 import {
   createAction,
   createAsyncThunk,
@@ -10,18 +10,12 @@ import {
   UnknownAsyncThunkPendingAction,
   UnknownAsyncThunkRejectedAction,
 } from '@reduxjs/toolkit/dist/matchers';
+import { providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
 import { LeaderData, LeaderEscrowData } from './types';
-import { SUPPORTED_CHAIN_IDS } from 'src/constants';
-import {
-  RAW_DATA_SAVED_EVENTS_QUERY,
-  RAW_LEADERS_QUERY,
-  RAW_LEADER_ESCROWS_QUERY,
-  RAW_LEADER_QUERY,
-} from 'src/queries';
+import { RPC_URLS, V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { AppState } from 'src/state';
 import { formatAmount } from 'src/utils';
-import { gqlFetch } from 'src/utils/gqlFetch';
 
 type LeadersType = { [chainId in ChainId]?: LeaderData[] };
 
@@ -53,10 +47,28 @@ export const fetchLeadersAsync = createAsyncThunk<
 >('leader/fetchLeadersAsync', async () => {
   const leaders = (
     await Promise.all(
-      SUPPORTED_CHAIN_IDS.map(async (chainId) => ({
-        chainId,
-        leaders: await getLeaders(NETWORKS[chainId]?.subgraphUrl!),
-      }))
+      V2_SUPPORTED_CHAIN_IDS.map(async (chainId) => {
+        const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
+        const client = await StakingClient.build(provider);
+        const leaders = await client.getLeaders();
+
+        return {
+          chainId,
+          leaders: leaders.map((leader) => ({
+            chainId,
+            address: leader.address,
+            role: leader.role,
+            amountStaked: formatAmount(leader.amountStaked),
+            amountAllocated: formatAmount(leader.amountAllocated),
+            amountLocked: formatAmount(leader.amountLocked),
+            amountSlashed: formatAmount(leader.amountSlashed),
+            amountWithdrawn: formatAmount(leader.amountWithdrawn),
+            lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+            reputation: Number(leader.reputation),
+            amountJobsLaunched: Number(leader.amountJobsLaunched),
+          })),
+        };
+      })
     )
   ).reduce((leaders, { chainId, leaders: chainLeaders }) => {
     leaders[chainId] = chainLeaders;
@@ -66,103 +78,51 @@ export const fetchLeadersAsync = createAsyncThunk<
   return leaders;
 });
 
-const getLeaders = async (subgraphUrl: string) => {
-  return await gqlFetch(subgraphUrl!, RAW_LEADERS_QUERY)
-    .then((res) => res.json())
-    .then((json) =>
-      json.data.leaders
-        .map((leader: any) => ({
-          address: leader.address,
-          role: leader.role,
-          amountStaked: formatAmount(leader.amountStaked),
-          amountAllocated: formatAmount(leader.amountAllocated),
-          amountLocked: formatAmount(leader.amountLocked),
-          amountSlashed: formatAmount(leader.amountSlashed),
-          amountWithdrawn: formatAmount(leader.amountWithdrawn),
-          lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
-          reputation: Number(leader.reputation),
-          amountJobsLaunched: Number(leader.amountJobsLaunched),
-        }))
-        .filter((leader: LeaderData) => Number(leader.amountStaked) > 0)
-    )
-    .catch((err) => []);
-};
-
 export const fetchLeaderAsync = createAsyncThunk<
   LeaderData,
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderAsync', async ({ chainId, address }) => {
-  const leader = await getLeader(NETWORKS[chainId]?.subgraphUrl!, address);
+  const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
+  const client = await StakingClient.build(provider);
+  const leader = await client.getLeader(address);
 
   if (!leader) {
     throw new Error('Error fetching leader detail');
   }
 
   return {
-    ...leader,
     chainId: chainId,
+    address: leader.address,
+    role: leader.role,
+    amountStaked: formatAmount(leader.amountStaked),
+    amountAllocated: formatAmount(leader.amountAllocated),
+    amountLocked: formatAmount(leader.amountLocked),
+    amountSlashed: formatAmount(leader.amountSlashed),
+    amountWithdrawn: formatAmount(leader.amountWithdrawn),
+    lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+    reputation: Number(leader.reputation),
+    amountJobsLaunched: Number(leader.amountJobsLaunched),
+    url: leader.url,
   };
 });
-
-const getLeader = async (
-  subgraphUrl: string,
-  address: string
-): Promise<Omit<LeaderData, 'chainId'> | undefined> => {
-  const leaderData: Omit<LeaderData, 'chainId'> | undefined = await gqlFetch(
-    subgraphUrl!,
-    RAW_LEADER_QUERY(address)
-  )
-    .then((res) => res.json())
-    .then((json) => ({
-      address: json.data.leader.address,
-      role: json.data.leader.role,
-      amountStaked: formatAmount(json.data.leader.amountStaked),
-      amountAllocated: formatAmount(json.data.leader.amountAllocated),
-      amountLocked: formatAmount(json.data.leader.amountLocked),
-      amountSlashed: formatAmount(json.data.leader.amountSlashed),
-      amountWithdrawn: formatAmount(json.data.leader.amountWithdrawn),
-      lockedUntilTimestamp: Number(json.data.leader.lockedUntilTimestamp),
-      reputation: Number(json.data.leader.reputation),
-      amountJobsLaunched: Number(json.data.leader.amountJobsLaunched),
-    }))
-    .catch((err) => undefined);
-
-  if (leaderData) {
-    const urls = await gqlFetch(subgraphUrl!, RAW_DATA_SAVED_EVENTS_QUERY, {
-      key: 'url',
-      leader: leaderData.address,
-    })
-      .then((res) => res.json())
-      .then((json) =>
-        json.data.dataSavedEvents.map((event: { value: any }) => event.value)
-      );
-
-    return { ...leaderData, url: urls[0] };
-  }
-};
 
 export const fetchLeaderEscrowsAsync = createAsyncThunk<
   LeaderEscrowData[],
   { chainId: ChainId; address: string },
   { state: AppState }
 >('leader/fetchLeaderEscrowsAsync', async ({ chainId, address }) => {
-  return await getLeaderEscrows(NETWORKS[chainId]?.subgraphUrl!, address);
-});
+  const provider = new providers.JsonRpcProvider(RPC_URLS[chainId]!);
+  const client = await EscrowClient.build(provider);
+  const launchedEscrows = await client.getEscrows({ launcher: address });
 
-const getLeaderEscrows = async (subgraphUrl: string, address: string) => {
-  return await gqlFetch(subgraphUrl!, RAW_LEADER_ESCROWS_QUERY(address))
-    .then((res) => res.json())
-    .then((json) =>
-      json.data.launchedEscrows.map((escrow: any) => ({
-        address: escrow.id,
-        amountAllocated: formatAmount(escrow.amountAllocated ?? '0'),
-        amountPayout: formatAmount(escrow.amountPayout ?? '0'),
-        status: escrow.status,
-      }))
-    )
-    .catch((err) => []);
-};
+  return launchedEscrows.map((escrow) => ({
+    address: escrow.address,
+    amountAllocated: formatAmount(escrow.totalFundedAmount),
+    amountPayout: formatAmount(escrow.amountPaid),
+    status: escrow.status,
+  }));
+});
 
 export const setChainId = createAction<ChainId>('leader/setChainId');
 

@@ -36,9 +36,10 @@ import {
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
   ErrorInvalidExchangeOracleAddressProvided,
+  ErrorTransferEventNotFoundInTransactionLogs,
 } from './error';
 import { IEscrowConfig, IEscrowsFilter } from './interfaces';
-import { EscrowStatus, NetworkData } from './types';
+import { EscrowCancel, EscrowStatus, NetworkData } from './types';
 import { isValidUrl, throwError } from './utils';
 import {
   EscrowData,
@@ -480,11 +481,11 @@ export class EscrowClient {
    * Cancels the specified escrow and sends the balance to the canceler.
    *
    * @param {string} escrowAddress - Address of the escrow.
-   * @returns {Promise<void>}
+   * @returns {Promise<EscrowCancel>}
    * @throws {Error} - An error object if an error occurred.
    */
   @requiresSigner
-  async cancel(escrowAddress: string): Promise<void> {
+  async cancel(escrowAddress: string): Promise<EscrowCancel> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -498,8 +499,39 @@ export class EscrowClient {
         escrowAddress,
         this.signerOrProvider
       );
-      await this.escrowContract.cancel();
-      return;
+      const tx = await this.escrowContract.cancel();
+      const transactionReceipt = await tx.wait();
+
+      let amountTransferred: BigNumber | undefined = undefined;
+      const tokenAddress = await this.escrowContract.token();
+
+      const tokenContract: HMToken = HMToken__factory.connect(
+        tokenAddress,
+        this.signerOrProvider
+      );
+
+      for (const log of transactionReceipt.logs) {
+        if (log.address === tokenAddress) {
+          const parsedLog = tokenContract.interface.parseLog(log);
+
+          const from = parsedLog.args[0];
+          if (parsedLog.name === 'Transfer' && from === escrowAddress) {
+            amountTransferred = parsedLog.args[2];
+            break;
+          }
+        }
+      }
+
+      if (amountTransferred === undefined) {
+        throw ErrorTransferEventNotFoundInTransactionLogs;
+      }
+
+      const escrowCancelData: EscrowCancel = {
+        txHash: transactionReceipt.transactionHash,
+        amountRefunded: amountTransferred,
+      };
+
+      return escrowCancelData;
     } catch (e) {
       return throwError(e);
     }

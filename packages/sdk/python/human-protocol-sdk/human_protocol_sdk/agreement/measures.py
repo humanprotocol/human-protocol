@@ -1,5 +1,4 @@
 """Module containing Inter Rater Agreement Measures."""
-
 from copy import copy
 from functools import partial
 from typing import Sequence, Optional, Callable, Union
@@ -120,9 +119,26 @@ def percentage(annotations: np.ndarray) -> float:
 
 def _percentage_from_label_counts(label_counts):
     n_raters = np.sum(label_counts, 1)
-    item_agreements = np.sum(label_counts * label_counts, 1) - n_raters
-    max_item_agreements = n_raters * (n_raters - 1)
-    return item_agreements.sum() / max_item_agreements.sum()
+    item_agreements = (np.sum(label_counts * label_counts, 1) - n_raters).sum()
+    max_item_agreements = (n_raters * (n_raters - 1)).sum()
+
+    if max_item_agreements == 0:
+        warn(
+            "All annotations were made by a single annotator, check your data to ensure this is not an error. Returning 1.0"
+        )
+        return 1.0
+
+    return item_agreements / max_item_agreements
+
+
+def _kappa(agreement_observed, agreement_expected):
+    if agreement_expected == 1.0:
+        warn(
+            "Annotations contained only a single value, check your data to ensure this is not an error. Returning 1.0."
+        )
+        return 1.0
+
+    return (agreement_observed - agreement_expected) / (1 - agreement_expected)
 
 
 def cohens_kappa(annotations: np.ndarray) -> float:
@@ -141,7 +157,7 @@ def cohens_kappa(annotations: np.ndarray) -> float:
     agreement_observed = np.diag(cm).sum() / cm.sum()
     agreement_expected = np.matmul(cm.sum(0), cm.sum(1)) / cm.sum() ** 2
 
-    return (agreement_observed - agreement_expected) / (1 - agreement_expected)
+    return _kappa(agreement_observed, agreement_expected)
 
 
 def fleiss_kappa(annotations: np.ndarray) -> float:
@@ -161,7 +177,7 @@ def fleiss_kappa(annotations: np.ndarray) -> float:
     class_probabilities = im.sum(0) / im.sum()
     agreement_expected = np.power(class_probabilities, 2).sum()
 
-    return (agreement_observed - agreement_expected) / (1 - agreement_expected)
+    return _kappa(agreement_observed, agreement_expected)
 
 
 def krippendorffs_alpha(

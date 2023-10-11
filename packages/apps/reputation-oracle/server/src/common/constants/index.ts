@@ -1,13 +1,20 @@
-import { JobRequestType } from "../enums";
+import { JobRequestType } from '../enums';
 
 export const NS = 'hmt';
 export const RETRIES_COUNT_THRESHOLD = 3;
 export const INITIAL_REPUTATION = 0;
+export const JWT_PREFIX = 'bearer ';
+export const SENDGRID_API_KEY_REGEX =
+  /^SG\.[A-Za-z0-9-_]{22}\.[A-Za-z0-9-_]{43}$/;
 
-export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip'
-export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json'
+export const CVAT_RESULTS_ANNOTATIONS_FILENAME = 'resulting_annotations.zip';
+export const CVAT_VALIDATION_META_FILENAME = 'validation_meta.json';
 
-export const CVAT_JOB_TYPES = [JobRequestType.IMAGE_LABEL_BINARY, JobRequestType.IMAGE_BOXES, JobRequestType.IMAGE_POINTS]
+export const CVAT_JOB_TYPES = [
+  JobRequestType.IMAGE_LABEL_BINARY,
+  JobRequestType.IMAGE_BOXES,
+  JobRequestType.IMAGE_POINTS,
+];
 
 export const HEADER_SIGNATURE_KEY = 'human-signature';
 
