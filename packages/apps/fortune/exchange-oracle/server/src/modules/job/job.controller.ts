@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JobService } from './job.service';
 import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
+import { Role, SignatureAuthGuard } from '../../common/guards';
 
 @ApiTags('Job')
 @Controller('job')
@@ -34,6 +43,7 @@ export class JobController {
     );
   }
 
+  @UseGuards(new SignatureAuthGuard(Role.Recording))
   @Patch('invalid-solution')
   invalidJobSolution(@Body() body: InvalidJobDto): Promise<any> {
     return this.jobService.processInvalidJobSolution(body);
