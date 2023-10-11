@@ -6,7 +6,7 @@ import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { ErrorPayment, ErrorSignature } from '../../common/constants/errors';
+import { ErrorPayment, ErrorPostgres, ErrorSignature } from '../../common/constants/errors';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
@@ -27,6 +27,7 @@ import { Web3Service } from '../web3/web3.service';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import { PaymentEntity } from './payment.entity';
+import { QueryFailedError } from 'typeorm';
 import { verifySignature } from '../../common/utils/signature';
 import { ConflictException } from '@nestjs/common';
 
@@ -654,6 +655,34 @@ describe('PaymentService', () => {
         userId,
         status: PaymentStatus.SUCCEEDED,
       });
+    });
+  });
+
+  describe('createRefundPayment', () => {
+    const mockPaymentRefundCreateDto = {
+      userId: 1,
+      jobId: 2,
+      refundAmount: 100,
+    };
+
+    it('should successfully create a refund payment', async () => {
+      jest.spyOn(paymentRepository, 'create').mockResolvedValueOnce(undefined as any);
+
+      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).resolves.not.toThrow();
+    });
+
+    it('should throw IncorrectAmount error when overflow occurs', async () => {
+      const mockError = new QueryFailedError('', [], '');
+      mockError.message = ErrorPostgres.NumericFieldOverflow.toLowerCase();
+      jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(mockError);
+
+      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).rejects.toThrow(ConflictException);
+    });
+
+    it('should throw NotSuccess error on other database errors', async () => {
+      jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(new Error());
+
+      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).rejects.toThrow(ConflictException);
     });
   });
 });

@@ -17,6 +17,7 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
+import { BigNumber } from 'ethers';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -54,6 +55,7 @@ export class JobFortuneDto extends JobDto {
 
   @ApiProperty()
   @IsNumber()
+  @IsPositive()
   public submissionsRequired: number;
 }
 
@@ -341,4 +343,9 @@ export class EscrowFailedWebhookDto {
   @ApiProperty()
   @IsString()
   public reason: string;
+}
+
+export class EscrowCancelDto {
+  txHash: string;
+  amountRefunded: BigNumber
 }
