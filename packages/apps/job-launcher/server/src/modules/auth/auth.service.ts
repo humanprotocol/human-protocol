@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -142,7 +143,16 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     if (userEntity.status !== UserStatus.ACTIVE)
       throw new UnauthorizedException(ErrorAuth.UserNotActive);
 
-    const tokenEntity = await this.tokenRepository.create({
+    const existingToken = await this.tokenRepository.findOne({
+      userId: userEntity.id,
+      tokenType: TokenType.PASSWORD,
+    });
+  
+    if (existingToken) {
+      await existingToken.remove();
+    }
+    
+    const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.PASSWORD,
       user: userEntity,
     });
@@ -150,8 +160,8 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     this.sendgridService.sendEmail({
       to: data.email,
       subject: 'Reset password',
-      html: `Click <a href="${this.feURL}/reset-password?token=${tokenEntity.uuid}">here</a> to reset the password.`,
-      text: `Click ${this.feURL}/reset-password?token=${tokenEntity.uuid} to reset the password.`,
+      html: `Click <a href="${this.feURL}/reset-password?token=${newTokenEntity.uuid}">here</a> to reset the password.`,
+      text: `Click ${this.feURL}/reset-password?token=${newTokenEntity.uuid} to reset the password.`,
     });
   }
 

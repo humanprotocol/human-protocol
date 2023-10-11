@@ -13,6 +13,7 @@ export enum ErrorJob {
   InvalidRequestType = 'Invalid job type',
   JobParamsValidationFailed = 'Job parameters validation failed',
   InvalidEventType = 'Invalid event type',
+  InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
 }
 
@@ -44,7 +45,7 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
-  UserNotActive = 'User not active',
+  UserNotActive = 'User not active'
 }
 
 /**

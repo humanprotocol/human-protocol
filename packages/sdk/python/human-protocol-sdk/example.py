@@ -26,18 +26,6 @@ def get_escrow_statistics(statistics_client: StatisticsClient):
     )
 
 
-def get_task_statistics(statistics_client: StatisticsClient):
-    print(statistics_client.get_task_statistics())
-    print(
-        statistics_client.get_task_statistics(
-            StatisticsParam(
-                date_from=datetime.datetime(2023, 5, 8),
-                date_to=datetime.datetime(2023, 6, 8),
-            )
-        )
-    )
-
-
 def get_worker_statistics(statistics_client: StatisticsClient):
     print(statistics_client.get_worker_statistics())
     print(
@@ -124,7 +112,6 @@ if __name__ == "__main__":
 
     # Run single example while testing, and remove comments before commit
 
-    get_task_statistics(statistics_client)
     get_escrow_statistics(statistics_client)
     get_worker_statistics(statistics_client)
     get_payment_statistics(statistics_client)

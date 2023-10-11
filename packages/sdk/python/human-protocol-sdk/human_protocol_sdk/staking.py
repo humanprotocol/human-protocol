@@ -48,11 +48,6 @@ class LeaderFilter:
 
         Args:
             role (Optional[str]): Leader role
-            reputation_oracle (Optional[str]): Reputation oracle address
-            recording_oracle (Optional[str]): Recording oracle address
-            status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
         """
 
         self.role = role

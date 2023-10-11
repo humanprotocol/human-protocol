@@ -3,21 +3,6 @@ import { StatisticsClient } from '../src/statistics';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 
-// Replace with your own API key
-const IM_API_KEY = '';
-
-const getTaskStatistics = async (statisticsClient: StatisticsClient) => {
-  console.log('Task statistics:', await statisticsClient.getTaskStatistics());
-
-  console.log(
-    'Task statistics from 5/8 - 6/8:',
-    await statisticsClient.getTaskStatistics({
-      from: new Date(2023, 4, 8),
-      to: new Date(2023, 5, 8),
-    })
-  );
-};
-
 const getEscrowStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Escrow statistics:',
@@ -55,8 +40,6 @@ const getPaymentStatistics = async (statisticsClient: StatisticsClient) => {
       (p) => ({
         ...p,
         totalAmountPaid: p.totalAmountPaid.toString(),
-        averageAmountPerJob: p.averageAmountPerJob.toString(),
-        averageAmountPerWorker: p.averageAmountPerWorker.toString(),
       })
     )
   );
@@ -71,8 +54,6 @@ const getPaymentStatistics = async (statisticsClient: StatisticsClient) => {
     ).dailyPaymentsData.map((p) => ({
       ...p,
       totalAmountPaid: p.totalAmountPaid.toString(),
-      averageAmountPerJob: p.averageAmountPerJob.toString(),
-      averageAmountPerWorker: p.averageAmountPerWorker.toString(),
     }))
   );
 };
@@ -83,6 +64,7 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   console.log('HMT statistics:', {
     ...hmtStatistics,
     totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatistics.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
@@ -101,6 +83,7 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   console.log('HMT statistics from 5/8 - 6/8:', {
     ...hmtStatisticsRange,
     totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatisticsRange.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
@@ -117,12 +100,8 @@ const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
     return;
   }
 
-  const statisticsClient = new StatisticsClient(
-    NETWORKS[ChainId.POLYGON],
-    IM_API_KEY
-  );
+  const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON]);
 
-  await getTaskStatistics(statisticsClient);
   await getEscrowStatistics(statisticsClient);
   await getWorkerStatistics(statisticsClient);
   await getPaymentStatistics(statisticsClient);

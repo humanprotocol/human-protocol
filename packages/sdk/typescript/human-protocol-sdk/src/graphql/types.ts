@@ -100,7 +100,6 @@ export type EscrowStatistics = {
 export type DailyWorkerData = {
   timestamp: Date;
   activeWorkers: number;
-  averageJobsSolved: number;
 };
 
 export type WorkerStatistics = {
@@ -111,7 +110,6 @@ export type DailyPaymentData = {
   timestamp: Date;
   totalAmountPaid: BigNumber;
   totalCount: number;
-  averageAmountPerJob: BigNumber;
   averageAmountPerWorker: BigNumber;
 };
 
@@ -137,6 +135,7 @@ export type DailyHMTData = {
 
 export type HMTStatistics = {
   totalTransferAmount: BigNumber;
+  totalTransferCount: number;
   totalHolders: number;
   holders: HMTHolder[];
   dailyHMTData: DailyHMTData[];

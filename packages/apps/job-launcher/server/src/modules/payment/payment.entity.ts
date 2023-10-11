@@ -60,7 +60,7 @@ export class PaymentEntity extends BaseEntity {
   public userId: number;
 
   @JoinColumn()
-  @OneToOne(() => JobEntity, (job) => job.payment)
+  @ManyToOne(() => JobEntity, (job) => job.payment)
   public job: JobEntity;
 
   @Column({ type: 'int', nullable: true  })
