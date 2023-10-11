@@ -39,6 +39,24 @@ export class SolveJobDto {
   public solution: string;
 }
 
+export class InvalidJobDto {
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public escrowAddress: string;
+
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  workerAddress: string;
+}
+
 export class EscrowFailedWebhookDto {
   public chain_id: ChainId;
   public escrow_address: string;
