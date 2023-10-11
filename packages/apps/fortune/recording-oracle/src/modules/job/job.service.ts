@@ -9,12 +9,7 @@ import {
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
 
-import {
-  S3ConfigType,
-  ServerConfigType,
-  s3ConfigKey,
-  serverConfigKey,
-} from '../../common/config';
+import { ServerConfigType, serverConfigKey } from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType } from '../../common/enums/job';
 import {
@@ -35,8 +30,6 @@ export class JobService {
   public readonly minioClient: Minio.Client;
 
   constructor(
-    @Inject(s3ConfigKey)
-    private s3Config: S3ConfigType,
     @Inject(serverConfigKey)
     private serverConfig: ServerConfigType,
     @Inject(Web3Service)
@@ -44,15 +37,7 @@ export class JobService {
     @Inject(StorageService)
     private readonly storageService: StorageService,
     private readonly httpService: HttpService,
-  ) {
-    this.minioClient = new Minio.Client({
-      endPoint: this.s3Config.endPoint,
-      port: this.s3Config.port,
-      accessKey: this.s3Config.accessKey,
-      secretKey: this.s3Config.secretKey,
-      useSSL: this.s3Config.useSSL,
-    });
-  }
+  ) {}
 
   private processSolutions(
     exchangeSolutions: ISolution[],
