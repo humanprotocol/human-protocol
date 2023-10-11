@@ -1,18 +1,14 @@
 """ API endpoints """
 from fastapi import APIRouter, FastAPI
 
-from src.schemas import ValidationErrorResponse, ResponseError, MetaResponse
 from src.core.config import Config
-
-from src.api.webhook import router as webhook_router
-
+from src.endpoints.webhook import router as webhook_router
+from src.schemas import MetaResponse, ResponseError, ValidationErrorResponse
 
 greet_router = APIRouter()
 
 
-@greet_router.get(
-    "/", description="Endpoint describing the API", response_model=MetaResponse
-)
+@greet_router.get("/", description="Endpoint describing the API", response_model=MetaResponse)
 def meta_route() -> MetaResponse:
     networks = [Config.polygon_mainnet, Config.polygon_mumbai]
 
@@ -44,6 +40,6 @@ def init_api(app: FastAPI) -> FastAPI:
     }
 
     app.include_router(greet_router)
-    app.include_router(webhook_router, prefix="/webhook", responses=default_responses)
+    app.include_router(webhook_router, responses=default_responses)
 
     return app

@@ -19,13 +19,24 @@ human-protocol-sdk = "^1.1.5"
 alembic = "^1.11.1"
 httpx = "^0.24.1"
 numpy = "^1.25.2"
-pandas = "^2.0.3"
-pyerf = "^1.0.1"
+boto3 = "^1.28.40"
+datumaro = {git = "https://github.com/cvat-ai/datumaro.git", rev = "ff83c00c2c1bc4b8fdfcc55067fcab0a9b5b6b11"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 pre-commit = "^3.3.3"
 hypothesis = "^6.82.6"
+isort = "^5.12.0"
+
+[tool.isort]
+profile = "black"
+forced_separate = ["tests"]
+line_length = 100
+skip_gitignore = true # align tool behavior with Black
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
 
 [build-system]
 requires = ["poetry-core"]
