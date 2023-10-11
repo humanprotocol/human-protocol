@@ -22,14 +22,11 @@ export function usePaymentStats() {
             d.totalAmountPaid,
             HM_TOKEN_DECIMALS
           ),
-          averageAmountPerJob: utils.formatUnits(
-            d.averageAmountPerJob,
-            HM_TOKEN_DECIMALS
-          ),
           averageAmountPerWorker: utils.formatUnits(
             d.averageAmountPerWorker,
             HM_TOKEN_DECIMALS
           ),
+          totalCount: d.totalCount,
         })),
       };
     }
