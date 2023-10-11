@@ -17,7 +17,6 @@ from .conftest import (
 
 
 def test_agreement(annotations_nan, labels):
-
     # test if both interfaces match
     k_agree = agreement(annotations_nan, measure="fleiss_kappa")["results"]["score"]
     k_fleiss = fleiss_kappa(annotations_nan)
@@ -55,6 +54,12 @@ def test_cohens_kappa(annotations_2_raters):
 def test_fleiss_kappa(annotations_multiple_raters):
     kappa = fleiss_kappa(annotations_multiple_raters)
     assert eq_rounded(kappa, 0.05)
+
+    single_class_annos = np.zeros((10, 3))  # all annotators gave the same labels
+    assert ~np.isnan(fleiss_kappa(single_class_annos))
+
+    single_annotator_annos = np.random.randint(0, 2, size=(10, 1))
+    assert ~np.isnan(fleiss_kappa(single_annotator_annos))
 
 
 def test_krippendorff():

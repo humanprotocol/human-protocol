@@ -31,6 +31,8 @@ const theme = createTheme({
     h4: {
       fontSize: '34px',
       fontWeight: 600,
+      lineHeight: '123.5%',
+      letterSpacing: '0.25px',
       '@media (max-width: 576px)': {
         fontSize: '28px',
       },
@@ -101,6 +103,22 @@ const theme = createTheme({
         },
         notchedOutline: {
           border: '1px solid #320a8d',
+        },
+      },
+    },
+    MuiCardActionArea: {
+      styleOverrides: {
+        focusHighlight: {
+          backgroundColor: '#1406b2',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: 'rgba(20, 6, 178, 0.08)',
+          },
         },
       },
     },

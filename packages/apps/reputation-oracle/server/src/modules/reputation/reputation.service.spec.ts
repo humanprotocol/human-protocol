@@ -170,7 +170,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputation: ReputationLevel.LOW,
-      }
+      };
 
       expect(reputationRepository.findOne).toHaveBeenCalledWith({
         chainId,
@@ -201,7 +201,7 @@ describe('ReputationService', () => {
         chainId,
         address,
         reputation: ReputationLevel.LOW,
-      }
+      };
 
       expect(reputationRepository.find).toHaveBeenCalled();
       expect(result).toEqual([resultReputation]);

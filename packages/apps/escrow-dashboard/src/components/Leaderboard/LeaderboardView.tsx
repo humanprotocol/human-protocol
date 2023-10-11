@@ -22,7 +22,7 @@ import {
 import { FC, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { ROLES, SUPPORTED_CHAIN_IDS } from 'src/constants';
+import { ROLES, V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { useLeadersByChainID } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
 
@@ -42,8 +42,9 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedRoles, setSelectedRoles] = useState<string[]>(ROLES);
-  const [selectedNetworks, setSelectedNetworks] =
-    useState<ChainId[]>(SUPPORTED_CHAIN_IDS);
+  const [selectedNetworks, setSelectedNetworks] = useState<ChainId[]>(
+    V2_SUPPORTED_CHAIN_IDS
+  );
 
   const leaders = useLeadersByChainID();
 
@@ -91,7 +92,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
             Network
           </Typography>
           <FormGroup>
-            {SUPPORTED_CHAIN_IDS.map((chainId, i) => (
+            {V2_SUPPORTED_CHAIN_IDS.map((chainId, i) => (
               <FormControlLabel
                 componentsProps={{ typography: { color: 'textPrimary' } }}
                 control={

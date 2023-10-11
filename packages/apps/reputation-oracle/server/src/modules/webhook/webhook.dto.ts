@@ -41,6 +41,9 @@ export class WebhookIncomingCreateDto {
 
   @IsDate()
   public waitUntil: Date;
+
+  @IsNumber()
+  public retriesCount: number;
 }
 
 export class WebhookIncomingUpdateDto {
