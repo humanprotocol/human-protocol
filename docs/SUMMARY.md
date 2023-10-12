@@ -1,10 +1,8 @@
 # Table of contents
 
-* [README](README.md)
-
 ## Typescript SDK​
 
-* [Encryption](packages/sdk/typescript/human-protocol-sdk/modules/encryption.md)
+* [Encryption](README.md)
   * [Encryption](packages/sdk/typescript/human-protocol-sdk/classes/encryption.Encryption.md)
   * [EnpcryptionUtils](typescript-sdk/encryption/enpcryptionutils.md)
 * [Escrow](packages/sdk/typescript/human-protocol-sdk/modules/escrow.md)
