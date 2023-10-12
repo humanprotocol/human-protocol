@@ -10,10 +10,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf ./dist",
-    "clean:doc": "rm -rf ../../../docs/packages/sdk/typescript/human-protocol-sdk/",
+    "clean:doc": "rm -rf ../../../../docs/packages/sdk/typescript/human-protocol-sdk/",
     "prebuild": "yarn workspace @human-protocol/core build",
     "build": "npm run clean && tsc",
-    "build:doc": "npm run clean:doc && npx typedoc --plugin typedoc-plugin-markdown --out ../../../docs/packages/sdk/typescript/human-protocol-sdk/",
+    "build:doc": "npm run clean:doc && npx typedoc --plugin typedoc-plugin-markdown --out ../../../../docs/packages/sdk/typescript/human-protocol-sdk/",
     "prepublish": "npm run build",
     "test": "vitest -u",
     "lint": "eslint .",
