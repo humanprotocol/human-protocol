@@ -1,5 +1,11 @@
 # Table of contents
 
+* [README](README.md)
+
+## HUMAN Architecture
+
+* [HUMAN Architecture](human-architecture/human-architecture.md)
+
 ## Typescript SDK​
 
 * [Encryption](packages/sdk/typescript/human-protocol-sdk/docs/modules/encryption.md)
