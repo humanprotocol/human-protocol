@@ -73,7 +73,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 #### Defined in
 
-[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
+[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
 
 ## Properties
 
@@ -83,7 +83,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 #### Defined in
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
 
 ## Methods
 
@@ -121,7 +121,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:93](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L93)
+[statistics.ts:93](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L93)
 
 ___
 
@@ -186,7 +186,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:297](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L297)
+[statistics.ts:297](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L297)
 
 ___
 
@@ -245,7 +245,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:214](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L214)
+[statistics.ts:214](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L214)
 
 ___
 
@@ -283,4 +283,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:145](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L145)
+[statistics.ts:145](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L145)

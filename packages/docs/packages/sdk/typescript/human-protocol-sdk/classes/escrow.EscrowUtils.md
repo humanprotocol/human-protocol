@@ -46,7 +46,7 @@ Returns the escrow for a given address
 
 #### Defined in
 
-[escrow.ts:1422](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1422)
+[escrow.ts:1422](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1422)
 
 ___
 
@@ -72,4 +72,4 @@ Returns the list of escrows for given filter
 
 #### Defined in
 
-[escrow.ts:1350](https://github.com/humanprotocol/human-protocol/blob/04b5bdf5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1350)
+[escrow.ts:1350](https://github.com/humanprotocol/human-protocol/blob/e24925d6/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1350)
