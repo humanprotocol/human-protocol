@@ -2,10 +2,6 @@
 
 * [README](README.md)
 
-## HUMAN Architecture
-
-* [HUMAN Architecture](human-architecture/human-architecture.md)
-
 ## Typescript SDK​
 
 * [Encryption](packages/sdk/typescript/human-protocol-sdk/modules/encryption.md)
