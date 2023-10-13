@@ -18,7 +18,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    if (
+      error?.response?.status === 401 &&
+      error?.response?.data?.message === 'Token expired'
+    ) {
       localStorage.removeItem('HUMAN_JOB_LAUNCHER_REFRESH_TOKEN');
       localStorage.removeItem('HUMAN_JOB_LAUNCHER_ACCESS_TOKEN');
       window.location.href = '/';

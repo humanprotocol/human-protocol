@@ -1,3 +1,4 @@
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import {
   Autocomplete,
   Box,
@@ -5,10 +6,12 @@ import {
   Chip,
   FormControl,
   Grid,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
@@ -22,7 +25,7 @@ export const CvatJobRequestForm = () => {
 
   const initialValues = {
     labels: [],
-    type: CvatJobType.IMAGE_POINTS,
+    type: CvatJobType.IMAGE_BOXES,
     description: '',
     dataUrl: '',
     groundTruthUrl: '',
@@ -168,6 +171,15 @@ export const CvatJobRequestForm = () => {
                       touched.groundTruthUrl && Boolean(errors.groundTruthUrl)
                     }
                     helperText={errors.groundTruthUrl}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Ground Truth URL tooltip here">
+                            <HelpOutlineIcon color="secondary" />
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </FormControl>
                 <FormControl fullWidth sx={{ mb: 2 }}>
@@ -180,6 +192,15 @@ export const CvatJobRequestForm = () => {
                     label="User Guide URL"
                     error={touched.userGuide && Boolean(errors.userGuide)}
                     helperText={errors.userGuide}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="User Guide URL tooltip here">
+                            <HelpOutlineIcon color="secondary" />
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </FormControl>
                 <FormControl fullWidth>
