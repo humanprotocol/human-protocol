@@ -7,15 +7,11 @@ import {
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constant';
 import { EscrowUtils } from '@human-protocol/sdk';
-
-export enum Role {
-  JobLaucher = 'job_launcher',
-  Recording = 'recording',
-}
+import { Role } from '../enums/role';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(private role: Role) {}
+  constructor(private role: Role[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -28,10 +24,12 @@ export class SignatureAuthGuard implements CanActivate {
         data.chainId,
         data.escrowAddress,
       );
-      if (this.role === Role.JobLaucher)
+      if (this.role.includes(Role.JobLaucher))
         oracleAdresses.push(escrowData.launcher);
-      if (this.role === Role.Recording)
+      if (this.role.includes(Role.Recording))
         oracleAdresses.push(escrowData.recordingOracle!);
+      if (this.role.includes(Role.Reputation))
+        oracleAdresses.push(escrowData.reputationOracle!);
 
       const isVerified = verifySignature(data, signature, oracleAdresses);
 

@@ -10,7 +10,8 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { JobService } from './job.service';
 import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
-import { Role, SignatureAuthGuard } from '../../common/guards';
+import { SignatureAuthGuard } from '../../common/guards';
+import { Role } from '../../common/enums/role';
 
 @ApiTags('Job')
 @Controller('job')
@@ -43,7 +44,7 @@ export class JobController {
     );
   }
 
-  @UseGuards(new SignatureAuthGuard(Role.Recording))
+  @UseGuards(new SignatureAuthGuard([Role.Recording, Role.Reputation]))
   @Patch('invalid-solution')
   invalidJobSolution(@Body() body: InvalidJobDto): Promise<any> {
     return this.jobService.processInvalidJobSolution(body);

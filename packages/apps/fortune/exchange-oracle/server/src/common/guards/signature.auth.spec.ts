@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { Role, SignatureAuthGuard } from './signature.auth';
+import { SignatureAuthGuard } from './signature.auth';
 import { verifySignature } from '../utils/signature';
 import { ChainId, EscrowUtils } from '@human-protocol/sdk';
 import { MOCK_ADDRESS } from '../../../test/constants';
+import { Role } from '../enums/role';
 
 jest.mock('../../common/utils/signature');
 
@@ -11,7 +12,8 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowUtils: {
     getEscrow: jest.fn().mockResolvedValue({
-      launcher: '0x1234567890123456789012345678901234567892',
+      launcher: '0x1234567890123456789012345678901234567891',
+      recordingOracle: '0x1234567890123456789012345678901234567892',
     }),
   },
 }));
@@ -24,7 +26,7 @@ describe('SignatureAuthGuard', () => {
       providers: [
         {
           provide: SignatureAuthGuard,
-          useValue: new SignatureAuthGuard(Role.JobLaucher),
+          useValue: new SignatureAuthGuard([Role.JobLaucher, Role.Recording]),
         },
       ],
     }).compile();
