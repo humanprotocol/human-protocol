@@ -14,6 +14,7 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { JobController } from './job.controller';
@@ -50,6 +51,11 @@ describe('JobController', () => {
             port: MOCK_S3_PORT,
             useSSL: MOCK_S3_USE_SSL,
             bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
           })),
         ),
         ConfigModule.forFeature(

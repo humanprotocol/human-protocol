@@ -7,7 +7,7 @@ export const MOCK_WEB3_PRIVATE_KEY =
   '5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a';
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
-export const MOCK_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const MOCK_ADDRESS = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 export const MOCK_FILE_URL = 'mockedFileUrl';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';

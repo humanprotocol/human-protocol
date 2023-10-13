@@ -111,7 +111,7 @@ export class JobController {
   @Public()
   @UseGuards(SignatureAuthGuard)
   @Post('/escrow-failed-webhook')
-  public async (
+  public async(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: EscrowFailedWebhookDto,
   ): Promise<any> {

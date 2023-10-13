@@ -24,6 +24,7 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import {
@@ -34,6 +35,11 @@ import {
 import { of } from 'rxjs';
 import { JobSolutionsRequestDto } from './job.dto';
 import { StorageService } from '../storage/storage.service';
+import {
+  EXCHANGE_INVALID_ENDPOINT,
+  HEADER_SIGNATURE_KEY,
+} from '../../common/constants';
+import { signMessage } from '../../common/utils/signature';
 
 jest.mock('minio', () => {
   class Client {
@@ -93,6 +99,11 @@ describe('JobService', () => {
             port: MOCK_S3_PORT,
             useSSL: MOCK_S3_USE_SSL,
             bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
           })),
         ),
         ConfigModule.forFeature(
@@ -464,12 +475,22 @@ describe('JobService', () => {
       };
 
       const result = await jobService.processJobSolution(jobSolution);
+
+      const expectedBody = {
+        chainId: jobSolution.chainId,
+        escrowAddress: jobSolution.escrowAddress,
+      };
       expect(result).toEqual('The requested job is completed.');
       expect(httpServicePostMock).toHaveBeenCalledWith(
         MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+        expectedBody,
         {
-          chainId: jobSolution.chainId,
-          escrowAddress: jobSolution.escrowAddress,
+          headers: {
+            [HEADER_SIGNATURE_KEY]: await signMessage(
+              expectedBody,
+              MOCK_WEB3_PRIVATE_KEY,
+            ),
+          },
         },
       );
     });
@@ -545,12 +566,22 @@ describe('JobService', () => {
     };
 
     const result = await jobService.processJobSolution(jobSolution);
+
+    const expectedBody = {
+      chainId: jobSolution.chainId,
+      escrowAddress: jobSolution.escrowAddress,
+    };
     expect(result).toEqual('The requested job is completed.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
       MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+      expectedBody,
       {
-        chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress,
+        headers: {
+          [HEADER_SIGNATURE_KEY]: await signMessage(
+            expectedBody,
+            MOCK_WEB3_PRIVATE_KEY,
+          ),
+        },
       },
     );
   });
@@ -611,13 +642,23 @@ describe('JobService', () => {
     };
 
     const result = await jobService.processJobSolution(jobSolution);
+
+    const expectedBody = {
+      chainId: jobSolution.chainId,
+      escrowAddress: jobSolution.escrowAddress,
+      workerAddress: exchangeJobSolutions.solutions[0].workerAddress,
+    };
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + '/invalid-solution',
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      expectedBody,
       {
-        chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress,
-        workerAddress: exchangeJobSolutions.solutions[0].workerAddress,
+        headers: {
+          [HEADER_SIGNATURE_KEY]: await signMessage(
+            expectedBody,
+            MOCK_WEB3_PRIVATE_KEY,
+          ),
+        },
       },
     );
   });
@@ -677,14 +718,23 @@ describe('JobService', () => {
       solutionsUrl: MOCK_FILE_URL,
     };
 
+    const expectedBody = {
+      chainId: jobSolution.chainId,
+      escrowAddress: jobSolution.escrowAddress,
+      workerAddress: exchangeJobSolutions.solutions[1].workerAddress,
+    };
     const result = await jobService.processJobSolution(jobSolution);
     expect(result).toEqual('Solution are recorded.');
     expect(httpServicePostMock).toHaveBeenCalledWith(
-      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + '/invalid-solution',
+      MOCK_EXCHANGE_ORACLE_WEBHOOK_URL + EXCHANGE_INVALID_ENDPOINT,
+      expectedBody,
       {
-        chainId: jobSolution.chainId,
-        escrowAddress: jobSolution.escrowAddress,
-        workerAddress: exchangeJobSolutions.solutions[1].workerAddress,
+        headers: {
+          [HEADER_SIGNATURE_KEY]: await signMessage(
+            expectedBody,
+            MOCK_WEB3_PRIVATE_KEY,
+          ),
+        },
       },
     );
   });
