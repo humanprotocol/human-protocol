@@ -31,9 +31,6 @@ export class ReputationController {
     const { chainId } = query;
     const { address } = params;
 
-    return this.reputationService.getReputation(
-      chainId,
-      address,
-    );
+    return this.reputationService.getReputation(chainId, address);
   }
 }
