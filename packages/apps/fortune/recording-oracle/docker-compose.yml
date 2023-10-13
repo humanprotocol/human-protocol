@@ -1,21 +1,6 @@
 version: '3.7'
 
 services:
-  postgres:
-    image: postgres:latest
-    restart: always
-    environment:
-      - POSTGRES_USER=fortune
-      - POSTGRES_PASSWORD=fortune
-      - POSTGRES_DB=hmt-job-launcher
-    logging:
-      options:
-        max-size: 10m
-        max-file: "3"
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./db:/var/lib/postgresql/data
   minio:
     container_name: minio
     image: minio/minio:RELEASE.2022-05-26T05-48-41Z

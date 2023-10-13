@@ -1,4 +1,3 @@
-import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../enums/job';
 
 export interface IManifest {
@@ -10,7 +9,12 @@ export interface IManifest {
 }
 
 export interface ISolution {
-  exchangeAddress: string;
   workerAddress: string;
   solution: string;
+  invalid?: boolean;
+}
+
+export interface ISolutionsFile {
+  exchangeAddress: string;
+  solutions: ISolution[];
 }
