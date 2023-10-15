@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global yarn && yarn --ignore-scripts
+      - run: npm install --global yarn && yarn
         name: Install dependencies
       - run: yarn subgraph:test
         name: Run subgraph test
