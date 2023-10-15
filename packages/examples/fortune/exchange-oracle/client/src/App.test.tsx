@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-test-renderer';
 import { vi } from 'vitest';
 
-import { Providers, ethereumClient } from 'tests/utils';
+import { Providers, ethereumClient } from '../tests/utils';
 import App from './App';
 
 vi.mock('./connectors/connectors', () => ({
