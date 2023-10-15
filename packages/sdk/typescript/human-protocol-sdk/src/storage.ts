@@ -165,7 +165,7 @@ export class StorageClient {
         const keys: string[] = [];
         const stream = this.client.listObjectsV2(bucket, '', true, '');
 
-        stream.on('data', (obj) => keys.push(obj.name));
+        stream.on('data', (obj: { name: string }) => keys.push(obj.name));
         stream.on('error', reject);
         stream.on('end', () => {
           resolve(keys);
