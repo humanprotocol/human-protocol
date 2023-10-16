@@ -165,7 +165,7 @@ export const CvatJobRequestForm = () => {
                       setFieldValue('groundTruthUrl', e.target.value)
                     }
                     onBlur={handleBlur}
-                    placeholder="Ground Truth URL"
+                    placeholder="Reference data for annotation accuracy"
                     label="Ground Truth URL"
                     error={
                       touched.groundTruthUrl && Boolean(errors.groundTruthUrl)
@@ -174,8 +174,11 @@ export const CvatJobRequestForm = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="Ground Truth URL tooltip here">
-                            <HelpOutlineIcon color="secondary" />
+                          <Tooltip title="This field should contain a URL or link to the ground truth data. Ground truth data serves as the reference or gold standard for your annotations. It represents the correct or desired data, against which the annotations are compared for accuracy and quality assessment.">
+                            <HelpOutlineIcon
+                              color="secondary"
+                              sx={{ cursor: 'pointer' }}
+                            />
                           </Tooltip>
                         </InputAdornment>
                       ),
@@ -188,15 +191,18 @@ export const CvatJobRequestForm = () => {
                     value={values.userGuide}
                     onChange={(e) => setFieldValue('userGuide', e.target.value)}
                     onBlur={handleBlur}
-                    placeholder="User Guide"
+                    placeholder="Annotator's guideline for data labeling"
                     label="User Guide URL"
                     error={touched.userGuide && Boolean(errors.userGuide)}
                     helperText={errors.userGuide}
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="User Guide URL tooltip here">
-                            <HelpOutlineIcon color="secondary" />
+                          <Tooltip title="This field should contain a brief description of how data should be annotated. A user guide is a valuable resource that provides instructions, guidelines, and best practices for annotators, helping them understand how to accurately and consistently annotate the data.">
+                            <HelpOutlineIcon
+                              color="secondary"
+                              sx={{ cursor: 'pointer' }}
+                            />
                           </Tooltip>
                         </InputAdornment>
                       ),
