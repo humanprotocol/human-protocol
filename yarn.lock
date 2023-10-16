@@ -9299,7 +9299,7 @@ enquirer@^2.3.0, enquirer@^2.3.5, enquirer@^2.3.6:
     ansi-colors "^4.1.1"
     strip-ansi "^6.0.1"
 
-entities@^4.2.0, entities@^4.4.0:
+entities@^4.2.0, entities@^4.4.0, entities@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/entities/-/entities-4.5.0.tgz#5d268ea5e7113ec74c4d033b79ea5a35a488fb48"
   integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
@@ -11447,15 +11447,14 @@ handlebars@^4.0.1:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-happy-dom@^8.2.6, happy-dom@^8.9.0:
-  version "8.9.0"
-  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-8.9.0.tgz#b7c9986538b83c3ca3197ce22a1d27a1777c49d9"
-  integrity sha512-JZwJuGdR7ko8L61136YzmrLv7LgTh5b8XaEM3P709mLjyQuXJ3zHTDXvUtBBahRjGlcYW0zGjIiEWizoTUGKfA==
+happy-dom@^12.9.1:
+  version "12.9.1"
+  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-12.9.1.tgz#bf48c2b885198890b932f46c3c09f53cff5a528a"
+  integrity sha512-UvQ3IwKn1G3iiNCdTrhijdLGqf8Vj7d3OpmYcPwlKakjFy83oYbW6TmOKDLMTVLO9whmOC1HIpS09wf/14k7cA==
   dependencies:
     css.escape "^1.5.1"
-    he "^1.2.0"
+    entities "^4.5.0"
     iconv-lite "^0.6.3"
-    node-fetch "^2.x.x"
     webidl-conversions "^7.0.0"
     whatwg-encoding "^2.0.0"
     whatwg-mimetype "^3.0.0"
@@ -11669,7 +11668,7 @@ hash.js@1.1.7, hash.js@^1.0.0, hash.js@^1.0.3, hash.js@^1.1.7:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-he@1.2.0, he@^1.2.0:
+he@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
@@ -15351,7 +15350,7 @@ node-emoji@1.11.0, node-emoji@^1.10.0:
   dependencies:
     lodash "^4.17.21"
 
-node-fetch@^2.6.0, node-fetch@^2.6.1, node-fetch@^2.6.12, node-fetch@^2.6.7, node-fetch@^2.6.8, node-fetch@^2.x.x:
+node-fetch@^2.6.0, node-fetch@^2.6.1, node-fetch@^2.6.12, node-fetch@^2.6.7, node-fetch@^2.6.8:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
