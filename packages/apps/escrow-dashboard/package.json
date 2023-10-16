@@ -28,7 +28,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.4.3",
     "react-test-renderer": "^18.2.0",
-    "recharts": "^2.1.16",
+    "recharts": "^2.9.0",
     "serve": "^14.1.1",
     "swr": "^2.2.4",
     "wagmi": "^0.12.2",
