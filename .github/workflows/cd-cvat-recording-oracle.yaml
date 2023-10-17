@@ -1,13 +1,13 @@
-name: Trigger docker build and deploy
+name: Deploy CVAT Recording Oracle
 
 on:
   push:
-    branches: [ develop, master ]
-    paths: 
+    branches: [ develop, main ]
+    paths:
       - 'packages/examples/cvat/recording-oracle/**'
   pull_request:
-    branches: [ develop, master ]
-    paths: 
+    branches: [ develop, main ]
+    paths:
       - 'packages/examples/cvat/recording-oracle/**'
   workflow_dispatch:
 
@@ -25,12 +25,12 @@ jobs:
 
       - name: PR check
         run: |
-          if [[ $GITHUB_REPOSITORY_OWNER == 'humanprotocol' ]] && [[ $GITHUB_BASE_REF == 'master' ]] && [[ $GITHUB_HEAD_REF == 'develop' ]]; then
+          if [[ $GITHUB_REPOSITORY_OWNER == 'humanprotocol' ]] && [[ $GITHUB_BASE_REF == 'main' ]] && [[ $GITHUB_HEAD_REF == 'develop' ]]; then
             echo "LGTM. PR from $GITHUB_HEAD_REF to $GITHUB_BASE_REF."
-          elif [[ $GITHUB_BASE_REF != 'master' ]]; then
+          elif [[ $GITHUB_BASE_REF != 'main' ]]; then
             echo "LGTM. PR from $GITHUB_HEAD_REF to $GITHUB_BASE_REF."
           else
-            echo "Check out the target branch. A PR to 'master' can only be from the 'develop' branch within the 'humanprotocol' organization."
+            echo "Check out the target branch. A PR to 'main' can only be from the 'develop' branch within the 'humanprotocol' organization."
             exit 1
           fi
 

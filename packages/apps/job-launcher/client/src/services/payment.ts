@@ -1,8 +1,16 @@
+import { Signer } from 'ethers';
+import { PAYMENT_SIGNATURE_KEY } from '../constants/payment';
 import { CryptoPaymentRequest, FiatPaymentRequest } from '../types';
 import api from '../utils/api';
 
-export const createCryptoPayment = async (body: CryptoPaymentRequest) => {
-  await api.post('/payment/crypto', body);
+export const createCryptoPayment = async (
+  signer: Signer,
+  body: CryptoPaymentRequest
+) => {
+  const signature = await signer.signMessage(JSON.stringify(body));
+  await api.post('/payment/crypto', body, {
+    headers: { [PAYMENT_SIGNATURE_KEY]: signature },
+  });
 };
 
 export const createFiatPayment = async (body: FiatPaymentRequest) => {

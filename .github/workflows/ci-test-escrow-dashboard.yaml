@@ -21,8 +21,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn build
-        name: Build core package
-        working-directory: ./packages/core
       - run: yarn escrow-dashboard:test
         name: Run escrow-dashboard test

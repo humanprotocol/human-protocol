@@ -16,12 +16,15 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "postgres": "docker compose up -d postgres",
+    "docker": "docker compose up -d",
+    "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )"
   },
   "dependencies": {
     "@human-protocol/sdk": "*",
     "@nestjs/axios": "^2.0.0",
-    "@nestjs/common": "^9.4.3",
+    "@nestjs/common": "^10.2.7",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.4.3",
     "@nestjs/platform-express": "^10.2.6",

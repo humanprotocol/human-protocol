@@ -1,24 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { SignatureAuthGuard } from './signature.auth';
 import { verifySignature } from '../utils/signature';
+import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+import { MOCK_ADDRESS } from '../../../test/constants';
+import { Role } from '../enums/role';
 
 jest.mock('../../common/utils/signature');
 
+jest.mock('@human-protocol/sdk', () => ({
+  ...jest.requireActual('@human-protocol/sdk'),
+  EscrowUtils: {
+    getEscrow: jest.fn().mockResolvedValue({
+      launcher: '0x1234567890123456789012345678901234567890',
+      exchangeOracle: '0x1234567890123456789012345678901234567891',
+      reputationOracle: '0x1234567890123456789012345678901234567892',
+    }),
+  },
+}));
+
 describe('SignatureAuthGuard', () => {
   let guard: SignatureAuthGuard;
-  let mockConfigService: Partial<ConfigService>;
 
   beforeEach(async () => {
-    mockConfigService = {
-      get: jest.fn(),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        SignatureAuthGuard,
-        { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: SignatureAuthGuard,
+          useValue: new SignatureAuthGuard([
+            Role.Exchange,
+            Role.Recording,
+            Role.Reputation,
+          ]),
+        },
       ],
     }).compile();
 
@@ -49,10 +63,18 @@ describe('SignatureAuthGuard', () => {
 
     it('should return true if signature is verified', async () => {
       mockRequest.headers['header-signature-key'] = 'validSignature';
+      mockRequest.body = {
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+      };
       (verifySignature as jest.Mock).mockReturnValue(true);
 
       const result = await guard.canActivate(context as any);
       expect(result).toBeTruthy();
+      expect(EscrowUtils.getEscrow).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_ADDRESS,
+      );
     });
 
     it('should throw unauthorized exception if signature is not verified', async () => {
