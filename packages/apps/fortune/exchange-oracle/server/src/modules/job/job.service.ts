@@ -17,7 +17,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ISolution } from 'src/common/interfaces/job';
 import { ConfigNames } from '../../common/config';
-import { HEADER_SIGNATURE_KEY } from '../../common/constant';
+import {
+  ESCROW_FAILED_ENDPOINT,
+  HEADER_SIGNATURE_KEY,
+} from '../../common/constant';
 import { EventType } from '../../common/enums/webhook';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
@@ -79,14 +82,9 @@ export class JobService {
         event_type: EventType.TASK_CREATION_FAILED,
         reason: 'Unable to get manifest',
       };
-      const signedBody = await signMessage(
+      await this.sendWebhook(
+        jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
         body,
-        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-      );
-      await this.httpService.post(
-        jobLauncherWebhookUrl + '/fortune/escrow-failed-webhook',
-        body,
-        { headers: { [HEADER_SIGNATURE_KEY]: signedBody } },
       );
       throw new NotFoundException('Unable to get manifest');
     }
@@ -148,7 +146,7 @@ export class JobService {
       solution,
     );
 
-    await this.httpService.post(recordingOracleWebhookUrl, {
+    await this.sendWebhook(recordingOracleWebhookUrl, {
       escrowAddress: escrowAddress,
       chainId: chainId,
       solutionsUrl: solutionsUrl,
@@ -219,5 +217,15 @@ export class JobService {
       invalidJobSolution.chainId,
       existingJobSolutions,
     );
+  }
+
+  private async sendWebhook(url: string, body: any): Promise<void> {
+    const signedBody = await signMessage(
+      body,
+      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+    );
+    await this.httpService.post(url, body, {
+      headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+    });
   }
 }

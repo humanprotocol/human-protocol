@@ -190,7 +190,7 @@ describe('JobService', () => {
     });
 
     it('should fail if reputation oracle url is empty', async () => {
-      (configServiceMock as any).get.mockImplementation((key: string) => {
+      (configServiceMock as any).get.mockImplementationOnce((key: string) => {
         if (key === 'REPUTATION_ORACLE_URL') {
           return '';
         }
@@ -272,15 +272,23 @@ describe('JobService', () => {
         workerAddress,
         'solution',
       );
-
+      const expectedBody = {
+        escrowAddress,
+        chainId,
+        solutionsUrl,
+      };
       expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
       expect(httpServicePostMock).toHaveBeenCalledWith(
         recordingOracleURLMock,
-        expect.objectContaining({
-          escrowAddress,
-          chainId,
-          solutionsUrl,
-        }),
+        expect.objectContaining(expectedBody),
+        {
+          headers: {
+            [HEADER_SIGNATURE_KEY]: await signMessage(
+              expectedBody,
+              MOCK_PRIVATE_KEY,
+            ),
+          },
+        },
       );
     });
 
