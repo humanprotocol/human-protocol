@@ -881,7 +881,7 @@ class EscrowUtils:
             get_escrows_query,
         )
 
-        escrow_addresses = []
+        escrows = []
         for chain_id in filter.networks:
             network = NETWORKS[ChainId(chain_id)]
             escrows_data = get_data_from_subgraph(
@@ -900,11 +900,39 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
-            escrows = escrows_data["data"]["escrows"]
-            for escrow in escrows:
-                escrow["chain_id"] = chain_id
-            escrow_addresses.extend(escrows)
-        return escrow_addresses
+            escrows_raw = escrows_data["data"]["escrows"]
+
+            escrows.extend(
+                [
+                    EscrowData(
+                        id=escrow["id"],
+                        address=escrow["address"],
+                        amountPaid=escrow["amountPaid"],
+                        balance=escrow["balance"],
+                        count=escrow["count"],
+                        factoryAddress=escrow["factoryAddress"],
+                        launcher=escrow["launcher"],
+                        status=escrow["status"],
+                        token=escrow["token"],
+                        totalFundedAmount=escrow["totalFundedAmount"],
+                        createdAt=escrow["createdAt"],
+                        chainId=chain_id,
+                        finalResultsUrl=escrow["finalResultsUrl"],
+                        intermediateResultsUrl=escrow["intermediateResultsUrl"],
+                        manifestHash=escrow["manifestHash"],
+                        manifestUrl=escrow["manifestUrl"],
+                        recordingOracle=escrow["recordingOracle"],
+                        recordingOracleFee=escrow["recordingOracleFee"],
+                        reputationOracle=escrow["reputationOracle"],
+                        reputationOracleFee=escrow["reputationOracleFee"],
+                        exchangeOracle=escrow["exchangeOracle"],
+                        exchangeOracleFee=escrow["exchangeOracleFee"],
+                    )
+                    for escrow in escrows_raw
+                ]
+            )
+
+        return escrows
 
     @staticmethod
     def get_escrow(
@@ -940,4 +968,29 @@ class EscrowUtils:
             },
         )
 
-        return escrow["data"]["escrow"]
+        escrow_raw = escrow["data"]["escrow"]
+
+        return EscrowData(
+            id=escrow_raw["id"],
+            address=escrow_raw["address"],
+            amountPaid=escrow_raw["amountPaid"],
+            balance=escrow_raw["balance"],
+            count=escrow_raw["count"],
+            factoryAddress=escrow_raw["factoryAddress"],
+            launcher=escrow_raw["launcher"],
+            status=escrow_raw["status"],
+            token=escrow_raw["token"],
+            totalFundedAmount=escrow_raw["totalFundedAmount"],
+            createdAt=escrow_raw["createdAt"],
+            chainId=chain_id,
+            finalResultsUrl=escrow_raw["finalResultsUrl"],
+            intermediateResultsUrl=escrow_raw["intermediateResultsUrl"],
+            manifestHash=escrow_raw["manifestHash"],
+            manifestUrl=escrow_raw["manifestUrl"],
+            recordingOracle=escrow_raw["recordingOracle"],
+            recordingOracleFee=escrow_raw["recordingOracleFee"],
+            reputationOracle=escrow_raw["reputationOracle"],
+            reputationOracleFee=escrow_raw["reputationOracleFee"],
+            exchangeOracle=escrow_raw["exchangeOracle"],
+            exchangeOracleFee=escrow_raw["exchangeOracleFee"],
+        )
