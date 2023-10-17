@@ -9,7 +9,12 @@ import {
 import { ethers } from 'ethers';
 import * as Minio from 'minio';
 
-import { ServerConfigType, serverConfigKey } from '../../common/config';
+import {
+  ServerConfigType,
+  Web3ConfigType,
+  serverConfigKey,
+  web3ConfigKey,
+} from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
 import { JobRequestType } from '../../common/enums/job';
 import {
@@ -32,6 +37,8 @@ export class JobService {
   constructor(
     @Inject(serverConfigKey)
     private serverConfig: ServerConfigType,
+    @Inject(web3ConfigKey)
+    private web3Config: Web3ConfigType,
     @Inject(Web3Service)
     private readonly web3Service: Web3Service,
     @Inject(StorageService)
@@ -189,6 +196,7 @@ export class JobService {
           chainId: jobSolution.chainId,
           escrowAddress: jobSolution.escrowAddress,
         },
+        this.web3Config.web3PrivateKey,
       );
 
       return 'The requested job is completed.';
@@ -208,6 +216,7 @@ export class JobService {
             escrowAddress: jobSolution.escrowAddress,
             workerAddress: solution.workerAddress,
           },
+          this.web3Config.web3PrivateKey,
         );
       }
     }

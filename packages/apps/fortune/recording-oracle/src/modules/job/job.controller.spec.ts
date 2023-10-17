@@ -14,11 +14,16 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_SIGNATURE,
+  MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
 import { Web3Service } from '../web3/web3.service';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
 import { StorageService } from '../storage/storage.service';
+import { verifySignature } from '../../common/utils/signature';
+
+jest.mock('../../common/utils/signature');
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -50,6 +55,11 @@ describe('JobController', () => {
             port: MOCK_S3_PORT,
             useSSL: MOCK_S3_USE_SSL,
             bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
           })),
         ),
         ConfigModule.forFeature(
@@ -86,8 +96,10 @@ describe('JobController', () => {
         .spyOn(jobService, 'processJobSolution')
         .mockImplementation(async () => 'OK');
 
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
       expect(
-        await jobController.solve({
+        await jobController.solve(MOCK_SIGNATURE, {
           escrowAddress: MOCK_ADDRESS,
           chainId: ChainId.LOCALHOST,
           solutionsUrl: MOCK_FILE_URL,
