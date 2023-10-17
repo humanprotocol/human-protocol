@@ -25,11 +25,11 @@ export class SignatureAuthGuard implements CanActivate {
         data.escrowAddress,
       );
       if (this.role.includes(Role.JobLaucher))
-        oracleAdresses.push(escrowData.launcher);
+        oracleAdresses.push(escrowData.launcher!);
       if (this.role.includes(Role.Exchange))
         oracleAdresses.push(escrowData.exchangeOracle!);
-      if (this.role.includes(Role.Recording))
-        oracleAdresses.push(escrowData.recordingOracle!);
+      if (this.role.includes(Role.Reputation))
+        oracleAdresses.push(escrowData.reputationOracle!);
 
       const isVerified = verifySignature(data, signature, oracleAdresses);
 

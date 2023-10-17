@@ -1,5 +1,6 @@
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
+export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 
 export const MOCK_S3_ENDPOINT = 'localhost';
 export const MOCK_S3_PORT = 9000;

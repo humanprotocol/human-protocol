@@ -12,9 +12,8 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowUtils: {
     getEscrow: jest.fn().mockResolvedValue({
-      launcher: '0x1234567890123456789012345678901234567890',
-      exchangeOracle: '0x1234567890123456789012345678901234567891',
-      reputationOracle: '0x1234567890123456789012345678901234567892',
+      launcher: '0x1234567890123456789012345678901234567891',
+      recordingOracle: '0x1234567890123456789012345678901234567892',
     }),
   },
 }));
@@ -27,11 +26,7 @@ describe('SignatureAuthGuard', () => {
       providers: [
         {
           provide: SignatureAuthGuard,
-          useValue: new SignatureAuthGuard([
-            Role.Exchange,
-            Role.Recording,
-            Role.Reputation,
-          ]),
+          useValue: new SignatureAuthGuard([Role.JobLaucher, Role.Recording]),
         },
       ],
     }).compile();

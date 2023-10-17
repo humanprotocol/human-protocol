@@ -28,6 +28,7 @@ import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
 import { Public } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
+import { Role } from '../../common/enums/role';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -109,9 +110,9 @@ export class JobController {
   }
 
   @Public()
-  @UseGuards(SignatureAuthGuard)
+  @UseGuards(new SignatureAuthGuard([Role.Exchange]))
   @Post('/escrow-failed-webhook')
-  public async (
+  public async(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: EscrowFailedWebhookDto,
   ): Promise<any> {
