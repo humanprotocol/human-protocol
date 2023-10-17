@@ -26,7 +26,11 @@ describe('SignatureAuthGuard', () => {
       providers: [
         {
           provide: SignatureAuthGuard,
-          useValue: new SignatureAuthGuard([Role.Exchange, Role.Reputation]),
+          useValue: new SignatureAuthGuard([
+            Role.JobLaucher,
+            Role.Exchange,
+            Role.Reputation,
+          ]),
         },
       ],
     }).compile();
