@@ -20,7 +20,10 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { EventType } from '../../common/enums/webhook';
-import { HEADER_SIGNATURE_KEY } from '../../common/constant';
+import {
+  ESCROW_FAILED_ENDPOINT,
+  HEADER_SIGNATURE_KEY,
+} from '../../common/constant';
 import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { StorageService } from '../storage/storage.service';
@@ -176,7 +179,7 @@ describe('JobService', () => {
         reason: 'Unable to get manifest',
       };
       expect(httpServicePostMock).toHaveBeenCalledWith(
-        jobLauncherWebhookUrl + '/fortune/escrow-failed-webhook',
+        jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
         expectedBody,
         {
           headers: {

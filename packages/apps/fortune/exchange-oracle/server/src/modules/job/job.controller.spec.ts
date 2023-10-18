@@ -15,8 +15,12 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_SIGNATURE,
 } from '../../../test/constants';
 import { StorageService } from '../storage/storage.service';
+import { verifySignature } from '../../common/utils/signature';
+
+jest.mock('../../common/utils/signature');
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -157,7 +161,9 @@ describe('JobController', () => {
 
       jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
 
-      await jobController.invalidJobSolution(solveJobDto);
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      await jobController.invalidJobSolution(MOCK_SIGNATURE, solveJobDto);
 
       expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
         solveJobDto,
