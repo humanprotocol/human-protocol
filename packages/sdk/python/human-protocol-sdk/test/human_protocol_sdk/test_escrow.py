@@ -14,6 +14,7 @@ from human_protocol_sdk.escrow import (
     EscrowClientError,
     EscrowConfig,
     EscrowUtils,
+    EscrowData,
 )
 from human_protocol_sdk.filter import EscrowFilter, FilterError
 from web3 import Web3
@@ -2004,7 +2005,7 @@ class EscrowTestCase(unittest.TestCase):
                 },
             )
             self.assertEqual(len(filtered), 1)
-            self.assertEqual(filtered[0], mock_escrow_1)
+            self.assertEqual(filtered[0].address, mock_escrow_1["address"])
 
             filter = EscrowFilter(
                 networks=[ChainId.POLYGON.value, ChainId.POLYGON_MUMBAI.value]
@@ -2027,8 +2028,8 @@ class EscrowTestCase(unittest.TestCase):
                 },
             )
             self.assertEqual(len(filtered), 2)
-            self.assertEqual(filtered[0]["chain_id"], ChainId.POLYGON.value)
-            self.assertEqual(filtered[1]["chain_id"], ChainId.POLYGON_MUMBAI.value)
+            self.assertEqual(filtered[0].chainId, ChainId.POLYGON.value)
+            self.assertEqual(filtered[1].chainId, ChainId.POLYGON_MUMBAI.value)
 
     def test_get_recording_oracle_address(self):
         mock_contract = MagicMock()
@@ -2328,7 +2329,9 @@ class EscrowTestCase(unittest.TestCase):
                     "escrowAddress": "0x1234567890123456789012345678901234567890",
                 },
             )
-            self.assertEqual(escrow, mock_escrow)
+            self.assertEqual(escrow.chainId, ChainId.POLYGON_MUMBAI.value)
+            self.assertEqual(escrow.address, mock_escrow["address"])
+            self.assertEqual(escrow.amountPaid, mock_escrow["amountPaid"])
 
     def test_get_escrow_empty_data(self):
         with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
