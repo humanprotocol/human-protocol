@@ -66,7 +66,7 @@ export const envValidator = Joi.object({
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string().default('reputation-oracle@hmt.ai'),
-  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Exchange Oracle'),
+  SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Reputation Oracle'),
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),
   REPUTATION_LEVEL_HIGH: Joi.number().default(700),

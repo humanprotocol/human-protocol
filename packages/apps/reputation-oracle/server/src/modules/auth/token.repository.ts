@@ -16,16 +16,11 @@ export class TokenRepository {
 
   public async findOne(
     where: FindOptionsWhere<TokenEntity>,
-  ): Promise<TokenEntity | undefined> {
+  ): Promise<TokenEntity | null> {
     const tokenEntity = await this.tokenEntityRepository.findOne({
       where,
       relations: ['user'],
     });
-
-    if (!tokenEntity) {
-      this.logger.log(ErrorToken.NotFound, TokenRepository.name);
-      throw new NotFoundException(ErrorToken.NotFound);
-    }
 
     return tokenEntity;
   }

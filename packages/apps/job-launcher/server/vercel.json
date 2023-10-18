@@ -20,11 +20,11 @@
   "crons": [
     {
       "path": "/job/cron/launch",
-      "schedule": "* * * * *"
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/job/cron/cancel",
-      "schedule": "* * * * *"
+      "schedule": "*/10 * * * *"
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
