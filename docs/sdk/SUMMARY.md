@@ -4,7 +4,7 @@
 
 * [Encryption](README.md)
   * [Encryption](typescript/classes/encryption.Encryption.md)
-  * [EnpcryptionUtils](typescript/classes/encryption.enpcryptionutils.md)
+  * [EncryptionUtils](typescript/classes/encryption.encryptionutils.md)
 * [Escrow](typescript/modules/escrow.md)
   * [EscrowClient](typescript/classes/escrow.EscrowClient.md)
   * [EscrowUtils](typescript/classes/escrow.EscrowUtils.md)
