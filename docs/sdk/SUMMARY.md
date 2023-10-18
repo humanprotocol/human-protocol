@@ -4,7 +4,7 @@
 
 * [Encryption](README.md)
   * [Encryption](packages/sdk/typescript/human-protocol-sdk/classes/encryption.Encryption.md)
-  * [EnpcryptionUtils](typescript-sdk/encryption/enpcryptionutils.md)
+  * [EnpcryptionUtils](packages/sdk/typescript/human-protocol-sdk/encryption.enpcryptionutils.md)
 * [Escrow](packages/sdk/typescript/human-protocol-sdk/modules/escrow.md)
   * [EscrowClient](packages/sdk/typescript/human-protocol-sdk/classes/escrow.EscrowClient.md)
   * [EscrowUtils](packages/sdk/typescript/human-protocol-sdk/classes/escrow.EscrowUtils.md)
