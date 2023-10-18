@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { BigNumber } from 'ethers';
 import gqlFetch from 'graphql-request';
 
 import {
@@ -18,7 +19,6 @@ import {
 import { IStatisticsParams } from './interfaces';
 import { NetworkData } from './types';
 import { throwError } from './utils';
-import { BigNumber } from 'ethers';
 
 /**
  * ## Introduction
@@ -157,11 +157,6 @@ export class StatisticsClient {
         dailyWorkersData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
           activeWorkers: +eventDayData.dailyWorkerCount,
-          averageJobsSolved:
-            eventDayData.dailyWorkerCount === '0'
-              ? 0
-              : +eventDayData.dailyBulkPayoutEventCount /
-                +eventDayData.dailyWorkerCount,
         })),
       };
     } catch (e: any) {
@@ -227,12 +222,6 @@ export class StatisticsClient {
           timestamp: new Date(+eventDayData.timestamp * 1000),
           totalAmountPaid: BigNumber.from(eventDayData.dailyPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
-          averageAmountPerJob:
-            eventDayData.dailyBulkPayoutEventCount === '0'
-              ? BigNumber.from(0)
-              : BigNumber.from(eventDayData.dailyPayoutAmount).div(
-                  eventDayData.dailyBulkPayoutEventCount
-                ),
           averageAmountPerWorker:
             eventDayData.dailyWorkerCount === '0'
               ? BigNumber.from(0)
@@ -317,6 +306,7 @@ export class StatisticsClient {
         totalTransferAmount: BigNumber.from(
           hmtokenStatistics.totalValueTransfered
         ),
+        totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
         totalHolders: +hmtokenStatistics.holders,
         holders: holders.map((holder) => ({
           address: holder.address,

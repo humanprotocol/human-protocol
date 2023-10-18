@@ -15,12 +15,9 @@ import {
   IsEthereumAddress,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import {
-  JobRequestType,
-  JobStatus,
-  JobStatusFilter,
-} from '../../common/enums/job';
+import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
+import { BigNumber } from 'ethers';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -58,6 +55,7 @@ export class JobFortuneDto extends JobDto {
 
   @ApiProperty()
   @IsNumber()
+  @IsPositive()
   public submissionsRequired: number;
 }
 
@@ -324,7 +322,7 @@ export class JobListDto {
   escrowAddress?: string;
   network: string;
   fundAmount: number;
-  status: JobStatusFilter;
+  status: JobStatus;
 }
 
 export class EscrowFailedWebhookDto {
@@ -345,4 +343,9 @@ export class EscrowFailedWebhookDto {
   @ApiProperty()
   @IsString()
   public reason: string;
+}
+
+export class EscrowCancelDto {
+  txHash: string;
+  amountRefunded: BigNumber
 }

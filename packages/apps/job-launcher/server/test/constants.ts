@@ -30,6 +30,8 @@ export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
 export const MOCK_TRANSACTION_HASH =
   '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc';
+export const MOCK_SIGNATURE =
+  '0x1502ec7e795ed9c96b215e80d46d87e26141bc8d41f69ee1bfbc8d8ed9a700db62136da8ee35eadbfd678817342444dff0239508be51c1fae55d62fcdba2867e1b';
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
 export const MOCK_HASHED_PASSWORD = 'hashedPassword';

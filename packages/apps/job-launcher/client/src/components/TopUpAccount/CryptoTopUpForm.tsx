@@ -60,7 +60,7 @@ export const CryptoTopUpForm = () => {
       const transactionHash = tx.hash;
 
       // create crypto payment record
-      await paymentService.createCryptoPayment({
+      await paymentService.createCryptoPayment(signer, {
         chainId: chain?.id,
         transactionHash,
       });
@@ -68,7 +68,7 @@ export const CryptoTopUpForm = () => {
       dispatch(fetchUserBalanceAsync());
 
       setIsSuccess(true);
-    } catch (err: any) {
+    } catch (err) {
       setErrorMessage(err?.response?.data?.message ?? err?.message);
       setIsSuccess(false);
     }

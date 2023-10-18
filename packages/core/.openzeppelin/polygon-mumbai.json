@@ -16,7 +16,7 @@
   ],
   "impls": {
     "afccf77e805d3dd3da745c059df631f8a0c582a296b159838e04b1c450f4a9b3": {
-      "address": "0xBFEC10935bda60509da18AD0eE571e46E50DE4ea",
+      "address": "0x58571c2505253e0bb758428c68a5e3D7AC162a4d",
       "layout": {
         "solcVersion": "0.8.9",
         "storage": [

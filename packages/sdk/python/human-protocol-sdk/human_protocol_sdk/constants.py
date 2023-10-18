@@ -120,26 +120,26 @@ NETWORKS = {
     ChainId.AVALANCHE: {
         "title": "Avalanche C-Chain Mainnet",
         "scan_url": "https://snowtrace.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche-v2",
         "hmt_address": "0x12365293cb6477d4fc2686e46BB97E3Fb64f1550",
-        "factory_address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
-        "staking_address": "",
-        "reward_pool_address": "",
-        "kvstore_address": "0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df",
-        "old_subgraph_url": "",
-        "old_factory_address": "",
+        "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+        "staking_address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+        "reward_pool_address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
+        "kvstore_address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
+        "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche",
+        "old_factory_address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
     },
     ChainId.AVALANCHE_TESTNET: {
         "title": "Fuji C-Chain",
         "scan_url": "https://testnet.snowtrace.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji-v2",
         "hmt_address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
-        "factory_address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
-        "staking_address": "",
-        "reward_pool_address": "",
-        "kvstore_address": "0xd232c1426CF0653cE8a71DC98bCfDf10c471c114",
-        "old_subgraph_url": "",
-        "old_factory_address": "",
+        "factory_address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
+        "staking_address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
+        "reward_pool_address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+        "kvstore_address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
+        "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji",
+        "old_factory_address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
     },
     ChainId.SKALE: {
         "title": "SKALE Human Protocol Chain",
@@ -190,3 +190,5 @@ class Role(Enum):
 
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
+
+GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))

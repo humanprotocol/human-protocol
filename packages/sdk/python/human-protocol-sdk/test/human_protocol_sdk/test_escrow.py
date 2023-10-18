@@ -6,15 +6,16 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.gql.escrow import (
+    get_escrow_query,
     get_escrows_query,
 )
 from human_protocol_sdk.escrow import (
     EscrowClient,
     EscrowClientError,
     EscrowConfig,
-    EscrowFilter,
     EscrowUtils,
 )
+from human_protocol_sdk.filter import EscrowFilter, FilterError
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
@@ -368,6 +369,7 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_escrow_invalid_token(self):
@@ -442,6 +444,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Setup",
                 mock_contract.functions.setup.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_setup_invalid_address(self):
@@ -595,12 +598,14 @@ class EscrowTestCase(unittest.TestCase):
                     "Create Escrow",
                     mock_function_create.return_value,
                     EscrowClientError,
+                    None,
                 )
                 mock_function.assert_called_with(
                     self.w3,
                     "Setup",
                     mock_contract.functions.setup.return_value,
                     EscrowClientError,
+                    None,
                 )
 
     def test_create_and_setup_escrow_invalid_token(self):
@@ -742,6 +747,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Store Results",
                 mock_contract.functions.storeResults.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_store_results_invalid_address(self):
@@ -867,6 +873,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Bulk Payout",
                 mock_contract.functions.bulkPayOut.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_bulk_payout_invalid_address(self):
@@ -1219,6 +1226,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Complete",
                 mock_contract.functions.complete.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_complete_invalid_address(self):
@@ -1299,6 +1307,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Cancel",
                 mock_contract.functions.cancel.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_cancel_invalid_address(self):
@@ -1378,6 +1387,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Abort",
                 mock_contract.functions.abort.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_abort_invalid_address(self):
@@ -1461,6 +1471,7 @@ class EscrowTestCase(unittest.TestCase):
                 "Add Trusted Handlers",
                 mock_contract.functions.addTrustedHandlers.return_value,
                 EscrowClientError,
+                None,
             )
 
     def test_add_trusted_handlers_invalid_address(self):
@@ -1869,24 +1880,24 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(escrow_filter.date_to, date_to)
 
     def test_escrow_filter_empty_chain_id(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(networks=[])
         self.assertEqual("Invalid ChainId", str(cm.exception))
 
     def test_escrow_filter_invalid_chain_id(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(networks=[123])
         self.assertEqual("Invalid ChainId", str(cm.exception))
 
     def test_escrow_filter_invalid_address_launcher(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value], launcher="invalid_address"
             )
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_reputation_oracle(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 reputation_oracle="invalid_address",
@@ -1894,7 +1905,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_address_recording_oracle(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 recording_oracle="invalid_address",
@@ -1902,7 +1913,7 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual("Invalid address: invalid_address", str(cm.exception))
 
     def test_escrow_filter_invalid_dates(self):
-        with self.assertRaises(EscrowClientError) as cm:
+        with self.assertRaises(FilterError) as cm:
             EscrowFilter(
                 networks=[ChainId.POLYGON_MUMBAI.value],
                 date_from=datetime.fromtimestamp(1683812007),
@@ -1914,7 +1925,6 @@ class EscrowTestCase(unittest.TestCase):
         )
 
     def test_get_escrows(self):
-        mock_function = MagicMock()
         with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
             mock_escrow_1 = {
                 "id": "0x1234567890123456789012345678901234567891",
@@ -2274,6 +2284,82 @@ class EscrowTestCase(unittest.TestCase):
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )
+
+    def test_get_escrow(self):
+        with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
+            mock_escrow = {
+                "id": "0x1234567890123456789012345678901234567891",
+                "address": "0x1234567890123456789012345678901234567891",
+                "amountPaid": "1000000000000000000",
+                "balance": "1000000000000000000",
+                "count": "1",
+                "factoryAddress": "0x1234567890123456789012345678901234567890",
+                "finalResultsUrl": "https://example.com",
+                "intermediateResultsUrl": "https://example.com",
+                "launcher": "0x1234567890123456789012345678901234567891",
+                "manifestHash": "0x1234567890123456789012345678901234567891",
+                "manifestUrl": "https://example.com",
+                "recordingOracle": "0x1234567890123456789012345678901234567891",
+                "recordingOracleFee": "1000000000000000000",
+                "reputationOracle": "0x1234567890123456789012345678901234567891",
+                "reputationOracleFee": "1000000000000000000",
+                "exchangeOracle": "0x1234567890123456789012345678901234567891",
+                "exchangeOracleFee": "1000000000000000000",
+                "status": "Pending",
+                "token": "0x1234567890123456789012345678901234567891",
+                "totalFundedAmount": "1000000000000000000",
+            }
+
+            mock_function.return_value = {
+                "data": {
+                    "escrow": mock_escrow,
+                }
+            }
+
+            escrow = EscrowUtils.get_escrow(
+                ChainId.POLYGON_MUMBAI.value,
+                "0x1234567890123456789012345678901234567890",
+            )
+
+            mock_function.assert_called_once_with(
+                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                query=get_escrow_query(),
+                params={
+                    "escrowAddress": "0x1234567890123456789012345678901234567890",
+                },
+            )
+            self.assertEqual(escrow, mock_escrow)
+
+    def test_get_escrow_empty_data(self):
+        with patch("human_protocol_sdk.escrow.get_data_from_subgraph") as mock_function:
+            mock_function.return_value = {
+                "data": {
+                    "escrow": None,
+                }
+            }
+
+            escrow = EscrowUtils.get_escrow(
+                ChainId.POLYGON_MUMBAI.value,
+                "0x1234567890123456789012345678901234567890",
+            )
+            mock_function.assert_called_once_with(
+                NETWORKS[ChainId.POLYGON_MUMBAI]["subgraph_url"],
+                query=get_escrow_query(),
+                params={
+                    "escrowAddress": "0x1234567890123456789012345678901234567890",
+                },
+            )
+            self.assertEqual(escrow, None)
+
+    def test_get_escrow_invalid_chain_id(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            EscrowUtils.get_escrow(123, "0x1234567890123456789012345678901234567890")
+        self.assertEqual("Invalid ChainId", str(cm.exception))
+
+    def test_get_escrow_invalid_address_launcher(self):
+        with self.assertRaises(EscrowClientError) as cm:
+            EscrowUtils.get_escrow(ChainId.LOCALHOST.value, "invalid_address")
+        self.assertEqual("Invalid escrow address: invalid_address", str(cm.exception))
 
 
 if __name__ == "__main__":

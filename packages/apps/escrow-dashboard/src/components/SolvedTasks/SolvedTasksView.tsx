@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 import { FC } from 'react';
@@ -14,6 +14,8 @@ import {
 
 import SOLVED_TASKS from '../../history-data/solved_tasks.json';
 import { CardContainer } from '../Cards';
+import { TooltipIcon } from '../TooltipIcon';
+import { TOOLTIPS } from 'src/constants/tooltips';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -38,11 +40,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const SolvedTasksView: FC = () => {
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <CardContainer>
-      <Grid container sx={{ height: '100%' }} spacing={3}>
-        <Grid item xs={12} lg={4}>
+    <CardContainer
+      sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
+    >
+      <Grid container sx={{ height: '100%' }} spacing={{ xs: 4, md: 2 }}>
+        <Grid item xs={12} md={5} xl={4}>
           <Box mb={2}>
             <Typography
               variant="body2"
@@ -59,14 +65,16 @@ export const SolvedTasksView: FC = () => {
               color="primary"
               fontWeight={800}
               lineHeight={1.125}
+              sx={{ whiteSpace: 'nowrap' }}
+              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
             >
               {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
             </Typography>
           </Box>
         </Grid>
-        <Grid item xs={12} lg={8}>
-          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-            <AreaChart data={SOLVED_TASKS} margin={{ right: 30, bottom: 10 }}>
+        <Grid item xs={12} md={7} xl={8}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+            <AreaChart data={SOLVED_TASKS} margin={{ bottom: 10 }}>
               <defs>
                 <linearGradient
                   id="paint0_linear_4037_63345"
@@ -78,10 +86,10 @@ export const SolvedTasksView: FC = () => {
                 >
                   <stop
                     offset="0.290598"
-                    stop-color="#CACFE8"
-                    stop-opacity="0.3"
+                    stopColor="#CACFE8"
+                    stopOpacity="0.3"
                   />
-                  <stop offset="1" stop-color="#E9ECFF" stop-opacity="0" />
+                  <stop offset="1" stopColor="#E9ECFF" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} strokeDasharray={3} />
@@ -91,7 +99,7 @@ export const SolvedTasksView: FC = () => {
                 tickLine={false}
                 tick={{
                   fill: '#320A8D',
-                  fontSize: '14px',
+                  fontSize: '10px',
                   fontFamily: 'Inter',
                   fontWeight: 500,
                 }}
@@ -102,9 +110,10 @@ export const SolvedTasksView: FC = () => {
               <YAxis
                 axisLine={false}
                 tickLine={false}
+                width={40}
                 tick={{
                   fill: '#320A8D',
-                  fontSize: '14px',
+                  fontSize: '10px',
                   fontFamily: 'Inter',
                   fontWeight: 500,
                 }}
@@ -126,6 +135,10 @@ export const SolvedTasksView: FC = () => {
           </ResponsiveContainer>
         </Grid>
       </Grid>
+      <TooltipIcon
+        position={isMobile ? 'topRight' : 'bottomLeft'}
+        title={TOOLTIPS.SOLVED_TASKS}
+      />
     </CardContainer>
   );
 };

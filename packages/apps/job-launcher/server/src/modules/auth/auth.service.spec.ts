@@ -29,6 +29,7 @@ import { PaymentService } from '../payment/payment.service';
 import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 
 jest.mock('@human-protocol/sdk');
 
@@ -387,17 +388,50 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
+    it('should remove existing token if it exists', async () => {
+      const userEntity = {
+        id: 1,
+        status: UserStatus.ACTIVE,
+      } as UserEntity;
+
+      userService.getByEmail = jest.fn().mockResolvedValue(userEntity);
+
+      const existingToken = {
+        id: 2,
+        userId: userEntity.id,
+        tokenType: TokenType.PASSWORD,
+        remove: jest.fn(),
+      };
+      tokenRepository.findOne = jest.fn().mockResolvedValue(existingToken);
+
+      await authService.forgotPassword({ email: 'user@example.com' });
+
+      expect(existingToken.remove).toHaveBeenCalled();
+    });
+
     it('should create a new token and send email', async () => {
       userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
 
       sendGridService.sendEmail = jest.fn();
+      const email = 'user@example.com';
 
-      await authService.forgotPassword({ email: 'user@example.com' });
+      await authService.forgotPassword({ email });
 
       expect(createTokenMock).toHaveBeenCalled();
       expect(sendGridService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining(tokenEntity.uuid),
+          personalizations: [
+            {
+              dynamicTemplateData: {
+                service_name: SERVICE_NAME,
+                url: expect.stringContaining(
+                  'undefined/reset-password?token=mocked-uuid',
+                ),
+              },
+              to: email,
+            },
+          ],
+          templateId: SENDGRID_TEMPLATES.resetPassword,
         }),
       );
     });
@@ -509,12 +543,6 @@ describe('AuthService', () => {
       status: UserStatus.PENDING,
     };
 
-    const tokenEntity = {
-      uuid: v4(),
-      tokenType: TokenType.EMAIL,
-      user: userEntity,
-    };
-
     let createTokenMock: any;
 
     beforeEach(() => {
@@ -537,13 +565,23 @@ describe('AuthService', () => {
       userService.getByEmail = jest.fn().mockResolvedValueOnce(userEntity);
 
       sendGridService.sendEmail = jest.fn();
+      const email = 'user@example.com';
 
-      await authService.resendEmailVerification({ email: 'user@example.com' });
+      await authService.resendEmailVerification({ email });
 
       expect(createTokenMock).toHaveBeenCalled();
       expect(sendGridService.sendEmail).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining(tokenEntity.uuid),
+          personalizations: [
+            {
+              dynamicTemplateData: {
+                service_name: SERVICE_NAME,
+                url: expect.stringContaining('/verify?token=mocked-uuid'),
+              },
+              to: email,
+            },
+          ],
+          templateId: SENDGRID_TEMPLATES.signup,
         }),
       );
     });

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -7,29 +6,32 @@ import {
 } from '@nestjs/common';
 import { verifySignature } from '../utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../constants';
-import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../config';
+import { EscrowUtils } from '@human-protocol/sdk';
+import { Role } from '../enums/role';
 
 @Injectable()
 export class SignatureAuthGuard implements CanActivate {
-  constructor(public readonly configService: ConfigService) {}
+  constructor(private role: Role[]) {}
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
     const data = request.body;
-    const signature = request.headers[HEADER_SIGNATURE_KEY]; 
-    const oracleAdresses = [
-      this.configService.get<string>(
-        ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS,
-      )!,
-      this.configService.get<string>(
-        ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS,
-      )!
-    ]
-    
+    const signature = request.headers[HEADER_SIGNATURE_KEY];
+    const oracleAdresses: string[] = [];
     try {
-      const isVerified = verifySignature(data, signature, oracleAdresses)
+      const escrowData = await EscrowUtils.getEscrow(
+        data.chainId,
+        data.escrowAddress,
+      );
+      if (this.role.includes(Role.Exchange))
+        oracleAdresses.push(escrowData.exchangeOracle!);
+      if (this.role.includes(Role.Recording))
+        oracleAdresses.push(escrowData.recordingOracle!);
+      if (this.role.includes(Role.Reputation))
+        oracleAdresses.push(escrowData.reputationOracle!);
+
+      const isVerified = verifySignature(data, signature, oracleAdresses);
 
       if (isVerified) {
         return true;

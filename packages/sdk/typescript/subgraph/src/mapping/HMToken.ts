@@ -7,6 +7,7 @@ import {
   Transfer,
 } from '../../generated/HMToken/HMToken';
 import {
+  DailyWorker,
   Escrow,
   FundEvent,
   HMTApprovalEvent,
@@ -17,7 +18,7 @@ import {
   Holder,
   Payout,
 } from '../../generated/schema';
-import { toEventId } from './utils/event';
+import { toEventDayId, toEventId } from './utils/event';
 import { ONE_BI, ZERO_BI } from './utils/number';
 import { createOrLoadEscrowStatistics, createOrLoadWorker } from './Escrow';
 import { getEventDayData } from './utils/dayUpdates';
@@ -170,11 +171,25 @@ export function handleTransfer(event: Transfer): void {
     payment.createdAt = event.block.timestamp;
     payment.save();
 
-    // Update worker, and payout day data
+    // Update worker and payout day data
     eventDayData.dailyPayoutCount = eventDayData.dailyPayoutCount.plus(ONE_BI);
     eventDayData.dailyPayoutAmount = eventDayData.dailyPayoutAmount.plus(
       event.params._value
     );
+
+    const eventDayId = toEventDayId(event);
+    const dailyWorkerId = `${eventDayId}-${event.params._to.toHex()}`;
+    let dailyWorker = DailyWorker.load(dailyWorkerId);
+    if (!dailyWorker) {
+      dailyWorker = new DailyWorker(dailyWorkerId);
+      dailyWorker.timestamp = BigInt.fromString(eventDayId);
+      dailyWorker.address = event.params._to;
+      dailyWorker.escrowAddress = event.params._from;
+      dailyWorker.save();
+
+      eventDayData.dailyWorkerCount =
+        eventDayData.dailyWorkerCount.plus(ONE_BI);
+    }
   }
 
   eventDayData.save();

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { ConfigNames } from '../../common/config';
@@ -40,19 +35,22 @@ export class SendGridService {
   }
 
   async sendEmail({
-    text = '',
     from = {
       email: this.defaultFromEmail,
       name: this.defaultFromName,
     },
+    templateId = '',
+    personalizations,
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       await this.mailService.send({
         from,
-        text,
+        templateId,
+        personalizations,
         ...emailData,
       });
+
       this.logger.log('Email sent successfully');
       return;
     } catch (error) {

@@ -1,4 +1,4 @@
-from human_protocol_sdk.escrow import EscrowFilter
+from human_protocol_sdk.filter import EscrowFilter
 
 escrow_fragment = """
 fragment EscrowFields on Escrow {
@@ -74,4 +74,19 @@ query GetEscrows(
         status_clause="status: $status" if filter.status else "",
         from_clause="createdAt_gte: $from" if filter.date_from else "",
         to_clause="createdAt_lte: $to" if filter.date_from else "",
+    )
+
+
+def get_escrow_query():
+    return """
+query GetEscrow(
+    $escrowAddress: String!
+) {{
+    escrow(id: $escrowAddress) {{
+      ...EscrowFields
+    }}
+}}
+{escrow_fragment}
+""".format(
+        escrow_fragment=escrow_fragment
     )

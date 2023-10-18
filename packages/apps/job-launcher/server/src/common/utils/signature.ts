@@ -9,7 +9,9 @@ export function verifySignature(
 ): boolean {
   const signer = recoverSigner(message, signature);
 
-  if (!addresses.some(address => address.toLowerCase() === signer.toLowerCase())) {
+  if (
+    !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
+  ) {
     throw new ConflictException(ErrorSignature.SignatureNotVerified);
   }
 
