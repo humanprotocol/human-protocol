@@ -226,7 +226,16 @@ export class AuthService {
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const tokenEntity = await this.tokenRepository.create({
+    const existingToken = await this.tokenRepository.findOne({
+      userId: userEntity.id,
+      tokenType: TokenType.EMAIL,
+    });
+
+    if (existingToken) {
+      await existingToken.remove();
+    }
+
+    const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
@@ -237,7 +246,7 @@ export class AuthService {
           to: data.email,
           dynamicTemplateData: {
             service_name: SERVICE_NAME,
-            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+            url: `${this.feURL}/verify?token=${newTokenEntity.uuid}`,
           },
         },
       ],
