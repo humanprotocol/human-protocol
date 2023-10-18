@@ -11,3 +11,4 @@
 - [kvstore](modules/kvstore.md)
 - [staking](modules/staking.md)
 - [statistics](modules/statistics.md)
+- [storage](modules/storage.md)

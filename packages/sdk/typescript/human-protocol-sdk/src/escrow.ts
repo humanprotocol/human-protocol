@@ -1371,13 +1371,132 @@ export class EscrowClient {
   }
 }
 
+/**
+ * ## Introduction
+ *
+ * Utility class for escrow-related operations.
+ *
+ * ## Installation
+ *
+ * ### npm
+ * ```bash
+ * npm install @human-protocol/sdk
+ * ```
+ *
+ * ### yarn
+ * ```bash
+ * yarn install @human-protocol/sdk
+ * ```
+ *
+ * ## Code example
+ *
+ * ### Signer
+ *
+ * **Using private key(backend)**
+ *
+ * ```ts
+ * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+ *
+ * const escrowAddresses = new EscrowUtils.getEscrows({
+ *   networks: [ChainId.POLYGON_MUMBAI]
+ * });
+ * ```
+ */
 export class EscrowUtils {
   /**
-   * Returns the list of escrows for given filter
+   * This function returns an array of escrows based on the specified filter parameters.
    *
-   * @param {IEscrowsFilter} filter - Filter parameters.
-   * @returns {Promise<EscrowData[]>}
-   * @throws {Error} - An error object if an error occurred.
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IEscrowsFilter {
+   *   networks: ChainId[];
+   *   launcher?: string;
+   *   reputationOracle?: string;
+   *   recordingOracle?: string;
+   *   exchangeOracle?: string;
+   *   jobRequesterId?: string;
+   *   status?: EscrowStatus;
+   *   from?: Date;
+   *   to?: Date;
+   * }
+   * ```
+   *
+   * ```ts
+   * enum ChainId {
+   *   ALL = -1,
+   *   MAINNET = 1,
+   *   RINKEBY = 4,
+   *   GOERLI = 5,
+   *   BSC_MAINNET = 56,
+   *   BSC_TESTNET = 97,
+   *   POLYGON = 137,
+   *   POLYGON_MUMBAI = 80001,
+   *   MOONBEAM = 1284,
+   *   MOONBASE_ALPHA = 1287,
+   *   AVALANCHE = 43114,
+   *   AVALANCHE_TESTNET = 43113,
+   *   SKALE = 1273227453,
+   *   LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * enum EscrowStatus {
+   *   Launched,
+   *   Pending,
+   *   Partial,
+   *   Paid,
+   *   Complete,
+   *   Cancelled,
+   * }
+   * ```
+   *
+   * ```ts
+   * type EscrowData = {
+   *   id: string;
+   *   address: string;
+   *   amountPaid: string;
+   *   balance: string;
+   *   count: string;
+   *   jobRequesterId: string;
+   *   factoryAddress: string;
+   *   finalResultsUrl?: string;
+   *   intermediateResultsUrl?: string;
+   *   launcher: string;
+   *   manifestHash?: string;
+   *   manifestUrl?: string;
+   *   recordingOracle?: string;
+   *   recordingOracleFee?: string;
+   *   reputationOracle?: string;
+   *   reputationOracleFee?: string;
+   *   exchangeOracle?: string;
+   *   exchangeOracleFee?: string;
+   *   status: EscrowStatus;
+   *   token: string;
+   *   totalFundedAmount: string;
+   *   createdAt: string;
+   * };
+   * ```
+   *
+   *
+   * @param {IEscrowsFilter} filter Filter parameters.
+   * @returns {EscrowData[]} List of escrows that match the filter.
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils, EscrowStatus } from '@human-protocol/sdk';
+   *
+   * const filters: IEscrowsFilter = {
+   *   status: EscrowStatus.Pending,
+   *   from: new Date(2023, 4, 8),
+   *   to: new Date(2023, 5, 8),
+   *   networks: [ChainId.POLYGON_MUMBAI]
+   * };
+   * const escrowDatas = await EscrowUtils.getEscrows(filters);
+   * ```
    */
   public static async getEscrows(
     filter: IEscrowsFilter
@@ -1444,12 +1563,70 @@ export class EscrowUtils {
   }
 
   /**
-   * Returns the escrow for a given address
+   * This function returns the escrow data for a given address.
    *
-   * @param {string} escrowAddress - Escrow address.
-   * @param {ChainId} chainId - Chain id.
-   * @returns {Promise<EscrowData>}
-   * @throws {Error} - An error object if an error occurred.
+   * > This uses Subgraph
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * enum ChainId {
+   *   ALL = -1,
+   *   MAINNET = 1,
+   *   RINKEBY = 4,
+   *   GOERLI = 5,
+   *   BSC_MAINNET = 56,
+   *   BSC_TESTNET = 97,
+   *   POLYGON = 137,
+   *   POLYGON_MUMBAI = 80001,
+   *   MOONBEAM = 1284,
+   *   MOONBASE_ALPHA = 1287,
+   *   AVALANCHE = 43114,
+   *   AVALANCHE_TESTNET = 43113,
+   *   SKALE = 1273227453,
+   *   LOCALHOST = 1338,
+   * }
+   * ```
+   *
+   * ```ts
+   * type EscrowData = {
+   *   id: string;
+   *   address: string;
+   *   amountPaid: string;
+   *   balance: string;
+   *   count: string;
+   *   jobRequesterId: string;
+   *   factoryAddress: string;
+   *   finalResultsUrl?: string;
+   *   intermediateResultsUrl?: string;
+   *   launcher: string;
+   *   manifestHash?: string;
+   *   manifestUrl?: string;
+   *   recordingOracle?: string;
+   *   recordingOracleFee?: string;
+   *   reputationOracle?: string;
+   *   reputationOracleFee?: string;
+   *   exchangeOracle?: string;
+   *   exchangeOracleFee?: string;
+   *   status: EscrowStatus;
+   *   token: string;
+   *   totalFundedAmount: string;
+   *   createdAt: string;
+   * };
+   * ```
+   *
+   *
+   * @param {ChainId} chainId Network in which the escrow has been deployed
+   * @param {string} escrowAddress Address of the escrow
+   * @returns {EscrowData} Escrow data
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ChainId, EscrowUtils } from '@human-protocol/sdk';
+   *
+   * const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x1234567890123456789012345678901234567890");
+   * ```
    */
   public static async getEscrow(
     chainId: ChainId,

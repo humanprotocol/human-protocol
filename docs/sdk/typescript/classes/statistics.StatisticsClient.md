@@ -73,7 +73,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 #### Defined in
 
-[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
+[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
 
 ## Properties
 
@@ -83,7 +83,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 #### Defined in
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
 
 ## Methods
 
@@ -92,6 +92,32 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 ▸ **getEscrowStatistics**(`params?`): `Promise`<`EscrowStatistics`\>
 
 This function returns the statistical data of escrows.
+
+**Input parameters**
+
+```ts
+interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+}
+```
+
+```ts
+type DailyEscrowsData = {
+  timestamp: Date;
+  escrowsTotal: number;
+  escrowsPending: number;
+  escrowsSolved: number;
+  escrowsPaid: number;
+  escrowsCancelled: number;
+};
+
+type EscrowStatistics = {
+  totalEscrows: number;
+  dailyEscrowsData: DailyEscrowsData[];
+};
+```
 
 #### Parameters
 
@@ -121,7 +147,7 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:93](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L93)
+[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
 
 ___
 
@@ -130,6 +156,37 @@ ___
 ▸ **getHMTStatistics**(`params?`): `Promise`<`HMTStatistics`\>
 
 This function returns the statistical data of HMToken.
+
+**Input parameters**
+
+```ts
+interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+}
+```
+
+```ts
+type HMTHolder = {
+  address: string;
+  balance: BigNumber;
+}
+
+type DailyHMTData = {
+  timestamp: Date;
+  totalTransactionAmount: BigNumber;
+  totalTransactionCount: number;
+};
+
+type HMTStatistics = {
+  totalTransferAmount: BigNumber;
+  totalTransferCount: BigNumber;
+  totalHolders: number;
+  holders: HMTHolder[];
+  dailyHMTData: DailyHMTData[];
+};
+```
 
 #### Parameters
 
@@ -186,7 +243,7 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:297](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L297)
+[statistics.ts:395](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L395)
 
 ___
 
@@ -195,6 +252,29 @@ ___
 ▸ **getPaymentStatistics**(`params?`): `Promise`<`PaymentStatistics`\>
 
 This function returns the statistical data of payments.
+
+**Input parameters**
+
+```ts
+interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+}
+```
+
+```ts
+type DailyPaymentData = {
+  timestamp: Date;
+  totalAmountPaid: BigNumber;
+  totalCount: number;
+  averageAmountPerWorker: BigNumber;
+};
+
+type PaymentStatistics = {
+  dailyPaymentsData: DailyPaymentData[];
+};
+```
 
 #### Parameters
 
@@ -245,7 +325,7 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:214](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L214)
+[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
 
 ___
 
@@ -254,6 +334,27 @@ ___
 ▸ **getWorkerStatistics**(`params?`): `Promise`<`WorkerStatistics`\>
 
 This function returns the statistical data of workers.
+
+**Input parameters**
+
+```ts
+interface IStatisticsParams {
+  from?: Date;
+  to?: Date;
+  limit?: number;
+}
+```
+
+```ts
+type DailyWorkerData = {
+  timestamp: Date;
+  activeWorkers: number;
+};
+
+type WorkerStatistics = {
+  dailyWorkersData: DailyWorkerData[];
+};
+```
 
 #### Parameters
 
@@ -283,4 +384,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:145](https://github.com/humanprotocol/human-protocol/blob/6f5067ab/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L145)
+[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)

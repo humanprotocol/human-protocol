@@ -12,5 +12,7 @@
   * [KVStoreClient](typescript/classes/kvstore.KVStoreClient.md)
 * [Staking](typescript/modules/staking.md)
   * [StakingClient](typescript/classes/staking.StakingClient.md)
+* [Storage](typescript/modules/storage.md)
+  * [StorageClient](typescript/classes/storage.StorageClient.md)
 * [Statistics](typescript/modules/statistics.md)
   * [StakingClient](typescript/classes/statistics.StatisticsClient.md)

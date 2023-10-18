@@ -72,6 +72,34 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of escrows.
    *
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IStatisticsParams {
+   *   from?: Date;
+   *   to?: Date;
+   *   limit?: number;
+   * }
+   * ```
+   *
+   * ```ts
+   * type DailyEscrowsData = {
+   *   timestamp: Date;
+   *   escrowsTotal: number;
+   *   escrowsPending: number;
+   *   escrowsSolved: number;
+   *   escrowsPaid: number;
+   *   escrowsCancelled: number;
+   * };
+   *
+   * type EscrowStatistics = {
+   *   totalEscrows: number;
+   *   dailyEscrowsData: DailyEscrowsData[];
+   * };
+   * ```
+   *
+   *
    * @param {IStatisticsParams} params Statistics params with duration data
    * @returns {EscrowStatistics} Escrow statistics data.
    *
@@ -124,6 +152,29 @@ export class StatisticsClient {
   /**
    * This function returns the statistical data of workers.
    *
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IStatisticsParams {
+   *   from?: Date;
+   *   to?: Date;
+   *   limit?: number;
+   * }
+   * ```
+   *
+   * ```ts
+   * type DailyWorkerData = {
+   *   timestamp: Date;
+   *   activeWorkers: number;
+   * };
+   *
+   * type WorkerStatistics = {
+   *   dailyWorkersData: DailyWorkerData[];
+   * };
+   * ```
+   *
+   *
    * @param {IStatisticsParams} params Statistics params with duration data
    * @returns {WorkerStatistics} Worker statistics data.
    *
@@ -166,6 +217,31 @@ export class StatisticsClient {
 
   /**
    * This function returns the statistical data of payments.
+   *
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IStatisticsParams {
+   *   from?: Date;
+   *   to?: Date;
+   *   limit?: number;
+   * }
+   * ```
+   *
+   * ```ts
+   * type DailyPaymentData = {
+   *   timestamp: Date;
+   *   totalAmountPaid: BigNumber;
+   *   totalCount: number;
+   *   averageAmountPerWorker: BigNumber;
+   * };
+   *
+   * type PaymentStatistics = {
+   *   dailyPaymentsData: DailyPaymentData[];
+   * };
+   * ```
+   *
    *
    * @param {IStatisticsParams} params Statistics params with duration data
    * @returns {PaymentStatistics} Payment statistics data.
@@ -237,6 +313,39 @@ export class StatisticsClient {
 
   /**
    * This function returns the statistical data of HMToken.
+   *
+   *
+   * **Input parameters**
+   *
+   * ```ts
+   * interface IStatisticsParams {
+   *   from?: Date;
+   *   to?: Date;
+   *   limit?: number;
+   * }
+   * ```
+   *
+   * ```ts
+   * type HMTHolder = {
+   *   address: string;
+   *   balance: BigNumber;
+   * }
+   *
+   * type DailyHMTData = {
+   *   timestamp: Date;
+   *   totalTransactionAmount: BigNumber;
+   *   totalTransactionCount: number;
+   * };
+   *
+   * type HMTStatistics = {
+   *   totalTransferAmount: BigNumber;
+   *   totalTransferCount: BigNumber;
+   *   totalHolders: number;
+   *   holders: HMTHolder[];
+   *   dailyHMTData: DailyHMTData[];
+   * };
+   * ```
+   *
    *
    * @param {IStatisticsParams} params Statistics params with duration data
    * @returns {HMTStatistics} HMToken statistics data.
