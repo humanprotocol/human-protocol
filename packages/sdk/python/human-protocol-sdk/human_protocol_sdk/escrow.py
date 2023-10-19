@@ -890,10 +890,16 @@ class EscrowUtils:
                 network["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
-                    "launcher": filter.launcher.lower(),
-                    "reputationOracle": filter.reputation_oracle.lower(),
-                    "recordingOracle": filter.recording_oracle.lower(),
-                    "exchangeOracle": filter.exchange_oracle.lower(),
+                    "launcher": filter.launcher.lower() if filter.launcher else None,
+                    "reputationOracle": filter.reputation_oracle.lower()
+                    if filter.reputation_oracle
+                    else None,
+                    "recordingOracle": filter.recording_oracle.lower()
+                    if filter.recording_oracle
+                    else None,
+                    "exchangeOracle": filter.exchange_oracle.lower()
+                    if filter.exchange_oracle
+                    else None,
                     "jobRequesterId": filter.job_requester_id,
                     "status": filter.status.name if filter.status else None,
                     "from": int(filter.date_from.timestamp())
