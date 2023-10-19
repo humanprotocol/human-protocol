@@ -575,7 +575,7 @@ export class StakingClient {
       const { leader } = await gqlFetch<{
         leader: ILeader;
       }>(this.network.subgraphUrl, GET_LEADER_QUERY, {
-        address,
+        address: address.toLowerCase(),
       });
 
       return leader;
@@ -687,7 +687,7 @@ export class StakingClient {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
       }>(this.network.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
-        slasherAddress,
+        slasherAddress: slasherAddress.toLowerCase(),
       });
 
       return rewardAddedEvents.map((reward: any) => {

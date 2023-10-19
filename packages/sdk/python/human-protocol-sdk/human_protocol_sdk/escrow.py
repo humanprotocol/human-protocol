@@ -109,6 +109,7 @@ class EscrowFilter:
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
+        job_requester_id: Optional[str] = None,
         status: Optional[Status] = None,
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
@@ -154,6 +155,7 @@ class EscrowFilter:
         self.reputation_oracle = reputation_oracle
         self.recording_oracle = recording_oracle
         self.exchange_oracle = exchange_oracle
+        self.job_requester_id = job_requester_id
         self.status = status
         self.date_from = date_from
         self.date_to = date_to
@@ -888,10 +890,10 @@ class EscrowUtils:
                 network["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
-                    "launcher": filter.launcher,
-                    "reputationOracle": filter.reputation_oracle,
-                    "recordingOracle": filter.recording_oracle,
-                    "exchangeOracle": filter.exchange_oracle,
+                    "launcher": filter.launcher.lower(),
+                    "reputationOracle": filter.reputation_oracle.lower(),
+                    "recordingOracle": filter.recording_oracle.lower(),
+                    "exchangeOracle": filter.exchange_oracle.lower(),
                     "jobRequesterId": filter.job_requester_id,
                     "status": filter.status.name if filter.status else None,
                     "from": int(filter.date_from.timestamp())
@@ -964,7 +966,7 @@ class EscrowUtils:
             network["subgraph_url"],
             query=get_escrow_query(),
             params={
-                "escrowAddress": escrow_address,
+                "escrowAddress": escrow_address.lower(),
             },
         )
 

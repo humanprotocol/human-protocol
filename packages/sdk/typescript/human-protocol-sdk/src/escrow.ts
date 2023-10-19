@@ -1543,6 +1543,10 @@ export class EscrowUtils {
           GET_ESCROWS_QUERY(filter),
           {
             ...filter,
+            launcher: filter.launcher?.toLowerCase(),
+            reputationOracle: filter.reputationOracle?.toLowerCase(),
+            recordingOracle: filter.recordingOracle?.toLowerCase(),
+            exchangeOracle: filter.exchangeOracle?.toLowerCase(),
             status: filter.status
               ? Object.entries(EscrowStatus).find(
                   ([, value]) => value === filter.status
@@ -1646,7 +1650,7 @@ export class EscrowUtils {
       const { escrow } = await gqlFetch<{ escrow: EscrowData }>(
         networkData.subgraphUrl,
         GET_ESCROW_BY_ADDRESS_QUERY(),
-        { escrowAddress }
+        { escrowAddress: escrowAddress.toLowerCase() }
       );
 
       return escrow || null;
