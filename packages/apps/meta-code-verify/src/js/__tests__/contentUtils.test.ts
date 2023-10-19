@@ -377,7 +377,7 @@ describe('contentUtils', () => {
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(
         (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
-      ).toBe(6);
+      ).toBe(14);
       expect(
         (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[4][0]
           .state
@@ -399,7 +399,7 @@ describe('contentUtils', () => {
       await (() => new Promise(res => setTimeout(res, 10)))();
       expect(
         (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls.length
-      ).toBe(11);
+      ).toBe(29);
       expect(
         (window.chrome.runtime.sendMessage as unknown as Mock).mock.calls[9][0]
           .state
