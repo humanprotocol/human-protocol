@@ -1603,13 +1603,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "human-protocol-sdk"
-version = "1.1.12"
+version = "1.1.15"
 description = "A python library to launch escrow contracts to the HUMAN network."
 optional = false
 python-versions = "*"
 files = [
-    {file = "human-protocol-sdk-1.1.12.tar.gz", hash = "sha256:1106fa655abf48be07eb8e33e74ae7dfb9b5887c3f7fc389ae3262bd91f930ef"},
-    {file = "human_protocol_sdk-1.1.12-py3-none-any.whl", hash = "sha256:f6005193a99c8b6c9e4ee10e252b3a7383721913f7798238659d88ea0268bfd9"},
+    {file = "human-protocol-sdk-1.1.15.tar.gz", hash = "sha256:b5bdd8072b5354e548a6631967a41a81f2c8d79acad08609ef798e21637e9c53"},
+    {file = "human_protocol_sdk-1.1.15-py3-none-any.whl", hash = "sha256:93c82d98d9bc3cd574306dcfadcfabf117b6d8cdb7d4abafb29a7aa5c7ae5a15"},
 ]
 
 [package.dependencies]
@@ -2385,9 +2385,9 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
     {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\" and python_version < \"3.11\""},
     {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
 ]
 
 [[package]]
@@ -2554,8 +2554,8 @@ files = [
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
     {version = ">=1.22.4", markers = "python_version < \"3.11\""},
+    {version = ">=1.23.2", markers = "python_version == \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
@@ -4068,4 +4068,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "8dfb4515a21e850616875993ffe48a12a440f2ed60bc99c835ab7e9d801b0d88"
+content-hash = "34528b808e3fbdd052cfc63dfa06c442cbf73a5325dbc6dd24146b85e0a68fc0"

@@ -8,7 +8,7 @@ import src.services.cvat as cvat_db_service
 import src.services.webhook as oracle_db_service
 from src.chain.escrow import validate_escrow
 from src.chain.kvstore import get_job_launcher_url
-from src.core.config import CronConfig
+from src.core.config import Config, CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobLauncherEventType, OracleWebhookTypes, ProjectStatuses
 from src.db import SessionLocal
@@ -70,7 +70,6 @@ def handle_job_launcher_event(
                 validate_escrow(
                     webhook.chain_id,
                     webhook.escrow_address,
-                    accepted_states=[EscrowStatus.Launched, EscrowStatus.Pending],
                     allow_no_funds=True,
                 )
 
@@ -96,13 +95,15 @@ def handle_job_launcher_event(
                 except Exception as ex_remove:
                     logger.exception(ex_remove)
 
-                oracle_db_service.outbox.create_webhook(
-                    session=db_session,
-                    escrow_address=webhook.escrow_address,
-                    chain_id=webhook.chain_id,
-                    type=OracleWebhookTypes.exchange_oracle,
-                    event=ExchangeOracleEvent_TaskCreationFailed(reason=str(ex)),
-                )
+                if webhook.attempts + 1 >= Config.webhook_max_retries:
+                    # We should not notify before the webhook handling attempts have expired
+                    oracle_db_service.outbox.create_webhook(
+                        session=db_session,
+                        escrow_address=webhook.escrow_address,
+                        chain_id=webhook.chain_id,
+                        type=OracleWebhookTypes.exchange_oracle,
+                        event=ExchangeOracleEvent_TaskCreationFailed(reason=str(ex)),
+                    )
 
                 raise
 

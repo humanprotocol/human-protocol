@@ -2,41 +2,48 @@ import json
 from typing import List
 
 from human_protocol_sdk.constants import Status
-from human_protocol_sdk.escrow import EscrowClient
+from human_protocol_sdk.escrow import EscrowClient, EscrowData, EscrowUtils
 from human_protocol_sdk.storage import StorageClient
 
 from src.chain.web3 import get_web3
-from src.core.config import Config
 
 
-def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
+def get_escrow(chain_id: int, escrow_address: str) -> EscrowData:
+    escrow = EscrowUtils.get_escrow(chain_id, escrow_address.lower())
+    if not escrow:
+        raise Exception(f"Can't find escrow {escrow_address}")
 
-    manifest_url = escrow_client.get_manifest_url(escrow_address)
-
-    return json.loads((StorageClient.download_file_from_url(manifest_url)).decode("utf-8"))
+    return escrow
 
 
 def validate_escrow(
-    chain_id: int, escrow_address: str, *, accepted_states: List[Status] = [Status.Pending]
+    chain_id: int,
+    escrow_address: str,
+    *,
+    accepted_states: List[Status] = [Status.Pending],
+    allow_no_funds: bool = False,
 ) -> None:
     assert accepted_states
 
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
+    escrow = get_escrow(chain_id, escrow_address)
 
-    escrow_status = escrow_client.get_status(escrow_address)
-    if escrow_status not in accepted_states:
+    status = Status[escrow.status]
+    if status not in accepted_states:
         raise ValueError(
             "Escrow is not in any of the accepted states ({}). Current state: {}".format(
-                ", ".join(s.name for s in accepted_states), escrow_status.name
+                ", ".join(s.name for s in accepted_states), status.name
             )
         )
 
-    if escrow_status == Status.Pending:
-        if escrow_client.get_balance(escrow_address) == 0:
+    if status == Status.Pending and not allow_no_funds:
+        if int(escrow.balance) == 0:
             raise ValueError("Escrow doesn't have funds")
+
+
+def get_escrow_manifest(chain_id: int, escrow_address: str) -> dict:
+    escrow = get_escrow(chain_id, escrow_address)
+    manifest_content = StorageClient.download_file_from_url(escrow.manifestUrl)
+    return json.loads(manifest_content.decode("utf-8"))
 
 
 def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> None:
@@ -47,18 +54,8 @@ def store_results(chain_id: int, escrow_address: str, url: str, hash: str) -> No
 
 
 def get_reputation_oracle_address(chain_id: int, escrow_address: str) -> str:
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
-
-    reputation_oracle_address = escrow_client.get_reputation_oracle_address(escrow_address)
-
-    return reputation_oracle_address
+    return get_escrow(chain_id, escrow_address).reputationOracle
 
 
 def get_exchange_oracle_address(chain_id: int, escrow_address: str) -> str:
-    web3 = get_web3(chain_id)
-    escrow_client = EscrowClient(web3)
-
-    exchange_oracle_address = escrow_client.get_exchange_oracle_address(escrow_address)
-
-    return exchange_oracle_address
+    return get_escrow(chain_id, escrow_address).exchangeOracle
