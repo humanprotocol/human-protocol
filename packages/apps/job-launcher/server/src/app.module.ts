@@ -44,7 +44,6 @@ import { join } from 'path';
     Web3Module,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '../../../../../', 'node_modules/swagger-ui-dist'),
-      serveRoot: process.env.NODE_ENV === 'development' ? '/' : '/swagger',
     }),
   ],
   controllers: [AppController],
