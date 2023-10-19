@@ -430,7 +430,7 @@ class StakingClient:
         reward_added_events_data = get_data_from_subgraph(
             self.network["subgraph_url"],
             query=get_reward_added_events_query,
-            params={"slasherAddress": slasher},
+            params={"slasherAddress": slasher.lower()},
         )
         reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
 

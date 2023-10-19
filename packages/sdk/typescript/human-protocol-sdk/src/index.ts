@@ -3,6 +3,7 @@ import { StorageClient } from './storage';
 import { KVStoreClient } from './kvstore';
 import { EscrowClient, EscrowUtils } from './escrow';
 import { StatisticsClient } from './statistics';
+import { Encryption, EncryptionUtils } from './encryption';
 
 export * from './constants';
 export * from './types';
@@ -16,4 +17,6 @@ export {
   EscrowClient,
   EscrowUtils,
   StatisticsClient,
+  Encryption,
+  EncryptionUtils,
 };
