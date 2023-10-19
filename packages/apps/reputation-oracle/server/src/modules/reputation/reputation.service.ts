@@ -114,15 +114,11 @@ export class ReputationService {
     return {
       chainId: reputationEntity.chainId,
       address: reputationEntity.address,
-      reputation: this.getReputationLevel(
-        reputationEntity.reputationPoints,
-      ),
-    }
+      reputation: this.getReputationLevel(reputationEntity.reputationPoints),
+    };
   }
 
-  public async getAllReputations(
-    chainId?: ChainId,
-  ): Promise<IReputation[]> {
+  public async getAllReputations(chainId?: ChainId): Promise<IReputation[]> {
     const reputations = await this.reputationRepository.find({
       chainId,
     });
@@ -130,9 +126,7 @@ export class ReputationService {
     return reputations.map((reputation) => ({
       chainId: reputation.chainId,
       address: reputation.address,
-      reputation: this.getReputationLevel(
-        reputation.reputationPoints,
-      ),
+      reputation: this.getReputationLevel(reputation.reputationPoints),
     }));
   }
 }

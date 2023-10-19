@@ -881,7 +881,7 @@ class EscrowUtils:
             get_escrows_query,
         )
 
-        escrow_addresses = []
+        escrows = []
         for chain_id in filter.networks:
             network = NETWORKS[ChainId(chain_id)]
             escrows_data = get_data_from_subgraph(
@@ -900,11 +900,39 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
-            escrows = escrows_data["data"]["escrows"]
-            for escrow in escrows:
-                escrow["chain_id"] = chain_id
-            escrow_addresses.extend(escrows)
-        return escrow_addresses
+            escrows_raw = escrows_data["data"]["escrows"]
+
+            escrows.extend(
+                [
+                    EscrowData(
+                        id=escrow.get("id", ""),
+                        address=escrow.get("address", ""),
+                        amountPaid=escrow.get("amountPaid", ""),
+                        balance=escrow.get("balance", ""),
+                        count=escrow.get("count", ""),
+                        factoryAddress=escrow.get("factoryAddress", ""),
+                        launcher=escrow.get("launcher", ""),
+                        status=escrow.get("status", ""),
+                        token=escrow.get("token", ""),
+                        totalFundedAmount=escrow.get("totalFundedAmount", ""),
+                        createdAt=escrow.get("createdAt", ""),
+                        chainId=chain_id,
+                        finalResultsUrl=escrow.get("finalResultsUrl", ""),
+                        intermediateResultsUrl=escrow.get("intermediateResultsUrl", ""),
+                        manifestHash=escrow.get("manifestHash", ""),
+                        manifestUrl=escrow.get("manifestUrl", ""),
+                        recordingOracle=escrow.get("recordingOracle", ""),
+                        recordingOracleFee=escrow.get("recordingOracleFee", ""),
+                        reputationOracle=escrow.get("reputationOracle", ""),
+                        reputationOracleFee=escrow.get("reputationOracleFee", ""),
+                        exchangeOracle=escrow.get("exchangeOracle", ""),
+                        exchangeOracleFee=escrow.get("exchangeOracleFee", ""),
+                    )
+                    for escrow in escrows_raw
+                ]
+            )
+
+        return escrows
 
     @staticmethod
     def get_escrow(
@@ -940,4 +968,32 @@ class EscrowUtils:
             },
         )
 
-        return escrow["data"]["escrow"]
+        escrow_raw = escrow["data"]["escrow"]
+
+        if not escrow_raw:
+            return None
+
+        return EscrowData(
+            id=escrow_raw.get("id", ""),
+            address=escrow_raw.get("address", ""),
+            amountPaid=escrow_raw.get("amountPaid", ""),
+            balance=escrow_raw.get("balance", ""),
+            count=escrow_raw.get("count", ""),
+            factoryAddress=escrow_raw.get("factoryAddress", ""),
+            launcher=escrow_raw.get("launcher", ""),
+            status=escrow_raw.get("status", ""),
+            token=escrow_raw.get("token", ""),
+            totalFundedAmount=escrow_raw.get("totalFundedAmount", ""),
+            createdAt=escrow_raw.get("createdAt", ""),
+            chainId=chain_id,
+            finalResultsUrl=escrow_raw.get("finalResultsUrl", ""),
+            intermediateResultsUrl=escrow_raw.get("intermediateResultsUrl", ""),
+            manifestHash=escrow_raw.get("manifestHash", ""),
+            manifestUrl=escrow_raw.get("manifestUrl", ""),
+            recordingOracle=escrow_raw.get("recordingOracle", ""),
+            recordingOracleFee=escrow_raw.get("recordingOracleFee", ""),
+            reputationOracle=escrow_raw.get("reputationOracle", ""),
+            reputationOracleFee=escrow_raw.get("reputationOracleFee", ""),
+            exchangeOracle=escrow_raw.get("exchangeOracle", ""),
+            exchangeOracleFee=escrow_raw.get("exchangeOracleFee", ""),
+        )

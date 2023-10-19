@@ -92,7 +92,7 @@ export const CryptoPayForm = ({
           await tx.wait();
 
           // create crypto payment record
-          await paymentService.createCryptoPayment({
+          await paymentService.createCryptoPayment(signer, {
             chainId: jobRequest.chainId,
             transactionHash: tx.hash,
           });

@@ -9,7 +9,9 @@ export function verifySignature(
 ): boolean {
   const signer = recoverSigner(message, signature);
 
-  if (!addresses.some(address => address.toLowerCase() === signer.toLowerCase())) {
+  if (
+    !addresses.some((address) => address.toLowerCase() === signer.toLowerCase())
+  ) {
     throw new ConflictException(ErrorSignature.SignatureNotVerified);
   }
 
@@ -37,7 +39,7 @@ export function recoverSigner(
   if (typeof message !== 'string') {
     message = JSON.stringify(message);
   }
-  
+
   try {
     return ethers.utils.verifyMessage(message, signature);
   } catch (e) {

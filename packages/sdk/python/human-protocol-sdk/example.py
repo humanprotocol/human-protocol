@@ -9,9 +9,8 @@ from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
 from human_protocol_sdk.storage import StorageClient
 from human_protocol_sdk.agreement import agreement
 
-# Replace with your own Alchemy URL and IM API key
+# Replace with your own Alchemy URL
 ALCHEMY_URL = ""
-IM_API_KEY = ""
 
 
 def get_escrow_statistics(statistics_client: StatisticsClient):
@@ -74,6 +73,12 @@ def get_escrows():
         )
     )
 
+    print(
+        vars(
+            EscrowUtils.get_escrow(80001, "0xf9ec66feeafb850d85b88142a7305f55e0532959")
+        )
+    )
+
 
 def get_leaders(staking_client: StakingClient):
     leaders = staking_client.get_leaders()
@@ -105,10 +110,7 @@ if __name__ == "__main__":
     alchemy_url = ALCHEMY_URL
     w3 = Web3(Web3.HTTPProvider(alchemy_url))
 
-    statistics_client = StatisticsClient(
-        w3,
-        IM_API_KEY,
-    )
+    statistics_client = StatisticsClient(w3)
 
     # Run single example while testing, and remove comments before commit
 

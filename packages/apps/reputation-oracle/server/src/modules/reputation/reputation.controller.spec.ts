@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing';
 
 import { ReputationController } from './reputation.controller';
 import { ReputationService } from './reputation.service';
-import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
@@ -75,7 +74,11 @@ describe('ReputationController', () => {
 
   describe('getReputation', () => {
     it('should call service', async () => {
-      const result = { chainId: CHAIN_ID, address: OPERATOR_ADDRESS, reputation: ReputationLevel.LOW }
+      const result = {
+        chainId: CHAIN_ID,
+        address: OPERATOR_ADDRESS,
+        reputation: ReputationLevel.LOW,
+      };
 
       jest
         .spyOn(reputationService, 'getReputation')

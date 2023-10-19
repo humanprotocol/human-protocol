@@ -1,23 +1,18 @@
-import session from 'express-session';
 import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'body-parser';
 import { useContainer } from 'class-validator';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import helmet from 'helmet';
 
+import { INestApplication } from '@nestjs/common';
 import { AppModule } from './app.module';
-import {
-  ConfigNames,
-  ServerConfigType,
-  serverConfigKey,
-} from './common/config';
+import { ServerConfigType, serverConfigKey } from './common/config';
 import { GlobalExceptionsFilter } from './common/filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  const app = await NestFactory.create<INestApplication>(AppModule, {
     cors: true,
   });
 

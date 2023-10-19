@@ -46,7 +46,6 @@ export const wagmiClient = createClient({
   autoConnect: true,
   connectors: w3mConnectors({
     projectId,
-    version: 1,
     chains,
   }),
   provider,
