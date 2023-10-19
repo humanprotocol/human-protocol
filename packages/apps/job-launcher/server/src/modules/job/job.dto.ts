@@ -347,5 +347,5 @@ export class EscrowFailedWebhookDto {
 
 export class EscrowCancelDto {
   txHash: string;
-  amountRefunded: BigNumber
+  amountRefunded: BigNumber;
 }

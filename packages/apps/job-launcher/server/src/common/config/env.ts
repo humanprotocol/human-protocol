@@ -47,6 +47,8 @@ export const ConfigNames = {
   CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
   CVAT_MAX_TIME: 'CVAT_MAX_TIME',
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
+  PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
+  PGP_PUBLIC_KEY: 'PGP_PUBLIC_KEY',
 };
 
 export const envValidator = Joi.object({
@@ -78,10 +80,14 @@ export const envValidator = Joi.object({
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
   EXCHANGE_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3004'),
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3004',
+  ),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3005',
+  ),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   // S3
@@ -105,4 +111,7 @@ export const envValidator = Joi.object({
   CVAT_JOB_SIZE: Joi.string().default('10'),
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
+  //PGP
+  PGP_PRIVATE_KEY: Joi.string().required(),
+  PGP_PUBLIC_KEY: Joi.string().required(),
 });

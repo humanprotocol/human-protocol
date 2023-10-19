@@ -8,6 +8,7 @@ import {
   IAllocation,
   EscrowUtils,
   NETWORKS,
+  Encryption,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -20,7 +21,6 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -48,6 +48,8 @@ import {
   MOCK_FILE_URL,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
+  MOCK_PGP_PRIVATE_KEY,
+  MOCK_PGP_PUBLIC_KEY,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_RECORDING_ORACLE_FEE,
@@ -79,7 +81,6 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
-import Decimal from 'decimal.js';
 import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
@@ -108,6 +109,11 @@ jest.mock('@human-protocol/sdk', () => ({
       ]),
     listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
   })),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      get: jest.fn().mockResolvedValue(''),
+    })),
+  },
 }));
 
 jest.mock('../../common/utils', () => ({
@@ -130,7 +136,8 @@ describe('JobService', () => {
     paymentService: PaymentService,
     createPaymentMock: any,
     routingProtocolService: RoutingProtocolService,
-    web3Service: Web3Service;
+    web3Service: Web3Service,
+    encryption: Encryption;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -175,6 +182,10 @@ describe('JobService', () => {
             return MOCK_BUCKET_NAME;
           case 'CVAT_JOB_SIZE':
             return 1;
+          case 'PGP_PRIVATE_KEY':
+            return MOCK_PGP_PRIVATE_KEY;
+          case 'PGP_PUBLIC_KEY':
+            return MOCK_PGP_PUBLIC_KEY;
         }
       }),
     };
@@ -182,6 +193,7 @@ describe('JobService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
+        Encryption,
         {
           provide: Web3Service,
           useValue: {
@@ -211,6 +223,10 @@ describe('JobService', () => {
     routingProtocolService = moduleRef.get(RoutingProtocolService);
     createPaymentMock = jest.spyOn(paymentRepository, 'create');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
+  });
+
+  beforeEach(async () => {
+    encryption = await Encryption.build(MOCK_PGP_PRIVATE_KEY);
   });
 
   describe('createJob', () => {
@@ -655,23 +671,13 @@ describe('JobService', () => {
   });
 
   describe('cancelCronJob', () => {
-    let escrowClientMock: any,
-      getManifestMock: any,
-      jobSaveMock: any,
-      findOneJobMock: any,
+    let findOneJobMock: any,
       findOnePaymentMock: any,
-      buildMock: any,
       sendWebhookMock: any,
       jobEntityMock: Partial<JobEntity>,
       paymentEntityMock: Partial<PaymentEntity>;
 
     beforeEach(() => {
-      escrowClientMock = {
-        cancel: jest.fn().mockResolvedValue(undefined),
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
-        getBalance: jest.fn().mockResolvedValue(new Decimal(10)),
-      };
-
       jobEntityMock = {
         status: JobStatus.TO_CANCEL,
         fundAmount: 100,
@@ -690,11 +696,8 @@ describe('JobService', () => {
         save: jest.fn(),
       };
 
-      getManifestMock = jest.spyOn(jobService, 'getManifest');
-      jobSaveMock = jest.spyOn(jobEntityMock, 'save');
       findOneJobMock = jest.spyOn(jobRepository, 'findOne');
       findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
-      buildMock = jest.spyOn(EscrowClient, 'build');
       sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
       findOnePaymentMock.mockResolvedValueOnce(
         paymentEntityMock as PaymentEntity,
@@ -802,6 +805,7 @@ describe('JobService', () => {
   });
 
   describe('saveManifest with fortune request type', () => {
+    const chainId = ChainId.LOCALHOST;
     const fortuneManifestParams = {
       requestType: JobRequestType.FORTUNE,
       submissionsRequired: MOCK_SUBMISSION_REQUIRED,
@@ -828,16 +832,26 @@ describe('JobService', () => {
         },
       ]);
 
-      const result = await jobService.saveManifest(fortuneManifestParams);
+      const result = await jobService.saveManifest(
+        fortuneManifestParams,
+        chainId,
+      );
 
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [fortuneManifestParams],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
     });
 
     it('should throw an error if the manifest file fails to upload', async () => {
@@ -846,14 +860,21 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.saveManifest(fortuneManifestParams),
+        jobService.saveManifest(fortuneManifestParams, chainId),
       ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [fortuneManifestParams],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
     });
 
     it('should rethrow any other errors encountered', async () => {
@@ -863,16 +884,25 @@ describe('JobService', () => {
       uploadFilesMock.mockRejectedValue(uploadError);
 
       await expect(
-        jobService.saveManifest(fortuneManifestParams),
+        jobService.saveManifest(fortuneManifestParams, chainId),
       ).rejects.toThrowError(new Error(errorMessage));
+
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [fortuneManifestParams],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
     });
   });
 
   describe('saveManifest with image label binary request type', () => {
+    const chainId = ChainId.LOCALHOST;
     const manifest: CvatManifestDto = {
       data: {
         data_url: MOCK_FILE_URL,
@@ -911,16 +941,23 @@ describe('JobService', () => {
         },
       ]);
 
-      const result = await jobService.saveManifest(manifest);
+      const result = await jobService.saveManifest(manifest, chainId);
 
       expect(result).toEqual({
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [manifest],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(manifest);
     });
 
     it('should throw an error if the manifest file fails to upload', async () => {
@@ -928,13 +965,22 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
+      await expect(
+        jobService.saveManifest(manifest, chainId),
+      ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [manifest],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(manifest);
     });
 
     it('should rethrow any other errors encountered', async () => {
@@ -943,13 +989,20 @@ describe('JobService', () => {
 
       uploadFilesMock.mockRejectedValue(uploadError);
 
-      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
-        new Error(errorMessage),
-      );
+      await expect(
+        jobService.saveManifest(manifest, chainId),
+      ).rejects.toThrowError(new Error(errorMessage));
       expect(jobService.storageClient.uploadFiles).toHaveBeenCalledWith(
-        [manifest],
+        expect.arrayContaining([expect.any(String)]),
         MOCK_BUCKET_NAME,
       );
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (jobService.storageClient.uploadFiles as any).mock.calls[0][0][0],
+          ),
+        ),
+      ).toEqual(manifest);
     });
   });
 

@@ -10,6 +10,9 @@ import {
   StorageCredentials,
   StorageParams,
   UploadFile,
+  Encryption,
+  KVStoreClient,
+  KVStoreKeys,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -91,6 +94,7 @@ export class JobService {
   public readonly storageClient: StorageClient;
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
+  public readonly publicKey: string;
 
   constructor(
     @Inject(Web3Service)
@@ -101,6 +105,7 @@ export class JobService {
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
+    private readonly encryption: Encryption,
   ) {
     const storageCredentials: StorageCredentials = {
       accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
@@ -121,6 +126,10 @@ export class JobService {
       this.storageParams,
       storageCredentials,
     );
+
+    this.publicKey = this.configService.get<string>(
+      ConfigNames.PGP_PUBLIC_KEY,
+    )!;
   }
 
   public async createJob(
@@ -129,10 +138,13 @@ export class JobService {
     dto: JobFortuneDto | JobCvatDto,
   ): Promise<number> {
     let manifestUrl, manifestHash;
-    const { chainId, fundAmount } = dto;
+    let { chainId } = dto;
+    const { fundAmount } = dto;
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
+    } else {
+      chainId = this.routingProtocolService.selectNetwork();
     }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
@@ -155,42 +167,48 @@ export class JobService {
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     if (requestType == JobRequestType.FORTUNE) {
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        ...(dto as JobFortuneDto),
-        requestType,
-        fundAmount: tokenFundAmount,
-      }));
+      ({ manifestUrl, manifestHash } = await this.saveManifest(
+        {
+          ...(dto as JobFortuneDto),
+          requestType,
+          fundAmount: tokenFundAmount,
+        },
+        chainId,
+      ));
     } else {
       dto = dto as JobCvatDto;
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        data: {
-          data_url: dto.dataUrl,
+      ({ manifestUrl, manifestHash } = await this.saveManifest(
+        {
+          data: {
+            data_url: dto.dataUrl,
+          },
+          annotation: {
+            labels: dto.labels.map((item) => ({ name: item })),
+            description: dto.requesterDescription,
+            user_guide: dto.userGuide,
+            type: requestType,
+            job_size: Number(
+              this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
+            ),
+            max_time: Number(
+              this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
+            ),
+          },
+          validation: {
+            min_quality: dto.minQuality,
+            val_size: Number(
+              this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
+            ),
+            gt_url: dto.gtUrl,
+          },
+          job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
         },
-        annotation: {
-          labels: dto.labels.map((item) => ({ name: item })),
-          description: dto.requesterDescription,
-          user_guide: dto.userGuide,
-          type: requestType,
-          job_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-          ),
-          max_time: Number(
-            this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
-          ),
-        },
-        validation: {
-          min_quality: dto.minQuality,
-          val_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
-          ),
-          gt_url: dto.gtUrl,
-        },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
-      }));
+        chainId,
+      ));
     }
 
     const jobEntity = await this.jobRepository.create({
-      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
+      chainId,
       userId,
       manifestUrl,
       manifestHash,
@@ -261,31 +279,42 @@ export class JobService {
     );
   }
 
+  private getOracleAddresses(requestType: JobRequestType) {
+    const exchangeOracleConfigKey =
+      requestType === JobRequestType.FORTUNE
+        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
+        : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    const recordingOracleConfigKey =
+      requestType === JobRequestType.FORTUNE
+        ? ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS
+        : ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
+
+    const exchangeOracle = this.configService.get<string>(
+      exchangeOracleConfigKey,
+    )!;
+    const recordingOracle = this.configService.get<string>(
+      recordingOracleConfigKey,
+    )!;
+    const reputationOracle = this.configService.get<string>(
+      ConfigNames.REPUTATION_ORACLE_ADDRESS,
+    )!;
+
+    return { exchangeOracle, recordingOracle, reputationOracle };
+  }
+
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
 
     const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-    const recordingOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS
-        : ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
-
-    const exchangeOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
-        : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
-
+    const oracleAddresses = this.getOracleAddresses(
+      (manifest as FortuneManifestDto).requestType,
+    );
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(
-        recordingOracleConfigKey,
-      )!,
-      reputationOracle: this.configService.get<string>(
-        ConfigNames.REPUTATION_ORACLE_ADDRESS,
-      )!,
-      exchangeOracle: this.configService.get<string>(exchangeOracleConfigKey)!,
+      recordingOracle: oracleAddresses.recordingOracle,
+      reputationOracle: oracleAddresses.reputationOracle,
+      exchangeOracle: oracleAddresses.exchangeOracle,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
@@ -359,9 +388,28 @@ export class JobService {
 
   public async saveManifest(
     manifest: FortuneManifestDto | CvatManifestDto,
+    chainId: ChainId,
   ): Promise<SaveManifestDto> {
+    const signer = this.web3Service.getSigner(chainId);
+    const kvstore = await KVStoreClient.build(signer);
+    const publicKeys: string[] = [
+      this.configService.get(ConfigNames.PGP_PUBLIC_KEY)!,
+    ];
+    const oracleAddresses = this.getOracleAddresses(
+      (manifest as FortuneManifestDto).requestType,
+    );
+    for (const address in Object.values(oracleAddresses)) {
+      const publicKey = await kvstore.get(address, KVStoreKeys.public_key);
+      if (publicKey) publicKeys.push(publicKey);
+    }
+
+    const encryptedManifest = await this.encryption.signAndEncrypt(
+      JSON.stringify(manifest),
+      publicKeys,
+    );
+
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [manifest],
+      [encryptedManifest],
       this.bucket,
     );
 
