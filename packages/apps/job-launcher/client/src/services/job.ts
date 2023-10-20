@@ -1,3 +1,4 @@
+import { ChainId } from '@human-protocol/sdk';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -41,8 +42,19 @@ export const createCvatJob = async (
   await api.post('/job/cvat', body);
 };
 
-export const getJobList = async (status?: JobStatus) => {
-  const { data } = await api.get(`/job/list`, { params: { status } });
+export const getJobList = async ({
+  chainId = ChainId.ALL,
+  status,
+}: {
+  chainId?: ChainId;
+  status?: JobStatus;
+}) => {
+  const { data } = await api.get(`/job/list`, {
+    params: {
+      networks: chainId,
+      status,
+    },
+  });
   return data;
 };
 
