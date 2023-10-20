@@ -9,6 +9,8 @@ export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
   ChainId.MOONBASE_ALPHA,
+  ChainId.CELO,
+  ChainId.CELO_ALFAJORES,
   // ChainId.SKALE,
   // ChainId.AVALANCHE,
   // ChainId.AVALANCHE_TESTNET,
@@ -27,6 +29,8 @@ export const SUPPORTED_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.AVALANCHE,
+  ChainId.CELO,
+  ChainId.CELO_ALFAJORES,
 ];
 
 export const L1_L2_CHAIN_IDS = [
@@ -44,6 +48,7 @@ export const TESTNET_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
+  ChainId.CELO_ALFAJORES,
 ];
 
 export const FAUCET_CHAIN_IDS = [
@@ -53,6 +58,7 @@ export const FAUCET_CHAIN_IDS = [
   ChainId.MOONBASE_ALPHA,
   ChainId.AVALANCHE_TESTNET,
   ChainId.SKALE,
+  ChainId.CELO_ALFAJORES,
 ];
 
 export const RPC_URLS: {
@@ -71,6 +77,8 @@ export const RPC_URLS: {
   [ChainId.AVALANCHE_TESTNET]: 'https://api.avax-test.network/ext/C/rpc',
   [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainId.SKALE]: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  [ChainId.CELO_ALFAJORES]: 'https://alfajores-forno.celo-testnet.org',
+  [ChainId.CELO]: 'https://forno.celo.org',
 };
 
 export const FAST_INTERVAL = 10_000;
