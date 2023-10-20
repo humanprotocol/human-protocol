@@ -3,8 +3,7 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
-  KVStoreClient,
-  KVStoreKeys,
+  StakingClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -71,11 +70,14 @@ export class JobService {
       const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
         escrowAddress,
       );
-      const kvstore = await KVStoreClient.build(signer);
-      const jobLauncherWebhookUrl = await kvstore.get(
-        jobLauncherAddress,
-        KVStoreKeys.webhook_url,
-      );
+      const stakingClient = await StakingClient.build(signer);
+      const leader = await stakingClient.getLeader(jobLauncherAddress);
+      const jobLauncherWebhookUrl = leader?.webhookUrl;
+
+      if (!jobLauncherWebhookUrl) {
+        throw new NotFoundException('Unable to get Job Launcher webhook URL');
+      }
+
       const body: EscrowFailedWebhookDto = {
         escrow_address: escrowAddress,
         chain_id: chainId,
@@ -129,12 +131,10 @@ export class JobService {
       escrowAddress,
     );
 
-    const kvstore = await KVStoreClient.build(signer);
-    const recordingOracleWebhookUrl = await kvstore.get(
-      recordingOracleAddress,
-      KVStoreKeys.webhook_url,
-    );
+    const stakingClient = await StakingClient.build(signer);
+    const leader = await stakingClient.getLeader(recordingOracleAddress);
 
+    const recordingOracleWebhookUrl = leader?.webhookUrl;
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 

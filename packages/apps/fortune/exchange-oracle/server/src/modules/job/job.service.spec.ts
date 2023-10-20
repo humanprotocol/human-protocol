@@ -6,9 +6,9 @@ import { Web3Service } from '../web3/web3.service';
 import { JobService } from './job.service';
 import {
   EscrowClient,
-  KVStoreClient,
   StorageClient,
   EscrowUtils,
+  StakingClient,
 } from '@human-protocol/sdk';
 import {
   MOCK_PRIVATE_KEY,
@@ -33,7 +33,7 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn(),
   },
-  KVStoreClient: {
+  StakingClient: {
     build: jest.fn(),
   },
   StorageClient: {
@@ -160,8 +160,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(jobLauncherWebhookUrl),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: jobLauncherWebhookUrl,
+        }),
       }));
 
       httpService.axiosRef.get = jest.fn().mockResolvedValue({
@@ -263,8 +265,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(recordingOracleURLMock),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: recordingOracleURLMock,
+        }),
       }));
 
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([]);
@@ -318,8 +322,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(''),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: '',
+        }),
       }));
 
       await expect(
@@ -336,8 +342,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue('https://example.com/recordingoracle'),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: 'https://example.com/recordingoracle',
+        }),
       }));
 
       StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
