@@ -90,9 +90,9 @@ describe('JobController', () => {
         escrowAddress,
         chainId,
         manifest: {
-          title: 'Example Title',
-          description: 'Example Description',
-          fortunesRequested: 5,
+          requesterTitle: 'Example Title',
+          requesterDescription: 'Example Description',
+          submissionsRequired: 5,
           fundAmount: 100,
         },
       };

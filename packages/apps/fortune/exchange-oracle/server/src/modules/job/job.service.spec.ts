@@ -27,6 +27,7 @@ import {
 import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { StorageService } from '../storage/storage.service';
+import { ManifestDto } from './job.dto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -132,17 +133,19 @@ describe('JobService', () => {
 
   describe('getDetails', () => {
     it('should return job details', async () => {
-      const manifest = {
-        title: 'Example Title',
-        description: 'Example Description',
-        fortunesRequested: 5,
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
         fundAmount: 100,
       };
 
       httpService.axiosRef.get = jest.fn().mockResolvedValue({
         status: 200,
-        data: { ...manifest, fortunesRequired: manifest.fortunesRequested },
+        data: manifest,
       });
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([]);
 
       const result = await jobService.getDetails(chainId, escrowAddress);
 
@@ -205,6 +208,32 @@ describe('JobService', () => {
         jobService.getDetails(chainId, escrowAddress),
       ).rejects.toThrow('Unable to get Reputation Oracle URL');
     });
+
+    it('should fail if job has already been completed', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 1,
+        fundAmount: 100,
+      };
+
+      httpService.axiosRef.get = jest.fn().mockResolvedValue({
+        status: 200,
+        data: manifest,
+      });
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
+
+      await expect(
+        jobService.getDetails(chainId, escrowAddress),
+      ).rejects.toThrow('This job has already been completed');
+    });
   });
 
   describe('getPendingJobs', () => {
@@ -255,6 +284,17 @@ describe('JobService', () => {
 
   describe('solveJob', () => {
     it('should solve a job', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      httpService.axiosRef.get = jest.fn().mockResolvedValue({
+        status: 200,
+        data: manifest,
+      });
       const solutionsUrl =
         'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
 
@@ -297,6 +337,46 @@ describe('JobService', () => {
           },
         },
       );
+    });
+
+    it('should fail if job has already been completed', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 1,
+        fundAmount: 100,
+      };
+
+      httpService.axiosRef.get = jest.fn().mockResolvedValue({
+        status: 200,
+        data: manifest,
+      });
+
+      const recordingOracleURLMock = 'https://example.com/recordingoracle';
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      }));
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: recordingOracleURLMock,
+        }),
+      }));
+
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
+
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow('This job has already been completed');
+      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
     });
 
     it('should fail if the escrow address is invalid', async () => {
