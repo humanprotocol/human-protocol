@@ -9,7 +9,8 @@ import gateIoIcon from 'src/assets/exchanges/gate-io.png';
 import lBankIcon from 'src/assets/exchanges/lbank.svg';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import { TOOLTIPS } from 'src/constants/tooltips';
-import { useHMTStats } from 'src/hooks/useHMTStats';
+import { useHumanAppData } from 'src/hooks/useHumanAppData';
+import { useChainId } from 'src/state/humanAppData/hooks';
 
 const EXCHANGES = [
   { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
@@ -70,7 +71,8 @@ const TotalSupplyComponent = ({ value }: { value: number }) => {
 };
 
 export const TokenView: FC = () => {
-  const { data } = useHMTStats();
+  const chainId = useChainId();
+  const { data } = useHumanAppData(chainId);
 
   return (
     <Box>
@@ -78,21 +80,21 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total transfers"
-            value={data?.totalTransferCount}
+            value={data?.data?.[0]?.attributes.totalTransferCount}
             tooltipTitle={TOOLTIPS.TOTAL_TRANSFERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Holders"
-            value={data?.holders}
+            value={data?.data?.[0]?.attributes?.totalHolders}
             tooltipTitle={TOOLTIPS.HOLDERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total Supply"
-            value={data?.totalSupply}
+            value={data?.data?.[0]?.attributes?.totalSupply}
             component={TotalSupplyComponent}
             tooltipTitle={TOOLTIPS.TOTAL_SUPPLY}
           />
