@@ -132,7 +132,6 @@ def create_project(
                 models.ProjectWriteRequest(
                     name=escrow_address,
                     labels=labels,
-                    owner_id=Config.cvat_config.cvat_admin_user_id,
                 )
             )
             if user_guide:
@@ -238,7 +237,6 @@ def create_task(project_id: int, escrow_address: str) -> models.TaskRead:
         task_write_request = models.TaskWriteRequest(
             name=escrow_address,
             project_id=project_id,
-            owner_id=Config.cvat_config.cvat_admin_user_id,
             overlap=0,
             segment_size=Config.cvat_config.cvat_job_segment_size,
         )

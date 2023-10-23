@@ -82,7 +82,6 @@ class CvatConfig:
     cvat_url = os.environ.get("CVAT_URL", "http://localhost:8080")
     cvat_admin = os.environ.get("CVAT_ADMIN", "admin")
     cvat_admin_pass = os.environ.get("CVAT_ADMIN_PASS", "admin")
-    cvat_admin_user_id = int(os.environ.get("CVAT_ADMIN_USER_ID", 1))
     cvat_org_slug = os.environ.get("CVAT_ORG_SLUG", "")
 
     cvat_job_overlap = int(os.environ.get("CVAT_JOB_OVERLAP", 0))
