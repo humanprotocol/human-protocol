@@ -5,9 +5,9 @@ import { IsValidEthereumAddress } from '../../common/validators';
 import { EventType } from 'src/common/enums/webhook';
 
 export class ManifestDto {
-  title: string;
-  description: string;
-  fortunesRequested: number;
+  requesterTitle: string;
+  requesterDescription: string;
+  submissionsRequired: number;
   fundAmount: number;
 }
 
