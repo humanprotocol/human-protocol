@@ -1,4 +1,5 @@
 import { ChainId } from '@human-protocol/sdk';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -51,7 +52,7 @@ export const getJobList = async ({
 }) => {
   const { data } = await api.get(`/job/list`, {
     params: {
-      networks: chainId,
+      networks: chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : chainId,
       status,
     },
   });
