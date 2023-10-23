@@ -437,7 +437,6 @@ describe('JobService', () => {
 
   describe('processInvalidJob', () => {
     it('should mark a job solution as invalid', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
 
@@ -458,16 +457,13 @@ describe('JobService', () => {
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify({
-          exchangeAddress,
-          solutions: [
-            {
-              workerAddress,
-              solution,
-              invalid: true,
-            },
-          ],
-        }),
+        JSON.stringify([
+          {
+            workerAddress,
+            solution,
+            error: true,
+          },
+        ]),
 
         {
           'Content-Type': 'application/json',

@@ -60,7 +60,7 @@ export class JobService {
     );
 
     if (
-      existingJobSolutions.filter((solution) => !solution.invalid).length >=
+      existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
       throw new BadRequestException('This job has already been completed');
@@ -116,7 +116,6 @@ export class JobService {
       chainId,
       escrowAddress,
       workerAddress,
-      signer.address,
       solution,
     );
 
@@ -140,7 +139,7 @@ export class JobService {
     );
 
     if (foundSolution) {
-      foundSolution.invalid = true;
+      foundSolution.error = true;
     } else {
       throw new BadRequestException(
         `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
@@ -148,7 +147,6 @@ export class JobService {
     }
 
     await this.storageService.uploadJobSolutions(
-      this.web3Service.getSigner(invalidJobSolution.chainId).address,
       invalidJobSolution.escrowAddress,
       invalidJobSolution.chainId,
       existingJobSolutions,
@@ -159,7 +157,6 @@ export class JobService {
     chainId: ChainId,
     escrowAddress: string,
     workerAddress: string,
-    exchangeAddress: string,
     solution: string,
   ): Promise<string> {
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
@@ -177,7 +174,7 @@ export class JobService {
 
     const manifest = await this.getManifest(chainId, escrowAddress);
     if (
-      existingJobSolutions.filter((solution) => !solution.invalid).length >=
+      existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
       throw new BadRequestException('This job has already been completed');
@@ -192,7 +189,6 @@ export class JobService {
     ];
 
     const url = await this.storageService.uploadJobSolutions(
-      exchangeAddress,
       escrowAddress,
       chainId,
       newJobSolutions,

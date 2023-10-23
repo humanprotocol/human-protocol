@@ -72,6 +72,7 @@ export class JobController {
     @Query('limit') limit = 10,
   ): Promise<JobListDto[] | BadRequestException> {
     networks = !Array.isArray(networks) ? [networks] : networks;
+    console.log(networks);
     return this.jobService.getJobsByStatus(
       networks,
       req.user.id,
