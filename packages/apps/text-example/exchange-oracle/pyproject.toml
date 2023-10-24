@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "text-example-exo"
+version = "0.1.0"
+description = ""
+authors = ["Marius Hamacher <marius.hamacher@outlook.de>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+hmt-basemodels = "^0.2.5"
+fastapi = "^0.104.0"
+doccano-client = "^1.2.8"
+uvicorn = {extras = ["standard"], version = "^0.23.2"}
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.10.0"
+pytest = "^7.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
