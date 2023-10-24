@@ -13,6 +13,12 @@ export const MOCK_LABEL_NEGATIVE = '';
 export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
+export const MOCK_JOB_LAUNCHER_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C441';
+export const MOCK_EXCHANGE_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C441';
+export const MOCK_RECORDING_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C442';
 export const MOCK_MANIFEST: IFortuneManifest = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
