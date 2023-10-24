@@ -24,7 +24,7 @@ class EscrowFilter:
 
     def __init__(
         self,
-        networks: [List[ChainId]],
+        networks: List[ChainId],
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
@@ -50,7 +50,7 @@ class EscrowFilter:
         """
 
         if not networks or any(
-            network not in set(chain_id.value for chain_id in ChainId)
+            network.value not in set(chain_id.value for chain_id in ChainId)
             for network in networks
         ):
             raise FilterError(f"Invalid ChainId")

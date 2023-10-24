@@ -9,7 +9,12 @@ from web3.providers.rpc import HTTPProvider
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.gql.reward import get_reward_added_events_query
 from human_protocol_sdk.gql.staking import get_leader_query, get_leaders_query
-from human_protocol_sdk.staking import StakingClient, LeaderFilter, StakingClientError
+from human_protocol_sdk.staking import (
+    StakingClient,
+    LeaderFilter,
+    StakingClientError,
+    StakingUtils,
+)
 
 from test.human_protocol_sdk.utils import (
     DEFAULT_GAS_PAYER_PRIV,
@@ -285,7 +290,7 @@ class StakingTestCase(unittest.TestCase):
         self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
     def test_get_leaders(self):
-        filter = LeaderFilter(role="role")
+        filter = LeaderFilter(networks=[ChainId.POLYGON], role="role")
         mock_function = MagicMock()
 
         with patch(
@@ -318,40 +323,34 @@ class StakingTestCase(unittest.TestCase):
                 }
             ]
 
-            leaders = self.staking_client.get_leaders(filter)
+            leaders = StakingUtils.get_leaders(filter)
 
             mock_function.assert_any_call(
-                "subgraph_url",
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
                 query=get_leaders_query(filter),
                 params={"role": filter.role},
             )
 
-            self.assertEqual(
-                leaders,
-                [
-                    {
-                        "id": self.gas_payer.address,
-                        "address": self.gas_payer.address,
-                        "amount_staked": 100,
-                        "amount_allocated": 50,
-                        "amount_locked": 25,
-                        "locked_until_timestamp": 0,
-                        "amount_withdrawn": 25,
-                        "amount_slashed": 25,
-                        "reputation": 25,
-                        "reward": 25,
-                        "amount_jobs_launched": 25,
-                        "role": "role",
-                        "fee": None,
-                        "public_key": None,
-                        "webhook_url": None,
-                        "url": None,
-                    }
-                ],
-            )
+            self.assertEqual(len(leaders), 1)
+            self.assertEqual(leaders[0].id, self.gas_payer.address)
+            self.assertEqual(leaders[0].address, self.gas_payer.address)
+            self.assertEqual(leaders[0].amount_staked, 100)
+            self.assertEqual(leaders[0].amount_allocated, 50)
+            self.assertEqual(leaders[0].amount_locked, 25)
+            self.assertEqual(leaders[0].locked_until_timestamp, 0)
+            self.assertEqual(leaders[0].amount_withdrawn, 25)
+            self.assertEqual(leaders[0].amount_slashed, 25)
+            self.assertEqual(leaders[0].reputation, 25)
+            self.assertEqual(leaders[0].reward, 25)
+            self.assertEqual(leaders[0].amount_jobs_launched, 25)
+            self.assertEqual(leaders[0].role, "role")
+            self.assertEqual(leaders[0].fee, None)
+            self.assertEqual(leaders[0].public_key, None)
+            self.assertEqual(leaders[0].webhook_url, None)
+            self.assertEqual(leaders[0].url, None)
 
     def test_get_leader(self):
-        staker_address = "staker1"
+        staker_address = "0x1234567890123456789012345678901234567891"
 
         mock_function = MagicMock()
 
@@ -383,97 +382,34 @@ class StakingTestCase(unittest.TestCase):
                 }
             ]
 
-            leader = self.staking_client.get_leader(staker_address)
+            leader = StakingUtils.get_leader(ChainId.POLYGON, staker_address)
 
             mock_function.assert_any_call(
-                "subgraph_url",
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
                 query=get_leader_query,
                 params={"address": staker_address},
             )
 
-            self.assertEqual(
-                leader,
-                {
-                    "id": staker_address,
-                    "address": staker_address,
-                    "amount_staked": 100,
-                    "amount_allocated": 50,
-                    "amount_locked": 25,
-                    "locked_until_timestamp": 0,
-                    "amount_withdrawn": 25,
-                    "amount_slashed": 25,
-                    "reputation": 25,
-                    "reward": 25,
-                    "amount_jobs_launched": 25,
-                    "role": "role",
-                    "fee": None,
-                    "public_key": None,
-                    "webhook_url": None,
-                    "url": None,
-                },
-            )
-
-    def test_get_leader_default_account(self):
-        with patch(
-            "human_protocol_sdk.staking.get_data_from_subgraph"
-        ) as mock_function:
-            mock_function.side_effect = [
-                {
-                    "data": {
-                        "leader": {
-                            "id": self.w3.eth.default_account,
-                            "address": self.w3.eth.default_account,
-                            "amountStaked": "100",
-                            "amountAllocated": "50",
-                            "amountLocked": "25",
-                            "lockedUntilTimestamp": "0",
-                            "amountWithdrawn": "25",
-                            "amountSlashed": "25",
-                            "reputation": "25",
-                            "reward": "25",
-                            "amountJobsLaunched": "25",
-                            "role": "role",
-                            "fee": None,
-                            "publicKey": None,
-                            "webhookUrl": None,
-                            "url": None,
-                        }
-                    }
-                }
-            ]
-
-            leader = self.staking_client.get_leader()
-
-            mock_function.assert_any_call(
-                "subgraph_url",
-                query=get_leader_query,
-                params={"address": self.w3.eth.default_account},
-            )
-
-            self.assertEqual(
-                leader,
-                {
-                    "id": self.w3.eth.default_account,
-                    "address": self.w3.eth.default_account,
-                    "amount_staked": 100,
-                    "amount_allocated": 50,
-                    "amount_locked": 25,
-                    "locked_until_timestamp": 0,
-                    "amount_withdrawn": 25,
-                    "amount_slashed": 25,
-                    "reputation": 25,
-                    "reward": 25,
-                    "amount_jobs_launched": 25,
-                    "role": "role",
-                    "fee": None,
-                    "public_key": None,
-                    "webhook_url": None,
-                    "url": None,
-                },
-            )
+            self.assertNotEqual(leader, None)
+            self.assertEqual(leader.id, staker_address)
+            self.assertEqual(leader.address, staker_address)
+            self.assertEqual(leader.amount_staked, 100)
+            self.assertEqual(leader.amount_allocated, 50)
+            self.assertEqual(leader.amount_locked, 25)
+            self.assertEqual(leader.locked_until_timestamp, 0)
+            self.assertEqual(leader.amount_withdrawn, 25)
+            self.assertEqual(leader.amount_slashed, 25)
+            self.assertEqual(leader.reputation, 25)
+            self.assertEqual(leader.reward, 25)
+            self.assertEqual(leader.amount_jobs_launched, 25)
+            self.assertEqual(leader.role, "role")
+            self.assertEqual(leader.fee, None)
+            self.assertEqual(leader.public_key, None)
+            self.assertEqual(leader.webhook_url, None)
+            self.assertEqual(leader.url, None)
 
     def test_get_allocation(self):
-        escrow_address = "escrow1"
+        escrow_address = "0x1234567890123456789012345678901234567891"
 
         mock_function = MagicMock()
         mock_function.return_value.call.return_value = [
@@ -489,14 +425,14 @@ class StakingTestCase(unittest.TestCase):
 
         mock_function.assert_called_once_with(escrow_address)
 
-        self.assertEqual(allocation["escrow_address"], escrow_address)
-        self.assertEqual(allocation["staker"], "staker")
-        self.assertEqual(allocation["tokens"], 10)
-        self.assertNotEqual(allocation["created_at"], 0)
-        self.assertEqual(allocation["closed_at"], 0)
+        self.assertEqual(allocation.escrow_address, escrow_address)
+        self.assertEqual(allocation.staker, "staker")
+        self.assertEqual(allocation.tokens, 10)
+        self.assertNotEqual(allocation.created_at, 0)
+        self.assertEqual(allocation.closed_at, 0)
 
     def test_get_allocation_invalid_address(self):
-        escrow_address = "escrow1"
+        escrow_address = "0x1234567890123456789012345678901234567891"
 
         mock_function = MagicMock()
         mock_function.return_value.call.return_value = [
@@ -515,7 +451,7 @@ class StakingTestCase(unittest.TestCase):
         self.assertIsNone(allocation)
 
     def test_get_rewards_info(self):
-        slasher = "slasher1"
+        slasher = "0x1234567890123456789012345678901234567891"
 
         mock_function = MagicMock()
         with patch(
@@ -535,19 +471,19 @@ class StakingTestCase(unittest.TestCase):
                     ]
                 }
             }
-            rewards_info = self.staking_client.get_rewards_info(slasher)
+            rewards_info = StakingUtils.get_rewards_info(ChainId.POLYGON, slasher)
 
             mock_function.assert_called_once_with(
-                "subgraph_url",
+                NETWORKS[ChainId.POLYGON]["subgraph_url"],
                 query=get_reward_added_events_query,
                 params={"slasherAddress": slasher},
             )
 
             self.assertEqual(len(rewards_info), 2)
-            self.assertEqual(rewards_info[0]["escrow_address"].lower(), "escrow1")
-            self.assertEqual(rewards_info[0]["amount"], 10)
-            self.assertEqual(rewards_info[1]["escrow_address"].lower(), "escrow2")
-            self.assertEqual(rewards_info[1]["amount"], 20)
+            self.assertEqual(rewards_info[0].escrow_address.lower(), "escrow1")
+            self.assertEqual(rewards_info[0].amount, 10)
+            self.assertEqual(rewards_info[1].escrow_address.lower(), "escrow2")
+            self.assertEqual(rewards_info[1].amount, 20)
 
 
 if __name__ == "__main__":
