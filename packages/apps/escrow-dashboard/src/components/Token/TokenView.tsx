@@ -1,5 +1,6 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Box, Link, Grid, Typography } from '@mui/material';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import { CardTextBlock } from '../Cards';
 import bingXIcon from 'src/assets/exchanges/bingx.png';
@@ -10,7 +11,7 @@ import lBankIcon from 'src/assets/exchanges/lbank.svg';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import { TOOLTIPS } from 'src/constants/tooltips';
 import { useHumanAppData } from 'src/hooks/useHumanAppData';
-import { useChainId } from 'src/state/humanAppData/hooks';
+import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
 const EXCHANGES = [
   { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
@@ -72,7 +73,20 @@ const TotalSupplyComponent = ({ value }: { value: number }) => {
 
 export const TokenView: FC = () => {
   const chainId = useChainId();
+  const days = useDays();
   const { data } = useHumanAppData(chainId);
+
+  const transferCount = useMemo(() => {
+    if (data) {
+      return data.data[0].attributes.dailyHMTData
+        .slice(0, days)
+        .reverse()
+        .reduce(
+          (acc: number, d: any) => acc + Number(d.totalTransactionCount),
+          0
+        );
+    }
+  }, [data, days]);
 
   return (
     <Box>
@@ -80,7 +94,7 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total transfers"
-            value={data?.data?.[0]?.attributes.totalTransferCount}
+            value={transferCount}
             tooltipTitle={TOOLTIPS.TOTAL_TRANSFERS}
           />
         </Grid>
@@ -94,7 +108,11 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total Supply"
-            value={data?.data?.[0]?.attributes?.totalSupply}
+            value={
+              chainId === ChainId.ALL
+                ? 1_000_000_000
+                : data?.data?.[0]?.attributes?.totalSupply
+            }
             component={TotalSupplyComponent}
             tooltipTitle={TOOLTIPS.TOTAL_SUPPLY}
           />

@@ -10,7 +10,7 @@ type HumanAppDataState = {
 
 const initialState: HumanAppDataState = {
   loadingKeys: {},
-  chainId: ChainId.POLYGON,
+  chainId: ChainId.ALL,
   days: 30,
 };
 
