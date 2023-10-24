@@ -508,7 +508,6 @@ export class WebhookService {
 
       return true;
     } catch (e) {
-      console.log(e);
       return await this.handleWebhookError(webhookEntity, e);
     }
   }
