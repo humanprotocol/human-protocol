@@ -465,7 +465,9 @@ export class JobService {
             skip,
             limit,
           );
-          const escrowAddresses = escrows.map((escrow) => escrow.address);
+          const escrowAddresses = escrows.map((escrow) =>
+            ethers.utils.getAddress(escrow.address),
+          );
 
           jobs = await this.jobRepository.findJobsByEscrowAddresses(
             userId,
@@ -488,11 +490,32 @@ export class JobService {
     skip: number,
     limit: number,
   ): Promise<EscrowData[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      networks,
-      jobRequesterId: userId.toString(),
-      status: filterToEscrowStatus(status),
-    });
+    const escrows: EscrowData[] = [];
+    escrows.push(
+      ...(await EscrowUtils.getEscrows({
+        networks,
+        jobRequesterId: userId.toString(),
+        status: filterToEscrowStatus(status),
+      })),
+    );
+
+    if (status === JobStatusFilter.LAUNCHED) {
+      escrows.push(
+        ...(await EscrowUtils.getEscrows({
+          networks,
+          jobRequesterId: userId.toString(),
+          status: EscrowStatus.Partial,
+        })),
+      );
+      escrows.push(
+        ...(await EscrowUtils.getEscrows({
+          networks,
+          jobRequesterId: userId.toString(),
+          status: EscrowStatus.Paid,
+        })),
+      );
+      escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    }
 
     return escrows.slice(skip, limit);
   }

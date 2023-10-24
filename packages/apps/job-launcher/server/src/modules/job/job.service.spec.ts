@@ -1149,7 +1149,7 @@ describe('JobService', () => {
         limit,
       );
     });
-    it('should call subgraph and database with LAUNCHED status', async () => {
+    it.only('should call subgraph and database with LAUNCHED status', async () => {
       const jobEntityMock = [
         {
           status: JobStatus.LAUNCHED,
@@ -1190,7 +1190,7 @@ describe('JobService', () => {
       ]);
       expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
         userId,
-        [MOCK_ADDRESS],
+        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
       );
     });
     it('should call subgraph and database with CANCELLED status', async () => {

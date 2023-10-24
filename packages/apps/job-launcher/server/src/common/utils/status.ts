@@ -1,5 +1,5 @@
 import { EscrowStatus } from '@human-protocol/sdk';
-import { JobStatus, JobStatusFilter } from '../enums/job';
+import { JobStatusFilter } from '../enums/job';
 
 export function filterToEscrowStatus(
   filterStatus: JobStatusFilter,
