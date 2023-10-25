@@ -398,7 +398,7 @@ export class WebhookService {
     try {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
       const escrowClient = await EscrowClient.build(signer);
-      console.log(escrowClient);
+
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,
       );
