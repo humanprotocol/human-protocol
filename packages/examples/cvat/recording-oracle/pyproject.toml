@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "recording_oracle"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.10, <3.13"
 fastapi = "^0.98.0"
 uvicorn = "^0.22.0"
 python-dotenv = "^1.0.0"
