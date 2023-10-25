@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 
 export const CvatJobRequestValidationSchema = Yup.object().shape({
-  title: Yup.string().required('Title is required'),
   description: Yup.string().required('Description is required'),
   dataUrl: Yup.string().required('Data URL is required').url('Invalid URL'),
   groundTruthUrl: Yup.string()

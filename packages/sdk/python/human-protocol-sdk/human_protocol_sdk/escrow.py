@@ -97,145 +97,82 @@ class EscrowConfig:
         self.hash = hash
 
 
-class EscrowFilter:
-    """
-    A class used to filter escrow requests.
-    """
-
-    def __init__(
-        self,
-        networks: [List[ChainId]],
-        launcher: Optional[str] = None,
-        reputation_oracle: Optional[str] = None,
-        recording_oracle: Optional[str] = None,
-        exchange_oracle: Optional[str] = None,
-        status: Optional[Status] = None,
-        date_from: Optional[datetime] = None,
-        date_to: Optional[datetime] = None,
-    ):
-        """
-        Initializes a EscrowFilter instance.
-
-        Args:
-            networks (List[ChainId]): Networks to request data
-            launcher (Optional[str]): Launcher address
-            reputation_oracle (Optional[str]): Reputation oracle address
-            recording_oracle (Optional[str]): Recording oracle address
-            exchange_oracle (Optional[str]): Exchange oracle address
-            status (Optional[Status]): Escrow status
-            date_from (Optional[datetime]): Created from date
-            date_to (Optional[datetime]): Created to date
-        """
-
-        if not networks or any(
-            network not in set(chain_id.value for chain_id in ChainId)
-            for network in networks
-        ):
-            raise EscrowClientError(f"Invalid ChainId")
-
-        if launcher and not Web3.is_address(launcher):
-            raise EscrowClientError(f"Invalid address: {launcher}")
-
-        if reputation_oracle and not Web3.is_address(reputation_oracle):
-            raise EscrowClientError(f"Invalid address: {reputation_oracle}")
-
-        if recording_oracle and not Web3.is_address(recording_oracle):
-            raise EscrowClientError(f"Invalid address: {recording_oracle}")
-
-        if exchange_oracle and not Web3.is_address(exchange_oracle):
-            raise EscrowClientError(f"Invalid address: {exchange_oracle}")
-
-        if date_from and date_to and date_from > date_to:
-            raise EscrowClientError(
-                f"Invalid dates: {date_from} must be earlier than {date_to}"
-            )
-
-        self.launcher = launcher
-        self.reputation_oracle = reputation_oracle
-        self.recording_oracle = recording_oracle
-        self.exchange_oracle = exchange_oracle
-        self.status = status
-        self.date_from = date_from
-        self.date_to = date_to
-        self.networks = networks
-
-
 class EscrowData:
     def __init__(
         self,
+        chain_id: ChainId,
         id: str,
         address: str,
-        amountPaid: str,
-        balance: str,
-        count: str,
-        factoryAddress: str,
+        amount_paid: int,
+        balance: int,
+        count: int,
+        factory_address: str,
         launcher: str,
         status: str,
         token: str,
-        totalFundedAmount: str,
-        createdAt: str,
-        chainId: int,
-        finalResultsUrl: Optional[str] = None,
-        intermediateResultsUrl: Optional[str] = None,
-        manifestHash: Optional[str] = None,
-        manifestUrl: Optional[str] = None,
-        recordingOracle: Optional[str] = None,
-        recordingOracleFee: Optional[str] = None,
-        reputationOracle: Optional[str] = None,
-        reputationOracleFee: Optional[str] = None,
-        exchangeOracle: Optional[str] = None,
-        exchangeOracleFee: Optional[str] = None,
+        total_funded_amount: int,
+        created_at: datetime,
+        final_results_url: Optional[str] = None,
+        intermediate_results_url: Optional[str] = None,
+        manifest_hash: Optional[str] = None,
+        manifest_url: Optional[str] = None,
+        recording_oracle: Optional[str] = None,
+        recording_oracle_fee: Optional[int] = None,
+        reputation_oracle: Optional[str] = None,
+        reputation_oracle_fee: Optional[int] = None,
+        exchange_oracle: Optional[str] = None,
+        exchange_oracle_fee: Optional[int] = None,
     ):
         """
         Initializes an EscrowData instance.
 
         Args:
+            chain_id (ChainId): Chain identifier
             id (str): Identifier
             address (str): Address
-            amountPaid (str): Amount paid
-            balance (str): Balance
-            count (str): Count
-            factoryAddress (str): Factory address
+            amount_paid (int): Amount paid
+            balance (int): Balance
+            count (int): Count
+            factory_address (str): Factory address
             launcher (str): Launcher
             status (str): Status
             token (str): Token
-            totalFundedAmount (str): Total funded amount
-            createdAt (str): Creation date
-            chainId (int): Chain identifier
-            finalResultsUrl (str, optional): Optional URL for final results.
-            intermediateResultsUrl (str, optional): Optional URL for intermediate results.
-            manifestHash (str, optional): Optional manifest hash.
-            manifestUrl (str, optional): Optional manifest URL.
-            recordingOracle (str, optional): Optional recording Oracle address.
-            recordingOracleFee (str, optional): Optional recording Oracle fee.
-            reputationOracle (str, optional): Optional reputation Oracle address.
-            reputationOracleFee (str, optional): Optional reputation Oracle fee.
-            exchangeOracle (str, optional): Optional exchange Oracle address.
-            exchangeOracleFee (str, optional): Optional exchange Oracle fee.
+            total_funded_amount (int): Total funded amount
+            created_at (datetime): Creation date
+            final_results_url (str, optional): Optional URL for final results.
+            intermediate_results_url (str, optional): Optional URL for intermediate results.
+            manifest_hash (str, optional): Optional manifest hash.
+            manifest_url (str, optional): Optional manifest URL.
+            recording_oracle (str, optional): Optional recording Oracle address.
+            recording_oracle_fee (int, optional): Optional recording Oracle fee.
+            reputation_oracle (str, optional): Optional reputation Oracle address.
+            reputation_oracle_fee (int, optional): Optional reputation Oracle fee.
+            exchange_oracle (str, optional): Optional exchange Oracle address.
+            exchange_oracle_fee (int, optional): Optional exchange Oracle fee.
         """
 
         self.id = id
         self.address = address
-        self.amountPaid = amountPaid
+        self.amount_paid = amount_paid
         self.balance = balance
         self.count = count
-        self.factoryAddress = factoryAddress
-        self.finalResultsUrl = finalResultsUrl
-        self.intermediateResultsUrl = intermediateResultsUrl
+        self.factory_address = factory_address
+        self.final_results_url = final_results_url
+        self.intermediate_results_url = intermediate_results_url
         self.launcher = launcher
-        self.manifestHash = manifestHash
-        self.manifestUrl = manifestUrl
-        self.recordingOracle = recordingOracle
-        self.recordingOracleFee = recordingOracleFee
-        self.reputationOracle = reputationOracle
-        self.reputationOracleFee = reputationOracleFee
-        self.exchangeOracle = exchangeOracle
-        self.exchangeOracleFee = exchangeOracleFee
+        self.manifest_hash = manifest_hash
+        self.manifest_url = manifest_url
+        self.recording_oracle = recording_oracle
+        self.recording_oracle_fee = recording_oracle_fee
+        self.reputation_oracle = reputation_oracle
+        self.reputation_oracle_fee = reputation_oracle_fee
+        self.exchange_oracle = exchange_oracle
+        self.exchange_oracle_fee = exchange_oracle_fee
         self.status = status
         self.token = token
-        self.totalFundedAmount = totalFundedAmount
-        self.createdAt = createdAt
-        self.chainId = chainId
+        self.total_funded_amount = total_funded_amount
+        self.created_at = created_at
+        self.chain_id = chain_id
 
 
 class EscrowClient:
@@ -258,7 +195,7 @@ class EscrowClient:
             self.w3.middleware_onion.inject(geth_poa_middleware, "geth_poa", layer=0)
 
         chain_id = None
-        # Load network configuration based on chainId
+        # Load network configuration based on chain_id
         try:
             chain_id = self.w3.eth.chain_id
             self.network = NETWORKS[ChainId(chain_id)]
@@ -867,7 +804,7 @@ class EscrowUtils:
 
     @staticmethod
     def get_escrows(
-        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI.value]),
+        filter: EscrowFilter = EscrowFilter(networks=[ChainId.POLYGON_MUMBAI]),
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
@@ -881,17 +818,23 @@ class EscrowUtils:
             get_escrows_query,
         )
 
-        escrow_addresses = []
+        escrows = []
         for chain_id in filter.networks:
-            network = NETWORKS[ChainId(chain_id)]
+            network = NETWORKS[chain_id]
             escrows_data = get_data_from_subgraph(
                 network["subgraph_url"],
                 query=get_escrows_query(filter),
                 params={
-                    "launcher": filter.launcher,
-                    "reputationOracle": filter.reputation_oracle,
-                    "recordingOracle": filter.recording_oracle,
-                    "exchangeOracle": filter.exchange_oracle,
+                    "launcher": filter.launcher.lower() if filter.launcher else None,
+                    "reputationOracle": filter.reputation_oracle.lower()
+                    if filter.reputation_oracle
+                    else None,
+                    "recordingOracle": filter.recording_oracle.lower()
+                    if filter.recording_oracle
+                    else None,
+                    "exchangeOracle": filter.exchange_oracle.lower()
+                    if filter.exchange_oracle
+                    else None,
                     "jobRequesterId": filter.job_requester_id,
                     "status": filter.status.name if filter.status else None,
                     "from": int(filter.date_from.timestamp())
@@ -900,11 +843,49 @@ class EscrowUtils:
                     "to": int(filter.date_to.timestamp()) if filter.date_to else None,
                 },
             )
-            escrows = escrows_data["data"]["escrows"]
-            for escrow in escrows:
-                escrow["chain_id"] = chain_id
-            escrow_addresses.extend(escrows)
-        return escrow_addresses
+            escrows_raw = escrows_data["data"]["escrows"]
+
+            escrows.extend(
+                [
+                    EscrowData(
+                        chain_id=chain_id,
+                        id=escrow.get("id", ""),
+                        address=escrow.get("address", ""),
+                        amount_paid=int(escrow.get("amountPaid", 0)),
+                        balance=int(escrow.get("balance", 0)),
+                        count=int(escrow.get("count", 0)),
+                        factory_address=escrow.get("factoryAddress", ""),
+                        launcher=escrow.get("launcher", ""),
+                        status=escrow.get("status", ""),
+                        token=escrow.get("token", ""),
+                        total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
+                        created_at=datetime.fromtimestamp(
+                            int(escrow.get("createdAt", 0))
+                        ),
+                        final_results_url=escrow.get("finalResultsUrl", None),
+                        intermediate_results_url=escrow.get(
+                            "intermediateResultsUrl", None
+                        ),
+                        manifest_hash=escrow.get("manifestHash", None),
+                        manifest_url=escrow.get("manifestUrl", None),
+                        recording_oracle=escrow.get("recordingOracle", None),
+                        recording_oracle_fee=int(escrow.get("recordingOracleFee"))
+                        if escrow.get("recordingOracleFee", None)
+                        else None,
+                        reputation_oracle=escrow.get("reputationOracle", None),
+                        reputation_oracle_fee=int(escrow.get("reputationOracleFee"))
+                        if escrow.get("reputationOracleFee", None)
+                        else None,
+                        exchange_oracle=escrow.get("exchangeOracle", None),
+                        exchange_oracle_fee=int(escrow.get("exchangeOracleFee"))
+                        if escrow.get("exchangeOracleFee", None)
+                        else None,
+                    )
+                    for escrow in escrows_raw
+                ]
+            )
+
+        return escrows
 
     @staticmethod
     def get_escrow(
@@ -924,7 +905,7 @@ class EscrowUtils:
             get_escrow_query,
         )
 
-        if chain_id not in set(chain_id.value for chain_id in ChainId):
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
             raise EscrowClientError(f"Invalid ChainId")
 
         if not Web3.is_address(escrow_address):
@@ -932,12 +913,46 @@ class EscrowUtils:
 
         network = NETWORKS[ChainId(chain_id)]
 
-        escrow = get_data_from_subgraph(
+        escrow_data = get_data_from_subgraph(
             network["subgraph_url"],
             query=get_escrow_query(),
             params={
-                "escrowAddress": escrow_address,
+                "escrowAddress": escrow_address.lower(),
             },
         )
 
-        return escrow["data"]["escrow"]
+        escrow = escrow_data["data"]["escrow"]
+
+        if not escrow:
+            return None
+
+        return EscrowData(
+            chain_id=chain_id,
+            id=escrow.get("id", ""),
+            address=escrow.get("address", ""),
+            amount_paid=int(escrow.get("amountPaid", 0)),
+            balance=int(escrow.get("balance", 0)),
+            count=int(escrow.get("count", 0)),
+            factory_address=escrow.get("factoryAddress", ""),
+            launcher=escrow.get("launcher", ""),
+            status=escrow.get("status", ""),
+            token=escrow.get("token", ""),
+            total_funded_amount=int(escrow.get("totalFundedAmount", 0)),
+            created_at=datetime.fromtimestamp(int(escrow.get("createdAt", 0))),
+            final_results_url=escrow.get("finalResultsUrl", None),
+            intermediate_results_url=escrow.get("intermediateResultsUrl", None),
+            manifest_hash=escrow.get("manifestHash", None),
+            manifest_url=escrow.get("manifestUrl", None),
+            recording_oracle=escrow.get("recordingOracle", None),
+            recording_oracle_fee=int(escrow.get("recordingOracleFee"))
+            if escrow.get("recordingOracleFee", None)
+            else None,
+            reputation_oracle=escrow.get("reputationOracle", None),
+            reputation_oracle_fee=int(escrow.get("reputationOracleFee"))
+            if escrow.get("reputationOracleFee", None)
+            else None,
+            exchange_oracle=escrow.get("exchangeOracle", None),
+            exchange_oracle_fee=int(escrow.get("exchangeOracleFee"))
+            if escrow.get("exchangeOracleFee", None)
+            else None,
+        )

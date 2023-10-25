@@ -34,23 +34,31 @@ class StakingClientError(Exception):
     pass
 
 
-class LeaderFilter:
-    """
-    A class used to filter leaders.
-    """
-
+class AllocationData:
     def __init__(
         self,
-        role: Optional[str] = None,
+        escrow_address: str,
+        staker: str,
+        tokens: str,
+        created_at: str,
+        closed_at: str,
     ):
         """
-        Initializes a LeaderFilter instance.
+        Initializes an AllocationData instance.
 
         Args:
-            role (Optional[str]): Leader role
+            escrow_address (str): Escrow address
+            staker (str): Staker address
+            tokens (str): Amount allocated
+            created_at (str): Creation date
+            closed_at (str): Closing date
         """
 
-        self.role = role
+        self.escrow_address = escrow_address
+        self.staker = staker
+        self.tokens = tokens
+        self.created_at = created_at
+        self.closed_at = closed_at
 
 
 class StakingClient:
@@ -308,94 +316,14 @@ class StakingClient:
             StakingClientError,
         )
 
-    def get_leaders(self, filter: LeaderFilter = LeaderFilter()) -> List[dict]:
-        """Get leaders data of the protocol
-
-        Returns:
-            List[dict]: List of leaders data
-        """
-        from human_protocol_sdk.gql.staking import get_leaders_query
-
-        leaders_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
-            query=get_leaders_query(filter),
-            params={"role": filter.role},
-        )
-        leaders = leaders_data["data"]["leaders"]
-
-        return [
-            {
-                "id": leader["id"],
-                "address": leader["address"],
-                "amount_staked": int(leader["amountStaked"]),
-                "amount_allocated": int(leader["amountAllocated"]),
-                "amount_locked": int(leader["amountLocked"]),
-                "locked_until_timestamp": int(leader["lockedUntilTimestamp"]),
-                "amount_withdrawn": int(leader["amountWithdrawn"]),
-                "amount_slashed": int(leader["amountSlashed"]),
-                "reputation": int(leader["reputation"]),
-                "reward": int(leader["reward"]),
-                "amount_jobs_launched": int(leader["amountJobsLaunched"]),
-                "role": leader["role"],
-                "fee": int(leader["fee"]) if leader["fee"] else None,
-                "public_key": leader["publicKey"],
-                "webhook_url": leader["webhookUrl"],
-                "url": leader["url"],
-            }
-            for leader in leaders
-        ]
-
-    def get_leader(self, address: Optional[str] = None) -> dict:
-        """Get the leader details.
-
-        Args:
-            address (Optional[str]): Address of the leader, defaults to the default account
-
-        Returns:
-            dict: Leader details
-        """
-        from human_protocol_sdk.gql.staking import get_leader_query
-
-        if not address:
-            if not self.w3.eth.default_account:
-                raise StakingClientError("No address provided")
-
-            address = self.w3.eth.default_account
-
-        leader_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
-            query=get_leader_query,
-            params={"address": address},
-        )
-        leader = leader_data["data"]["leader"]
-
-        return {
-            "id": leader["id"],
-            "address": leader["address"],
-            "amount_staked": int(leader["amountStaked"]),
-            "amount_allocated": int(leader["amountAllocated"]),
-            "amount_locked": int(leader["amountLocked"]),
-            "locked_until_timestamp": int(leader["lockedUntilTimestamp"]),
-            "amount_withdrawn": int(leader["amountWithdrawn"]),
-            "amount_slashed": int(leader["amountSlashed"]),
-            "reputation": int(leader["reputation"]),
-            "reward": int(leader["reward"]),
-            "amount_jobs_launched": int(leader["amountJobsLaunched"]),
-            "role": leader["role"],
-            "fee": int(leader["fee"]) if leader["fee"] else None,
-            "public_key": leader["publicKey"],
-            "webhook_url": leader["webhookUrl"],
-            "url": leader["url"],
-        }
-
-    def get_allocation(self, escrow_address: str) -> Optional[dict]:
+    def get_allocation(self, escrow_address: str) -> Optional[AllocationData]:
         """Gets the allocation info for the specified escrow.
 
         Args:
             escrow_address (str): Address of the escrow
 
         Returns:
-            Optional[dict]: Allocation info if escrow exists, otherwise None
+            Optional[AllocationData]: Allocation info if escrow exists, otherwise None
         """
 
         [
@@ -409,38 +337,13 @@ class StakingClient:
         if escrow_address == web3.constants.ADDRESS_ZERO:
             return None
 
-        return {
-            "escrow_address": escrow_address,
-            "staker": staker,
-            "tokens": tokens,
-            "created_at": created_at,
-            "closed_at": closed_at,
-        }
-
-    def get_rewards_info(self, slasher: str) -> List[dict]:
-        """Get rewards of the given slasher
-
-        Args:
-            slasher (str): Address of the slasher
-
-        Returns:
-            List[dict]: List of rewards info
-        """
-
-        reward_added_events_data = get_data_from_subgraph(
-            self.network["subgraph_url"],
-            query=get_reward_added_events_query,
-            params={"slasherAddress": slasher},
+        return AllocationData(
+            escrow_address=escrow_address,
+            staker=staker,
+            tokens=tokens,
+            created_at=created_at,
+            closed_at=closed_at,
         )
-        reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
-
-        return [
-            {
-                "escrow_address": reward_added_events[i]["escrowAddress"],
-                "amount": reward_added_events[i]["amount"],
-            }
-            for i in range(len(reward_added_events))
-        ]
 
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.
@@ -454,3 +357,258 @@ class StakingClient:
 
         # TODO: Use Escrow/Job Module once implemented
         return self.factory_contract.functions.hasEscrow(escrow_address).call()
+
+
+class LeaderFilter:
+    """
+    A class used to filter leaders.
+    """
+
+    def __init__(
+        self,
+        networks: List[ChainId],
+        role: Optional[str] = None,
+    ):
+        """
+        Initializes a LeaderFilter instance.
+
+        Args:
+            networks (List[ChainId]): Networks to request data
+            role (Optional[str]): Leader role
+        """
+
+        if not networks or any(
+            network.value not in set(chain_id.value for chain_id in ChainId)
+            for network in networks
+        ):
+            raise StakingClientError(f"Invalid ChainId")
+
+        self.networks = networks
+        self.role = role
+
+
+class LeaderData:
+    def __init__(
+        self,
+        chain_id: ChainId,
+        id: str,
+        address: str,
+        amount_staked: int,
+        amount_allocated: int,
+        amount_locked: int,
+        locked_until_timestamp: int,
+        amount_withdrawn: int,
+        amount_slashed: int,
+        reputation: int,
+        reward: int,
+        amount_jobs_launched: int,
+        role: Optional[str] = None,
+        fee: Optional[int] = None,
+        public_key: Optional[str] = None,
+        webhook_url: Optional[str] = None,
+        url: Optional[str] = None,
+    ):
+        """
+        Initializes an LeaderData instance.
+
+        Args:
+            chain_id (ChainId): Chain Identifier
+            id (str): Identifier
+            address (str): Address
+            amount_staked (int): Amount staked
+            amount_allocated (int): Amount allocated
+            amount_locked (int): Amount locked
+            locked_until_timestamp (int): Locked until timestamp
+            amount_withdrawn (int): Amount withdrawn
+            amount_slashed (int): Amount slashed
+            reputation (int): Reputation
+            reward (int): Reward
+            amount_jobs_launched (int): Amount of jobs launched
+            role (Optional[str]): Role
+            fee (Optional[int]): Fee
+            public_key (Optional[str]): Public key
+            webhook_url (Optional[str]): Webhook url
+            url (Optional[str]): Url
+        """
+
+        self.chain_id = chain_id
+        self.id = id
+        self.address = address
+        self.amount_staked = amount_staked
+        self.amount_allocated = amount_allocated
+        self.amount_locked = amount_locked
+        self.locked_until_timestamp = locked_until_timestamp
+        self.amount_withdrawn = amount_withdrawn
+        self.amount_slashed = amount_slashed
+        self.reputation = reputation
+        self.reward = reward
+        self.amount_jobs_launched = amount_jobs_launched
+        self.role = role
+        self.fee = fee
+        self.public_key = public_key
+        self.webhook_url = webhook_url
+        self.url = url
+
+
+class RewardData:
+    def __init__(
+        self,
+        escrow_address: str,
+        amount: int,
+    ):
+        """
+        Initializes an RewardData instance.
+
+        Args:
+            escrow_address (str): Escrow address
+            amount (int): Amount
+        """
+
+        self.escrow_address = escrow_address
+        self.amount = amount
+
+
+class StakingUtils:
+    """
+    A utility class that provides additional staking-related functionalities.
+    """
+
+    @staticmethod
+    def get_leaders(
+        filter: LeaderFilter = LeaderFilter(networks=[ChainId.POLYGON_MUMBAI]),
+    ) -> List[LeaderData]:
+        """Get leaders data of the protocol
+
+        Returns:
+            List[LeaderData]: List of leaders data
+        """
+        from human_protocol_sdk.gql.staking import get_leaders_query
+
+        leaders = []
+        for chain_id in filter.networks:
+            network = NETWORKS[chain_id]
+
+            leaders_data = get_data_from_subgraph(
+                network["subgraph_url"],
+                query=get_leaders_query(filter),
+                params={"role": filter.role},
+            )
+            leaders_raw = leaders_data["data"]["leaders"]
+
+            leaders.extend(
+                [
+                    LeaderData(
+                        chain_id=chain_id,
+                        id=leader.get("id", ""),
+                        address=leader.get("address", ""),
+                        amount_staked=int(leader.get("amountStaked", 0)),
+                        amount_allocated=int(leader.get("amountAllocated", 0)),
+                        amount_locked=int(leader.get("amountLocked", 0)),
+                        locked_until_timestamp=int(
+                            leader.get("lockedUntilTimestamp", 0)
+                        ),
+                        amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
+                        amount_slashed=int(leader.get("amountSlashed", 0)),
+                        reputation=int(leader.get("reputation", 0)),
+                        reward=int(leader.get("reward", 0)),
+                        amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+                        role=leader.get("role", None),
+                        fee=int(leader.get("fee")) if leader.get("fee", None) else None,
+                        public_key=leader.get("publicKey", None),
+                        webhook_url=leader.get("webhookUrl", None),
+                        url=leader.get("url", None),
+                    )
+                    for leader in leaders_raw
+                ]
+            )
+
+        return leaders
+
+    @staticmethod
+    def get_leader(
+        chain_id: ChainId,
+        leader_address: str,
+    ) -> Optional[LeaderData]:
+        """Get the leader details.
+
+        Args:
+            chain_id (ChainId): Network in which the leader exists
+            leader_address (str): Address of the leader
+
+        Returns:
+            Optional[LeaderData]: Leader data if exists, otherwise None
+        """
+        from human_protocol_sdk.gql.staking import get_leader_query
+
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
+            raise StakingClientError(f"Invalid ChainId")
+
+        if not Web3.is_address(leader_address):
+            raise StakingClientError(f"Invalid leader address: {leader_address}")
+
+        network = NETWORKS[chain_id]
+
+        leader_data = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_leader_query,
+            params={"address": leader_address},
+        )
+        leader = leader_data["data"]["leader"]
+
+        if not leader:
+            return None
+
+        return LeaderData(
+            chain_id=chain_id,
+            id=leader.get("id", ""),
+            address=leader.get("address", ""),
+            amount_staked=int(leader.get("amountStaked", 0)),
+            amount_allocated=int(leader.get("amountAllocated", 0)),
+            amount_locked=int(leader.get("amountLocked", 0)),
+            locked_until_timestamp=int(leader.get("lockedUntilTimestamp", 0)),
+            amount_withdrawn=int(leader.get("amountWithdrawn", 0)),
+            amount_slashed=int(leader.get("amountSlashed", 0)),
+            reputation=int(leader.get("reputation", 0)),
+            reward=int(leader.get("reward", 0)),
+            amount_jobs_launched=int(leader.get("amountJobsLaunched", 0)),
+            role=leader.get("role", None),
+            fee=int(leader.get("fee")) if leader.get("fee", None) else None,
+            public_key=leader.get("publicKey", None),
+            webhook_url=leader.get("webhookUrl", None),
+            url=leader.get("url", None),
+        )
+
+    @staticmethod
+    def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
+        """Get rewards of the given slasher
+
+        Args:
+            chain_id (ChainId): Network in which the slasher exists
+            slasher (str): Address of the slasher
+
+        Returns:
+            List[RewardData]: List of rewards info
+        """
+
+        if chain_id.value not in set(chain_id.value for chain_id in ChainId):
+            raise StakingClientError(f"Invalid ChainId")
+
+        if not Web3.is_address(slasher):
+            raise StakingClientError(f"Invalid slasher address: {slasher}")
+
+        network = NETWORKS[chain_id]
+
+        reward_added_events_data = get_data_from_subgraph(
+            network["subgraph_url"],
+            query=get_reward_added_events_query,
+            params={"slasherAddress": slasher.lower()},
+        )
+        reward_added_events = reward_added_events_data["data"]["rewardAddedEvents"]
+
+        return [
+            RewardData(
+                escrow_address=reward_added_event.get("escrowAddress", ""),
+                amount=int(reward_added_event.get("amount", 0)),
+            )
+            for reward_added_event in reward_added_events
+        ]

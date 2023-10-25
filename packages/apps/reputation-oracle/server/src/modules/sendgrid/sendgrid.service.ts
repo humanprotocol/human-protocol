@@ -35,17 +35,19 @@ export class SendGridService {
   }
 
   async sendEmail({
-    text = '',
     from = {
       email: this.defaultFromEmail,
       name: this.defaultFromName,
     },
+    templateId = '',
+    personalizations,
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       await this.mailService.send({
         from,
-        text,
+        templateId,
+        personalizations,
         ...emailData,
       });
       this.logger.log('Email sent successfully');

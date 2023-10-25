@@ -2,10 +2,25 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { JobController } from './job.controller';
 import { JobService } from './job.service';
-import { JobDetailsDto, SolveJobDto } from './job.dto';
+import { InvalidJobDto, JobDetailsDto, SolveJobDto } from './job.dto';
 import { Web3Service } from '../web3/web3.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
+import { ConfigModule, registerAs } from '@nestjs/config';
+import {
+  MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
+  MOCK_SIGNATURE,
+} from '../../../test/constants';
+import { StorageService } from '../storage/storage.service';
+import { verifySignature } from '../../common/utils/signature';
+
+jest.mock('../../common/utils/signature');
 
 describe('JobController', () => {
   let jobController: JobController;
@@ -22,6 +37,23 @@ describe('JobController', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+        ConfigModule.forFeature(
+          registerAs('server', () => ({
+            reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+          })),
+        ),
+      ],
       controllers: [JobController],
       providers: [
         JobService,
@@ -38,6 +70,7 @@ describe('JobController', () => {
             }),
           },
         },
+        StorageService,
         {
           provide: HttpService,
           useValue: {
@@ -57,9 +90,9 @@ describe('JobController', () => {
         escrowAddress,
         chainId,
         manifest: {
-          title: 'Example Title',
-          description: 'Example Description',
-          fortunesRequested: 5,
+          requesterTitle: 'Example Title',
+          requesterDescription: 'Example Description',
+          submissionsRequired: 5,
           fundAmount: 100,
         },
       };
@@ -104,18 +137,36 @@ describe('JobController', () => {
         workerAddress,
         solution,
       };
-      const expectedResult = true;
 
-      jest.spyOn(jobService, 'solveJob').mockResolvedValue(expectedResult);
+      jest.spyOn(jobService, 'solveJob').mockResolvedValue();
 
-      const result = await jobController.solveJob(solveJobDto);
+      await jobController.solveJob(solveJobDto);
 
-      expect(result).toBe(expectedResult);
       expect(jobService.solveJob).toHaveBeenCalledWith(
         solveJobDto.chainId,
         solveJobDto.escrowAddress,
         solveJobDto.workerAddress,
         solveJobDto.solution,
+      );
+    });
+  });
+
+  describe('invalidJobSolution-solution', () => {
+    it('should mark a job solution as invalid', async () => {
+      const solveJobDto: InvalidJobDto = {
+        chainId,
+        escrowAddress,
+        workerAddress,
+      };
+
+      jest.spyOn(jobService, 'processInvalidJobSolution').mockResolvedValue();
+
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
+      await jobController.invalidJobSolution(MOCK_SIGNATURE, solveJobDto);
+
+      expect(jobService.processInvalidJobSolution).toHaveBeenCalledWith(
+        solveJobDto,
       );
     });
   });

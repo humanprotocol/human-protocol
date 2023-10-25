@@ -18,6 +18,75 @@ import {
 } from './error';
 import { NetworkData } from './types';
 
+/**
+ * ## Introduction
+ *
+ * This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
+ *
+ * Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+ * To use this client, it is recommended to initialize it using the static `build` method.
+ *
+ * ```ts
+ * static async build(signerOrProvider: Signer | Provider);
+ * ```
+ *
+ * A `Signer` or a `Provider` should be passed depending on the use case of this module:
+ *
+ * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
+ * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+ *
+ * ## Installation
+ *
+ * ### npm
+ * ```bash
+ * npm install @human-protocol/sdk
+ * ```
+ *
+ * ### yarn
+ * ```bash
+ * yarn install @human-protocol/sdk
+ * ```
+ *
+ * ## Code example
+ *
+ * ### Signer
+ *
+ * **Using private key(backend)**
+ *
+ * ```ts
+ * import { KVStoreClient } from '@human-protocol/sdk';
+ * import { Wallet, providers } from 'ethers';
+ *
+ * const rpcUrl = 'YOUR_RPC_URL';
+ * const privateKey = 'YOUR_PRIVATE_KEY'
+ *
+ * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const signer = new Wallet(privateKey, provider);
+ * const kvstoreClient = await KVStoreClient.build(signer);
+ * ```
+ *
+ * **Using Wagmi(frontend)**
+ *
+ * ```ts
+ * import { useSigner, useChainId } from 'wagmi';
+ * import { KVStoreClient } from '@human-protocol/sdk';
+ *
+ * const { data: signer } = useSigner();
+ * const kvstoreClient = await KVStoreClient.build(signer);
+ * ```
+ *
+ * ### Provider
+ *
+ * ```ts
+ * import { KVStoreClient } from '@human-protocol/sdk';
+ * import { providers } from 'ethers';
+ *
+ * const rpcUrl = 'YOUR_RPC_URL';
+ *
+ * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const kvstoreClient = await KVStoreClient.build(signer);
+ * ```
+ */
 export class KVStoreClient {
   private contract: KVStore;
   private signerOrProvider: Signer | Provider;
@@ -67,12 +136,30 @@ export class KVStoreClient {
   }
 
   /**
-   * Sets a key-value pair in the contract
+   * This function sets a key-value pair associated with the address that submits the transaction.
    *
-   * @param {string} key - The key of the key-value pair to set
-   * @param {string} value - The value of the key-value pair to set
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred
+   * @param {string} key Key of the key-value pair
+   * @param {string} value Value of the key-value pair
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * > Need to have available stake.
+   *
+   * ```ts
+   * import { Wallet, providers } from 'ethers';
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const kvstoreClient = await KVStoreClient.build(signer);
+   *
+   * await kvstoreClient.set('Role', 'RecordingOracle');
+   * ```
    */
   @requiresSigner
   public async set(key: string, value: string): Promise<void> {
@@ -86,12 +173,32 @@ export class KVStoreClient {
   }
 
   /**
-   * Sets multiple key-value pairs in the contract
+   * This function sets key-value pairs in bulk associated with the address that submits the transaction.
    *
-   * @param {string[]} keys - An array of keys to set
-   * @param {string[]} values - An array of values to set
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred
+   * @param {string[]} keys Array of keys (keys and value must have the same order)
+   * @param {string[]} values Array of values
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * > Need to have available stake.
+   *
+   * ```ts
+   * import { Wallet, providers } from 'ethers';
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const kvstoreClient = await KVStoreClient.build(signer);
+   *
+   * const keys = ['Role', 'Webhook_url'];
+   * const values = ['RecordingOracle', 'http://localhost'];
+   * await kvstoreClient.set(keys, values);
+   * ```
    */
   @requiresSigner
   public async setBulk(keys: string[], values: string[]): Promise<void> {
@@ -108,12 +215,28 @@ export class KVStoreClient {
   }
 
   /**
-   * Gets the value of a key-value pair in the contract
+   * This function returns the value for a specified key and address.
    *
-   * @param {string} address - The Ethereum address associated with the key-value pair
-   * @param {string} key - The key of the key-value pair to get
-   * @returns {Promise<string>} - The value of the key-value pair if it exists
-   * @throws {Error} - An error object if an error occurred
+   * @param {string} address Address from which to get the key value.
+   * @param {string} key Key to obtain the value.
+   * @returns {string} Value of the key.
+   *
+   *
+   * **Code example**
+   *
+   * > Need to have available stake.
+   *
+   * ```ts
+   * import { providers } from 'ethers';
+   * import { KVStoreClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const kvstoreClient = await KVStoreClient.build(provider);
+   *
+   * const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 'Role');
+   * ```
    */
   public async get(address: string, key: string): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;

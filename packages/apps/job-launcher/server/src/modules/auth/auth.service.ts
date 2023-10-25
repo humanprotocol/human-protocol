@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -27,6 +26,7 @@ import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
 
 @Injectable()
 export class AuthService {
@@ -84,12 +84,16 @@ export class AuthService {
     });
 
     await this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
-Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
-Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.signup,
     });
 
     return userEntity;
@@ -147,21 +151,27 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
       userId: userEntity.id,
       tokenType: TokenType.PASSWORD,
     });
-  
+
     if (existingToken) {
       await existingToken.remove();
     }
-    
+
     const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.PASSWORD,
       user: userEntity,
     });
 
-    this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Reset password',
-      html: `Click <a href="${this.feURL}/reset-password?token=${newTokenEntity.uuid}">here</a> to reset the password.`,
-      text: `Click ${this.feURL}/reset-password?token=${newTokenEntity.uuid} to reset the password.`,
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/reset-password?token=${newTokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.resetPassword,
     });
   }
 
@@ -176,11 +186,16 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
-
-    this.sendgridService.sendEmail({
-      to: tokenEntity.user.email,
-      subject: 'Password changed',
-      text: 'Password has been changed successfully!',
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: tokenEntity.user.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.passwordChanged,
     });
 
     await tokenEntity.remove();
@@ -211,18 +226,31 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const tokenEntity = await this.tokenRepository.create({
+    const existingToken = await this.tokenRepository.findOne({
+      userId: userEntity.id,
+      tokenType: TokenType.EMAIL,
+    });
+
+    if (existingToken) {
+      await existingToken.remove();
+    }
+
+    const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
 
-    this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
-Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
-Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/verify?token=${newTokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.signup,
     });
   }
 

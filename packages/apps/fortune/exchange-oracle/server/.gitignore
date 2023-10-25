@@ -13,7 +13,7 @@ lerna-debug.log*
 
 # OS
 .DS_Store
-.env*
+.env.development
 
 # Tests
 /coverage

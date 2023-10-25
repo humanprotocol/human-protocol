@@ -1,18 +1,12 @@
-import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
+import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { of } from 'rxjs';
 
-import { JobController } from './job.controller';
-import { JobService } from './job.service';
-import { Web3Service } from '../web3/web3.service';
+import { ChainId } from '@human-protocol/sdk';
 import {
   MOCK_ADDRESS,
-  MOCK_FILE_HASH,
-  MOCK_FILE_KEY,
   MOCK_FILE_URL,
-  MOCK_HOST,
-  MOCK_PORT,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
@@ -20,10 +14,16 @@ import {
   MOCK_S3_PORT,
   MOCK_S3_SECRET_KEY,
   MOCK_S3_USE_SSL,
+  MOCK_SIGNATURE,
   MOCK_WEB3_PRIVATE_KEY,
 } from '../../../test/constants';
-import { ChainId } from '@human-protocol/sdk';
-import { JobRequestType } from '@/common/enums/job';
+import { Web3Service } from '../web3/web3.service';
+import { JobController } from './job.controller';
+import { JobService } from './job.service';
+import { StorageService } from '../storage/storage.service';
+import { verifySignature } from '../../common/utils/signature';
+
+jest.mock('../../common/utils/signature');
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -58,6 +58,11 @@ describe('JobController', () => {
           })),
         ),
         ConfigModule.forFeature(
+          registerAs('web3', () => ({
+            web3PrivateKey: MOCK_WEB3_PRIVATE_KEY,
+          })),
+        ),
+        ConfigModule.forFeature(
           registerAs('server', () => ({
             reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
           })),
@@ -65,6 +70,7 @@ describe('JobController', () => {
       ],
       providers: [
         JobService,
+        StorageService,
         {
           provide: Web3Service,
           useValue: {
@@ -90,13 +96,13 @@ describe('JobController', () => {
         .spyOn(jobService, 'processJobSolution')
         .mockImplementation(async () => 'OK');
 
+      (verifySignature as jest.Mock).mockReturnValue(true);
+
       expect(
-        await jobController.solve({
+        await jobController.solve(MOCK_SIGNATURE, {
           escrowAddress: MOCK_ADDRESS,
           chainId: ChainId.LOCALHOST,
-          exchangeAddress: MOCK_ADDRESS,
-          workerAddress: MOCK_ADDRESS,
-          solution: 'Solution',
+          solutionsUrl: MOCK_FILE_URL,
         }),
       ).toBe('OK');
     });

@@ -70,7 +70,11 @@ import {
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { CANCEL_JOB_STATUSES, JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import {
+  CANCEL_JOB_STATUSES,
+  HEADER_SIGNATURE_KEY,
+  JOB_RETRIES_COUNT_THRESHOLD,
+} from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
 import { EventType } from '../../common/enums/webhook';
 import {
@@ -80,6 +84,7 @@ import {
 import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
+import { signMessage } from '../../common/utils/signature';
 
 @Injectable()
 export class JobService {
@@ -411,8 +416,14 @@ export class JobService {
     webhookUrl: string,
     webhookData: SendWebhookDto,
   ): Promise<boolean> {
+    const signedBody = await signMessage(
+      webhookData,
+      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+    );
     const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData),
+      await this.httpService.post(webhookUrl, webhookData, {
+        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
+      }),
     );
 
     if (!data) {
@@ -433,6 +444,10 @@ export class JobService {
     try {
       let jobs: JobEntity[] = [];
       let escrows: EscrowData[] | undefined;
+
+      networks.forEach((chainId) =>
+        this.web3Service.validateChainId(Number(chainId)),
+      );
 
       switch (status) {
         case JobStatusFilter.FAILED:
@@ -455,7 +470,9 @@ export class JobService {
             skip,
             limit,
           );
-          const escrowAddresses = escrows.map((escrow) => escrow.address);
+          const escrowAddresses = escrows.map((escrow) =>
+            ethers.utils.getAddress(escrow.address),
+          );
 
           jobs = await this.jobRepository.findJobsByEscrowAddresses(
             userId,
@@ -478,11 +495,23 @@ export class JobService {
     skip: number,
     limit: number,
   ): Promise<EscrowData[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      networks,
-      jobRequesterId: userId.toString(),
-      status: filterToEscrowStatus(status),
-    });
+    const escrows: EscrowData[] = [];
+    const statuses = filterToEscrowStatus(status);
+
+    for (const escrowStatus in statuses) {
+      escrows.push(
+        ...(await EscrowUtils.getEscrows({
+          networks,
+          jobRequesterId: userId.toString(),
+          status: Number(escrowStatus) as EscrowStatus,
+          launcher: this.web3Service.signerAddress,
+        })),
+      );
+    }
+
+    if (statuses.length > 1) {
+      escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    }
 
     return escrows.slice(skip, limit);
   }
@@ -641,51 +670,65 @@ export class JobService {
     if (!jobEntity) return;
 
     if (jobEntity.escrowAddress) {
-      const { amountRefunded } = await this.processEscrowCancellation(jobEntity);
-      await this.paymentService.createRefundPayment({ refundAmount: Number(ethers.utils.formatEther(amountRefunded)), userId: jobEntity.userId, jobId: jobEntity.id });
+      const { amountRefunded } = await this.processEscrowCancellation(
+        jobEntity,
+      );
+      await this.paymentService.createRefundPayment({
+        refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
     } else {
-      await this.paymentService.createRefundPayment({ refundAmount: jobEntity.fundAmount, userId: jobEntity.userId, jobId: jobEntity.id });
+      await this.paymentService.createRefundPayment({
+        refundAmount: jobEntity.fundAmount,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
     }
 
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
     const manifest = await this.getManifest(jobEntity.manifestUrl);
-    const configKey = (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE 
-                      ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL 
-                      : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
+    const configKey =
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL
+        : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
 
-    await this.sendWebhook(
-        this.configService.get<string>(configKey)!,
-        {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-        }
-    );
+    await this.sendWebhook(this.configService.get<string>(configKey)!, {
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CANCELED,
+    });
 
     return true;
   }
 
-  public async processEscrowCancellation(jobEntity: JobEntity): Promise<EscrowCancelDto> {
-      const { chainId, escrowAddress } = jobEntity;
+  public async processEscrowCancellation(
+    jobEntity: JobEntity,
+  ): Promise<EscrowCancelDto> {
+    const { chainId, escrowAddress } = jobEntity;
 
-      const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
 
-      const escrowStatus = await escrowClient.getStatus(escrowAddress);
-      if (escrowStatus === EscrowStatus.Complete || escrowStatus === EscrowStatus.Paid || escrowStatus === EscrowStatus.Cancelled) {
-          this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
-          throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
-      }
+    const escrowStatus = await escrowClient.getStatus(escrowAddress);
+    if (
+      escrowStatus === EscrowStatus.Complete ||
+      escrowStatus === EscrowStatus.Paid ||
+      escrowStatus === EscrowStatus.Cancelled
+    ) {
+      this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+      throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+    }
 
-      const balance = await escrowClient.getBalance(escrowAddress);
-      if (balance.eq(0)) {
-          this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
-          throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
-      }
+    const balance = await escrowClient.getBalance(escrowAddress);
+    if (balance.eq(0)) {
+      this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+      throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+    }
 
-      return escrowClient.cancel(escrowAddress);
+    return escrowClient.cancel(escrowAddress);
   }
 
   public async escrowFailedWebhook(
