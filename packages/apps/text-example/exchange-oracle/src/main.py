@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 
 from src.chain import EscrowInfo, get_manifest_url
-from src.storage import download_manifest
+from src.storage import (
+    download_manifest,
+    download_datasets,
+    convert_taskdata_to_doccano,
+)
+from src.annotation import create_project
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
@@ -19,10 +24,14 @@ async def create_job(escrow_info: EscrowInfo):
     s3_url = get_manifest_url(escrow_info)
     manifest = download_manifest(s3_url)
 
-    # TODO: download datasets
-    # TODO: create doccano project
-    # transform data to doccano format
-    # write data to doccano
+    # download job data
+    job_dir = download_datasets(manifest)
+
+    # FIXME: probably need some chunking since doccano does not allow individual assignment of tasks, will cross that bridge once we get there
+    # convert data into doccano format
+    doccano_filepath = convert_taskdata_to_doccano(job_dir)
+    project = create_project(manifest, doccano_filepath)
+
     # TODO: write job id into db
     # TODO: return some success stuff
     raise NotImplementedError

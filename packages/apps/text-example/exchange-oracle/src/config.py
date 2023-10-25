@@ -3,6 +3,7 @@ import os
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from minio import Minio
+from pathlib import Path
 
 if not load_dotenv():
     raise IOError("Could not read dotenv file.")
@@ -88,12 +89,7 @@ class StorageConfig:
     secret_key = os.environ.get("S3_SECRET_KEY")
     results_bucket_name = os.environ.get("S3_RESULTS_BUCKET_NAME", "")
     secure = bool(int(os.environ.get("S3_USE_SSL")))
-
-    @classmethod
-    def bucket_url(cls):
-        return (
-            f"https://{StorageConfig.results_bucket_name}.{StorageConfig.endpoint_url}/"
-        )
+    dataset_dir = Path(os.environ.get("LOCAL_DATA_DIR"))
 
     @classmethod
     def client(cls) -> Minio:
@@ -104,6 +100,18 @@ class StorageConfig:
             secret_key=cls.secret_key,
             secure=cls.secure,
         )
+
+
+class DoccanoConfig:
+    host = os.environ.get("DOCCANO_HOST")
+    port = os.environ.get("DOCCANO_PORT")
+    ssl = bool(int(os.environ.get("DOCCANO_USE_SSL")))
+    admin = os.environ.get("DOCCANO_ADMIN")
+    password = os.environ.get("DOCCANO_ADMIN_PASS")
+
+    @classmethod
+    def url(cls):
+        return f"{cls.host}:{cls.port}"
 
 
 class Config:
@@ -120,3 +128,5 @@ class Config:
     postgres_config = Postgres
     cron_config = CronConfig
     storage_config = StorageConfig
+
+    doccano = DoccanoConfig
