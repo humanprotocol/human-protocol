@@ -491,29 +491,20 @@ export class JobService {
     limit: number,
   ): Promise<EscrowData[]> {
     const escrows: EscrowData[] = [];
-    escrows.push(
-      ...(await EscrowUtils.getEscrows({
-        networks,
-        jobRequesterId: userId.toString(),
-        status: filterToEscrowStatus(status),
-      })),
-    );
+    const statuses = filterToEscrowStatus(status);
 
-    if (status === JobStatusFilter.LAUNCHED) {
+    for (const escrowStatus in statuses) {
       escrows.push(
         ...(await EscrowUtils.getEscrows({
           networks,
           jobRequesterId: userId.toString(),
-          status: EscrowStatus.Partial,
+          status: escrowStatus as any,
+          launcher: this.web3Service.getSigner(networks[0]).address,
         })),
       );
-      escrows.push(
-        ...(await EscrowUtils.getEscrows({
-          networks,
-          jobRequesterId: userId.toString(),
-          status: EscrowStatus.Paid,
-        })),
-      );
+    }
+
+    if (statuses.length > 1) {
       escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
     }
 

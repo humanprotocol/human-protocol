@@ -1149,7 +1149,7 @@ describe('JobService', () => {
         limit,
       );
     });
-    it.only('should call subgraph and database with LAUNCHED status', async () => {
+    it('should call subgraph and database with LAUNCHED status', async () => {
       const jobEntityMock = [
         {
           status: JobStatus.LAUNCHED,
