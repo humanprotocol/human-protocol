@@ -654,7 +654,6 @@ describe('JobService', () => {
     });
   });
 
-  
   describe('cancelCronJob', () => {
     let escrowClientMock: any,
       getManifestMock: any,

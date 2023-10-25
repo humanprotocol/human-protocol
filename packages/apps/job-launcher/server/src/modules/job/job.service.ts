@@ -11,7 +11,6 @@ import {
   StorageParams,
   UploadFile,
 } from '@human-protocol/sdk';
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
@@ -663,9 +662,9 @@ export class JobService {
       },
       {
         order: {
-            waitUntil: SortDirection.ASC,
+          waitUntil: SortDirection.ASC,
         },
-      }
+      },
     );
     if (!jobEntity) return;
 
