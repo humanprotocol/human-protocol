@@ -444,6 +444,10 @@ export class JobService {
       let jobs: JobEntity[] = [];
       let escrows: EscrowData[] | undefined;
 
+      networks.forEach((chainId) =>
+        this.web3Service.validateChainId(Number(chainId)),
+      );
+
       switch (status) {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
@@ -498,8 +502,8 @@ export class JobService {
         ...(await EscrowUtils.getEscrows({
           networks,
           jobRequesterId: userId.toString(),
-          status: escrowStatus as any,
-          launcher: this.web3Service.getSigner(networks[0]).address,
+          status: Number(escrowStatus) as EscrowStatus,
+          launcher: this.web3Service.signerAddress,
         })),
       );
     }
