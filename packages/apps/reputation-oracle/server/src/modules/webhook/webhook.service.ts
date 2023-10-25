@@ -201,15 +201,19 @@ export class WebhookService {
         results.hash,
       );
 
-      await this.webhookRepository.updateOne(
-        { id: webhookEntity.id },
-        {
-          resultsUrl: results.url,
-          checkPassed: results.checkPassed,
-          status: WebhookStatus.PAID,
-          retriesCount: 0,
-        },
-      );
+      const balance = await escrowClient.getBalance(escrowAddress);
+
+      if (balance.toNumber() == 0) {
+        await this.webhookRepository.updateOne(
+          { id: webhookEntity.id },
+          {
+            resultsUrl: results.url,
+            checkPassed: results.checkPassed,
+            status: WebhookStatus.PAID,
+            retriesCount: 0,
+          },
+        );
+      }
 
       return true;
     } catch (e) {
@@ -498,6 +502,8 @@ export class WebhookService {
           ReputationEntityType.RECORDING_ORACLE,
         );
       }
+
+      await escrowClient.complete(webhookEntity.escrowAddress);
 
       await this.webhookRepository.updateOne(
         {
