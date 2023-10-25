@@ -1,6 +1,6 @@
 import unittest
 from datetime import datetime
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 from human_protocol_sdk.constants import NETWORKS, ChainId
 from human_protocol_sdk.gql.hmtoken import get_holders_query
@@ -11,56 +11,18 @@ from human_protocol_sdk.gql.statistics import (
 )
 from human_protocol_sdk.statistics import (
     StatisticsClient,
-    StatisticsClientError,
     StatisticsParam,
 )
-from web3 import Web3
-from web3.providers.rpc import HTTPProvider
 
 
 class StatisticsTestCase(unittest.TestCase):
     def setUp(self):
-        self.mock_provider = MagicMock(spec=HTTPProvider)
-        self.w3 = Web3(self.mock_provider)
-
-        self.mock_chain_id = ChainId.LOCALHOST.value
-        type(self.w3.eth).chain_id = PropertyMock(return_value=self.mock_chain_id)
-
-        self.statistics = StatisticsClient(self.w3)
-
-    def test_init_with_valid_inputs(self):
-        mock_provider = MagicMock(spec=HTTPProvider)
-        w3 = Web3(mock_provider)
-
-        mock_chain_id = ChainId.LOCALHOST.value
-        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
-
-        statistics = StatisticsClient(w3)
-
-        self.assertEqual(statistics.w3, w3)
-        self.assertEqual(statistics.network, NETWORKS[ChainId(mock_chain_id)])
+        self.statistics = StatisticsClient(ChainId.LOCALHOST)
 
     def test_init_with_invalid_chain_id(self):
-        mock_provider = MagicMock(spec=HTTPProvider)
-        w3 = Web3(mock_provider)
-
-        mock_chain_id = 9999
-        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
-
-        with self.assertRaises(StatisticsClientError) as cm:
-            StatisticsClient(w3)
-        self.assertEqual(f"Invalid ChainId: {mock_chain_id}", str(cm.exception))
-
-    def test_init_with_invalid_web3(self):
-        mock_provider = MagicMock(spec=HTTPProvider)
-        w3 = Web3(mock_provider)
-
-        mock_chain_id = None
-        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
-
-        with self.assertRaises(StatisticsClientError) as cm:
-            StatisticsClient(w3)
-        self.assertEqual(f"Invalid Web3 Instance", str(cm.exception))
+        with self.assertRaises(ValueError) as cm:
+            StatisticsClient(ChainId(123))
+        self.assertEqual(f"123 is not a valid ChainId", str(cm.exception))
 
     def test_get_escrow_statistics(self):
         param = StatisticsParam(
