@@ -1190,7 +1190,7 @@ describe('JobService', () => {
       ]);
       expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
         userId,
-        [MOCK_ADDRESS],
+        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
       );
     });
     it('should call subgraph and database with CANCELLED status', async () => {
