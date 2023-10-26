@@ -318,9 +318,7 @@ export class JobService {
     return true;
   }
 
-  public async getManifest(
-    manifestUrl: string,
-  ): Promise<CampaignManifestDto> {
+  public async getManifest(manifestUrl: string): Promise<CampaignManifestDto> {
     const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!manifest) {
