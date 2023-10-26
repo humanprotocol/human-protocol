@@ -3,8 +3,7 @@ import {
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
-  KVStoreClient,
-  KVStoreKeys,
+  StakingClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -60,7 +59,7 @@ export class JobService {
     );
 
     if (
-      existingJobSolutions.filter((solution) => !solution.invalid).length >=
+      existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
       throw new BadRequestException('This job has already been completed');
@@ -103,12 +102,10 @@ export class JobService {
       escrowAddress,
     );
 
-    const kvstore = await KVStoreClient.build(signer);
-    const recordingOracleWebhookUrl = await kvstore.get(
-      recordingOracleAddress,
-      KVStoreKeys.webhook_url,
-    );
+    const stakingClient = await StakingClient.build(signer);
+    const leader = await stakingClient.getLeader(recordingOracleAddress);
 
+    const recordingOracleWebhookUrl = leader?.webhookUrl;
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
@@ -116,7 +113,6 @@ export class JobService {
       chainId,
       escrowAddress,
       workerAddress,
-      signer.address,
       solution,
     );
 
@@ -140,7 +136,7 @@ export class JobService {
     );
 
     if (foundSolution) {
-      foundSolution.invalid = true;
+      foundSolution.error = true;
     } else {
       throw new BadRequestException(
         `Solution not found in Escrow: ${invalidJobSolution.escrowAddress}`,
@@ -148,7 +144,6 @@ export class JobService {
     }
 
     await this.storageService.uploadJobSolutions(
-      this.web3Service.getSigner(invalidJobSolution.chainId).address,
       invalidJobSolution.escrowAddress,
       invalidJobSolution.chainId,
       existingJobSolutions,
@@ -159,7 +154,6 @@ export class JobService {
     chainId: ChainId,
     escrowAddress: string,
     workerAddress: string,
-    exchangeAddress: string,
     solution: string,
   ): Promise<string> {
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
@@ -177,7 +171,7 @@ export class JobService {
 
     const manifest = await this.getManifest(chainId, escrowAddress);
     if (
-      existingJobSolutions.filter((solution) => !solution.invalid).length >=
+      existingJobSolutions.filter((solution) => !solution.error).length >=
       manifest.submissionsRequired
     ) {
       throw new BadRequestException('This job has already been completed');
@@ -192,7 +186,6 @@ export class JobService {
     ];
 
     const url = await this.storageService.uploadJobSolutions(
-      exchangeAddress,
       escrowAddress,
       chainId,
       newJobSolutions,
@@ -235,11 +228,14 @@ export class JobService {
       const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
         escrowAddress,
       );
-      const kvstore = await KVStoreClient.build(signer);
-      const jobLauncherWebhookUrl = await kvstore.get(
-        jobLauncherAddress,
-        KVStoreKeys.webhook_url,
-      );
+      const stakingClient = await StakingClient.build(signer);
+      const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
+      const jobLauncherWebhookUrl = jobLauncher?.webhookUrl;
+
+      if (!jobLauncherWebhookUrl) {
+        throw new NotFoundException('Unable to get Job Launcher webhook URL');
+      }
+
       const body: EscrowFailedWebhookDto = {
         escrow_address: escrowAddress,
         chain_id: chainId,

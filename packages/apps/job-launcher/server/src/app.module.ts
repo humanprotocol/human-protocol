@@ -43,7 +43,11 @@ import { join } from 'path';
     PaymentModule,
     Web3Module,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../../../../../', 'node_modules/swagger-ui-dist'),
+      rootPath: join(
+        __dirname,
+        '../../../../../',
+        'node_modules/swagger-ui-dist',
+      ),
     }),
   ],
   controllers: [AppController],

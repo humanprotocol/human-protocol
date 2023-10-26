@@ -1,4 +1,4 @@
-import { JobRequestType } from '../enums/job';
+import { JobRequestType, SolutionError } from '../enums/job';
 
 export interface IManifest {
   submissionsRequired: number;
@@ -11,7 +11,7 @@ export interface IManifest {
 export interface ISolution {
   workerAddress: string;
   solution: string;
-  invalid?: boolean;
+  error?: boolean | SolutionError;
 }
 
 export interface ISolutionsFile {

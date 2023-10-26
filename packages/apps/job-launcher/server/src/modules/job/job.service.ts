@@ -608,6 +608,10 @@ export class JobService {
       let jobs: JobEntity[] = [];
       let escrows: EscrowData[] | undefined;
 
+      networks.forEach((chainId) =>
+        this.web3Service.validateChainId(Number(chainId)),
+      );
+
       switch (status) {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
@@ -629,7 +633,9 @@ export class JobService {
             skip,
             limit,
           );
-          const escrowAddresses = escrows.map((escrow) => escrow.address);
+          const escrowAddresses = escrows.map((escrow) =>
+            ethers.utils.getAddress(escrow.address),
+          );
 
           jobs = await this.jobRepository.findJobsByEscrowAddresses(
             userId,
@@ -652,11 +658,23 @@ export class JobService {
     skip: number,
     limit: number,
   ): Promise<EscrowData[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      networks,
-      jobRequesterId: userId.toString(),
-      status: filterToEscrowStatus(status),
-    });
+    const escrows: EscrowData[] = [];
+    const statuses = filterToEscrowStatus(status);
+
+    for (const escrowStatus of statuses) {
+      escrows.push(
+        ...(await EscrowUtils.getEscrows({
+          networks,
+          jobRequesterId: userId.toString(),
+          status: escrowStatus,
+          launcher: this.web3Service.signerAddress,
+        })),
+      );
+    }
+
+    if (statuses.length > 1) {
+      escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    }
 
     return escrows.slice(skip, limit);
   }
@@ -917,7 +935,8 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
+      jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -978,6 +997,7 @@ export class JobService {
           manifestHash,
           balance: 0,
           paidOut: 0,
+          status,
         },
         manifest: manifestDetails,
         staking: {
@@ -995,6 +1015,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
         paidOut: Number(escrow?.amountPaid || 0),
+        status,
       },
       manifest: manifestDetails,
       staking: {

@@ -10,7 +10,7 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { EventType, WebhookStatus } from '../../common/enums';
+import { EventType, SolutionError, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
 import { BigNumber } from 'ethers';
@@ -181,9 +181,9 @@ export class ProcessingResultDto {
 }
 
 export class FortuneFinalResult {
-  exchangeAddress: string;
   workerAddress: string;
   solution: string;
+  error?: SolutionError;
 }
 
 export class ImageLabelBinaryJobResults {

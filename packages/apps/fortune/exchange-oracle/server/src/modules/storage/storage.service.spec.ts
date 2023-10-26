@@ -57,7 +57,6 @@ describe('Web3Service', () => {
 
   describe('uploadJobSolutions', () => {
     it('should upload the solutions correctly', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
@@ -72,7 +71,6 @@ describe('Web3Service', () => {
         solution,
       };
       const fileUrl = await storageService.uploadJobSolutions(
-        exchangeAddress,
         escrowAddress,
         chainId,
         [jobSolution],
@@ -83,15 +81,12 @@ describe('Web3Service', () => {
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify({
-          exchangeAddress,
-          solutions: [
-            {
-              workerAddress,
-              solution,
-            },
-          ],
-        }),
+        JSON.stringify([
+          {
+            workerAddress,
+            solution,
+          },
+        ]),
 
         {
           'Content-Type': 'application/json',
@@ -100,7 +95,6 @@ describe('Web3Service', () => {
     });
 
     it('should fail if the bucket does not exist', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
@@ -115,16 +109,12 @@ describe('Web3Service', () => {
         solution,
       };
       await expect(
-        storageService.uploadJobSolutions(
-          exchangeAddress,
-          escrowAddress,
-          chainId,
-          [jobSolution],
-        ),
+        storageService.uploadJobSolutions(escrowAddress, chainId, [
+          jobSolution,
+        ]),
       ).rejects.toThrow('Bucket not found');
     });
     it('should fail if the file cannot be uploaded', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
@@ -143,33 +133,26 @@ describe('Web3Service', () => {
       };
 
       await expect(
-        storageService.uploadJobSolutions(
-          exchangeAddress,
-          escrowAddress,
-          chainId,
-          [jobSolution],
-        ),
+        storageService.uploadJobSolutions(escrowAddress, chainId, [
+          jobSolution,
+        ]),
       ).rejects.toThrow('File not uploaded');
     });
   });
 
   describe('downloadJobSolutions', () => {
     it('should download the file correctly', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
       const chainId = ChainId.LOCALHOST;
       const solution = 'test';
 
-      const expectedJobFile = {
-        exchangeAddress,
-        solutions: [
-          {
-            workerAddress,
-            solution,
-          },
-        ],
-      };
+      const expectedJobFile = [
+        {
+          workerAddress,
+          solution,
+        },
+      ];
 
       StorageClient.downloadFileFromUrl = jest
         .fn()

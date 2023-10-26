@@ -2,6 +2,7 @@
 """ Schema for API input&output"""
 
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 

@@ -1,10 +1,8 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
 from src.core.config import Config
 
 # this is the Alembic Config object, which provides
@@ -23,9 +21,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from src.models.cvat import Task, Job
-from src.models.webhook import Webhook
 from src.db import Base
+from src.models.cvat import Job, Task
+from src.models.webhook import Webhook
 
 target_metadata = Base.metadata
 

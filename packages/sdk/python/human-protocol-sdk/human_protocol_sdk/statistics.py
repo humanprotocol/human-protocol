@@ -6,14 +6,10 @@ import os
 
 from typing import List, Optional
 
-from web3 import Web3
-
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.gql.hmtoken import get_holders_query
 
 from human_protocol_sdk.utils import get_data_from_subgraph
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 LOG = logging.getLogger("human_protocol_sdk.statistics")
 
@@ -278,26 +274,17 @@ class StatisticsClient:
     A client used to get statistical data.
     """
 
-    def __init__(self, w3: Web3):
+    def __init__(self, chain_id: ChainId = ChainId.POLYGON_MUMBAI):
         """Initializes a Statistics instance
 
         Args:
 
         """
 
-        # Initialize web3 instance
-        self.w3 = w3
+        if chain_id.value not in [chain_id.value for chain_id in ChainId]:
+            raise StatisticsClientError(f"Invalid ChainId: {chain_id}")
 
-        chain_id = None
-        # Load network configuration based on chain_id
-        try:
-            chain_id = self.w3.eth.chain_id
-            self.network = NETWORKS[ChainId(chain_id)]
-        except:
-            if chain_id is not None:
-                raise StatisticsClientError(f"Invalid ChainId: {chain_id}")
-            else:
-                raise StatisticsClientError(f"Invalid Web3 Instance")
+        self.network = NETWORKS[ChainId(chain_id)]
 
         if not self.network:
             raise StatisticsClientError("Empty network configuration")
@@ -335,18 +322,24 @@ class StatisticsClient:
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
         return EscrowStatistics(
-            total_escrows=int(escrow_statistics["totalEscrowCount"]),
+            total_escrows=int(escrow_statistics.get("totalEscrowCount", 0)),
             daily_escrows_data=[
                 DailyEscrowData(
-                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
-                    escrows_total=int(event_day_data["dailyEscrowCount"]),
-                    escrows_pending=int(event_day_data["dailyPendingStatusEventCount"]),
-                    escrows_solved=int(
-                        event_day_data["dailyCompletedStatusEventCount"]
+                    timestamp=datetime.fromtimestamp(
+                        int(event_day_data.get("timestamp", 0))
                     ),
-                    escrows_paid=int(event_day_data["dailyPaidStatusEventCount"]),
+                    escrows_total=int(event_day_data.get("dailyEscrowCount", 0)),
+                    escrows_pending=int(
+                        event_day_data.get("dailyPendingStatusEventCount", 0)
+                    ),
+                    escrows_solved=int(
+                        event_day_data.get("dailyCompletedStatusEventCount", 0)
+                    ),
+                    escrows_paid=int(
+                        event_day_data.get("dailyPaidStatusEventCount", 0)
+                    ),
                     escrows_cancelled=int(
-                        event_day_data["dailyCancelledStatusEventCount"]
+                        event_day_data.get("dailyCancelledStatusEventCount", 0)
                     ),
                 )
                 for event_day_data in event_day_datas
@@ -381,8 +374,10 @@ class StatisticsClient:
         return WorkerStatistics(
             daily_workers_data=[
                 DailyWorkerData(
-                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
-                    active_workers=int(event_day_data["dailyWorkerCount"]),
+                    timestamp=datetime.fromtimestamp(
+                        int(event_day_data.get("timestamp", 0))
+                    ),
+                    active_workers=int(event_day_data.get("dailyWorkerCount", 0)),
                 )
                 for event_day_data in event_day_datas
             ],
@@ -418,12 +413,16 @@ class StatisticsClient:
         return PaymentStatistics(
             daily_payments_data=[
                 DailyPaymentData(
-                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
-                    total_amount_paid=int(event_day_data["dailyPayoutAmount"]),
-                    total_count=int(event_day_data["dailyPayoutCount"]),
-                    average_amount_per_worker=int(event_day_data["dailyPayoutAmount"])
-                    / int(event_day_data["dailyWorkerCount"])
-                    if event_day_data["dailyWorkerCount"] != "0"
+                    timestamp=datetime.fromtimestamp(
+                        int(event_day_data.get("timestamp", 0))
+                    ),
+                    total_amount_paid=int(event_day_data.get("dailyPayoutAmount", 0)),
+                    total_count=int(event_day_data.get("dailyPayoutCount", 0)),
+                    average_amount_per_worker=int(
+                        event_day_data.get("dailyPayoutAmount", 0)
+                    )
+                    / int(event_day_data.get("dailyWorkerCount"))
+                    if event_day_data.get("dailyWorkerCount", "0") != "0"
                     else 0,
                 )
                 for event_day_data in event_day_datas
@@ -469,24 +468,30 @@ class StatisticsClient:
         event_day_datas = event_day_datas_data["data"]["eventDayDatas"]
 
         return HMTStatistics(
-            total_transfer_amount=int(hmtoken_statistics["totalValueTransfered"]),
-            total_transfer_count=int(hmtoken_statistics["totalTransferEventCount"]),
-            total_holders=int(hmtoken_statistics["holders"]),
+            total_transfer_amount=int(
+                hmtoken_statistics.get("totalValueTransfered", 0)
+            ),
+            total_transfer_count=int(
+                hmtoken_statistics.get("totalTransferEventCount", 0)
+            ),
+            total_holders=int(hmtoken_statistics.get("holders", 0)),
             holders=[
                 HMTHolder(
-                    address=holder["address"],
-                    balance=int(holder["balance"]),
+                    address=holder.get("address", ""),
+                    balance=int(holder.get("balance", 0)),
                 )
                 for holder in holders
             ],
             daily_hmt_data=[
                 DailyHMTData(
-                    timestamp=datetime.fromtimestamp(int(event_day_data["timestamp"])),
+                    timestamp=datetime.fromtimestamp(
+                        int(event_day_data.get("timestamp", 0))
+                    ),
                     total_transaction_amount=int(
-                        event_day_data["dailyHMTTransferAmount"]
+                        event_day_data.get("dailyHMTTransferAmount", 0)
                     ),
                     total_transaction_count=int(
-                        event_day_data["dailyHMTTransferCount"]
+                        event_day_data.get("dailyHMTTransferCount", 0)
                     ),
                 )
                 for event_day_data in event_day_datas

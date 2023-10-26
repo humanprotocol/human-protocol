@@ -7,23 +7,32 @@ import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
 import {
   CvatManifestDto,
+  FortuneFinalResult,
   FortuneManifestDto,
   ProcessingResultDto,
   WebhookIncomingDto,
 } from './webhook.dto';
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { BigNumber } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
 import { ErrorWebhook } from '../../common/constants/errors';
-import { EventType, JobRequestType } from '../../common/enums';
+import {
+  EventType,
+  JobRequestType,
+  ReputationEntityType,
+  SolutionError,
+} from '../../common/enums';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_NAME,
+  MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
+  MOCK_JOB_LAUNCHER_ADDRESS,
   MOCK_PRIVATE_KEY,
+  MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
 } from '../../../test/constants';
@@ -39,6 +48,7 @@ jest.mock('@human-protocol/sdk', () => ({
       getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       bulkPayOut: jest.fn().mockResolvedValue(true),
+      getBalance: jest.fn().mockResolvedValue(BigNumber.from(10)),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -59,7 +69,9 @@ jest.mock('../../common/utils', () => ({
 }));
 
 describe('WebhookService', () => {
-  let webhookService: WebhookService, webhookRepository: WebhookRepository;
+  let webhookService: WebhookService,
+    webhookRepository: WebhookRepository,
+    reputationService: ReputationService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -113,6 +125,7 @@ describe('WebhookService', () => {
 
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
+    reputationService = moduleRef.get(ReputationService);
   });
 
   afterEach(() => {
@@ -259,6 +272,32 @@ describe('WebhookService', () => {
 
       expect(await webhookService.processPendingCronJob()).toBe(true);
     });
+
+    it('should update the webhook entity to Paid status if the balance is zero', async () => {
+      webhookRepository.findOne = jest.fn().mockResolvedValue(webhookEntity);
+      webhookRepository.updateOne = jest.fn().mockResolvedValue(true);
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockReturnValueOnce(fortuneManifest);
+      jest
+        .spyOn(webhookService, 'processFortune')
+        .mockResolvedValue(results as any);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        bulkPayOut: jest.fn().mockResolvedValue(true),
+        getBalance: jest.fn().mockResolvedValue(BigNumber.from(0)),
+      }));
+
+      expect(await webhookService.processPendingCronJob()).toBe(true);
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
+        { id: 1 },
+        expect.objectContaining({ status: WebhookStatus.PAID }),
+      );
+    });
   });
 
   describe('handleWebhookError', () => {
@@ -267,7 +306,7 @@ describe('WebhookService', () => {
         { id: 1, retriesCount: RETRIES_COUNT_THRESHOLD } as any,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toBeCalledWith(
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: 1 },
         { status: WebhookStatus.FAILED },
       );
@@ -278,7 +317,7 @@ describe('WebhookService', () => {
         { id: 1, retriesCount: 0 } as any,
         new Error('Sample error'),
       );
-      expect(webhookRepository.updateOne).toBeCalledWith(
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: 1 },
         {
           retriesCount: 1,
@@ -309,10 +348,7 @@ describe('WebhookService', () => {
       const intermediateResultsUrl = MOCK_FILE_URL;
 
       jest
-        .spyOn(webhookService, 'getIntermediateResults')
-        .mockResolvedValue(intermediateResults);
-      jest
-        .spyOn(webhookService, 'finalizeFortuneResults')
+        .spyOn(webhookService as any, 'getIntermediateResults')
         .mockResolvedValue(intermediateResults);
       jest
         .spyOn(webhookService.storageClient, 'uploadFiles')
@@ -386,6 +422,172 @@ describe('WebhookService', () => {
         hash: expect.any(String),
         checkPassed: true,
       });
+    });
+  });
+
+  describe('processPaidCronJob', () => {
+    const fortuneManifest: FortuneManifestDto = {
+      submissionsRequired: 1,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: 10,
+      requestType: JobRequestType.FORTUNE,
+    };
+
+    const cvatManifest: CvatManifestDto = {
+      data: {
+        data_url: MOCK_FILE_URL,
+      },
+      annotation: {
+        labels: [{ name: 'cat' }, { name: 'dog' }],
+        description: 'Description',
+        type: JobRequestType.IMAGE_BOXES,
+        job_size: 10,
+        max_time: 10,
+      },
+      validation: {
+        min_quality: 0.95,
+        val_size: 10,
+        gt_url: MOCK_FILE_URL,
+      },
+      job_bounty: '10',
+    };
+
+    const webhookEntity: Partial<WebhookIncomingEntity> = {
+      id: 1,
+      chainId: ChainId.LOCALHOST,
+      escrowAddress: MOCK_ADDRESS,
+      status: WebhookStatus.PAID,
+      checkPassed: true,
+      waitUntil: new Date(),
+    };
+
+    it('should return false if no pending webhook is found', async () => {
+      webhookRepository.findOne = jest.fn().mockReturnValue(null);
+      expect(await webhookService.processPaidCronJob()).toBe(false);
+    });
+
+    it('should handle error if any exception is thrown', async () => {
+      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockReturnValueOnce(fortuneManifest);
+      jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue(false);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: jest.fn().mockImplementation(() => {
+          throw new Error();
+        }),
+      }));
+
+      expect(await webhookService.processPaidCronJob()).toBe(false);
+      expect(webhookService.handleWebhookError).toBeCalled();
+    });
+
+    it('should successfully process Fortune reputations', async () => {
+      const worker1 = '0xCf88b3f1992458C2f5a229573c768D0E9F70C440';
+      const worker2 = '0xCf88b3f1992458C2f5a229573c768D0E9F70C443';
+      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
+      const finalResults: FortuneFinalResult[] = [
+        { solution: 'Solution', workerAddress: worker1 },
+        {
+          solution: 'Solution',
+          workerAddress: worker2,
+          error: SolutionError.Duplicated,
+        },
+      ];
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(fortuneManifest)
+        .mockResolvedValue(finalResults);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_JOB_LAUNCHER_ADDRESS),
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_RECORDING_ORACLE_ADDRESS),
+        complete: jest.fn().mockResolvedValue(true),
+      }));
+
+      jest.spyOn(reputationService, 'increaseReputation');
+      jest.spyOn(reputationService, 'decreaseReputation');
+
+      expect(await webhookService.processPaidCronJob()).toBe(true);
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        worker1,
+        ReputationEntityType.WORKER,
+      );
+      expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        worker2,
+        ReputationEntityType.WORKER,
+      );
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_JOB_LAUNCHER_ADDRESS,
+        ReputationEntityType.JOB_LAUNCHER,
+      );
+      expect(reputationService.decreaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_EXCHANGE_ORACLE_ADDRESS,
+        ReputationEntityType.EXCHANGE_ORACLE,
+      );
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_RECORDING_ORACLE_ADDRESS,
+        ReputationEntityType.RECORDING_ORACLE,
+      );
+    });
+
+    it('should successfully process CVAT reputations', async () => {
+      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(cvatManifest);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_JOB_LAUNCHER_ADDRESS),
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_RECORDING_ORACLE_ADDRESS),
+        complete: jest.fn().mockResolvedValue(true),
+      }));
+
+      jest.spyOn(reputationService, 'increaseReputation');
+      jest.spyOn(reputationService, 'decreaseReputation');
+
+      expect(await webhookService.processPaidCronJob()).toBe(true);
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_JOB_LAUNCHER_ADDRESS,
+        ReputationEntityType.JOB_LAUNCHER,
+      );
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_EXCHANGE_ORACLE_ADDRESS,
+        ReputationEntityType.EXCHANGE_ORACLE,
+      );
+      expect(reputationService.increaseReputation).toHaveBeenCalledWith(
+        ChainId.LOCALHOST,
+        MOCK_RECORDING_ORACLE_ADDRESS,
+        ReputationEntityType.RECORDING_ORACLE,
+      );
+      expect(reputationService.decreaseReputation).not.toHaveBeenCalled();
     });
   });
 });

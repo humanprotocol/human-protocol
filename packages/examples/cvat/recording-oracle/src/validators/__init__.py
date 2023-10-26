@@ -4,7 +4,7 @@
 class ValidationResult:
     """
     Helper class that should be used for validation purposes
-    It incapsulates validation logic and helping during generating response body
+    It encapsulates validation logic and helping during generating response body
     """
 
     def __init__(self):

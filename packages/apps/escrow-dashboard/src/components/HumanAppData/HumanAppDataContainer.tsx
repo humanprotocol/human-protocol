@@ -37,6 +37,7 @@ export const HumanAppDataContainer: FC = () => {
         <Box sx={{ width: '100%', maxWidth: { xs: '100%', lg: '513px' } }}>
           <NetworkSelect
             value={chainId}
+            showAllNetwork
             supportedChainIds={V2_SUPPORTED_CHAIN_IDS}
             width="100%"
             onChange={handleNetworkChange}

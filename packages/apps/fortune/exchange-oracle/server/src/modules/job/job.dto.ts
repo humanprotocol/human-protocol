@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 import { IsEnum, IsString } from 'class-validator';
 import { IsValidEthereumAddress } from '../../common/validators';
-import { EventType } from 'src/common/enums/webhook';
+import { EventType } from '../../common/enums/webhook';
 
 export class ManifestDto {
   requesterTitle: string;

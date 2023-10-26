@@ -206,6 +206,9 @@ export class CommonDetails {
 
   @IsNumber()
   amountOfTasks?: number;
+
+  @IsEnum(JobStatus)
+  status: JobStatus;
 }
 
 export class JobDetailsDto {
@@ -363,7 +366,7 @@ export class EscrowFailedWebhookDto {
 
 export class EscrowCancelDto {
   txHash: string;
-  amountRefunded: BigNumber
+  amountRefunded: BigNumber;
 }
 
 export class JobCaptchaAdvancedDto {

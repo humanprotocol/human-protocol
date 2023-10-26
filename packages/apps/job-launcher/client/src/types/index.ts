@@ -102,8 +102,7 @@ export enum JobStatus {
   PENDING = 'PENDING',
   CANCELED = 'CANCELED',
   FAILED = 'FAILED',
-  PAID = 'PAID',
-  TO_CANCEL = 'TO_CANCEL',
+  COMPLETED = 'COMPLETED',
 }
 
 export type JobDetailsResponse = {
