@@ -249,7 +249,7 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const kvstoreClient = await KVStoreClient.build(signer);
 
-const keys = ['Role', 'Webhook_url'];
+const keys = ['Role', 'WebhookUrl'];
 const values = ['RecordingOracle', 'http://localhost'];
 await kvstoreClient.set(keys, values);
 ```
