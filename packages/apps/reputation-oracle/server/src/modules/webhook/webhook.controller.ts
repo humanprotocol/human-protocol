@@ -7,8 +7,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
-import { SignatureAuthGuard } from 'src/common/guards';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
 import { WebhookIncomingDto } from './webhook.dto';
 import { WebhookService } from './webhook.service';

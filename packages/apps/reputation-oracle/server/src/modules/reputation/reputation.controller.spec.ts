@@ -6,7 +6,7 @@ import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
-import { IReputation } from 'src/common/interfaces';
+import { IReputation } from '../../common/interfaces';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
