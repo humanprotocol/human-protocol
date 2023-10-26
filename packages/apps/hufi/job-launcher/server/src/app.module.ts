@@ -45,7 +45,7 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
-        '../../../../../',
+        '../../../../../../',
         'node_modules/swagger-ui-dist',
       ),
     }),
