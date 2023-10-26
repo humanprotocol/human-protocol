@@ -19,5 +19,43 @@ export enum JobStatusFilter {
 export enum JobRequestType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+  HCAPTCHA = 'HCAPTCHA',
   FORTUNE = 'FORTUNE',
+}
+
+export enum JobCaptchaMode {
+  BATCH = 'batch'
+}
+
+export enum JobCaptchaRequestType {
+  IMAGE_LABEL_BINARY = 'image_label_binary',
+  IMAGE_LABEL_MULTIPLE_CHOICE  = 'image_label_multiple_choice',
+  IMAGE_LABEL_AREA_SELECT = 'image_label_area_select',
+  TEXT_FREEE_NTRY = 'text_free_entry',
+}
+
+export enum JobCaptchaShapeType {
+  POLYGON = 'polygon',
+  CATEGORAZATION = 'categorization',
+  POINT = 'point',
+  BOUNDING_BOX = 'bounding_box',
+  COMPARISON = 'comparison',
+}
+
+export enum WorkerLanguage {
+  ENGLISH = 'English',
+  GERMAN = 'German',
+  FRENCH = 'French'
+}
+
+export enum WorkerLocation {
+  GERMANY = 'Germany',
+  FRANCE = 'France'
+}
+
+export enum WorkerBrowser {
+  ALL_BROWSERS = 'All Browsers',
+  DESKTOP = 'Desktop',
+  MOBILE = 'Mobile',
+  MODERN_BROWSER = 'Modern Browsers'
 }

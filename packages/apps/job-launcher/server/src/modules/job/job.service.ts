@@ -12,6 +12,7 @@ import {
   UploadFile,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
+const { v4: uuidv4 } = require('uuid');
 import {
   BadGatewayException,
   BadRequestException,
@@ -36,6 +37,9 @@ import {
   ErrorPostgres,
 } from '../../common/constants/errors';
 import {
+  JobCaptchaMode,
+  JobCaptchaRequestType,
+  JobCaptchaShapeType,
   JobRequestType,
   JobStatus,
   JobStatusFilter,
@@ -47,7 +51,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseUrl } from '../../common/utils';
+import { getRate, listObjectsInBucket, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -59,10 +63,14 @@ import {
   EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
+  HCaptchaManifest,
+  JobCaptchaAdvancedDto,
+  JobCaptchaDto,
   JobCvatDto,
   JobDetailsDto,
   JobFortuneDto,
   JobListDto,
+  RestrictedAudience,
   SaveManifestDto,
   SendWebhookDto,
 } from './job.dto';
@@ -71,6 +79,13 @@ import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
+  HCAPTCHA_MAX_POINTS,
+  HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+  HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+  HCAPTCHA_MIN_POINTS,
+  HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+  HCAPTCHA_REQUESTER_MAX_REPEATS,
+  HCAPTCHA_REQUESTER_MIN_REPEATS,
   HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
@@ -123,72 +138,221 @@ export class JobService {
     );
   }
 
+  private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType): Promise<CvatManifestDto> {
+    return {
+      data: {
+        data_url: dto.dataUrl,
+      },
+      annotation: {
+        labels: dto.labels.map((item) => ({ name: item })),
+        description: dto.requesterDescription,
+        user_guide: dto.userGuide,
+        type: requestType,
+        job_size: Number(
+          this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
+        ),
+        max_time: Number(
+          this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
+        ),
+      },
+      validation: {
+        min_quality: dto.minQuality,
+        val_size: Number(
+          this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
+        ),
+        gt_url: dto.gtUrl,
+      },
+      job_bounty: await this.calculateJobBounty(dto.dataUrl, dto.fundAmount),
+    };
+  }
+
+  async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifest> {
+    const objectsInBucket = await listObjectsInBucket(jobDto.dataUrl);
+
+    const commonManifestProperties = {
+        job_mode: JobCaptchaMode.BATCH,
+        job_api_key: this.configService.get<string>(ConfigNames.HCAPTHCHA_JOB_API_KEY)!,
+        requester_accuracy_target: jobDto.accuracyTarget,
+        request_config: {},
+        requester_max_repeats: HCAPTCHA_REQUESTER_MAX_REPEATS,
+        requester_min_repeats: HCAPTCHA_REQUESTER_MIN_REPEATS,
+        requester_question: { en: jobDto.annotations.labelingPrompt },
+        requester_question_example: jobDto.annotations.exampleImages || [],
+        job_total_tasks: objectsInBucket.length,
+        task_bid_price: jobDto.annotations.taskBidPrice,
+        groundtruth_uri: jobDto.annotations.groundTruths,
+        taskdata_uri: await this.generateAndUploadTaskData(objectsInBucket),
+    };
+
+    switch (jobType) {
+        case JobCaptchaShapeType.COMPARISON:
+            return {
+                ...commonManifestProperties,
+                request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+                restricted_audience: {},
+                requester_restricted_answer_set: {},
+            };
+
+        case JobCaptchaShapeType.CATEGORAZATION:
+            const categorizationManifest = {
+                ...commonManifestProperties,
+                request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+                restricted_audience: {},
+                requester_restricted_answer_set: {},
+            };
+
+            const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
+            const restrictedAnswerSet = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
+
+            categorizationManifest.requester_restricted_answer_set = restrictedAnswerSet;
+
+            return categorizationManifest;
+
+        case JobCaptchaShapeType.POLYGON:
+            const polygonManifest = {
+                ...commonManifestProperties,
+                request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+                request_config: {
+                    shape_type: JobCaptchaShapeType.POLYGON,
+                    min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+                    max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+                    min_points: HCAPTCHA_MIN_POINTS,
+                    max_points: HCAPTCHA_MAX_POINTS,
+                    minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+                },
+                restricted_audience: this.buildHCaptchaRestrictedAnswerSet(jobDto.advanced),
+                requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+            };
+
+            return polygonManifest;
+
+        case JobCaptchaShapeType.POINT || JobCaptchaShapeType.BOUNDING_BOX:
+            const shapeManifest = {
+                ...commonManifestProperties,
+                request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+                request_config: {
+                    shape_type: jobType,
+                    min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+                    max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+                    min_points: HCAPTCHA_MIN_POINTS,
+                    max_points: HCAPTCHA_MAX_POINTS,
+                },
+                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+                requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+            };
+
+            return shapeManifest;
+
+        default:
+            this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
+            throw new ConflictException(ErrorJob.HCaptchaInvalidJobType);
+    }
+}
+
+  private buildHCaptchaRestrictedAudience(advanced: JobCaptchaAdvancedDto) {
+    const restrictedAudience: RestrictedAudience = {};
+
+    if (advanced.workerLanguage) {
+        restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
+    }
+
+    if (advanced.workerLocation !== undefined) {
+        restrictedAudience.country = [{ [advanced.workerLocation]: { score: 1 } }];
+    }
+
+    if (advanced.targetBrowser !== undefined) {
+        restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
+    }
+
+    return restrictedAudience;
+  }
+
+  private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
+    const maxElements = 3;
+    const outputObject: any = {};
+
+    let elementCount = 0;
+
+    for (const key of Object.keys(groundTruthsData)) {
+        if (elementCount >= maxElements) {
+            break;
+        }
+
+        const value = groundTruthsData[key][0][0];
+        outputObject[value] = { en: value, answer_example_uri: key };
+        elementCount++;
+    }
+
+    return outputObject;
+  }
+
+  private async generateAndUploadTaskData(objectNames: string[]) {
+    const protocol = this.storageParams.useSSL ? 'https' : 'http';
+ 
+    const taskData = objectNames.map(objectName => {
+        return {
+            datapoint_uri: `${protocol}://${this.storageParams.endPoint}:${this.storageParams.port}/${this.bucket}/${objectName}`,
+            datapoint_hash: 'undefined-hash',
+            task_key: uuidv4(),
+        };
+    });
+
+    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles([taskData], this.bucket);
+
+    return uploadedFiles[0].url;
+  }
+
   public async createJob(
     userId: number,
     requestType: JobRequestType,
-    dto: JobFortuneDto | JobCvatDto,
+    dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
-    let manifestUrl, manifestHash;
-    const { chainId, fundAmount } = dto;
-
+    const { chainId } = dto;
+  
     if (chainId) {
       this.web3Service.validateChainId(chainId);
     }
+  
+    let manifest, fundAmount;
+  
+    if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
+      manifest = await this.createHCaptchaManifest(
+        (dto as JobCaptchaDto).annotations.typeOfJob,
+        dto as JobCaptchaDto
+      );
 
+      // TODO: Encrypt manifest using hCaptcha public key
+
+      
+      fundAmount = manifest.task_bid_price * manifest.job_total_tasks;
+    } else if (requestType === JobRequestType.FORTUNE) { // Fortune
+      dto = dto as JobFortuneDto;
+      manifest = { ...dto, requestType };
+      fundAmount = dto.fundAmount;
+    } else { // CVAT
+      dto = dto as JobCvatDto;
+      manifest = await this.createCvatManifest(dto, requestType);
+      fundAmount = dto.fundAmount;
+    }
+  
     const userBalance = await this.paymentService.getUserBalance(userId);
-
     const rate = await getRate(Currency.USD, TokenId.HMT);
-
-    const feePercentage = this.configService.get<number>(
-      ConfigNames.JOB_LAUNCHER_FEE,
-    )!;
+    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
+  
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
-
+  
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
-
+  
     const tokenFundAmount = mul(fundAmount, rate);
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
-
-    if (requestType == JobRequestType.FORTUNE) {
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        ...(dto as JobFortuneDto),
-        requestType,
-        fundAmount: tokenFundAmount,
-      }));
-    } else {
-      dto = dto as JobCvatDto;
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        data: {
-          data_url: dto.dataUrl,
-        },
-        annotation: {
-          labels: dto.labels.map((item) => ({ name: item })),
-          description: dto.requesterDescription,
-          user_guide: dto.userGuide,
-          type: requestType,
-          job_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-          ),
-          max_time: Number(
-            this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
-          ),
-        },
-        validation: {
-          min_quality: dto.minQuality,
-          val_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
-          ),
-          gt_url: dto.gtUrl,
-        },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
-      }));
-    }
-
+  
+    const { manifestUrl, manifestHash } = await this.saveManifest(manifest);
+  
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
@@ -199,12 +363,12 @@ export class JobService {
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
-
+  
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotCreated, JobService.name);
       throw new NotFoundException(ErrorJob.NotCreated);
     }
-
+  
     try {
       await this.paymentRepository.create({
         userId,
@@ -228,10 +392,10 @@ export class JobService {
         throw new ConflictException(ErrorPayment.NotSuccess);
       }
     }
-
+  
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
-
+  
     return jobEntity.id;
   }
 
@@ -358,7 +522,7 @@ export class JobService {
   }
 
   public async saveManifest(
-    manifest: FortuneManifestDto | CvatManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifest,
   ): Promise<SaveManifestDto> {
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
       [manifest],

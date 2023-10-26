@@ -22,6 +22,7 @@ import {
   EscrowFailedWebhookDto,
   JobDetailsDto,
   JobIdDto,
+  JobCaptchaDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -51,6 +52,14 @@ export class JobController {
     @Body() data: JobCvatDto,
   ): Promise<number> {
     return this.jobService.createJob(req.user.id, data.type, data);
+  }
+
+  @Post('/hCaptcha')
+  public async createCaptchaJob(
+    @Request() req: RequestWithUser,
+    @Body() data: JobCaptchaDto,
+  ): Promise<number> {
+    return this.jobService.createJob(req.user.id, JobRequestType.HCAPTCHA, data);
   }
 
   @Get('/list')

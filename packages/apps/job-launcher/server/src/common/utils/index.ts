@@ -3,8 +3,10 @@ import { CoingeckoTokenId } from '../constants/payment';
 import { TokenId } from '../enums/payment';
 import { COINGECKO_API_URL } from '../constants';
 import { NotFoundException } from '@nestjs/common';
-import { ErrorCurrency } from '../constants/errors';
+import { ErrorBucket, ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
+import axios from 'axios';
+import { parseString } from 'xml2js';
 
 export async function getRate(from: string, to: string): Promise<number> {
   if (from === to) {
@@ -75,3 +77,26 @@ export const parseUrl = (url: string): {
 
   throw new Error('Invalid URL');
 };
+
+export const listObjectsInBucket = async (bucketUrl: string): Promise<string[]> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await axios.get(bucketUrl);
+
+      if (response.status === 200 && response.data) {
+        parseString(response.data, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+
+          const objectKeys = result.ListBucketResult.Contents.map((item: any) => item.Key);
+          resolve(objectKeys.flat());
+        });
+      } else {
+        reject(ErrorBucket.FailedToFetchBucketContents);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+}

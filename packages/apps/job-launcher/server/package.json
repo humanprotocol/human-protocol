@@ -73,6 +73,7 @@
     "@types/node": "18.16.12",
     "@types/supertest": "^2.0.11",
     "@types/zxcvbn": "4.4.1",
+    "@types/xml2js": "0.4.13",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",

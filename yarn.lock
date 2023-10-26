@@ -5230,6 +5230,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/xml2js@0.4.13":
+  version "0.4.13"
+  resolved "https://registry.yarnpkg.com/@types/xml2js/-/xml2js-0.4.13.tgz#219134d550c21e2f1d7b0e2fbb9174144c6053ed"
+  integrity sha512-nuT42GzgoUa4zZgBoF4d+Zqc12/FlVxXCT4xU6j3RfqTFVQWrUAClI/0sNJ5ImM9Wv6KB42KMG2xsVMn4cSBzA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/yargs-parser@*":
   version "21.0.1"
   resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-21.0.1.tgz#07773d7160494d56aa882d7531aac7319ea67c3b"

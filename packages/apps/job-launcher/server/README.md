@@ -39,10 +39,10 @@ First of all, postgres needs to be installed, please see here <a href="https://w
 
 Then run the following commands in the postgres console to create the database and issue permissions:
 ```bash
-$ CREATE DATABASE "reputation-oracle";
+$ CREATE DATABASE "launcher";
 $ CREATE USER operator WITH ENCRYPTED PASSWORD 'qwerty';
-$ GRANT ALL PRIVILEGES ON DATABASE "reputation-oracle" TO "operator";
-$ \c "reputation-oracle" postgres
+$ GRANT ALL PRIVILEGES ON DATABASE "launcher" TO "operator";
+$ \c "launcher" postgres
 $ GRANT CREATE ON SCHEMA public TO operator;
 ```
 Now we're ready to run the migrations:

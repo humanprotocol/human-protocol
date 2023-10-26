@@ -15,6 +15,8 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+  TaskDataNotFound = 'Task data not found',
+  HCaptchaInvalidJobType = 'hCaptcha invalid job type',
 }
 
 /**
@@ -88,6 +90,7 @@ export enum ErrorCurrency {
 export enum ErrorBucket {
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents'
 }
 
 /**

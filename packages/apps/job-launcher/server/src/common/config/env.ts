@@ -30,6 +30,7 @@ export const ConfigNames = {
   CVAT_EXCHANGE_ORACLE_ADDRESS: 'CVAT_EXCHANGE_ORACLE_ADDRESS',
   CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL',
   CVAT_RECORDING_ORACLE_ADDRESS: 'CVAT_RECORDING_ORACLE_ADDRESS',
+  HCAPTHCHA_JOB_API_KEY: 'HCAPTHCHA_JOB_API_KEY',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -84,6 +85,7 @@ export const envValidator = Joi.object({
   CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
+  HCAPTHCHA_JOB_API_KEY: Joi.string().required(),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),
