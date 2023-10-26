@@ -20,6 +20,7 @@ async def debug():
 async def create_job(escrow_info: EscrowInfo):
     """Webhook to create a new job. To be called by the JobLauncher."""
 
+    # FIXME: offload into cron jobs
     # get manifest from escrow url
     s3_url = get_manifest_url(escrow_info)
     manifest = download_manifest(s3_url)

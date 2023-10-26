@@ -1,0 +1,25 @@
+{
+ "job_id": "72bf2d74-8e5d-4105-8834-20ebe4e4d1ee",
+ "job_total_tasks": 100,
+ "requester_restricted_answer_set": {
+  "0": { "en":  "Acting" },
+  "1": { "en":  "Story" },
+  "2": { "en":  "Plot" }
+ },
+ "requester_description": "Your job is to identify passages in which reviewers talk about certain topics...",
+ "requester_accuracy_target": 0.6,
+ "requester_max_repeats": 3,
+ "requester_question": {
+   "en": "Mark text spans in which the reviewer talks about one of the given topics."
+ },
+ "unsafe_content": false,
+ "task_bidprice": 1.3,
+ "expiration_date": 9001,
+ "taskdata_uri": "http://127.0.0.1:9000/text-exo/Movies_and_TV_5.sample.task.json",
+ "groundtruth_uri": "",
+ "job_mode": "batch",
+ "request_type": "text_label_multiple_span_select",
+ "request_config": {},
+ "requester_min_repeats": 3,
+ "requester_question_example": []
+}
