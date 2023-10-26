@@ -48,6 +48,7 @@ jest.mock('@human-protocol/sdk', () => ({
       getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       bulkPayOut: jest.fn().mockResolvedValue(true),
+      getBalance: jest.fn().mockResolvedValue(BigNumber.from(10)),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -271,6 +272,32 @@ describe('WebhookService', () => {
 
       expect(await webhookService.processPendingCronJob()).toBe(true);
     });
+
+    it('should update the webhook entity to Paid status if the balance is zero', async () => {
+      webhookRepository.findOne = jest.fn().mockResolvedValue(webhookEntity);
+      webhookRepository.updateOne = jest.fn().mockResolvedValue(true);
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockReturnValueOnce(fortuneManifest);
+      jest
+        .spyOn(webhookService, 'processFortune')
+        .mockResolvedValue(results as any);
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getIntermediateResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+        bulkPayOut: jest.fn().mockResolvedValue(true),
+        getBalance: jest.fn().mockResolvedValue(BigNumber.from(0)),
+      }));
+
+      expect(await webhookService.processPendingCronJob()).toBe(true);
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
+        { id: 1 },
+        expect.objectContaining({ status: WebhookStatus.PAID }),
+      );
+    });
   });
 
   describe('handleWebhookError', () => {
@@ -486,6 +513,7 @@ describe('WebhookService', () => {
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValue(MOCK_RECORDING_ORACLE_ADDRESS),
+        complete: jest.fn().mockResolvedValue(true),
       }));
 
       jest.spyOn(reputationService, 'increaseReputation');
@@ -537,6 +565,7 @@ describe('WebhookService', () => {
         getRecordingOracleAddress: jest
           .fn()
           .mockResolvedValue(MOCK_RECORDING_ORACLE_ADDRESS),
+        complete: jest.fn().mockResolvedValue(true),
       }));
 
       jest.spyOn(reputationService, 'increaseReputation');
