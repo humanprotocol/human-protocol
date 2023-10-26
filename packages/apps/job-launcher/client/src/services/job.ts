@@ -68,3 +68,8 @@ export const getJobDetails = async (jobId: number) => {
   const { data } = await api.get<JobDetailsResponse>(`/job/details/${jobId}`);
   return data;
 };
+
+export const cancelJob = async (jobId: number) => {
+  const { data } = await api.patch<JobDetailsResponse>(`/job/cancel/${jobId}`);
+  return data;
+};

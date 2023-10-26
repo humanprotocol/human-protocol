@@ -97,7 +97,6 @@ export type JobRequest = {
 };
 
 export enum JobStatus {
-  ALL = 'ALL',
   LAUNCHED = 'LAUNCHED',
   PENDING = 'PENDING',
   CANCELED = 'CANCELED',
@@ -112,7 +111,7 @@ export type JobDetailsResponse = {
     manifestHash: string;
     balance: number;
     paidOut: number;
-    amountOfTasks: number;
+    status: string;
   };
   manifest: {
     chainId: number;

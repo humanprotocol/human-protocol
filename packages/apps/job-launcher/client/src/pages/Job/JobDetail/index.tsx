@@ -1,10 +1,14 @@
+import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { useJobDetails } from '../../../hooks/useJobDetails';
+import { useSnackbar } from '../../../providers/SnackProvider';
+import * as jobService from '../../../services/job';
+import { JobStatus } from '../../../types';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -19,6 +23,22 @@ const CardContainer = styled(Card)(({ theme }) => ({
 export default function JobDetail() {
   const { jobId } = useParams();
   const { data, isLoading, error } = useJobDetails(Number(jobId));
+  const [isCancelling, setIsCancelling] = useState(false);
+  const { openSnackbar } = useSnackbar();
+
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      await jobService.cancelJob(Number(jobId));
+      openSnackbar('Job cancelled', 'success');
+    } catch (err: any) {
+      openSnackbar(
+        err?.response?.data?.message ?? 'Job cancellation failed.',
+        'error'
+      );
+    }
+    setIsCancelling(false);
+  };
 
   if (isLoading) return <>Loading...</>;
 
@@ -33,6 +53,17 @@ export default function JobDetail() {
           </Typography>
           <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
+        {data.details.status === JobStatus.CANCELED && (
+          <LoadingButton
+            sx={{ mb: 2 }}
+            variant="contained"
+            color="primary"
+            loading={isCancelling}
+            onClick={handleCancel}
+          >
+            Cancel
+          </LoadingButton>
+        )}
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <CardContainer>
@@ -61,10 +92,7 @@ export default function JobDetail() {
                   label="Paid Out HMT"
                   value={`${data.details.paidOut} HMT`}
                 />
-                <CardTextRow
-                  label="Amount of Jobs"
-                  value={data.details.amountOfTasks}
-                />
+                <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
               </Stack>
             </CardContainer>

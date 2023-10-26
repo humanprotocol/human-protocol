@@ -12,7 +12,7 @@ import { JobStatus } from '../../types';
 
 export default function Dashboard() {
   const [chainId, setChainId] = useState<ChainId>(ChainId.ALL);
-  const [status, setStatus] = useState<JobStatus>(JobStatus.ALL);
+  const [status, setStatus] = useState<JobStatus>(JobStatus.LAUNCHED);
 
   return (
     <Box>
