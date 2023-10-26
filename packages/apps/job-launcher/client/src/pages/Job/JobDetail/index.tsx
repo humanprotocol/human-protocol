@@ -53,7 +53,7 @@ export default function JobDetail() {
           </Typography>
           <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
-        {data.details.status === JobStatus.CANCELED && (
+        {data.details.status === JobStatus.FAILED && (
           <LoadingButton
             sx={{ mb: 2 }}
             variant="contained"
