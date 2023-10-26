@@ -497,12 +497,12 @@ export class JobService {
     const escrows: EscrowData[] = [];
     const statuses = filterToEscrowStatus(status);
 
-    for (const escrowStatus in statuses) {
+    for (const escrowStatus of statuses) {
       escrows.push(
         ...(await EscrowUtils.getEscrows({
           networks,
           jobRequesterId: userId.toString(),
-          status: Number(escrowStatus) as EscrowStatus,
+          status: escrowStatus,
           launcher: this.web3Service.signerAddress,
         })),
       );
@@ -771,7 +771,8 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
+      jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -832,6 +833,7 @@ export class JobService {
           manifestHash,
           balance: 0,
           paidOut: 0,
+          status,
         },
         manifest: manifestDetails,
         staking: {
@@ -849,6 +851,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
         paidOut: Number(escrow?.amountPaid || 0),
+        status,
       },
       manifest: manifestDetails,
       staking: {

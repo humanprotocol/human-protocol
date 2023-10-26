@@ -1345,6 +1345,7 @@ describe('JobService', () => {
           manifestHash: MOCK_FILE_HASH,
           balance: expect.any(Number),
           paidOut: expect.any(Number),
+          status: JobStatus.TO_CANCEL,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -1416,6 +1417,7 @@ describe('JobService', () => {
           manifestHash: MOCK_FILE_HASH,
           balance: 0,
           paidOut: 0,
+          status: JobStatus.TO_CANCEL,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
