@@ -771,8 +771,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
-      jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -783,6 +782,9 @@ export class JobService {
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
     }
+
+    const status =
+      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     const manifestData = await this.getManifest(manifestUrl);
     if (!manifestData) {

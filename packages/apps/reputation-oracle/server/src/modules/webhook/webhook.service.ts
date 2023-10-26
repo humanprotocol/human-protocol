@@ -239,9 +239,9 @@ export class WebhookService {
     const recipients = intermediateResults
       .filter((result) => !result.error)
       .map((item) => item.workerAddress);
-    const payoutAmount = BigNumber.from(manifest.fundAmount).div(
-      recipients.length,
-    );
+    const payoutAmount = BigNumber.from(
+      ethers.utils.parseUnits(manifest.fundAmount.toString(), 'ether'),
+    ).div(recipients.length);
     const amounts = new Array(recipients.length).fill(payoutAmount);
 
     return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
