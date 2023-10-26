@@ -1,12 +1,14 @@
-from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
+
+from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
+
+from tests.utils.constants import DEFAULT_GAS_PAYER as JOB_LAUNCHER
 from tests.utils.constants import (
-    DEFAULT_GAS_PAYER as JOB_LAUNCHER,
+    DEFAULT_GAS_PAYER_PRIV,
+    SIGNATURE,
     WEBHOOK_MESSAGE,
     WEBHOOK_MESSAGE_SIGNED,
-    SIGNATURE,
 )
 
 
@@ -19,9 +21,7 @@ class PolygonMumbaiConfig:
 def test_incoming_webhook_200(client: TestClient) -> None:
     with patch("src.api.webhook.SessionLocal.begin") as mock_session_local, patch(
         "src.api.webhook.create_webhook"
-    ) as mock_create_webhook, patch(
-        "src.chain.escrow.get_web3"
-    ) as mock_get_web3, patch(
+    ) as mock_create_webhook, patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.chain.escrow.EscrowClient"
     ) as mock_escrow_client, patch(
         "src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
@@ -117,9 +117,7 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.chain.escrow.EscrowClient"
-    ) as mock_escrow_client, patch(
-        "src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
-    ):
+    ) as mock_escrow_client, patch("src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 
@@ -141,9 +139,7 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.chain.escrow.EscrowClient"
-    ) as mock_escrow_client, patch(
-        "src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
-    ):
+    ) as mock_escrow_client, patch("src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 
@@ -167,9 +163,7 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
     with patch("src.chain.escrow.get_web3") as mock_get_web3, patch(
         "src.chain.escrow.EscrowClient"
-    ) as mock_escrow_client, patch(
-        "src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig
-    ):
+    ) as mock_escrow_client, patch("src.chain.web3.Config.polygon_mumbai", PolygonMumbaiConfig):
         mock_web3_instance = MagicMock()
         mock_get_web3.return_value = mock_web3_instance
 

@@ -1,8 +1,9 @@
 from fastapi.testclient import TestClient
+
 from tests.utils.setup_cvat import (
-    generate_cvat_signature,
     add_cvat_project_to_db,
     add_cvat_task_to_db,
+    generate_cvat_signature,
     get_cvat_job_from_db,
 )
 

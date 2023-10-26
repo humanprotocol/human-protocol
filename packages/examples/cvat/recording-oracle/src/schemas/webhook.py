@@ -1,17 +1,18 @@
-from typing import TypeVar
+from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, validator
 
-from src.core.constants import Networks
 from src.chain.web3 import validate_address
-
-T = TypeVar("T")
+from src.core.types import ExchangeOracleEventType, Networks
 
 
 class OracleWebhook(BaseModel):
     escrow_address: str
     chain_id: Networks
-    s3_url: str
+    event_type: str
+    event_data: Optional[dict] = None
+    timestamp: Optional[datetime] = None  # TODO: remove optional
 
     @validator("escrow_address", allow_reuse=True)
     def validate_escrow_(cls, value):
@@ -23,7 +24,8 @@ class OracleWebhook(BaseModel):
             "example": {
                 "escrow_address": "0x199c44cfa6a84554ac01f3e3b01d7cfce38a75eb",
                 "chain_id": 80001,
-                "s3_url": "https://cvat-eo-results.storage.googleapis.com/s3c7d8121830b8bdfd37157ae99a1336206c0a061c.json",
+                "event_type": ExchangeOracleEventType.task_finished.value,
+                "event_data": {},
             }
         }
 
