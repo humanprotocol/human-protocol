@@ -786,7 +786,7 @@ describe('Escrow', () => {
     );
 
     // Escrow
-    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Completed');
+    assert.fieldEquals('Escrow', escrowAddress.toHex(), 'status', 'Complete');
   });
 
   describe('Statistics', () => {
