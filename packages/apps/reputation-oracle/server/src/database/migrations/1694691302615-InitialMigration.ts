@@ -1,4 +1,4 @@
-import { NS } from 'src/common/constants';
+import { NS } from '../../common/constants';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialMigration1694776006387 implements MigrationInterface {
