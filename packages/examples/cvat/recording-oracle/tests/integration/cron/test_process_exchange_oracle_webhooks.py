@@ -4,19 +4,18 @@ from unittest.mock import patch
 
 from human_protocol_sdk.storage import StorageClient
 from sqlalchemy.sql import select
-from src.core.config import StorageConfig
-from src.core.constants import Networks
-from src.db import SessionLocal
-from src.core.constants import OracleWebhookStatuses, OracleWebhookTypes
-from src.crons.process_exchange_oracle_webhooks import (
-    process_exchange_oracle_webhooks,
-)
-from src.models.webhook import Webhook
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
-from tests.utils.setup_escrow import create_escrow, fund_escrow
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
+
+from src.core.config import StorageConfig
+from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
+from src.crons.process_exchange_oracle_webhooks import process_exchange_oracle_webhooks
+from src.db import SessionLocal
+from src.models.webhook import Webhook
+
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
+from tests.utils.setup_escrow import create_escrow, fund_escrow
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -56,9 +55,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
         self.assertEqual(updated_webhook.attempts, 1)
@@ -73,9 +70,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             .scalars()
             .first()
         )
-        self.assertEqual(
-            reputation_oracle_webhook.status, OracleWebhookStatuses.pending.value
-        )
+        self.assertEqual(reputation_oracle_webhook.status, OracleWebhookStatuses.pending.value)
 
         self.assertIsNotNone(
             webhook.signature,
@@ -112,9 +107,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -148,9 +141,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -163,9 +154,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     @patch("src.chain.escrow.EscrowClient.get_manifest_url")
-    def test_process_job_launcher_webhooks_invalid_manifest_url(
-        self, mock_manifest_url
-    ):
+    def test_process_job_launcher_webhooks_invalid_manifest_url(self, mock_manifest_url):
         mock_manifest_url.return_value = "invalid_url"
         chain_id = Networks.localhost.value
         escrow_address = create_escrow(self.w3)
@@ -189,9 +178,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -224,9 +211,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -237,9 +222,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     @patch("src.core.config.StorageConfig.secure")
-    def test_process_job_launcher_webhooks_error_uploading_files(
-        self, mock_storage_config
-    ):
+    def test_process_job_launcher_webhooks_error_uploading_files(self, mock_storage_config):
         mock_storage_config.return_value = True
         chain_id = Networks.localhost.value
         escrow_address = create_escrow(self.w3)
@@ -263,9 +246,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_exchange_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)

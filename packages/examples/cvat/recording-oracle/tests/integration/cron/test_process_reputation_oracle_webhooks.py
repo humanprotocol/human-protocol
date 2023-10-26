@@ -3,19 +3,18 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 from sqlalchemy.sql import select
-from src.core.constants import Networks
-from src.db import SessionLocal
-from src.core.constants import OracleWebhookStatuses, OracleWebhookTypes
-from src.crons.process_reputation_oracle_webhooks import (
-    process_reputation_oracle_webhooks,
-)
-from src.models.webhook import Webhook
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
-from tests.utils.setup_escrow import create_escrow
-from tests.utils.setup_kvstore import store_kvstore_value
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
+
+from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
+from src.crons.process_reputation_oracle_webhooks import process_reputation_oracle_webhooks
+from src.db import SessionLocal
+from src.models.webhook import Webhook
+
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
+from tests.utils.setup_escrow import create_escrow
+from tests.utils.setup_kvstore import store_kvstore_value
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -33,7 +32,7 @@ class ServiceIntegrationTest(unittest.TestCase):
     def tearDown(self):
         self.session.close()
 
-    @patch("httpx.Client.post")
+    @patch("src.crons.process_reputation_oracle_webhooks.httpx.Client.post")
     def test_process_reputation_oracle_webhooks(self, mock_httpx_post):
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
@@ -61,9 +60,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         process_reputation_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.completed.value)
@@ -99,9 +96,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_reputation_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -135,9 +130,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_reputation_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
@@ -149,13 +142,11 @@ class ServiceIntegrationTest(unittest.TestCase):
             ],
         )
 
-    @patch("httpx.Client.post")
+    @patch("src.crons.process_reputation_oracle_webhooks.httpx.Client.post")
     def test_process_reputation_oracle_webhooks_invalid_request(self, mock_httpx_post):
         mock_response = MagicMock()
         mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = Exception(
-            "The requested URL was not found."
-        )
+        mock_response.raise_for_status.side_effect = Exception("The requested URL was not found.")
         mock_httpx_post.return_value = mock_response
         expected_url = "expected_url"
 
@@ -181,9 +172,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             process_reputation_oracle_webhooks()
 
         updated_webhook = (
-            self.session.execute(select(Webhook).where(Webhook.id == webhok_id))
-            .scalars()
-            .first()
+            self.session.execute(select(Webhook).where(Webhook.id == webhok_id)).scalars().first()
         )
 
         self.assertEqual(updated_webhook.status, OracleWebhookStatuses.pending.value)
