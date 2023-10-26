@@ -4,7 +4,7 @@ import { JobController } from './job.controller';
 import { JobService } from './job.service';
 import { HttpModule } from '@nestjs/axios';
 import { Web3Module } from '../web3/web3.module';
-import { s3Config } from 'src/common/config';
+import { s3Config } from '../../common/config';
 
 @Module({
   imports: [
