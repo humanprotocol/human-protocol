@@ -28,7 +28,6 @@ import { LOCAL_STORAGE_KEYS } from './constants';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
-import { fetchUserJobsAsync } from './state/jobs/reducer';
 import theme from './theme';
 // import { isJwtExpired } from './utils/jwt';
 
@@ -109,7 +108,6 @@ loadStripe(publishableKey).then((stripePromise) => {
       })
     );
     store.dispatch(fetchUserBalanceAsync());
-    store.dispatch(fetchUserJobsAsync());
   }
 
   root.render(
