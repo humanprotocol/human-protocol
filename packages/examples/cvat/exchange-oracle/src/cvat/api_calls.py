@@ -1,7 +1,6 @@
 import io
 import logging
 import zipfile
-from contextlib import suppress
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
@@ -96,7 +95,10 @@ def get_api_client() -> ApiClient:
         password=Config.cvat_config.cvat_admin_pass,
     )
 
-    return ApiClient(configuration=configuration)
+    api_client = ApiClient(configuration=configuration)
+    api_client.set_default_header("X-organization", Config.cvat_config.cvat_org_slug)
+
+    return api_client
 
 
 def create_cloudstorage(
@@ -529,19 +531,6 @@ def restart_job(id: str):
             raise
 
 
-def invite_user_into_org(user_email: str):
-    logger = logging.getLogger("app")
-
-    with get_api_client() as api_client:
-        try:
-            api_client.invitations_api.create(
-                models.InvitationWriteRequest(role="worker", email=user_email)
-            )
-        except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling InvitationsApi.create(): {e}\n")
-            raise
-
-
 def get_user_id(user_email: str) -> int:
     logger = logging.getLogger("app")
 
@@ -551,19 +540,34 @@ def get_user_id(user_email: str) -> int:
                 models.InvitationWriteRequest(role="worker", email=user_email),
                 org=Config.cvat_config.cvat_org_slug,
             )
-
-            (page, _) = api_client.memberships_api.list(
-                user=invitation.user.username, org=Config.cvat_config.cvat_org_slug
-            )
-            if page.results:
-                membership = page.results[0]
-                with suppress(exceptions.NotFoundException):
-                    api_client.memberships_api.destroy(membership.id)
-
-            with suppress(exceptions.NotFoundException):
-                api_client.invitations_api.destroy(invitation.key)
         except exceptions.ApiException as e:
-            logger.exception(f"Exception when calling InvitationsApi.create(): {e}\n")
+            logger.exception(f"Exception when calling get_user_id(): {e}\n")
             raise
 
         return invitation.user.id
+
+
+def remove_user_from_org(user_id: int):
+    logger = logging.getLogger("app")
+
+    with get_api_client() as api_client:
+        try:
+            (page, _) = api_client.users_api.list(
+                filter='{"==":[{"var":"id"},"%s"]}' % (user_id,),
+                org=Config.cvat_config.cvat_org_slug,
+            )
+            if not page.results:
+                return
+
+            user = page.results[0]
+            assert user.id == user_id
+
+            (page, _) = api_client.memberships_api.list(
+                user=user.username,
+                org=Config.cvat_config.cvat_org_slug,
+            )
+            if page.results:
+                api_client.memberships_api.destroy(page.results[0].id)
+        except exceptions.ApiException as e:
+            logger.exception(f"Exception when calling remove_user_from_org: {e}\n")
+            raise

@@ -300,6 +300,10 @@ def get_user_by_id(session: Session, wallet_address: str) -> Optional[User]:
     return session.query(User).where(User.wallet_address == wallet_address).first()
 
 
+def get_user_by_email(session: Session, email: str) -> Optional[User]:
+    return session.query(User).where(User.cvat_email == email).first()
+
+
 # Assignments
 
 

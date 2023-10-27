@@ -1,3 +1,4 @@
+from contextlib import suppress
 from http import HTTPStatus
 from typing import Optional
 
@@ -34,40 +35,63 @@ async def register(
 ) -> UserResponse:
     await validate_human_app_signature(signature)
 
-    try:
-        cvat_id = cvat_api.get_user_id(user.cvat_email)
-    except cvat_api.exceptions.ApiException as e:
-        if (
-            e.status == HTTPStatus.BAD_REQUEST
-            and "It is not a valid email in the system." in e.body
-        ):
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND,
-                detail="User with this email not found",
-            ) from e
-        raise
+    with SessionLocal.begin() as session:
+        email_db_user = cvat_service.get_user_by_email(session, user.cvat_email)
+        wallet_db_user = cvat_service.get_user_by_id(session, user.wallet_address)
 
-    # The db exception is raised after the session (which is a transaction) is closed
-    try:
-        with SessionLocal.begin() as session:
-            user = cvat_service.put_user(
+        if wallet_db_user and not email_db_user and wallet_db_user.cvat_email != user.cvat_email:
+            # Allow changing email for a wallet, don't allow changing wallet for a email
+            # Need to clean up existing membership
+            with suppress(cvat_api.exceptions.NotFoundException):
+                cvat_api.remove_user_from_org(wallet_db_user.cvat_id)
+
+        if not email_db_user:
+            try:
+                cvat_id = cvat_api.get_user_id(user.cvat_email)
+            except cvat_api.exceptions.ApiException as e:
+                if (
+                    # NOTE: CVAT < v2.8.0 compatibility
+                    e.status == HTTPStatus.BAD_REQUEST
+                    and "It is not a valid email in the system." in e.body
+                ):
+                    raise HTTPException(
+                        status_code=HTTPStatus.NOT_FOUND, detail="User with this email not found"
+                    ) from e
+
+                elif (
+                    e.status == HTTPStatus.BAD_REQUEST
+                    and "The user is a member of the organization already." in e.body
+                ):
+                    # This error can indicate that we tried to add the user previously
+                    # or he was added manually
+                    raise HTTPException(
+                        status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="User already exists"
+                    )
+
+                elif (
+                    e.status == HTTPStatus.BAD_REQUEST and "Enter a valid email address." in e.body
+                ):
+                    raise HTTPException(
+                        status_code=HTTPStatus.BAD_REQUEST, detail="Invalid email address"
+                    )
+
+                raise
+
+            email_db_user = cvat_service.put_user(
                 session,
                 wallet_address=user.wallet_address,
                 cvat_email=user.cvat_email,
                 cvat_id=cvat_id,
             )
-    except sqlalchemy.exc.IntegrityError as e:
-        if f"(cvat_email)=({user.cvat_email}) already exists" in str(e):
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST, detail="User already exists"
-            ) from e
-        raise
 
-    return UserResponse(
-        wallet_address=user.wallet_address,
-        cvat_email=user.cvat_email,
-        cvat_id=user.cvat_id,
-    )
+        elif email_db_user.wallet_address != user.wallet_address:
+            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="User already exists")
+
+        return UserResponse(
+            wallet_address=email_db_user.wallet_address,
+            cvat_email=email_db_user.cvat_email,
+            cvat_id=email_db_user.cvat_id,
+        )
 
 
 @router.post(
