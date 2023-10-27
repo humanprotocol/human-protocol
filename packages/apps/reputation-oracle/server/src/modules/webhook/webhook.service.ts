@@ -201,19 +201,15 @@ export class WebhookService {
         results.hash,
       );
 
-      const balance = await escrowClient.getBalance(escrowAddress);
-
-      if (balance.toNumber() == 0) {
-        await this.webhookRepository.updateOne(
-          { id: webhookEntity.id },
-          {
-            resultsUrl: results.url,
-            checkPassed: results.checkPassed,
-            status: WebhookStatus.PAID,
-            retriesCount: 0,
-          },
-        );
-      }
+      await this.webhookRepository.updateOne(
+        { id: webhookEntity.id },
+        {
+          resultsUrl: results.url,
+          checkPassed: results.checkPassed,
+          status: WebhookStatus.PAID,
+          retriesCount: 0,
+        },
+      );
 
       return true;
     } catch (e) {
@@ -235,6 +231,16 @@ export class WebhookService {
     const intermediateResults = (await this.getIntermediateResults(
       intermediateResultsUrl,
     )) as FortuneFinalResult[];
+
+    const validResults = intermediateResults.filter((result) => !result.error);
+    if (validResults.length < manifest.submissionsRequired) {
+      this.logger.error(
+        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
+        WebhookService.name,
+      );
+      throw new Error(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
+    }
+
     const [{ url, hash }] = await this.storageClient.uploadFiles(
       [intermediateResults],
       this.bucket,
@@ -318,7 +324,7 @@ export class WebhookService {
       );
     }
 
-    this.logger.log(
+    this.logger.error(
       'An error occurred during webhook validation: ',
       error,
       WebhookService.name,

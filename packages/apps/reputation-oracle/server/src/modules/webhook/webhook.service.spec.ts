@@ -16,7 +16,7 @@ import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { BigNumber } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
-import { ErrorWebhook } from '../../common/constants/errors';
+import { ErrorResults, ErrorWebhook } from '../../common/constants/errors';
 import {
   EventType,
   JobRequestType,
@@ -339,7 +339,6 @@ describe('WebhookService', () => {
 
       const intermediateResults = [
         {
-          exchangeAddress: 'string',
           workerAddress: 'string',
           solution: 'string',
         },
@@ -367,6 +366,38 @@ describe('WebhookService', () => {
         hash: MOCK_FILE_HASH,
         checkPassed: expect.any(Boolean),
       });
+    });
+
+    it('should throw an error if the number of solutions is less than solutions required', async () => {
+      const manifest = {
+        submissionsRequired: 2,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      const intermediateResults = [
+        {
+          workerAddress: 'string',
+          solution: 'string',
+        },
+      ];
+
+      const intermediateResultsUrl = MOCK_FILE_URL;
+
+      jest
+        .spyOn(webhookService as any, 'getIntermediateResults')
+        .mockResolvedValue(intermediateResults);
+      jest
+        .spyOn(webhookService.storageClient, 'uploadFiles')
+        .mockResolvedValue([
+          { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+        ] as any);
+
+      await expect(
+        webhookService.processFortune(manifest, intermediateResultsUrl),
+      ).rejects.toThrowError(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
     });
   });
 
