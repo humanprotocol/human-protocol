@@ -551,7 +551,9 @@ def get_user_id(user_email: str) -> int:
                 org=Config.cvat_config.cvat_org_slug,
             )
 
-            (page, _) = api_client.memberships_api.list(user=invitation.user.username)
+            (page, _) = api_client.memberships_api.list(
+                user=invitation.user.username, org=Config.cvat_config.cvat_org_slug
+            )
             membership = page.results[0]
             api_client.memberships_api.destroy(membership.id)
         except exceptions.ApiException as e:
