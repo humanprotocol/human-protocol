@@ -36,6 +36,8 @@ export enum ErrorUser {
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
+  ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
+  ApiKeyNotFound = 'API key not found'
 }
 
 /**

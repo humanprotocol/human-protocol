@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
 import { NS } from '../../common/constants';
@@ -39,4 +39,33 @@ export class UserEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
+
+  @OneToOne(() => ApiKeyEntity, apiKey => apiKey.user)
+  public apiKey: ApiKeyEntity;
+
+}
+
+@Entity({ schema: NS, name: 'api_keys' })
+export class ApiKeyEntity extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  public id: number;
+
+  @Column({ type: 'varchar' })
+  hashedAPIKey: string;
+
+  @Column({ type: 'varchar' })
+  salt: string;
+
+  @OneToOne(() => UserEntity, user => user.apiKey)
+  @JoinColumn({ name: 'user_id' })
+  public user: UserEntity;
+
+  @Column({ type: 'int' })
+  public userId: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

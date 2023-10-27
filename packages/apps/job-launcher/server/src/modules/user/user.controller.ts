@@ -5,6 +5,9 @@ import {
   Request,
   UnprocessableEntityException,
   UseGuards,
+  HttpCode,
+  HttpStatus,
+  Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
@@ -35,6 +38,25 @@ export class UserController {
       );
       throw new UnprocessableEntityException(
         ErrorUser.BalanceCouldNotBeRetreived,
+      );
+    }
+  }
+
+  @Post('/api-key')
+  @HttpCode(HttpStatus.CREATED)
+  public async createOrUpdateAPIKey(
+    @Request() req: RequestWithUser,
+  ): Promise<{ apiKey: string }> {
+    try {
+      const apiKey = await this.userService.createOrUpdateAPIKey(req.user.id);
+      return { apiKey };
+    } catch (e) {
+      this.logger.log(
+        e.message,
+        `${UserController.name} - ${ErrorUser.ApiKeyCouldNotBeCreatedOrUpdated}`,
+      );
+      throw new UnprocessableEntityException(
+        ErrorUser.ApiKeyCouldNotBeCreatedOrUpdated,
       );
     }
   }
