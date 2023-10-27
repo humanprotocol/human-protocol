@@ -1,6 +1,7 @@
 import io
 import logging
 import zipfile
+from contextlib import suppress
 from datetime import timedelta
 from enum import Enum
 from http import HTTPStatus
@@ -554,8 +555,13 @@ def get_user_id(user_email: str) -> int:
             (page, _) = api_client.memberships_api.list(
                 user=invitation.user.username, org=Config.cvat_config.cvat_org_slug
             )
-            membership = page.results[0]
-            api_client.memberships_api.destroy(membership.id)
+            if page.results:
+                membership = page.results[0]
+                with suppress(exceptions.NotFoundException):
+                    api_client.memberships_api.destroy(membership.id)
+
+            with suppress(exceptions.NotFoundException):
+                api_client.invitations_api.destroy(invitation.key)
         except exceptions.ApiException as e:
             logger.exception(f"Exception when calling InvitationsApi.create(): {e}\n")
             raise
