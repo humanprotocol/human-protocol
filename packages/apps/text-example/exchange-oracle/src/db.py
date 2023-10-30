@@ -1,9 +1,11 @@
 from enum import Enum
+from uuid import uuid4
 
 import sqlalchemy
 from sqlalchemy import UniqueConstraint, String, DateTime
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID
 
 from src.config import Config
 
@@ -29,11 +31,11 @@ class Base(DeclarativeBase):
 class JobRequest(Base):
     __tablename__ = "job_requests"
 
-    id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, index=True, default=uuid4
+    )
     escrow_address: Mapped[str] = mapped_column(String(42), nullable=False)
     chain_id: Mapped[int] = mapped_column(nullable=False)
-    manifest_url: Mapped[str]
-    webhook_type: Mapped[str] = mapped_column(nullable=False)
     webhook_status: Mapped[WebhookStatuses] = mapped_column(
         String, server_default=WebhookStatuses.pending.value
     )
@@ -41,7 +43,5 @@ class JobRequest(Base):
     updated_at = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     __table_args__ = (
-        UniqueConstraint(
-            "escrow_address", "webhook_type", name="_escrow_address_type_uc"
-        ),
+        UniqueConstraint("escrow_address", "chain_id", name="_escrow_address_chain_uc"),
     )

@@ -1,19 +1,33 @@
 from fastapi import FastAPI
 
 from src.chain import EscrowInfo
+from src.db import Session, JobRequest
+
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
 
-@exchange_oracle.post("/job/create")
+@exchange_oracle.post("/job/request")
 async def register_job_request(escrow_info: EscrowInfo):
-    raise NotImplementedError
+    """Adds a job request to the database, to be processed later."""
+    # TODO: validation
+    job_request = JobRequest(
+        escrow_address=escrow_info.escrow_address, chain_id=escrow_info.chain_id
+    )
+
+    with Session() as session:
+        session.add(job_request)
+        session.commit()
 
 
 @exchange_oracle.get("job/list")
 async def list_available_jobs():
     """Lists available jobs."""
-    # TODO: get list of in-progress jobs from database
+    raise NotImplementedError
+
+
+@exchange_oracle.get("job/{job_id}/details")
+async def get_job_details():
     raise NotImplementedError
 
 
