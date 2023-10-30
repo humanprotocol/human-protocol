@@ -195,7 +195,7 @@ export class KVStoreClient {
    * const signer = new Wallet(privateKey, provider);
    * const kvstoreClient = await KVStoreClient.build(signer);
    *
-   * const keys = ['Role', 'WebhookUrl'];
+   * const keys = ['role', 'webhookUrl'];
    * const values = ['RecordingOracle', 'http://localhost'];
    * await kvstoreClient.set(keys, values);
    * ```
