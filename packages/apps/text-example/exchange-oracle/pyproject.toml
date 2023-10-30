@@ -17,6 +17,7 @@ python-dotenv = "^1.0.0"
 urllib3 = "1.26.18"
 sqlalchemy = "^2.0.22"
 psycopg2 = "^2.9.9"
+apscheduler = "^3.10.4"
 
 
 [tool.poetry.group.dev.dependencies]

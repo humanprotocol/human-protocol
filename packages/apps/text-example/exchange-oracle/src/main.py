@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.chain import EscrowInfo
 from src.db import Session, JobRequest
-
+from src.config import Config
+from src.cron_jobs import process_pending_job_requests
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
@@ -42,3 +44,13 @@ async def apply_for_job(worker_id: str):
     # TODO: if fail
     # return error response
     raise NotImplementedError
+
+
+@exchange_oracle.on_event("startup")
+def startup():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        process_pending_job_requests,
+        "interval",
+        seconds=Config.cron_config.task_interval,
+    )

@@ -60,26 +60,8 @@ LocalhostConfig = BlockChainConfig(
 
 
 class CronConfig:
-    process_job_launcher_webhooks_int = int(
-        os.environ.get("PROCESS_JOB_LAUNCHER_WEBHOOKS_INT")
-    )
-    process_job_launcher_webhooks_chunk_size = os.environ.get(
-        "PROCESS_JOB_LAUNCHER_WEBHOOKS_CHUNK_SIZE"
-    )
-    process_recording_oracle_webhooks_int = int(
-        os.environ.get("PROCESS_RECORDING_ORACLE_WEBHOOKS_INT")
-    )
-    process_recording_oracle_webhooks_chunk_size = os.environ.get(
-        "PROCESS_RECORDING_ORACLE_WEBHOOKS_CHUNK_SIZE"
-    )
-    track_completed_projects_int = int(os.environ.get("TRACK_COMPLETED_PROJECTS_INT"))
-    track_completed_projects_chunk_size = os.environ.get(
-        "TRACK_COMPLETED_PROJECTS_CHUNK_SIZE"
-    )
-    track_completed_tasks_int = int(os.environ.get("TRACK_COMPLETED_TASKS_INT"))
-
-    retrieve_annotatons_int = int(os.environ.get("RETRIEVE_ANNOTATIONS_INT"))
-    retrieve_annotations_chunk_size = os.environ.get("RETRIEVE_ANNOTATIONS_CHUNK_SIZE")
+    task_interval = int(os.environ.get("BACKGROUND_TASK_INTERVAL"))
+    task_chunk_size = int(os.environ.get("BACKGROUND_TASK_CHUNK_SIZE"))
 
 
 class StorageConfig:
