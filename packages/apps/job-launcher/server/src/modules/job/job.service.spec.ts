@@ -652,6 +652,22 @@ describe('JobService', () => {
         jobService.requestToCancelJob(userId, jobId),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should throw an error if status is invalid', async () => {
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.COMPLETED,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+
+      await expect(
+        jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(new ConflictException(ErrorJob.InvalidStatusCancellation));
+    });
   });
 
   describe('cancelCronJob', () => {
