@@ -1,11 +1,12 @@
 from pathlib import Path
-from uuid import uuid4
 
 from basemodels import Manifest
 from doccano_client import DoccanoClient
 from doccano_client.models.data_upload import Task
 
+from chain import EscrowInfo, get_manifest_url
 from src.config import Config
+from storage import download_manifest, download_datasets, convert_taskdata_to_doccano
 
 
 def create_project(manifest: Manifest, dataset_path: Path):
@@ -45,5 +46,23 @@ def create_project(manifest: Manifest, dataset_path: Path):
         column_data="text",
         column_label="label",
     )
+
+    return project
+
+
+def create_job(escrow_info: EscrowInfo):
+    """Creates a new job."""
+
+    # get manifest from escrow url
+    s3_url = get_manifest_url(escrow_info)
+    manifest = download_manifest(s3_url)
+
+    # download job data
+    job_dir = download_datasets(manifest)
+
+    # FIXME: probably need some chunking since doccano does not allow individual assignment of tasks, will cross that bridge once we get there
+    # convert data into doccano format
+    doccano_filepath = convert_taskdata_to_doccano(job_dir)
+    project = create_project(manifest, doccano_filepath)
 
     return project
