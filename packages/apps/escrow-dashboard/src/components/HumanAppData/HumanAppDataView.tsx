@@ -6,13 +6,15 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 
 import { TooltipIcon } from '../TooltipIcon';
 import { PaymentsView } from './views/Payments';
 import { TasksView } from './views/Tasks';
 import { TransactionsView } from './views/Transactions';
 import { TOOLTIPS } from 'src/constants/tooltips';
+import { useHumanAppData } from 'src/hooks/useHumanAppData';
+import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
 enum ViewButton {
   Transactions = 'Transactions',
@@ -30,6 +32,35 @@ export const HumanAppDataView: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(600));
   const [viewButton, setViewButton] = useState(ViewButton.Transactions);
+  const chainId = useChainId();
+  const days = useDays();
+  const { data, isLoading } = useHumanAppData(chainId);
+
+  const transactionsSeries = useMemo(() => {
+    if (data) {
+      return data.data[0].attributes.dailyHMTData
+        .slice(0, days)
+        .reverse()
+        .map((d: any) => ({
+          date: d.timestamp,
+          value: Number(d.totalTransactionCount),
+        }));
+    }
+    return [];
+  }, [data, days]);
+
+  const paymentsSeries = useMemo(() => {
+    if (data) {
+      return data.data[0].attributes.dailyPaymentsData
+        .slice(0, days)
+        .reverse()
+        .map((d: any) => ({
+          date: d.timestamp,
+          value: Number(d.totalAmountPaid),
+        }));
+    }
+    return [];
+  }, [data, days]);
 
   const getTooltipTitle = (button: ViewButton) => {
     switch (button) {
@@ -45,9 +76,9 @@ export const HumanAppDataView: FC = () => {
   if (isMobile) {
     return (
       <Stack spacing={4}>
-        <TransactionsView />
+        <TransactionsView isLoading={isLoading} data={transactionsSeries} />
         <TasksView />
-        <PaymentsView />
+        <PaymentsView isLoading={isLoading} data={paymentsSeries} />
       </Stack>
     );
   }
@@ -92,9 +123,13 @@ export const HumanAppDataView: FC = () => {
         ))}
       </ToggleButtonGroup>
       <Box mt={3} sx={{ overflow: 'auto' }}>
-        {viewButton === ViewButton.Transactions && <TransactionsView />}
+        {viewButton === ViewButton.Transactions && (
+          <TransactionsView isLoading={isLoading} data={transactionsSeries} />
+        )}
         {viewButton === ViewButton.Tasks && <TasksView />}
-        {viewButton === ViewButton.Payments && <PaymentsView />}
+        {viewButton === ViewButton.Payments && (
+          <PaymentsView isLoading={isLoading} data={paymentsSeries} />
+        )}
       </Box>
       <TooltipIcon title={getTooltipTitle(viewButton)} />
     </Box>

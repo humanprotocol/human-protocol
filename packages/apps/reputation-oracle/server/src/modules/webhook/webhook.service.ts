@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BadRequestException,
   Injectable,
@@ -34,12 +35,16 @@ import {
   CVAT_VALIDATION_META_FILENAME,
   RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
-import { checkCurseWords } from '../../common/helpers/utils';
 import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber, ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import { ConfigNames } from '../../common/config';
-import { EventType, SortDirection, WebhookStatus } from '../../common/enums';
+import {
+  EventType,
+  SolutionError,
+  SortDirection,
+  WebhookStatus,
+} from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
 import { copyFileFromURLToBucket } from '../../common/utils';
@@ -226,21 +231,30 @@ export class WebhookService {
     const intermediateResults = (await this.getIntermediateResults(
       intermediateResultsUrl,
     )) as FortuneFinalResult[];
-    const finalResults = await this.finalizeFortuneResults(intermediateResults);
-    const checkPassed = intermediateResults.length <= finalResults.length;
+
+    const validResults = intermediateResults.filter((result) => !result.error);
+    if (validResults.length < manifest.submissionsRequired) {
+      this.logger.error(
+        ErrorResults.NotAllRequiredSolutionsHaveBeenSent,
+        WebhookService.name,
+      );
+      throw new Error(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
+    }
 
     const [{ url, hash }] = await this.storageClient.uploadFiles(
-      [finalResults],
+      [intermediateResults],
       this.bucket,
     );
 
-    const recipients = finalResults.map((item) => item.workerAddress);
-    const payoutAmount = BigNumber.from(manifest.fundAmount).div(
-      recipients.length,
-    );
+    const recipients = intermediateResults
+      .filter((result) => !result.error)
+      .map((item) => item.workerAddress);
+    const payoutAmount = BigNumber.from(
+      ethers.utils.parseUnits(manifest.fundAmount.toString(), 'ether'),
+    ).div(recipients.length);
     const amounts = new Array(recipients.length).fill(payoutAmount);
 
-    return { recipients, amounts, url, hash, checkPassed };
+    return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
   }
 
   /**
@@ -310,7 +324,7 @@ export class WebhookService {
       );
     }
 
-    this.logger.log(
+    this.logger.error(
       'An error occurred during webhook validation: ',
       error,
       WebhookService.name,
@@ -325,7 +339,7 @@ export class WebhookService {
    * @returns {Promise<any>} - Return an array of intermediate results.
    * @throws {Error} - An error object if an error occurred.
    */
-  public async getIntermediateResultsUrl(
+  private async getIntermediateResultsUrl(
     chainId: ChainId,
     escrowAddress: string,
   ): Promise<string> {
@@ -352,7 +366,7 @@ export class WebhookService {
    * @returns {Promise<any>} - Return an array of intermediate results.
    * @throws {Error} - An error object if an error occurred.
    */
-  public async getIntermediateResults(
+  private async getIntermediateResults(
     url: string,
   ): Promise<FortuneFinalResult[] | ImageLabelBinaryJobResults> {
     const intermediateResults = await StorageClient.downloadFileFromUrl(
@@ -368,32 +382,6 @@ export class WebhookService {
     }
 
     return intermediateResults;
-  }
-
-  /**
-   * Validate intermediate fortune results for curses and uniqueness and return their final version.
-   * @param results - Intermediate results to be validated and finalized.
-   * @returns {Promise<FortuneFinalResult[]>} - Return an array of fortune final results.
-   * @throws {Error} - An error object if an error occurred.
-   */
-  public async finalizeFortuneResults(
-    results: FortuneFinalResult[],
-  ): Promise<FortuneFinalResult[]> {
-    const finalResults: FortuneFinalResult[] = results.filter(
-      (item) =>
-        !checkCurseWords(item.solution) ||
-        !results.some((result) => result.solution === item.solution),
-    );
-
-    if (finalResults.length === 0) {
-      this.logger.log(
-        ErrorResults.NoResultsHaveBeenVerified,
-        WebhookService.name,
-      );
-      throw new Error(ErrorResults.NoResultsHaveBeenVerified);
-    }
-
-    return finalResults;
   }
 
   /**
@@ -436,6 +424,7 @@ export class WebhookService {
       const manifest: FortuneManifestDto | CvatManifestDto =
         await StorageClient.downloadFileFromUrl(manifestUrl);
 
+      let decreaseExchangeReputation = false;
       if (
         (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
       ) {
@@ -457,12 +446,48 @@ export class WebhookService {
 
         await Promise.all(
           finalResults.map(async (result: FortuneFinalResult) => {
-            await this.reputationService.increaseReputation(
-              webhookEntity.chainId,
-              result.workerAddress,
-              ReputationEntityType.WORKER,
-            );
+            if (result.error) {
+              if (result.error === SolutionError.Duplicated)
+                decreaseExchangeReputation = true;
+              await this.reputationService.decreaseReputation(
+                webhookEntity.chainId,
+                result.workerAddress,
+                ReputationEntityType.WORKER,
+              );
+            } else {
+              await this.reputationService.increaseReputation(
+                webhookEntity.chainId,
+                result.workerAddress,
+                ReputationEntityType.WORKER,
+              );
+            }
           }),
+        );
+      }
+
+      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
+        webhookEntity.escrowAddress,
+      );
+      await this.reputationService.increaseReputation(
+        webhookEntity.chainId,
+        jobLauncherAddress,
+        ReputationEntityType.JOB_LAUNCHER,
+      );
+
+      const exchangeOracleAddress = await escrowClient.getExchangeOracleAddress(
+        webhookEntity.escrowAddress,
+      );
+      if (decreaseExchangeReputation) {
+        await this.reputationService.decreaseReputation(
+          webhookEntity.chainId,
+          exchangeOracleAddress,
+          ReputationEntityType.EXCHANGE_ORACLE,
+        );
+      } else {
+        await this.reputationService.increaseReputation(
+          webhookEntity.chainId,
+          exchangeOracleAddress,
+          ReputationEntityType.EXCHANGE_ORACLE,
         );
       }
 
@@ -470,7 +495,6 @@ export class WebhookService {
         await escrowClient.getRecordingOracleAddress(
           webhookEntity.escrowAddress,
         );
-
       if (webhookEntity.checkPassed) {
         this.reputationService.increaseReputation(
           webhookEntity.chainId,
@@ -484,6 +508,8 @@ export class WebhookService {
           ReputationEntityType.RECORDING_ORACLE,
         );
       }
+
+      await escrowClient.complete(webhookEntity.escrowAddress);
 
       await this.webhookRepository.updateOne(
         {

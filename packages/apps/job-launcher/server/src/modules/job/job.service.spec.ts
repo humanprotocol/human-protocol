@@ -652,6 +652,22 @@ describe('JobService', () => {
         jobService.requestToCancelJob(userId, jobId),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('should throw an error if status is invalid', async () => {
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.COMPLETED,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+
+      await expect(
+        jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(new ConflictException(ErrorJob.InvalidStatusCancellation));
+    });
   });
 
   describe('cancelCronJob', () => {
@@ -1190,7 +1206,7 @@ describe('JobService', () => {
       ]);
       expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
         userId,
-        [MOCK_ADDRESS],
+        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
       );
     });
     it('should call subgraph and database with CANCELLED status', async () => {
@@ -1345,6 +1361,7 @@ describe('JobService', () => {
           manifestHash: MOCK_FILE_HASH,
           balance: expect.any(Number),
           paidOut: expect.any(Number),
+          status: JobStatus.TO_CANCEL,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
@@ -1416,6 +1433,7 @@ describe('JobService', () => {
           manifestHash: MOCK_FILE_HASH,
           balance: 0,
           paidOut: 0,
+          status: JobStatus.TO_CANCEL,
         },
         manifest: {
           chainId: ChainId.LOCALHOST,
