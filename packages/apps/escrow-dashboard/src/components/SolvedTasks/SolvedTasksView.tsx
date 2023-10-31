@@ -1,42 +1,12 @@
-import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
 import { FC } from 'react';
-import {
-  AreaChart,
-  Area,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from 'recharts';
 
 import SOLVED_TASKS from '../../history-data/solved_tasks.json';
 import { CardContainer } from '../Cards';
 import { TooltipIcon } from '../TooltipIcon';
 import { TOOLTIPS } from 'src/constants/tooltips';
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <Box
-        sx={{
-          background: '#fff',
-          border: '1px solid #CBCFE6',
-          borderRadius: '10px',
-          padding: '8px 16px',
-        }}
-      >
-        <Typography color="text.primary" variant="h6" fontWeight={500}>
-          {numeral(payload[0].value).format('0a').toUpperCase()}
-        </Typography>
-      </Box>
-    );
-  }
-
-  return null;
-};
 
 export const SolvedTasksView: FC = () => {
   const solvedTasksCount = SOLVED_TASKS.reduce((acc, d) => acc + d.value, 0);
@@ -45,96 +15,25 @@ export const SolvedTasksView: FC = () => {
 
   return (
     <CardContainer
-      sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
+      sxProps={{ padding: { xs: '32px 32px 44px', md: '44px 54px 72px' } }}
     >
-      <Grid container sx={{ height: '100%' }} spacing={{ xs: 4, md: 2 }}>
-        <Grid item xs={12} md={5} xl={4}>
-          <Box mb={2}>
-            <Typography
-              variant="body2"
-              color="primary"
-              fontWeight={600}
-              mb="8px"
-            >
-              {`Solved Tasks till ${dayjs(
-                SOLVED_TASKS[SOLVED_TASKS.length - 1].date
-              ).format('MMM D, YYYY')}`}
-            </Typography>
-            <Typography
-              variant="h2"
-              color="primary"
-              fontWeight={800}
-              lineHeight={1.125}
-              sx={{ whiteSpace: 'nowrap' }}
-              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
-            >
-              {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
-            </Typography>
-          </Box>
-        </Grid>
-        <Grid item xs={12} md={7} xl={8}>
-          <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-            <AreaChart data={SOLVED_TASKS} margin={{ bottom: 10 }}>
-              <defs>
-                <linearGradient
-                  id="paint0_linear_4037_63345"
-                  x1="257"
-                  y1="0"
-                  x2="257"
-                  y2="276.5"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop
-                    offset="0.290598"
-                    stopColor="#CACFE8"
-                    stopOpacity="0.3"
-                  />
-                  <stop offset="1" stopColor="#E9ECFF" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} strokeDasharray={3} />
-              <XAxis
-                dataKey="date"
-                axisLine={false}
-                tickLine={false}
-                tick={{
-                  fill: '#320A8D',
-                  fontSize: '10px',
-                  fontFamily: 'Inter',
-                  fontWeight: 500,
-                }}
-                tickFormatter={(value: any) => dayjs(value).format('MMM')}
-                tickMargin={12}
-                padding={{ left: 10, right: 10 }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                width={40}
-                tick={{
-                  fill: '#320A8D',
-                  fontSize: '10px',
-                  fontFamily: 'Inter',
-                  fontWeight: 500,
-                }}
-                tickFormatter={(value: any) =>
-                  numeral(value).format('0a').toUpperCase()
-                }
-              />
-              <Tooltip
-                cursor={{ fill: '#dadef0' }}
-                content={<CustomTooltip />}
-              />
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="#320A8D"
-                fill="url(#paint0_linear_4037_63345)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Grid>
-      </Grid>
+      <Box mb={2}>
+        <Typography variant="body2" color="primary" fontWeight={600} mb="14px">
+          {`Total number of tasks till ${dayjs(
+            SOLVED_TASKS[SOLVED_TASKS.length - 1].date
+          ).format('MMM D, YYYY')}`}
+        </Typography>
+        <Typography
+          variant="h2"
+          color="primary"
+          fontWeight={800}
+          lineHeight={1.125}
+          sx={{ whiteSpace: 'nowrap' }}
+          fontSize={{ xs: '40px', lg: '55px' }}
+        >
+          {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
+        </Typography>
+      </Box>
       <TooltipIcon
         position={isMobile ? 'topRight' : 'bottomLeft'}
         title={TOOLTIPS.SOLVED_TASKS}
