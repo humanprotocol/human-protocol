@@ -1,18 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BadRequestException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-  ChainId,
-  EscrowClient,
-  StorageClient,
-  StorageCredentials,
-  StorageParams,
-} from '@human-protocol/sdk';
+import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import {
   CvatAnnotationMeta,
@@ -38,7 +32,6 @@ import {
 import { ReputationService } from '../reputation/reputation.service';
 import { BigNumber, ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
-import { ConfigNames } from '../../common/config';
 import {
   EventType,
   SolutionError,
@@ -47,44 +40,19 @@ import {
 } from '../../common/enums';
 import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
-import { copyFileFromURLToBucket } from '../../common/utils';
 import { LessThanOrEqual } from 'typeorm';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
-  public readonly storageClient: StorageClient;
-  public readonly storageParams: StorageParams;
-  public readonly storageCredentials: StorageCredentials;
-  public readonly bucket: string;
-
   constructor(
     private readonly web3Service: Web3Service,
+    @Inject(StorageService)
+    private readonly storageService: StorageService,
     private readonly webhookRepository: WebhookRepository,
     private readonly reputationService: ReputationService,
-    private readonly configService: ConfigService,
-  ) {
-    this.storageCredentials = {
-      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
-      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
-    };
-
-    const useSSL =
-      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
-
-    this.storageParams = {
-      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL,
-    };
-
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
-
-    this.storageClient = new StorageClient(
-      this.storageParams,
-      this.storageCredentials,
-    );
-  }
+  ) {}
 
   /**
    * Create a incoming webhook using the DTO data.
@@ -157,11 +125,7 @@ export class WebhookService {
       }
 
       const manifest: FortuneManifestDto | CvatManifestDto =
-        await StorageClient.downloadFileFromUrl(manifestUrl);
-      const intermediateResultsUrl = await this.getIntermediateResultsUrl(
-        chainId,
-        escrowAddress,
-      );
+        await this.storageService.download(manifestUrl);
 
       let results: {
         recipients: string[];
@@ -176,14 +140,16 @@ export class WebhookService {
       ) {
         results = await this.processFortune(
           manifest as FortuneManifestDto,
-          intermediateResultsUrl,
+          chainId,
+          escrowAddress,
         );
       } else if (
         CVAT_JOB_TYPES.includes((manifest as CvatManifestDto).annotation.type)
       ) {
         results = await this.processCvat(
           manifest as CvatManifestDto,
-          intermediateResultsUrl,
+          chainId,
+          escrowAddress,
         );
       } else {
         this.logger.log(
@@ -226,8 +192,13 @@ export class WebhookService {
    */
   public async processFortune(
     manifest: FortuneManifestDto,
-    intermediateResultsUrl: string,
+    chainId: ChainId,
+    escrowAddress: string,
   ): Promise<ProcessingResultDto> {
+    const intermediateResultsUrl = await this.getIntermediateResultsUrl(
+      chainId,
+      escrowAddress,
+    );
     const intermediateResults = (await this.getIntermediateResults(
       intermediateResultsUrl,
     )) as FortuneFinalResult[];
@@ -241,9 +212,10 @@ export class WebhookService {
       throw new Error(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
     }
 
-    const [{ url, hash }] = await this.storageClient.uploadFiles(
-      [intermediateResults],
-      this.bucket,
+    const { url, hash } = await this.storageService.uploadJobSolutions(
+      escrowAddress,
+      chainId,
+      intermediateResults,
     );
 
     const recipients = intermediateResults
@@ -266,18 +238,19 @@ export class WebhookService {
    */
   public async processCvat(
     manifest: CvatManifestDto,
-    intermediateResultsUrl: string,
+    chainId: ChainId,
+    escrowAddress: string,
   ): Promise<ProcessingResultDto> {
-    const { url, hash } = await copyFileFromURLToBucket(
-      `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
-      this.bucket,
-      this.storageParams,
-      this.storageCredentials,
+    const intermediateResultsUrl = await this.getIntermediateResultsUrl(
+      chainId,
+      escrowAddress,
     );
-    const annotations: CvatAnnotationMeta =
-      await StorageClient.downloadFileFromUrl(
-        `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
-      );
+    const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+      `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
+    );
+    const annotations: CvatAnnotationMeta = await this.storageService.download(
+      `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
+    );
 
     const bountyValue = ethers.utils.parseUnits(manifest.job_bounty, 18);
     const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
@@ -369,9 +342,9 @@ export class WebhookService {
   private async getIntermediateResults(
     url: string,
   ): Promise<FortuneFinalResult[] | ImageLabelBinaryJobResults> {
-    const intermediateResults = await StorageClient.downloadFileFromUrl(
-      url,
-    ).catch(() => []);
+    const intermediateResults = await this.storageService
+      .download(url)
+      .catch(() => []);
 
     if (intermediateResults.length === 0) {
       this.logger.log(
@@ -422,7 +395,7 @@ export class WebhookService {
       }
 
       const manifest: FortuneManifestDto | CvatManifestDto =
-        await StorageClient.downloadFileFromUrl(manifestUrl);
+        await this.storageService.download(manifestUrl);
 
       let decreaseExchangeReputation = false;
       if (
@@ -432,9 +405,9 @@ export class WebhookService {
           webhookEntity.escrowAddress,
         );
 
-        const finalResults = await StorageClient.downloadFileFromUrl(
-          finalResultsUrl,
-        ).catch(() => []);
+        const finalResults = await this.storageService
+          .download(finalResultsUrl)
+          .catch(() => []);
 
         if (finalResults.length === 0) {
           this.logger.log(
