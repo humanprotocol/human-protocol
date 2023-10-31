@@ -666,7 +666,9 @@ describe('JobService', () => {
 
       await expect(
         jobService.requestToCancelJob(userId, jobId),
-      ).rejects.toThrow(new ConflictException(ErrorJob.InvalidStatusCancellation));
+      ).rejects.toThrow(
+        new ConflictException(ErrorJob.InvalidStatusCancellation),
+      );
     });
   });
 
@@ -1206,7 +1208,7 @@ describe('JobService', () => {
       ]);
       expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
         userId,
-        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
+        [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
       );
     });
     it('should call subgraph and database with CANCELLED status', async () => {
