@@ -14,12 +14,13 @@
  },
  "unsafe_content": false,
  "task_bidprice": 1.3,
- "expiration_date": 9001,
+ "start_date": 9001,
+ "expiration_date": 18001,
  "taskdata_uri": "http://127.0.0.1:9000/text-exo/Movies_and_TV_5.sample.task.json",
- "groundtruth_uri": "",
  "job_mode": "batch",
  "request_type": "text_label_multiple_span_select",
  "request_config": {},
  "requester_min_repeats": 3,
- "requester_question_example": []
+ "task_bid_price": 1.0,
+ "oracle_stake": 0.0
 }

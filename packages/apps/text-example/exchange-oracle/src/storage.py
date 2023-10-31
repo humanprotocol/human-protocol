@@ -25,7 +25,7 @@ def download_manifest(manifest_url):
     client = Config.storage_config.client()
     s3_info = s3_info_from_url(manifest_url)
     manifest = client.get_object(s3_info.bucket_name, s3_info.object_name)
-    return Manifest.construct(**json.loads(manifest.data))
+    return Manifest(**json.loads(manifest.data))
 
 
 def download_datasets(manifest: Manifest):
