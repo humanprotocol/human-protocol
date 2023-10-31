@@ -1,8 +1,8 @@
 {
   "name": "hufi-exchange-oracle-server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Hufi Exchange Oracle Server",
+  "author": "Human Protocol",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
