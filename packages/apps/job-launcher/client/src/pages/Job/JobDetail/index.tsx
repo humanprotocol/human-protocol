@@ -22,7 +22,7 @@ const CardContainer = styled(Card)(({ theme }) => ({
 
 export default function JobDetail() {
   const { jobId } = useParams();
-  const { data, isLoading, error } = useJobDetails(Number(jobId));
+  const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
   const [isCancelling, setIsCancelling] = useState(false);
   const { openSnackbar } = useSnackbar();
 
@@ -30,6 +30,13 @@ export default function JobDetail() {
     setIsCancelling(true);
     try {
       await jobService.cancelJob(Number(jobId));
+
+      if (data) {
+        mutate({
+          ...data,
+          details: { ...data.details, status: JobStatus.TO_CANCEL },
+        });
+      }
       openSnackbar('Job cancelled', 'success');
     } catch (err: any) {
       openSnackbar(
@@ -39,6 +46,11 @@ export default function JobDetail() {
     }
     setIsCancelling(false);
   };
+
+  const isCancellable =
+    data?.details.status === JobStatus.FAILED ||
+    data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;
 
@@ -53,7 +65,7 @@ export default function JobDetail() {
           </Typography>
           <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
-        {data.details.status === JobStatus.FAILED && (
+        {isCancellable && (
           <LoadingButton
             sx={{ mb: 2 }}
             variant="contained"
