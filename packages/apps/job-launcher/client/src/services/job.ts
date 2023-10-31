@@ -38,6 +38,7 @@ export const createCvatJob = async (
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
     gtUrl: data.groundTruthUrl,
+    userGuide: data.userGuide,
     type: data.type,
   };
   await api.post('/job/cvat', body);

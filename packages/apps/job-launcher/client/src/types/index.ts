@@ -48,6 +48,7 @@ export type CreateCvatJobRequest = {
   labels: string[];
   minQuality: number;
   gtUrl: string;
+  userGuide: string;
   type: CvatJobType;
 };
 
