@@ -1547,11 +1547,12 @@ export class EscrowUtils {
             reputationOracle: filter.reputationOracle?.toLowerCase(),
             recordingOracle: filter.recordingOracle?.toLowerCase(),
             exchangeOracle: filter.exchangeOracle?.toLowerCase(),
-            status: filter.status
-              ? Object.entries(EscrowStatus).find(
-                  ([, value]) => value === filter.status
-                )?.[0]
-              : undefined,
+            status:
+              filter.status !== undefined
+                ? Object.entries(EscrowStatus).find(
+                    ([, value]) => value === filter.status
+                  )?.[0]
+                : undefined,
             from: filter.from ? +filter.from.getTime() / 1000 : undefined,
             to: filter.to ? +filter.to.getTime() / 1000 : undefined,
           }

@@ -56,7 +56,7 @@ export const GET_ESCROWS_QUERY = (filter: IEscrowsFilter) => {
       ${reputationOracle ? `reputationOracle: $reputationOracle` : ''}
       ${recordingOracle ? `recordingOracle: $recordingOracle` : ''}
       ${exchangeOracle ? `exchangeOracle: $exchangeOracle` : ''}
-      ${status ? `status: $status` : ''}
+      ${status !== undefined ? `status: $status` : ''}
       ${from ? `createdAt_gte: $from` : ''}
       ${to ? `createdAt_lte: $to` : ''}
     }
