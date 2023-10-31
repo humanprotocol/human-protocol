@@ -49,6 +49,7 @@ export default function JobDetail() {
 
   const isCancellable =
     data?.details.status === JobStatus.FAILED ||
+    data?.details.status === JobStatus.PAID ||
     data?.details.status === JobStatus.PENDING ||
     data?.details.status === JobStatus.LAUNCHED;
 

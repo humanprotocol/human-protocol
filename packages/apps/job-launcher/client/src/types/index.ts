@@ -103,6 +103,7 @@ export enum JobStatus {
   FAILED = 'FAILED',
   COMPLETED = 'COMPLETED',
   TO_CANCEL = 'TO_CANCEL',
+  PAID = 'PAID',
 }
 
 export type JobDetailsResponse = {
