@@ -240,6 +240,11 @@ export class JobService {
     fundAmount: number,
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
+
+    if (!storageData.bucket) {
+      throw new BadRequestException(ErrorBucket.NotExist);
+    }
+
     const storageClient = new StorageClient({
       endPoint: storageData.endPoint,
       port: storageData.port,

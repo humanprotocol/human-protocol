@@ -50,6 +50,14 @@ export const parseUrl = (url: string): {
       endPoint: 'storage.googleapis.com',
     },
     {
+      regex: /^https:\/\/s3\.[a-z0-9-]+\.amazonaws\.com\/[a-zA-Z0-9\.-]+$/,
+      endPoint: 's3.amazonaws.com',
+    },
+    {
+      regex: /^https:\/\/[a-zA-Z0-9\.-]+\.s3\.[a-z0-9-]+\.amazonaws\.com\/$/,
+      endPoint: 's3.amazonaws.com',
+    },
+    {
       regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
       endPoint: '$1',
       port: '$2',
