@@ -13,10 +13,20 @@ export const TasksView = () => {
 
   const seriesData = useMemo(() => {
     if (data) {
-      return [...data.dailyWorkersData].slice(-days).map((d: any) => ({
-        date: d.timestamp,
-        value: Number(d.averageJobsSolved),
-      }));
+      const cumulativeDailyWorkersData = [...data.dailyWorkersData]
+        .map((d) => ({
+          date: d.timestamp,
+          value: Number(d.averageJobsSolved),
+        }))
+        .reduce((acc, d) => {
+          acc.push({
+            date: d.date,
+            value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
+          });
+          return acc;
+        }, [] as any[]);
+
+      return cumulativeDailyWorkersData.slice(-days);
     }
     return [];
   }, [data, days]);
