@@ -9,6 +9,7 @@ import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { AuthEntity } from '../auth/auth.entity';
+import { ApiKeyEntity } from '../auth/apikey.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -45,27 +46,3 @@ export class UserEntity extends BaseEntity implements IUser {
 
 }
 
-@Entity({ schema: NS, name: 'api_keys' })
-export class ApiKeyEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  public id: number;
-
-  @Column({ type: 'varchar' })
-  hashedAPIKey: string;
-
-  @Column({ type: 'varchar' })
-  salt: string;
-
-  @OneToOne(() => UserEntity, user => user.apiKey)
-  @JoinColumn({ name: 'user_id' })
-  public user: UserEntity;
-
-  @Column({ type: 'int' })
-  public userId: number;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
-}

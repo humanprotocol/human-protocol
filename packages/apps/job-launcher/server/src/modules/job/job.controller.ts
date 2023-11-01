@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
+import { JwtAuthGuard, JwtOrApiKeyGuard, SignatureAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
   JobFortuneDto,
@@ -37,6 +37,7 @@ import { Role } from '../../common/enums/role';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
+  @UseGuards(JwtOrApiKeyGuard)
   @Post('/fortune')
   public async createFortuneJob(
     @Request() req: RequestWithUser,

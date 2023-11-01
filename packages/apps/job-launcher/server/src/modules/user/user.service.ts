@@ -102,23 +102,5 @@ export class UserService {
     };
   }
 
-  async createOrUpdateAPIKey(userId: number): Promise<string> {
-    const salt = crypto.randomBytes(16).toString('hex');
-    const apiKey = crypto.randomBytes(32).toString('hex');
-    const hashedAPIKey = crypto.pbkdf2Sync(apiKey, salt, 1000, 64, `sha512`).toString(`hex`);
-    await this.userRepository.createOrUpdateAPIKey(userId, hashedAPIKey, salt);
 
-    return apiKey;
-  }
-
-  async validateAPIKey(userId: number, apiKey: string): Promise<boolean> {
-    const userWithApiKey = await this.userRepository.findUserWithAPIKey(userId);
-
-    if (!userWithApiKey || !userWithApiKey.apiKey) {
-      return false;
-    }
-
-    const hash = crypto.pbkdf2Sync(apiKey, userWithApiKey.apiKey.salt, 1000, 64, `sha512`).toString(`hex`);
-    return hash === userWithApiKey.apiKey.hashedAPIKey;
-  }
 }

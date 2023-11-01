@@ -15,6 +15,7 @@ import { IUserBalance } from '../../common/interfaces';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorUser } from '../../common/constants/errors';
+import { ApiKeyService } from '../auth/apikey.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -23,7 +24,7 @@ import { ErrorUser } from '../../common/constants/errors';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly apikeyService: ApiKeyService) {}
 
   @Get('/balance')
   public async getBalance(
@@ -48,7 +49,7 @@ export class UserController {
     @Request() req: RequestWithUser,
   ): Promise<{ apiKey: string }> {
     try {
-      const apiKey = await this.userService.createOrUpdateAPIKey(req.user.id);
+      const apiKey = await this.apikeyService.createOrUpdateAPIKey(req.user.id);
       return { apiKey };
     } catch (e) {
       this.logger.log(

@@ -63,32 +63,4 @@ export class UserRepository {
   public async create(dto: UserDto): Promise<UserEntity> {
     return this.userEntityRepository.create(dto).save();
   }
-
-  async createOrUpdateAPIKey(userId: number, hashedAPIKey: string, salt: string): Promise<void> {
-    const userEntity = await this.userEntityRepository.findOne({
-      where: { id: userId },
-      relations: ['apiKey'],
-    });
-
-    if (!userEntity) {
-      this.logger.log(ErrorUser.NotFound, UserRepository.name);
-      throw new NotFoundException(ErrorUser.NotFound);
-    }
-
-    if (!userEntity.apiKey) {
-      userEntity.apiKey = new ApiKeyEntity();
-    }
-
-    userEntity.apiKey.hashedAPIKey = hashedAPIKey;
-    userEntity.apiKey.salt = salt;
-
-    await this.userEntityRepository.save(userEntity);
-  }
-
-  public async findUserWithAPIKey(userId: number): Promise<UserEntity | null> {
-    return this.userEntityRepository.findOne({
-      where: { id: userId },
-      relations: ['apiKey'],
-    });
-  }
 }
