@@ -50,11 +50,11 @@ export const parseUrl = (url: string): {
       endPoint: 'storage.googleapis.com',
     },
     {
-      regex: /^https:\/\/s3\.[a-z0-9-]+\.amazonaws\.com\/[a-zA-Z0-9\.-]+$/,
+      regex: /^https:\/\/s3\.[a-z0-9-]+\.amazonaws\.com\/([^/]+)\/?$/,
       endPoint: 's3.amazonaws.com',
     },
     {
-      regex: /^https:\/\/[a-zA-Z0-9\.-]+\.s3\.[a-z0-9-]+\.amazonaws\.com\/$/,
+      regex: /^https:\/\/([^\.]+)\.s3\.[a-z0-9-]+\.amazonaws\.com\/?$/,
       endPoint: 's3.amazonaws.com',
     },
     {
@@ -66,9 +66,10 @@ export const parseUrl = (url: string): {
 
   for (const { regex, endPoint, port } of patterns) {
     const match = url.match(regex);
+    
     if (match) {
       const parts = match[3] ? match[3].split('/').filter(part => part) : [];
-      const bucket = parts[0] || '';
+      const bucket = parts[0] || match[1] || '';
       const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
 
       return {
