@@ -389,7 +389,7 @@ export class JobCaptchaAdvancedDto {
   })
   @IsEnum(WorkerBrowser)
   @IsOptional()
-  targetBrowser: WorkerBrowser;
+  targetBrowser?: WorkerBrowser;
 }
 
 export class JobCaptchaAnnotationsDto {

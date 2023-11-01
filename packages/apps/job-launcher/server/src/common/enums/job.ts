@@ -52,8 +52,7 @@ export enum WorkerLocation {
 }
 
 export enum WorkerBrowser {
-  ALL_BROWSERS = 'All Browsers',
-  DESKTOP = 'Desktop',
-  MOBILE = 'Mobile',
-  MODERN_BROWSER = 'Modern Browsers'
+  DESKTOP = 'desktop',
+  MOBILE = 'mobile',
+  MODERN_BROWSER = 'modern_browser'
 }

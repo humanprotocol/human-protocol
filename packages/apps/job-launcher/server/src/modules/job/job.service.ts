@@ -193,7 +193,7 @@ export class JobService {
             return {
                 ...commonManifestProperties,
                 request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-                restricted_audience: {},
+                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
                 requester_restricted_answer_set: {},
             };
 
@@ -201,14 +201,12 @@ export class JobService {
             const categorizationManifest = {
                 ...commonManifestProperties,
                 request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
-                restricted_audience: {},
+                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
                 requester_restricted_answer_set: {},
             };
 
             const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
-            const restrictedAnswerSet = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
-
-            categorizationManifest.requester_restricted_answer_set = restrictedAnswerSet;
+            categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
 
             return categorizationManifest;
 
@@ -224,7 +222,7 @@ export class JobService {
                     max_points: HCAPTCHA_MAX_POINTS,
                     minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
                 },
-                restricted_audience: this.buildHCaptchaRestrictedAnswerSet(jobDto.advanced),
+                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
                 requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
             };
 
@@ -260,11 +258,11 @@ export class JobService {
         restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
     }
 
-    if (advanced.workerLocation !== undefined) {
+    if (advanced.workerLocation) {
         restrictedAudience.country = [{ [advanced.workerLocation]: { score: 1 } }];
     }
 
-    if (advanced.targetBrowser !== undefined) {
+    if (advanced.targetBrowser) {
         restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
     }
 
