@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { useJobDetails } from '../../../hooks/useJobDetails';
+import { formatAmount } from '../../../utils/bignumber';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -55,11 +56,11 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Balance of"
-                  value={`${data.details.balance} HMT`}
+                  value={`${data.details.balance.toFixed(2)} HMT`}
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${data.details.paidOut} HMT`}
+                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
                 />
                 <CardTextRow
                   label="Amount of Jobs"
@@ -83,11 +84,13 @@ export default function JobDetail() {
                 <CardTextRow label="Staker" value={data.staking.staker} />
                 <CardTextRow
                   label="Staked HMT"
-                  value={`${data.staking.allocated} HMT`}
+                  value={`${formatAmount(
+                    data.staking.allocated.toString()
+                  )} HMT`}
                 />
                 <CardTextRow
                   label="Slashed HMT"
-                  value={`${data.staking.slashed} HMT`}
+                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -124,7 +127,9 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${data.manifest.fundAmount} HMT`}
+                      value={`${formatAmount(
+                        data.manifest.fundAmount.toString()
+                      )} HMT`}
                     />
                     <CardTextRow
                       label="Job Requester"
