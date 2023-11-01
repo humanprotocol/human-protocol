@@ -43,14 +43,12 @@ export enum JobCaptchaShapeType {
 }
 
 export enum WorkerLanguage {
-  ENGLISH = 'English',
-  GERMAN = 'German',
-  FRENCH = 'French'
+  ENGLISH = 'en',
 }
 
 export enum WorkerLocation {
-  GERMANY = 'Germany',
-  FRANCE = 'France'
+  GERMANY = 'DE',
+  FRANCE = 'FR'
 }
 
 export enum WorkerBrowser {

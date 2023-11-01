@@ -10,6 +10,9 @@ import {
   StorageCredentials,
   StorageParams,
   UploadFile,
+  Encryption,
+  EncryptionUtils,
+  KVStoreClient
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 const { v4: uuidv4 } = require('uuid');
@@ -63,7 +66,7 @@ import {
   EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
-  HCaptchaManifest,
+  HCaptchaManifestDto,
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   JobCvatDto,
@@ -99,6 +102,7 @@ import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
+import { string } from 'joi';
 
 @Injectable()
 export class JobService {
@@ -166,7 +170,7 @@ export class JobService {
     };
   }
 
-  async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifest> {
+  async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifestDto> {
     const objectsInBucket = await listObjectsInBucket(jobDto.dataUrl);
 
     const commonManifestProperties = {
@@ -247,7 +251,7 @@ export class JobService {
             this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
             throw new ConflictException(ErrorJob.HCaptchaInvalidJobType);
     }
-}
+  }
 
   private buildHCaptchaRestrictedAudience(advanced: JobCaptchaAdvancedDto) {
     const restrictedAudience: RestrictedAudience = {};
@@ -320,11 +324,15 @@ export class JobService {
         (dto as JobCaptchaDto).annotations.typeOfJob,
         dto as JobCaptchaDto
       );
-
-      // TODO: Encrypt manifest using hCaptcha public key
-
-      
       fundAmount = manifest.task_bid_price * manifest.job_total_tasks;
+
+      manifest = await EncryptionUtils.encrypt(
+        JSON.stringify(manifest), 
+        [
+          this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!
+        ]
+      );
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
       manifest = { ...dto, requestType };
@@ -430,49 +438,48 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    let manifest = await this.getManifest(jobEntity.manifestUrl);
 
-    const recordingOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS
-        : ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
+    if (manifest instanceof string) {
+      const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
+      manifest = await encription.decrypt(manifest as any)
+    }
 
-    const exchangeOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
-        : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    let recordingOracleConfigKey;
+    let exchangeOracleConfigKey;
+
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
+    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+    } else {
+      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    }
 
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(
-        recordingOracleConfigKey,
-      )!,
-      reputationOracle: this.configService.get<string>(
-        ConfigNames.REPUTATION_ORACLE_ADDRESS,
-      )!,
+      recordingOracle: this.configService.get<string>(recordingOracleConfigKey)!,
+      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
       exchangeOracle: this.configService.get<string>(exchangeOracleConfigKey)!,
-      recordingOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-      ),
-      reputationOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-      ),
-      exchangeOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
-      ),
+      recordingOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!),
+      reputationOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!),
+      exchangeOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
 
     const escrowAddress = await escrowClient.createAndSetupEscrow(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      [],
-      jobEntity.userId.toString(),
-      escrowConfig,
+        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+        [],
+        jobEntity.userId.toString(),
+        escrowConfig,
     );
 
     if (!escrowAddress) {
-      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorEscrow.NotCreated);
+        this.logger.log(ErrorEscrow.NotCreated, JobService.name);
+        throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
     jobEntity.escrowAddress = escrowAddress;
@@ -522,7 +529,7 @@ export class JobService {
   }
 
   public async saveManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifest,
+    manifest: FortuneManifestDto | CvatManifestDto | string,
   ): Promise<SaveManifestDto> {
     const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
       [manifest],
@@ -541,7 +548,7 @@ export class JobService {
   }
 
   private async validateManifest(
-    manifest: FortuneManifestDto | CvatManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
     const dtoCheck =
       (manifest as FortuneManifestDto).requestType == JobRequestType.FORTUNE
@@ -565,7 +572,7 @@ export class JobService {
 
   public async getManifest(
     manifestUrl: string,
-  ): Promise<FortuneManifestDto | CvatManifestDto> {
+  ): Promise<FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto | string> {
     const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!manifest) {
@@ -788,7 +795,12 @@ export class JobService {
       if (!jobEntity) return;
 
       const manifest = await this.getManifest(jobEntity.manifestUrl);
-      await this.validateManifest(manifest);
+
+      if (manifest instanceof string) {
+        //Encryption()
+      }
+
+      //await this.validateManifest(manifest);
 
       if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);

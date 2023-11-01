@@ -378,9 +378,9 @@ export class JobCaptchaAdvancedDto {
   workerLanguage?: WorkerLanguage;
 
   @ApiProperty({
-    enum: WorkerLanguage,
+    enum: WorkerLocation,
   })
-  @IsEnum(WorkerLanguage)
+  @IsEnum(WorkerLocation)
   @IsOptional()
   workerLocation?: WorkerLocation;
 
@@ -404,7 +404,8 @@ export class JobCaptchaAnnotationsDto {
   @IsPositive()
   taskBidPrice: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   label: string;
 
@@ -498,7 +499,7 @@ class RequestConfig {
   minimum_selection_area_per_shape?: number;
 }
 
-export class HCaptchaManifest {
+export class HCaptchaManifestDto {
   @IsString()
   job_mode: string;
 
