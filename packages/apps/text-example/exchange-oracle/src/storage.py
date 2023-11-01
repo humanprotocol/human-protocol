@@ -1,3 +1,4 @@
+"""Module for interaction with S3 storage."""
 from src.config import Config
 from urllib.parse import urlparse
 from basemodels import Manifest
@@ -5,6 +6,7 @@ from basemodels.manifest.data.taskdata import TaskDataEntry
 from pathlib import Path
 import json
 from dataclasses import dataclass
+from random import shuffle
 
 
 @dataclass
@@ -57,19 +59,38 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
     with open(job_dir / "taskdata.json", "r") as f:
         task_data = json.load(f)
 
-    doccano_filepath = job_dir / "taskdata.doccano.jsonl"
-    with open(doccano_filepath, "w") as f:
-        for entry in task_data:
-            try:
-                TaskDataEntry.validate(entry)
-                s3_info = s3_info_from_url(entry["datapoint_uri"])
-                entry["text"] = bytes.decode(
-                    client.get_object(s3_info.bucket_name, s3_info.object_name).data
-                )
-                entry["label"] = []
+    # add text and label fields, required for doccano
+    # TODO: ensure groundtruth entries in file
+    entries = []
+    for entry in task_data:
+        try:
+            TaskDataEntry.validate(entry)
+            s3_info = s3_info_from_url(entry["datapoint_uri"])
+            entry["text"] = bytes.decode(
+                client.get_object(s3_info.bucket_name, s3_info.object_name).data
+            )
+            entry["label"] = []
+            entries.append(entry)
+        except Exception as e:
+            raise RuntimeError(f"Could not process entry {entry}: {e}")
+
+    # split data into chunks for each project
+    shuffle(entries)
+    chunksize = Config.doccano.tasks_per_worker
+
+    def chunks(a, n):
+        """Yield successive n-sized chunks from lst."""
+        for i in range(0, len(a), n):
+            yield a[i : i + n]
+
+    # write one file per project
+    doccano_filepath = job_dir / "project_data"
+    doccano_filepath.mkdir(exist_ok=True)
+    for i, chunk in enumerate(chunks(entries, chunksize)):
+        with open(doccano_filepath / f"{i}.jsonl", "w") as f:
+            for entry in chunk:
+                entry["chunk"] = i
                 f.write(json.dumps(entry) + "\n")
-            except Exception:
-                pass
 
     return doccano_filepath
 

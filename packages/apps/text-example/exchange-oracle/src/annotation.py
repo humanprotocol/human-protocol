@@ -4,12 +4,10 @@ from basemodels import Manifest
 from doccano_client import DoccanoClient
 from doccano_client.models.data_upload import Task
 
-from chain import EscrowInfo, get_manifest_url
 from src.config import Config
-from storage import download_manifest, download_datasets, convert_taskdata_to_doccano
 
 
-def create_project(manifest: Manifest, dataset_path: Path):
+def create_project(manifest: Manifest, dataset_path: Path, suffix=""):
     client = DoccanoClient(base_url=Config.doccano.url(), verify=Config.doccano.ssl)
     client.login(username=Config.doccano.admin, password=Config.doccano.password)
 
@@ -20,7 +18,7 @@ def create_project(manifest: Manifest, dataset_path: Path):
 
     task = Task.SEQUENCE_LABELING
     project = client.create_project(
-        name=str(manifest.job_id),
+        name=f"{manifest.job_id}__{dataset_path.stem}{suffix}",
         project_type=task.value,
         collaborative_annotation=False,
         description=manifest.requester_description,
@@ -50,19 +48,13 @@ def create_project(manifest: Manifest, dataset_path: Path):
     return project
 
 
-def create_job(escrow_info: EscrowInfo):
-    """Creates a new job."""
+def create_projects(manifest: Manifest, data_dir: Path):
+    """Creates multiple projects by creating a number of projects for each jsonl file under data_dir."""
+    project_replicas = list(range(manifest.requester_max_repeats))
+    projects = []
+    for dataset_path in data_dir.glob("*.jsonl"):
+        for i in project_replicas:
+            project = create_project(manifest, dataset_path, suffix=f"-{i}")
+            projects.append(project)
 
-    # get manifest from escrow url
-    s3_url = get_manifest_url(escrow_info)
-    manifest = download_manifest(s3_url)
-
-    # download job data
-    job_dir = download_datasets(manifest)
-
-    # FIXME: probably need some chunking since doccano does not allow individual assignment of tasks, will cross that bridge once we get there
-    # convert data into doccano format
-    doccano_filepath = convert_taskdata_to_doccano(job_dir)
-    project = create_project(manifest, doccano_filepath)
-
-    return project
+    return projects

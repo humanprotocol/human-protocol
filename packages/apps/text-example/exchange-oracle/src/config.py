@@ -90,6 +90,7 @@ class DoccanoConfig:
     ssl = bool(int(os.environ.get("DOCCANO_USE_SSL")))
     admin = os.environ.get("DOCCANO_ADMIN")
     password = os.environ.get("DOCCANO_ADMIN_PASS")
+    tasks_per_worker = int(os.environ.get("DOCCANO_TASKS_PER_WORKER"))
 
     @classmethod
     def url(cls):
