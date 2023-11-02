@@ -5,9 +5,11 @@ import { FC, useMemo } from 'react';
 import { CardTextBlock } from '../Cards';
 import bingXIcon from 'src/assets/exchanges/bingx.png';
 import bitfinexIcon from 'src/assets/exchanges/bitfinex.png';
+import bitmartIcon from 'src/assets/exchanges/bitmart.png';
 import coinlistProIcon from 'src/assets/exchanges/coinlist-pro.png';
 import gateIoIcon from 'src/assets/exchanges/gate-io.png';
 import lBankIcon from 'src/assets/exchanges/lbank.svg';
+import mexcIcon from 'src/assets/exchanges/mexc.png';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import { TOOLTIPS } from 'src/constants/tooltips';
 import { useHumanAppData } from 'src/hooks/useHumanAppData';
@@ -28,6 +30,8 @@ const EXCHANGES = [
     name: 'Coinlist Pro',
   },
   { icon: lBankIcon, href: 'https://www.lbank.com/', name: 'LBank' },
+  { icon: mexcIcon, href: 'https://www.mexc.com/', name: 'MEXC' },
+  { icon: bitmartIcon, href: 'https://www.bitmart.com/', name: 'Bitmart' },
 ];
 
 const TotalSupplyComponent = ({ value }: { value: number }) => {
