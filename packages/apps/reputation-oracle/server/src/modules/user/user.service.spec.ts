@@ -7,6 +7,8 @@ import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
+import { getNonce } from '../../common/utils/signature';
+import { MOCK_ADDRESS } from '../../../test/constants';
 
 jest.mock('@human-protocol/sdk');
 
@@ -144,6 +146,83 @@ describe('UserService', () => {
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
         email,
+      });
+    });
+  });
+
+  describe('createWeb3User', () => {
+    const address = '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36';
+    const type = UserType.WORKER;
+    const nonce = getNonce();
+
+    it('should create a new user and return the created user entity', async () => {
+      const createdUser: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: address,
+        nonce,
+      };
+
+      jest
+        .spyOn(userRepository, 'createWeb3User')
+        .mockResolvedValue(createdUser as UserEntity);
+
+      const result = await userService.createWeb3User(address, type);
+
+      expect(userRepository.createWeb3User).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evmAddress: address,
+          type,
+          status: UserStatus.ACTIVE,
+        }),
+      );
+      expect(result).toBe(createdUser);
+    });
+
+    it('should throw ConflictException if the address is already taken', async () => {
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue({ evmAddress: MOCK_ADDRESS } as UserEntity);
+
+      await expect(userService.createWeb3User(address, type)).rejects.toThrow(
+        ConflictException,
+      );
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        evmAddress: address,
+      });
+    });
+  });
+
+  describe('getByAddress', () => {
+    const address = '0x0755D4d722a4a201c1C5A4B5E614D913e7747b36';
+
+    it('should return the user entity if the address exists', async () => {
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: address,
+      };
+
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue(userEntity as UserEntity);
+
+      const result = await userService.getByAddress(address);
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        evmAddress: address,
+      });
+      expect(result).toBe(userEntity);
+    });
+
+    it('should throw NotFoundException if the address does not exist', async () => {
+      jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(userService.getByAddress(address)).rejects.toThrow(
+        NotFoundException,
+      );
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        evmAddress: address,
       });
     });
   });
