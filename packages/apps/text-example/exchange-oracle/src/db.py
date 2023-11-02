@@ -85,7 +85,7 @@ class JobApplication(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True, default=Sequence("job_application_ids")
     )
-    job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_request.id"))
+    job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_requests.id"))
     job_request: Mapped["JobRequest"] = relationship()
     worker_id: Mapped[str] = mapped_column(ForeignKey("worker.id"))
     worker: Mapped["Worker"] = relationship()

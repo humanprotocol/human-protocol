@@ -71,7 +71,7 @@ def create_user(username: str, password: str):
     try:
         user = client.create_user(username, password)
     except DoccanoAPIError:
-        pass
+        raise ValueError(f"User with username '{username}' already exists.")
 
 
 def register_annotator(username: str, project_id: int):

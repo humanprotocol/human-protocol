@@ -1,70 +1,15 @@
 import shutil
-from random import shuffle
-from typing import List
 
-from sqlalchemy import select
-
-from annotation import create_projects, create_user, register_annotator
+from annotation import create_projects
 from src.chain import EscrowInfo, get_manifest_url
 from src.config import Config
 from src.db import (
     Session,
     Statuses,
     JobRequest,
-    JobApplication,
     AnnotationProject,
-    Worker,
 )
 from storage import download_manifest, download_datasets, convert_taskdata_to_doccano
-
-
-def process_pending_applications():
-    q = (
-        select(JobApplication)
-        .where(JobApplication.status == Statuses.pending.value)
-        .limit(Config.cron_config.task_chunk_size)
-    )
-    with Session() as session:
-        for application in session.execute(q).all():
-            try:
-                register_worker_on_annotation_tool(application)
-                application.status = Statuses.completed
-            except Exception as e:
-                application.status = Statuses.failed
-        session.commit()
-
-
-def register_worker_on_annotation_tool(application: JobApplication):
-    job: JobRequest = application.job_request
-    worker: Worker = application.worker
-
-    # validate job application
-    error_message = (
-        f"Job application by worker {worker.id} for job {job.id} is invalid.\n"
-    )
-    if job.status != Statuses.in_progress:
-        raise ValueError(error_message + "Job is not in progress.")
-    if not worker.is_validated:
-        raise ValueError(error_message + "Worker is not validated.")
-
-    # get available projects
-    projects: List[AnnotationProject] = [
-        project for project in job.projects if project.status == Statuses.pending
-    ]
-
-    if len(projects) == 0:
-        raise ValueError(error_message + "No available projects for job")
-
-    shuffle(projects)
-    project = projects[0]
-
-    # create user and register in project with doccano
-    create_user(worker.id, worker.password)
-    register_annotator(worker.id, project.id)
-
-    # update project
-    project.worker = worker
-    project.id = worker.id
 
 
 def process_pending_job_requests():
