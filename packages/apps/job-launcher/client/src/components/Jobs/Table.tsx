@@ -23,10 +23,10 @@ export const JobTable = ({
           id: 'address',
           label: 'Address',
           sortable: true,
-          render: ({ address }) =>
-            address ? (
+          render: ({ escrowAddress }) =>
+            escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {address}
+                {escrowAddress}
                 <IconButton color="primary" sx={{ ml: 3 }}>
                   <CopyLinkIcon />
                 </IconButton>

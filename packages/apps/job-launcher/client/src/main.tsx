@@ -25,6 +25,7 @@ import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App';
 import { LOCAL_STORAGE_KEYS } from './constants';
+import SnackbarProvider from './providers/SnackProvider';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
@@ -117,7 +118,9 @@ loadStripe(publishableKey).then((stripePromise) => {
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <Elements stripe={stripePromise}>
-              <App />
+              <SnackbarProvider>
+                <App />
+              </SnackbarProvider>
             </Elements>
           </ThemeProvider>
         </Provider>
