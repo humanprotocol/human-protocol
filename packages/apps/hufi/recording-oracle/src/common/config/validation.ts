@@ -6,7 +6,6 @@ export const ConfigNames = {
   PORT: 'PORT',
   SESSION_SECRET: 'SESSION_SECRET',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
-  REPUTATION_ORACLE_WEBHOOK_URL: 'REPUTATION_ORACLE_WEBHOOK_URL',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -26,7 +25,6 @@ export const envValidator = Joi.object({
   SESSION_SECRET: Joi.string().default('session_key'),
   // Web3
   WEB3_PRIVATE_KEY: Joi.string().required(),
-  REPUTATION_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:4005'),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),
