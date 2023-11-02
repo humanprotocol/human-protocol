@@ -36,6 +36,7 @@ export async function getRate(from: string, to: string): Promise<number> {
 export const parseUrl = (url: string): {
   endPoint: string,
   bucket: string,
+  region: string,
   useSSL: boolean,
   filename?: string,
   port?: number,
@@ -52,12 +53,13 @@ export const parseUrl = (url: string): {
     {
       regex: /^https:\/\/s3\.[a-z0-9-]+\.amazonaws\.com\/([^/]+)\/?$/,
       endPoint: 's3.amazonaws.com',
+      region: '$1'
     },
     {
-      regex: /^https:\/\/([^\.]+)\.s3\.[a-z0-9-]+\.amazonaws\.com\/?$/,
+      regex: /^https:\/\/([^\.]+)\.s3\.([a-z0-9-]+)\.amazonaws\.com\/?$/,
       endPoint: 's3.amazonaws.com',
     },
-    {
+    { 
       regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
       endPoint: '$1',
       port: '$2',
@@ -71,10 +73,12 @@ export const parseUrl = (url: string): {
       const parts = match[3] ? match[3].split('/').filter(part => part) : [];
       const bucket = parts[0] || match[1] || '';
       const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
+      const region = match[2] || '';
 
       return {
         useSSL: url.startsWith('https:'),
         endPoint: endPoint.replace('$1', match[1]),
+        region,
         port: port && match[2] ? Number(match[2]) : undefined,
         bucket,
         filename,

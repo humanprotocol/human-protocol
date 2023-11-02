@@ -248,7 +248,8 @@ export class JobService {
     const storageClient = new StorageClient({
       endPoint: storageData.endPoint,
       port: storageData.port,
-      useSSL: false,
+      useSSL: storageData.useSSL,
+      region: storageData.region
     });
 
     const totalImages = (await storageClient.listObjects(storageData.bucket))
