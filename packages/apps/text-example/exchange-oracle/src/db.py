@@ -2,9 +2,9 @@ from enum import Enum
 from typing import List
 from uuid import uuid4
 
-
 import sqlalchemy
-from sqlalchemy import UniqueConstraint, String, DateTime, ForeignKey
+from sqlalchemy import UniqueConstraint, String, DateTime, ForeignKey, Sequence
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
     sessionmaker,
     DeclarativeBase,
@@ -13,7 +13,6 @@ from sqlalchemy.orm import (
     relationship,
 )
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import UUID
 
 from src.config import Config
 
@@ -64,6 +63,32 @@ class AnnotationProject(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_requests.id"))
     job_request: Mapped["JobRequest"] = relationship(back_populates="projects")
+    worker_id = mapped_column(ForeignKey("worker.id"))
+    worker: Mapped["Worker"] = relationship(back_populates="projects")
+    status: Mapped[Statuses] = mapped_column(
+        String, server_default=Statuses.pending.value
+    )
+
+
+class Worker(Base):
+    __tablename__ = "worker"
+
+    id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    is_validated: Mapped[bool] = mapped_column(default=False)
+    password: Mapped[str]
+    projects: Mapped[List["AnnotationProject"]] = relationship(back_populates="worker")
+
+
+class JobApplication(Base):
+    __tablename__ = "job_application"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, default=Sequence("job_application_ids")
+    )
+    job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_request.id"))
+    job_request: Mapped["JobRequest"] = relationship()
+    worker_id: Mapped[str] = mapped_column(ForeignKey("worker.id"))
+    worker: Mapped["Worker"] = relationship()
     status: Mapped[Statuses] = mapped_column(
         String, server_default=Statuses.pending.value
     )

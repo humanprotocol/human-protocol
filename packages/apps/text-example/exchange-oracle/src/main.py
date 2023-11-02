@@ -1,10 +1,15 @@
-from fastapi import FastAPI
+from random import choices
+from string import ascii_letters, punctuation
+
 from apscheduler.schedulers.background import BackgroundScheduler
+from fastapi import FastAPI
+from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 
 from src.chain import EscrowInfo
-from src.db import Session, JobRequest
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests
+from src.db import Session, JobRequest, Worker, JobApplication, Statuses
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
@@ -25,7 +30,10 @@ async def register_job_request(escrow_info: EscrowInfo):
 @exchange_oracle.get("job/list")
 async def list_available_jobs():
     """Lists available jobs."""
-    raise NotImplementedError
+    # TODO: return more details
+    j = select(JobRequest).where(JobRequest.status == Statuses.in_progress.value)
+    with Session() as session:
+        return [job.id for job in session.execute(j).all()]
 
 
 @exchange_oracle.get("job/{job_id}/details")
@@ -34,16 +42,37 @@ async def get_job_details():
 
 
 @exchange_oracle.post("job/{job_id}/apply")
-async def apply_for_job(worker_id: str):
-    """Applies the given worker for the job."""
-    # TODO: validate user
-    # TODO: if success
-    # create doccano user if not exists
-    # register user for doccano project
-    # check current progress and assign tasks dynamically to user
-    # TODO: if fail
-    # return error response
-    raise NotImplementedError
+async def apply_for_job(worker_id: str, job_id: str):
+    """Applies the given worker for the job. Registers and validates them if necessary"""
+    w = select(Worker).where(Worker.id == worker_id)
+    with Session() as session:
+        try:
+            worker = session.execute(w).one()
+        except NoResultFound:
+            if await validate_worker(worker_id):
+                worker = Worker(
+                    id=worker_id, is_validated=True, password=get_password()
+                )
+                session.add(worker)
+            else:
+                # TODO: return error response
+                raise NotImplementedError
+
+        session.add(JobApplication(worker_id=worker_id, job_request_id=job_id))
+        session.commit()
+
+
+async def validate_worker(worker_id: str):
+    """Validates the given worker_id with the Reputation Oracle.
+
+    Notes:
+        - Currently, this just returns True, as there is no validation mechanism in place in the Reputation Oracle.
+    """
+    return True
+
+
+def get_password():
+    return choices(ascii_letters + punctuation, k=16)
 
 
 @exchange_oracle.on_event("startup")

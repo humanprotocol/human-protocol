@@ -2,14 +2,20 @@ from pathlib import Path
 
 from basemodels import Manifest
 from doccano_client import DoccanoClient
+from doccano_client.exceptions import DoccanoAPIError
 from doccano_client.models.data_upload import Task
 
 from src.config import Config
 
 
-def create_project(manifest: Manifest, dataset_path: Path, suffix=""):
+def get_client():
     client = DoccanoClient(base_url=Config.doccano.url(), verify=Config.doccano.ssl)
     client.login(username=Config.doccano.admin, password=Config.doccano.password)
+    return client
+
+
+def create_project(manifest: Manifest, dataset_path: Path, suffix=""):
+    client = get_client()
 
     allow_overlapping = False
 
@@ -58,3 +64,16 @@ def create_projects(manifest: Manifest, data_dir: Path):
             projects.append(project)
 
     return projects
+
+
+def create_user(username: str, password: str):
+    client = get_client()
+    try:
+        user = client.create_user(username, password)
+    except DoccanoAPIError:
+        pass
+
+
+def register_annotator(username: str, project_id: int):
+    client = get_client()
+    client.add_member(project_id=project_id, username=username, role_name="annotator")
