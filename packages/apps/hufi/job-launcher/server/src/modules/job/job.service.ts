@@ -47,7 +47,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseUrl } from '../../common/utils';
+import { getRate } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -210,7 +210,9 @@ export class JobService {
       reputationOracle: this.configService.get<string>(
         ConfigNames.REPUTATION_ORACLE_ADDRESS,
       )!,
-      exchangeOracle: this.configService.get<string>(ConfigNames.EXCHANGE_ORACLE_ADDRESS)!,
+      exchangeOracle: this.configService.get<string>(
+        ConfigNames.EXCHANGE_ORACLE_ADDRESS,
+      )!,
       recordingOracleFee: BigNumber.from(
         this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
       ),
@@ -304,7 +306,6 @@ export class JobService {
   private async validateManifest(
     manifest: CampaignManifestDto,
   ): Promise<boolean> {
-
     const validationErrors: ValidationError[] = await validate(manifest);
     if (validationErrors.length > 0) {
       this.logger.log(
@@ -494,12 +495,8 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const validationErrors: ValidationError[] = await validate(
-      result,
-    );
-    if (
-      validationErrors.length > 0
-    ) {
+    const validationErrors: ValidationError[] = await validate(result);
+    if (validationErrors.length > 0) {
       this.logger.log(
         ErrorJob.ResultValidationFailed,
         JobService.name,
@@ -672,8 +669,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
-      jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -684,6 +680,9 @@ export class JobService {
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
     }
+
+    const status =
+      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     const manifest = await this.getManifest(manifestUrl);
     if (!manifest) {

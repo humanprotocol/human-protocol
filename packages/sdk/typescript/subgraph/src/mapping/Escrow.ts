@@ -347,7 +347,7 @@ export function handleCompleted(event: Completed): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
-    escrowEntity.status = 'Completed';
+    escrowEntity.status = 'Complete';
     escrowEntity.save();
   }
 }

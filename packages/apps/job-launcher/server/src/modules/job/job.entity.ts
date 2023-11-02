@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { IJob } from '../../common/interfaces';

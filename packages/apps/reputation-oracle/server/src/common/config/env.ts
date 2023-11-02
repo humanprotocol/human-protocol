@@ -61,7 +61,7 @@ export const envValidator = Joi.object({
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
-  S3_BUCKET: Joi.string().default('launcher'),
+  S3_BUCKET: Joi.string().default('reputation'),
   S3_USE_SSL: Joi.string().default(false),
   // SendGrid
   SENDGRID_API_KEY: Joi.string().required(),

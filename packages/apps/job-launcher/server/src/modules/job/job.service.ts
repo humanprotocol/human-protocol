@@ -240,10 +240,16 @@ export class JobService {
     fundAmount: number,
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
+
+    if (!storageData.bucket) {
+      throw new BadRequestException(ErrorBucket.NotExist);
+    }
+
     const storageClient = new StorageClient({
       endPoint: storageData.endPoint,
       port: storageData.port,
-      useSSL: false,
+      useSSL: storageData.useSSL,
+      region: storageData.region
     });
 
     const totalImages = (await storageClient.listObjects(storageData.bucket))
@@ -771,8 +777,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
-      jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -783,6 +788,9 @@ export class JobService {
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
     }
+
+    const status =
+      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     const manifestData = await this.getManifest(manifestUrl);
     if (!manifestData) {

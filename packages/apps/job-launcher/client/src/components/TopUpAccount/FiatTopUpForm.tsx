@@ -6,8 +6,6 @@ import {
   Link,
   TextField,
   Typography,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import {
   CardCvcElement,
@@ -17,6 +15,7 @@ import {
   useStripe,
 } from '@stripe/react-stripe-js';
 import React, { useState } from 'react';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
@@ -29,8 +28,8 @@ export const FiatTopUpForm = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [amount, setAmount] = useState<string>();
   const [name, setName] = useState<string>();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
+  const { openSnackbar } = useSnackbar();
 
   const handleTopUpAccount = async () => {
     if (!stripe || !elements) {
@@ -88,7 +87,7 @@ export const FiatTopUpForm = () => {
 
       setIsSuccess(true);
     } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message ?? err?.message);
+      openSnackbar(err?.response?.data?.message ?? err?.message, 'error');
       setIsSuccess(false);
     }
     setIsLoading(false);
@@ -180,16 +179,6 @@ export const FiatTopUpForm = () => {
           </Link>
         </Grid>
       </Grid>
-      <Snackbar
-        open={errorMessage !== null}
-        autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

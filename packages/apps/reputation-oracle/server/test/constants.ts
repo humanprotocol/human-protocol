@@ -177,7 +177,6 @@ export const MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS: ImageLabelBinaryJobResults = {
     },
   ],
 };
-export const MOCK_BUCKET_NAME = 'bucket-name';
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
 export const MOCK_EMAIL = 'test@example.com';
@@ -192,3 +191,10 @@ export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
 export const MOCK_SENDGRID_FROM_NAME = 'John Doe';
+
+export const MOCK_S3_ENDPOINT = 'localhost';
+export const MOCK_S3_PORT = 9000;
+export const MOCK_S3_ACCESS_KEY = 'access_key';
+export const MOCK_S3_SECRET_KEY = 'secret_key';
+export const MOCK_S3_BUCKET = 'solution';
+export const MOCK_S3_USE_SSL = false;

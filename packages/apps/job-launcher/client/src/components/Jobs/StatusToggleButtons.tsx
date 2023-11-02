@@ -6,9 +6,9 @@ import React, { FC } from 'react';
 import { JobStatus } from '../../types';
 
 const RANGE_BUTTONS = [
-  { label: 'All', value: JobStatus.ALL },
   { label: 'Launched', value: JobStatus.LAUNCHED },
   { label: 'Pending', value: JobStatus.PENDING },
+  { label: 'Completed', value: JobStatus.COMPLETED },
   { label: 'Cancelled', value: JobStatus.CANCELED },
   { label: 'Failed', value: JobStatus.FAILED },
 ];
