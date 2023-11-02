@@ -26,40 +26,45 @@ def process_pending_applications():
     )
     with Session() as session:
         for application in session.execute(q).all():
-            job: JobRequest = application.job_request
-            worker: Worker = application.worker
+            try:
+                register_worker_on_annotation_tool(application)
+                application.status = Statuses.completed
+            except Exception as e:
+                application.status = Statuses.failed
+        session.commit()
 
-            # validate job application
-            error_message = (
-                f"Job application by worker {worker.id} for job {job.id} is invalid.\n"
-            )
-            if job.status != Statuses.in_progress:
-                raise ValueError(error_message + "Job is not in progress.")
-            if not worker.is_validated:
-                raise ValueError(error_message + "Worker is not validated.")
 
-            # get available projects
-            projects: List[AnnotationProject] = [
-                project
-                for project in job.projects
-                if project.status == Statuses.pending
-            ]
+def register_worker_on_annotation_tool(application: JobApplication):
+    job: JobRequest = application.job_request
+    worker: Worker = application.worker
 
-            if len(projects) == 0:
-                raise ValueError(error_message + "No available projects for job")
+    # validate job application
+    error_message = (
+        f"Job application by worker {worker.id} for job {job.id} is invalid.\n"
+    )
+    if job.status != Statuses.in_progress:
+        raise ValueError(error_message + "Job is not in progress.")
+    if not worker.is_validated:
+        raise ValueError(error_message + "Worker is not validated.")
 
-            shuffle(projects)
-            project = projects[0]
+    # get available projects
+    projects: List[AnnotationProject] = [
+        project for project in job.projects if project.status == Statuses.pending
+    ]
 
-            # create user and register in project with doccano
-            create_user(worker.id, worker.password)
-            register_annotator(worker.id, project.id)
+    if len(projects) == 0:
+        raise ValueError(error_message + "No available projects for job")
 
-            # update project
-            project.worker = worker
-            project.id = worker.id
+    shuffle(projects)
+    project = projects[0]
 
-            session.commit()
+    # create user and register in project with doccano
+    create_user(worker.id, worker.password)
+    register_annotator(worker.id, project.id)
+
+    # update project
+    project.worker = worker
+    project.id = worker.id
 
 
 def process_pending_job_requests():
