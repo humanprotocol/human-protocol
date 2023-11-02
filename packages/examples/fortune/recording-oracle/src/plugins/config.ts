@@ -41,7 +41,7 @@ const configPlugin: FastifyPluginAsync = async (server) => {
     NODE_ENV: process.env.NODE_ENV as NodeEnv,
     LOG_LEVEL: process.env.LOG_LEVEL || 'info',
     API_HOST: process.env.API_HOST || 'localhost',
-    API_PORT: process.env.API_PORT || '3005'
+    API_PORT: process.env.API_PORT || '3005',
   };
 
   server.decorate('config', config);
