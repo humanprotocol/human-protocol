@@ -294,13 +294,11 @@ export class StorageClient {
    * ```
    */
   public async listObjects(bucket: string): Promise<string[]> {
-    console.log(0);
     const isBucketExists = await this.client.bucketExists(bucket);
-    console.log(1);
     if (!isBucketExists) {
       throw ErrorStorageBucketNotFound;
     }
-    console.log(2);
+
     try {
       return new Promise((resolve, reject) => {
         const keys: string[] = [];
@@ -313,7 +311,6 @@ export class StorageClient {
         });
       });
     } catch (e) {
-      console.log(e);
       throw new Error(String(e));
     }
   }
