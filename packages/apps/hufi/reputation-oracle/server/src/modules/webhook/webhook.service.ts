@@ -123,7 +123,6 @@ export class WebhookService {
       const totalAmount = await escrowClient.getBalance(escrowAddress);
       const amounts = this.calculateCampaignPayoutAmounts(
         totalAmount,
-        recipients,
         intermediateResults,
       );
 
@@ -162,7 +161,6 @@ export class WebhookService {
 
   public calculateCampaignPayoutAmounts(
     totalAmount: BigNumber,
-    recipient: Array<string>,
     results: liquidityDto[],
   ): BigNumber[] {
     // Convert the liquidity scores to BigNumber for precision in calculations.
