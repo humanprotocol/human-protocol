@@ -35,7 +35,9 @@ export const TasksView = () => {
     <ChartContainer
       isLoading={isLoading}
       data={seriesData}
-      isNotSupportedChain={chainId !== ChainId.POLYGON}
+      isNotSupportedChain={
+        chainId !== ChainId.POLYGON && chainId !== ChainId.ALL
+      }
       title="Tasks"
     >
       <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
