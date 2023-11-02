@@ -12,7 +12,6 @@ import {
   UploadFile,
   Encryption,
   EncryptionUtils,
-  KVStoreClient
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 const { v4: uuidv4 } = require('uuid');
@@ -87,8 +86,6 @@ import {
   HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
   HCAPTCHA_MIN_POINTS,
   HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-  HCAPTCHA_REQUESTER_MAX_REPEATS,
-  HCAPTCHA_REQUESTER_MIN_REPEATS,
   HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
@@ -178,8 +175,8 @@ export class JobService {
         job_api_key: this.configService.get<string>(ConfigNames.HCAPTHCHA_JOB_API_KEY)!,
         requester_accuracy_target: jobDto.accuracyTarget,
         request_config: {},
-        requester_max_repeats: HCAPTCHA_REQUESTER_MAX_REPEATS,
-        requester_min_repeats: HCAPTCHA_REQUESTER_MIN_REPEATS,
+        requester_max_repeats: jobDto.maxRequests,
+        requester_min_repeats: jobDto.minRequests,
         requester_question: { en: jobDto.annotations.labelingPrompt },
         requester_question_example: jobDto.annotations.exampleImages || [],
         job_total_tasks: objectsInBucket.length,
@@ -190,60 +187,93 @@ export class JobService {
 
     switch (jobType) {
         case JobCaptchaShapeType.COMPARISON:
-            return {
-                ...commonManifestProperties,
-                request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-                requester_restricted_answer_set: {},
-            };
+          return {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: {},
+          };
 
         case JobCaptchaShapeType.CATEGORAZATION:
-            const categorizationManifest = {
-                ...commonManifestProperties,
-                request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
-                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-                requester_restricted_answer_set: {},
-            };
+          const categorizationManifest = {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: {},
+          };
 
-            const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
-            categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
+          const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
+          categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
 
-            return categorizationManifest;
+          return categorizationManifest;
 
         case JobCaptchaShapeType.POLYGON:
-            const polygonManifest = {
-                ...commonManifestProperties,
-                request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-                request_config: {
-                    shape_type: JobCaptchaShapeType.POLYGON,
-                    min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-                    max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                    min_points: HCAPTCHA_MIN_POINTS,
-                    max_points: HCAPTCHA_MAX_POINTS,
-                    minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
-                },
-                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-                requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
-            };
+          const polygonManifest = {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+              request_config: {
+                  shape_type: JobCaptchaShapeType.POLYGON,
+                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+                  min_points: 4,
+                  max_points: 4,
+                  minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+              },
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+          };
 
-            return polygonManifest;
+          return polygonManifest;
 
-        case JobCaptchaShapeType.POINT || JobCaptchaShapeType.BOUNDING_BOX:
-            const shapeManifest = {
-                ...commonManifestProperties,
-                request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-                request_config: {
-                    shape_type: jobType,
-                    min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-                    max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                    min_points: HCAPTCHA_MIN_POINTS,
-                    max_points: HCAPTCHA_MAX_POINTS,
-                },
-                restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-                requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
-            };
+        case JobCaptchaShapeType.POINT:
+          const pointManifest = {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+              request_config: {
+                  shape_type: jobType,
+                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+                  min_points: 1,
+                  max_points: 8,
+              },
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+          };
 
-            return shapeManifest;
+          return pointManifest;
+        case JobCaptchaShapeType.BOUNDING_BOX:
+          const boundingBoxManifest = {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+              request_config: {
+                  shape_type: jobType,
+                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+                  min_points: 4,
+                  max_points: 4,
+              },
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+          };
+
+            return boundingBoxManifest;
+        case JobCaptchaShapeType.IMMO:
+          const immoManifest = {
+              ...commonManifestProperties,
+              request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
+              request_config: {
+                  multiple_choice_max_choices:1,
+                  multiple_choice_min_choices:1,
+                  overlap_threshold: null,
+                  answer_type: "str",
+                  max_length: 100,
+                  min_length: 1
+              },
+              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+          };
+
+          return immoManifest;
 
         default:
             this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);

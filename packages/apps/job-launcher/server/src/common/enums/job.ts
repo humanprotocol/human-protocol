@@ -40,6 +40,7 @@ export enum JobCaptchaShapeType {
   POINT = 'point',
   BOUNDING_BOX = 'bounding_box',
   COMPARISON = 'comparison',
+  IMMO = 'immo'
 }
 
 export enum WorkerLanguage {

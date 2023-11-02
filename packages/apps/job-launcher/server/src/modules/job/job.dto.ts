@@ -25,6 +25,7 @@ import { JobCaptchaRequestType, JobCaptchaShapeType, JobRequestType, JobStatus, 
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
 import { isEmpty } from 'rxjs';
+import { IsNull } from 'typeorm';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -439,6 +440,18 @@ export class JobCaptchaDto extends JobDto {
   completionDate: Date;
 
   @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  minRequests: number;
+  
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  maxRequests: number;
+
+  @ApiProperty()
   @IsDefined()
   @IsNotEmptyObject()
   @IsObject()
@@ -497,6 +510,27 @@ class RequestConfig {
   @IsNumber()
   @IsPositive()
   minimum_selection_area_per_shape?: number;
+
+  @IsNumber()
+  @IsPositive()
+  multiple_choice_max_choices?: number;
+
+  @IsNumber()
+  @IsPositive()
+  multiple_choice_min_choices?: number;
+
+  @IsString()
+  answer_type?: string;
+
+  overlap_threshold?: any;
+
+  @IsNumber()
+  @IsPositive()
+  max_length?: number;
+
+  @IsNumber()
+  @IsPositive()
+  min_length?: number;
 }
 
 export class HCaptchaManifestDto {
