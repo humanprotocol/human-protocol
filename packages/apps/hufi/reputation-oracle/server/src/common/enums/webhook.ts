@@ -1,5 +1,5 @@
 export enum EventType {
-  TASK_FINISHED = 'task_finished'
+  CAMPAIGN_PAYOUT = 'campaign_payout'
 }
 
 export enum WebhookStatus {

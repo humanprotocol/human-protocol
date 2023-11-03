@@ -51,7 +51,7 @@ describe('ReputationService', () => {
   describe('increaseReputation', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
-    const type = ReputationEntityType.WORKER;
+    const type = ReputationEntityType.LIQUIDITY_PROVIDER;
 
     it('should create a new reputation entity if not found', async () => {
       jest
@@ -92,7 +92,7 @@ describe('ReputationService', () => {
   describe('decreaseReputation', () => {
     const chainId = ChainId.LOCALHOST;
     const address = MOCK_ADDRESS;
-    const type = ReputationEntityType.WORKER;
+    const type = ReputationEntityType.LIQUIDITY_PROVIDER;
 
     it('should create a new reputation entity if not found', async () => {
       jest

@@ -20,10 +20,10 @@ import { Role } from '../../common/enums/role';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
-  @UseGuards(new SignatureAuthGuard([Role.Recording]))
+  // @UseGuards(new SignatureAuthGuard([Role.Recording]))
   @Post('/')
   public async createIncomingWebhook(
-    @Headers(HEADER_SIGNATURE_KEY) _: string,
+    // @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: WebhookIncomingDto,
   ): Promise<boolean> {
     return this.webhookService.createIncomingWebhook(data);

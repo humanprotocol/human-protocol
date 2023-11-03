@@ -42,16 +42,11 @@ export class WebhookRepository {
   public async findOne(
     where: FindOptionsWhere<WebhookIncomingEntity>,
     options?: FindOneOptions<WebhookIncomingEntity>,
-  ): Promise<WebhookIncomingEntity> {
+  ): Promise<WebhookIncomingEntity | null> {
     const webhookEntity = await this.webhookIncomingEntityRepository.findOne({
       where,
       ...options,
     });
-
-    if (!webhookEntity) {
-      this.logger.log(ErrorWebhook.NotFound, WebhookIncomingEntity.name);
-      throw new NotFoundException(ErrorWebhook.NotFound);
-    }
 
     return webhookEntity;
   }
