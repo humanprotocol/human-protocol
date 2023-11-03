@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JobService } from './job.service';
-import { campaignDetailsDto, liquidityRequestDto } from './job.dto';
+import { campaignDetailsDto, liquidityRequestDto, liquidityResponseDto } from './job.dto';
 
 @ApiTags('Job')
 @Controller('job')
@@ -22,7 +22,7 @@ export class JobController {
   }
 
   @Post('liquidity')
-  getLiquidityScore(@Body() body: liquidityRequestDto): Promise<any> {
+  getLiquidityScore(@Body() body: liquidityRequestDto): Promise<liquidityResponseDto> {
     return this.jobService.getLiquidityScore(
       body.chainId,
       body.escrowAddress,
@@ -32,7 +32,7 @@ export class JobController {
   }
 
   @Post('saveLiquidity')
-  saveScore(@Body() body: liquidityRequestDto): Promise<any> {
+  saveScore(@Body() body: liquidityRequestDto): Promise<liquidityResponseDto> {
     return this.jobService.getLiquidityScore(
       body.chainId,
       body.escrowAddress,
