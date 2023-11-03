@@ -68,3 +68,8 @@ export class liquidityRequestDto {
   @IsValidEthereumAddress()
   public liquidityProvider: string;
 }
+
+export class liquidityResponseDto{
+  public liquidityScore: string;
+  public liquidityProvider: string;
+}
