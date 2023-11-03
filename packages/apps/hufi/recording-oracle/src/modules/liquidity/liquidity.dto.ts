@@ -52,6 +52,11 @@ export class CEXLiquidityRequestDto {
   public liquidityProviderAPISecret: string;
 
   @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public liquidityProvider: string;
+
+  @ApiProperty()
   @IsBoolean()
   public save:boolean;
 }

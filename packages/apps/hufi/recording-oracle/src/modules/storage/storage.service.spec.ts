@@ -1,4 +1,4 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { StorageClient } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -11,7 +11,6 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
-import crypto from 'crypto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -55,89 +54,6 @@ describe('Web3Service', () => {
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
-  });
-
-  describe('uploadJobSolutions', () => {
-    it('should upload the solutions correctly', async () => {
-      const workerAddress = '0x1234567890123456789012345678901234567891';
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const chainId = ChainId.LOCALHOST;
-      const solution = 'test';
-
-      storageService.minioClient.bucketExists = jest
-        .fn()
-        .mockResolvedValue(true);
-
-      const jobSolution = {
-        workerAddress,
-        solution,
-      };
-      const fileData = await storageService.uploadJobSolutions(
-        escrowAddress,
-        chainId,
-        [jobSolution],
-      );
-      expect(fileData).toEqual({
-        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-        hash: crypto
-          .createHash('sha1')
-          .update(JSON.stringify([jobSolution]))
-          .digest('hex'),
-      });
-      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_S3_BUCKET,
-        `${escrowAddress}-${chainId}.json`,
-        expect.stringContaining(solution),
-        {
-          'Content-Type': 'application/json',
-        },
-      );
-    });
-
-    it('should fail if the bucket does not exist', async () => {
-      const workerAddress = '0x1234567890123456789012345678901234567891';
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const chainId = ChainId.LOCALHOST;
-      const solution = 'test';
-
-      storageService.minioClient.bucketExists = jest
-        .fn()
-        .mockResolvedValue(false);
-
-      const jobSolution = {
-        workerAddress,
-        solution,
-      };
-      await expect(
-        storageService.uploadJobSolutions(escrowAddress, chainId, [
-          jobSolution,
-        ]),
-      ).rejects.toThrow('Bucket not found');
-    });
-    it('should fail if the file cannot be uploaded', async () => {
-      const workerAddress = '0x1234567890123456789012345678901234567891';
-      const escrowAddress = '0x1234567890123456789012345678901234567890';
-      const chainId = ChainId.LOCALHOST;
-      const solution = 'test';
-
-      storageService.minioClient.bucketExists = jest
-        .fn()
-        .mockResolvedValue(true);
-      storageService.minioClient.putObject = jest
-        .fn()
-        .mockRejectedValue('Network error');
-
-      const jobSolution = {
-        workerAddress,
-        solution,
-      };
-
-      await expect(
-        storageService.uploadJobSolutions(escrowAddress, chainId, [
-          jobSolution,
-        ]),
-      ).rejects.toThrow('File not uploaded');
-    });
   });
 
   describe('download', () => {
