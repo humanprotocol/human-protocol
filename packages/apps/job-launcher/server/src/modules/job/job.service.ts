@@ -7,8 +7,6 @@ import {
   NETWORKS,
   StakingClient,
   StorageClient,
-  StorageCredentials,
-  StorageParams,
   UploadFile,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -84,13 +82,12 @@ import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
+import { StorageService } from '../storage/storage.service';
+import { UploadedFile } from 'src/common/interfaces/s3';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  public readonly storageClient: StorageClient;
-  public readonly storageParams: StorageParams;
-  public readonly bucket: string;
 
   constructor(
     @Inject(Web3Service)
@@ -101,27 +98,8 @@ export class JobService {
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
-  ) {
-    const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
-      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
-    };
-
-    const useSSL =
-      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
-    this.storageParams = {
-      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL,
-    };
-
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
-
-    this.storageClient = new StorageClient(
-      this.storageParams,
-      storageCredentials,
-    );
-  }
+    private readonly storageService: StorageService,
+  ) {}
 
   public async createJob(
     userId: number,
@@ -272,7 +250,7 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
     const recordingOracleConfigKey =
       (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
@@ -366,20 +344,18 @@ export class JobService {
   public async saveManifest(
     manifest: FortuneManifestDto | CvatManifestDto,
   ): Promise<SaveManifestDto> {
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [manifest],
-      this.bucket,
+    const uploadedManifest: UploadedFile = await this.storageService.uploadManifest(
+      manifest,
     );
 
-    if (!uploadedFiles[0]) {
+    if (!uploadedManifest) {
       this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
       throw new BadGatewayException(ErrorBucket.UnableSaveFile);
     }
 
-    const { url, hash } = uploadedFiles[0];
-    const manifestUrl = url;
+    const manifestUrl = uploadedManifest.url;
 
-    return { manifestUrl, manifestHash: hash };
+    return { manifestUrl, manifestHash: uploadedManifest.hash };
   }
 
   private async validateManifest(
@@ -403,18 +379,6 @@ export class JobService {
     }
 
     return true;
-  }
-
-  public async getManifest(
-    manifestUrl: string,
-  ): Promise<FortuneManifestDto | CvatManifestDto> {
-    const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
-
-    if (!manifest) {
-      throw new NotFoundException(ErrorJob.ManifestNotFound);
-    }
-
-    return manifest;
   }
 
   public async sendWebhook(
@@ -577,7 +541,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+    const result = await this.storageService.download(finalResultUrl);
 
     if (!result) {
       throw new NotFoundException(ErrorJob.ResultNotFound);
@@ -629,7 +593,7 @@ export class JobService {
 
       if (!jobEntity) return;
 
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
+      const manifest = await this.storageService.download(jobEntity.manifestUrl);
       await this.validateManifest(manifest);
 
       if (!jobEntity.escrowAddress) {
@@ -694,7 +658,7 @@ export class JobService {
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const manifest = await this.storageService.download(jobEntity.manifestUrl);
     const configKey =
       (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
         ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL
@@ -792,7 +756,7 @@ export class JobService {
     const status =
       escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
-    const manifestData = await this.getManifest(manifestUrl);
+    const manifestData = await this.storageService.download(manifestUrl);
     if (!manifestData) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
