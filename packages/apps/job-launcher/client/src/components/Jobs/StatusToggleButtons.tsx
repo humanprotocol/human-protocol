@@ -9,7 +9,7 @@ const RANGE_BUTTONS = [
   { label: 'Launched', value: JobStatus.LAUNCHED },
   { label: 'Pending', value: JobStatus.PENDING },
   { label: 'Completed', value: JobStatus.COMPLETED },
-  { label: 'Cancelled', value: JobStatus.CANCELED },
+  { label: 'Canceled', value: JobStatus.CANCELED },
   { label: 'Failed', value: JobStatus.FAILED },
 ];
 
