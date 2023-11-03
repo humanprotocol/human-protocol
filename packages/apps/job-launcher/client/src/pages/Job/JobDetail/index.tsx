@@ -37,7 +37,7 @@ export default function JobDetail() {
           details: { ...data.details, status: JobStatus.TO_CANCEL },
         });
       }
-      openSnackbar('Job cancelled', 'success');
+      openSnackbar('Job canceled', 'success');
     } catch (err: any) {
       openSnackbar(
         err?.response?.data?.message ?? 'Job cancellation failed.',

@@ -63,7 +63,7 @@ export default function AuthLayout() {
                   <Link to="/jobs/completed">Completed</Link>
                 </ListItem>
                 <ListItem>
-                  <Link to="/jobs/cancelled">Cancelled</Link>
+                  <Link to="/jobs/canceled">Canceled</Link>
                 </ListItem>
                 <ListItem>
                   <Link to="/jobs/failed">Failed</Link>

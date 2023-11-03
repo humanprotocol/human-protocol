@@ -20,7 +20,7 @@ export const JobTable = ({
     <Table
       columns={[
         {
-          id: 'address',
+          id: 'escrowAddress',
           label: 'Address',
           sortable: true,
           render: ({ escrowAddress }) =>
@@ -38,7 +38,7 @@ export const JobTable = ({
         { id: 'network', label: 'Network', sortable: true },
         {
           id: 'fundAmount',
-          label: 'Balance',
+          label: 'Fund Amount',
           sortable: true,
           render: ({ fundAmount }) => `${fundAmount} HMT`,
         },
