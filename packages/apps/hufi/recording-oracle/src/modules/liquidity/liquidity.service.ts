@@ -1,4 +1,5 @@
 import {
+  ChainId,
   EscrowClient,
   EscrowStatus,
   KVStoreClient,
@@ -153,6 +154,7 @@ export class LiquidityService {
         await escrowClient.getRecordingOracleAddress(
           liquidityRequest.escrowAddress,
         );
+      
       if (
         ethers.utils.getAddress(recordingOracleAddress) !==
         (await signer.getAddress())
@@ -181,6 +183,14 @@ export class LiquidityService {
           (order: any) => order.status === 'FILLED' || order.type === 'LIMIT'
         );
         const liquidityScore = this.calculateCentralizedLiquidityScore(filteredOrders);
+        if (liquidityRequest.save) {
+          await this.pushLiquidityScore(
+            liquidityRequest.escrowAddress,
+            liquidityRequest.chainId,
+            liquidityRequest.liquidityProvider,
+            liquidityScore,
+          );
+        }
         return liquidityScore;
       }
       throw new Error('No data received from server');
@@ -259,6 +269,7 @@ export class LiquidityService {
         await escrowClient.getRecordingOracleAddress(
           liquidityRequest.escrowAddress,
         );
+      
       if (
         ethers.utils.getAddress(recordingOracleAddress) !==
         (await signer.getAddress())
@@ -291,7 +302,12 @@ export class LiquidityService {
 
       if (liquidityRequest.save) {
         try {
-          await this.pushLiquidityScore(liquidityRequest, liquidityScore);
+          await this.pushLiquidityScore(
+            liquidityRequest.escrowAddress,
+            liquidityRequest.chainId,
+            liquidityRequest.liquidityProvider,
+            liquidityScore,
+          );
         } catch (error: any) {
           console.error(`Error in getLiquidityScore: ${error.message}`);
           throw error;
@@ -434,24 +450,26 @@ export class LiquidityService {
   }
 
   public async pushLiquidityScore(
-    liquidityRequest: liquidityRequestDto,
+    escrowAddress: string,
+    chainId: ChainId,
+    liquidityProvider: string,
     score: string,
   ): Promise<string> {
-    const signer = this.web3Service.getSigner(liquidityRequest.chainId);
+    const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
 
     let liquidities: liquidityDto[];
-    const existingLiquiditiesURL: string = await escrowClient.getIntermediateResultsUrl(liquidityRequest.escrowAddress);
+    const existingLiquiditiesURL: string = await escrowClient.getIntermediateResultsUrl(escrowAddress);
     if (existingLiquiditiesURL) {
       liquidities = JSON.parse(await this.storageService.download(existingLiquiditiesURL));
       if (liquidities) {
-        const exisitingLiquidity = liquidities.find((liq) => liq.liquidityProvider === liquidityRequest.liquidityProvider);
+        const exisitingLiquidity = liquidities.find((liq) => liq.liquidityProvider === liquidityProvider);
         if (exisitingLiquidity) {
           exisitingLiquidity.liquidityScore = score;
         } else {
           liquidities.push({
-            chainId: liquidityRequest.chainId,
-            liquidityProvider: liquidityRequest.liquidityProvider,
+            chainId: chainId,
+            liquidityProvider: liquidityProvider,
             liquidityScore: score,
           });
         }
@@ -462,22 +480,22 @@ export class LiquidityService {
     } else {
       liquidities = [
         {
-          chainId: liquidityRequest.chainId,
-          liquidityProvider: liquidityRequest.liquidityProvider,
+          chainId,
+          liquidityProvider,
           liquidityScore: score,
         }
       ]
     }
 
     const saveLiquidityResult = await this.storageService.uploadLiquidities(
-      liquidityRequest.escrowAddress,
-      liquidityRequest.chainId,
+      escrowAddress,
+      chainId,
       liquidities,
     );
     
     if (!existingLiquiditiesURL) {
       await escrowClient.storeResults(
-        liquidityRequest.escrowAddress,
+        escrowAddress,
         saveLiquidityResult.url,
         saveLiquidityResult.hash,
       );

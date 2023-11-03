@@ -1,5 +1,4 @@
 import { JobRequestType } from '../src/common/enums/job';
-import { IManifest } from '../src/common/interfaces/job';
 
 export const MOCK_HOST = '127.0.0.1';
 export const MOCK_PORT = 5000;
@@ -20,10 +19,3 @@ export const MOCK_S3_ACCESS_KEY = 'access_key';
 export const MOCK_S3_SECRET_KEY = 'secret_key';
 export const MOCK_S3_BUCKET = 'solution';
 export const MOCK_S3_USE_SSL = false;
-export const MOCK_MANIFEST: IManifest = {
-  submissionsRequired: 2,
-  requesterTitle: 'Fortune',
-  requesterDescription: 'Some desc',
-  fundAmount: '8',
-  requestType: JobRequestType.FORTUNE,
-};
