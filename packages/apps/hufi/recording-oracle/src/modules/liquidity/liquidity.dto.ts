@@ -27,6 +27,36 @@ export class liquidityRequestDto {
   @IsBoolean()
   public save:boolean;
 }
+
+
+export class CEXLiquidityRequestDto {
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public escrowAddress: string;
+
+  @ApiProperty({
+    enum: ChainId,
+  })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public liquidityProviderAPIKEY: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsValidEthereumAddress()
+  public liquidityProviderAPISecret: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  public save:boolean;
+}
+
+
 export class SaveLiquidityDto {
   public url: string;
   public hash: string;

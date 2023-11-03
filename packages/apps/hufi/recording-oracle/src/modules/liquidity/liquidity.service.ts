@@ -28,6 +28,7 @@ import { JobRequestType } from '../../common/enums/job';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import {
+  CEXLiquidityRequestDto,
   CampaignManifestDto,
   liquidityDto,
   liquidityRequestDto,
@@ -37,6 +38,7 @@ import { ConfigService } from '@nestjs/config';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { GraphQLClient, gql } from 'graphql-request';
+import crypto from "crypto";
 
 @Injectable()
 export class LiquidityService {
@@ -122,7 +124,73 @@ export class LiquidityService {
     });
   }
 
-  public async getLiquidityScore(
+  public async getCEXLiquidityScore(liquidityRequest: CEXLiquidityRequestDto): Promise<string> {
+    try {
+      const manifest = await this.getManifest(
+        liquidityRequest.chainId,
+        liquidityRequest.escrowAddress,
+      );
+  
+      if (manifest.requestType !== JobRequestType.Campaign) {
+        this.logger.log(ErrorJob.InvalidJobType, LiquidityService.name);
+        throw new BadRequestException(ErrorJob.InvalidJobType);
+      }
+  
+      const signer = this.web3Service.getSigner(liquidityRequest.chainId);
+      const escrowClient = await EscrowClient.build(signer);
+      const escrowStatus = await escrowClient.getStatus(
+        liquidityRequest.escrowAddress,
+      );
+      if (
+        escrowStatus !== EscrowStatus.Pending &&
+        escrowStatus !== EscrowStatus.Partial
+      ) {
+        this.logger.log(ErrorJob.InvalidStatus, LiquidityService.name);
+        throw new BadRequestException(ErrorJob.InvalidStatus);
+      }
+  
+      const recordingOracleAddress =
+        await escrowClient.getRecordingOracleAddress(
+          liquidityRequest.escrowAddress,
+        );
+      if (
+        ethers.utils.getAddress(recordingOracleAddress) !==
+        (await signer.getAddress())
+      ) {
+        this.logger.log(ErrorJob.AddressMismatches, LiquidityService.name);
+        throw new BadRequestException(ErrorJob.AddressMismatches);
+      }
+  
+      const queryString = `timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
+      const signature = crypto
+        .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
+        .update(queryString)
+        .digest('hex');
+      const signedQueryString = `${queryString}&signature=${signature}`;
+      const headers = {
+        'X-MBX-APIKEY': process.env.BINANCE_API_KEY,
+      };
+      const response = await this.httpService.get(`${ConfigNames.BINANCE_URL}/api/v3/allOrders?${signedQueryString}`, { headers }).toPromise();
+      if (!response) {
+        throw new Error('Failed to get response from server');
+      }
+      const data = response.data;
+      if (data) {
+        const filteredOrders = data.filter(
+          (order: any) => order.status === 'FILLED' || order.type === 'LIMIT'
+        );
+        const liquidityScore = this.calculateCentralizedLiquidityScore(filteredOrders);
+        return liquidityScore;
+      }
+      throw new Error('No data received from server');
+    } catch (error: any) {
+      console.error(`Error in getCEXLiquidityScore: ${error.message}`);
+      throw error;
+    }
+  }
+  
+
+  public async getDEXLiquidityScore(
     liquidityRequest: liquidityRequestDto,
   ): Promise<any> {
     const UniswapQuery = gql`
@@ -329,6 +397,24 @@ export class LiquidityService {
     }
 
     return totalScore;
+  }
+
+  public calculateCentralizedLiquidityScore(orders: { cummulativeQuoteQty: number; time: number; updateTime: number; }[]): string {
+    if (orders.length === 0) {
+      return '0';
+    }
+  
+    const totalScore = orders.reduce((acc, order) => {
+      console.log('Order: ', order);
+      const liquidityAmount = order.cummulativeQuoteQty;
+      const timeWithheld = order.time === order.updateTime ? 1 : order.updateTime - order.time;
+      const score = liquidityAmount * timeWithheld;
+      acc += score;
+      console.log('Total Score: ', acc);
+      return acc;
+    }, 0);
+  
+    return totalScore.toString();
   }
 
   private filterObjectsByInputTokenSymbol(

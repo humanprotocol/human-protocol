@@ -15,6 +15,7 @@ export const ConfigNames = {
   UniswapEthereumEndpoint:'UniswapEthereumEndpoint',
   UniswapPolygonEndpoint: 'UniswapPolygonEndpoint',
   pancakeSwapEndpoint: 'pancakeSwapEndpoint' ,
+  BINANCE_URL:'BINANCE_URL',
 };
 
 export const envValidator = Joi.object({
@@ -35,4 +36,5 @@ export const envValidator = Joi.object({
   UniswapEthereumEndpoint:Joi.string().default('https://api.thegraph.com/subgraphs/name/messari/uniswap-v3-ethereum'),
   UniswapPolygonEndpoint: Joi.string().default('https://api.thegraph.com/subgraphs/name/messari/uniswap-v3-polygon'),
   pancakeSwapEndpoint:Joi.string().default('https://api.thegraph.com/subgraphs/name/messari/pancakeswap-v3-bsc'),
+  BINANCE_URL:Joi.string().default('https://testnet.binance.vision/api'),
 });
