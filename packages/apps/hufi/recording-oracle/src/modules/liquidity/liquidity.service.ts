@@ -171,9 +171,9 @@ export class LiquidityService {
         .digest('hex');
       const signedQueryString = `${queryString}&signature=${signature}`;
       const headers = {
-        'X-MBX-APIKEY': process.env.BINANCE_API_KEY,
+        'X-MBX-APIKEY': this.configService.get(ConfigNames.BINANCE_API_KEY),
       };
-      const response = await this.httpService.get(`${ConfigNames.BINANCE_URL}/api/v3/allOrders?${signedQueryString}`, { headers }).toPromise();
+      const response = await this.httpService.get(`${this.configService.get(ConfigNames.BINANCE_URL)}/api/v3/allOrders?${signedQueryString}`, { headers }).toPromise();
       if (!response) {
         throw new Error('Failed to get response from server');
       }
