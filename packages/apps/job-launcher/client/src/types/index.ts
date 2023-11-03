@@ -67,11 +67,20 @@ export enum PayMethod {
 export enum JobType {
   Fortune,
   CVAT,
+  HCAPTCHA,
 }
 
 export enum CvatJobType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+}
+
+export enum HCaptchaJobType {
+  COMPARISON = 'COMPARISON',
+  CATEGORIZATION = 'CATEGORIZATION',
+  POLYGON = 'POLYGON',
+  LANDMARK = 'LANDMARK',
+  BOUNDING_BOX = 'BOUNDING_BOX',
 }
 
 export type FortuneRequest = {

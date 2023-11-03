@@ -7,6 +7,7 @@ import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { JobType, PayMethod } from '../../../types';
 import { CvatJobRequestForm } from './CvatJobRequestForm';
 import { FortuneJobRequestForm } from './FortuneJobRequestForm';
+import { HCaptchaJobRequestForm } from './HCaptchaJobRequestForm';
 
 export const CreateJob = () => {
   const { payMethod, jobRequest, updateJobRequest } = useCreateJobPageUI();
@@ -60,6 +61,7 @@ export const CreateJob = () => {
           >
             <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
             <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
+            <MenuItem value={JobType.HCAPTCHA}>hCaptcha</MenuItem>
           </Select>
         </FormControl>
         <NetworkSelect
@@ -75,6 +77,7 @@ export const CreateJob = () => {
       </Box>
       {jobRequest.jobType === JobType.Fortune && <FortuneJobRequestForm />}
       {jobRequest.jobType === JobType.CVAT && <CvatJobRequestForm />}
+      {jobRequest.jobType === JobType.HCAPTCHA && <HCaptchaJobRequestForm />}
     </Box>
   );
 };
