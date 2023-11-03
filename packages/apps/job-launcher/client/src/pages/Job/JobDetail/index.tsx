@@ -56,7 +56,7 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Balance of"
-                  value={`${data.details.balance.toFixed(2)} HMT`}
+                  value={`${data.details.balance} HMT`}
                 />
                 <CardTextRow
                   label="Paid Out HMT"
