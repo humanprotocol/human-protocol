@@ -1,8 +1,8 @@
 {
   "name": "hufi-job-launcher-server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Hufi Job Launcher Server",
+  "author": "Human Protocol",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
