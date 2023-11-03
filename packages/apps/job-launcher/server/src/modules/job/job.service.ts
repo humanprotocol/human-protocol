@@ -427,9 +427,13 @@ export class JobService {
       this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
     );
     const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, {
-        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
+      await this.httpService.post(
+        webhookUrl,
+        webhookData,
+        webhookData instanceof FortuneWebhookDto
+          ? { headers: { [HEADER_SIGNATURE_KEY]: signedBody } }
+          : undefined
+      ),
     );
 
     if (!data) {
