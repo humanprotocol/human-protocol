@@ -430,9 +430,9 @@ export class JobService {
       await this.httpService.post(
         webhookUrl,
         webhookData,
-        webhookData instanceof FortuneWebhookDto
-          ? { headers: { [HEADER_SIGNATURE_KEY]: signedBody } }
-          : undefined
+        webhookData instanceof CVATWebhookDto
+          ? undefined
+          : { headers: { [HEADER_SIGNATURE_KEY]: signedBody } }
       ),
     );
 
@@ -645,15 +645,16 @@ export class JobService {
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
         if ((manifest as CvatManifestDto)?.annotation?.type) {
+          const cvatWebhookData: CVATWebhookDto = {
+            escrow_address: jobEntity.escrowAddress,
+            chain_id: jobEntity.chainId,
+            event_type: EventType.ESCROW_CREATED,
+          };
           await this.sendWebhook(
             this.configService.get<string>(
               ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
             )!,
-            {
-              escrow_address: jobEntity.escrowAddress,
-              chain_id: jobEntity.chainId,
-              event_type: EventType.ESCROW_CREATED,
-            },
+            cvatWebhookData,
           );
         }
       }
