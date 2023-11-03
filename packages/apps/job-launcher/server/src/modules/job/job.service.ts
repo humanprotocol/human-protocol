@@ -64,7 +64,8 @@ import {
   JobFortuneDto,
   JobListDto,
   SaveManifestDto,
-  SendWebhookDto,
+  CVATWebhookDto,
+  FortuneWebhookDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -418,7 +419,7 @@ export class JobService {
 
   public async sendWebhook(
     webhookUrl: string,
-    webhookData: SendWebhookDto,
+    webhookData: FortuneWebhookDto | CVATWebhookDto,
   ): Promise<boolean> {
     const signedBody = await signMessage(
       webhookData,
@@ -644,9 +645,9 @@ export class JobService {
               ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
             )!,
             {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
+              escrow_address: jobEntity.escrowAddress,
+              chain_id: jobEntity.chainId,
+              event_type: EventType.ESCROW_CREATED,
             },
           );
         }
@@ -694,16 +695,20 @@ export class JobService {
     await jobEntity.save();
 
     const manifest = await this.getManifest(jobEntity.manifestUrl);
-    const configKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL
-        : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
-
-    await this.sendWebhook(this.configService.get<string>(configKey)!, {
-      escrowAddress: jobEntity.escrowAddress,
-      chainId: jobEntity.chainId,
-      eventType: EventType.ESCROW_CANCELED,
-    });
+    
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      await this.sendWebhook(this.configService.get<string>(ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
+        escrowAddress: jobEntity.escrowAddress,
+        chainId: jobEntity.chainId,
+        eventType: EventType.ESCROW_CANCELED,
+      });
+    } else {
+      await this.sendWebhook(this.configService.get<string>(ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
+        escrow_address: jobEntity.escrowAddress,
+        chain_id: jobEntity.chainId,
+        event_type: EventType.ESCROW_CANCELED,
+      });
+    }
 
     return true;
   }
