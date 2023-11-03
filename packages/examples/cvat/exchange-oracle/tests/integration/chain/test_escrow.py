@@ -1,116 +1,149 @@
+import json
 import unittest
 from unittest.mock import patch
 
-from human_protocol_sdk.escrow import EscrowClientError
+from human_protocol_sdk.constants import ChainId, Status
+from human_protocol_sdk.escrow import EscrowClientError, EscrowData
 from human_protocol_sdk.storage import StorageClientError
-from web3 import Web3
-from web3.middleware import construct_sign_and_send_raw_middleware
-from web3.providers.rpc import HTTPProvider
 
-from src.chain.escrow import get_escrow_manifest, get_job_launcher_address, validate_escrow
+from src.chain.escrow import (
+    get_escrow_manifest,
+    get_job_launcher_address,
+    get_recording_oracle_address,
+    validate_escrow,
+)
 
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
-from tests.utils.setup_escrow import bulk_payout, create_escrow, fund_escrow
+from tests.utils.constants import (
+    ESCROW_ADDRESS,
+    FACTORY_ADDRESS,
+    JOB_LAUNCHER_ADDRESS,
+    RECORDING_ORACLE_ADDRESS,
+    TOKEN_ADDRESS,
+)
+
+escrow_address = ESCROW_ADDRESS
+chain_id = ChainId.LOCALHOST.value
 
 
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
-        self.w3 = Web3(HTTPProvider())
-
-        # Set default gas payer
-        self.gas_payer = self.w3.eth.account.from_key(DEFAULT_GAS_PAYER_PRIV)
-        self.w3.middleware_onion.add(
-            construct_sign_and_send_raw_middleware(self.gas_payer),
-            "construct_sign_and_send_raw_middleware",
+        self.escrow_data = EscrowData(
+            escrow_address,
+            escrow_address,
+            "0",
+            "1000",
+            0,
+            FACTORY_ADDRESS,
+            JOB_LAUNCHER_ADDRESS,
+            Status.Pending.name,
+            TOKEN_ADDRESS,
+            "1000",
+            "",
+            ChainId.LOCALHOST.name,
         )
-        self.w3.eth.default_account = self.gas_payer.address
 
     def test_validate_escrow(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            validation = validate_escrow(self.w3.eth.chain_id, escrow_address)
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            mock_function.return_value = self.escrow_data
+            validation = validate_escrow(chain_id, escrow_address)
             self.assertIsNone(validation)
 
     def test_validate_escrow_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                validate_escrow(self.w3.eth.chain_id, "invalid_address")
+        with self.assertRaises(EscrowClientError) as error:
+            validate_escrow(chain_id, "invalid_address")
 
         self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
-    def test_validate_escrow_without_funds(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(ValueError) as error:
-                validate_escrow(self.w3.eth.chain_id, escrow_address)
-
-        self.assertEqual(f"Escrow doesn't have funds", str(error.exception))
-
     def test_validate_escrow_invalid_status(self):
-        escrow_address = create_escrow(self.w3)
-        fund_escrow(self.w3, escrow_address)
-        bulk_payout(
-            self.w3,
-            escrow_address,
-            self.gas_payer.address,
-            Web3.toWei(50, "milliether"),
-        )
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            self.escrow_data.status = Status.Launched.name
+            mock_function.return_value = self.escrow_data
             with self.assertRaises(ValueError) as error:
-                validate_escrow(self.w3.eth.chain_id, escrow_address)
+                validate_escrow(chain_id, escrow_address)
         self.assertEqual(
-            f"Escrow is not in a Pending state. Current state: Partial",
+            f"Escrow is not in any of the accepted states (Pending). Current state: {self.escrow_data.status}",
+            str(error.exception),
+        )
+
+    def test_validate_escrow_without_funds(self):
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            self.escrow_data.balance = "0"
+            mock_function.return_value = self.escrow_data
+            with self.assertRaises(ValueError) as error:
+                validate_escrow(chain_id, escrow_address)
+        self.assertEqual(
+            f"Escrow doesn't have funds",
             str(error.exception),
         )
 
     def test_get_escrow_manifest(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            manifest = get_escrow_manifest(self.w3.eth.chain_id, escrow_address)
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function, patch(
+            "src.chain.escrow.StorageClient.download_file_from_url"
+        ) as mock_storage:
+            mock_storage.return_value = json.dumps({"title": "test"}).encode()
+            mock_function.return_value = self.escrow_data
+            manifest = get_escrow_manifest(chain_id, escrow_address)
             self.assertIsInstance(manifest, dict)
             self.assertIsNotNone(manifest)
 
     def test_get_escrow_manifest_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                get_escrow_manifest(self.w3.eth.chain_id, "invalid_address")
+        with self.assertRaises(EscrowClientError) as error:
+            get_escrow_manifest(chain_id, "invalid_address")
         self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_escrow_manifest_invalid_url(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            with patch("src.chain.escrow.EscrowClient") as mock_client:
-                mock_escrow_client = mock_client.return_value
-                mock_escrow_client.get_manifest_url.return_value = "invalid_url"
-                mock_function.return_value = self.w3
-                with self.assertRaises(StorageClientError) as error:
-                    get_escrow_manifest(self.w3.eth.chain_id, escrow_address)
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            self.escrow_data.manifestUrl = "invalid_url"
+            mock_function.return_value = self.escrow_data
+            with self.assertRaises(StorageClientError) as error:
+                get_escrow_manifest(chain_id, escrow_address)
         self.assertEqual(f"Invalid URL: invalid_url", str(error.exception))
 
     def test_get_job_launcher_address(self):
-        escrow_address = create_escrow(self.w3)
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            job_launcher_address = get_job_launcher_address(self.w3.eth.chain_id, escrow_address)
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            mock_function.return_value = self.escrow_data
+            job_launcher_address = get_job_launcher_address(chain_id, escrow_address)
             self.assertIsInstance(job_launcher_address, str)
-            self.assertIsNotNone(job_launcher_address)
+            self.assertEqual(job_launcher_address, JOB_LAUNCHER_ADDRESS)
 
     def test_get_job_launcher_address_invalid_address(self):
-        with patch("src.chain.escrow.get_web3") as mock_function:
-            mock_function.return_value = self.w3
-            with self.assertRaises(EscrowClientError) as error:
-                get_job_launcher_address(self.w3.eth.chain_id, "invalid_address")
+        with self.assertRaises(EscrowClientError) as error:
+            get_job_launcher_address(chain_id, "invalid_address")
         self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address_invalid_chain_id(self):
-        with self.assertRaises(ValueError) as error:
-            get_job_launcher_address(1, "0x1234567890123456789012345678901234567890")
-        self.assertEqual(f"1 is not in available list of networks.", str(error.exception))
+        with self.assertRaises(EscrowClientError) as error:
+            get_job_launcher_address(123, escrow_address)
+        self.assertEqual(f"Invalid ChainId", str(error.exception))
+
+    def test_get_job_launcher_address_empty_escrow(self):
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            mock_function.return_value = None
+            with self.assertRaises(Exception) as error:
+                get_job_launcher_address(chain_id, escrow_address)
+            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))
+
+    def test_get_recording_oracle_address(self):
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            self.escrow_data.recordingOracle = RECORDING_ORACLE_ADDRESS
+            mock_function.return_value = self.escrow_data
+            recording_oracle_address = get_recording_oracle_address(chain_id, escrow_address)
+            self.assertIsInstance(recording_oracle_address, str)
+            self.assertEqual(recording_oracle_address, RECORDING_ORACLE_ADDRESS)
+
+    def test_get_recording_oracle_address_invalid_address(self):
+        with self.assertRaises(EscrowClientError) as error:
+            get_recording_oracle_address(chain_id, "invalid_address")
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
+
+    def test_get_recording_oracle_address_invalid_chain_id(self):
+        with self.assertRaises(EscrowClientError) as error:
+            get_recording_oracle_address(123, escrow_address)
+        self.assertEqual(f"Invalid ChainId", str(error.exception))
+
+    def test_get_recording_oracle_address_empty_escrow(self):
+        with patch("src.chain.escrow.EscrowUtils.get_escrow") as mock_function:
+            mock_function.return_value = None
+            with self.assertRaises(Exception) as error:
+                get_recording_oracle_address(chain_id, escrow_address)
+            self.assertEqual(f"Can't find escrow {ESCROW_ADDRESS}", str(error.exception))
