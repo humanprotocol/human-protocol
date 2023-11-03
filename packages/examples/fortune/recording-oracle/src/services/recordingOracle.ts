@@ -47,7 +47,7 @@ async function isValidFortune(
   const fortunesContent = getFortunesContent(escrow);
 
   if (
-    await plugins.curses.isProfane(fortune.fortune) ||
+    (await plugins.curses.isProfane(fortune.fortune)) ||
     !plugins.uniqueness.isUnique(fortune.fortune, fortunesContent)
   ) {
     escrow = plugins.storage.addFortune(
