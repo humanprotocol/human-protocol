@@ -33,7 +33,6 @@
     "@fastify/cors": "^8.2.0",
     "@human-protocol/core": "*",
     "@sinclair/typebox": "^0.23.5",
-    "@xenova/transformers": "^2.7.0",
     "ajv": "^8.11.2",
     "aws-sdk": "^2.1294.0",
     "axios": "^1.2.2",
