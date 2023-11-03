@@ -186,7 +186,7 @@ export class JobService {
           ),
           gt_url: dto.gtUrl,
         },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
+        job_bounty: await this.calculateJobBounty(dto.dataUrl, tokenFundAmount),
       }));
     }
 
