@@ -166,7 +166,7 @@ export class JobService {
     const kvstore = await KVStoreClient.build(signer);
     const recordingOracleWebhookUrl = await kvstore.get(
       recordingOracleAddress,
-      KVStoreKeys.webhook_url,
+      KVStoreKeys.webhookUrl,
     );
 
     if (!recordingOracleWebhookUrl)

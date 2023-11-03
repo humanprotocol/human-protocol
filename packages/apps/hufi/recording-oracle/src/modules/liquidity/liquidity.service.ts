@@ -2,8 +2,6 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
-  KVStoreClient,
-  StakingClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
@@ -29,7 +27,6 @@ import { JobRequestType } from '../../common/enums/job';
 import { StorageService } from '../storage/storage.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  CEXLiquidityRequestDto,
   CampaignManifestDto,
   liquidityDto,
   liquidityRequestDto,
@@ -40,6 +37,7 @@ import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { GraphQLClient, gql } from 'graphql-request';
 import crypto from "crypto";
+import { DEX } from '../../common/constants/exchange';
 
 @Injectable()
 export class LiquidityService {
@@ -123,85 +121,9 @@ export class LiquidityService {
     await this.httpService.post(url, body, {
       headers: { [HEADER_SIGNATURE_KEY]: signedBody },
     });
-  }
+  }  
 
-  public async getCEXLiquidityScore(liquidityRequest: CEXLiquidityRequestDto): Promise<string> {
-    try {
-      const manifest = await this.getManifest(
-        liquidityRequest.chainId,
-        liquidityRequest.escrowAddress,
-      );
-  
-      if (manifest.requestType !== JobRequestType.Campaign) {
-        this.logger.log(ErrorJob.InvalidJobType, LiquidityService.name);
-        throw new BadRequestException(ErrorJob.InvalidJobType);
-      }
-  
-      const signer = this.web3Service.getSigner(liquidityRequest.chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const escrowStatus = await escrowClient.getStatus(
-        liquidityRequest.escrowAddress,
-      );
-      if (
-        escrowStatus !== EscrowStatus.Pending &&
-        escrowStatus !== EscrowStatus.Partial
-      ) {
-        this.logger.log(ErrorJob.InvalidStatus, LiquidityService.name);
-        throw new BadRequestException(ErrorJob.InvalidStatus);
-      }
-  
-      const recordingOracleAddress =
-        await escrowClient.getRecordingOracleAddress(
-          liquidityRequest.escrowAddress,
-        );
-      
-      if (
-        ethers.utils.getAddress(recordingOracleAddress) !==
-        (await signer.getAddress())
-      ) {
-        this.logger.log(ErrorJob.AddressMismatches, LiquidityService.name);
-        throw new BadRequestException(ErrorJob.AddressMismatches);
-      }
-  
-     
-      const queryString = `symbol=${manifest.tokenA}${manifest.tokenB}&timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
-      const signature = crypto
-        .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
-        .update(queryString)
-        .digest('hex');
-      const signedQueryString = `${queryString}&signature=${signature}`;
-      const headers = {
-        'X-MBX-APIKEY': this.configService.get(ConfigNames.BINANCE_API_KEY),
-      };
-      const response = await this.httpService.get(`${this.configService.get(ConfigNames.BINANCE_URL)}/api/v3/allOrders?${signedQueryString}`, { headers }).toPromise();
-      if (!response) {
-        throw new Error('Failed to get response from server');
-      }
-      const data = response.data;
-      if (data) {
-        const filteredOrders = data.filter(
-          (order: any) => order.status === 'FILLED' || order.type === 'LIMIT'
-        );
-        const liquidityScore = this.calculateCentralizedLiquidityScore(filteredOrders);
-        if (liquidityRequest.save) {
-          await this.pushLiquidityScore(
-            liquidityRequest.escrowAddress,
-            liquidityRequest.chainId,
-            liquidityRequest.liquidityProvider,
-            liquidityScore,
-          );
-        }
-        return liquidityScore;
-      }
-      throw new Error('No data received from server');
-    } catch (error: any) {
-      console.error(`Error in getCEXLiquidityScore: ${error.message}`);
-      throw error;
-    }
-  }
-  
-
-  public async getDEXLiquidityScore(
+  public async getLiquidityScore(
     liquidityRequest: liquidityRequestDto,
   ): Promise<any> {
     const UniswapQuery = gql`
@@ -289,35 +211,81 @@ export class LiquidityService {
         chain,
       };
 
-      const client = this.getGraphQLClient(variables.chain, variables.exchange);
-      const result: any = await client.request(UniswapQuery, variables);
-      let positionSnapshots = result?.positionSnapshots;
+      if (DEX.includes(manifest.exchangeName)) {
+        const client = this.getGraphQLClient(variables.chain, variables.exchange);
+        const result: any = await client.request(UniswapQuery, variables);
+        let positionSnapshots = result?.positionSnapshots;
 
-      const filteredSnapshots = this.filterObjectsByInputTokenSymbol(
-        positionSnapshots,
-        variables.token0,
-        variables.token1,
-      );
-      const liquidityScore = this.calculateLiquidityScore(filteredSnapshots);
+        const filteredSnapshots = this.filterObjectsByInputTokenSymbol(
+          positionSnapshots,
+          variables.token0,
+          variables.token1,
+        );
+        const liquidityScore = this.calculateLiquidityScore(filteredSnapshots);
 
-      if (liquidityRequest.save) {
-        try {
-          await this.pushLiquidityScore(
-            liquidityRequest.escrowAddress,
-            liquidityRequest.chainId,
-            liquidityRequest.liquidityProvider,
-            liquidityScore,
-          );
-        } catch (error: any) {
-          console.error(`Error in getLiquidityScore: ${error.message}`);
-          throw error;
+        if (liquidityRequest.save) {
+          try {
+            await this.pushLiquidityScore(
+              liquidityRequest.escrowAddress,
+              liquidityRequest.chainId,
+              liquidityRequest.liquidityProvider,
+              liquidityScore,
+            );
+          } catch (error: any) {
+            console.error(`Error in getLiquidityScore: ${error.message}`);
+            throw error;
+          }
         }
+        const response: liquidityResponseDto = {
+          liquidityScore,
+          liquidityProvider: liquidityRequest.liquidityProvider,
+        };
+        return response;
+      } else {
+        if (!liquidityRequest.liquidityProviderAPISecret || !liquidityRequest.liquidityProviderAPIKEY) {
+          throw new Error('Empty API keys');
+        }
+        const queryString = `symbol=${manifest.tokenA}${
+          manifest.tokenB
+        }&timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
+        const signature = crypto
+          .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
+          .update(queryString)
+          .digest('hex');
+        const signedQueryString = `${queryString}&signature=${signature}`;
+        const headers = {
+          'X-MBX-APIKEY': liquidityRequest.liquidityProviderAPIKEY,
+        };
+        const response = await this.httpService
+          .get(
+            `${this.configService.get(
+              ConfigNames.BINANCE_URL,
+            )}/api/v3/allOrders?${signedQueryString}`,
+            { headers },
+          )
+          .toPromise();
+        if (!response) {
+          throw new Error('Failed to get response from server');
+        }
+        const data = response.data;
+        if (data) {
+          const filteredOrders = data.filter(
+            (order: any) => order.status === 'FILLED' || order.type === 'LIMIT',
+          );
+          const liquidityScore =
+            this.calculateCentralizedLiquidityScore(filteredOrders);
+          if (liquidityRequest.save) {
+            await this.pushLiquidityScore(
+              liquidityRequest.escrowAddress,
+              liquidityRequest.chainId,
+              liquidityRequest.liquidityProvider,
+              liquidityScore,
+            );
+          }
+          return liquidityScore;
+        }
+      throw new Error('No data received from server');
       }
-      const response: liquidityResponseDto = {
-        liquidityScore,
-        liquidityProvider: liquidityRequest.liquidityProvider,
-      };
-      return response;
     } catch (error: any) {
       console.error(`Error in getLiquidityScore: ${error.message}`);
       throw error;
