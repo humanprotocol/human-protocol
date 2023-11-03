@@ -57,7 +57,7 @@ export class JobService {
       (exchangeSolution) => !exchangeSolution.invalid,
     );
 
-    filteredExchangeSolution.forEach((exchangeSolution) => {
+    filteredExchangeSolution.forEach(async (exchangeSolution) => {
       if (errorSolutions.includes(exchangeSolution)) return;
       const duplicatedInExchange = filteredExchangeSolution.filter(
         (solution) =>
@@ -83,7 +83,7 @@ export class JobService {
       );
 
       if (duplicatedInRecording.length === 0) {
-        if (checkCurseWords(exchangeSolution.solution))
+        if (await checkCurseWords(exchangeSolution.solution))
           errorSolutions.push(exchangeSolution);
         else uniqueSolutions.push(exchangeSolution);
       }
