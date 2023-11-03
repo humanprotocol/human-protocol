@@ -27,5 +27,5 @@
       }
     }
   ],
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet ."
+  "ignoreCommand": "exit 0"
 }
