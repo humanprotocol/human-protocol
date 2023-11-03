@@ -64,7 +64,7 @@ export class WebhookService {
     dto: WebhookIncomingDto,
   ): Promise<boolean> {
     try {
-      if (dto.eventType !== EventType.TASK_FINISHED) {
+      if (dto.eventType !== EventType.TASK_COMPLETED) {
         this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
         throw new BadRequestException(ErrorWebhook.InvalidEventType);
       }
