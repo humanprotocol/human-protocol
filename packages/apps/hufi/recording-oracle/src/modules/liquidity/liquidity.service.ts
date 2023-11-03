@@ -161,7 +161,8 @@ export class LiquidityService {
         throw new BadRequestException(ErrorJob.AddressMismatches);
       }
   
-      const queryString = `timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
+     
+      const queryString = `symbol=${manifest.tokenA}${manifest.tokenB}&timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
       const signature = crypto
         .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
         .update(queryString)
