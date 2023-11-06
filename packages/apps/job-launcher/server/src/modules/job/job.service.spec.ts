@@ -349,10 +349,10 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
-      const fundAmount = 0.013997056833333334;
+      const tokenFundAmount = 0.013997056833333334;
       const result = await jobService['calculateJobBounty'](
         MOCK_FILE_URL,
-        fundAmount,
+        tokenFundAmount,
       );
 
       expect(result).toEqual('0.002332842805555555');
@@ -651,6 +651,22 @@ describe('JobService', () => {
       await expect(
         jobService.requestToCancelJob(userId, jobId),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw an error if status is invalid', async () => {
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.COMPLETED,
+        chainId: ChainId.LOCALHOST,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+
+      await expect(
+        jobService.requestToCancelJob(userId, jobId),
+      ).rejects.toThrow(new ConflictException(ErrorJob.InvalidStatusCancellation));
     });
   });
 

@@ -1,10 +1,15 @@
+import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { useJobDetails } from '../../../hooks/useJobDetails';
+import { useSnackbar } from '../../../providers/SnackProvider';
+import * as jobService from '../../../services/job';
+import { JobStatus } from '../../../types';
+import { formatAmount } from '../../../utils/bignumber';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -18,7 +23,36 @@ const CardContainer = styled(Card)(({ theme }) => ({
 
 export default function JobDetail() {
   const { jobId } = useParams();
-  const { data, isLoading, error } = useJobDetails(Number(jobId));
+  const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
+  const [isCancelling, setIsCancelling] = useState(false);
+  const { openSnackbar } = useSnackbar();
+
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      await jobService.cancelJob(Number(jobId));
+
+      if (data) {
+        mutate({
+          ...data,
+          details: { ...data.details, status: JobStatus.TO_CANCEL },
+        });
+      }
+      openSnackbar('Job canceled', 'success');
+    } catch (err: any) {
+      openSnackbar(
+        err?.response?.data?.message ?? 'Job cancellation failed.',
+        'error'
+      );
+    }
+    setIsCancelling(false);
+  };
+
+  const isCancellable =
+    data?.details.status === JobStatus.FAILED ||
+    data?.details.status === JobStatus.PAID ||
+    data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;
 
@@ -33,6 +67,17 @@ export default function JobDetail() {
           </Typography>
           <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
+        {isCancellable && (
+          <LoadingButton
+            sx={{ mb: 2 }}
+            variant="contained"
+            color="primary"
+            loading={isCancelling}
+            onClick={handleCancel}
+          >
+            Cancel
+          </LoadingButton>
+        )}
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <CardContainer>
@@ -59,12 +104,9 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${data.details.paidOut} HMT`}
+                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
                 />
-                <CardTextRow
-                  label="Amount of Jobs"
-                  value={data.details.amountOfTasks}
-                />
+                <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
               </Stack>
             </CardContainer>
@@ -83,11 +125,13 @@ export default function JobDetail() {
                 <CardTextRow label="Staker" value={data.staking.staker} />
                 <CardTextRow
                   label="Staked HMT"
-                  value={`${data.staking.allocated} HMT`}
+                  value={`${formatAmount(
+                    data.staking.allocated.toString()
+                  )} HMT`}
                 />
                 <CardTextRow
                   label="Slashed HMT"
-                  value={`${data.staking.slashed} HMT`}
+                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -124,7 +168,9 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${data.manifest.fundAmount} HMT`}
+                      value={`${formatAmount(
+                        data.manifest.fundAmount.toString()
+                      )} HMT`}
                     />
                     <CardTextRow
                       label="Job Requester"

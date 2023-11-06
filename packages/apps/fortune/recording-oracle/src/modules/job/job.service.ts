@@ -210,7 +210,7 @@ export class JobService {
     if (errorSolutions.length) {
       const exchangeOracleURL = (await kvstoreClient.get(
         await escrowClient.getExchangeOracleAddress(jobSolution.escrowAddress),
-        'webhook_url',
+        'webhookUrl',
       )) as string;
       for (const solution of errorSolutions) {
         await sendWebhook(

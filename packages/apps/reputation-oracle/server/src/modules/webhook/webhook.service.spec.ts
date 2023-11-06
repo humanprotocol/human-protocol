@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { WebhookService } from './webhook.service';
 import { WebhookRepository } from './webhook.repository';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
 import { ReputationService } from '../reputation/reputation.service';
@@ -16,7 +16,7 @@ import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import { BigNumber } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
-import { ErrorWebhook } from '../../common/constants/errors';
+import { ErrorResults, ErrorWebhook } from '../../common/constants/errors';
 import {
   EventType,
   JobRequestType,
@@ -25,7 +25,6 @@ import {
 } from '../../common/enums';
 import {
   MOCK_ADDRESS,
-  MOCK_BUCKET_NAME,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -35,10 +34,17 @@ import {
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
+  MOCK_S3_ACCESS_KEY,
+  MOCK_S3_BUCKET,
+  MOCK_S3_ENDPOINT,
+  MOCK_S3_PORT,
+  MOCK_S3_SECRET_KEY,
+  MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { WebhookStatus } from '../../common/enums';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
 import { Web3Service } from '../web3/web3.service';
+import { StorageService } from '../storage/storage.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -61,17 +67,25 @@ jest.mock('@human-protocol/sdk', () => ({
   })),
 }));
 
-jest.mock('../../common/utils', () => ({
-  ...jest.requireActual('../../common/utils'),
-  copyFileFromURLToBucket: jest.fn().mockImplementation(() => {
-    return { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH };
-  }),
-}));
+jest.mock('minio', () => {
+  class Client {
+    putObject = jest.fn();
+    bucketExists = jest.fn().mockResolvedValue(true);
+    constructor() {
+      (this as any).protocol = 'http:';
+      (this as any).host = MOCK_S3_ENDPOINT;
+      (this as any).port = MOCK_S3_PORT;
+    }
+  }
+
+  return { Client };
+});
 
 describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
-    reputationService: ReputationService;
+    reputationService: ReputationService,
+    storageService: StorageService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -82,25 +96,29 @@ describe('WebhookService', () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'S3_ENDPOINT':
-            return '127.0.0.1';
-          case 'S3_PORT':
-            return 9000;
-          case 'S3_USE_SSL':
-            return false;
           case 'HOST':
             return '127.0.0.1';
           case 'PORT':
             return 5000;
           case 'WEB3_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
-          case 'S3_BUCKET':
-            return MOCK_BUCKET_NAME;
         }
       }),
     };
 
     const moduleRef = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forFeature(
+          registerAs('s3', () => ({
+            accessKey: MOCK_S3_ACCESS_KEY,
+            secretKey: MOCK_S3_SECRET_KEY,
+            endPoint: MOCK_S3_ENDPOINT,
+            port: MOCK_S3_PORT,
+            useSSL: MOCK_S3_USE_SSL,
+            bucket: MOCK_S3_BUCKET,
+          })),
+        ),
+      ],
       providers: [
         WebhookService,
         {
@@ -109,6 +127,7 @@ describe('WebhookService', () => {
             getSigner: jest.fn().mockReturnValue(signerMock),
           },
         },
+        StorageService,
         ReputationService,
         {
           provide: ReputationRepository,
@@ -126,6 +145,7 @@ describe('WebhookService', () => {
     webhookService = moduleRef.get<WebhookService>(WebhookService);
     webhookRepository = moduleRef.get(WebhookRepository);
     reputationService = moduleRef.get(ReputationService);
+    storageService = moduleRef.get(StorageService);
   });
 
   afterEach(() => {
@@ -135,7 +155,7 @@ describe('WebhookService', () => {
   describe('createIncomingWebhook', () => {
     const dto: WebhookIncomingDto = {
       chainId: ChainId.LOCALHOST,
-      eventType: EventType.TASK_FINISHED,
+      eventType: EventType.TASK_COMPLETED,
       escrowAddress: MOCK_ADDRESS,
     };
 
@@ -339,34 +359,63 @@ describe('WebhookService', () => {
 
       const intermediateResults = [
         {
-          exchangeAddress: 'string',
           workerAddress: 'string',
           solution: 'string',
         },
       ];
 
-      const intermediateResultsUrl = MOCK_FILE_URL;
+      const escrowAddress = MOCK_ADDRESS;
+      const chainId = ChainId.LOCALHOST;
 
       jest
         .spyOn(webhookService as any, 'getIntermediateResults')
         .mockResolvedValue(intermediateResults);
-      jest
-        .spyOn(webhookService.storageClient, 'uploadFiles')
-        .mockResolvedValue([
-          { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-        ] as any);
 
       const result = await webhookService.processFortune(
         manifest,
-        intermediateResultsUrl,
+        chainId,
+        escrowAddress,
       );
       expect(result).toEqual({
         recipients: expect.any(Array),
         amounts: expect.any(Array),
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
+        url: storageService.getUrl(`${escrowAddress}-${chainId}.json`),
+        hash: expect.any(String),
         checkPassed: expect.any(Boolean),
       });
+    });
+
+    it('should throw an error if the number of solutions is less than solutions required', async () => {
+      const manifest = {
+        submissionsRequired: 2,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount: 10,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      const intermediateResults = [
+        {
+          workerAddress: 'string',
+          solution: 'string',
+        },
+      ];
+
+      const escrowAddress = MOCK_ADDRESS;
+      const chainId = ChainId.LOCALHOST;
+
+      jest
+        .spyOn(webhookService as any, 'getIntermediateResults')
+        .mockResolvedValue(intermediateResults);
+      // jest
+      //   .spyOn(webhookService.storageClient, 'uploadFiles')
+      //   .mockResolvedValue([
+      //     { url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+      //   ] as any);
+
+      await expect(
+        webhookService.processFortune(manifest, chainId, escrowAddress),
+      ).rejects.toThrowError(ErrorResults.NotAllRequiredSolutionsHaveBeenSent);
     });
   });
 
@@ -391,7 +440,8 @@ describe('WebhookService', () => {
     };
 
     it('should successfully process and return correct result values', async () => {
-      const intermediateResultsUrl = MOCK_FILE_URL;
+      const escrowAddress = MOCK_ADDRESS;
+      const chainId = ChainId.LOCALHOST;
       StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce({
         jobs: [
           {
@@ -411,9 +461,14 @@ describe('WebhookService', () => {
         ],
       });
 
+      jest
+        .spyOn(storageService, 'copyFileFromURLToBucket')
+        .mockResolvedValue({ url: MOCK_FILE_URL, hash: MOCK_FILE_HASH });
+
       const result = await webhookService.processCvat(
         manifest as any,
-        intermediateResultsUrl,
+        chainId,
+        escrowAddress,
       );
       expect(result).toEqual({
         recipients: expect.any(Array),

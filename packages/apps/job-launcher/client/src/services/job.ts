@@ -38,6 +38,7 @@ export const createCvatJob = async (
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
     gtUrl: data.groundTruthUrl,
+    userGuide: data.userGuide,
     type: data.type,
   };
   await api.post('/job/cvat', body);
@@ -66,5 +67,10 @@ export const getJobResult = async (jobId: number) => {
 
 export const getJobDetails = async (jobId: number) => {
   const { data } = await api.get<JobDetailsResponse>(`/job/details/${jobId}`);
+  return data;
+};
+
+export const cancelJob = async (jobId: number) => {
+  const { data } = await api.patch<JobDetailsResponse>(`/job/cancel/${jobId}`);
   return data;
 };

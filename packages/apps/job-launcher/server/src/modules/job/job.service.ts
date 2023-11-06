@@ -74,7 +74,8 @@ import {
   JobListDto,
   RestrictedAudience,
   SaveManifestDto,
-  SendWebhookDto,
+  CVATWebhookDto,
+  FortuneWebhookDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -440,10 +441,16 @@ export class JobService {
     fundAmount: number,
   ): Promise<string> {
     const storageData = parseUrl(endpointUrl);
+
+    if (!storageData.bucket) {
+      throw new BadRequestException(ErrorBucket.NotExist);
+    }
+
     const storageClient = new StorageClient({
       endPoint: storageData.endPoint,
       port: storageData.port,
-      useSSL: false,
+      useSSL: storageData.useSSL,
+      region: storageData.region
     });
 
     const totalImages = (await storageClient.listObjects(storageData.bucket))
@@ -612,16 +619,24 @@ export class JobService {
 
   public async sendWebhook(
     webhookUrl: string,
-    webhookData: SendWebhookDto,
+    webhookData: FortuneWebhookDto | CVATWebhookDto,
+    hasSignature: boolean
   ): Promise<boolean> {
-    const signedBody = await signMessage(
-      webhookData,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-    );
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, {
+    let config = {}
+    
+    if (hasSignature) {
+      const signedBody = await signMessage(
+        webhookData,
+        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      );
+
+      config = {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
+      }
+    }
+
+    const { data } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, webhookData, config),
     );
 
     if (!data) {
@@ -843,10 +858,11 @@ export class JobService {
               ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
             )!,
             {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
+              escrow_address: jobEntity.escrowAddress,
+              chain_id: jobEntity.chainId,
+              event_type: EventType.ESCROW_CREATED,
             },
+            false
           );
         }
       }
@@ -893,16 +909,20 @@ export class JobService {
     await jobEntity.save();
 
     const manifest = await this.getManifest(jobEntity.manifestUrl);
-    const configKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL
-        : ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL;
-
-    await this.sendWebhook(this.configService.get<string>(configKey)!, {
-      escrowAddress: jobEntity.escrowAddress,
-      chainId: jobEntity.chainId,
-      eventType: EventType.ESCROW_CANCELED,
-    });
+    
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      await this.sendWebhook(this.configService.get<string>(ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
+        escrowAddress: jobEntity.escrowAddress,
+        chainId: jobEntity.chainId,
+        eventType: EventType.ESCROW_CANCELED,
+      }, true);
+    } else {
+      await this.sendWebhook(this.configService.get<string>(ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
+        escrow_address: jobEntity.escrowAddress,
+        chain_id: jobEntity.chainId,
+        event_type: EventType.ESCROW_CANCELED,
+      }, false);
+    }
 
     return true;
   }
@@ -975,8 +995,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    const { chainId, escrowAddress, manifestUrl, manifestHash, status } =
-      jobEntity;
+    const { chainId, escrowAddress, manifestUrl, manifestHash } = jobEntity;
     const signer = this.web3Service.getSigner(chainId);
 
     let escrow, allocation;
@@ -987,6 +1006,9 @@ export class JobService {
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
     }
+
+    const status =
+      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     const manifestData = await this.getManifest(manifestUrl);
     if (!manifestData) {
