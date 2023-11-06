@@ -18,6 +18,7 @@ import MuiAccordionSummary, {
 } from '@mui/material/AccordionSummary';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Formik } from 'formik';
 import { useState } from 'react';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
@@ -63,6 +64,7 @@ export const HCaptchaJobRequestForm = () => {
     groundTruthUrl: '',
     userGuide: '',
     accuracyTarget: 80,
+    images: [],
   };
 
   const handleChange =
@@ -252,15 +254,47 @@ export const HCaptchaJobRequestForm = () => {
                           gap: 2,
                         }}
                       >
-                        <Box></Box>
-                        <Box></Box>
-                        <Box></Box>
+                        {values.images.map((image, index) => (
+                          <Box
+                            key={image}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: '32px',
+                                height: '32px',
+                                background: 'rgba(203, 207, 232, 0.28)',
+                                borderRadius: '100%',
+                                mr: 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {index + 1}
+                            </Box>
+                            <TextField
+                              fullWidth
+                              name="images"
+                              placeholder="Place link to an example image"
+                              sx={{ flex: 1 }}
+                            />
+                          </Box>
+                        ))}
                       </Box>
                       <Box>
                         <Button
                           variant="outlined"
                           color="primary"
                           startIcon={<AddIcon />}
+                          onClick={() => {
+                            if (values.images.length < 3) {
+                              setFieldValue('images', [...values.images, '']);
+                            }
+                          }}
                         >
                           Add Image
                         </Button>
@@ -315,38 +349,67 @@ export const HCaptchaJobRequestForm = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={12} md={6}>
                     <FormControl fullWidth>
-                      <TextField
-                        name="jobCompletionDate"
-                        label="Job completion date"
-                        placeholder="MM/DD/YYYY"
-                      />
+                      <DatePicker label="Job completion date" />
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={12} md={6}>
                     <FormControl fullWidth>
-                      <TextField
-                        name="workerLanguage"
+                      <InputLabel id="worker-language-select-label">
+                        Worker language
+                      </InputLabel>
+                      <Select
+                        labelId="worker-language-select-label"
+                        id="worker-language-select"
                         label="Worker language"
-                        placeholder="Text translation displayed"
-                      />
+                      >
+                        <MenuItem value={HCaptchaJobType.COMPARISON}>
+                          English
+                        </MenuItem>
+                        <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                          Spanish
+                        </MenuItem>
+                      </Select>
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={12} md={6}>
                     <FormControl fullWidth>
-                      <TextField
-                        name="targetBrowser"
+                      <InputLabel id="target-browser-select-label">
+                        Target browser
+                      </InputLabel>
+                      <Select
+                        labelId="target-browser-select-label"
+                        id="target-browser-select"
                         label="Target browser"
-                        placeholder="All browsers"
-                      />
+                      >
+                        <MenuItem value={HCaptchaJobType.COMPARISON}>
+                          All browsers
+                        </MenuItem>
+                        <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                          Chrome
+                        </MenuItem>
+                        <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                          Safari
+                        </MenuItem>
+                      </Select>
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={12} md={6}>
                     <FormControl fullWidth>
-                      <TextField
-                        name="workerLocation"
+                      <InputLabel id="worker-location-select-label">
+                        Worker location
+                      </InputLabel>
+                      <Select
+                        labelId="worker-location-select-label"
+                        id="worker-location-select"
                         label="Worker location"
-                        placeholder="Jobs served to specific region"
-                      />
+                      >
+                        <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                          United States
+                        </MenuItem>
+                        <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                          Canada
+                        </MenuItem>
+                      </Select>
                     </FormControl>
                   </Grid>
                 </Grid>
