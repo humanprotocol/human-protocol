@@ -189,10 +189,10 @@ def process_outgoing_job_launcher_webhooks():
                     # FIXME: If using against the launcher from
                     # https://github.com/humanprotocol/human-protocol/pull/889
                     # Add this:
-                    # body["escrowAddress"] = body.pop("escrow_address")
-                    # body["chainId"] = body.pop("chain_id")
-                    # body["eventType"] = body.pop("event_type")
-                    # body["eventData"] = body.pop("event_data")
+                    body["escrowAddress"] = body.pop("escrow_address")
+                    body["chainId"] = body.pop("chain_id")
+                    body["eventType"] = body.pop("event_type")
+                    body["eventData"] = body.pop("event_data")
                     # ^^^
 
                     _, signature = prepare_signed_message(
