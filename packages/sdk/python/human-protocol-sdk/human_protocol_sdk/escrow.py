@@ -48,18 +48,18 @@ class EscrowConfig:
         exchange_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
+        skip_manifest_url_validation: bool,
     ):
         """
         Initializes a Escrow instance.
 
-        Args:
-            recording_oracle_address (str): Address of the Recording Oracle
-            reputation_oracle_address (str): Address of the Reputation Oracle
-            recording_oracle_fee (Decimal): Fee percentage of the Recording Oracle
-            reputation_oracle_fee (Decimal): Fee percentage of the Reputation Oracle
-            manifest_url (str): Manifest file url
-            hash (str): Manifest file hash
-            skip_manifest_url_validation (bool): Identify wether validate manifest_url
+        :param recording_oracle_address: Address of the Recording Oracle
+        :param reputation_oracle_address: Address of the Reputation Oracle
+        :param recording_oracle_fee: Fee percentage of the Recording Oracle
+        :param reputation_oracle_fee: Fee percentage of the Reputation Oracle
+        :param manifest_url: Manifest file url
+        :param hash: Manifest file hash
+        :param skip_manifest_url_validation: Identify wether validate manifest_url
         """
         if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
@@ -95,6 +95,7 @@ class EscrowConfig:
         self.exchange_oracle_fee = exchange_oracle_fee
         self.manifest_url = manifest_url
         self.hash = hash
+        self.skip_manifest_url_validation = skip_manifest_url_validation
 
 
 class EscrowData:
@@ -126,29 +127,28 @@ class EscrowData:
         """
         Initializes an EscrowData instance.
 
-        Args:
-            chain_id (ChainId): Chain identifier
-            id (str): Identifier
-            address (str): Address
-            amount_paid (int): Amount paid
-            balance (int): Balance
-            count (int): Count
-            factory_address (str): Factory address
-            launcher (str): Launcher
-            status (str): Status
-            token (str): Token
-            total_funded_amount (int): Total funded amount
-            created_at (datetime): Creation date
-            final_results_url (str, optional): Optional URL for final results.
-            intermediate_results_url (str, optional): Optional URL for intermediate results.
-            manifest_hash (str, optional): Optional manifest hash.
-            manifest_url (str, optional): Optional manifest URL.
-            recording_oracle (str, optional): Optional recording Oracle address.
-            recording_oracle_fee (int, optional): Optional recording Oracle fee.
-            reputation_oracle (str, optional): Optional reputation Oracle address.
-            reputation_oracle_fee (int, optional): Optional reputation Oracle fee.
-            exchange_oracle (str, optional): Optional exchange Oracle address.
-            exchange_oracle_fee (int, optional): Optional exchange Oracle fee.
+        :param chain_id: Chain identifier
+        :param id: Identifier
+        :param address: Address
+        :param amount_paid: Amount paid
+        :param balance: Balance
+        :param count: Count
+        :param factory_address: Factory address
+        :param launcher: Launcher
+        :param status: Status
+        :param token: Token
+        :param total_funded_amount: Total funded amount
+        :param created_at: Creation date
+        :param final_results_url: URL for final results.
+        :param intermediate_results_url: URL for intermediate results.
+        :param manifest_hash: Manifest hash.
+        :param manifest_url: Manifest URL.
+        :param recording_oracle: Recording Oracle address.
+        :param recording_oracle_fee: Recording Oracle fee.
+        :param reputation_oracle: Reputation Oracle address.
+        :param reputation_oracle_fee: Reputation Oracle fee.
+        :param exchange_oracle: Exchange Oracle address.
+        :param exchange_oracle_fee: Exchange Oracle fee.
         """
 
         self.id = id
@@ -184,9 +184,8 @@ class EscrowClient:
         """
         Initializes a Escrow instance.
 
-        Args:
-            web3 (Web3): The Web3 object
-            gas_limit (int): Gas limit to be provided to transaction
+        :param web3: The Web3 object
+        :param gas_limit: Gas limit to be provided to transaction
         """
 
         # Initialize web3 instance
@@ -218,16 +217,13 @@ class EscrowClient:
         """
         Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
 
-        Args:
-            tokenAddress (str): The address of the token to use for payouts
-            trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
-            job_requester_id (str): The id of the job requester
+        :param tokenAddress: The address of the token to use for payouts
+        :param trusted_handlers: Array of addresses that can perform actions on the contract
+        :param job_requester_id: The id of the job requester
 
-        Returns:
-            str: The address of the escrow created
+        :return: The address of the escrow created
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
         if not Web3.is_address(token_address):
             raise EscrowClientError(f"Invalid token address: {token_address}")
@@ -258,15 +254,12 @@ class EscrowClient:
         """
         Sets up the parameters of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow to setup
-            escrow_config (EscrowConfig): Object containing all the necessary information to setup an escrow
+        :param escrow_address: Address of the escrow to setup
+        :param escrow_config: Object containing all the necessary information to setup an escrow
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -299,17 +292,14 @@ class EscrowClient:
         """
         Creates and sets up an escrow.
 
-        Args:
-            token_address (str): Token to use for pay outs
-            trusted_handlers (List[str]): Array of addresses that can perform actions on the contract
-            job_requester_id (str): The id of the job requester
-            escrow_config (EscrowConfig): Object containing all the necessary information to setup an escrow
+        :param token_address: Token to use for pay outs
+        :param trusted_handlers: Array of addresses that can perform actions on the contract
+        :param job_requester_id: The id of the job requester
+        :param escrow_config: Object containing all the necessary information to setup an escrow
 
-        Returns:
-            str: The address of the escrow created
+        :return: The address of the escrow created
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         escrow_address = self.create_escrow(
@@ -323,15 +313,12 @@ class EscrowClient:
         """
         Adds funds to the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow to setup
-            amount (Decimal): Amount to be added as funds
+        :param escrow_address: Address of the escrow to setup
+        :param amount: Amount to be added as funds
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -355,16 +342,13 @@ class EscrowClient:
     def store_results(self, escrow_address: str, url: str, hash: str) -> None:
         """Stores the results url.
 
-        Args:
-            escrow_address (str): Address of the escrow
-            url (str): Results file url
-            hash (str): Results file hash
+        :param escrow_address: Address of the escrow
+        :param url: Results file url
+        :param hash: Results file hash
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -387,14 +371,11 @@ class EscrowClient:
     def complete(self, escrow_address: str) -> None:
         """Sets the status of an escrow to completed.
 
-        Args:
-            escrow_address (str): Address of the escrow to complete
+        :param escrow_address: Address of the escrow to complete
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -419,19 +400,16 @@ class EscrowClient:
     ) -> None:
         """Pays out the amounts specified to the workers and sets the URL of the final results file.
 
-        Args:
-            escrow_address (str): Address of the escrow
-            recipients (List[str]): Array of recipient addresses
-            amounts (List[Decimal]): Array of amounts the recipients will receive
-            final_results_url (str): Final results file url
-            final_results_hash (str): Final results file hash
-            txId (Decimal): Serial number of the bulks
+        :param escrow_address: Address of the escrow
+        :param recipients: Array of recipient addresses
+        :param amounts: Array of amounts the recipients will receive
+        :param final_results_url: Final results file url
+        :param final_results_hash: Final results file hash
+        :param txId: Serial number of the bulks
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -471,14 +449,11 @@ class EscrowClient:
     def cancel(self, escrow_address: str) -> None:
         """Cancels the specified escrow and sends the balance to the canceler.
 
-        Args:
-            escrow_address (str): Address of the escrow to cancel
+        :param escrow_address: Address of the escrow to cancel
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -493,16 +468,14 @@ class EscrowClient:
         )
 
     def abort(self, escrow_address: str) -> None:
-        """Cancels the specified escrow, sends the balance to the canceler and selfdestructs the escrow contract.
+        """Cancels the specified escrow,
+        sends the balance to the canceler and selfdestructs the escrow contract.
 
-        Args:
-            escrow_address (str): Address of the escrow to abort
+        :param escrow_address: Address of the escrow to abort
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -519,15 +492,12 @@ class EscrowClient:
     def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
         """Adds an array of addresses to the trusted handlers list.
 
-        Args:
-            escrow_address (str): Address of the escrow
-            handlers (List[str]): Array of trusted handler addresses
+        :param escrow_address: Address of the escrow
+        :param handlers: Array of trusted handler addresses
 
-        Returns:
-            None
+        :return: None
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
@@ -548,14 +518,11 @@ class EscrowClient:
     def get_balance(self, escrow_address: str) -> Decimal:
         """Gets the balance for a specified escrow address.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            Decimal: Value of the balance
+        :return: Value of the balance
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -566,14 +533,11 @@ class EscrowClient:
     def get_manifest_hash(self, escrow_address: str) -> str:
         """Gets the manifest file hash.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Manifest file hash
+        :return: Manifest file hash
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -584,14 +548,11 @@ class EscrowClient:
     def get_manifest_url(self, escrow_address: str) -> str:
         """Gets the manifest file URL.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Manifest file url
+        :return str: Manifest file url
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -602,14 +563,11 @@ class EscrowClient:
     def get_results_url(self, escrow_address: str) -> str:
         """Gets the results file URL.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Results file url
+        :return: Results file url
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -622,14 +580,11 @@ class EscrowClient:
     def get_intermediate_results_url(self, escrow_address: str) -> str:
         """Gets the intermediate results file URL.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Intermediate results file url
+        :return: Intermediate results file url
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -644,14 +599,11 @@ class EscrowClient:
     def get_token_address(self, escrow_address: str) -> str:
         """Gets the address of the token used to fund the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Address of the token
+        :return: Address of the token
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -662,14 +614,11 @@ class EscrowClient:
     def get_status(self, escrow_address: str) -> Status:
         """Gets the current status of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            Status: Current status
+        :return: Current escrow status
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -682,14 +631,11 @@ class EscrowClient:
     def get_recording_oracle_address(self, escrow_address: str) -> str:
         """Gets the recording oracle address of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Recording oracle address
+        :return: Recording oracle address
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -702,14 +648,11 @@ class EscrowClient:
     def get_reputation_oracle_address(self, escrow_address: str) -> str:
         """Gets the reputation oracle address of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Reputation oracle address
+        :return: Reputation oracle address
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -724,14 +667,11 @@ class EscrowClient:
     def get_exchange_oracle_address(self, escrow_address: str) -> str:
         """Gets the exchange oracle address of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Exchange oracle address
+        :return: Exchange oracle address
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -744,14 +684,11 @@ class EscrowClient:
     def get_job_launcher_address(self, escrow_address: str) -> str:
         """Gets the job launcher address of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Job launcher address
+        :return: Job launcher address
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -762,14 +699,11 @@ class EscrowClient:
     def get_factory_address(self, escrow_address: str) -> str:
         """Gets the escrow factory address of the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            str: Escrow factory address
+        :return: Escrow factory address
 
-        Raises:
-            EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If an error occurs while checking the parameters
         """
 
         if not Web3.is_address(escrow_address):
@@ -782,11 +716,9 @@ class EscrowClient:
     def _get_escrow_contract(self, address: str) -> contract:
         """Returns the escrow contract instance.
 
-        Args:
-            address (str): Address of the deployed escrow
+        :param escrow_address: Address of the deployed escrow
 
-        Returns:
-            Contract: The instance of the escrow contract
+        :return: The instance of the escrow contract
 
         """
 
@@ -808,11 +740,9 @@ class EscrowUtils:
     ) -> List[EscrowData]:
         """Get an array of escrow addresses based on the specified filter parameters.
 
-        Args:
-            filter (EscrowFilter): Object containing all the necessary parameters to filter
+        :param filter: Object containing all the necessary parameters to filter
 
-        Returns:
-            List[EscrowData]: List of escrows
+        :return: List of escrows
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrows_query,
@@ -894,12 +824,10 @@ class EscrowUtils:
     ) -> Optional[EscrowData]:
         """Returns the escrow for a given address.
 
-        Args:
-            chain_id (ChainId): Network in which the escrow has been deployed
-            escrow_address (str): Address of the escrow
+        :param chain_id: Network in which the escrow has been deployed
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            Optional[EscrowData]: Escrow data
+        :return: Escrow data
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrow_query,
