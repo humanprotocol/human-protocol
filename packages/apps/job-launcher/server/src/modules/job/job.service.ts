@@ -186,7 +186,7 @@ export class JobService {
           ),
           gt_url: dto.gtUrl,
         },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
+        job_bounty: await this.calculateJobBounty(dto.dataUrl, tokenFundAmount),
       }));
     }
 
@@ -421,15 +421,23 @@ export class JobService {
   public async sendWebhook(
     webhookUrl: string,
     webhookData: FortuneWebhookDto | CVATWebhookDto,
+    hasSignature: boolean
   ): Promise<boolean> {
-    const signedBody = await signMessage(
-      webhookData,
-      this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-    );
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, {
+    let config = {}
+    
+    if (hasSignature) {
+      const signedBody = await signMessage(
+        webhookData,
+        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
+      );
+
+      config = {
         headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      }),
+      }
+    }
+
+    const { data } = await firstValueFrom(
+      await this.httpService.post(webhookUrl, webhookData, config),
     );
 
     if (!data) {
@@ -650,6 +658,7 @@ export class JobService {
               chain_id: jobEntity.chainId,
               event_type: EventType.ESCROW_CREATED,
             },
+            false
           );
         }
       }
@@ -702,13 +711,13 @@ export class JobService {
         escrowAddress: jobEntity.escrowAddress,
         chainId: jobEntity.chainId,
         eventType: EventType.ESCROW_CANCELED,
-      });
+      }, true);
     } else {
       await this.sendWebhook(this.configService.get<string>(ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
         escrow_address: jobEntity.escrowAddress,
         chain_id: jobEntity.chainId,
         event_type: EventType.ESCROW_CANCELED,
-      });
+      }, false);
     }
 
     return true;

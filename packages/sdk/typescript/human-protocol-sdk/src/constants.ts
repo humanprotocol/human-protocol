@@ -241,7 +241,8 @@ export const NETWORKS: {
 
 export const KVStoreKeys = {
   role: 'role',
-  webhook_url: 'webhook_url',
   fee: 'fee',
-  public_key: 'public_key',
+  publicKey: 'publicKey',
+  webhookUrl: 'webhookUrl',
+  url: 'url',
 };

@@ -1,5 +1,5 @@
 export enum EventType {
-  TASK_FINISHED = 'task_finished',
+  TASK_COMPLETED = 'task_completed',
 }
 
 export enum WebhookStatus {

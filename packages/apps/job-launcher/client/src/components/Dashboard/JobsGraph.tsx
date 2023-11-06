@@ -80,7 +80,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           </Box>
           <Box>
             <Typography color="text.primary" variant="caption" component="p">
-              Jobs Cancelled
+              Jobs Canceled
             </Typography>
             <Typography color="text.primary" variant="h6" fontWeight={500}>
               35,845

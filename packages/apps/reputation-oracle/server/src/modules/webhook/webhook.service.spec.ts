@@ -155,7 +155,7 @@ describe('WebhookService', () => {
   describe('createIncomingWebhook', () => {
     const dto: WebhookIncomingDto = {
       chainId: ChainId.LOCALHOST,
-      eventType: EventType.TASK_FINISHED,
+      eventType: EventType.TASK_COMPLETED,
       escrowAddress: MOCK_ADDRESS,
     };
 
