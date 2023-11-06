@@ -72,7 +72,7 @@
     "@types/zxcvbn": "4.4.1",
     "@types/cookie-parser": "^1.4.3",
     "@types/express-session": "^1.17.7",
-    "@types/uuid": "^9.0.2",
+    "@types/uuid": "^9.0.6",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
