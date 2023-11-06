@@ -511,13 +511,13 @@ Bases: `Exception`
 
 Raises when some error happens when interacting with escrow.
 
-### *class* human_protocol_sdk.escrow.EscrowConfig(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash, skip_manifest_url_validation)
+### *class* human_protocol_sdk.escrow.EscrowConfig(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash)
 
 Bases: `object`
 
 A class used to manage escrow parameters.
 
-#### \_\_init_\_(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash, skip_manifest_url_validation)
+#### \_\_init_\_(recording_oracle_address, reputation_oracle_address, exchange_oracle_address, recording_oracle_fee, reputation_oracle_fee, exchange_oracle_fee, manifest_url, hash)
 
 Initializes a Escrow instance.
 
@@ -528,7 +528,6 @@ Initializes a Escrow instance.
   * **reputation_oracle_fee** (`Decimal`) – Fee percentage of the Reputation Oracle
   * **manifest_url** (`str`) – Manifest file url
   * **hash** (`str`) – Manifest file hash
-  * **skip_manifest_url_validation** (`bool`) – Identify wether validate manifest_url
 
 ### *class* human_protocol_sdk.escrow.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, recording_oracle_fee=None, reputation_oracle=None, reputation_oracle_fee=None, exchange_oracle=None, exchange_oracle_fee=None)
 

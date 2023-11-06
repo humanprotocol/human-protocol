@@ -48,7 +48,6 @@ class EscrowConfig:
         exchange_oracle_fee: Decimal,
         manifest_url: str,
         hash: str,
-        skip_manifest_url_validation: bool,
     ):
         """
         Initializes a Escrow instance.
@@ -59,7 +58,6 @@ class EscrowConfig:
         :param reputation_oracle_fee: Fee percentage of the Reputation Oracle
         :param manifest_url: Manifest file url
         :param hash: Manifest file hash
-        :param skip_manifest_url_validation: Identify wether validate manifest_url
         """
         if not Web3.is_address(recording_oracle_address):
             raise EscrowClientError(
@@ -95,7 +93,6 @@ class EscrowConfig:
         self.exchange_oracle_fee = exchange_oracle_fee
         self.manifest_url = manifest_url
         self.hash = hash
-        self.skip_manifest_url_validation = skip_manifest_url_validation
 
 
 class EscrowData:
