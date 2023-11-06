@@ -7,7 +7,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
-import * as crypto from 'crypto';
 
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
@@ -101,6 +100,4 @@ export class UserService {
       currency: Currency.USD,
     };
   }
-
-
 }

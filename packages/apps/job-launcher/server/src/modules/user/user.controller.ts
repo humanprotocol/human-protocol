@@ -5,9 +5,6 @@ import {
   Request,
   UnprocessableEntityException,
   UseGuards,
-  HttpCode,
-  HttpStatus,
-  Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
