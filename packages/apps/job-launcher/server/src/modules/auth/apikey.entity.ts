@@ -12,8 +12,8 @@ export class ApiKeyEntity {
   @Column({ type: 'varchar' })
   public salt: string;
 
-  @OneToOne(() => UserEntity, user => user.apiKey)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn()
+  @OneToOne(() => UserEntity)
   public user: UserEntity;
 
   @CreateDateColumn({ type: 'timestamp' })

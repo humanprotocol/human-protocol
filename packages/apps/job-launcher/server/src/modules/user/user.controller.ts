@@ -15,7 +15,6 @@ import { IUserBalance } from '../../common/interfaces';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorUser } from '../../common/constants/errors';
-import { ApiKeyService } from '../auth/apikey.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -24,7 +23,7 @@ import { ApiKeyService } from '../auth/apikey.service';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(private readonly userService: UserService, private readonly apikeyService: ApiKeyService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('/balance')
   public async getBalance(
@@ -39,25 +38,6 @@ export class UserController {
       );
       throw new UnprocessableEntityException(
         ErrorUser.BalanceCouldNotBeRetreived,
-      );
-    }
-  }
-
-  @Post('/api-key')
-  @HttpCode(HttpStatus.CREATED)
-  public async createOrUpdateAPIKey(
-    @Request() req: RequestWithUser,
-  ): Promise<{ apiKey: string }> {
-    try {
-      const apiKey = await this.apikeyService.createOrUpdateAPIKey(req.user.id);
-      return { apiKey };
-    } catch (e) {
-      this.logger.log(
-        e.message,
-        `${UserController.name} - ${ErrorUser.ApiKeyCouldNotBeCreatedOrUpdated}`,
-      );
-      throw new UnprocessableEntityException(
-        ErrorUser.ApiKeyCouldNotBeCreatedOrUpdated,
       );
     }
   }

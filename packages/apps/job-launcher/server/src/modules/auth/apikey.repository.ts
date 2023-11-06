@@ -45,6 +45,5 @@ export class ApiKeyRepository {
       where: { id: apiKeyId },
       relations: ['user'],
     });
-  }
-  
+  }  
 }

@@ -35,9 +35,7 @@ export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
   BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
-  InvalidCredentials = 'Invalid credentials',
-  ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
-  ApiKeyNotFound = 'API key not found'
+  InvalidCredentials = 'Invalid credentials'
 }
 
 /**
@@ -47,7 +45,9 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
-  UserNotActive = 'User not active'
+  UserNotActive = 'User not active',
+  ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
+  ApiKeyNotFound = 'API key not found'
 }
 
 /**

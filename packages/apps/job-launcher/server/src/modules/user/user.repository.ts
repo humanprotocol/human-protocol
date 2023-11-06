@@ -7,7 +7,7 @@ import {
   Repository,
 } from 'typeorm';
 
-import { ApiKeyEntity, UserEntity } from './user.entity';
+import { UserEntity } from './user.entity';
 import { UserDto, UserUpdateDto } from './user.dto';
 import { ErrorUser } from '../../common/constants/errors';
 
