@@ -122,6 +122,14 @@ const theme = createTheme({
         },
       },
     },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          color: '#304FFE',
+          textTransform: 'none',
+        },
+      },
+    },
   },
 });
 

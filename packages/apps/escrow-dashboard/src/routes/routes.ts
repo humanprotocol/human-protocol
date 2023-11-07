@@ -5,7 +5,7 @@ import {
   Faucet,
   Kvstore,
   LeaderDetail,
-  // Leaderboard,
+  Leaderboard,
   Main,
   Owner,
   Profile,
@@ -28,12 +28,12 @@ export const routes: Array<Route> = [
     path: '/',
     component: Main,
   },
-  // {
-  //   key: 'leaderboard-route',
-  //   title: 'Leaderboard',
-  //   path: '/leaderboard',
-  //   component: Leaderboard,
-  // },
+  {
+    key: 'leaderboard-route',
+    title: 'Leaderboard',
+    path: '/leaderboard',
+    component: Leaderboard,
+  },
   {
     key: 'leader-detail-route',
     title: 'Leader',

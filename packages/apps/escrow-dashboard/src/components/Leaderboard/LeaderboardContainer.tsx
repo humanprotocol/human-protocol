@@ -1,21 +1,9 @@
-import {
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { FC, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { Box, Chip, Typography } from '@mui/material';
+import { FC } from 'react';
 
-import { FilterListFilledIcon } from '../Icons';
-import { ViewTitle } from '../ViewTitle';
+import { LaunchTaskView } from './LaunchTaskView';
 import { LeaderboardView } from './LeaderboardView';
-
-import userSvg from 'src/assets/user.svg';
-import { AppState } from 'src/state';
-import { useLeadersData } from 'src/state/leader/hooks';
+import { OraclesView } from './OraclesView';
 
 type LeaderboardContainerProps = {
   showAll?: boolean;
@@ -24,50 +12,81 @@ type LeaderboardContainerProps = {
 export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
   showAll = true,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const { leadersLoaded } = useSelector((state: AppState) => state.leader);
-
-  useLeadersData();
-
-  const openMobileFilter = () => setMobileFilterOpen(true);
-
-  const closeMobileFilter = () => setMobileFilterOpen(false);
-
   return (
-    <Box mt={{ xs: 4, md: 8 }} id="leaderboard">
-      <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="Leaderboard" iconUrl={userSvg} />
-        {!showAll && (
-          <Button
-            variant="outlined"
-            sx={{ ml: { xs: 'auto', sm: 3 }, mr: { xs: 'auto', sm: 0 } }}
-            href="/leaderboard"
+    <Box>
+      <Box display="flex" justifyContent="center" alignItems="start" mb={3}>
+        <Typography fontWeight={800} variant="h2" color="primary">
+          Leaderboard
+        </Typography>
+        <Chip label="NEW" sx={{ m: '10px' }} />
+      </Box>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        gap="108px"
+      >
+        <Box>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="primary"
+            mb={2}
           >
-            See More
-          </Button>
-        )}
-        {showAll && isMobile && (
-          <IconButton sx={{ ml: 'auto' }} onClick={openMobileFilter}>
-            <FilterListFilledIcon />
-          </IconButton>
-        )}
+            Launch task
+          </Typography>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="text.secondary"
+          >
+            Data annotation tasks
+          </Typography>
+        </Box>
+        <Box>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="text.secondary"
+            mb={2}
+          >
+            Explore
+          </Typography>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="text.secondary"
+          >
+            Leaderboard
+          </Typography>
+        </Box>
+        <Box>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="text.secondary"
+            mb={2}
+          >
+            Learn
+          </Typography>
+          <Typography
+            fontSize="20px"
+            fontWeight={500}
+            lineHeight={1.6}
+            color="text.secondary"
+          >
+            Oracles
+          </Typography>
+        </Box>
       </Box>
-      <Box mt={{ xs: 4, md: 8 }}>
-        {leadersLoaded ? (
-          <LeaderboardView
-            showAll={showAll}
-            filterOpen={mobileFilterOpen}
-            openFilter={openMobileFilter}
-            closeFilter={closeMobileFilter}
-          />
-        ) : (
-          <Box display="flex" justifyContent="center" py={10}>
-            <CircularProgress size={36} />
-          </Box>
-        )}
-      </Box>
+      <LaunchTaskView />
+      <LeaderboardView showAll={showAll} />
+      <OraclesView />
     </Box>
   );
 };
