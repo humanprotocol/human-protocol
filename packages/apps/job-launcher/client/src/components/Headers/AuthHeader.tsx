@@ -13,6 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { MouseEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCreateJobPageUI } from '../../providers/CreateJobPageUIProvider';
 import * as authServices from '../../services/auth';
 import { useAppDispatch, useAppSelector } from '../../state';
 import { signOut } from '../../state/auth/reducer';
@@ -52,6 +53,7 @@ export const AuthHeader = () => {
   const dispatch = useAppDispatch();
   const { user, refreshToken } = useAppSelector((state) => state.auth);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { reset } = useCreateJobPageUI();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -102,7 +104,10 @@ export const AuthHeader = () => {
           <Button
             variant="contained"
             sx={{ mr: 1 }}
-            onClick={() => navigate('/jobs/create')}
+            onClick={() => {
+              reset?.();
+              navigate('/jobs/create');
+            }}
           >
             + Create a Job
           </Button>
