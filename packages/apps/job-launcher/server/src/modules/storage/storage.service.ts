@@ -61,7 +61,7 @@ export class StorageService {
       await this.minioClient.putObject(
         this.s3Config.bucket,
         key,
-        JSON.stringify(content),
+        content,
         {
           'Content-Type': contentType,
         },
