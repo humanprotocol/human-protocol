@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
@@ -20,7 +21,6 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -79,7 +79,6 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
-import Decimal from 'decimal.js';
 import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 
@@ -625,7 +624,7 @@ describe('JobService', () => {
     const jobId = 1;
     const userId = 123;
 
-    it('should cancel the job', async () => {
+    it('should cancel the job when status is Launched', async () => {
       const escrowAddress = MOCK_ADDRESS;
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
@@ -642,6 +641,35 @@ describe('JobService', () => {
 
       expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
+      expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
+    });
+
+    it('should cancel the job when status is Pending', async () => {
+      const fundAmount = 1000;
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId,
+        status: JobStatus.PENDING,
+        chainId: ChainId.LOCALHOST,
+        fundAmount: fundAmount,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
+      paymentService.createRefundPayment = jest
+        .fn()
+        .mockResolvedValue(mockJobEntity);
+
+      const result = await jobService.requestToCancelJob(userId, jobId);
+
+      expect(result).toEqual(true);
+      expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
+      expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
+        jobId,
+        userId,
+        refundAmount: fundAmount,
+      });
       expect(mockJobEntity.save).toHaveBeenCalled();
     });
 
@@ -673,23 +701,13 @@ describe('JobService', () => {
   });
 
   describe('cancelCronJob', () => {
-    let escrowClientMock: any,
-      getManifestMock: any,
-      jobSaveMock: any,
-      findOneJobMock: any,
+    let findOneJobMock: any,
       findOnePaymentMock: any,
-      buildMock: any,
       sendWebhookMock: any,
       jobEntityMock: Partial<JobEntity>,
       paymentEntityMock: Partial<PaymentEntity>;
 
     beforeEach(() => {
-      escrowClientMock = {
-        cancel: jest.fn().mockResolvedValue(undefined),
-        getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
-        getBalance: jest.fn().mockResolvedValue(new Decimal(10)),
-      };
-
       jobEntityMock = {
         status: JobStatus.TO_CANCEL,
         fundAmount: 100,
@@ -708,11 +726,8 @@ describe('JobService', () => {
         save: jest.fn(),
       };
 
-      getManifestMock = jest.spyOn(jobService, 'getManifest');
-      jobSaveMock = jest.spyOn(jobEntityMock, 'save');
       findOneJobMock = jest.spyOn(jobRepository, 'findOne');
       findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
-      buildMock = jest.spyOn(EscrowClient, 'build');
       sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
       findOnePaymentMock.mockResolvedValueOnce(
         paymentEntityMock as PaymentEntity,
@@ -1211,48 +1226,20 @@ describe('JobService', () => {
         [MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS, MOCK_ADDRESS],
       );
     });
-    it('should call subgraph and database with CANCELLED status', async () => {
-      const jobEntityMock = [
-        {
-          status: JobStatus.CANCELED,
-          fundAmount: 100,
-          userId: 1,
-          id: 1,
-          escrowAddress: MOCK_ADDRESS,
-          chainId: ChainId.LOCALHOST,
-        },
-      ];
-      const getEscrowsData = [
-        {
-          address: MOCK_ADDRESS,
-          status: EscrowStatus[EscrowStatus.Cancelled],
-        },
-      ];
-      jobRepository.findJobsByEscrowAddresses = jest
-        .fn()
-        .mockResolvedValue(jobEntityMock as any);
-      EscrowUtils.getEscrows = jest.fn().mockResolvedValue(getEscrowsData);
-
-      const results = await jobService.getJobsByStatus(
+    it('should call the database with CANCELLED status', async () => {
+      jobService.getJobsByStatus(
         [ChainId.LOCALHOST],
         userId,
-        JobStatusFilter.CANCELED,
+        JobStatusFilter.PENDING,
         skip,
         limit,
       );
-
-      expect(results).toMatchObject([
-        {
-          status: JobStatus.CANCELED,
-          fundAmount: 100,
-          jobId: 1,
-          escrowAddress: MOCK_ADDRESS,
-          network: NETWORKS[ChainId.LOCALHOST]?.title,
-        },
-      ]);
-      expect(jobRepository.findJobsByEscrowAddresses).toHaveBeenCalledWith(
+      expect(jobRepository.findJobsByStatusFilter).toHaveBeenCalledWith(
+        [ChainId.LOCALHOST],
         userId,
-        [MOCK_ADDRESS],
+        JobStatusFilter.PENDING,
+        skip,
+        limit,
       );
     });
   });

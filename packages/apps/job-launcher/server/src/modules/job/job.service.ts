@@ -350,7 +350,19 @@ export class JobService {
       throw new ConflictException(ErrorJob.InvalidStatusCancellation);
     }
 
-    jobEntity.status = JobStatus.TO_CANCEL;
+    if (
+      jobEntity.status === JobStatus.PENDING ||
+      jobEntity.status === JobStatus.PAID
+    ) {
+      await this.paymentService.createRefundPayment({
+        refundAmount: jobEntity.fundAmount,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
+      jobEntity.status = JobStatus.CANCELED;
+    } else {
+      jobEntity.status = JobStatus.TO_CANCEL;
+    }
     jobEntity.retriesCount = 0;
     await jobEntity.save();
 
@@ -451,6 +463,7 @@ export class JobService {
       switch (status) {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
+        case JobStatusFilter.CANCELED:
           jobs = await this.jobRepository.findJobsByStatusFilter(
             networks,
             userId,
@@ -459,10 +472,9 @@ export class JobService {
             limit,
           );
           break;
-        case JobStatusFilter.CANCELED:
         case JobStatusFilter.LAUNCHED:
         case JobStatusFilter.COMPLETED:
-          const escrows = await this.findEscrowsByStatus(
+          escrows = await this.findEscrowsByStatus(
             networks,
             userId,
             status,
@@ -515,30 +527,36 @@ export class JobService {
     return escrows.slice(skip, limit);
   }
 
-  private transformJobs(
+  private async transformJobs(
     jobs: JobEntity[],
     escrows: EscrowData[] | undefined,
-  ): JobListDto[] {
-    return jobs.map((job) => ({
-      jobId: job.id,
-      escrowAddress: job.escrowAddress,
-      network: NETWORKS[job.chainId as ChainId]!.title,
-      fundAmount: job.fundAmount,
-      status: this.mapJobStatus(job, escrows),
-    }));
+  ): Promise<JobListDto[]> {
+    const jobPromises = jobs.map(async (job) => {
+      return {
+        jobId: job.id,
+        escrowAddress: job.escrowAddress,
+        network: NETWORKS[job.chainId as ChainId]!.title,
+        fundAmount: job.fundAmount,
+        status: await this.mapJobStatus(job, escrows),
+      };
+    });
+
+    return Promise.all(jobPromises);
   }
 
-  private mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
+  private async mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
     if (job.status === JobStatus.PAID) {
       return JobStatus.PENDING;
     }
 
     if (escrows) {
       const escrow = escrows.find(
-        (escrow) => escrow.address === job.escrowAddress,
+        (escrow) =>
+          escrow.address.toLowerCase() === job.escrowAddress.toLowerCase(),
       );
       if (escrow) {
-        return (<any>JobStatus)[escrow.status.toUpperCase()];
+        const newJob = await this.updateCompletedStatus(job, escrow);
+        return newJob.status;
       }
     }
 
@@ -684,7 +702,6 @@ export class JobService {
         jobId: jobEntity.id,
       });
     }
-
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
@@ -764,7 +781,7 @@ export class JobService {
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    const jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
+    let jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -781,10 +798,8 @@ export class JobService {
 
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
+      jobEntity = await this.updateCompletedStatus(jobEntity, escrow);
     }
-
-    const status =
-      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     const manifestData = await this.getManifest(manifestUrl);
     if (!manifestData) {
@@ -835,7 +850,7 @@ export class JobService {
           manifestHash,
           balance: 0,
           paidOut: 0,
-          status,
+          status: jobEntity.status,
         },
         manifest: manifestDetails,
         staking: {
@@ -853,7 +868,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
         paidOut: Number(escrow?.amountPaid || 0),
-        status,
+        status: jobEntity.status,
       },
       manifest: manifestDetails,
       staking: {
@@ -906,5 +921,21 @@ export class JobService {
     });
 
     return Number(paidOutAmount);
+  }
+
+  private async updateCompletedStatus(
+    job: JobEntity,
+    escrow: EscrowData,
+  ): Promise<JobEntity> {
+    let updatedJob = job;
+    if (
+      escrow.status === EscrowStatus[EscrowStatus.Complete] &&
+      job.status !== JobStatus.COMPLETED
+    )
+      updatedJob = await this.jobRepository.updateOne(
+        { id: job.id },
+        { status: JobStatus.COMPLETED },
+      );
+    return updatedJob;
   }
 }

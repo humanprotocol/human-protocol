@@ -53,14 +53,9 @@ export class StorageService {
     const key = `${escrowAddress}-${chainId}.json`;
     try {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
-      await this.minioClient.putObject(
-        this.s3Config.bucket,
-        key,
-        JSON.stringify(content),
-        {
-          'Content-Type': 'application/json',
-        },
-      );
+      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
+        'Content-Type': 'application/json',
+      });
 
       return { url: this.getUrl(key), hash };
     } catch (e) {

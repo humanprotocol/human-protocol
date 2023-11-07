@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import {
   CvatAnnotationMeta,
@@ -405,9 +405,9 @@ export class WebhookService {
           webhookEntity.escrowAddress,
         );
 
-        const finalResults = await this.storageService
-          .download(finalResultsUrl)
-          .catch(() => []);
+        const finalResults = await this.storageService.download(
+          finalResultsUrl,
+        );
 
         if (finalResults.length === 0) {
           this.logger.log(
