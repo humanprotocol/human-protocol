@@ -21,8 +21,10 @@ import {
   EscrowFailedWebhookDto,
   CampaignManifestDto,
   campaignDetailsDto,
+  liquidityResponseDto,
 } from './job.dto';
 import { StorageClient } from '@human-protocol/sdk';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JobService {
@@ -156,7 +158,7 @@ export class JobService {
     escrowAddress: string,
     liquidityProvider: string,
     save: boolean,
-  ): Promise<boolean> {
+  ): Promise<liquidityResponseDto> {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const recordingOracleAddress = await escrowClient.getRecordingOracleAddress(
@@ -166,20 +168,21 @@ export class JobService {
     const kvstore = await KVStoreClient.build(signer);
     const recordingOracleWebhookUrl = await kvstore.get(
       recordingOracleAddress,
-      KVStoreKeys.webhook_url,
+      KVStoreKeys.webhookUrl,
     );
 
     if (!recordingOracleWebhookUrl)
       throw new NotFoundException('Unable to get Recording Oracle webhook URL');
 
-    await this.httpService.post(recordingOracleWebhookUrl, {
-      escrowAddress,
-      chainId,
-      exchangeAddress: signer.address,
-      liquidityProvider,
-      save,
-    });
+    const response = await firstValueFrom(
+      this.httpService.post(recordingOracleWebhookUrl, {
+        escrowAddress,
+        chainId,
+        liquidityProvider,
+        save,
+      }),
+    );
 
-    return true;
+    return response.data as liquidityResponseDto;
   }
 }

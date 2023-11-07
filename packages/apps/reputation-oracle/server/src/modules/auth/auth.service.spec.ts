@@ -16,10 +16,12 @@ import { ErrorAuth } from '../../common/constants/errors';
 import {
   MOCK_ACCESS_TOKEN,
   MOCK_ACCESS_TOKEN_HASHED,
+  MOCK_ADDRESS,
   MOCK_EMAIL,
   MOCK_EXPIRES_IN,
   MOCK_HASHED_PASSWORD,
   MOCK_PASSWORD,
+  MOCK_PRIVATE_KEY,
   MOCK_REFRESH_TOKEN,
   MOCK_REFRESH_TOKEN_HASHED,
 } from '../../../test/constants';
@@ -27,8 +29,17 @@ import { TokenType } from './token.entity';
 import { v4 } from 'uuid';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  SENDGRID_TEMPLATES,
+  SERVICE_NAME,
+  WEB3_SIGNUP_MESSAGE,
+} from '../../common/constants';
+import { getNonce, signMessage } from '../../common/utils/signature';
 
 jest.mock('@human-protocol/sdk');
 
@@ -562,6 +573,142 @@ describe('AuthService', () => {
           templateId: SENDGRID_TEMPLATES.signup,
         }),
       );
+    });
+  });
+
+  describe('web3auth', () => {
+    describe('signin', () => {
+      const nonce = getNonce();
+      const nonce1 = getNonce();
+
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: MOCK_ADDRESS,
+        nonce,
+      };
+
+      let getByAddressMock: any;
+      let updateNonceMock: any;
+
+      beforeEach(() => {
+        getByAddressMock = jest.spyOn(userService, 'getByAddress');
+        updateNonceMock = jest.spyOn(userService, 'updateNonce');
+
+        jest.spyOn(authService, 'auth').mockResolvedValue({
+          accessToken: MOCK_ACCESS_TOKEN,
+          refreshToken: MOCK_REFRESH_TOKEN,
+        });
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should sign in the user, reset nonce and return the JWT', async () => {
+        getByAddressMock.mockResolvedValue(userEntity as UserEntity);
+        updateNonceMock.mockResolvedValue({
+          ...userEntity,
+          nonce: nonce1,
+        } as UserEntity);
+
+        const signature = await signMessage(nonce, MOCK_PRIVATE_KEY);
+        const result = await authService.web3Signin({
+          address: MOCK_ADDRESS,
+          signature,
+        });
+
+        expect(userService.getByAddress).toHaveBeenCalledWith(MOCK_ADDRESS);
+        expect(userService.updateNonce).toHaveBeenCalledWith(userEntity);
+
+        expect(authService.auth).toHaveBeenCalledWith(userEntity);
+        expect(result).toStrictEqual({
+          accessToken: MOCK_ACCESS_TOKEN,
+          refreshToken: MOCK_REFRESH_TOKEN,
+        });
+      });
+
+      it("should throw ConflictException if signature doesn't match", async () => {
+        const invalidSignature = await signMessage(
+          'invalid message',
+          MOCK_PRIVATE_KEY,
+        );
+
+        await expect(
+          authService.web3Signin({
+            address: MOCK_ADDRESS,
+            signature: invalidSignature,
+          }),
+        ).rejects.toThrow(ConflictException);
+      });
+    });
+
+    describe('signup', () => {
+      const web3UserCreateDto = {
+        address: MOCK_ADDRESS,
+        type: UserType.WORKER,
+      };
+
+      const nonce = getNonce();
+
+      const userEntity: Partial<UserEntity> = {
+        id: 1,
+        evmAddress: web3UserCreateDto.address,
+        nonce,
+      };
+
+      let createUserMock: any;
+
+      beforeEach(() => {
+        createUserMock = jest.spyOn(userService, 'createWeb3User');
+
+        createUserMock.mockResolvedValue(userEntity);
+
+        jest.spyOn(authService, 'auth').mockResolvedValue({
+          accessToken: MOCK_ACCESS_TOKEN,
+          refreshToken: MOCK_REFRESH_TOKEN,
+        });
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('should create a new web3 user and return the token', async () => {
+        const signature = await signMessage(
+          WEB3_SIGNUP_MESSAGE,
+          MOCK_PRIVATE_KEY,
+        );
+
+        const result = await authService.web3Signup({
+          ...web3UserCreateDto,
+          signature,
+        });
+
+        expect(userService.createWeb3User).toHaveBeenCalledWith(
+          web3UserCreateDto.address,
+          web3UserCreateDto.type,
+        );
+
+        expect(authService.auth).toHaveBeenCalledWith(userEntity);
+        expect(result).toStrictEqual({
+          accessToken: MOCK_ACCESS_TOKEN,
+          refreshToken: MOCK_REFRESH_TOKEN,
+        });
+      });
+
+      it("should throw ConflictException if signature doesn't match", async () => {
+        const invalidSignature = await signMessage(
+          'invalid message',
+          MOCK_PRIVATE_KEY,
+        );
+
+        await expect(
+          authService.web3Signup({
+            ...web3UserCreateDto,
+            signature: invalidSignature,
+          }),
+        ).rejects.toThrow(ConflictException);
+      });
     });
   });
 });

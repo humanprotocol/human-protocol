@@ -10,7 +10,7 @@ const JOB_NAV_ITEMS = [
   { status: JobStatus.LAUNCHED, label: 'launched' },
   { status: JobStatus.COMPLETED, label: 'completed' },
   { status: JobStatus.PENDING, label: 'pending' },
-  { status: JobStatus.CANCELED, label: 'cancelled' },
+  { status: JobStatus.CANCELED, label: 'canceled' },
   { status: JobStatus.FAILED, label: 'failed' },
 ];
 
