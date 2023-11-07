@@ -46,6 +46,12 @@ def process_outgoing_reputation_oracle_webhooks():
                         timestamp=None,  # TODO: reputation oracle doesn't support
                     )
 
+                    # FIXME: For a sake of compatability with the current
+                    # version of Reputation Oracle keep this
+                    body["escrowAddress"] = body.pop("escrow_address")
+                    body["chainId"] = body.pop("chain_id")
+                    body["eventType"] = body.pop("event_type")
+                
                     # TODO: remove compatibility code
                     # vvv
                     body.pop("event_data")

@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
 import { ErrorAuth, ErrorUser } from '../../common/constants/errors';
@@ -18,15 +19,21 @@ import {
   RestorePasswordDto,
   SignInDto,
   VerifyEmailDto,
+  Web3SignInDto,
+  Web3SignUpDto,
 } from './auth.dto';
 import { TokenType } from './token.entity';
 import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
-import { ConfigService } from '@nestjs/config';
+import { verifySignature } from '../../common/utils/signature';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
-import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import {
+  WEB3_SIGNUP_MESSAGE,
+  SENDGRID_TEMPLATES,
+  SERVICE_NAME,
+} from '../../common/constants';
 
 @Injectable()
 export class AuthService {
@@ -108,12 +115,14 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync({
       email: userEntity.email,
+      evmAddress: userEntity.evmAddress,
       userId: userEntity.id,
     });
 
     const refreshToken = await this.jwtService.signAsync(
       {
         email: userEntity.email,
+        evmAddress: userEntity.evmAddress,
         userId: userEntity.id,
       },
       {
@@ -262,5 +271,46 @@ export class AuthService {
 
   public compareToken(token: string, hashedToken: string): boolean {
     return this.hashToken(token) === hashedToken;
+  }
+
+  public async web3Signup(data: Web3SignUpDto): Promise<AuthDto> {
+    const verified = await verifySignature(
+      WEB3_SIGNUP_MESSAGE,
+      data.signature,
+      [data.address],
+    );
+
+    if (!verified) {
+      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+    }
+
+    const userEntity = await this.userService.createWeb3User(
+      data.address,
+      data.type,
+    );
+
+    return this.auth(userEntity);
+  }
+
+  public async getNonce(address: string): Promise<string> {
+    const userEntity = await this.userService.getByAddress(address);
+
+    return userEntity.nonce;
+  }
+
+  public async web3Signin(data: Web3SignInDto): Promise<AuthDto> {
+    const userEntity = await this.userService.getByAddress(data.address);
+
+    const verified = await verifySignature(userEntity.nonce, data.signature, [
+      data.address,
+    ]);
+
+    if (!verified) {
+      throw new UnauthorizedException(ErrorAuth.InvalidSignature);
+    }
+
+    await this.userService.updateNonce(userEntity);
+
+    return this.auth(userEntity);
   }
 }

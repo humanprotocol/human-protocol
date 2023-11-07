@@ -59,6 +59,7 @@ export enum ErrorAuth {
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
+  InvalidSignature = 'Invalid signature',
 }
 
 /**
