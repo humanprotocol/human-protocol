@@ -7,8 +7,6 @@ import {
   NETWORKS,
   StakingClient,
   StorageClient,
-  StorageCredentials,
-  StorageParams,
   UploadFile,
   Encryption,
   EncryptionUtils,
@@ -53,7 +51,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, listObjectsInBucket, parseUrl } from '../../common/utils';
+import { getRate, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -82,10 +80,8 @@ import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
-  HCAPTCHA_MAX_POINTS,
   HCAPTCHA_MAX_SHAPES_PER_IMAGE,
   HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
-  HCAPTCHA_MIN_POINTS,
   HCAPTCHA_MIN_SHAPES_PER_IMAGE,
   HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
@@ -100,14 +96,13 @@ import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
+import { StorageService } from '../storage/storage.service';
+import { UploadedFile } from 'src/common/interfaces/s3';
 import { string } from 'joi';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  public readonly storageClient: StorageClient;
-  public readonly storageParams: StorageParams;
-  public readonly bucket: string;
 
   constructor(
     @Inject(Web3Service)
@@ -118,27 +113,8 @@ export class JobService {
     public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
-  ) {
-    const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
-      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
-    };
-
-    const useSSL =
-      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
-    this.storageParams = {
-      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL,
-    };
-
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
-
-    this.storageClient = new StorageClient(
-      this.storageParams,
-      storageCredentials,
-    );
-  }
+    private readonly storageService: StorageService,
+  ) {}
 
   private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType): Promise<CvatManifestDto> {
     return {
@@ -169,7 +145,7 @@ export class JobService {
   }
 
   async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifestDto> {
-    const objectsInBucket = await listObjectsInBucket(jobDto.dataUrl);
+    const objectsInBucket = await this.storageService.listObjectsInBucket(jobDto.dataUrl);
 
     const commonManifestProperties = {
         job_mode: JobCaptchaMode.BATCH,
@@ -320,19 +296,19 @@ export class JobService {
   }
 
   private async generateAndUploadTaskData(objectNames: string[]) {
-    const protocol = this.storageParams.useSSL ? 'https' : 'http';
+    const protocol = this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true' ? 'https' : 'http';
  
     const taskData = objectNames.map(objectName => {
         return {
-            datapoint_uri: `${protocol}://${this.storageParams.endPoint}:${this.storageParams.port}/${this.bucket}/${objectName}`,
+            datapoint_uri: `${protocol}://${this.configService.get<string>(ConfigNames.S3_ENDPOINT)}:${this.configService.get<string>(ConfigNames.S3_PORT)}/${this.configService.get<string>(ConfigNames.S3_BUCKET)}/${objectName}`,
             datapoint_hash: 'undefined-hash',
             task_key: uuidv4(),
         };
     });
 
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles([taskData], this.bucket);
+    const uploadedFile: UploadedFile = await this.storageService.uploadFile(taskData);
 
-    return uploadedFiles[0].url;
+    return uploadedFile.url;
   }
 
   public async createJob(
@@ -349,6 +325,8 @@ export class JobService {
     let manifest, fundAmount;
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
+      console.log((dto as JobCaptchaDto).annotations.typeOfJob,
+      dto as JobCaptchaDto)
       manifest = await this.createHCaptchaManifest(
         (dto as JobCaptchaDto).annotations.typeOfJob,
         dto as JobCaptchaDto
@@ -473,7 +451,7 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    let manifest = await this.getManifest(jobEntity.manifestUrl);
+    let manifest = await this.storageService.download(jobEntity.manifestUrl);
 
     if (manifest instanceof string) {
       const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
@@ -566,20 +544,18 @@ export class JobService {
   public async saveManifest(
     manifest: FortuneManifestDto | CvatManifestDto | string,
   ): Promise<SaveManifestDto> {
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [manifest],
-      this.bucket,
+    const uploadedManifest: UploadedFile = await this.storageService.uploadManifest(
+      manifest,
     );
 
-    if (!uploadedFiles[0]) {
+    if (!uploadedManifest) {
       this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
       throw new BadGatewayException(ErrorBucket.UnableSaveFile);
     }
 
-    const { url, hash } = uploadedFiles[0];
-    const manifestUrl = url;
+    const manifestUrl = uploadedManifest.url;
 
-    return { manifestUrl, manifestHash: hash };
+    return { manifestUrl, manifestHash: uploadedManifest.hash };
   }
 
   private async validateManifest(
@@ -603,18 +579,6 @@ export class JobService {
     }
 
     return true;
-  }
-
-  public async getManifest(
-    manifestUrl: string,
-  ): Promise<FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto | string> {
-    const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
-
-    if (!manifest) {
-      throw new NotFoundException(ErrorJob.ManifestNotFound);
-    }
-
-    return manifest;
   }
 
   public async sendWebhook(
@@ -785,7 +749,7 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
+    const result = await this.storageService.download(finalResultUrl);
 
     if (!result) {
       throw new NotFoundException(ErrorJob.ResultNotFound);
@@ -837,12 +801,7 @@ export class JobService {
 
       if (!jobEntity) return;
 
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-      if (manifest instanceof string) {
-        //Encryption()
-      }
-
+      const manifest = await this.storageService.download(jobEntity.manifestUrl);
       //await this.validateManifest(manifest);
 
       if (!jobEntity.escrowAddress) {
@@ -908,7 +867,7 @@ export class JobService {
     jobEntity.status = JobStatus.CANCELED;
     await jobEntity.save();
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
+    const manifest = await this.storageService.download(jobEntity.manifestUrl);
     
     if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
       await this.sendWebhook(this.configService.get<string>(ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL)!, {
@@ -1010,7 +969,7 @@ export class JobService {
     const status =
       escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
-    const manifestData = await this.getManifest(manifestUrl);
+    const manifestData = await this.storageService.download(manifestUrl);
     if (!manifestData) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }

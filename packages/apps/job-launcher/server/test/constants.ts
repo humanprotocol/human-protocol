@@ -1,3 +1,6 @@
+import { JobRequestType } from "../src/common/enums/job";
+import { FortuneManifestDto } from "../src/modules/job/job.dto";
+
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_SUBMISSION_REQUIRED = 5;
@@ -49,3 +52,16 @@ export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
 export const MOCK_SENDGRID_FROM_NAME = 'John Doe';
+export const MOCK_S3_ENDPOINT = 'localhost';
+export const MOCK_S3_PORT = 9000;
+export const MOCK_S3_ACCESS_KEY = 'access_key';
+export const MOCK_S3_SECRET_KEY = 'secret_key';
+export const MOCK_S3_BUCKET = 'solution';
+export const MOCK_S3_USE_SSL = false;
+export const MOCK_MANIFEST: FortuneManifestDto = {
+  submissionsRequired: 2,
+  requesterTitle: 'Fortune',
+  requesterDescription: 'Some desc',
+  fundAmount: 10,
+  requestType: JobRequestType.FORTUNE,
+};

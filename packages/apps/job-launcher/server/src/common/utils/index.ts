@@ -5,6 +5,8 @@ import { COINGECKO_API_URL } from '../constants';
 import { NotFoundException } from '@nestjs/common';
 import { ErrorBucket, ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
+import * as crypto from 'crypto';
+import { Readable } from 'stream';
 import axios from 'axios';
 import { parseString } from 'xml2js';
 
@@ -98,25 +100,20 @@ export const parseUrl = (url: string): {
   throw new Error('Invalid URL');
 };
 
-export const listObjectsInBucket = async (bucketUrl: string): Promise<string[]> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const response = await axios.get(bucketUrl);
+export function hashStream(stream: Readable): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha1');
 
-      if (response.status === 200 && response.data) {
-        parseString(response.data, (err, result) => {
-          if (err) {
-            reject(err);
-          }
+    stream.on('data', (chunk) => {
+      hash.update(chunk);
+    });
 
-          const objectKeys = result.ListBucketResult.Contents.map((item: any) => item.Key);
-          resolve(objectKeys.flat());
-        });
-      } else {
-        reject(ErrorBucket.FailedToFetchBucketContents);
-      }
-    } catch (err) {
-      reject(err);
-    }
+    stream.on('end', () => {
+      resolve(hash.digest('hex'));
+    });
+
+    stream.on('error', (error) => {
+      reject(error);
+    });
   });
 }
