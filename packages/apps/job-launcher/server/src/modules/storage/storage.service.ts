@@ -8,9 +8,10 @@ import { PassThrough } from 'stream';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { hashStream } from '../../common/utils';
-import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
+import { CvatManifestDto, FortuneManifestDto, HCaptchaManifestDto } from '../job/job.dto';
 import { ErrorBucket } from 'src/common/constants/errors';
 import { parseString } from 'xml2js';
+import stringify from 'json-stable-stringify'
 
 @Injectable()
 export class StorageService {
@@ -43,26 +44,23 @@ export class StorageService {
   }
 
   public async uploadManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | string
+    origin: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    encrypted?: string
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
-    const isString = typeof manifest === "string";
-
-    const contentType = isString ? 'text/plain' : 'application/json'
-
-    const content = isString ? manifest : JSON.stringify(manifest);
-
-    const hash = crypto.createHash('sha1').update(content).digest('hex');
-    const key = isString ? `s3${hash}`: `s3${hash}.json`;
+    const contentType = encrypted ? 'text/plain' : 'application/json'
+    const content = encrypted ? encrypted : stringify(origin);
+    const hash = crypto.createHash('sha1').update(stringify(origin)).digest('hex');
+    const key = encrypted ? `s3${hash}`: `s3${hash}.json`;
 
     try {
       await this.minioClient.putObject(
         this.s3Config.bucket,
         key,
-        JSON.stringify(content),
+        content,
         {
           'Content-Type': contentType,
         },
@@ -81,19 +79,16 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    console.log(data)
-
-    const contentType = 'application/json'
-    const content = data;
-
-    const hash = crypto.createHash('sha1').update(JSON.stringify(content)).digest('hex');
+    const contentType = 'application/json';
+    const content = stringify(data);
+    const hash = crypto.createHash('sha1').update(stringify(data)).digest('hex');
     const key = `s3${hash}.json`;
 
     try {
       await this.minioClient.putObject(
         this.s3Config.bucket,
         key,
-        JSON.stringify(content),
+        content,
         {
           'Content-Type': contentType,
         },

@@ -7,7 +7,6 @@ import {
   NETWORKS,
   StakingClient,
   StorageClient,
-  UploadFile,
   Encryption,
   EncryptionUtils,
 } from '@human-protocol/sdk';
@@ -99,6 +98,7 @@ import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { UploadedFile } from 'src/common/interfaces/s3';
 import { string } from 'joi';
+import stringify from 'json-stable-stringify'
 
 @Injectable()
 export class JobService {
@@ -322,19 +322,18 @@ export class JobService {
       this.web3Service.validateChainId(chainId);
     }
   
-    let manifest, fundAmount;
+    let manifestOrigin, manifestEncryped, fundAmount;
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
-      console.log((dto as JobCaptchaDto).annotations.typeOfJob,
-      dto as JobCaptchaDto)
-      manifest = await this.createHCaptchaManifest(
+      manifestOrigin = await this.createHCaptchaManifest(
         (dto as JobCaptchaDto).annotations.typeOfJob,
         dto as JobCaptchaDto
       );
-      fundAmount = manifest.task_bid_price * manifest.job_total_tasks;
 
-      manifest = await EncryptionUtils.encrypt(
-        JSON.stringify(manifest), 
+      fundAmount = manifestOrigin.task_bid_price * manifestOrigin.job_total_tasks;
+
+      manifestEncryped = await EncryptionUtils.encrypt(
+        stringify(manifestOrigin), 
         [
           this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
           this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!
@@ -342,11 +341,11 @@ export class JobService {
       );
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
-      manifest = { ...dto, requestType };
+      manifestOrigin = { ...dto, requestType };
       fundAmount = dto.fundAmount;
     } else { // CVAT
       dto = dto as JobCvatDto;
-      manifest = await this.createCvatManifest(dto, requestType);
+      manifestOrigin = await this.createCvatManifest(dto, requestType);
       fundAmount = dto.fundAmount;
     }
   
@@ -366,7 +365,7 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
   
-    const { manifestUrl, manifestHash } = await this.saveManifest(manifest);
+    const { manifestUrl, manifestHash } = await this.saveManifest(manifestOrigin, manifestEncryped);
   
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
@@ -542,10 +541,12 @@ export class JobService {
   }
 
   public async saveManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | string,
+    origin: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    encryped?: string
   ): Promise<SaveManifestDto> {
     const uploadedManifest: UploadedFile = await this.storageService.uploadManifest(
-      manifest,
+      origin,
+      encryped
     );
 
     if (!uploadedManifest) {
