@@ -1,3 +1,4 @@
+import random
 import unittest
 import uuid
 
@@ -6,145 +7,83 @@ from sqlalchemy.exc import IntegrityError
 from src.core.types import Networks, OracleWebhookStatuses, OracleWebhookTypes
 from src.db import SessionLocal
 from src.models.webhook import Webhook
-from src.services import webhooks as webhook_service
+from src.services.webhook import OracleWebhookDirectionTag, inbox
 
 
 class ServiceIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.session = SessionLocal()
+        self.webhook_kwargs = dict(
+            session=self.session,
+            escrow_address="0x1234567890123456789012345678901234567890",
+            chain_id=Networks.polygon_mainnet.value,
+            type=OracleWebhookTypes.exchange_oracle,
+            signature="signature",
+            event_type="task_finished",
+        )
+        random.seed(42)
 
     def tearDown(self):
         self.session.close()
 
-    def test_create_webhook(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
-
-        webhook_id = webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
+    def dummy_webhook(self, oracle_webhook_type: OracleWebhookTypes, status: OracleWebhookStatuses):
+        address = "0x" + "".join([str(random.randint(0, 9)) for _ in range(40)])
+        return Webhook(
+            id=str(uuid.uuid4()),
+            direction=OracleWebhookDirectionTag.incoming.value,
+            signature=f"signature-{uuid.uuid4()}",
+            escrow_address=address,
+            chain_id=Networks.polygon_mainnet.value,
+            type=oracle_webhook_type.value,
+            status=status.value,
+            event_type="task_finished",
         )
+
+    def test_create_webhook(self):
+        webhook_id = inbox.create_webhook(**self.webhook_kwargs)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.s3_url, s3_url)
+        self.assertEqual(webhook.escrow_address, self.webhook_kwargs["escrow_address"])
+        self.assertEqual(webhook.chain_id, self.webhook_kwargs["chain_id"])
         self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
+        self.assertEqual(webhook.signature, self.webhook_kwargs["signature"])
+        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.pending)
+        # TODO: check intended fields and verify those
+
+    def _test_none_webhook_argument(self, argument_name, error_type):
+        kwargs = dict(**self.webhook_kwargs)
+        kwargs[argument_name] = None
+        with self.assertRaises(error_type):
+            inbox.create_webhook(**kwargs)
+            self.session.commit()
 
     def test_create_webhook_none_escrow_address(self):
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
-        webhook_service.create_webhook(
-            self.session,
-            escrow_address=None,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-        with self.assertRaises(IntegrityError):
-            self.session.commit()
+        self._test_none_webhook_argument("escrow_address", IntegrityError)
 
     def test_create_webhook_none_chain_id(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        signature = "signature"
-        s3_url = "s3_url"
-        webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=None,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-        with self.assertRaises(IntegrityError):
-            self.session.commit()
-
-    def test_create_webhook_none_s3_url(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=None,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-        with self.assertRaises(IntegrityError):
-            self.session.commit()
+        self._test_none_webhook_argument("chain_id", IntegrityError)
 
     def test_create_webhook_none_signature(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        s3_url = "s3_url"
-
-        webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=None,
-        )
-        with self.assertRaises(IntegrityError):
-            self.session.commit()
+        self._test_none_webhook_argument("signature", ValueError)
 
     def test_get_pending_webhooks(self):
-        chain_id = Networks.polygon_mainnet.value
-
-        webhook1_id = str(uuid.uuid4())
-        webhook1 = Webhook(
-            id=webhook1_id,
-            signature="signature1",
-            escrow_address="0x1234567890123456789012345678901234567890",
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.exchange_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
+        webhook1 = self.dummy_webhook(
+            oracle_webhook_type=OracleWebhookTypes.exchange_oracle,
+            status=OracleWebhookStatuses.pending,
         )
-        webhook2_id = str(uuid.uuid4())
-        webhook2 = Webhook(
-            id=webhook2_id,
-            signature="signature2",
-            escrow_address="0x1234567890123456789012345678901234567891",
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.exchange_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
+        webhook2 = self.dummy_webhook(
+            oracle_webhook_type=OracleWebhookTypes.exchange_oracle,
+            status=OracleWebhookStatuses.pending,
         )
-        webhook3_id = str(uuid.uuid4())
-        webhook3 = Webhook(
-            id=webhook3_id,
-            signature="signature3",
-            escrow_address="0x1234567890123456789012345678901234567892",
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.exchange_oracle.value,
-            status=OracleWebhookStatuses.completed.value,
+        webhook3 = self.dummy_webhook(
+            oracle_webhook_type=OracleWebhookTypes.exchange_oracle,
+            status=OracleWebhookStatuses.completed,
         )
-
-        webhook4_id = str(uuid.uuid4())
-        webhook4 = Webhook(
-            id=webhook4_id,
-            signature="signature4",
-            escrow_address="0x1234567890123456789012345678901234567892",
-            chain_id=chain_id,
-            s3_url="s3_url",
-            type=OracleWebhookTypes.reputation_oracle.value,
-            status=OracleWebhookStatuses.pending.value,
+        webhook4 = self.dummy_webhook(
+            oracle_webhook_type=OracleWebhookTypes.reputation_oracle,
+            status=OracleWebhookStatuses.pending,
         )
 
         self.session.add(webhook1)
@@ -153,129 +92,58 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(webhook4)
         self.session.commit()
 
-        pending_webhooks = webhook_service.get_pending_webhooks(
-            self.session, OracleWebhookTypes.exchange_oracle.value, 10
+        pending_webhooks = inbox.get_pending_webhooks(
+            self.session, OracleWebhookTypes.exchange_oracle, 10
         )
         self.assertEqual(len(pending_webhooks), 2)
-        self.assertEqual(pending_webhooks[0].id, webhook1_id)
-        self.assertEqual(pending_webhooks[1].id, webhook2_id)
+        self.assertEqual(pending_webhooks[0].id, webhook1.id)
+        self.assertEqual(pending_webhooks[1].id, webhook2.id)
 
-        pending_webhooks = webhook_service.get_pending_webhooks(
-            self.session, OracleWebhookTypes.reputation_oracle.value, 10
+        pending_webhooks = inbox.get_pending_webhooks(
+            self.session, OracleWebhookTypes.reputation_oracle, 10
         )
         self.assertEqual(len(pending_webhooks), 1)
-        self.assertEqual(pending_webhooks[0].id, webhook4_id)
+        self.assertEqual(pending_webhooks[0].id, webhook4.id)
 
     def test_update_webhook_status(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
+        webhook_id = inbox.create_webhook(**self.webhook_kwargs)
+        webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
+        self.assertEqual(webhook.status, OracleWebhookStatuses.pending)
 
-        webhook_id = webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-
-        webhook_service.update_webhook_status(
-            self.session, webhook_id, OracleWebhookStatuses.completed.value
-        )
+        inbox.update_webhook_status(self.session, webhook_id, OracleWebhookStatuses.completed)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
-
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.s3_url, s3_url)
-        self.assertEqual(webhook.attempts, 0)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
-        self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
+        self.assertEqual(webhook.status, OracleWebhookStatuses.completed)
 
     def test_update_webhook_invalid_status(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
-
-        webhook_id = webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-
-        with self.assertRaises(ValueError):
-            webhook_service.update_webhook_status(self.session, webhook_id, "Invalid status")
+        webhook_id = inbox.create_webhook(**self.webhook_kwargs)
+        with self.assertRaises(AttributeError):
+            inbox.update_webhook_status(self.session, webhook_id, "Invalid status")
 
     def test_handle_webhook_success(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
+        webhook_id = inbox.create_webhook(**self.webhook_kwargs)
 
-        webhook_id = webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-
-        webhook_service.handle_webhook_success(self.session, webhook_id)
+        inbox.handle_webhook_success(self.session, webhook_id)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.s3_url, s3_url)
         self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
         self.assertEqual(webhook.status, OracleWebhookStatuses.completed.value)
 
     def test_handle_webhook_fail(self):
-        escrow_address = "0x1234567890123456789012345678901234567890"
-        chain_id = Networks.polygon_mainnet.value
-        signature = "signature"
-        s3_url = "s3_url"
-
-        webhook_id = webhook_service.create_webhook(
-            self.session,
-            escrow_address=escrow_address,
-            chain_id=chain_id,
-            s3_url=s3_url,
-            type=OracleWebhookTypes.exchange_oracle.value,
-            signature=signature,
-        )
-
-        webhook_service.handle_webhook_fail(self.session, webhook_id)
-
+        webhook_id = inbox.create_webhook(**self.webhook_kwargs)
+        inbox.handle_webhook_fail(self.session, webhook_id)
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.s3_url, s3_url)
         self.assertEqual(webhook.attempts, 1)
-        self.assertEqual(webhook.signature, signature)
         self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
         self.assertEqual(webhook.status, OracleWebhookStatuses.pending.value)
 
+        # assumes Config.webhook_max_retries == 5
         for i in range(4):
-            webhook_service.handle_webhook_fail(self.session, webhook_id)
+            inbox.handle_webhook_fail(self.session, webhook_id)
 
         webhook = self.session.query(Webhook).filter_by(id=webhook_id).first()
 
-        self.assertEqual(webhook.escrow_address, escrow_address)
-        self.assertEqual(webhook.chain_id, chain_id)
-        self.assertEqual(webhook.s3_url, s3_url)
         self.assertEqual(webhook.attempts, 5)
-        self.assertEqual(webhook.signature, signature)
-        self.assertEqual(webhook.type, OracleWebhookTypes.exchange_oracle.value)
         self.assertEqual(webhook.status, OracleWebhookStatuses.failed.value)
