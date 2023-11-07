@@ -7,7 +7,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "cross-env nest start",
     "start:dev": "NODE_ENV=${NODE_ENV:=development} nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -22,13 +22,14 @@
     "local": "docker compose down && (concurrently --hide 0 \"yarn docker\" \"yarn recording-oracle:dev\" )"
   },
   "dependencies": {
-    "@human-protocol/sdk": "*",
+    "@human-protocol/sdk": "^1.1.16",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^10.2.7",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.4.3",
     "@nestjs/platform-express": "^10.2.6",
     "@nestjs/swagger": "^7.1.13",
+    "@xenova/transformers": "^2.7.0",
     "body-parser": "^1.20.2",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
