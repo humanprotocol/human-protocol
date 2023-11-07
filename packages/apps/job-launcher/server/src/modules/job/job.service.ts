@@ -562,10 +562,15 @@ export class JobService {
   private async validateManifest(
     manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
-    const dtoCheck =
-      (manifest as FortuneManifestDto).requestType == JobRequestType.FORTUNE
-        ? new FortuneManifestDto()
-        : new CvatManifestDto();
+    let dtoCheck;
+
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      dtoCheck = new FortuneManifestDto()
+    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+      dtoCheck = new HCaptchaManifestDto()
+    } else {
+      dtoCheck = new CvatManifestDto();
+    }
 
     Object.assign(dtoCheck, manifest);
 
@@ -975,11 +980,14 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
 
-    const manifest =
-      (manifestData as FortuneManifestDto).requestType ===
-      JobRequestType.FORTUNE
-        ? (manifestData as FortuneManifestDto)
-        : (manifestData as CvatManifestDto);
+    let manifest;
+    if ((manifestData as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      manifest = (manifestData as FortuneManifestDto)
+    } else if ((manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+      manifest = (manifestData as HCaptchaManifestDto)
+    } else {
+      manifest = (manifestData as CvatManifestDto)
+    }
 
     const baseManifestDetails = {
       chainId,
@@ -991,20 +999,27 @@ export class JobService {
       reputationOracleAddress: escrow?.reputationOracle,
     };
 
-    const specificManifestDetails =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? {
-            title: (manifest as FortuneManifestDto).requesterTitle,
-            description: (manifest as FortuneManifestDto).requesterDescription,
-            requestType: JobRequestType.FORTUNE,
-            submissionsRequired: (manifest as FortuneManifestDto)
-              .submissionsRequired,
-          }
-        : {
-            requestType: (manifest as CvatManifestDto).annotation.type,
-            submissionsRequired: (manifest as CvatManifestDto).annotation
-              .job_size,
-          };
+    let specificManifestDetails;
+    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      specificManifestDetails = {
+        title: (manifest as FortuneManifestDto).requesterTitle,
+        description: (manifest as FortuneManifestDto).requesterDescription,
+        requestType: JobRequestType.FORTUNE,
+        submissionsRequired: (manifest as FortuneManifestDto)
+          .submissionsRequired,
+      };
+    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+      specificManifestDetails = {
+        requestType: JobRequestType.HCAPTCHA,
+        submissionsRequired: (manifest as HCaptchaManifestDto).job_total_tasks
+      };
+    } else {
+      specificManifestDetails = {
+        requestType: (manifest as CvatManifestDto).annotation.type,
+        submissionsRequired: (manifest as CvatManifestDto).annotation
+          .job_size,
+      };
+    }
 
     const manifestDetails = {
       ...baseManifestDetails,

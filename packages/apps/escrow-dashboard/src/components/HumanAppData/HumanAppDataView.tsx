@@ -38,26 +38,42 @@ export const HumanAppDataView: FC = () => {
 
   const transactionsSeries = useMemo(() => {
     if (data) {
-      return data.data[0].attributes.dailyHMTData
-        .slice(0, days)
-        .reverse()
+      const cumulativeData = [...data.data[0].attributes.dailyHMTData]
         .map((d: any) => ({
           date: d.timestamp,
           value: Number(d.totalTransactionCount),
-        }));
+        }))
+        .reverse()
+        .reduce((acc, d) => {
+          acc.push({
+            date: d.date,
+            value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
+          });
+          return acc;
+        }, [] as any[]);
+
+      return cumulativeData.reverse().slice(0, days).reverse();
     }
     return [];
   }, [data, days]);
 
   const paymentsSeries = useMemo(() => {
     if (data) {
-      return data.data[0].attributes.dailyPaymentsData
-        .slice(0, days)
-        .reverse()
+      const cumulativeData = [...data.data[0].attributes.dailyPaymentsData]
         .map((d: any) => ({
           date: d.timestamp,
           value: Number(d.totalAmountPaid),
-        }));
+        }))
+        .reverse()
+        .reduce((acc, d) => {
+          acc.push({
+            date: d.date,
+            value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
+          });
+          return acc;
+        }, [] as any[]);
+
+      return cumulativeData.reverse().slice(0, days).reverse();
     }
     return [];
   }, [data, days]);

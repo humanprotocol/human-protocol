@@ -73,7 +73,7 @@
     "@types/jest": "29.5.1",
     "@types/json-stable-stringify": "^1.0.36",
     "@types/node": "18.16.12",
-    "@types/supertest": "^2.0.11",
+    "@types/supertest": "^2.0.15",
     "@types/zxcvbn": "4.4.1",
     "@types/xml2js": "0.4.13",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
