@@ -28,7 +28,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
-import { ErrorAuth } from 'src/common/constants/errors';
+import { ErrorAuth } from '../../common/constants/errors';
 
 @ApiTags('Auth')
 @Controller('/auth')

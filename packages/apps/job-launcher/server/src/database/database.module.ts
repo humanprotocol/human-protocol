@@ -12,7 +12,7 @@ import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { JobEntity } from '../modules/job/job.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
 import { ConfigNames } from '../common/config';
-import { ApiKeyEntity } from 'src/modules/auth/apikey.entity';
+import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 
 @Module({
   imports: [
