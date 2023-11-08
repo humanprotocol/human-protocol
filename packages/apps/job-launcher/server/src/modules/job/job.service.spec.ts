@@ -8,6 +8,7 @@ import {
   IAllocation,
   EscrowUtils,
   NETWORKS,
+  EncryptionUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -31,23 +32,35 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import {
+  JobCaptchaMode,
+  JobCaptchaRequestType,
+  JobCaptchaShapeType,
   JobRequestType,
   JobStatus,
   JobStatusFilter,
+  WorkerBrowser,
+  WorkerLanguage,
+  WorkerLocation,
 } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
+  MOCK_ENCRYPTED_MANIFEST,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
   MOCK_FILE_URL,
+  MOCK_HCAPTCHA_ORACLE_ADDRESS,
+  MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
+  MOCK_HCAPTHCHA_JOB_API_KEY,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
+  MOCK_PGP_PRIVATE_KEY,
+  MOCK_PGP_PUBLIC_KEY,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_RECORDING_ORACLE_FEE,
@@ -69,6 +82,9 @@ import {
   JobCvatDto,
   CvatFinalResultDto,
   JobDetailsDto,
+  HCaptchaManifestDto,
+  JobCaptchaDto,
+  JobCaptchaAnnotationsDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -83,6 +99,7 @@ import Decimal from 'decimal.js';
 import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
+import stringify from 'json-stable-stringify';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -177,6 +194,17 @@ describe('JobService', () => {
             return MOCK_BUCKET_NAME;
           case 'CVAT_JOB_SIZE':
             return 1;
+          case 'PGP_PRIVATE_KEY': 
+            return MOCK_PGP_PRIVATE_KEY;
+          case 'PGP_PUBLIC_KEY': 
+            return MOCK_PGP_PUBLIC_KEY;
+          case 'HCAPTCHA_PGP_PUBLIC_KEY': 
+            return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
+          case 'HCAPTHCHA_JOB_API_KEY':
+            return MOCK_HCAPTHCHA_JOB_API_KEY
+          case 'HCAPTCHA_ORACLE_ADDRESS':
+            return MOCK_HCAPTCHA_ORACLE_ADDRESS
+          
         }
       }),
     };
@@ -216,7 +244,7 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
 
-    storageService.uploadManifest = jest.fn().mockResolvedValue(
+    storageService.uploadFile = jest.fn().mockResolvedValue(
       {
         url: MOCK_FILE_URL,
         hash: MOCK_FILE_HASH,
@@ -450,7 +478,7 @@ describe('JobService', () => {
       });
     });
 
-    it('should create a fortune job successfully on network selected from round robin logic', async () => {
+    it('should create a job successfully on network selected from round robin logic', async () => {
       const fundAmount = imageLabelBinaryJobDto.fundAmount;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -523,6 +551,161 @@ describe('JobService', () => {
           userId,
           JobRequestType.IMAGE_POINTS,
           imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorJob.NotCreated);
+    });
+  });
+
+  describe('createJob with hCaptcha type', () => {
+    const userId = 1;
+    const jobId = 123;
+
+    const hCaptchaJobDto: JobCaptchaDto = {
+      dataUrl: MOCK_FILE_URL,  
+      accuracyTarget: 0.9,
+      completionDate: new Date(),
+      minRequests: 1,
+      maxRequests: 4,
+      advanced: {
+        workerLanguage: WorkerLanguage.EN,
+        workerLocation: WorkerLocation.FR,
+        targetBrowser: WorkerBrowser.DESKTOP
+      },
+      annotations: {
+        typeOfJob: JobCaptchaShapeType.COMPARISON,
+        taskBidPrice: 1,
+        labelingPrompt: "Test description",
+        groundTruths: MOCK_FILE_URL,
+        exampleImages: [
+          MOCK_FILE_URL
+        ]
+      }
+    };
+
+    let getUserBalanceMock: any;
+
+    beforeEach(() => {
+      getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
+      createPaymentMock.mockResolvedValue(true);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should create a job successfully', async () => {
+      const fundAmount = 1;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const mockJobEntity: Partial<JobEntity> = {
+        id: jobId,
+        userId: userId,
+        chainId: ChainId.LOCALHOST,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        fee,
+        fundAmount,
+        status: JobStatus.PENDING,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+      
+      await jobService.createJob(
+        userId,
+        JobRequestType.HCAPTCHA,
+        hCaptchaJobDto,
+      );
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(paymentRepository.create).toHaveBeenCalledWith({
+        userId,
+        jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.WITHDRAWAL,
+        currency: TokenId.HMT,
+        amount: -mul(fundAmount + fee, rate),
+        rate: div(1, rate),
+        status: PaymentStatus.SUCCEEDED,
+      });
+      expect(jobRepository.create).toHaveBeenCalledWith({
+        chainId: hCaptchaJobDto.chainId,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        fee: Number(mul(fee, rate).toFixed(3)),
+        fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
+    it('should create a job successfully on network selected from round robin logic', async () => {
+      const fundAmount = 1;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+
+      jest
+        .spyOn(routingProtocolService, 'selectNetwork')
+        .mockReturnValue(ChainId.MOONBEAM);
+
+      await jobService.createJob(userId, JobRequestType.HCAPTCHA, {
+        ...hCaptchaJobDto,
+        chainId: undefined,
+      });
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+      expect(jobRepository.create).toHaveBeenCalledWith({
+        chainId: ChainId.MOONBEAM,
+        userId,
+        manifestUrl: expect.any(String),
+        manifestHash: expect.any(String),
+        fee: mul(fee, rate),
+        fundAmount: mul(fundAmount, rate),
+        status: JobStatus.PENDING,
+        waitUntil: expect.any(Date),
+      });
+    });
+
+    it('should throw an exception for insufficient user balance', async () => {
+      const userBalance = 1;
+
+      jest
+        .spyOn(paymentService, 'getUserBalance')
+        .mockResolvedValue(userBalance);
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.HCAPTCHA,
+          hCaptchaJobDto,
+        ),
+      ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
+    });
+
+    it('should throw an exception if job entity creation fails', async () => {
+      const userBalance = 100;
+
+      getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+
+      jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.HCAPTCHA,
+          hCaptchaJobDto,
         ),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
@@ -840,7 +1023,7 @@ describe('JobService', () => {
     let uploadFilesMock: any;
 
     beforeEach(() => {
-      uploadFilesMock = storageService.uploadManifest;
+      uploadFilesMock = storageService.uploadFile;
     });
 
     afterEach(() => {
@@ -861,8 +1044,9 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        fortuneManifestParams
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        fortuneManifestParams,
+        undefined
       );
     });
 
@@ -876,8 +1060,9 @@ describe('JobService', () => {
       ).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        fortuneManifestParams
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        fortuneManifestParams,
+        undefined
       );
     });
 
@@ -891,8 +1076,9 @@ describe('JobService', () => {
         jobService.saveManifest(fortuneManifestParams),
       ).rejects.toThrowError(new Error(errorMessage));
 
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        fortuneManifestParams
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        fortuneManifestParams,
+        undefined
       );
     });
   });
@@ -921,7 +1107,7 @@ describe('JobService', () => {
     let uploadFilesMock: any;
 
     beforeEach(() => {
-      uploadFilesMock = storageService.uploadManifest;
+      uploadFilesMock = storageService.uploadFile;
     });
 
     afterEach(() => {
@@ -942,8 +1128,9 @@ describe('JobService', () => {
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
       });
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        manifest
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        manifest,
+        undefined
       );
     });
 
@@ -955,8 +1142,9 @@ describe('JobService', () => {
       await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
         new BadGatewayException(ErrorBucket.UnableSaveFile),
       );
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        manifest
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        manifest,
+        undefined
       );
     });
 
@@ -969,8 +1157,98 @@ describe('JobService', () => {
       await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
         new Error(errorMessage),
       );
-      expect(storageService.uploadManifest).toHaveBeenCalledWith(
-        manifest
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        manifest,
+        undefined
+      );
+    });
+  });
+
+  describe('saveManifest with hCaptcha request type', () => {
+    const commonManifestProperties = {
+      job_mode: JobCaptchaMode.BATCH,
+      job_api_key: MOCK_HCAPTHCHA_JOB_API_KEY,
+      requester_accuracy_target: 0.9,
+      request_config: {},
+      requester_max_repeats: 4,
+      requester_min_repeats: 1,
+      requester_question: { en: "Test description" },
+      requester_question_example: [],
+      job_total_tasks: 10,
+      task_bid_price: 0.1,
+      groundtruth_uri: MOCK_FILE_URL,
+      taskdata_uri: MOCK_FILE_URL
+    };
+
+    const comparisonManifest: HCaptchaManifestDto = {
+      ...commonManifestProperties,
+      request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+      restricted_audience: {
+        lang: [{ [WorkerLanguage.EN]: { score: 1 } }],
+        browser: [{ [WorkerLocation.FR]: { score: 1 } }],
+        country: [{ [WorkerBrowser.DESKTOP]: { score: 1 } }]
+      },
+      requester_restricted_answer_set: {},
+      public_results: true,
+      oracle_stake: 0.05
+    }
+
+    let uploadFilesMock: any;
+
+    beforeEach(() => {
+      uploadFilesMock = storageService.uploadFile;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should save the manifest and return the manifest URL and hash', async () => {
+      uploadFilesMock.mockResolvedValue(
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      );
+
+      const result = await jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST);
+
+      expect(result).toEqual({
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+      });
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        comparisonManifest,
+        MOCK_ENCRYPTED_MANIFEST
+      );
+    });
+
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST)).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        comparisonManifest,
+        MOCK_ENCRYPTED_MANIFEST
+      );
+    });
+
+    it('should rethrow any other errors encountered', async () => {
+      const errorMessage = 'Something went wrong';
+      const uploadError = new Error(errorMessage);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST)).rejects.toThrowError(
+        new Error(errorMessage),
+      );
+      expect(storageService.uploadFile).toHaveBeenCalledWith(
+        comparisonManifest,
+        MOCK_ENCRYPTED_MANIFEST
       );
     });
   });

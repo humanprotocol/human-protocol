@@ -9,7 +9,7 @@ import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { hashStream } from '../../common/utils';
 import { CvatManifestDto, FortuneManifestDto, HCaptchaManifestDto } from '../job/job.dto';
-import { ErrorBucket } from 'src/common/constants/errors';
+import { ErrorBucket } from '../../common/constants/errors';
 import { parseString } from 'xml2js';
 import stringify from 'json-stable-stringify'
 
@@ -43,8 +43,8 @@ export class StorageService {
     }
   }
 
-  public async uploadManifest(
-    origin: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+  public async uploadFile(
+    origin: object,
     encrypted?: string
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
@@ -55,34 +55,6 @@ export class StorageService {
     const content = encrypted ? encrypted : stringify(origin);
     const hash = crypto.createHash('sha1').update(stringify(origin)).digest('hex');
     const key = encrypted ? `s3${hash}`: `s3${hash}.json`;
-
-    try {
-      await this.minioClient.putObject(
-        this.s3Config.bucket,
-        key,
-        content,
-        {
-          'Content-Type': contentType,
-        },
-      );
-
-      return { url: this.getUrl(key), hash };
-    } catch (e) {
-      throw new BadRequestException('File not uploaded');
-    }
-  }
-
-  public async uploadFile(
-    data: any
-  ): Promise<UploadedFile> {
-    if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
-      throw new BadRequestException('Bucket not found');
-    }
-
-    const contentType = 'application/json';
-    const content = stringify(data);
-    const hash = crypto.createHash('sha1').update(stringify(data)).digest('hex');
-    const key = `s3${hash}.json`;
 
     try {
       await this.minioClient.putObject(

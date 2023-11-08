@@ -96,7 +96,7 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { string } from 'joi';
 import stringify from 'json-stable-stringify'
 
@@ -155,11 +155,12 @@ export class JobService {
         requester_max_repeats: jobDto.maxRequests,
         requester_min_repeats: jobDto.minRequests,
         requester_question: { en: jobDto.annotations.labelingPrompt },
-        requester_question_example: jobDto.annotations.exampleImages || [],
         job_total_tasks: objectsInBucket.length,
         task_bid_price: jobDto.annotations.taskBidPrice,
         groundtruth_uri: jobDto.annotations.groundTruths,
         taskdata_uri: await this.generateAndUploadTaskData(objectsInBucket),
+        public_results: true,
+        oracle_stake: 0.05
     };
 
     switch (jobType) {
@@ -167,16 +168,18 @@ export class JobService {
           return {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
+              requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
         case JobCaptchaShapeType.CATEGORAZATION:
           const categorizationManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
+              requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
           const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
@@ -185,6 +188,11 @@ export class JobService {
           return categorizationManifest;
 
         case JobCaptchaShapeType.POLYGON:
+          if (!jobDto.annotations.label) {
+            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+          }
+          
           const polygonManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
@@ -196,13 +204,19 @@ export class JobService {
                   max_points: 4,
                   minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
               },
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
+              requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
           return polygonManifest;
 
         case JobCaptchaShapeType.POINT:
+          if (!jobDto.annotations.label) {
+            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+          }
+
           const pointManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
@@ -213,12 +227,18 @@ export class JobService {
                   min_points: 1,
                   max_points: 8,
               },
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
+              requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
           return pointManifest;
         case JobCaptchaShapeType.BOUNDING_BOX:
+          if (!jobDto.annotations.label) {
+            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+          }
+
           const boundingBoxManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
@@ -229,12 +249,18 @@ export class JobService {
                   min_points: 4,
                   max_points: 4,
               },
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
+              requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
             return boundingBoxManifest;
         case JobCaptchaShapeType.IMMO:
+          if (!jobDto.annotations.label) {
+            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+          }
+
           const immoManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
@@ -246,8 +272,8 @@ export class JobService {
                   max_length: 100,
                   min_length: 1
               },
-              restricted_audience: this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label]: { en: jobDto.annotations.label } },
+              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
           };
 
           return immoManifest;
@@ -329,9 +355,8 @@ export class JobService {
         (dto as JobCaptchaDto).annotations.typeOfJob,
         dto as JobCaptchaDto
       );
-
+      
       fundAmount = manifestOrigin.task_bid_price * manifestOrigin.job_total_tasks;
-
       manifestEncryped = await EncryptionUtils.encrypt(
         stringify(manifestOrigin), 
         [
@@ -382,7 +407,7 @@ export class JobService {
       this.logger.log(ErrorJob.NotCreated, JobService.name);
       throw new NotFoundException(ErrorJob.NotCreated);
     }
-  
+
     try {
       await this.paymentRepository.create({
         userId,
@@ -544,7 +569,7 @@ export class JobService {
     origin: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
     encryped?: string
   ): Promise<SaveManifestDto> {
-    const uploadedManifest: UploadedFile = await this.storageService.uploadManifest(
+    const uploadedManifest: UploadedFile = await this.storageService.uploadFile(
       origin,
       encryped
     );

@@ -15,6 +15,7 @@ import { StorageService } from './storage.service';
 import crypto from 'crypto';
 import axios from 'axios';
 import stream from 'stream';
+import stringify from 'json-stable-stringify';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -62,20 +63,20 @@ describe('Web3Service', () => {
     storageService = moduleRef.get<StorageService>(StorageService);
   });
 
-  describe('uploadManifest', () => {
+  describe('uploadFile', () => {
     it('should upload the manifest correctly', async () => {
       storageService.minioClient.bucketExists = jest
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = crypto.createHash('sha1').update(JSON.stringify(MOCK_MANIFEST)).digest('hex');
+      const hash = crypto.createHash('sha1').update(stringify(MOCK_MANIFEST)).digest('hex');
 
-      const fileData = await storageService.uploadManifest(MOCK_MANIFEST);
+      const fileData = await storageService.uploadFile(MOCK_MANIFEST);
       expect(fileData).toEqual({
         url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/s3${hash}.json`,
         hash: crypto
           .createHash('sha1')
-          .update(JSON.stringify(MOCK_MANIFEST))
+          .update(stringify(MOCK_MANIFEST))
           .digest('hex'),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
@@ -94,7 +95,7 @@ describe('Web3Service', () => {
         .mockResolvedValueOnce(false);
 
       await expect(
-        storageService.uploadManifest(MOCK_MANIFEST),
+        storageService.uploadFile(MOCK_MANIFEST),
       ).rejects.toThrow('Bucket not found');
     });
 
@@ -107,7 +108,7 @@ describe('Web3Service', () => {
         .mockRejectedValueOnce('Network error');
 
       await expect(
-        storageService.uploadManifest(MOCK_MANIFEST),
+        storageService.uploadFile(MOCK_MANIFEST),
       ).rejects.toThrow('File not uploaded');
     });
   });

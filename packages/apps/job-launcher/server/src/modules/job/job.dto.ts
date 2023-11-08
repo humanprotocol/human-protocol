@@ -414,7 +414,7 @@ export class JobCaptchaAnnotationsDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  label: string;
+  label?: string;
 
   @ApiProperty()
   @IsString()
@@ -564,7 +564,7 @@ export class HCaptchaManifestDto {
 
   @IsArray()
   @IsUrl({}, { each: true })
-  requester_question_example: string[];
+  requester_question_example?: string[];
 
   @IsObject()
   @IsString()
@@ -581,6 +581,11 @@ export class HCaptchaManifestDto {
 
   @IsUrl()
   groundtruth_uri: string;
+
+  public_results: boolean;
+
+  @IsNumber()
+  oracle_stake: number;
 
   @IsObject()
   @ValidateNested()
