@@ -1,7 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from '../user/user.entity';
+import { NS } from '../../common/constants';
 
-@Entity('api_keys')
+@Entity({ schema: NS, name: 'api_keys' })
 export class ApiKeyEntity {
   @PrimaryGeneratedColumn()
   public id: number;
