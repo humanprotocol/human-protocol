@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from human_protocol_sdk.constants import NETWORKS, ChainId
+from human_protocol_sdk.constants import ChainId
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 
@@ -62,24 +62,22 @@ class ServiceIntegrationTest(unittest.TestCase):
         )
 
     def test_sign_message_polygon(self):
-        with patch("src.chain.web3.get_web3") as mock_function:
-            with patch(
-                "src.chain.web3.Config.polygon_mainnet.private_key",
-                DEFAULT_GAS_PAYER_PRIV,
-            ):
-                mock_function.return_value = self.w3
-                signed_message = sign_message(ChainId.POLYGON.value, "message")
-            self.assertEqual(signed_message, SIGNATURE)
+        with patch("src.chain.web3.get_web3") as mock_function, patch(
+            "src.chain.web3.Config.polygon_mainnet.private_key",
+            DEFAULT_GAS_PAYER_PRIV,
+        ):
+            mock_function.return_value = self.w3
+            signed_message, _ = sign_message(ChainId.POLYGON.value, "message")
+        self.assertEqual(signed_message, SIGNATURE)
 
     def test_sign_message_mumbai(self):
-        with patch("src.chain.web3.get_web3") as mock_function:
-            with patch(
-                "src.chain.web3.Config.polygon_mumbai.private_key",
-                DEFAULT_GAS_PAYER_PRIV,
-            ):
-                mock_function.return_value = self.w3
-                signed_message = sign_message(ChainId.POLYGON_MUMBAI.value, "message")
-            self.assertEqual(signed_message, SIGNATURE)
+        with patch("src.chain.web3.get_web3") as mock_function, patch(
+            "src.chain.web3.Config.polygon_mumbai.private_key",
+            DEFAULT_GAS_PAYER_PRIV,
+        ):
+            mock_function.return_value = self.w3
+            signed_message, _ = sign_message(ChainId.POLYGON_MUMBAI.value, "message")
+        self.assertEqual(signed_message, SIGNATURE)
 
     def test_sign_message_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
