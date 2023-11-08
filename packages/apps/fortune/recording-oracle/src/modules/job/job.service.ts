@@ -53,7 +53,7 @@ export class JobService {
       (exchangeSolution) => !exchangeSolution.error,
     );
 
-    filteredExchangeSolution.forEach((exchangeSolution) => {
+    filteredExchangeSolution.forEach(async (exchangeSolution) => {
       if (errorSolutions.includes(exchangeSolution)) return;
 
       const duplicatedInRecording = recordingSolutions.filter(
@@ -82,7 +82,7 @@ export class JobService {
             }
           });
         }
-        if (checkCurseWords(exchangeSolution.solution))
+        if (await checkCurseWords(exchangeSolution.solution))
           errorSolutions.push({
             ...exchangeSolution,
             error: SolutionError.CurseWord,
