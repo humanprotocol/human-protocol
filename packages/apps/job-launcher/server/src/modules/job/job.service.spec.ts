@@ -60,6 +60,7 @@ import {
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
   MOCK_PGP_PUBLIC_KEY,
+  MOCK_MANIFEST,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
   MOCK_RECORDING_ORACLE_FEE,
@@ -1251,9 +1252,22 @@ describe('JobService', () => {
 
   describe('getResult', () => {
     let downloadFileFromUrlMock: any;
+    const jobEntityMock = {
+      status: JobStatus.COMPLETED,
+      fundAmount: 100,
+      userId: 1,
+      id: 1,
+      manifestUrl: MOCK_FILE_URL,
+      manifestHash: MOCK_FILE_HASH,
+      escrowAddress: MOCK_ADDRESS,
+      chainId: ChainId.LOCALHOST,
+      save: jest.fn(),
+    };
+    
 
     beforeEach(() => {
       downloadFileFromUrlMock = storageService.download
+      jobRepository.findOne = jest.fn().mockResolvedValue(jobEntityMock);
     });
 
     afterEach(() => {
@@ -1261,45 +1275,55 @@ describe('JobService', () => {
     });
 
     it('should download and return the fortune result', async () => {
-      const fortuneResult: FortuneFinalResultDto = {
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solution: 'good',
+      const fortuneResult: FortuneFinalResultDto[] = [
+        {
+          workerAddress: MOCK_ADDRESS,
+          solution: 'good',
+        },
+        {
+          workerAddress: MOCK_ADDRESS,
+          solution: 'bad',
+          error: 'wrong answer',
+        },
+      ];
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      }));
+      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
+      downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
+
+      const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
+
+      expect(storageService.download).toHaveBeenCalledWith(
+        MOCK_FILE_URL,
+      );
+      expect(storageService.download).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(fortuneResult);
+    });
+
+    it('should download and return the image binary result', async () => {
+      const manifestMock = {
+        requestType: JobRequestType.IMAGE_BOXES,
       };
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       }));
-      downloadFileFromUrlMock.mockResolvedValue(fortuneResult);
+
+      downloadFileFromUrlMock.mockResolvedValue(manifestMock);
 
       const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
 
       expect(storageService.download).toHaveBeenCalledWith(
         MOCK_FILE_URL,
       );
-      expect(result).toEqual(fortuneResult);
-    });
-
-    it('should download and return the image binary result', async () => {
-      const imageBinaryResult: CvatFinalResultDto = {
-        url: 'https://example.com',
-        final_answer: 'good',
-        correct: ['good', 'good', 'good'],
-        wrong: [''],
-      };
-
-      downloadFileFromUrlMock.mockResolvedValue(imageBinaryResult);
-
-      const result = await jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID);
-
-      expect(storageService.download).toHaveBeenCalledWith(
-        MOCK_FILE_URL,
-      );
-      expect(result).toEqual(imageBinaryResult);
+      expect(result).toEqual(MOCK_FILE_URL);
     });
 
     it('should throw a NotFoundException if the result is not found', async () => {
-      downloadFileFromUrlMock.mockResolvedValue(null);
+      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
+      downloadFileFromUrlMock.mockResolvedValueOnce(null);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
@@ -1307,23 +1331,38 @@ describe('JobService', () => {
       expect(storageService.download).toHaveBeenCalledWith(
         MOCK_FILE_URL,
       );
+      expect(storageService.download).toHaveBeenCalledTimes(2);
     });
 
     it('should throw a NotFoundException if the result is not valid', async () => {
-      downloadFileFromUrlMock.mockResolvedValue({
-        exchangeAddress: MOCK_ADDRESS,
-        workerAddress: MOCK_ADDRESS,
-        solutionNotFortune: 'good',
-      });
+      const fortuneResult: any[] = [
+        {
+          wrongAddress: MOCK_ADDRESS,
+          solution: 1,
+        },
+        {
+          wrongAddress: MOCK_ADDRESS,
+          solution: 1,
+          error: 1,
+        },
+      ];
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
+      }));
+      downloadFileFromUrlMock.mockResolvedValueOnce(MOCK_MANIFEST);
+      downloadFileFromUrlMock.mockResolvedValueOnce(fortuneResult);
 
       await expect(
         jobService.getResult(MOCK_USER_ID, MOCK_JOB_ID),
       ).rejects.toThrowError(
         new NotFoundException(ErrorJob.ResultValidationFailed),
       );
+
       expect(storageService.download).toHaveBeenCalledWith(
         MOCK_FILE_URL,
       );
+      expect(storageService.download).toHaveBeenCalledTimes(2);
     });
   });
 

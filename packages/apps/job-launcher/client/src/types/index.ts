@@ -135,3 +135,13 @@ export type JobDetailsResponse = {
     slashed: number;
   };
 };
+
+export type JobDetailsResults = JobDetailsResponse & {
+  results?: FortuneFinalResult[] | string;
+};
+
+export type FortuneFinalResult = {
+  exchangeAddress: string;
+  workerAddress: string;
+  solution: string;
+};
