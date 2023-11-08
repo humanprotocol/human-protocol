@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChainId } from '@human-protocol/sdk';
 import { IsBoolean, IsEnum, IsNumber, IsPositive, IsString } from 'class-validator';
 
@@ -23,11 +23,13 @@ export class liquidityRequestDto {
   @IsValidEthereumAddress()
   public liquidityProvider: string;
 
-  @ApiProperty()
-  public liquidityProviderAPIKEY: string | undefined;
+  @ApiPropertyOptional()
+  @IsString()
+  public liquidityProviderAPIKEY?: string ;
 
-  @ApiProperty()
-  public liquidityProviderAPISecret: string | undefined;
+  @ApiPropertyOptional()
+  @IsString()
+  public liquidityProviderAPISecret?: string;
 
   @ApiProperty()
   @IsBoolean()
