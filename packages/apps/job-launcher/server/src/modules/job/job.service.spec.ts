@@ -56,7 +56,6 @@ import {
   MOCK_FILE_URL,
   MOCK_HCAPTCHA_ORACLE_ADDRESS,
   MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
-  MOCK_HCAPTHCHA_JOB_API_KEY,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
@@ -200,8 +199,6 @@ describe('JobService', () => {
             return MOCK_PGP_PUBLIC_KEY;
           case 'HCAPTCHA_PGP_PUBLIC_KEY': 
             return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
-          case 'HCAPTHCHA_JOB_API_KEY':
-            return MOCK_HCAPTHCHA_JOB_API_KEY
           case 'HCAPTCHA_ORACLE_ADDRESS':
             return MOCK_HCAPTCHA_ORACLE_ADDRESS
           
@@ -1167,7 +1164,6 @@ describe('JobService', () => {
   describe('saveManifest with hCaptcha request type', () => {
     const commonManifestProperties = {
       job_mode: JobCaptchaMode.BATCH,
-      job_api_key: MOCK_HCAPTHCHA_JOB_API_KEY,
       requester_accuracy_target: 0.9,
       request_config: {},
       requester_max_repeats: 4,

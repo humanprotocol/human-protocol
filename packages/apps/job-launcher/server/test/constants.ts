@@ -66,7 +66,6 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   requestType: JobRequestType.FORTUNE,
 };
 export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest'
-export const MOCK_HCAPTHCHA_JOB_API_KEY='qdf971a8-48e6-1fds-20gd-218bd06e64f5'
 export const MOCK_PGP_PRIVATE_KEY=`-----BEGIN PGP PRIVATE KEY BLOCK-----
 
 xVgEZTveLhYJKwYBBAHaRw8BAQdAD7pTrDk129glXoPH+rMofQwsQuyuo1j0

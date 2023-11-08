@@ -149,7 +149,6 @@ export class JobService {
 
     const commonManifestProperties = {
         job_mode: JobCaptchaMode.BATCH,
-        job_api_key: this.configService.get<string>(ConfigNames.HCAPTHCHA_JOB_API_KEY)!,
         requester_accuracy_target: jobDto.accuracyTarget,
         request_config: {},
         requester_max_repeats: jobDto.maxRequests,

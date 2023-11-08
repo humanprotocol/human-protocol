@@ -543,9 +543,6 @@ export class HCaptchaManifestDto {
   @IsString()
   job_mode: string;
 
-  @IsString()
-  job_api_key: string;
-
   @IsEnum(JobCaptchaRequestType)
   request_type: JobCaptchaRequestType;
 
