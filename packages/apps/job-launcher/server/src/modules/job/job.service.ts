@@ -527,11 +527,10 @@ export class JobService {
   public async getResult(
     userId: number,
     jobId: number,
-  ): Promise<FortuneFinalResultDto | CvatFinalResultDto> {
+  ): Promise<FortuneFinalResultDto[] | string> {
     const jobEntity = await this.jobRepository.findOne({
       id: jobId,
       userId,
-      status: JobStatus.LAUNCHED,
     });
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -550,38 +549,38 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const result = await this.storageService.download(finalResultUrl);
-
-    if (!result) {
-      throw new NotFoundException(ErrorJob.ResultNotFound);
-    }
-
-    const fortuneDtoCheck = new FortuneFinalResultDto();
-    const imageLabelBinaryDtoCheck = new CvatFinalResultDto();
-
-    Object.assign(fortuneDtoCheck, result);
-    Object.assign(imageLabelBinaryDtoCheck, result);
-
-    const fortuneValidationErrors: ValidationError[] = await validate(
-      fortuneDtoCheck,
-    );
-    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
-      imageLabelBinaryDtoCheck,
-    );
+    const manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (
-      fortuneValidationErrors.length > 0 &&
-      imageLabelBinaryValidationErrors.length > 0
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
     ) {
-      this.logger.log(
-        ErrorJob.ResultValidationFailed,
-        JobService.name,
-        fortuneValidationErrors,
-        imageLabelBinaryValidationErrors,
-      );
-      throw new NotFoundException(ErrorJob.ResultValidationFailed);
-    }
+      const result = await this.storageService.download(finalResultUrl);
 
-    return result;
+      if (!result) {
+        throw new NotFoundException(ErrorJob.ResultNotFound);
+      }
+
+      let allFortuneValidationErrors: ValidationError[] = [];
+      
+      for (const fortune of result) {
+        const fortuneDtoCheck = new FortuneFinalResultDto();
+        Object.assign(fortuneDtoCheck, fortune);
+        const fortuneValidationErrors: ValidationError[] = await validate(
+          fortuneDtoCheck,
+        );
+        allFortuneValidationErrors.push(...fortuneValidationErrors);
+      }
+      
+      if (allFortuneValidationErrors.length > 0) {
+        this.logger.log(
+          ErrorJob.ResultValidationFailed,
+          JobService.name,
+          allFortuneValidationErrors,
+        );
+        throw new NotFoundException(ErrorJob.ResultValidationFailed);
+      }
+      return result
+    }
+    return finalResultUrl;
   }
 
   public async launchCronJob() {
