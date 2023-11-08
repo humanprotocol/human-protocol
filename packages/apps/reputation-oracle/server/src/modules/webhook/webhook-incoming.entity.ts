@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
@@ -6,6 +6,7 @@ import { WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 
 @Entity({ schema: NS, name: 'webhook_incoming' })
+@Index(['chainId', 'escrowAddress'], { unique: true })
 export class WebhookIncomingEntity extends BaseEntity {
   @Column({ type: 'int' })
   public chainId: ChainId;
