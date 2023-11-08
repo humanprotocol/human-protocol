@@ -567,7 +567,6 @@ export class HCaptchaManifestDto {
   requester_question_example?: string[];
 
   @IsObject()
-  @IsString()
   requester_question: Record<string, string>;
 
   @IsUrl()

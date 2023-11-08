@@ -43,7 +43,6 @@ export const SENDGRID_TEMPLATES = {
   passwordChanged: 'd-ca0ac7e6fff845829cd0167af09f25cf',
 };
 
-export const HCAPTCHA_ = 4;
 export const HCAPTCHA_MIN_SHAPES_PER_IMAGE = 1;
 export const HCAPTCHA_MAX_SHAPES_PER_IMAGE = 1;
 export const HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE = 5;

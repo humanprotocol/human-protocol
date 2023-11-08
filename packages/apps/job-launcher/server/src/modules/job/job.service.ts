@@ -346,8 +346,34 @@ export class JobService {
     if (chainId) {
       this.web3Service.validateChainId(chainId);
     }
-  
+
     let manifestOrigin, manifestEncryped, fundAmount;
+
+    if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
+      dto = dto as JobCaptchaDto;
+      const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
+      fundAmount = (dto as JobCaptchaDto).annotations.taskBidPrice * objectsInBucket.length;
+      
+    } else if (requestType === JobRequestType.FORTUNE) { // Fortune
+      dto = dto as JobFortuneDto;
+      fundAmount = dto.fundAmount;
+      
+    } else { // CVAT
+      dto = dto as JobCvatDto;
+      fundAmount = dto.fundAmount;
+    }
+
+    const userBalance = await this.paymentService.getUserBalance(userId);
+    const rate = await getRate(Currency.USD, TokenId.HMT);
+    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
+  
+    const fee = mul(div(feePercentage, 100), fundAmount);
+    const usdTotalAmount = add(fundAmount, fee);
+  
+    if (lt(userBalance, usdTotalAmount)) {
+      this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
+      throw new BadRequestException(ErrorJob.NotEnoughFunds);
+    }
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
       manifestOrigin = await this.createHCaptchaManifest(
@@ -355,7 +381,6 @@ export class JobService {
         dto as JobCaptchaDto
       );
       
-      fundAmount = manifestOrigin.task_bid_price * manifestOrigin.job_total_tasks;
       manifestEncryped = await EncryptionUtils.encrypt(
         stringify(manifestOrigin), 
         [
@@ -371,18 +396,6 @@ export class JobService {
       dto = dto as JobCvatDto;
       manifestOrigin = await this.createCvatManifest(dto, requestType);
       fundAmount = dto.fundAmount;
-    }
-  
-    const userBalance = await this.paymentService.getUserBalance(userId);
-    const rate = await getRate(Currency.USD, TokenId.HMT);
-    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
-  
-    const fee = mul(div(feePercentage, 100), fundAmount);
-    const usdTotalAmount = add(fundAmount, fee);
-  
-    if (lt(userBalance, usdTotalAmount)) {
-      this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
-      throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
   
     const tokenFundAmount = mul(fundAmount, rate);
@@ -831,7 +844,7 @@ export class JobService {
       if (!jobEntity) return;
 
       const manifest = await this.storageService.download(jobEntity.manifestUrl);
-      //await this.validateManifest(manifest);
+      await this.validateManifest(manifest);
 
       if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);
