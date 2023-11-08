@@ -2,7 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
@@ -249,7 +249,30 @@ export default function JobDetail() {
                   alignItems: 'center',
                 }}
               >
-                <CardTextRow label="URL" value={data.results as string} />
+                <Stack direction="row" spacing={3}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ minWidth: 130 }}
+                  >
+                    URL :
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    <Link
+                      style={{
+                        textDecoration: 'underline',
+                        alignItems: 'left',
+                      }}
+                      to={data.results as string}
+                    >
+                      {data.results as string}
+                    </Link>
+                  </Typography>
+                </Stack>
               </Box>
             )}
           </Box>
