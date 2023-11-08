@@ -1,12 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from sqlalchemy import ColumnExpressionArgument, delete, insert, update
+from sqlalchemy import delete, insert, update
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import select
 
 from src.core.types import AssignmentStatus, JobStatuses, ProjectStatuses, TaskStatus
+from src.db.utils import ForUpdateParams
+from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
 from src.utils.time import utcnow
 
@@ -43,37 +44,56 @@ def create_project(
     return project_id
 
 
-def get_project_by_id(session: Session, project_id: str) -> Optional[Project]:
-    project_query = select(Project).where(Project.id == project_id)
-    project = session.execute(project_query).scalars().first()
+def get_project_by_id(
+    session: Session,
+    project_id: str,
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
+    status_in: Optional[List[ProjectStatuses]] = None,
+) -> Optional[Project]:
+    if status_in:
+        status_filter_arg = [Project.status.in_(s.value for s in status_in)]
+    else:
+        status_filter_arg = []
 
-    return project
+    return (
+        _maybe_for_update(session.query(Project), enable=for_update)
+        .where(Project.id == project_id, *status_filter_arg)
+        .first()
+    )
 
 
-def get_project_by_escrow_address(session: Session, escrow_address: str) -> Optional[Project]:
-    project_query = select(Project).where(Project.escrow_address == escrow_address)
-    project = session.execute(project_query).scalars().first()
-
-    return project
+def get_project_by_escrow_address(
+    session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Project]:
+    return (
+        _maybe_for_update(session.query(Project), enable=for_update)
+        .where(Project.escrow_address == escrow_address)
+        .first()
+    )
 
 
 def get_projects_by_status(
-    session: Session, status: ProjectStatuses, limit: int = 5
+    session: Session,
+    status: ProjectStatuses,
+    *,
+    limit: int = 5,
+    for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
     projects = (
-        session.query(Project)
-        .where(
-            Project.status == status.value,
-        )
+        _maybe_for_update(session.query(Project), enable=for_update)
+        .where(Project.status == status.value)
         .limit(limit)
         .all()
     )
     return projects
 
 
-def get_available_projects(session: Session, limit: int = 10) -> List[Project]:
+def get_available_projects(
+    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Project]:
     return (
-        session.query(Project)
+        _maybe_for_update(session.query(Project), enable=for_update)
         .where(
             (Project.status == ProjectStatuses.annotation.value)
             & Project.jobs.any(
@@ -88,10 +108,14 @@ def get_available_projects(session: Session, limit: int = 10) -> List[Project]:
 
 
 def get_projects_by_assignee(
-    session: Session, wallet_address: Optional[str] = None, limit: int = 10
+    session: Session,
+    wallet_address: Optional[str] = None,
+    *,
+    limit: int = 10,
+    for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Project]:
     return (
-        session.query(Project)
+        _maybe_for_update(session.query(Project), enable=for_update)
         .where(
             Project.jobs.any(
                 Job.assignments.any(
@@ -149,26 +173,32 @@ def create_task(session: Session, cvat_id: int, cvat_project_id: int, status: Ta
     return task_id
 
 
-def get_task_by_id(session: Session, task_id: str) -> Optional[Task]:
-    task_query = select(Task).where(Task.id == task_id)
-    task = session.execute(task_query).scalars().first()
-
-    return task
-
-
-def get_tasks_by_cvat_id(session: Session, task_ids: List[int]) -> List[Task]:
-    return session.query(Task).where(Task.cvat_id.in_(task_ids)).all()
+def get_task_by_id(
+    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Task]:
+    return (
+        _maybe_for_update(session.query(Task), enable=for_update).where(Task.id == task_id).first()
+    )
 
 
-def get_tasks_by_status(session: Session, status: TaskStatus) -> List[Task]:
-    tasks = (
-        session.query(Task)
-        .where(
-            Task.status == status.value,
-        )
+def get_tasks_by_cvat_id(
+    session: Session, task_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Task]:
+    return (
+        _maybe_for_update(session.query(Task), enable=for_update)
+        .where(Task.cvat_id.in_(task_ids))
         .all()
     )
-    return tasks
+
+
+def get_tasks_by_status(
+    session: Session, status: TaskStatus, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Task]:
+    return (
+        _maybe_for_update(session.query(Task), enable=for_update)
+        .where(Task.status == status.value)
+        .all()
+    )
 
 
 def update_task_status(session: Session, task_id: int, status: TaskStatus) -> None:
@@ -176,15 +206,14 @@ def update_task_status(session: Session, task_id: int, status: TaskStatus) -> No
     session.execute(upd)
 
 
-def get_tasks_by_cvat_project_id(session: Session, cvat_project_id: int) -> List[Task]:
-    tasks = (
-        session.query(Task)
-        .where(
-            Task.cvat_project_id == cvat_project_id,
-        )
+def get_tasks_by_cvat_project_id(
+    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Task]:
+    return (
+        _maybe_for_update(session.query(Task), enable=for_update)
+        .where(Task.cvat_project_id == cvat_project_id)
         .all()
     )
-    return tasks
 
 
 def create_data_upload(
@@ -202,12 +231,20 @@ def create_data_upload(
     return upload_id
 
 
-def get_active_task_uploads_by_task_id(session: Session, task_ids: List[int]) -> List[DataUpload]:
-    return session.query(DataUpload).where(DataUpload.task_id.in_(task_ids)).all()
+def get_active_task_uploads_by_task_id(
+    session: Session, task_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[DataUpload]:
+    return (
+        _maybe_for_update(session.query(DataUpload), enable=for_update)
+        .where(DataUpload.task_id.in_(task_ids))
+        .all()
+    )
 
 
-def get_active_task_uploads(session: Session, *, limit: int = 10) -> List[DataUpload]:
-    return session.query(DataUpload).limit(limit).all()
+def get_active_task_uploads(
+    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
+) -> List[DataUpload]:
+    return _maybe_for_update(session.query(DataUpload), enable=for_update).limit(limit).all()
 
 
 def finish_uploads(session: Session, uploads: list[DataUpload]) -> None:
@@ -240,15 +277,20 @@ def create_job(
     return job_id
 
 
-def get_job_by_id(session: Session, job_id: str) -> Optional[Job]:
-    job_query = select(Job).where(Job.id == job_id)
-    job = session.execute(job_query).scalars().first()
+def get_job_by_id(
+    session: Session, job_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Job]:
+    return _maybe_for_update(session.query(Job), enable=for_update).where(Job.id == job_id).first()
 
-    return job
 
-
-def get_jobs_by_cvat_id(session: Session, cvat_ids: List[int]) -> List[Job]:
-    return session.query(Job).where(Job.cvat_id.in_(cvat_ids)).all()
+def get_jobs_by_cvat_id(
+    session: Session, cvat_ids: List[int], *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(Job.cvat_id.in_(cvat_ids))
+        .all()
+    )
 
 
 def update_job_status(session: Session, job_id: int, status: JobStatuses) -> None:
@@ -256,26 +298,24 @@ def update_job_status(session: Session, job_id: int, status: JobStatuses) -> Non
     session.execute(upd)
 
 
-def get_jobs_by_cvat_task_id(session: Session, cvat_task_id: int) -> List[Job]:
-    jobs = (
-        session.query(Job)
-        .where(
-            Job.cvat_task_id == cvat_task_id,
-        )
+def get_jobs_by_cvat_task_id(
+    session: Session, cvat_task_id: int, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(Job.cvat_task_id == cvat_task_id)
         .all()
     )
-    return jobs
 
 
-def get_jobs_by_cvat_project_id(session: Session, cvat_project_id: int) -> List[Job]:
-    jobs = (
-        session.query(Job)
-        .where(
-            Job.cvat_project_id == cvat_project_id,
-        )
+def get_jobs_by_cvat_project_id(
+    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(Job.cvat_project_id == cvat_project_id)
         .all()
     )
-    return jobs
 
 
 # Users
@@ -296,12 +336,24 @@ def put_user(session: Session, wallet_address: str, cvat_email: str, cvat_id: in
     return user
 
 
-def get_user_by_id(session: Session, wallet_address: str) -> Optional[User]:
-    return session.query(User).where(User.wallet_address == wallet_address).first()
+def get_user_by_id(
+    session: Session, wallet_address: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[User]:
+    return (
+        _maybe_for_update(session.query(User), enable=for_update)
+        .where(User.wallet_address == wallet_address)
+        .first()
+    )
 
 
-def get_user_by_email(session: Session, email: str) -> Optional[User]:
-    return session.query(User).where(User.cvat_email == email).first()
+def get_user_by_email(
+    session: Session, email: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[User]:
+    return (
+        _maybe_for_update(session.query(User), enable=for_update)
+        .where(User.cvat_email == email)
+        .first()
+    )
 
 
 # Assignments
@@ -326,24 +378,32 @@ def create_assignment(
     return obj_id
 
 
-def get_assignments_by_id(session: Session, ids: List[str]) -> List[Assignment]:
-    return session.query(Assignment).where(Assignment.id.in_(ids)).all()
+def get_assignments_by_id(
+    session: Session, ids: List[str], *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Assignment]:
+    return (
+        _maybe_for_update(session.query(Assignment), enable=for_update)
+        .where(Assignment.id.in_(ids))
+        .all()
+    )
 
 
 def get_latest_assignment_by_cvat_job_id(
-    session: Session, cvat_job_id: int
+    session: Session, cvat_job_id: int, *, for_update: Union[bool, ForUpdateParams] = False
 ) -> Optional[Assignment]:
     return (
-        session.query(Assignment)
+        _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(Assignment.cvat_job_id == cvat_job_id)
         .order_by(Assignment.created_at.desc())
         .first()
     )
 
 
-def get_unprocessed_expired_assignments(session: Session, limit: int = 10) -> List[Assignment]:
+def get_unprocessed_expired_assignments(
+    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Assignment]:
     return (
-        session.query(Assignment)
+        _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
             (Assignment.status == AssignmentStatus.created.value)
             & (Assignment.completed_at == None)
@@ -354,9 +414,11 @@ def get_unprocessed_expired_assignments(session: Session, limit: int = 10) -> Li
     )
 
 
-def get_active_assignments(session: Session, limit: int = 10) -> List[Assignment]:
+def get_active_assignments(
+    session: Session, *, limit: int = 10, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Assignment]:
     return (
-        session.query(Assignment)
+        _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
             (Assignment.status == AssignmentStatus.created.value)
             & (Assignment.completed_at == None)
@@ -400,10 +462,14 @@ def complete_assignment(session: Session, assignment_id: str, completed_at: date
 
 
 def get_user_assignments_in_cvat_projects(
-    session: Session, wallet_address: int, cvat_projects: List[int]
+    session: Session,
+    wallet_address: int,
+    cvat_projects: List[int],
+    *,
+    for_update: Union[bool, ForUpdateParams] = False,
 ) -> List[Assignment]:
     return (
-        session.query(Assignment)
+        _maybe_for_update(session.query(Assignment), enable=for_update)
         .where(
             Assignment.job.has(Job.cvat_project_id.in_(cvat_projects))
             & (Assignment.user_wallet_address == wallet_address)
@@ -427,5 +493,11 @@ def add_project_images(session: Session, cvat_project_id: int, filenames: List[s
     )
 
 
-def get_project_images(session: Session, cvat_project_id: int) -> List[Image]:
-    return session.query(Image).where(Image.cvat_project_id == cvat_project_id).all()
+def get_project_images(
+    session: Session, cvat_project_id: int, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[Image]:
+    return (
+        _maybe_for_update(session.query(Image), enable=for_update)
+        .where(Image.cvat_project_id == cvat_project_id)
+        .all()
+    )

@@ -14,6 +14,7 @@ from src.core.oracle_events import (
 )
 from src.core.types import JobStatuses, OracleWebhookTypes, ProjectStatuses, TaskStatus
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.handlers.annotation import (
     CVAT_EXPORT_FORMAT_MAPPING,
     FileDescriptor,
@@ -44,13 +45,14 @@ def track_completed_projects() -> None:
                 session,
                 ProjectStatuses.annotation,
                 limit=CronConfig.track_completed_projects_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             completed_project_ids = []
 
             for project in projects:
                 tasks = cvat_service.get_tasks_by_cvat_project_id(session, project.cvat_id)
-                if len(tasks) > 0 and all(task.status == TaskStatus.completed for task in tasks):
+                if tasks and all(task.status == TaskStatus.completed for task in tasks):
                     cvat_service.update_project_status(
                         session, project.id, ProjectStatuses.completed
                     )
@@ -82,15 +84,14 @@ def track_completed_tasks() -> None:
         logger.debug("Starting cron job")
         with SessionLocal.begin() as session:
             tasks = cvat_service.get_tasks_by_status(
-                session,
-                TaskStatus.annotation,
+                session, TaskStatus.annotation, for_update=ForUpdateParams(skip_locked=True)
             )
 
             completed_task_ids = []
 
             for task in tasks:
                 jobs = cvat_service.get_jobs_by_cvat_task_id(session, task.cvat_id)
-                if len(jobs) > 0 and all(job.status == JobStatuses.completed for job in jobs):
+                if jobs and all(job.status == JobStatuses.completed for job in jobs):
                     cvat_service.update_task_status(session, task.id, TaskStatus.completed)
 
                     completed_task_ids.append(task.cvat_id)
@@ -121,7 +122,9 @@ def track_assignments() -> None:
 
         with SessionLocal.begin() as session:
             assignments = cvat_service.get_unprocessed_expired_assignments(
-                session, limit=CronConfig.track_assignments_chunk_size
+                session,
+                limit=CronConfig.track_assignments_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for assignment in assignments:
@@ -147,7 +150,9 @@ def track_assignments() -> None:
 
         with SessionLocal.begin() as session:
             assignments = cvat_service.get_active_assignments(
-                session, limit=CronConfig.track_assignments_chunk_size
+                session,
+                limit=CronConfig.track_assignments_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for assignment in assignments:
@@ -196,6 +201,7 @@ def retrieve_annotations() -> None:
                 session,
                 ProjectStatuses.completed,
                 limit=CronConfig.retrieve_annotations_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for project in projects:
@@ -334,6 +340,7 @@ def track_task_creation() -> None:
             uploads = cvat_service.get_active_task_uploads(
                 session,
                 limit=CronConfig.track_creating_tasks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             logger.debug(

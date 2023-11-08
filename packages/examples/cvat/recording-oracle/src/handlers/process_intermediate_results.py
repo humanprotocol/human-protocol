@@ -122,10 +122,10 @@ def process_intermediate_results(
             ", ".join(f"{k}: {v:.2f}" for k, v in job_results.items()),
         )
 
-    task = db_service.get_task_by_escrow_address(session, escrow_address)
+    task = db_service.get_task_by_escrow_address(session, escrow_address, for_update=True)
     if not task:
         task_id = db_service.create_task(session, escrow_address=escrow_address, chain_id=chain_id)
-        task = db_service.get_task_by_id(session, task_id)
+        task = db_service.get_task_by_id(session, task_id, for_update=True)
 
     job_final_result_ids: Dict[int, str] = {}
     for job_meta in meta.jobs:
