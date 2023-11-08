@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard, ApiKeyGuard, SignatureAuthGuard } from '../../common/guards';
+import { JwtAuthGuard, SignatureAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import {
   JobFortuneDto,
@@ -25,7 +25,7 @@ import {
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
-import { Public } from '../../common/decorators';
+import { Public, ApiKey } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
@@ -37,7 +37,7 @@ import { Role } from '../../common/enums/role';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
-  @UseGuards(ApiKeyGuard)
+  @ApiKey()
   @Post('/fortune')
   public async createFortuneJob(
     @Request() req: RequestWithUser,
