@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { UserEntity } from './user.entity';
-import { UserDto, UserUpdateDto } from './user.dto';
+import { UserDto, UserUpdateDto, Web3UserDto } from './user.dto';
 import { ErrorUser } from '../../common/constants/errors';
 
 @Injectable()
@@ -61,6 +61,10 @@ export class UserRepository {
   }
 
   public async create(dto: UserDto): Promise<UserEntity> {
+    return this.userEntityRepository.create(dto).save();
+  }
+
+  public async createWeb3User(dto: Web3UserDto): Promise<UserEntity> {
     return this.userEntityRepository.create(dto).save();
   }
 }

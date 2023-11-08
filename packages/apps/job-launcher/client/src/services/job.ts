@@ -7,6 +7,7 @@ import {
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
+  FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
 
@@ -61,11 +62,18 @@ export const getJobList = async ({
 };
 
 export const getJobResult = async (jobId: number) => {
-  const { data } = await api.get(`/job/result`, { params: { jobId } });
+  const { data } = await api.get<FortuneFinalResult[] | string>(`/job/result`, {
+    params: { jobId },
+  });
   return data;
 };
 
 export const getJobDetails = async (jobId: number) => {
   const { data } = await api.get<JobDetailsResponse>(`/job/details/${jobId}`);
+  return data;
+};
+
+export const cancelJob = async (jobId: number) => {
+  const { data } = await api.patch<JobDetailsResponse>(`/job/cancel/${jobId}`);
   return data;
 };

@@ -11,7 +11,7 @@ import { TokenEntity } from '../auth/token.entity';
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
   @Exclude()
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   public password: string;
 
   @Column({ type: 'varchar', nullable: true, unique: true })
@@ -19,6 +19,12 @@ export class UserEntity extends BaseEntity implements IUser {
 
   @Column({ type: 'enum', enum: UserType })
   public type: UserType;
+
+  @Column({ type: 'varchar', nullable: true, unique: true })
+  public evmAddress: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  public nonce: string;
 
   @Column({
     type: 'enum',

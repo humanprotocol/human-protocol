@@ -46,3 +46,7 @@ export function recoverSigner(
     throw new ConflictException(ErrorSignature.InvalidSignature);
   }
 }
+
+export function getNonce(): string {
+  return Buffer.from(ethers.utils.randomBytes(16)).toString('hex');
+}

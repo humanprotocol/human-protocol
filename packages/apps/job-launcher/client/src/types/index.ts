@@ -98,12 +98,13 @@ export type JobRequest = {
 };
 
 export enum JobStatus {
-  ALL = 'ALL',
   LAUNCHED = 'LAUNCHED',
   PENDING = 'PENDING',
   CANCELED = 'CANCELED',
   FAILED = 'FAILED',
   COMPLETED = 'COMPLETED',
+  TO_CANCEL = 'TO_CANCEL',
+  PAID = 'PAID',
 }
 
 export type JobDetailsResponse = {
@@ -113,7 +114,7 @@ export type JobDetailsResponse = {
     manifestHash: string;
     balance: number;
     paidOut: number;
-    amountOfTasks: number;
+    status: string;
   };
   manifest: {
     chainId: number;
@@ -133,4 +134,14 @@ export type JobDetailsResponse = {
     allocated: number;
     slashed: number;
   };
+};
+
+export type JobDetailsResults = JobDetailsResponse & {
+  results?: FortuneFinalResult[] | string;
+};
+
+export type FortuneFinalResult = {
+  exchangeAddress: string;
+  workerAddress: string;
+  solution: string;
 };

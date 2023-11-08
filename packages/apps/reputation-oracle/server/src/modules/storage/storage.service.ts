@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { FortuneFinalResult } from '../webhook/webhook.dto';
 import { PassThrough } from 'stream';
 import axios from 'axios';

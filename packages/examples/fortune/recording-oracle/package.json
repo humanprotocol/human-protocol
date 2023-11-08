@@ -33,6 +33,7 @@
     "@fastify/cors": "^8.2.0",
     "@human-protocol/core": "*",
     "@sinclair/typebox": "^0.23.5",
+    "@xenova/transformers": "^2.7.0",
     "ajv": "^8.11.2",
     "aws-sdk": "^2.1294.0",
     "axios": "^1.2.2",
@@ -45,10 +46,10 @@
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.226.0",
-    "@types/uuid": "^9.0.0",
+    "@types/uuid": "^9.0.6",
     "esbuild": "^0.14.54",
     "pino-pretty": "^8.1.0",
-    "tsx": "^3.12.1",
+    "tsx": "^3.14.0",
     "vitest": "^0.30.1"
   }
 }
