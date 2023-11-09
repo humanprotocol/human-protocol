@@ -1,25 +1,16 @@
 import unittest
 from unittest.mock import patch
 
-from src.chain.escrow import (
-    validate_escrow,
-    get_escrow_manifest,
-    get_job_launcher_address,
-)
-from tests.utils.setup_escrow import (
-    create_escrow,
-    fund_escrow,
-    bulk_payout,
-)
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
-
 from human_protocol_sdk.escrow import EscrowClientError
 from human_protocol_sdk.storage import StorageClientError
-
-
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
+
+from src.chain.escrow import get_escrow_manifest, get_job_launcher_address, validate_escrow
+
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV
+from tests.utils.setup_escrow import bulk_payout, create_escrow, fund_escrow
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -48,9 +39,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             with self.assertRaises(EscrowClientError) as error:
                 validate_escrow(self.w3.eth.chain_id, "invalid_address")
 
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_validate_escrow_without_funds(self):
         escrow_address = create_escrow(self.w3)
@@ -93,9 +82,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = self.w3
             with self.assertRaises(EscrowClientError) as error:
                 get_escrow_manifest(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_escrow_manifest_invalid_url(self):
         escrow_address = create_escrow(self.w3)
@@ -112,9 +99,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = create_escrow(self.w3)
         with patch("src.chain.escrow.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            job_launcher_address = get_job_launcher_address(
-                self.w3.eth.chain_id, escrow_address
-            )
+            job_launcher_address = get_job_launcher_address(self.w3.eth.chain_id, escrow_address)
             self.assertIsInstance(job_launcher_address, str)
             self.assertIsNotNone(job_launcher_address)
 
@@ -123,13 +108,9 @@ class ServiceIntegrationTest(unittest.TestCase):
             mock_function.return_value = self.w3
             with self.assertRaises(EscrowClientError) as error:
                 get_job_launcher_address(self.w3.eth.chain_id, "invalid_address")
-        self.assertEqual(
-            f"Invalid escrow address: invalid_address", str(error.exception)
-        )
+        self.assertEqual(f"Invalid escrow address: invalid_address", str(error.exception))
 
     def test_get_job_launcher_address_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:
             get_job_launcher_address(1, "0x1234567890123456789012345678901234567890")
-        self.assertEqual(
-            f"1 is not in available list of networks.", str(error.exception)
-        )
+        self.assertEqual(f"1 is not in available list of networks.", str(error.exception))

@@ -1,13 +1,13 @@
 import hmac
 import json
 import uuid
-
 from hashlib import sha256
+
 from sqlalchemy.sql import select
 
-from src.db import SessionLocal
 from src.core.config import CvatConfig
-from src.models.cvat import Project, Task, Job
+from src.db import SessionLocal
+from src.models.cvat import Job, Project, Task
 
 
 def generate_cvat_signature(data: dict):
@@ -16,7 +16,9 @@ def generate_cvat_signature(data: dict):
     signature = (
         "sha256="
         + hmac.new(
-            CvatConfig.cvat_webhook_secret.encode("utf-8"), b_data, digestmod=sha256
+            CvatConfig.cvat_webhook_secret.encode("utf-8"),
+            b_data,
+            digestmod=sha256,
         ).hexdigest()
     )
 
@@ -57,9 +59,7 @@ def add_cvat_task_to_db(cvat_id: int, cvat_project_id: int, status: str) -> str:
     return task_id
 
 
-def add_cvat_job_to_db(
-    cvat_id: int, cvat_task_id: int, cvat_project_id: int, status: str
-) -> str:
+def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, status: str) -> str:
     with SessionLocal.begin() as session:
         job_id = str(uuid.uuid4())
         job = Job(

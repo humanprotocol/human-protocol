@@ -1,6 +1,6 @@
-import pytest
 import numpy as np
-from hypothesis.strategies import tuples, integers, builds, just
+import pytest
+from hypothesis.strategies import builds, integers, just, tuples
 
 
 @pytest.fixture
@@ -78,9 +78,7 @@ def normal_sample():
 _incidence_matrix_generator = tuples(integers(1, 500), integers(2, 50)).map(
     lambda xs: np.random.randint(0, 100, size=xs)
 )
-_confusion_matrix_generator = integers(2).map(
-    lambda x: np.random.randint(0, 100, size=(x, x))
-)
+_confusion_matrix_generator = integers(2).map(lambda x: np.random.randint(0, 100, size=(x, x)))
 
 
 def _eq_rounded(a, b, n_digits=3):

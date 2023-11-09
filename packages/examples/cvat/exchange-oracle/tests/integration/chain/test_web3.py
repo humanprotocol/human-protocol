@@ -1,20 +1,14 @@
 import unittest
 from unittest.mock import patch
 
-from src.chain.web3 import (
-    get_web3,
-    sign_message,
-    recover_signer,
-    validate_address,
-)
-from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_GAS_PAYER, SIGNATURE
-
 from human_protocol_sdk.constants import NETWORKS, ChainId
+from web3 import HTTPProvider, Web3
+from web3.middleware import construct_sign_and_send_raw_middleware
+
+from src.chain.web3 import get_web3, recover_signer, sign_message, validate_address
 from src.core.config import LocalhostConfig
 
-
-from web3 import Web3, HTTPProvider
-from web3.middleware import construct_sign_and_send_raw_middleware
+from tests.utils.constants import DEFAULT_GAS_PAYER, DEFAULT_GAS_PAYER_PRIV, SIGNATURE
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -39,9 +33,7 @@ class ServiceIntegrationTest(unittest.TestCase):
             w3 = get_web3(ChainId.POLYGON.value)
         self.assertIsInstance(w3, Web3)
         self.assertEqual(w3.eth.default_account, DEFAULT_GAS_PAYER)
-        self.assertEqual(
-            w3.manager._provider.endpoint_uri, PolygonMainnetConfig.rpc_api
-        )
+        self.assertEqual(w3.manager._provider.endpoint_uri, PolygonMainnetConfig.rpc_api)
 
     def test_get_web3_mumbai(self):
         class PolygonMumbaiConfig:
@@ -117,5 +109,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         with self.assertRaises(ValueError) as error:
             validate_address("invalid_address")
         self.assertEqual(
-            f"invalid_address is not a correct Web3 address", str(error.exception)
+            f"invalid_address is not a correct Web3 address",
+            str(error.exception),
         )

@@ -1,31 +1,57 @@
+import { ChainId } from '@human-protocol/sdk';
 import { Box, Link, Grid, Typography } from '@mui/material';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 import { CardTextBlock } from '../Cards';
-import bingXIcon from 'src/assets/exchanges/bingx.png';
+// import bingXIcon from 'src/assets/exchanges/bingx.png';
 import bitfinexIcon from 'src/assets/exchanges/bitfinex.png';
+import bitmartIcon from 'src/assets/exchanges/bitmart.png';
 import coinlistProIcon from 'src/assets/exchanges/coinlist-pro.png';
 import gateIoIcon from 'src/assets/exchanges/gate-io.png';
 import lBankIcon from 'src/assets/exchanges/lbank.svg';
+import mexcIcon from 'src/assets/exchanges/mexc.png';
 import probitGlobalIcon from 'src/assets/exchanges/probit-global.png';
 import { TOOLTIPS } from 'src/constants/tooltips';
-import { useHMTStats } from 'src/hooks/useHMTStats';
+import { useHumanAppData } from 'src/hooks/useHumanAppData';
+import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
 const EXCHANGES = [
-  { icon: bitfinexIcon, href: 'https://www.bitfinex.com/', name: 'Bitfinex' },
+  {
+    icon: bitfinexIcon,
+    href: 'https://trading.bitfinex.com/t/HMT:USD?type=exchange',
+    name: 'Bitfinex',
+  },
   {
     icon: probitGlobalIcon,
-    href: 'https://www.probit.com/',
+    href: 'https://www.probit.com/app/exchange/HMT-USDT',
     name: 'Probit Global',
   },
-  { icon: gateIoIcon, href: 'https://www.gate.io/', name: 'Gate.io' },
-  { icon: bingXIcon, href: 'https://www.bingx.com/', name: 'BingX' },
+  {
+    icon: gateIoIcon,
+    href: 'https://gate.io/trade/hmt_usdt',
+    name: 'Gate.io',
+  },
+  // { icon: bingXIcon, href: 'https://www.bingx.com/', name: 'BingX' },
   {
     icon: coinlistProIcon,
-    href: 'https://pro.coinlist.co/trader/HMT-USD',
+    href: 'https://pro.coinlist.co/trader/HMT-USDT',
     name: 'Coinlist Pro',
   },
-  { icon: lBankIcon, href: 'https://www.lbank.com/', name: 'LBank' },
+  {
+    icon: lBankIcon,
+    href: 'https://www.lbank.com/en-US/trade/hmt_usdt/',
+    name: 'LBank',
+  },
+  {
+    icon: mexcIcon,
+    href: 'https://www.mexc.com/exchange/HMT_USDT',
+    name: 'MEXC',
+  },
+  {
+    icon: bitmartIcon,
+    href: 'https://www.bitmart.com/trade/en?symbol=HMT_USDT',
+    name: 'Bitmart',
+  },
 ];
 
 const TotalSupplyComponent = ({ value }: { value: number }) => {
@@ -70,7 +96,21 @@ const TotalSupplyComponent = ({ value }: { value: number }) => {
 };
 
 export const TokenView: FC = () => {
-  const { data } = useHMTStats();
+  const chainId = useChainId();
+  const days = useDays();
+  const { data } = useHumanAppData(chainId);
+
+  const transferCount = useMemo(() => {
+    if (data) {
+      return data.data[0].attributes.dailyHMTData
+        .slice(0, days)
+        .reverse()
+        .reduce(
+          (acc: number, d: any) => acc + Number(d.totalTransactionCount),
+          0
+        );
+    }
+  }, [data, days]);
 
   return (
     <Box>
@@ -78,21 +118,25 @@ export const TokenView: FC = () => {
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total transfers"
-            value={data?.totalTransferCount}
+            value={transferCount}
             tooltipTitle={TOOLTIPS.TOTAL_TRANSFERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Holders"
-            value={data?.holders}
+            value={data?.data?.[0]?.attributes?.totalHolders}
             tooltipTitle={TOOLTIPS.HOLDERS}
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CardTextBlock
             title="Total Supply"
-            value={data?.totalSupply}
+            value={
+              chainId === ChainId.ALL
+                ? 1_000_000_000
+                : data?.data?.[0]?.attributes?.totalSupply
+            }
             component={TotalSupplyComponent}
             tooltipTitle={TOOLTIPS.TOTAL_SUPPLY}
           />

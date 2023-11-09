@@ -1,7 +1,7 @@
 import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import numeral from 'numeral';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -43,6 +43,16 @@ export const SolvedTasksView: FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const cumulativeSolvedTasks = useMemo(() => {
+    return SOLVED_TASKS.reduce((acc, d) => {
+      acc.push({
+        date: d.date,
+        value: acc.length ? acc[acc.length - 1].value + d.value : d.value,
+      });
+      return acc;
+    }, [] as any[]);
+  }, []);
+
   return (
     <CardContainer
       sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
@@ -54,9 +64,9 @@ export const SolvedTasksView: FC = () => {
               variant="body2"
               color="primary"
               fontWeight={600}
-              mb="8px"
+              mb="14px"
             >
-              {`Solved Tasks till ${dayjs(
+              {`Total number of tasks till ${dayjs(
                 SOLVED_TASKS[SOLVED_TASKS.length - 1].date
               ).format('MMM D, YYYY')}`}
             </Typography>
@@ -66,7 +76,7 @@ export const SolvedTasksView: FC = () => {
               fontWeight={800}
               lineHeight={1.125}
               sx={{ whiteSpace: 'nowrap' }}
-              fontSize={{ xs: '40px', lg: '55px', xl: '80px' }}
+              fontSize={{ xs: '40px', lg: '55px' }}
             >
               {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
             </Typography>
@@ -74,7 +84,7 @@ export const SolvedTasksView: FC = () => {
         </Grid>
         <Grid item xs={12} md={7} xl={8}>
           <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-            <AreaChart data={SOLVED_TASKS} margin={{ bottom: 10 }}>
+            <AreaChart data={cumulativeSolvedTasks} margin={{ bottom: 10 }}>
               <defs>
                 <linearGradient
                   id="paint0_linear_4037_63345"

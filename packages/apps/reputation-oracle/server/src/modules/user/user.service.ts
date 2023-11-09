@@ -6,13 +6,13 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
-
-import { UserEntity } from './user.entity';
+import { ErrorUser } from '../../common/constants/errors';
 import { UserStatus, UserType } from '../../common/enums/user';
+import { getNonce } from '../../common/utils/signature';
+import { UserEntity } from './user.entity';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { ErrorUser } from '../../common/constants/errors';
 
 @Injectable()
 export class UserService {
@@ -83,5 +83,47 @@ export class UserService {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
       throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
     }
+  }
+
+  public async createWeb3User(
+    address: string,
+    type: UserType,
+  ): Promise<UserEntity> {
+    await this.checkEvmAddress(address);
+
+    return await this.userRepository.createWeb3User({
+      evmAddress: address,
+      nonce: getNonce(),
+      status: UserStatus.ACTIVE,
+      type,
+    });
+  }
+
+  public async checkEvmAddress(address: string): Promise<void> {
+    const userEntity = await this.userRepository.findOne({
+      evmAddress: address,
+    });
+
+    if (userEntity) {
+      this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
+      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
+    }
+  }
+
+  public async getByAddress(address: string): Promise<UserEntity> {
+    const userEntity = await this.userRepository.findOne({
+      evmAddress: address,
+    });
+
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
+
+    return userEntity;
+  }
+
+  public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
+    userEntity.nonce = getNonce();
+    return userEntity.save();
   }
 }

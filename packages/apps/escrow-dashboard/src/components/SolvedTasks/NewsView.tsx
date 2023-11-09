@@ -17,7 +17,7 @@ export const NewsView = () => {
         >
           <Box
             sx={{
-              padding: { xs: '22px 24px', lg: '19px 17px', xl: '22px 24px' },
+              padding: '16px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',

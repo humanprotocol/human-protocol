@@ -190,6 +190,9 @@ export class CommonDetails {
 
   @IsNumber()
   amountOfTasks?: number;
+
+  @IsEnum(JobStatus)
+  status: JobStatus;
 }
 
 export class JobDetailsDto {
@@ -208,10 +211,16 @@ export class SaveManifestDto {
   public manifestHash: string;
 }
 
-export class SendWebhookDto {
+export class FortuneWebhookDto {
   public escrowAddress: string;
   public chainId: number;
   public eventType: EventType;
+}
+
+export class CVATWebhookDto {
+  public escrow_address: string;
+  public chain_id: number;
+  public event_type: EventType;
 }
 
 export class FortuneManifestDto {
@@ -293,14 +302,17 @@ export class CvatManifestDto {
 }
 
 export class FortuneFinalResultDto {
-  @IsString()
-  exchangeAddress: string;
-
+  @IsNotEmpty()
   @IsString()
   workerAddress: string;
 
+  @IsNotEmpty()
   @IsString()
   solution: string;
+
+  @IsOptional()
+  @IsString()
+  error?: string;
 }
 
 export class CvatFinalResultDto {
@@ -347,5 +359,5 @@ export class EscrowFailedWebhookDto {
 
 export class EscrowCancelDto {
   txHash: string;
-  amountRefunded: BigNumber
+  amountRefunded: BigNumber;
 }

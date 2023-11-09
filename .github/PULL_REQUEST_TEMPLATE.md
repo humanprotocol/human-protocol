@@ -14,8 +14,3 @@
 [Keywords for linking issues](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests)
 
 <!-- Does this close any open issues? -->
-
-## Operational checklist
-
-- [ ] All new functionality is covered by tests
-- [ ] Any related documentation has been changed or added

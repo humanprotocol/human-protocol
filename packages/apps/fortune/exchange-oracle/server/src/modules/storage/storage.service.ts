@@ -2,7 +2,7 @@ import { ChainId, StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
-import { ISolution, ISolutionsFile } from '../../common/interfaces/job';
+import { ISolution } from '../../common/interfaces/job';
 
 @Injectable()
 export class StorageService {
@@ -41,7 +41,6 @@ export class StorageService {
   }
 
   public async uploadJobSolutions(
-    exchangeAddress: string,
     escrowAddress: string,
     chainId: ChainId,
     solutions: ISolution[],
@@ -50,16 +49,11 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const content: ISolutionsFile = {
-      exchangeAddress,
-      solutions,
-    };
-
     try {
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify(content),
+        JSON.stringify(solutions),
         {
           'Content-Type': 'application/json',
         },

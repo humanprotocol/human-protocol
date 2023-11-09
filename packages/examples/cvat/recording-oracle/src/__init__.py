@@ -1,12 +1,14 @@
 import logging
+
 from fastapi import FastAPI
 
-import src.log
-from src.api import init_api
-from src.handlers.error_handlers import setup_error_handlers
-from src.crons import setup_cron_jobs
 from src.core.config import Config
+from src.crons import setup_cron_jobs
+from src.endpoints import init_api
+from src.endpoints.error_handlers import setup_error_handlers
+from src.log import setup_logging
 
+setup_logging()
 
 app = FastAPI(
     title="Human Recording Oracle",

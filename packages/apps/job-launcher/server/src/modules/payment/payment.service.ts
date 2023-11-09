@@ -272,24 +272,30 @@ export class PaymentService {
     const rate = await getRate(TokenId.HMT, Currency.USD);
 
     try {
-        await this.paymentRepository.create({
-            userId: dto.userId,
-            jobId: dto.jobId,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.REFUND,
-            amount: dto.refundAmount,
-            currency: TokenId.HMT,
-            rate,
-            status: PaymentStatus.SUCCEEDED,
-        });
+      await this.paymentRepository.create({
+        userId: dto.userId,
+        jobId: dto.jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.REFUND,
+        amount: dto.refundAmount,
+        currency: TokenId.HMT,
+        rate,
+        status: PaymentStatus.SUCCEEDED,
+      });
     } catch (error) {
-        if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
-            this.logger.log(ErrorPostgres.NumericFieldOverflow, PaymentService.name);
-            throw new ConflictException(ErrorPayment.IncorrectAmount);
-        } else {
-            this.logger.log(error, PaymentService.name);
-            throw new ConflictException(ErrorPayment.NotSuccess);
-        }
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
+        this.logger.log(
+          ErrorPostgres.NumericFieldOverflow,
+          PaymentService.name,
+        );
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, PaymentService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
     }
   }
 }

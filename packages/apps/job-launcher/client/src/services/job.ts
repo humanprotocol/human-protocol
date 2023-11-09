@@ -1,3 +1,5 @@
+import { ChainId } from '@human-protocol/sdk';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -5,6 +7,7 @@ import {
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
+  FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
 
@@ -36,22 +39,41 @@ export const createCvatJob = async (
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
     gtUrl: data.groundTruthUrl,
+    userGuide: data.userGuide,
     type: data.type,
   };
   await api.post('/job/cvat', body);
 };
 
-export const getJobList = async (status?: JobStatus) => {
-  const { data } = await api.get(`/job/list`, { params: { status } });
+export const getJobList = async ({
+  chainId = ChainId.ALL,
+  status,
+}: {
+  chainId?: ChainId;
+  status?: JobStatus;
+}) => {
+  const { data } = await api.get(`/job/list`, {
+    params: {
+      networks: chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : chainId,
+      status,
+    },
+  });
   return data;
 };
 
 export const getJobResult = async (jobId: number) => {
-  const { data } = await api.get(`/job/result`, { params: { jobId } });
+  const { data } = await api.get<FortuneFinalResult[] | string>(`/job/result`, {
+    params: { jobId },
+  });
   return data;
 };
 
 export const getJobDetails = async (jobId: number) => {
   const { data } = await api.get<JobDetailsResponse>(`/job/details/${jobId}`);
+  return data;
+};
+
+export const cancelJob = async (jobId: number) => {
+  const { data } = await api.patch<JobDetailsResponse>(`/job/cancel/${jobId}`);
   return data;
 };

@@ -22,6 +22,7 @@ export enum ErrorResults {
   IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
   NoIntermediateResultsFound = 'No intermediate results found',
   NoResultsHaveBeenVerified = 'No results have been verified',
+  NotAllRequiredSolutionsHaveBeenSent = 'Not all required solutions have been sent',
 }
 
 /**
@@ -58,6 +59,7 @@ export enum ErrorAuth {
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
+  InvalidSignature = 'Invalid signature',
 }
 
 /**

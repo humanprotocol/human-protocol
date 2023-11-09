@@ -1,10 +1,8 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
 from src.core.config import Config
 
 # this is the Alembic Config object, which provides
@@ -18,12 +16,13 @@ config.set_main_option("sqlalchemy.url", Config.postgres_config.connection_url()
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+from src.db import Base
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from src.models.webhook import Webhook
-from src.db import Base
 
 target_metadata = Base.metadata
 

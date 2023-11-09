@@ -1,6 +1,7 @@
-import pytest
 import json
 from pathlib import Path
+
+import pytest
 
 resource_path_root = Path(__file__).parent.parent.parent / "utils"
 

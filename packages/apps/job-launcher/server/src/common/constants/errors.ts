@@ -86,6 +86,7 @@ export enum ErrorCurrency {
  * Represents error messages related to bucket.
  */
 export enum ErrorBucket {
+  NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
 }
