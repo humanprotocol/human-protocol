@@ -2,7 +2,6 @@ from contextlib import suppress
 from http import HTTPStatus
 from typing import Optional
 
-import sqlalchemy.exc
 from fastapi import APIRouter, Header, HTTPException, Path, Query
 
 import src.cvat.api_calls as cvat_api
@@ -36,8 +35,8 @@ async def register(
     await validate_human_app_signature(signature)
 
     with SessionLocal.begin() as session:
-        email_db_user = cvat_service.get_user_by_email(session, user.cvat_email)
-        wallet_db_user = cvat_service.get_user_by_id(session, user.wallet_address)
+        email_db_user = cvat_service.get_user_by_email(session, user.cvat_email, for_update=True)
+        wallet_db_user = cvat_service.get_user_by_id(session, user.wallet_address, for_update=True)
 
         if wallet_db_user and not email_db_user and wallet_db_user.cvat_email != user.cvat_email:
             # Allow changing email for a wallet, don't allow changing wallet for a email

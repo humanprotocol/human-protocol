@@ -18,7 +18,7 @@ def handle_update_job_event(payload: dict) -> None:
 
     with SessionLocal.begin() as session:
         job_id = payload.job["id"]
-        jobs = cvat_service.get_jobs_by_cvat_id(session, [job_id])
+        jobs = cvat_service.get_jobs_by_cvat_id(session, [job_id], for_update=True)
         if not jobs:
             logger.warning(
                 f"Received a job update webhook for an unknown job id {job_id}, ignoring "
@@ -106,7 +106,7 @@ def handle_create_job_event(payload: dict) -> None:
             return
 
         task_id = payload.job["task_id"]
-        if not cvat_service.get_tasks_by_cvat_id(session, [task_id]):
+        if not cvat_service.get_tasks_by_cvat_id(session, [task_id], for_update=True):
             logger.warning(
                 f"Received a job creation webhook for an unknown task id {task_id}, ignoring "
             )

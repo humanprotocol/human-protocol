@@ -101,17 +101,27 @@ class UserHasUnfinishedAssignmentError(Exception):
 def create_assignment(project_id: int, wallet_address: str) -> Optional[str]:
     with SessionLocal.begin() as session:
         user = get_or_404(
-            cvat_service.get_user_by_id(session, wallet_address),
+            cvat_service.get_user_by_id(session, wallet_address, for_update=True),
             wallet_address,
             "user",
         )
-        project = get_or_404(
-            cvat_service.get_project_by_id(session, project_id),
+
+        project = cvat_service.get_project_by_id(
+            session,
             project_id,
-            "task",
+            status_in=[
+                ProjectStatuses.annotation
+            ],  # avoid unnecessary locking on completed projects
+            for_update=True,
         )
 
-        if project.status != ProjectStatuses.annotation:
+        if not project:
+            # Retry without a lock to check if the project doesn't exist
+            get_or_404(
+                cvat_service.get_project_by_id(session, project_id),
+                project_id,
+                "task",
+            )
             return None
 
         manifest = parse_manifest(get_escrow_manifest(project.chain_id, project.escrow_address))
