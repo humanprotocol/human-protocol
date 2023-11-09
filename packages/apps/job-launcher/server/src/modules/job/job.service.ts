@@ -319,7 +319,7 @@ export class JobService {
   private async generateAndUploadTaskData(objectNames: string[]) {
     const protocol = this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true' ? 'https' : 'http';
  
-    const taskData = objectNames.map(objectName => {
+    const data = objectNames.map(objectName => {
         return {
             datapoint_uri: `${protocol}://${this.configService.get<string>(ConfigNames.S3_ENDPOINT)}:${this.configService.get<string>(ConfigNames.S3_PORT)}/${this.configService.get<string>(ConfigNames.S3_BUCKET)}/${objectName}`,
             datapoint_hash: 'undefined-hash',
@@ -327,7 +327,9 @@ export class JobService {
         };
     });
 
-    const { url } = await this.storageService.uploadFile(taskData);
+
+    const hash = hashString(stringify(data));
+    const { url } = await this.storageService.uploadFile(data, hash);
     return url;
   }
 
@@ -399,13 +401,14 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin)
+    const hash = hashString(stringify(manifestOrigin));
+    const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
       manifestUrl: url,
-      manifestHash: hashString(stringify(manifestOrigin)),
+      manifestHash: hash,
       fee: tokenFee,
       fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
@@ -485,11 +488,16 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
-
-    if (manifest instanceof string) {
+    console.log(555, manifest instanceof string)
+    if (typeof manifest === 'string') {
+      console.log(123123)
       const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
       manifest = await encription.decrypt(manifest as any)
+      console.log(123123)
     }
+
+    console.log(manifest)
+    await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;
     let exchangeOracleConfigKey;
@@ -822,7 +830,6 @@ export class JobService {
       if (!jobEntity) return;
 
       const manifest = await this.storageService.download(jobEntity.manifestUrl);
-      await this.validateManifest(manifest);
 
       if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);

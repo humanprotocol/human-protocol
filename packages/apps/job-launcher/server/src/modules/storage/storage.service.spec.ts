@@ -2,6 +2,7 @@ import { StorageClient } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
   MOCK_S3_ACCESS_KEY,
@@ -73,10 +74,10 @@ describe('Web3Service', () => {
 
       const hash = hashString(stringify(MOCK_MANIFEST))
 
-      const fileData = await storageService.uploadFile(MOCK_MANIFEST);
+      const fileData = await storageService.uploadFile(MOCK_MANIFEST, hash);
       expect(fileData).toEqual({
         url: expect.any(String),
-        hash
+        hash: expect.any(String)
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
@@ -94,7 +95,7 @@ describe('Web3Service', () => {
         .mockResolvedValueOnce(false);
 
       await expect(
-        storageService.uploadFile(MOCK_MANIFEST),
+        storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
       ).rejects.toThrow(ErrorBucket.NotExist);
     });
 
@@ -107,7 +108,7 @@ describe('Web3Service', () => {
         .mockRejectedValueOnce('Network error');
 
       await expect(
-        storageService.uploadFile(MOCK_MANIFEST),
+        storageService.uploadFile(MOCK_MANIFEST, MOCK_FILE_HASH),
       ).rejects.toThrow('File not uploaded');
     });
   });

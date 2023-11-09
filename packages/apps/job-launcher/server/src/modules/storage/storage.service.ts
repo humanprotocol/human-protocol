@@ -44,7 +44,8 @@ export class StorageService {
   }
 
   public async uploadFile(
-    data: string | object
+    data: string | object,
+    hash: string
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
       throw new BadRequestException(ErrorBucket.NotExist);
@@ -53,8 +54,7 @@ export class StorageService {
     const isStringData = typeof data === 'string';
     const contentType = isStringData ? ContentType.TEXT_PLAIN : ContentType.APPLICATION_JSON
     const content = isStringData ? data : stringify(data);
-    const hash = isStringData ? hashString(data) : hashString(stringify(data));
-    const key = `${hash}${isStringData ? '' : Extension.JSON}`;
+    const key = `s3${hash}${isStringData ? '' : Extension.JSON}`;
 
     try {
       await this.minioClient.putObject(
@@ -85,7 +85,7 @@ export class StorageService {
       data.pipe(stream);
 
       const hash = await hashStream(data);
-      const key = `${hash}${Extension.ZIP}`;
+      const key = `s3${hash}${Extension.ZIP}`;
 
       await this.minioClient.putObject(this.s3Config.bucket, key, stream);
 
