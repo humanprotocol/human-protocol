@@ -596,7 +596,8 @@ export class HCaptchaManifestDto {
   @ValidateNested({ each: true })
   requester_restricted_answer_set: RequesterRestrictedAnswer;
 
-  @IsObject()
+  @IsOptional()
+  @IsArray()
   @ValidateNested({ each: true })
   taskdata?: TaskData[];
 }

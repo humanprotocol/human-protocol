@@ -403,6 +403,7 @@ export class JobService {
       dto = dto as JobCaptchaDto;
       const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
       fundAmount = (dto as JobCaptchaDto).annotations.taskBidPrice * objectsInBucket.length;
+      console.log(123, fundAmount)
       dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
       
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
@@ -420,12 +421,19 @@ export class JobService {
     const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
   
     const fee = mul(div(feePercentage, 100), fundAmount);
-    const usdTotalAmount = add(fundAmount, fee);
-  
+    const usdFundAmount = div(fundAmount, rate);
+    const usdFee = div(fee, rate);
+    
+    const usdTotalAmount = add(usdFundAmount, usdFee);
+
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
+    
+    const tokenFundAmount = fundAmount;
+    const tokenFee = fee;
+    const tokenTotalAmount = add(tokenFundAmount, tokenFee);
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
       dto = dto as JobCaptchaDto
@@ -453,10 +461,6 @@ export class JobService {
       manifestOrigin = await this.createCvatManifest(dto, requestType);
       fundAmount = dto.fundAmount;
     }
-  
-    const tokenFundAmount = mul(fundAmount, rate);
-    const tokenFee = mul(fee, rate);
-    const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     const hash = hashString(stringify(manifestOrigin));
     console.log(manifestOrigin)
@@ -468,7 +472,7 @@ export class JobService {
       manifestUrl: url,
       manifestHash: hash,
       fee: tokenFee,
-      fundAmount: tokenFundAmount,
+      fundAmount: tokenTotalAmount,
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
