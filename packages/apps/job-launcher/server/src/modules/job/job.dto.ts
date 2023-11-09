@@ -18,6 +18,7 @@ import {
   ValidateNested,
   IsDefined,
   IsNotEmptyObject,
+  ArrayMinSize
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
@@ -78,6 +79,7 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty()
   @IsArray()
+  @ArrayMinSize(2)
   public labels: string[];
 
   @ApiProperty()

@@ -153,7 +153,7 @@ export class JobService {
         job_total_tasks: objectsInBucket.length,
         task_bid_price: jobDto.annotations.taskBidPrice,
         groundtruth_uri: jobDto.annotations.groundTruths,
-        taskdata_uri: await this.generateAndUploadTaskData(objectsInBucket),
+        taskdata_uri: await this.generateAndUploadTaskData(jobDto.dataUrl, objectsInBucket),
         public_results: true,
         oracle_stake: 0.05
     };
@@ -316,12 +316,10 @@ export class JobService {
     return outputObject;
   }
 
-  private async generateAndUploadTaskData(objectNames: string[]) {
-    const protocol = this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true' ? 'https' : 'http';
- 
+  private async generateAndUploadTaskData(dataUrl: string, objectNames: string[]) {
     const data = objectNames.map(objectName => {
         return {
-            datapoint_uri: `${protocol}://${this.configService.get<string>(ConfigNames.S3_ENDPOINT)}:${this.configService.get<string>(ConfigNames.S3_PORT)}/${this.configService.get<string>(ConfigNames.S3_BUCKET)}/${objectName}`,
+            datapoint_uri: `${dataUrl}/${objectName}`,
             datapoint_hash: 'undefined-hash',
             task_key: uuidv4(),
         };
@@ -350,14 +348,16 @@ export class JobService {
       dto = dto as JobCaptchaDto;
       const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
       fundAmount = (dto as JobCaptchaDto).annotations.taskBidPrice * objectsInBucket.length;
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
       
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
       fundAmount = dto.fundAmount;
-      
+
     } else { // CVAT
       dto = dto as JobCvatDto;
       fundAmount = dto.fundAmount;
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
     }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
@@ -394,6 +394,7 @@ export class JobService {
     } else { // CVAT
       dto = dto as JobCvatDto;
       manifestOrigin = await this.createCvatManifest(dto, requestType);
+      console.log(manifestOrigin)
       fundAmount = dto.fundAmount;
     }
   
@@ -469,7 +470,7 @@ export class JobService {
 
     const totalImages = (await storageClient.listObjects(storageData.bucket))
       .length;
-
+    
     const totalJobs = Math.ceil(
       div(
         totalImages,
@@ -488,15 +489,12 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
-    console.log(555, manifest instanceof string)
     if (typeof manifest === 'string') {
-      console.log(123123)
       const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
       manifest = await encription.decrypt(manifest as any)
-      console.log(123123)
     }
 
-    console.log(manifest)
+    manifest = JSON.parse(manifest);
     await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;
