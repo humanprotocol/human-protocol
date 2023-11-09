@@ -2,16 +2,16 @@ import { StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
-import crypto from 'crypto';
-import { UploadedFile } from '../../common/interfaces/s3';
 import { PassThrough } from 'stream';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
-import { hashStream } from '../../common/utils';
-import { CvatManifestDto, FortuneManifestDto, HCaptchaManifestDto } from '../job/job.dto';
+import { hashStream, hashString } from '../../common/utils';
 import { ErrorBucket } from '../../common/constants/errors';
 import { parseString } from 'xml2js';
-import stringify from 'json-stable-stringify'
+import stringify from 'json-stable-stringify';
+import {v4 as uuidv4} from 'uuid';
+import { ContentType, Extension } from '../../common/enums/storage';
+import { UploadedFile } from '../../common/interfaces';
 
 @Injectable()
 export class StorageService {
@@ -29,7 +29,7 @@ export class StorageService {
       useSSL: this.s3Config.useSSL,
     });
   }
-  public getUrl(key: string): string {
+  public formatUrl(key: string): string {
     return `${this.s3Config.useSSL ? 'https' : 'http'}://${
       this.s3Config.endPoint
     }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
@@ -44,17 +44,17 @@ export class StorageService {
   }
 
   public async uploadFile(
-    origin: object,
-    encrypted?: string
+    data: string | object
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
-      throw new BadRequestException('Bucket not found');
+      throw new BadRequestException(ErrorBucket.NotExist);
     }
 
-    const contentType = encrypted ? 'text/plain' : 'application/json'
-    const content = encrypted ? encrypted : stringify(origin);
-    const hash = crypto.createHash('sha1').update(stringify(origin)).digest('hex');
-    const key = encrypted ? `s3${hash}`: `s3${hash}.json`;
+    const isStringData = typeof data === 'string';
+    const contentType = isStringData ? ContentType.TEXT_PLAIN : ContentType.APPLICATION_JSON
+    const content = isStringData ? data : stringify(data);
+    const hash = isStringData ? hashString(data) : hashString(stringify(data));
+    const key = `${hash}${isStringData ? '' : Extension.JSON}`;
 
     try {
       await this.minioClient.putObject(
@@ -66,7 +66,7 @@ export class StorageService {
         },
       );
 
-      return { url: this.getUrl(key), hash };
+      return { url: this.formatUrl(key), hash};
     } catch (e) {
       throw new BadRequestException('File not uploaded');
     }
@@ -85,19 +85,18 @@ export class StorageService {
       data.pipe(stream);
 
       const hash = await hashStream(data);
-      const key = `s3${hash}.zip`;
+      const key = `${hash}${Extension.ZIP}`;
 
       await this.minioClient.putObject(this.s3Config.bucket, key, stream);
 
       Logger.log(`File from ${url} copied to ${this.s3Config.bucket}/${key}`);
 
       return {
-        url: this.getUrl(key),
+        url: this.formatUrl(key),
         hash,
       };
     } catch (error) {
       Logger.error('Error copying file:', error);
-      console.log(error);
       throw new Error('File not uploaded');
     }
   }

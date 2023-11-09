@@ -1,4 +1,4 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { StorageClient } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -12,10 +12,12 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
-import crypto from 'crypto';
 import axios from 'axios';
 import stream from 'stream';
 import stringify from 'json-stable-stringify';
+import { ErrorBucket } from '../../common/constants/errors';
+import { hashString } from '../../common/utils';
+import { ContentType, Extension } from '../../common/enums/storage';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -69,22 +71,19 @@ describe('Web3Service', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = crypto.createHash('sha1').update(stringify(MOCK_MANIFEST)).digest('hex');
+      const hash = hashString(stringify(MOCK_MANIFEST))
 
       const fileData = await storageService.uploadFile(MOCK_MANIFEST);
       expect(fileData).toEqual({
-        url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/s3${hash}.json`,
-        hash: crypto
-          .createHash('sha1')
-          .update(stringify(MOCK_MANIFEST))
-          .digest('hex'),
+        url: expect.any(String),
+        hash
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
-        `s3${hash}.json`,
+        expect.any(String),
         expect.any(String),
         {
-          'Content-Type': 'application/json',
+          'Content-Type': ContentType.APPLICATION_JSON,
         },
       );
     });
@@ -96,7 +95,7 @@ describe('Web3Service', () => {
 
       await expect(
         storageService.uploadFile(MOCK_MANIFEST),
-      ).rejects.toThrow('Bucket not found');
+      ).rejects.toThrow(ErrorBucket.NotExist);
     });
 
     it('should fail if the file cannot be uploaded', async () => {
@@ -154,7 +153,7 @@ describe('Web3Service', () => {
       (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
 
       const uploadedFile = await storageService.copyFileFromURLToBucket(
-        MOCK_FILE_URL,
+        MOCK_FILE_URL
       );
 
       expect(

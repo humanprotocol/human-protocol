@@ -2,13 +2,11 @@ import { createMock } from '@golevelup/ts-jest';
 import {
   ChainId,
   EscrowClient,
-  StorageClient,
   EscrowStatus,
   StakingClient,
   IAllocation,
   EscrowUtils,
   NETWORKS,
-  EncryptionUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -21,7 +19,6 @@ import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
   ErrorBucket,
-  ErrorEscrow,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -80,11 +77,9 @@ import {
   CvatManifestDto,
   JobFortuneDto,
   JobCvatDto,
-  CvatFinalResultDto,
   JobDetailsDto,
   HCaptchaManifestDto,
   JobCaptchaDto,
-  JobCaptchaAnnotationsDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -99,7 +94,6 @@ import Decimal from 'decimal.js';
 import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
-import stringify from 'json-stable-stringify';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -1006,247 +1000,6 @@ describe('JobService', () => {
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
       ).rejects.toThrow(BadRequestException);
-    });
-  });
-
-  describe('saveManifest with fortune request type', () => {
-    const fortuneManifestParams = {
-      requestType: JobRequestType.FORTUNE,
-      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
-      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
-      fundAmount: 10,
-      requesterTitle: MOCK_REQUESTER_TITLE,
-    };
-
-    let uploadFilesMock: any;
-
-    beforeEach(() => {
-      uploadFilesMock = storageService.uploadFile;
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue(
-        {
-          url: MOCK_FILE_URL,
-          hash: MOCK_FILE_HASH,
-        },
-      );
-
-      const result = await jobService.saveManifest(fortuneManifestParams);
-
-      expect(result).toEqual({
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      });
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        fortuneManifestParams,
-        undefined
-      );
-    });
-
-    it('should throw an error if the manifest file fails to upload', async () => {
-      const uploadError = new Error(ErrorBucket.UnableSaveFile);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(
-        jobService.saveManifest(fortuneManifestParams),
-      ).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        fortuneManifestParams,
-        undefined
-      );
-    });
-
-    it('should rethrow any other errors encountered', async () => {
-      const errorMessage = 'Something went wrong';
-      const uploadError = new Error(errorMessage);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(
-        jobService.saveManifest(fortuneManifestParams),
-      ).rejects.toThrowError(new Error(errorMessage));
-
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        fortuneManifestParams,
-        undefined
-      );
-    });
-  });
-
-  describe('saveManifest with image label binary request type', () => {
-    const manifest: CvatManifestDto = {
-      data: {
-        data_url: MOCK_FILE_URL,
-      },
-      annotation: {
-        labels: [{ name: 'label1' }],
-        description: MOCK_REQUESTER_DESCRIPTION,
-        user_guide: MOCK_FILE_URL,
-        type: JobRequestType.IMAGE_POINTS,
-        job_size: 10,
-        max_time: 300,
-      },
-      validation: {
-        min_quality: 1,
-        val_size: 2,
-        gt_url: '',
-      },
-      job_bounty: '1',
-    };
-
-    let uploadFilesMock: any;
-
-    beforeEach(() => {
-      uploadFilesMock = storageService.uploadFile;
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue(
-        {
-          url: MOCK_FILE_URL,
-          hash: MOCK_FILE_HASH,
-        },
-      );
-
-      const result = await jobService.saveManifest(manifest);
-
-      expect(result).toEqual({
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      });
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        manifest,
-        undefined
-      );
-    });
-
-    it('should throw an error if the manifest file fails to upload', async () => {
-      const uploadError = new Error(ErrorBucket.UnableSaveFile);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        manifest,
-        undefined
-      );
-    });
-
-    it('should rethrow any other errors encountered', async () => {
-      const errorMessage = 'Something went wrong';
-      const uploadError = new Error(errorMessage);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(jobService.saveManifest(manifest)).rejects.toThrowError(
-        new Error(errorMessage),
-      );
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        manifest,
-        undefined
-      );
-    });
-  });
-
-  describe('saveManifest with hCaptcha request type', () => {
-    const commonManifestProperties = {
-      job_mode: JobCaptchaMode.BATCH,
-      requester_accuracy_target: 0.9,
-      request_config: {},
-      requester_max_repeats: 4,
-      requester_min_repeats: 1,
-      requester_question: { en: "Test description" },
-      requester_question_example: [],
-      job_total_tasks: 10,
-      task_bid_price: 0.1,
-      groundtruth_uri: MOCK_FILE_URL,
-      taskdata_uri: MOCK_FILE_URL
-    };
-
-    const comparisonManifest: HCaptchaManifestDto = {
-      ...commonManifestProperties,
-      request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-      restricted_audience: {
-        lang: [{ [WorkerLanguage.EN]: { score: 1 } }],
-        browser: [{ [WorkerLocation.FR]: { score: 1 } }],
-        country: [{ [WorkerBrowser.DESKTOP]: { score: 1 } }]
-      },
-      requester_restricted_answer_set: {},
-      public_results: true,
-      oracle_stake: 0.05
-    }
-
-    let uploadFilesMock: any;
-
-    beforeEach(() => {
-      uploadFilesMock = storageService.uploadFile;
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('should save the manifest and return the manifest URL and hash', async () => {
-      uploadFilesMock.mockResolvedValue(
-        {
-          url: MOCK_FILE_URL,
-          hash: MOCK_FILE_HASH,
-        },
-      );
-
-      const result = await jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST);
-
-      expect(result).toEqual({
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-      });
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        comparisonManifest,
-        MOCK_ENCRYPTED_MANIFEST
-      );
-    });
-
-    it('should throw an error if the manifest file fails to upload', async () => {
-      const uploadError = new Error(ErrorBucket.UnableSaveFile);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST)).rejects.toThrowError(
-        new BadGatewayException(ErrorBucket.UnableSaveFile),
-      );
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        comparisonManifest,
-        MOCK_ENCRYPTED_MANIFEST
-      );
-    });
-
-    it('should rethrow any other errors encountered', async () => {
-      const errorMessage = 'Something went wrong';
-      const uploadError = new Error(errorMessage);
-
-      uploadFilesMock.mockRejectedValue(uploadError);
-
-      await expect(jobService.saveManifest(comparisonManifest, MOCK_ENCRYPTED_MANIFEST)).rejects.toThrowError(
-        new Error(errorMessage),
-      );
-      expect(storageService.uploadFile).toHaveBeenCalledWith(
-        comparisonManifest,
-        MOCK_ENCRYPTED_MANIFEST
-      );
     });
   });
 

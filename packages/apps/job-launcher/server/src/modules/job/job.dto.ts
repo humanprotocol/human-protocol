@@ -223,11 +223,6 @@ export class JobDetailsDto {
   staking: StakingDetails;
 }
 
-export class SaveManifestDto {
-  public manifestUrl: string;
-  public manifestHash: string;
-}
-
 export class FortuneWebhookDto {
   public escrowAddress: string;
   public chainId: number;

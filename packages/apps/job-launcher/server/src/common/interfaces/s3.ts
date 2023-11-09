@@ -1,4 +1,4 @@
-export class UploadedFile {
-    public url: string;
-    public hash: string;
+export interface UploadedFile {
+    url: string;
+    hash: string;
 }

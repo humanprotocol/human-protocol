@@ -13,7 +13,6 @@ import {
 import { HttpService } from '@nestjs/axios';
 const { v4: uuidv4 } = require('uuid');
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   Inject,
@@ -50,13 +49,12 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseUrl } from '../../common/utils';
+import { getRate, hashString, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  CvatFinalResultDto,
   CvatManifestDto,
   EscrowCancelDto,
   EscrowFailedWebhookDto,
@@ -70,7 +68,6 @@ import {
   JobFortuneDto,
   JobListDto,
   RestrictedAudience,
-  SaveManifestDto,
   CVATWebhookDto,
   FortuneWebhookDto,
 } from './job.dto';
@@ -96,7 +93,6 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from '../../common/interfaces/s3';
 import { string } from 'joi';
 import stringify from 'json-stable-stringify'
 
@@ -331,9 +327,8 @@ export class JobService {
         };
     });
 
-    const uploadedFile: UploadedFile = await this.storageService.uploadFile(taskData);
-
-    return uploadedFile.url;
+    const { url } = await this.storageService.uploadFile(taskData);
+    return url;
   }
 
   public async createJob(
@@ -347,7 +342,7 @@ export class JobService {
       this.web3Service.validateChainId(chainId);
     }
 
-    let manifestOrigin, manifestEncryped, fundAmount;
+    let manifestOrigin, manifestEncrypted, fundAmount;
 
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
       dto = dto as JobCaptchaDto;
@@ -380,18 +375,20 @@ export class JobService {
         (dto as JobCaptchaDto).annotations.typeOfJob,
         dto as JobCaptchaDto
       );
-      
-      manifestEncryped = await EncryptionUtils.encrypt(
+
+      manifestEncrypted = await EncryptionUtils.encrypt(
         stringify(manifestOrigin), 
         [
           this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
           this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!
         ]
       );
+
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
       manifestOrigin = { ...dto, requestType };
       fundAmount = dto.fundAmount;
+
     } else { // CVAT
       dto = dto as JobCvatDto;
       manifestOrigin = await this.createCvatManifest(dto, requestType);
@@ -401,14 +398,14 @@ export class JobService {
     const tokenFundAmount = mul(fundAmount, rate);
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
-  
-    const { manifestUrl, manifestHash } = await this.saveManifest(manifestOrigin, manifestEncryped);
-  
+
+    const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin)
+
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
-      manifestUrl,
-      manifestHash,
+      manifestUrl: url,
+      manifestHash: hashString(stringify(manifestOrigin)),
       fee: tokenFee,
       fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
@@ -500,7 +497,7 @@ export class JobService {
     if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
       recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
       recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
     } else {
@@ -577,25 +574,6 @@ export class JobService {
     return true;
   }
 
-  public async saveManifest(
-    origin: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
-    encryped?: string
-  ): Promise<SaveManifestDto> {
-    const uploadedManifest: UploadedFile = await this.storageService.uploadFile(
-      origin,
-      encryped
-    );
-
-    if (!uploadedManifest) {
-      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
-    }
-
-    const manifestUrl = uploadedManifest.url;
-
-    return { manifestUrl, manifestHash: uploadedManifest.hash };
-  }
-
   private async validateManifest(
     manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
@@ -603,7 +581,7 @@ export class JobService {
 
     if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
       dtoCheck = new FortuneManifestDto()
-    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
       dtoCheck = new HCaptchaManifestDto()
     } else {
       dtoCheck = new CvatManifestDto();
@@ -1044,7 +1022,7 @@ export class JobService {
         submissionsRequired: (manifest as FortuneManifestDto)
           .submissionsRequired,
       };
-    } else if ((manifest as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
+    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
         submissionsRequired: (manifest as HCaptchaManifestDto).job_total_tasks

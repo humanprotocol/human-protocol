@@ -7,6 +7,7 @@ import { ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
+import stringify from 'json-stable-stringify';
 
 export async function getRate(from: string, to: string): Promise<number> {
   if (from === to) {
@@ -114,4 +115,8 @@ export function hashStream(stream: Readable): Promise<string> {
       reject(error);
     });
   });
+}
+
+export function hashString(data: string): string {
+  return crypto.createHash('sha1').update(data).digest('hex');
 }
