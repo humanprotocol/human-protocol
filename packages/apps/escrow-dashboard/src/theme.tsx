@@ -59,6 +59,9 @@ const theme = createTheme({
           fontWeight: 600,
           textTransform: 'none',
         },
+        sizeLarge: {
+          height: '48px',
+        },
       },
     },
     MuiTabs: {
