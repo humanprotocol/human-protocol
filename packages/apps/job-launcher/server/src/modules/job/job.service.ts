@@ -70,6 +70,11 @@ import {
   RestrictedAudience,
   CVATWebhookDto,
   FortuneWebhookDto,
+  BoundingBoxGroundTruthDto,
+  LandmarkGroundTruthDto,
+  PolygonGroundTruthDto,
+  CategorizationGroundTruthDto,
+  ComparisonGroundTruthDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -152,17 +157,23 @@ export class JobService {
         requester_question: { en: jobDto.annotations.labelingPrompt },
         job_total_tasks: objectsInBucket.length,
         task_bid_price: jobDto.annotations.taskBidPrice,
-        groundtruth_uri: jobDto.annotations.groundTruths,
         taskdata_uri: await this.generateAndUploadTaskData(jobDto.dataUrl, objectsInBucket),
         public_results: true,
         oracle_stake: 0.05
     };
+
+    let groundTruthsData;
+    if (jobDto.annotations.groundTruths) {
+      groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths)
+      await this.validateGroundThuth(groundTruthsData, jobType);
+    }
 
     switch (jobType) {
         case JobCaptchaShapeType.COMPARISON:
           return {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+              groundtruth_uri: jobDto.annotations.groundTruths,
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
               requester_question_example: jobDto.annotations.exampleImages || [],
@@ -172,12 +183,12 @@ export class JobService {
           const categorizationManifest = {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+              groundtruth_uri: jobDto.annotations.groundTruths,
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
 
-          const groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths);
           categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
 
           return categorizationManifest;
@@ -199,6 +210,7 @@ export class JobService {
                   max_points: 4,
                   minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
               },
+              groundtruth_uri: jobDto.annotations.groundTruths,
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
@@ -222,6 +234,7 @@ export class JobService {
                   min_points: 1,
                   max_points: 8,
               },
+              groundtruth_uri: jobDto.annotations.groundTruths,
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
@@ -244,6 +257,7 @@ export class JobService {
                   min_points: 4,
                   max_points: 4,
               },
+              groundtruth_uri: jobDto.annotations.groundTruths,
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
@@ -269,6 +283,7 @@ export class JobService {
               },
               restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
+              taskdata: []
           };
 
           return immoManifest;
@@ -373,9 +388,11 @@ export class JobService {
     }
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
+      dto = dto as JobCaptchaDto
+  
       manifestOrigin = await this.createHCaptchaManifest(
-        (dto as JobCaptchaDto).annotations.typeOfJob,
-        dto as JobCaptchaDto
+        dto.annotations.typeOfJob,
+        dto
       );
 
       manifestEncrypted = await EncryptionUtils.encrypt(
@@ -402,6 +419,7 @@ export class JobService {
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     const hash = hashString(stringify(manifestOrigin));
+
     const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
     const jobEntity = await this.jobRepository.create({
@@ -494,7 +512,7 @@ export class JobService {
     }
 
     manifest = JSON.parse(manifest);
-    console.log(manifest)
+  
     await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;
@@ -603,6 +621,44 @@ export class JobService {
         validationErrors,
       );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
+    }
+
+    return true;
+  }
+
+  private async validateGroundThuth(
+    data: ComparisonGroundTruthDto | CategorizationGroundTruthDto | PolygonGroundTruthDto | LandmarkGroundTruthDto | BoundingBoxGroundTruthDto,
+    jobType: JobCaptchaShapeType
+  ): Promise<boolean> {
+    let dtoCheck;
+
+    if (jobType === JobCaptchaShapeType.COMPARISON) {
+      dtoCheck = new ComparisonGroundTruthDto()
+    } else if (jobType === JobCaptchaShapeType.CATEGORAZATION) {
+      dtoCheck = new CategorizationGroundTruthDto()
+    } else if (jobType === JobCaptchaShapeType.POLYGON) {
+      dtoCheck = new PolygonGroundTruthDto();
+    } else if (jobType === JobCaptchaShapeType.POINT) {
+      dtoCheck = new LandmarkGroundTruthDto();
+    } else if (jobType === JobCaptchaShapeType.BOUNDING_BOX) {
+      dtoCheck = new BoundingBoxGroundTruthDto();
+    } 
+
+    if (!dtoCheck) {
+      this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
+      throw new BadRequestException(ErrorJob.HCaptchaInvalidJobType);
+    }
+
+    Object.assign(dtoCheck, data);
+
+    const validationErrors: ValidationError[] = await validate(dtoCheck);
+    if (validationErrors.length > 0) {
+      this.logger.log(
+        ErrorJob.GroundThuthValidationFailed,
+        JobService.name,
+        validationErrors,
+      );
+      throw new BadRequestException(ErrorJob.GroundThuthValidationFailed);
     }
 
     return true;

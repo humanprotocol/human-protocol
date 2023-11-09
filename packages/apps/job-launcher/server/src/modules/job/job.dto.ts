@@ -18,7 +18,8 @@ import {
   ValidateNested,
   IsDefined,
   IsNotEmptyObject,
-  ArrayMinSize
+  ArrayMinSize,
+  ArrayNotEmpty
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
@@ -443,6 +444,7 @@ export class JobCaptchaDto extends JobDto {
 
   @ApiProperty()
   @IsDateString()
+  @IsOptional()
   completionDate: Date;
 
   @ApiProperty()
@@ -576,7 +578,7 @@ export class HCaptchaManifestDto {
   task_bid_price: number;
 
   @IsUrl()
-  groundtruth_uri: string;
+  groundtruth_uri?: string;
 
   public_results: boolean;
 
@@ -590,4 +592,133 @@ export class HCaptchaManifestDto {
   @IsObject()
   @ValidateNested({ each: true })
   requester_restricted_answer_set: RequesterRestrictedAnswer;
+
+  @IsObject()
+  @ValidateNested({ each: true })
+  taskdata?: TaskData[];
+}
+
+class DatapointText {
+  @IsString()
+  en: string;
+}
+
+class TaskData {
+  @IsString()
+  task_key: string;
+
+  @IsOptional()
+  @IsString()
+  datapoint_uri?: string;
+
+  @IsString()
+  datapoint_hash: string;
+
+  @IsObject()
+  @IsOptional()
+  datapoint_text?: DatapointText;
+}
+
+
+class ComparisonImageData {
+  @IsArray({ each: true })
+  @ArrayNotEmpty()
+  data: string[][];
+}
+
+class ComparisonImageDataMap {
+  [key: string]: ComparisonImageData;
+}
+
+export class ComparisonGroundTruthDto {
+  [key: string]: ComparisonImageDataMap;
+}
+
+class CategorizationImageData {
+  @IsArray()
+  @ArrayNotEmpty()
+  data: boolean[];
+}
+
+class CategorizationImageDataMap {
+  [key: string]: CategorizationImageData;
+}
+
+export class CategorizationGroundTruthDto {
+  [key: string]: CategorizationImageDataMap;
+}
+
+class PolygonEntityCoords {
+  @IsNumber({}, { each: true })
+  @ArrayNotEmpty()
+  entity_coords: number[];
+  
+  @IsNumber()
+  entity_name: number;
+}
+
+class PolygonImageData {
+  @IsArray({ each: true })
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => PolygonEntityCoords)
+  data: PolygonEntityCoords[][];
+}
+
+class PolygonImageDataMap {
+  [key: string]: PolygonImageData;
+}
+
+export class PolygonGroundTruthDto {
+  [key: string]: PolygonImageDataMap;
+}
+
+class LandmarkEntityCoords {
+  @IsNumber({}, { each: true })
+  @ArrayNotEmpty()
+  entity_coords: number[];
+  
+  @IsNumber()
+  entity_name: number;
+}
+
+class LandmarkImageData {
+  @IsArray({ each: true })
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => LandmarkEntityCoords)
+  data: LandmarkEntityCoords[][];
+}
+
+class LandmarkImageDataMap {
+  [key: string]: LandmarkImageData;
+}
+
+export class LandmarkGroundTruthDto {
+  [key: string]: LandmarkImageDataMap;
+}
+
+class BoundingBoxEntityCoords {
+  @IsNumber({}, { each: true })
+  @ArrayNotEmpty()
+  entity_coords: number[];
+  
+  @IsNumber()
+  entity_name: number;
+}
+
+class BoundingBoxImageData {
+  @IsArray({ each: true })
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => BoundingBoxEntityCoords)
+  data: BoundingBoxEntityCoords[][];
+}
+
+class BoundingBoxImageDataMap {
+  [key: string]: BoundingBoxImageData;
+}
+
+export class BoundingBoxGroundTruthDto {
+  [key: string]: BoundingBoxImageDataMap;
 }
