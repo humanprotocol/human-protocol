@@ -394,7 +394,6 @@ export class JobService {
     } else { // CVAT
       dto = dto as JobCvatDto;
       manifestOrigin = await this.createCvatManifest(dto, requestType);
-      console.log(manifestOrigin)
       fundAmount = dto.fundAmount;
     }
   
@@ -495,6 +494,7 @@ export class JobService {
     }
 
     manifest = JSON.parse(manifest);
+    console.log(manifest)
     await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;

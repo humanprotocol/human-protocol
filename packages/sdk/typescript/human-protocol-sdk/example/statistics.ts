@@ -24,7 +24,7 @@ const getWorkerStatistics = async (statisticsClient: StatisticsClient) => {
     await statisticsClient.getWorkerStatistics()
   );
 
-  console.log(
+  (
     'Worker statistics from 5/8 - 6/8:',
     await statisticsClient.getWorkerStatistics({
       from: new Date(2023, 4, 8),

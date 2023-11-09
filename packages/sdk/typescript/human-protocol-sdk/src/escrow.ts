@@ -164,11 +164,6 @@ export class EscrowClient {
       throw ErrorUnsupportedChainID;
     }
 
-    networkData.hmtAddress = '0x5827cc03fB12C01004d8954942C1D2aB97D629F3'
-    networkData.factoryAddress = '0xfDf6f1A2Bc1C5aE503904A0947eA73724bdF4111'
-    networkData.stakingAddress = '0xFDBC1A7a4f7d3AAdc26437c136486102Fd78a968'
-    networkData.kvstoreAddress = '0xD9ad9563de5A380EAE808CdBf31B84F4B4f41F16'
-
     return new EscrowClient(signerOrProvider, networkData);
   }
 

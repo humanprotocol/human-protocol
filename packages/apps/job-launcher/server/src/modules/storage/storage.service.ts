@@ -72,35 +72,6 @@ export class StorageService {
     }
   }
 
-  /**
-   * **Copy file from a URL to cloud storage**
-   *
-   * @param {string} url - URL of the source file
-   * @returns {Promise<UploadedFile>} - Uploaded file with key/hash
-   */
-  public async copyFileFromURLToBucket(url: string): Promise<UploadedFile> {
-    try {
-      const { data } = await axios.get(url, { responseType: 'stream' });
-      const stream = new PassThrough();
-      data.pipe(stream);
-
-      const hash = await hashStream(data);
-      const key = `s3${hash}${Extension.ZIP}`;
-
-      await this.minioClient.putObject(this.s3Config.bucket, key, stream);
-
-      Logger.log(`File from ${url} copied to ${this.s3Config.bucket}/${key}`);
-
-      return {
-        url: this.formatUrl(key),
-        hash,
-      };
-    } catch (error) {
-      Logger.error('Error copying file:', error);
-      throw new Error('File not uploaded');
-    }
-  }
-
   public async listObjectsInBucket(bucketUrl: string): Promise<string[]> {
     return new Promise(async (resolve, reject) => {
       try {
