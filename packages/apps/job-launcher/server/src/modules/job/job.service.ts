@@ -174,7 +174,15 @@ export class JobService {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
               groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {
+                sitekey: [
+                  {
+                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+                      score: 1
+                    }
+                  }
+                ]
+              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
@@ -184,7 +192,15 @@ export class JobService {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
               groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {
+                sitekey: [
+                  {
+                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+                      score: 1
+                    }
+                  }
+                ]
+              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: {},
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
@@ -211,7 +227,15 @@ export class JobService {
                   minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {
+                sitekey: [
+                  {
+                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+                      score: 1
+                    }
+                  }
+                ]
+              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
@@ -235,7 +259,15 @@ export class JobService {
                   max_points: 8,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {
+                sitekey: [
+                  {
+                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+                      score: 1
+                    }
+                  }
+                ]
+              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
@@ -258,7 +290,15 @@ export class JobService {
                   max_points: 4,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+              restricted_audience: {
+                sitekey: [
+                  {
+                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+                      score: 1
+                    }
+                  }
+                ]
+              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               requester_question_example: jobDto.annotations.exampleImages || [],
           };
@@ -419,7 +459,7 @@ export class JobService {
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
     const hash = hashString(stringify(manifestOrigin));
-
+    console.log(manifestOrigin)
     const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
     const jobEntity = await this.jobRepository.create({
@@ -512,7 +552,7 @@ export class JobService {
     }
 
     manifest = JSON.parse(manifest);
-  
+    console.log(manifest)
     await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;
@@ -638,6 +678,7 @@ export class JobService {
       dtoCheck = new CategorizationGroundTruthDto()
     } else if (jobType === JobCaptchaShapeType.POLYGON) {
       dtoCheck = new PolygonGroundTruthDto();
+      console.log(dtoCheck, data, jobType)
     } else if (jobType === JobCaptchaShapeType.POINT) {
       dtoCheck = new LandmarkGroundTruthDto();
     } else if (jobType === JobCaptchaShapeType.BOUNDING_BOX) {

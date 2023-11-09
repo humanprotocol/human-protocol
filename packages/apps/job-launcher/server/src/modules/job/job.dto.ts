@@ -476,7 +476,18 @@ export class JobCaptchaDto extends JobDto {
   annotations: JobCaptchaAnnotationsDto;
 }
 
+class SiteData {
+  @IsUUID()
+  site_key: string;
+
+  @IsNumber()
+  score: number;
+}
+
 export class RestrictedAudience {
+  @IsObject()
+  sitekey?: Record<string, { score: number }>[];
+
   @IsObject()
   lang?: Record<string, { score: number }>[];
 
