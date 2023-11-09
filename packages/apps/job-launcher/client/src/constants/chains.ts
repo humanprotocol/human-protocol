@@ -2,7 +2,7 @@ import { ChainId } from '@human-protocol/sdk';
 
 export const SUPPORTED_CHAIN_IDS =
   import.meta.env.VITE_APP_NETWORK === 'mainnet'
-    ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
+    ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
     : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
