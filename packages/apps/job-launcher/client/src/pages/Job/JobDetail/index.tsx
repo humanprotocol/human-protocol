@@ -1,10 +1,12 @@
 import { LoadingButton } from '@mui/lab';
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
+import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
+import { Table } from '../../../components/Table';
 import { useJobDetails } from '../../../hooks/useJobDetails';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import * as jobService from '../../../services/job';
@@ -202,50 +204,57 @@ export default function JobDetail() {
           </Grid>
         </Grid>
       </Box>
-      {/*
-      TODO: Add this back in when we have a way to fetch the job solution
-      <Box sx={{ mt: 10 }}>
-        <Typography variant="h4" fontWeight={600}>
-          Job solutions
-        </Typography>
-        <Box sx={{ mt: 7 }}>
-          <Table
-            columns={[
-              {
-                id: 'workerAddress',
-                label: 'Worker Address',
-                render: ({ workerAddress }) => (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {workerAddress}
-                    <IconButton color="primary" sx={{ ml: 3 }}>
-                      <CopyLinkIcon />
-                    </IconButton>
-                  </Box>
-                ),
-              },
-              { id: 'fortune', label: 'Fortune' },
-            ]}
-            data={[
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-            ]}
-          />
+      {data.results && (
+        <Box sx={{ mt: 10 }}>
+          <Typography variant="h4" fontWeight={600}>
+            Job solutions
+          </Typography>
+          <Box sx={{ mt: 7 }}>
+            {data.manifest.requestType === 'FORTUNE' && (
+              <Table
+                columns={[
+                  {
+                    id: 'workerAddress',
+                    label: 'Worker Address',
+                    render: ({ workerAddress }) => (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {workerAddress}
+                        <IconButton color="primary" sx={{ ml: 3 }}>
+                          <CopyLinkIcon />
+                        </IconButton>
+                      </Box>
+                    ),
+                  },
+                  { id: 'solution', label: 'Fortune' },
+                  {
+                    id: 'error',
+                    label: 'Status',
+                    render: ({ error }) => (error ? 'Refused' : 'Accepted'),
+                  },
+                  { id: 'error', label: 'Refused reason' },
+                ]}
+                data={data.results}
+              />
+            )}
+            {data.manifest.requestType !== 'FORTUNE' && (
+              <Box
+                sx={{
+                  borderRadius: '16px',
+                  background: '#fff',
+                  boxShadow:
+                    '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
+                  p: '14px 42px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <CardTextRow label="URL" value={data.results as string} />
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Box> */}
+      )}
     </Box>
   );
 }

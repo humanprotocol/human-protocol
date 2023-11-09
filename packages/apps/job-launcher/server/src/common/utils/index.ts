@@ -5,6 +5,8 @@ import { COINGECKO_API_URL } from '../constants';
 import { NotFoundException } from '@nestjs/common';
 import { ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
+import * as crypto from 'crypto';
+import { Readable } from 'stream';
 
 export async function getRate(from: string, to: string): Promise<number> {
   if (from === to) {
@@ -95,3 +97,21 @@ export const parseUrl = (url: string): {
 
   throw new Error('Invalid URL');
 };
+
+export function hashStream(stream: Readable): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha1');
+
+    stream.on('data', (chunk) => {
+      hash.update(chunk);
+    });
+
+    stream.on('end', () => {
+      resolve(hash.digest('hex'));
+    });
+
+    stream.on('error', (error) => {
+      reject(error);
+    });
+  });
+}

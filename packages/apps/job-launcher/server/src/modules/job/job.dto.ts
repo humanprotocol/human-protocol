@@ -302,14 +302,17 @@ export class CvatManifestDto {
 }
 
 export class FortuneFinalResultDto {
-  @IsString()
-  exchangeAddress: string;
-
+  @IsNotEmpty()
   @IsString()
   workerAddress: string;
 
+  @IsNotEmpty()
   @IsString()
   solution: string;
+
+  @IsOptional()
+  @IsString()
+  error?: string;
 }
 
 export class CvatFinalResultDto {

@@ -10,6 +10,11 @@ export function filterToEscrowStatus(
     case JobStatusFilter.CANCELED:
       return [EscrowStatus.Cancelled];
     default:
-      return [EscrowStatus.Launched, EscrowStatus.Partial, EscrowStatus.Paid];
+      return [
+        EscrowStatus.Launched,
+        EscrowStatus.Pending,
+        EscrowStatus.Partial,
+        EscrowStatus.Paid,
+      ];
   }
 }

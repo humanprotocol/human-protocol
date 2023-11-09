@@ -4,11 +4,11 @@ import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
-import { FortuneFinalResult } from '../webhook/webhook.dto';
 import { PassThrough } from 'stream';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { hashStream } from '../../common/utils';
+import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
 
 @Injectable()
 export class StorageService {
@@ -40,22 +40,32 @@ export class StorageService {
     }
   }
 
-  public async uploadJobSolutions(
-    escrowAddress: string,
-    chainId: ChainId,
-    solutions: FortuneFinalResult[],
+  public async uploadManifest(
+    manifest: FortuneManifestDto | CvatManifestDto | string
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
-    const content = JSON.stringify(solutions);
-    const key = `${escrowAddress}-${chainId}.json`;
+    const isString = typeof manifest === "string";
+
+    const contentType = isString ? 'text/plain' : 'application/json'
+
+    const content = isString ? manifest : JSON.stringify(manifest);
+
+    const hash = crypto.createHash('sha1').update(content).digest('hex');
+    const key = isString ? `s3${hash}`: `s3${hash}.json`;
+
     try {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
-      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
-        'Content-Type': 'application/json',
-      });
+      await this.minioClient.putObject(
+        this.s3Config.bucket,
+        key,
+        content,
+        {
+          'Content-Type': contentType,
+        },
+      );
 
       return { url: this.getUrl(key), hash };
     } catch (e) {

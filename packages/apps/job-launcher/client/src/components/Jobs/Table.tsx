@@ -1,5 +1,6 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, Button, IconButton, Typography } from '@mui/material';
+import copy from 'copy-to-clipboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
@@ -27,7 +28,11 @@ export const JobTable = ({
             escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 {escrowAddress}
-                <IconButton color="primary" sx={{ ml: 3 }}>
+                <IconButton
+                  color="primary"
+                  sx={{ ml: 3 }}
+                  onClick={() => copy(escrowAddress)}
+                >
                   <CopyLinkIcon />
                 </IconButton>
               </Box>
