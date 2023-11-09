@@ -92,7 +92,8 @@ export class JobController {
   @Public()
   @Get('/cron/launch')
   public async launchCronJob(): Promise<any> {
-    return this.jobService.launchCronJob();
+    this.jobService.launchCronJob();
+    return;
   }
 
   @Patch('/cancel/:id')
