@@ -17,6 +17,8 @@ import {
   skaleHumanProtocol,
   moonbeam,
   moonbaseAlpha,
+  celo,
+  celoAlfajores,
 } from 'wagmi/chains';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
@@ -62,6 +64,8 @@ const { chains, provider, webSocketProvider } = configureChains(
     fortune,
     moonbeam,
     moonbaseAlpha,
+    celo,
+    celoAlfajores,
   ],
   [publicProvider()]
 );

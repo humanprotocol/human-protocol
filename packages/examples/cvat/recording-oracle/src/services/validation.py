@@ -1,14 +1,10 @@
-import datetime
 import uuid
-from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from attrs import define
-from sqlalchemy import case, update
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import select
 
-from src.core.types import Networks
+from src.db.utils import ForUpdateParams
+from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.validation import Job, Task, ValidationResult
 
 
@@ -21,17 +17,29 @@ def create_task(session: Session, escrow_address: str, chain_id: int) -> str:
     return obj_id
 
 
-def get_task_by_escrow_address(session: Session, escrow_address: str) -> Optional[Task]:
-    return session.query(Task).where(Task.escrow_address == escrow_address).first()
-
-
-def get_task_by_id(session: Session, task_id: str) -> Optional[Task]:
-    return session.query(Task).where(Task.id == task_id).first()
-
-
-def get_task_validation_results(session: Session, task_id: str) -> List[ValidationResult]:
+def get_task_by_escrow_address(
+    session: Session, escrow_address: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Task]:
     return (
-        session.query(ValidationResult)
+        _maybe_for_update(session.query(Task), enable=for_update)
+        .where(Task.escrow_address == escrow_address)
+        .first()
+    )
+
+
+def get_task_by_id(
+    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Task]:
+    return (
+        _maybe_for_update(session.query(Task), enable=for_update).where(Task.id == task_id).first()
+    )
+
+
+def get_task_validation_results(
+    session: Session, task_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> List[ValidationResult]:
+    return (
+        _maybe_for_update(session.query(ValidationResult), enable=for_update)
         .where(ValidationResult.job.has(Job.task_id == task_id))
         .all()
     )
@@ -46,12 +54,20 @@ def create_job(session: Session, job_cvat_id: int, task_id: str) -> str:
     return obj_id
 
 
-def get_job_by_cvat_id(session: Session, job_cvat_id: int) -> Optional[Job]:
-    return session.query(Job).where(Job.cvat_id == job_cvat_id).first()
+def get_job_by_cvat_id(
+    session: Session, job_cvat_id: int, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Job]:
+    return (
+        _maybe_for_update(session.query(Job), enable=for_update)
+        .where(Job.cvat_id == job_cvat_id)
+        .first()
+    )
 
 
-def get_job_by_id(session: Session, job_id: str) -> Optional[Job]:
-    return session.query(Job).where(Job.id == job_id).first()
+def get_job_by_id(
+    session: Session, job_id: str, *, for_update: Union[bool, ForUpdateParams] = False
+) -> Optional[Job]:
+    return _maybe_for_update(session.query(Job), enable=for_update).where(Job.id == job_id).first()
 
 
 def create_validation_result(
@@ -76,10 +92,10 @@ def create_validation_result(
 
 
 def get_validation_result_by_assignment_id(
-    session: Session, assignment_id: str
+    session: Session, assignment_id: str, *, for_update: Union[bool, ForUpdateParams] = False
 ) -> Optional[ValidationResult]:
     return (
-        session.query(ValidationResult)
+        _maybe_for_update(session.query(ValidationResult), enable=for_update)
         .where(ValidationResult.assignment_id == assignment_id)
         .first()
     )

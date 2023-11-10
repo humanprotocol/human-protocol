@@ -22,6 +22,7 @@ class PostgresConfig:
     user = os.environ.get("PG_USER", "admin")
     password = os.environ.get("PG_PASSWORD", "admin")
     database = os.environ.get("PG_DB", "exchange_oracle")
+    lock_timeout = int(os.environ.get("PG_LOCK_TIMEOUT", "3000"))  # milliseconds
 
     @classmethod
     def connection_url(cls):

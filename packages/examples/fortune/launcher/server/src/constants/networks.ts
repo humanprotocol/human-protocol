@@ -8,6 +8,8 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
   SKALE = 1273227453,
 }
@@ -70,6 +72,13 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://rpc-mumbai.maticvigil.com',
     factoryAddress: '0xA8D927C4DA17A6b71675d2D49dFda4E9eBE58f2d',
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
+  },
+  [ChainId.CELO_ALFAJORES]: {
+    chainId: ChainId.CELO_ALFAJORES,
+    title: 'Celo Alfajores',
+    rpcUrl: 'https://alfajores-forno.celo-testnet.org',
+    factoryAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
+    hmtAddress: '0x2736B33455A872dC478E1E004106D04c35472468',
   },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,

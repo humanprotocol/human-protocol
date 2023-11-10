@@ -17,6 +17,8 @@ class ChainId(Enum):
     AVALANCHE_TESTNET = 43113
     AVALANCHE = 43114
     SKALE = 1273227453
+    CELO = 42220
+    CELO_ALFAJORES = 44787
     LOCALHOST = 1338
 
 
@@ -140,6 +142,30 @@ NETWORKS = {
         "kvstore_address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
         "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji",
         "old_factory_address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
+    },
+    ChainId.CELO: {
+        "title": "Celo",
+        "scan_url": "https://celoscan.io/",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/celo",
+        "hmt_address": "0x19Ead835951493A763c96910255d5eeF147E914F",
+        "factory_address": "0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08",
+        "staking_address": "0x34cD3Bd6B16c559f321799b516dE61E12017fFd1",
+        "reward_pool_address": "0xb9344bAD98E3d26a4d83900922baf395a2Ec154c",
+        "kvstore_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.CELO_ALFAJORES: {
+        "title": "Celo",
+        "scan_url": "https://alfajores.celoscan.io/",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores",
+        "hmt_address": "0x2736B33455A872dC478E1E004106D04c35472468",
+        "factory_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
+        "staking_address": "0x003548Df34be8836cF0F9673403a1E40ba449a0F",
+        "reward_pool_address": "0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86",
+        "kvstore_address": "0x938335006ea6F9Eb0e8020969cFF94404425e298",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
     },
     ChainId.SKALE: {
         "title": "SKALE Human Protocol Chain",

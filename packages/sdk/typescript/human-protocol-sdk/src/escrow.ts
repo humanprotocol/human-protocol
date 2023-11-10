@@ -1437,6 +1437,8 @@ export class EscrowUtils {
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
    *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
    *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }
@@ -1547,11 +1549,12 @@ export class EscrowUtils {
             reputationOracle: filter.reputationOracle?.toLowerCase(),
             recordingOracle: filter.recordingOracle?.toLowerCase(),
             exchangeOracle: filter.exchangeOracle?.toLowerCase(),
-            status: filter.status
-              ? Object.entries(EscrowStatus).find(
-                  ([, value]) => value === filter.status
-                )?.[0]
-              : undefined,
+            status:
+              filter.status !== undefined
+                ? Object.entries(EscrowStatus).find(
+                    ([, value]) => value === filter.status
+                  )?.[0]
+                : undefined,
             from: filter.from ? +filter.from.getTime() / 1000 : undefined,
             to: filter.to ? +filter.to.getTime() / 1000 : undefined,
           }
@@ -1587,6 +1590,8 @@ export class EscrowUtils {
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
    *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
    *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }

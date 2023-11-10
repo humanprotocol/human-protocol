@@ -20,6 +20,7 @@ import PlusIcon from '../assets/Plus.svg';
 import { AuthFooter } from '../components/Footer/AuthFooter';
 import { AuthHeader } from '../components/Headers/AuthHeader';
 import { HumanSocialLinks } from '../components/HumanSocialLinks';
+import { CreateJobPageUIProvider } from '../providers/CreateJobPageUIProvider';
 
 const drawerWidth = 256;
 
@@ -134,22 +135,24 @@ export default function AuthLayout() {
           {drawer}
         </Drawer>
       </Box>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          px: 4,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          minHeight: '100vh',
-          background: '#F6F7FE',
-        }}
-      >
-        <AuthHeader />
-        <Box sx={{ pt: 11, pb: 2 }}>
-          <Outlet />
+      <CreateJobPageUIProvider>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            px: 4,
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            minHeight: '100vh',
+            background: '#F6F7FE',
+          }}
+        >
+          <AuthHeader />
+          <Box sx={{ pt: 11, pb: 2 }}>
+            <Outlet />
+          </Box>
+          <AuthFooter />
         </Box>
-        <AuthFooter />
-      </Box>
+      </CreateJobPageUIProvider>
     </Box>
   );
 }

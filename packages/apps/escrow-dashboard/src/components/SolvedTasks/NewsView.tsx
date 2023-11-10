@@ -1,4 +1,5 @@
 import { Box, CardActionArea, Typography } from '@mui/material';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { CardContainer } from '../Cards';
 import { useHumanProtocolNews } from 'src/hooks/useHumanProtocolNews';
 
@@ -8,7 +9,46 @@ export const NewsView = () => {
   return (
     <CardContainer sxProps={{ padding: 0 }}>
       {isLoading ? (
-        <></>
+        <Box
+          sx={{
+            px: { xs: '24px', lg: '34px', xl: '40px' },
+            pt: { xs: '26px', lg: '34px', xl: '36px' },
+            pb: '16px',
+          }}
+        >
+          <Box sx={{ mb: '20px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="72px" height="32px" />
+            </SkeletonTheme>
+          </Box>
+          <Box sx={{ mb: '14px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="72px" />
+            </SkeletonTheme>
+          </Box>
+          <Box sx={{ mb: '38px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="40px" />
+            </SkeletonTheme>
+          </Box>
+          <Box>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="200px" />
+            </SkeletonTheme>
+          </Box>
+        </Box>
       ) : (
         <CardActionArea
           href={data?.link ?? ''}

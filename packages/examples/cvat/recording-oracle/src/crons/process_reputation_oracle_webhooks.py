@@ -5,6 +5,7 @@ from src.chain.kvstore import get_reputation_oracle_url
 from src.core.config import CronConfig
 from src.core.types import OracleWebhookTypes
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.utils.logging import get_function_logger
 from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
@@ -27,7 +28,8 @@ def process_outgoing_reputation_oracle_webhooks():
             webhooks = oracle_db_service.outbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.reputation_oracle,
-                CronConfig.process_reputation_oracle_webhooks_chunk_size,
+                limit=CronConfig.process_reputation_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
             for webhook in webhooks:
                 try:
@@ -51,7 +53,7 @@ def process_outgoing_reputation_oracle_webhooks():
                     body["escrowAddress"] = body.pop("escrow_address")
                     body["chainId"] = body.pop("chain_id")
                     body["eventType"] = body.pop("event_type")
-                
+
                     # TODO: remove compatibility code
                     # vvv
                     body.pop("event_data")
