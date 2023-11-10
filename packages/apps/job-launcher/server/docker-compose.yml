@@ -50,7 +50,7 @@ services:
       "
   job-launcher:
     container_name: job-launcher
-    restart: unless-stoped
+    restart: unless-stopped
     build:
       context: ../../../../
       dockerfile: packages/apps/job-launcher/server/Dockerfile

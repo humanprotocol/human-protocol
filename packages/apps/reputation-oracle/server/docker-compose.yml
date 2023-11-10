@@ -51,7 +51,7 @@ services:
       "
   reputation-oracle:
     container_name: reputation-oracle
-    restart: unless-stoped
+    restart: unless-stopped
     build:
       context: ../../../../
       dockerfile: packages/apps/reputation-oracle/server/Dockerfile
