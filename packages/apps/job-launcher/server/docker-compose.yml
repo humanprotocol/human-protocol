@@ -56,7 +56,7 @@ services:
     expose:
       - '${PORT}'
     ports:
-      - '${PORT}:${PORT}'
+      - '${LOCAL_PORT}:${PORT}'
     environment:
       NODE_ENV: ${NODE_ENV}
       HOST: ${HOST}
