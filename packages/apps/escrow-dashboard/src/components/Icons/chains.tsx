@@ -3,6 +3,7 @@ import { ReactElement } from 'react';
 
 import { AvalancheIcon } from './AvalancheIcon';
 import { BinanceSmartChainIcon } from './BinanceSmartChainIcon';
+import { CeloIcon } from './CeloIcon';
 import { EthereumIcon } from './EthereumIcon';
 import { HumanIcon } from './HumanIcon';
 import { MoonbaseAlphaIcon } from './MoonbaseAlphaIcon';
@@ -24,4 +25,6 @@ export const CHAIN_ICONS: { [chainId in ChainId]?: ReactElement } = {
   [ChainId.AVALANCHE]: <AvalancheIcon />,
   [ChainId.AVALANCHE_TESTNET]: <AvalancheIcon />,
   [ChainId.SKALE]: <SkaleHumanProtocolIcon />,
+  [ChainId.CELO]: <CeloIcon />,
+  [ChainId.CELO_ALFAJORES]: <CeloIcon />,
 };

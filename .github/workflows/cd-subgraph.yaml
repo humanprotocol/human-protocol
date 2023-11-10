@@ -36,6 +36,10 @@ jobs:
             graph: fuji-v2
           - name: avalanche
             graph: avalanche-v2
+          - name: celo
+            graph: celo
+          - name: celo-alfajores
+            graph: celo-alfajores
       fail-fast: true
       max-parallel: 3
     steps:
