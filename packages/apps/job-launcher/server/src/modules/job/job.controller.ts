@@ -107,7 +107,8 @@ export class JobController {
   @Public()
   @Get('/cron/cancel')
   public async cancelCronJob(): Promise<any> {
-    return this.jobService.cancelCronJob();
+    this.jobService.cancelCronJob();
+    return;
   }
 
   @Public()
