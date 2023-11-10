@@ -11,7 +11,7 @@ COPY . .
 RUN yarn install
 
 # Creates a "dist" folder with the production build
-RUN yarn workspace job-launcher-server build
+RUN yarn workspace @human-protocol/reputation-oracle build
 
 # Start the server using the production build
 CMD [ "node", "packages/apps/reputation-oracle/server/dist/src/main.js" ]
