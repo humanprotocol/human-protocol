@@ -6,7 +6,6 @@ import {
   EscrowUtils,
   NETWORKS,
   StakingClient,
-  StorageClient,
   Encryption,
   EncryptionUtils,
 } from '@human-protocol/sdk';
@@ -22,13 +21,12 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { validate } from 'class-validator';
+import { validate, validateSync } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 import { LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
-  ErrorBucket,
   ErrorEscrow,
   ErrorJob,
   ErrorPayment,
@@ -49,7 +47,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, hashString, parseUrl } from '../../common/utils';
+import { isPGPMessage, getRate, hashString, isValidJSON, parseUrl } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -70,11 +68,6 @@ import {
   RestrictedAudience,
   CVATWebhookDto,
   FortuneWebhookDto,
-  BoundingBoxGroundTruthDto,
-  LandmarkGroundTruthDto,
-  PolygonGroundTruthDto,
-  CategorizationGroundTruthDto,
-  ComparisonGroundTruthDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -98,7 +91,6 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { string } from 'joi';
 import stringify from 'json-stable-stringify'
 
 @Injectable()
@@ -117,7 +109,7 @@ export class JobService {
     private readonly storageService: StorageService,
   ) {}
 
-  private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType): Promise<CvatManifestDto> {
+  private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType, tokenFundAmount: number): Promise<CvatManifestDto> {
     return {
       data: {
         data_url: dto.dataUrl,
@@ -141,7 +133,7 @@ export class JobService {
         ),
         gt_url: dto.gtUrl,
       },
-      job_bounty: await this.calculateJobBounty(dto.dataUrl, dto.fundAmount),
+      job_bounty: await this.calculateJobBounty(dto.dataUrl, tokenFundAmount),
     };
   }
 
@@ -164,8 +156,11 @@ export class JobService {
 
     let groundTruthsData;
     if (jobDto.annotations.groundTruths) {
-      groundTruthsData = await StorageClient.downloadFileFromUrl(jobDto.annotations.groundTruths)
-      await this.validateGroundThuth(groundTruthsData, jobType);
+      groundTruthsData = await this.storageService.download(jobDto.annotations.groundTruths)
+
+      if (isValidJSON(groundTruthsData)) {
+        groundTruthsData = JSON.parse(groundTruthsData);
+      }
     }
 
     switch (jobType) {
@@ -398,12 +393,12 @@ export class JobService {
     }
 
     let manifestOrigin, manifestEncrypted, fundAmount;
+    const rate = await getRate(Currency.USD, TokenId.HMT);
 
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
       dto = dto as JobCaptchaDto;
       const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
-      fundAmount = (dto as JobCaptchaDto).annotations.taskBidPrice * objectsInBucket.length;
-      console.log(123, fundAmount)
+      fundAmount = div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
       dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
       
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
@@ -413,26 +408,21 @@ export class JobService {
     } else { // CVAT
       dto = dto as JobCvatDto;
       fundAmount = dto.fundAmount;
-      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
     }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const rate = await getRate(Currency.USD, TokenId.HMT);
     const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
   
     const fee = mul(div(feePercentage, 100), fundAmount);
-    const usdFundAmount = div(fundAmount, rate);
-    const usdFee = div(fee, rate);
-    
-    const usdTotalAmount = add(usdFundAmount, usdFee);
-
+    const usdTotalAmount = add(fundAmount, fee);
+  
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
     }
-    
-    const tokenFundAmount = fundAmount;
-    const tokenFee = fee;
+
+    const tokenFundAmount = mul(fundAmount, rate);
+    const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
@@ -453,17 +443,15 @@ export class JobService {
 
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
-      manifestOrigin = { ...dto, requestType };
-      fundAmount = dto.fundAmount;
+      manifestOrigin = { ...dto, requestType, fundAmount: tokenTotalAmount };
 
     } else { // CVAT
       dto = dto as JobCvatDto;
-      manifestOrigin = await this.createCvatManifest(dto, requestType);
-      fundAmount = dto.fundAmount;
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
+      manifestOrigin = await this.createCvatManifest(dto, requestType, tokenFundAmount);
     }
 
     const hash = hashString(stringify(manifestOrigin));
-    console.log(manifestOrigin)
     const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
     const jobEntity = await this.jobRepository.create({
@@ -472,7 +460,7 @@ export class JobService {
       manifestUrl: url,
       manifestHash: hash,
       fee: tokenFee,
-      fundAmount: tokenTotalAmount,
+      fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
@@ -516,20 +504,7 @@ export class JobService {
     endpointUrl: string,
     fundAmount: number,
   ): Promise<string> {
-    const storageData = parseUrl(endpointUrl);
-
-    if (!storageData.bucket) {
-      throw new BadRequestException(ErrorBucket.NotExist);
-    }
-
-    const storageClient = new StorageClient({
-      endPoint: storageData.endPoint,
-      port: storageData.port,
-      useSSL: storageData.useSSL,
-      region: storageData.region
-    });
-
-    const totalImages = (await storageClient.listObjects(storageData.bucket))
+    const totalImages = (await this.storageService.listObjectsInBucket(endpointUrl))
       .length;
     
     const totalJobs = Math.ceil(
@@ -550,13 +525,15 @@ export class JobService {
     const escrowClient = await EscrowClient.build(signer);
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
-    if (typeof manifest === 'string') {
+    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
       const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
       manifest = await encription.decrypt(manifest as any)
+    } 
+    
+    if (isValidJSON(manifest)) {
+      manifest = JSON.parse(manifest);
     }
 
-    manifest = JSON.parse(manifest);
-    console.log(manifest)
     await this.validateManifest(manifest);
 
     let recordingOracleConfigKey;
@@ -665,45 +642,6 @@ export class JobService {
         validationErrors,
       );
       throw new NotFoundException(ErrorJob.ManifestValidationFailed);
-    }
-
-    return true;
-  }
-
-  private async validateGroundThuth(
-    data: ComparisonGroundTruthDto | CategorizationGroundTruthDto | PolygonGroundTruthDto | LandmarkGroundTruthDto | BoundingBoxGroundTruthDto,
-    jobType: JobCaptchaShapeType
-  ): Promise<boolean> {
-    let dtoCheck;
-
-    if (jobType === JobCaptchaShapeType.COMPARISON) {
-      dtoCheck = new ComparisonGroundTruthDto()
-    } else if (jobType === JobCaptchaShapeType.CATEGORAZATION) {
-      dtoCheck = new CategorizationGroundTruthDto()
-    } else if (jobType === JobCaptchaShapeType.POLYGON) {
-      dtoCheck = new PolygonGroundTruthDto();
-      console.log(dtoCheck, data, jobType)
-    } else if (jobType === JobCaptchaShapeType.POINT) {
-      dtoCheck = new LandmarkGroundTruthDto();
-    } else if (jobType === JobCaptchaShapeType.BOUNDING_BOX) {
-      dtoCheck = new BoundingBoxGroundTruthDto();
-    } 
-
-    if (!dtoCheck) {
-      this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
-      throw new BadRequestException(ErrorJob.HCaptchaInvalidJobType);
-    }
-
-    Object.assign(dtoCheck, data);
-
-    const validationErrors: ValidationError[] = await validate(dtoCheck);
-    if (validationErrors.length > 0) {
-      this.logger.log(
-        ErrorJob.GroundThuthValidationFailed,
-        JobService.name,
-        validationErrors,
-      );
-      throw new BadRequestException(ErrorJob.GroundThuthValidationFailed);
     }
 
     return true;
@@ -1095,12 +1033,21 @@ export class JobService {
     const status =
       escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
-    const manifestData = await this.storageService.download(manifestUrl);
+    let manifestData = await this.storageService.download(manifestUrl);
     if (!manifestData) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
 
     let manifest;
+    if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
+      const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
+      manifestData = await encription.decrypt(manifestData as any)
+    } 
+    
+    if (isValidJSON(manifestData)) {
+      manifestData = JSON.parse(manifestData);
+    }
+
     if ((manifestData as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
       manifest = (manifestData as FortuneManifestDto)
     } else if ((manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
@@ -1112,31 +1059,34 @@ export class JobService {
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.constants.AddressZero,
-      fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
       requesterAddress: signer.address,
-      exchangeOracleAddress: escrow?.exchangeOracle,
-      recordingOracleAddress: escrow?.recordingOracle,
-      reputationOracleAddress: escrow?.reputationOracle,
+      fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
+      exchangeOracleAddress: escrow?.exchangeOracle || ethers.constants.AddressZero,
+      recordingOracleAddress: escrow?.recordingOracle || ethers.constants.AddressZero,
+      reputationOracleAddress: escrow?.reputationOracle || ethers.constants.AddressZero,
     };
 
     let specificManifestDetails;
     if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+      manifest = manifest as FortuneManifestDto;
       specificManifestDetails = {
-        title: (manifest as FortuneManifestDto).requesterTitle,
-        description: (manifest as FortuneManifestDto).requesterDescription,
+        title: manifest.requesterTitle,
+        description: manifest.requesterDescription,
         requestType: JobRequestType.FORTUNE,
-        submissionsRequired: (manifest as FortuneManifestDto)
+        submissionsRequired: manifest
           .submissionsRequired,
       };
     } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
+      manifest = (manifest as HCaptchaManifestDto);
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
-        submissionsRequired: (manifest as HCaptchaManifestDto).job_total_tasks
+        submissionsRequired: manifest.job_total_tasks
       };
     } else {
+      manifest = (manifest as CvatManifestDto);
       specificManifestDetails = {
-        requestType: (manifest as CvatManifestDto).annotation.type,
-        submissionsRequired: (manifest as CvatManifestDto).annotation
+        requestType: manifest.annotation.type,
+        submissionsRequired: manifest.annotation
           .job_size,
       };
     }

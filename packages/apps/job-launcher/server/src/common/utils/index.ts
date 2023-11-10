@@ -7,7 +7,6 @@ import { ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
-import stringify from 'json-stable-stringify';
 
 export async function getRate(from: string, to: string): Promise<number> {
   if (from === to) {
@@ -119,4 +118,18 @@ export function hashStream(stream: Readable): Promise<string> {
 
 export function hashString(data: string): string {
   return crypto.createHash('sha1').update(data).digest('hex');
+}
+
+export function isValidJSON(str: string): boolean {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isPGPMessage(str: string): boolean {
+  const pattern = /-----BEGIN PGP MESSAGE-----\n\n[\s\S]+?\n-----END PGP MESSAGE-----/;
+  return pattern.test(str);
 }

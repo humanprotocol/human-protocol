@@ -112,14 +112,6 @@ jest.mock('@human-protocol/sdk', () => ({
       getAllocation: jest.fn(),
     })),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    uploadFiles: jest
-      .fn()
-      .mockResolvedValue([
-        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-      ]),
-    listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
-  })),
 }));
 
 jest.mock('../../common/utils', () => ({
@@ -360,6 +352,7 @@ describe('JobService', () => {
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
@@ -382,6 +375,7 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
       const tokenFundAmount = 0.013997056833333334;
       const result = await jobService['calculateJobBounty'](
         MOCK_FILE_URL,
@@ -425,6 +419,7 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
@@ -476,6 +471,7 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -535,6 +531,7 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -586,7 +583,7 @@ describe('JobService', () => {
     });
 
     it('should create a job successfully', async () => {
-      const fundAmount = 1;
+      const fundAmount = div(hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length, rate);
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
@@ -605,7 +602,7 @@ describe('JobService', () => {
       };
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
       
       await jobService.createJob(
         userId,
@@ -637,12 +634,12 @@ describe('JobService', () => {
     });
 
     it('should create a job successfully on network selected from round robin logic', async () => {
-      const fundAmount = 1;
+      const fundAmount = div(hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length, rate);
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -674,7 +671,7 @@ describe('JobService', () => {
         .mockResolvedValue(userBalance);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       await expect(
         jobService.createJob(
@@ -689,7 +686,7 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(['1.jpg']);
+      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -1435,9 +1432,9 @@ describe('JobService', () => {
           fundAmount: expect.any(Number),
           requesterAddress: MOCK_ADDRESS,
           requestType: JobRequestType.FORTUNE,
-          exchangeOracleAddress: undefined,
-          recordingOracleAddress: undefined,
-          reputationOracleAddress: undefined,
+          exchangeOracleAddress: ethers.constants.AddressZero,
+          recordingOracleAddress: ethers.constants.AddressZero,
+          reputationOracleAddress: ethers.constants.AddressZero,
         },
         staking: {
           staker: expect.any(String),
