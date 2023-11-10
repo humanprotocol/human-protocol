@@ -17,79 +17,11 @@ from src.core.types import (
 from src.db import SessionLocal
 from src.models.cvat import Assignment, DataUpload, Image, Job, Project, Task, User
 
-
-def create_project(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
-    cvat_project = Project(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_cloudstorage_id=1,
-        status=ProjectStatuses.annotation.value,
-        job_type=TaskType.image_label_binary.value,
-        escrow_address=escrow_address,
-        chain_id=Networks.localhost.value,
-        bucket_url="https://test.storage.googleapis.com/",
-    )
-    session.add(cvat_project)
-    session.commit()
-
-    return cvat_project
-
-
-def create_project_and_task(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
-    cvat_project = Project(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_cloudstorage_id=1,
-        status=ProjectStatuses.annotation.value,
-        job_type=TaskType.image_label_binary.value,
-        escrow_address=escrow_address,
-        chain_id=Networks.localhost.value,
-        bucket_url="https://test.storage.googleapis.com/",
-    )
-    cvat_task = Task(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_project_id=cvat_id,
-        status=TaskStatus.annotation.value,
-    )
-    session.add(cvat_project)
-    session.add(cvat_task)
-    session.commit()
-
-    return cvat_project, cvat_task
-
-
-def create_project_task_and_job(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
-    cvat_project = Project(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_cloudstorage_id=1,
-        status=ProjectStatuses.annotation.value,
-        job_type=TaskType.image_label_binary.value,
-        escrow_address=escrow_address,
-        chain_id=Networks.localhost.value,
-        bucket_url="https://test.storage.googleapis.com/",
-    )
-    cvat_task = Task(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_project_id=cvat_id,
-        status=TaskStatus.annotation.value,
-    )
-
-    cvat_job = Job(
-        id=str(uuid.uuid4()),
-        cvat_id=cvat_id,
-        cvat_project_id=cvat_id,
-        cvat_task_id=cvat_id,
-        status=JobStatuses.new,
-    )
-    session.add(cvat_project)
-    session.add(cvat_task)
-    session.add(cvat_job)
-    session.commit()
-
-    return cvat_project, cvat_task, cvat_job
+from tests.utils.db_helper import (
+    create_project,
+    create_project_and_task,
+    create_project_task_and_job,
+)
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -294,6 +226,24 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(project.bucket_url, bucket_url)
 
         project = cvat_service.get_project_by_id(self.session, "dummy_id")
+
+        self.assertIsNone(project)
+
+        project = cvat_service.get_project_by_id(
+            self.session, p_id, status_in=[ProjectStatuses.annotation]
+        )
+
+        self.assertIsNotNone(project)
+        self.assertEqual(project.id, p_id)
+        self.assertEqual(project.cvat_id, cvat_id)
+        self.assertEqual(project.status, ProjectStatuses.annotation.value)
+        self.assertEqual(project.job_type, job_type)
+        self.assertEqual(project.escrow_address, escrow_address)
+        self.assertEqual(project.bucket_url, bucket_url)
+
+        project = cvat_service.get_project_by_id(
+            self.session, p_id, status_in=[ProjectStatuses.canceled]
+        )
 
         self.assertIsNone(project)
 
