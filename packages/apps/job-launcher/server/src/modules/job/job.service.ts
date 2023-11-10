@@ -399,7 +399,6 @@ export class JobService {
       dto = dto as JobCaptchaDto;
       const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
       fundAmount = div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
-      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
       
     } else if (requestType === JobRequestType.FORTUNE) { // Fortune
       dto = dto as JobFortuneDto;
@@ -427,12 +426,14 @@ export class JobService {
   
     if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
       dto = dto as JobCaptchaDto
-  
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
       manifestOrigin = await this.createHCaptchaManifest(
         dto.annotations.typeOfJob,
         dto
       );
 
+
+      console.log(manifestOrigin)
       manifestEncrypted = await EncryptionUtils.encrypt(
         stringify(manifestOrigin), 
         [
@@ -451,6 +452,8 @@ export class JobService {
       manifestOrigin = await this.createCvatManifest(dto, requestType, tokenFundAmount);
     }
 
+    console.log(manifestOrigin)
+    console.log(manifestOrigin)
     const hash = hashString(stringify(manifestOrigin));
     const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
