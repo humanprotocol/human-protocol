@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EscrowClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
 import {
   CvatAnnotationMeta,
@@ -64,7 +64,7 @@ export class WebhookService {
     dto: WebhookIncomingDto,
   ): Promise<boolean> {
     try {
-      if (dto.eventType !== EventType.TASK_FINISHED) {
+      if (dto.eventType !== EventType.TASK_COMPLETED) {
         this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
         throw new BadRequestException(ErrorWebhook.InvalidEventType);
       }
@@ -405,9 +405,9 @@ export class WebhookService {
           webhookEntity.escrowAddress,
         );
 
-        const finalResults = await this.storageService
-          .download(finalResultsUrl)
-          .catch(() => []);
+        const finalResults = await this.storageService.download(
+          finalResultsUrl,
+        );
 
         if (finalResults.length === 0) {
           this.logger.log(

@@ -198,24 +198,24 @@ export class PaymentService {
     }
 
     const signer = this.web3Service.getSigner(dto.chainId);
-
-    const recipientAddress = transaction.logs[0].topics.some(
-      (topic) =>
-        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
-    );
-    if (!recipientAddress) {
-      this.logger.error(ErrorPayment.InvalidRecipient);
-      throw new ConflictException(ErrorPayment.InvalidRecipient);
-    }
-
-    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
       signer,
     );
+    tokenContract.interface.parseLog(transaction.logs[0]);
+    if (
+      ethers.utils.hexValue(
+        tokenContract.interface.parseLog(transaction.logs[0]).args['_to'],
+      ) !== ethers.utils.hexValue(signer.address)
+    ) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const tokenId = (await tokenContract.symbol()).toLowerCase();
+    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
 
     if (
       network?.tokens[tokenId] != tokenAddress ||
@@ -272,24 +272,30 @@ export class PaymentService {
     const rate = await getRate(TokenId.HMT, Currency.USD);
 
     try {
-        await this.paymentRepository.create({
-            userId: dto.userId,
-            jobId: dto.jobId,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.REFUND,
-            amount: dto.refundAmount,
-            currency: TokenId.HMT,
-            rate,
-            status: PaymentStatus.SUCCEEDED,
-        });
+      await this.paymentRepository.create({
+        userId: dto.userId,
+        jobId: dto.jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.REFUND,
+        amount: dto.refundAmount,
+        currency: TokenId.HMT,
+        rate,
+        status: PaymentStatus.SUCCEEDED,
+      });
     } catch (error) {
-        if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
-            this.logger.log(ErrorPostgres.NumericFieldOverflow, PaymentService.name);
-            throw new ConflictException(ErrorPayment.IncorrectAmount);
-        } else {
-            this.logger.log(error, PaymentService.name);
-            throw new ConflictException(ErrorPayment.NotSuccess);
-        }
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
+        this.logger.log(
+          ErrorPostgres.NumericFieldOverflow,
+          PaymentService.name,
+        );
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, PaymentService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
     }
   }
 }

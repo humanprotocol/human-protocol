@@ -19,6 +19,7 @@ from src.core.oracle_events import (
 )
 from src.core.types import ExchangeOracleEventType, OracleWebhookTypes
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.handlers.process_intermediate_results import (
     ValidationSuccess,
     parse_annotation_metafile,
@@ -50,7 +51,8 @@ def process_incoming_exchange_oracle_webhooks():
             webhooks = oracle_db_service.inbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.exchange_oracle,
-                Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
+                limit=Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for webhook in webhooks:
@@ -240,7 +242,8 @@ def process_outgoing_exchange_oracle_webhooks():
             webhooks = oracle_db_service.outbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.exchange_oracle,
-                Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
+                limit=Config.cron_config.process_exchange_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
             for webhook in webhooks:
                 try:

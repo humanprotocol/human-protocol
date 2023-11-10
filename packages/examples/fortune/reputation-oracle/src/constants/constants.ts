@@ -7,6 +7,8 @@ export enum ChainId {
   POLYGON_MUMBAI = 80001,
   MOONBEAM = 1284,
   MOONBASE_ALPHA = 1287,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
 }
 
@@ -72,5 +74,10 @@ export const REPUTATION_NETWORKS: {
     chainId: ChainId.MOONBASE_ALPHA,
     title: 'Moonbase Alpha',
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
+  },
+  [ChainId.CELO_ALFAJORES]: {
+    chainId: ChainId.CELO_ALFAJORES,
+    title: 'Celo Alfajores',
+    rpcUrl: 'https://alfajores-forno.celo-testnet.org',
   },
 };

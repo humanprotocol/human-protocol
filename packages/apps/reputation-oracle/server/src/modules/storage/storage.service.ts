@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { FortuneFinalResult } from '../webhook/webhook.dto';
 import { PassThrough } from 'stream';
 import axios from 'axios';
@@ -53,14 +53,9 @@ export class StorageService {
     const key = `${escrowAddress}-${chainId}.json`;
     try {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
-      await this.minioClient.putObject(
-        this.s3Config.bucket,
-        key,
-        JSON.stringify(content),
-        {
-          'Content-Type': 'application/json',
-        },
-      );
+      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
+        'Content-Type': 'application/json',
+      });
 
       return { url: this.getUrl(key), hash };
     } catch (e) {

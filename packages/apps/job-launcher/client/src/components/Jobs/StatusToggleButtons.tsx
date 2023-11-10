@@ -1,7 +1,5 @@
 import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup, {
-  ToggleButtonGroupProps,
-} from '@mui/material/ToggleButtonGroup';
+import ToggleButtonGroup, { ToggleButtonGroupProps } from '@mui/material/ToggleButtonGroup';
 import React, { FC } from 'react';
 import { JobStatus } from '../../types';
 
@@ -9,7 +7,7 @@ const RANGE_BUTTONS = [
   { label: 'Launched', value: JobStatus.LAUNCHED },
   { label: 'Pending', value: JobStatus.PENDING },
   { label: 'Completed', value: JobStatus.COMPLETED },
-  { label: 'Cancelled', value: JobStatus.CANCELED },
+  { label: 'Canceled', value: JobStatus.CANCELED },
   { label: 'Failed', value: JobStatus.FAILED },
 ];
 

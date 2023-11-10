@@ -8,6 +8,7 @@ import {
   JobStatus,
   JobDetailsResponse,
   HCaptchaRequest,
+  FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
 
@@ -52,7 +53,9 @@ export const getJobList = async ({ chainId = ChainId.ALL, status }: { chainId?: 
 };
 
 export const getJobResult = async (jobId: number) => {
-  const { data } = await api.get(`/job/result`, { params: { jobId } });
+  const { data } = await api.get<FortuneFinalResult[] | string>(`/job/result`, {
+    params: { jobId },
+  });
   return data;
 };
 

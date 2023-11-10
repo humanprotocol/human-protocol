@@ -210,6 +210,33 @@ export const NETWORKS: {
       'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche',
     oldFactoryAddress: '0x9767a578ba7a5FA1563c8229943cB01cd8446BB4',
   },
+  [ChainId.CELO_ALFAJORES]: {
+    chainId: ChainId.CELO_ALFAJORES,
+    title: 'Celo Alfajores',
+    scanUrl: 'https://alfajores.celoscan.io/',
+    factoryAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
+    hmtAddress: '0x2736B33455A872dC478E1E004106D04c35472468',
+    stakingAddress: '0x003548Df34be8836cF0F9673403a1E40ba449a0F',
+    rewardPoolAddress: '0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86',
+    kvstoreAddress: '0x938335006ea6F9Eb0e8020969cFF94404425e298',
+    subgraphUrl:
+      'https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
+  [ChainId.CELO]: {
+    chainId: ChainId.CELO,
+    title: 'Celo',
+    scanUrl: 'https://celoscan.io/',
+    factoryAddress: '0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08',
+    hmtAddress: '0x19Ead835951493A763c96910255d5eeF147E914F',
+    stakingAddress: '0x34cD3Bd6B16c559f321799b516dE61E12017fFd1',
+    rewardPoolAddress: '0xb9344bAD98E3d26a4d83900922baf395a2Ec154c',
+    kvstoreAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
+    subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/celo',
+    oldSubgraphUrl: '',
+    oldFactoryAddress: '',
+  },
   [ChainId.SKALE]: {
     chainId: ChainId.SKALE,
     title: 'SKALE Human Protocol Chain',
@@ -241,7 +268,8 @@ export const NETWORKS: {
 
 export const KVStoreKeys = {
   role: 'role',
-  webhook_url: 'webhook_url',
   fee: 'fee',
-  public_key: 'public_key',
+  publicKey: 'publicKey',
+  webhookUrl: 'webhookUrl',
+  url: 'url',
 };

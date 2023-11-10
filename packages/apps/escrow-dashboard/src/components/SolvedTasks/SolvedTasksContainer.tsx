@@ -14,10 +14,10 @@ export const SolvedTasksContainer: FC = () => {
       </Box>
       <Box mt={{ xs: '26px', md: '51px' }}>
         <Grid container spacing={{ xs: 5, lg: 3, xl: 4 }}>
-          <Grid item xs={12} sm={12} md={4}>
+          <Grid item xs={12} md={8}>
             <SolvedTasksView />
           </Grid>
-          <Grid item xs={12} sm={12} md={8}>
+          <Grid item xs={12} md={4}>
             <NewsView />
           </Grid>
         </Grid>
