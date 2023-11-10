@@ -42,6 +42,7 @@ import { JobRequestType } from '../../common/enums';
 import { ReputationEntityType } from '../../common/enums';
 import { LessThanOrEqual } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class WebhookService {
@@ -88,6 +89,7 @@ export class WebhookService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processes a pending webhook. Validates and processes incoming data,
    * then sends payments based on the processing results.
@@ -95,6 +97,7 @@ export class WebhookService {
    * @throws {Error} Will throw an error if processing fails at any step.
    */
   public async processPendingCronJob(): Promise<boolean> {
+    this.logger.log('Pending webhooks START');
     const webhookEntity = await this.webhookRepository.findOne(
       {
         status: WebhookStatus.PENDING,
@@ -108,7 +111,10 @@ export class WebhookService {
       },
     );
 
-    if (!webhookEntity) return false;
+    if (!webhookEntity) {
+      this.logger.log('Pending webhooks STOP');
+      return false;
+    }
 
     try {
       const { chainId, escrowAddress } = webhookEntity;
@@ -176,7 +182,7 @@ export class WebhookService {
           retriesCount: 0,
         },
       );
-
+      this.logger.log('Pending webhooks STOP');
       return true;
     } catch (e) {
       return await this.handleWebhookError(webhookEntity, e);
@@ -357,12 +363,14 @@ export class WebhookService {
     return intermediateResults;
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processing a webhook of an entity with a paid status.
    * @returns {Promise<boolean>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
   public async processPaidCronJob(): Promise<boolean> {
+    this.logger.log('Paid jobs START');
     const webhookEntity = await this.webhookRepository.findOne(
       {
         status: WebhookStatus.PAID,
@@ -490,7 +498,7 @@ export class WebhookService {
         },
         { status: WebhookStatus.COMPLETED },
       );
-
+      this.logger.log('Paid jobs STOP');
       return true;
     } catch (e) {
       return await this.handleWebhookError(webhookEntity, e);
