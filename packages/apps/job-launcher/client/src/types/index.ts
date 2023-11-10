@@ -81,7 +81,6 @@ export enum HCaptchaJobType {
   POINT = 'point',
   BOUNDING_BOX = 'bounding_box',
   COMPARISON = 'comparison',
-  IMMO = 'immo',
 }
 
 export type FortuneRequest = {

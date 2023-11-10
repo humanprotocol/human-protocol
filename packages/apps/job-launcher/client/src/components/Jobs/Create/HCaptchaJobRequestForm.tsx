@@ -85,28 +85,31 @@ export const HCaptchaJobRequestForm = () => {
   };
 
   const handleNext = (data: any) => {
+    const hCaptchaRequest: any = {
+      dataUrl: data.dataUrl,
+      accuracyTarget: Number(data.accuracyTarget) / 100,
+      minRequests: Number(data.minRequests),
+      maxRequests: Number(data.maxRequests),
+      advanced: {
+        workerLanguage: data.workerLanguage,
+        workerLocation: data.workerLocation,
+        targetBrowser: data.targetBrowser,
+      },
+      annotations: {
+        typeOfJob: data.type,
+        taskBidPrice: Number(data.taskBidPrice),
+        label: data.label,
+        labelingPrompt: data.labelingPrompt,
+        groundTruths: data.groundTruths,
+        exampleImages: data.images,
+      },
+    };
+    if (data.completionDate) {
+      hCaptchaRequest['completionDate'] = data.completionDate;
+    }
     updateJobRequest?.({
       ...jobRequest,
-      hCaptchaRequest: {
-        dataUrl: data.dataUrl,
-        accuracyTarget: Number(data.accuracyTarget) / 100,
-        completionDate: data.completionDate,
-        minRequests: Number(data.minRequests),
-        maxRequests: Number(data.maxRequests),
-        advanced: {
-          workerLanguage: data.workerLanguage,
-          workerLocation: data.workerLocation,
-          targetBrowser: data.targetBrowser,
-        },
-        annotations: {
-          typeOfJob: data.type,
-          taskBidPrice: Number(data.taskBidPrice),
-          label: data.label,
-          labelingPrompt: data.labelingPrompt,
-          groundTruths: data.groundTruths,
-          exampleImages: data.images,
-        },
-      },
+      hCaptchaRequest,
     });
     goToNextStep?.();
   };
@@ -141,7 +144,6 @@ export const HCaptchaJobRequestForm = () => {
                           <MenuItem value={HCaptchaJobType.COMPARISON}>Comparison</MenuItem>
                           <MenuItem value={HCaptchaJobType.CATEGORIZATION}>Categorization</MenuItem>
                           <MenuItem value={HCaptchaJobType.POLYGON}>Polygon</MenuItem>
-                          <MenuItem value={HCaptchaJobType.IMMO}>IMMO</MenuItem>
                           <MenuItem value={HCaptchaJobType.BOUNDING_BOX}>Bounding Box</MenuItem>
                         </Select>
                       </FormControl>
