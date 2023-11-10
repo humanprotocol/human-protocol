@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@human-protocol/core": "*",
-    "axios": "^1.1.3",
+    "axios": "^1.6.0",
     "minio": "^7.0.32",
     "web3": "^1.8.1"
   },

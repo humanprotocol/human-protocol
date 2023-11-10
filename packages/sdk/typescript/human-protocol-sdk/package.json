@@ -41,7 +41,7 @@
   "dependencies": {
     "@human-protocol/core": "*",
     "aws-sdk": "^2.1255.0",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "crypto": "^1.0.1",
     "ethers": "^5.7.2",
     "graphql": "^16.7.1",
