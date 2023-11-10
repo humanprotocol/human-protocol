@@ -1437,6 +1437,8 @@ export class EscrowUtils {
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
    *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
    *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }
@@ -1588,6 +1590,8 @@ export class EscrowUtils {
    *   MOONBASE_ALPHA = 1287,
    *   AVALANCHE = 43114,
    *   AVALANCHE_TESTNET = 43113,
+   *   CELO = 42220,
+   *   CELO_ALFAJORES = 44787,
    *   SKALE = 1273227453,
    *   LOCALHOST = 1338,
    * }
