@@ -32,12 +32,14 @@ export class WebhookController {
   @Public()
   @Get('/cron/pending')
   public async processPendingCronJob(): Promise<any> {
-    return this.webhookService.processPendingCronJob();
+    this.webhookService.processPendingCronJob();
+    return;
   }
 
   @Public()
   @Get('/cron/paid')
   public async processPaidCronJob(): Promise<any> {
-    return this.webhookService.processPaidCronJob();
+    this.webhookService.processPaidCronJob();
+    return;
   }
 }
