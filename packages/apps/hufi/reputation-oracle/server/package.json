@@ -56,7 +56,7 @@
     "express-session": "^1.17.3",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
-    "helmet": "^7.0.0",
+    "helmet": "^7.1.0",
     "pg": "8.11.0",
     "typeorm": "^0.3.16"
   },

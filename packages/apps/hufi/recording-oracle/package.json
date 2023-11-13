@@ -36,7 +36,7 @@
     "cookie-parser": "^1.4.6",
     "ethers": "^5.7.2",
     "graphql-request": "^6.1.0",
-    "helmet": "^6.0.1",
+    "helmet": "^7.1.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
