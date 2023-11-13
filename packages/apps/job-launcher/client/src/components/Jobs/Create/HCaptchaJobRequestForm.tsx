@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormHelperText,
   Grid,
   InputAdornment,
   InputLabel,
@@ -28,6 +29,7 @@ import languages from '../../../data/languages.json';
 import locations from '../../../data/locations.json';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { HCaptchaJobType } from '../../../types';
+import { HCaptchaJobRequesteValidationSchema } from './schema';
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
   ({ theme }) => ({
@@ -116,7 +118,11 @@ export const HCaptchaJobRequestForm = () => {
 
   return (
     <Box mt="42px">
-      <Formik initialValues={initialValues} onSubmit={handleNext}>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={HCaptchaJobRequesteValidationSchema}
+        onSubmit={handleNext}
+      >
         {({ errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue }) => (
           <form>
             <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
@@ -198,7 +204,7 @@ export const HCaptchaJobRequestForm = () => {
                         name="minRequests"
                         label="Requests number minimum"
                         placeholder="Add the number of requests to complete the job"
-                        helperText="Minimum number of times the image is sent for annotation."
+                        helperText={errors.minRequests ?? 'Minimum number of times the image is sent for annotation.'}
                         value={values.minRequests}
                         onChange={(e) => setFieldValue('minRequests', e.target.value)}
                         onBlur={handleBlur}
@@ -213,7 +219,7 @@ export const HCaptchaJobRequestForm = () => {
                         name="maxRequests"
                         label="Requests number maximum"
                         placeholder="Add the number of requests to complete the job"
-                        helperText="Maximum number of times the image is sent for annotation."
+                        helperText={errors.maxRequests ?? 'Maximum number of times the image is sent for annotation.'}
                         value={values.maxRequests}
                         onChange={(e) => setFieldValue('maxRequests', e.target.value)}
                         onBlur={handleBlur}
@@ -251,12 +257,11 @@ export const HCaptchaJobRequestForm = () => {
                         onChange={(e) => setFieldValue('dataUrl', e.target.value)}
                         onBlur={handleBlur}
                         error={touched.dataUrl && Boolean(errors.dataUrl)}
+                        helperText={errors.dataUrl}
                       />
                     </FormControl>
                   </Grid>
-                  {(values.type === HCaptchaJobType.POLYGON ||
-                    values.type === HCaptchaJobType.IMMO ||
-                    values.type === HCaptchaJobType.BOUNDING_BOX) && (
+                  {(values.type === HCaptchaJobType.POLYGON || values.type === HCaptchaJobType.BOUNDING_BOX) && (
                     <Grid item xs={12}>
                       <FormControl fullWidth>
                         <TextField
@@ -277,7 +282,7 @@ export const HCaptchaJobRequestForm = () => {
                         name="labelingPrompt"
                         label="Question for workers"
                         placeholder="Instructions for labeling the item"
-                        helperText="60 characters is optimal"
+                        helperText={errors.labelingPrompt ?? '60 characters is optimal'}
                         value={values.labelingPrompt}
                         onChange={(e) => setFieldValue('labelingPrompt', e.target.value)}
                         onBlur={handleBlur}
@@ -361,7 +366,7 @@ export const HCaptchaJobRequestForm = () => {
                         name="groundTruths"
                         label="Ground truth"
                         placeholder="Add URL to ground truth: Amazon S3, Google Cloud Platform, etc."
-                        helperText="Provide ground truth to set the right ones images."
+                        helperText={errors.groundTruths ?? 'Provide ground truth to set the right ones images.'}
                         value={values.groundTruths}
                         onChange={(e) => setFieldValue('groundTruths', e.target.value)}
                         onBlur={handleBlur}
@@ -388,6 +393,7 @@ export const HCaptchaJobRequestForm = () => {
                         onChange={(e) => setFieldValue('accuracyTarget', e.target.value)}
                         onBlur={handleBlur}
                         error={touched.accuracyTarget && Boolean(errors.accuracyTarget)}
+                        helperText={errors.accuracyTarget}
                         type="number"
                       />
                     </FormControl>
@@ -454,6 +460,11 @@ export const HCaptchaJobRequestForm = () => {
                           </MenuItem>
                         ))}
                       </Select>
+                      {errors.workerLanguage && (
+                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                          {errors.workerLanguage}
+                        </FormHelperText>
+                      )}
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={12} md={6}>
@@ -472,6 +483,11 @@ export const HCaptchaJobRequestForm = () => {
                         <MenuItem value={'desktop'}>Desktop</MenuItem>
                         <MenuItem value={'mobile'}>Mobile</MenuItem>
                       </Select>
+                      {errors.targetBrowser && (
+                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                          {errors.targetBrowser}
+                        </FormHelperText>
+                      )}
                     </FormControl>
                   </Grid>
                   <Grid item xs={12} sm={12} md={6}>
@@ -492,6 +508,11 @@ export const HCaptchaJobRequestForm = () => {
                           </MenuItem>
                         ))}
                       </Select>
+                      {errors.workerLocation && (
+                        <FormHelperText sx={{ mx: '14px', mt: '3px' }} error>
+                          {errors.workerLocation}
+                        </FormHelperText>
+                      )}
                     </FormControl>
                   </Grid>
                 </Grid>

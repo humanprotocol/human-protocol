@@ -39,7 +39,11 @@ export const createCvatJob = async (chainId: number, data: CvatRequest, amount: 
 };
 
 export const createHCaptchaJob = async (chainId: number, data: HCaptchaRequest, amount: number | string) => {
-  await api.post('/job/hCaptcha', data);
+  await api.post('/job/hCaptcha', {
+    chainId,
+    ...data,
+    fundAmount: amount,
+  });
 };
 
 export const getJobList = async ({ chainId = ChainId.ALL, status }: { chainId?: ChainId; status?: JobStatus }) => {
