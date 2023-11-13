@@ -18,5 +18,6 @@ export * from './HumanAppData';
 export * from './Faucet';
 export * from './Kvstore';
 export * from './Leaderboard';
+export * from './LeaderboardAllJobTypes';
 export * from './SolvedTasks';
 export * from './Token';

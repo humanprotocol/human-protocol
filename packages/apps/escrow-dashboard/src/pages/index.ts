@@ -1,6 +1,7 @@
 export * from './EscrowDetail';
 export * from './Faucet';
 export * from './Leaderboard';
+export * from './LeaderboardAllJobTypes';
 export * from './LeaderDetail';
 export * from './Kvstore';
 export * from './Main';

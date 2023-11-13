@@ -22,8 +22,17 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { CardContainer } from '../Cards';
+import {
+  CvatIcon,
+  ExchangeOracleIcon,
+  HCaptchaIcon,
+  RecordingOracleIcon,
+  ReputationOracleIcon,
+} from '../Icons';
+import { CHAIN_ICONS } from '../Icons/chains';
 import { ViewTitle } from '../ViewTitle';
-import userSvg from 'src/assets/user.svg';
+import leaderboardImg from 'src/assets/leaderboard/leaderboard.png';
+import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { AppState } from 'src/state';
 import { useLeadersData, useLeadersByChainID } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
@@ -74,6 +83,37 @@ function stableSort<T>(
   return stabilizedThis.map((el) => el[0]);
 }
 
+const LeaderRole = ({ role }: { role?: string }) => {
+  const IconComponent = useMemo(() => {
+    if (role === 'CVAT') return <CvatIcon sx={{ fontSize: '2rem' }} />;
+    if (role === 'hCaptcha') return <HCaptchaIcon />;
+    if (role === 'Reputation Oracle') return <ReputationOracleIcon />;
+    if (role === 'Exchange Oracle') return <ExchangeOracleIcon />;
+    if (role === 'Recording Oracle') return <RecordingOracleIcon />;
+
+    return <></>;
+  }, [role]);
+
+  return (
+    <Box display="flex" alignItems="center" gap={2}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '52px',
+          height: '52px',
+          borderRadius: '10px',
+          backgroundColor: 'rgba(20, 6, 178, 0.04)',
+        }}
+      >
+        {IconComponent}
+      </Box>
+      <Box>{role}</Box>
+    </Box>
+  );
+};
+
 export const LeaderboardView: FC<LeaderboardViewProps> = ({
   showAll = true,
 }) => {
@@ -93,6 +133,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
   const [orderBy, setOrderBy] = useState<string | undefined>();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [networkFilter, setNetworkFilter] = useState<ChainId>(ChainId.ALL);
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -111,26 +152,37 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
     setPage(0);
   };
 
+  const filteredLeaders = useMemo(
+    () =>
+      leaders?.filter(
+        (leader) =>
+          networkFilter === ChainId.ALL || leader.chainId === networkFilter
+      ),
+    [leaders, networkFilter]
+  );
+
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - leaders?.length) : 0;
+    page > 0
+      ? Math.max(0, (1 + page) * rowsPerPage - filteredLeaders?.length)
+      : 0;
 
   const visibleRows = useMemo(() => {
     if (!orderBy) {
-      return leaders?.slice(
+      return filteredLeaders?.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       );
     }
-    return stableSort(leaders, getComparator(order, orderBy)).slice(
+    return stableSort(filteredLeaders, getComparator(order, orderBy)).slice(
       page * rowsPerPage,
       page * rowsPerPage + rowsPerPage
     );
-  }, [leaders, order, orderBy, page, rowsPerPage]);
+  }, [order, orderBy, page, rowsPerPage, filteredLeaders]);
 
   return (
     <Box mt={13}>
       <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="Leaderboard" iconUrl={userSvg} />
+        <ViewTitle title="Leaderboard" iconUrl={leaderboardImg} fontSize={50} />
         {!showAll && (
           <Button
             variant="outlined"
@@ -197,17 +249,24 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                   </TableCell>
                   <TableCell>
                     <FormControl sx={{ minWidth: 210 }} size="small">
-                      <InputLabel id="demo-select-small-label">
+                      <InputLabel id="network-filter-label">
                         By Network
                       </InputLabel>
                       <Select
-                        labelId="demo-select-small-label"
-                        id="demo-select-small"
+                        labelId="network-filter-label"
+                        id="network-filter-label"
                         label="By Network"
+                        value={networkFilter}
+                        onChange={(e) =>
+                          setNetworkFilter(e.target.value as ChainId)
+                        }
                       >
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        <MenuItem value={ChainId.ALL}>All</MenuItem>
+                        {V2_SUPPORTED_CHAIN_IDS.map((chainId) => (
+                          <MenuItem value={chainId}>
+                            {NETWORKS[chainId]?.title}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </TableCell>
@@ -233,7 +292,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                     </TableCell>
                   </TableRow>
                 </TableBody>
-              ) : leaders?.length > 0 ? (
+              ) : filteredLeaders?.length > 0 ? (
                 <TableBody>
                   {visibleRows.map((staker, i) => (
                     <TableRow
@@ -244,10 +303,17 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                       }
                     >
                       <TableCell>{i + 1}</TableCell>
-                      <TableCell>{staker.role}</TableCell>
+                      <TableCell>
+                        <LeaderRole role={staker.role} />
+                      </TableCell>
                       <TableCell>{shortenAddress(staker.address)}</TableCell>
                       <TableCell>{staker.amountStaked} HMT</TableCell>
-                      <TableCell>{NETWORKS[staker.chainId]?.title}</TableCell>
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          {CHAIN_ICONS[staker.chainId]}
+                          {NETWORKS[staker.chainId]?.title}
+                        </Box>
+                      </TableCell>
                       <TableCell>{staker.reputation}</TableCell>
                       <TableCell>0 HMT</TableCell>
                     </TableRow>
@@ -272,7 +338,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
             component="div"
-            count={leaders?.length}
+            count={filteredLeaders?.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}

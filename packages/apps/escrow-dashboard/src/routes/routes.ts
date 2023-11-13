@@ -6,6 +6,7 @@ import {
   Kvstore,
   LeaderDetail,
   Leaderboard,
+  LeaderboardAllJobTypes,
   Main,
   Owner,
   Profile,
@@ -33,6 +34,12 @@ export const routes: Array<Route> = [
     title: 'Leaderboard',
     path: '/leaderboard',
     component: Leaderboard,
+  },
+  {
+    key: 'leaderboard-all-job-types-route',
+    title: 'Leaderboard | All job types',
+    path: '/leaderboard-all-job-types',
+    component: LeaderboardAllJobTypes,
   },
   {
     key: 'leader-detail-route',

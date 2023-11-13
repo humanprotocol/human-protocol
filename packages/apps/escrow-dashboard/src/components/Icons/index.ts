@@ -24,3 +24,5 @@ export { TextLabelingIcon } from './TextLabelingIcon';
 export { ImageLabelingIcon } from './ImageLabelingIcon';
 export { MarketMakingIcon } from './MarketMakingIcon';
 export { OpenQueriesIcon } from './OpenQueriesIcon';
+export { HCaptchaIcon } from './HCaptchaIcon';
+export { CvatIcon } from './CvatIcon';

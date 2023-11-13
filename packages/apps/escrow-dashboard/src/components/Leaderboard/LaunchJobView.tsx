@@ -10,7 +10,8 @@ import {
   Button,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { CardContainer } from '../Cards';
 import {
   ImageLabelingIcon,
@@ -20,6 +21,16 @@ import {
 } from '../Icons';
 import { ViewTitle } from '../ViewTitle';
 import launchTaskImg from 'src/assets/leaderboard/launch-task.png';
+import {
+  ImageLabelingJobType,
+  ImageLabelingJobTypeLabels,
+  MarketMakingJobType,
+  MarketMakingJobTypeLabels,
+  OpenQueriesJobType,
+  OpenQueriesJobTypeLabels,
+  TextLabelingJobType,
+  TextLabelingJobTypeLabels,
+} from 'src/constants/leaderboard';
 
 const SelectContainer = styled(Box)({
   borderRadius: '10px',
@@ -59,7 +70,38 @@ const FormControl = styled(MuiFormControl)({
   },
 });
 
+const JobTypeSelect = ({
+  values,
+  labelMap,
+  placeholder,
+  icon: IconComponent,
+  selectedValue,
+  onChange,
+}: any) => {
+  return (
+    <SelectContainer>
+      <SelectIcon>{IconComponent}</SelectIcon>
+      <FormControl variant="standard" sx={{ flex: 1 }}>
+        <Select
+          displayEmpty
+          renderValue={(selected: any) => labelMap[selected] ?? placeholder}
+          value={selectedValue as any}
+          onChange={onChange}
+        >
+          {values.map((jobType: any) => (
+            <MenuItem key={jobType} value={jobType}>
+              {labelMap[jobType]}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </SelectContainer>
+  );
+};
+
 export const LaunchJobView = () => {
+  const [selectedJobType, setSelectedJobType] = useState('');
+
   return (
     <Box mt={10}>
       <ViewTitle title="Launch job" iconUrl={launchTaskImg} fontSize={50} />
@@ -91,84 +133,58 @@ export const LaunchJobView = () => {
             <Typography variant="body2" color="#013654" sx={{ ml: '12px' }}>
               Unsure what job type to choose?
             </Typography>
-            <Button
-              sx={{ ml: 2 }}
-              color="secondary"
-              endIcon={<ArrowForwardIcon />}
-            >
-              Explore jobs
-            </Button>
+            <Link to="/leaderboard-all-job-types">
+              <Button
+                sx={{ ml: 2 }}
+                color="secondary"
+                endIcon={<ArrowForwardIcon />}
+              >
+                Explore jobs
+              </Button>
+            </Link>
           </Box>
         </Box>
         <Box maxWidth="984px" mx="auto" p={4} mt={4}>
           <Grid container spacing={4}>
             <Grid item xs={12} sm={12} md={6}>
-              <SelectContainer>
-                <SelectIcon>
-                  <TextLabelingIcon />
-                </SelectIcon>
-                <FormControl variant="standard" sx={{ flex: 1 }}>
-                  <Select
-                    displayEmpty
-                    renderValue={(selected: any) => selected ?? 'Text labeling'}
-                  >
-                    <MenuItem value={10}>Text free entry/OCR</MenuItem>
-                    <MenuItem value={20}>Multiple Choice</MenuItem>
-                  </Select>
-                </FormControl>
-              </SelectContainer>
+              <JobTypeSelect
+                values={Object.values(TextLabelingJobType)}
+                labelMap={TextLabelingJobTypeLabels}
+                icon={<TextLabelingIcon />}
+                placeholder="Text labeling"
+                selectedValue={selectedJobType}
+                onChange={(e: any) => setSelectedJobType(e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
-              <SelectContainer>
-                <SelectIcon>
-                  <ImageLabelingIcon />
-                </SelectIcon>
-                <FormControl variant="standard" sx={{ flex: 1 }}>
-                  <Select
-                    displayEmpty
-                    renderValue={(selected: any) =>
-                      selected ?? 'Image labeling'
-                    }
-                  >
-                    <MenuItem value={10}>Binary</MenuItem>
-                    <MenuItem value={20}>Bounding box</MenuItem>
-                    <MenuItem value={20}>Redo BB</MenuItem>
-                    <MenuItem value={20}>Multiple Choice</MenuItem>
-                    <MenuItem value={20}>Semantic segmentation</MenuItem>
-                  </Select>
-                </FormControl>
-              </SelectContainer>
+              <JobTypeSelect
+                values={Object.values(ImageLabelingJobType)}
+                labelMap={ImageLabelingJobTypeLabels}
+                icon={<ImageLabelingIcon />}
+                placeholder="Image labeling"
+                selectedValue={selectedJobType}
+                onChange={(e: any) => setSelectedJobType(e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
-              <SelectContainer>
-                <SelectIcon>
-                  <MarketMakingIcon />
-                </SelectIcon>
-                <FormControl variant="standard" sx={{ flex: 1 }}>
-                  <Select
-                    displayEmpty
-                    renderValue={(selected: any) => selected ?? 'Market making'}
-                  >
-                    <MenuItem value={10}>HuFi</MenuItem>
-                  </Select>
-                </FormControl>
-              </SelectContainer>
+              <JobTypeSelect
+                values={Object.values(MarketMakingJobType)}
+                labelMap={MarketMakingJobTypeLabels}
+                icon={<MarketMakingIcon />}
+                placeholder="Market Making"
+                selectedValue={selectedJobType}
+                onChange={(e: any) => setSelectedJobType(e.target.value)}
+              />
             </Grid>
             <Grid item xs={12} sm={12} md={6}>
-              <SelectContainer>
-                <SelectIcon>
-                  <OpenQueriesIcon />
-                </SelectIcon>
-                <FormControl variant="standard" sx={{ flex: 1 }}>
-                  <Select
-                    displayEmpty
-                    renderValue={(selected: any) => selected ?? 'Open queries'}
-                  >
-                    <MenuItem value={10}>Text free entry/OCR</MenuItem>
-                    <MenuItem value={20}>Multiple Choice</MenuItem>
-                  </Select>
-                </FormControl>
-              </SelectContainer>
+              <JobTypeSelect
+                values={Object.values(OpenQueriesJobType)}
+                labelMap={OpenQueriesJobTypeLabels}
+                icon={<OpenQueriesIcon />}
+                placeholder="Open Queries"
+                selectedValue={selectedJobType}
+                onChange={(e: any) => setSelectedJobType(e.target.value)}
+              />
             </Grid>
           </Grid>
         </Box>
