@@ -12,6 +12,7 @@ from src.core.config import Config, CronConfig
 from src.core.oracle_events import ExchangeOracleEvent_TaskCreationFailed
 from src.core.types import JobLauncherEventType, OracleWebhookTypes, ProjectStatuses
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 from src.utils.logging import get_function_logger
@@ -33,7 +34,8 @@ def process_incoming_job_launcher_webhooks():
             webhooks = oracle_db_service.inbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.job_launcher,
-                CronConfig.process_job_launcher_webhooks_chunk_size,
+                limit=CronConfig.process_job_launcher_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for webhook in webhooks:
@@ -74,7 +76,7 @@ def handle_job_launcher_event(
                 )
 
                 if cvat_db_service.get_project_by_escrow_address(
-                    db_session, webhook.escrow_address
+                    db_session, webhook.escrow_address, for_update=True
                 ):
                     logger.error(
                         f"Received an escrow creation event for "
@@ -116,7 +118,7 @@ def handle_job_launcher_event(
                 )
 
                 project = cvat_db_service.get_project_by_escrow_address(
-                    db_session, webhook.escrow_address
+                    db_session, webhook.escrow_address, for_update=True
                 )
                 if not project:
                     logger.error(
@@ -167,7 +169,8 @@ def process_outgoing_job_launcher_webhooks():
             webhooks = oracle_db_service.outbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.job_launcher,
-                CronConfig.process_job_launcher_webhooks_chunk_size,
+                limit=CronConfig.process_job_launcher_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
             for webhook in webhooks:
                 try:

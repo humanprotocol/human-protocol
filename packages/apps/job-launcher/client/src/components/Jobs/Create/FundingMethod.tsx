@@ -43,7 +43,11 @@ export const FundingMethod = () => {
         }}
       >
         <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
+          <Grid
+            item
+            xs={12}
+            md={import.meta.env.VITE_APP_NETWORK === 'mainnet' ? 12 : 6}
+          >
             <Box
               sx={{
                 width: '100%',
@@ -76,58 +80,60 @@ export const FundingMethod = () => {
               </Button>
             </Box>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                boxSizing: 'border-box',
-                background: '#fbfbfe',
-                borderRadius: '10px',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                flexDirection: 'column',
-                py: 8,
-              }}
-            >
-              <img
-                src={fundFiatImg}
-                alt="fiat"
-                style={{ width: 143, height: 'auto' }}
-              />
-              <Typography variant="body2" color="primary" mt={8}>
-                Click to pay with credit card
-              </Typography>
+          {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
+            <Grid item xs={12} md={6}>
               <Box
                 sx={{
-                  mt: 2.5,
+                  width: '100%',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                  background: '#fbfbfe',
+                  borderRadius: '10px',
                   display: 'flex',
-                  justifyContent: 'center',
-                  gap: '18px',
-                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                  py: 8,
                 }}
               >
-                <Button
-                  variant="outlined"
-                  sx={{ minWidth: '200px' }}
-                  onClick={() => {
-                    changePayMethod?.(PayMethod.Fiat);
-                    goToNextStep?.();
+                <img
+                  src={fundFiatImg}
+                  alt="fiat"
+                  style={{ width: 143, height: 'auto' }}
+                />
+                <Typography variant="body2" color="primary" mt={8}>
+                  Click to pay with credit card
+                </Typography>
+                <Box
+                  sx={{
+                    mt: 2.5,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '18px',
+                    flexWrap: 'wrap',
                   }}
                 >
-                  Pay with Credit Card
-                </Button>
-                <Button
-                  variant="outlined"
-                  sx={{ minWidth: '200px' }}
-                  onClick={() => navigate('/profile/top-up')}
-                >
-                  Top up your account
-                </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{ minWidth: '200px' }}
+                    onClick={() => {
+                      changePayMethod?.(PayMethod.Fiat);
+                      goToNextStep?.();
+                    }}
+                  >
+                    Pay with Credit Card
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{ minWidth: '200px' }}
+                    onClick={() => navigate('/profile/top-up')}
+                  >
+                    Top up your account
+                  </Button>
+                </Box>
               </Box>
-            </Box>
-          </Grid>
+            </Grid>
+          )}
         </Grid>
       </Box>
       <WalletModal

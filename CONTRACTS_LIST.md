@@ -97,6 +97,22 @@
 |2023/03/21                  | RewardPool     | 0xca8745D76588C2aa8bA13E8ef14E986b8A74EE3E | 0x881218246c25C6898aE96145259584340153aDA2 |
 |2023/03/22                  | EthKVStore     | 0xE1055607327b1be2080D31211dCDC4D9338CaF4A | N/A                                        |
 
+|🟢 Celo (Mainnet)           | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2023/10/20                  | HMToken        | 0x19Ead835951493A763c96910255d5eeF147E914F | N/A                                        |
+|2023/10/31                  | EscrowFactory  | 0x003548Df34be8836cF0F9673403a1E40ba449a0F | 0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08 |
+|2023/10/31                  | Staking        | 0x2736B33455A872dC478E1E004106D04c35472468 | 0x34cD3Bd6B16c559f321799b516dE61E12017fFd1 |
+|2023/10/31                  | RewardPool     | 0x938335006ea6F9Eb0e8020969cFF94404425e298 | 0xb9344bAD98E3d26a4d83900922baf395a2Ec154c |
+|2023/10/31                  | EthKVStore     | 0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569 | N/A                                        |
+
+|🟠 Celo Alfajores (Testnet) | Contract       | Address                                    | Proxy                                      |
+|----------------------------|----------------|--------------------------------------------|--------------------------------------------|
+|2023/10/20                  | HMToken        | 0x2736B33455A872dC478E1E004106D04c35472468 | N/A                                        |
+|2023/10/20                  | EscrowFactory  | 0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08 | 0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569 |
+|2023/10/20                  | Staking        | 0x34cD3Bd6B16c559f321799b516dE61E12017fFd1 | 0x003548Df34be8836cF0F9673403a1E40ba449a0F |
+|2023/10/20                  | RewardPool     | 0xb9344bAD98E3d26a4d83900922baf395a2Ec154c | 0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86 |
+|2023/10/20                  | EthKVStore     | 0x938335006ea6F9Eb0e8020969cFF94404425e298 | N/A                                        |
+
 
 
 # Old contracts

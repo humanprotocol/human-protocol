@@ -16,6 +16,7 @@ from src.core.types import (
     TaskStatus,
 )
 from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
 from src.log import ROOT_LOGGER_NAME
 from src.models.webhook import Webhook
 from src.utils.logging import get_function_logger
@@ -37,7 +38,8 @@ def process_incoming_recording_oracle_webhooks():
             webhooks = oracle_db_service.inbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.recording_oracle,
-                CronConfig.process_recording_oracle_webhooks_chunk_size,
+                limit=CronConfig.process_recording_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
 
             for webhook in webhooks:
@@ -60,7 +62,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
     match webhook.event_type:
         case RecordingOracleEventType.task_completed:
             project = cvat_db_service.get_project_by_escrow_address(
-                db_session, webhook.escrow_address
+                db_session, webhook.escrow_address, for_update=True
             )
             if not project:
                 logger.error(
@@ -93,7 +95,7 @@ def handle_recording_oracle_event(webhook: Webhook, *, db_session: Session, logg
             event = RecordingOracleEvent_TaskRejected.parse_obj(webhook.event_data)
 
             project = cvat_db_service.get_project_by_escrow_address(
-                db_session, webhook.escrow_address
+                db_session, webhook.escrow_address, for_update=True
             )
 
             if project.status != ProjectStatuses.validation:
@@ -139,7 +141,8 @@ def process_outgoing_recording_oracle_webhooks():
             webhooks = oracle_db_service.outbox.get_pending_webhooks(
                 session,
                 OracleWebhookTypes.recording_oracle,
-                CronConfig.process_recording_oracle_webhooks_chunk_size,
+                limit=CronConfig.process_recording_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
             for webhook in webhooks:
                 try:

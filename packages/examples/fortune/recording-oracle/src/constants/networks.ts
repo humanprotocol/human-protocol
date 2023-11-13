@@ -7,6 +7,8 @@ export enum ChainId {
   POLYGON = 137,
   POLYGON_MUMBAI = 80001,
   MOONBASE_ALPHA = 1287,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   LOCALHOST = 1338,
   SKALE = 1273227453,
 }
@@ -56,6 +58,13 @@ export const ESCROW_NETWORKS: {
     rpcUrl: 'https://rpc.api.moonbase.moonbeam.network',
     factoryAddress: '0x5e622FF522D81aa426f082bDD95210BC25fCA7Ed',
     hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
+  },
+  [ChainId.CELO_ALFAJORES]: {
+    chainId: ChainId.CELO_ALFAJORES,
+    title: 'Celo Alfajores',
+    rpcUrl: 'https://alfajores-forno.celo-testnet.org',
+    factoryAddress: '0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569',
+    hmtAddress: '0x2736B33455A872dC478E1E004106D04c35472468',
   },
   [ChainId.LOCALHOST]: {
     chainId: ChainId.LOCALHOST,

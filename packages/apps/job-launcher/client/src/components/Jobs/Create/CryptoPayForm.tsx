@@ -18,7 +18,6 @@ import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { useAccount, useNetwork, useSigner } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
 import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -85,7 +84,7 @@ export const CryptoPayForm = ({
           );
 
           const tx = await contract.transfer(
-            JOB_LAUNCHER_OPERATOR_ADDRESS,
+            import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
             ethers.utils.parseUnits(tokenAmount.toFixed(2), 18)
           );
 

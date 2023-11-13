@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from attrs import define
 from sqlalchemy import case, update
@@ -11,6 +11,8 @@ from sqlalchemy.sql import select
 from src.core.config import Config
 from src.core.oracle_events import OracleEvent, validate_event
 from src.core.types import OracleWebhookStatuses, OracleWebhookTypes
+from src.db.utils import ForUpdateParams
+from src.db.utils import maybe_for_update as _maybe_for_update
 from src.models.webhook import Webhook
 from src.utils.enums import BetterEnumMeta
 from src.utils.time import utcnow
@@ -86,10 +88,15 @@ class OracleWebhookQueue:
         return existing_webhook.id
 
     def get_pending_webhooks(
-        self, session: Session, sender_type: OracleWebhookTypes, limit: int = 10
+        self,
+        session: Session,
+        sender_type: OracleWebhookTypes,
+        *,
+        limit: int = 10,
+        for_update: Union[bool, ForUpdateParams] = False,
     ) -> List[Webhook]:
         webhooks = (
-            session.query(Webhook)
+            _maybe_for_update(session.query(Webhook), enable=for_update)
             .where(
                 Webhook.direction == self.direction.value,
                 Webhook.type == sender_type.value,
