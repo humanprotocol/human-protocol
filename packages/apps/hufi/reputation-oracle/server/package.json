@@ -88,6 +88,6 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.2.0",
     "typescript": "^5.0.0",
-    "@types/bcrypt": "^5.0.0"
+    "@types/bcrypt": "^5.0.2"
   }
 }
