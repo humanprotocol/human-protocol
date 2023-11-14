@@ -617,7 +617,7 @@ export class JobService {
           },
         },
       );
-      console.log(jobEntity);
+      this.logger.log(jobEntity);
 
       if (!jobEntity) return;
 
