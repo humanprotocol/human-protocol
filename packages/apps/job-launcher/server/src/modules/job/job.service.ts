@@ -151,7 +151,9 @@ export class JobService {
         task_bid_price: jobDto.annotations.taskBidPrice,
         taskdata_uri: await this.generateAndUploadTaskData(jobDto.dataUrl, objectsInBucket),
         public_results: true,
-        oracle_stake: 0.05
+        oracle_stake: 0.05,
+        repo_uri: "http://reporacle.yellow.svc.cluster.local:5000",
+        ro_uri: "http://recoracle:5000/rocheck"
     };
 
     let groundTruthsData;
@@ -386,6 +388,7 @@ export class JobService {
     requestType: JobRequestType,
     dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
+    console.log(dto)
     const { chainId } = dto;
   
     if (chainId) {
@@ -566,7 +569,19 @@ export class JobService {
 
     const escrowAddress = await escrowClient.createAndSetupEscrow(
         NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        [],
+        [
+          "0x40042D27Df0745e5e0cb619C0CfD7D51D59535DC",
+          "0x117AD648f29AFEc3aE313826DA3356dB1040ae4F",
+          "0xaE1FE9f8927AEEE885bbD4aFEFB02741B317902E",
+          "0x8b48d9908A80508A7Aa5900008Ab176987f418E2",
+          "0x3f12aF5134f44f2247aCca6c43b3ee6775abd914",
+          "0x26E7Ef2D05793c6D47c678f1F4B246856236F089",
+          "0xb56c770c2FA5222947a9e3C5Beb8dc46Dd656b5F",
+          "0x10c01D6B0396D9F3B2F06Fc5D3F60bc6Dc9cB1F6",
+          "0x93920Dbc3dcb192F1713d344Fb4Db6BD714A9ab9",
+          "0x727cB81C955e1De954473B5939Eda0dfDFe07281",
+          "0x6a13E0280740CC5bd35eeee33B470b5bBb93dF37"
+        ],
         jobEntity.userId.toString(),
         escrowConfig,
     );

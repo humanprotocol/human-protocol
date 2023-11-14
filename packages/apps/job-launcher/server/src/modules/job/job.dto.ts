@@ -80,7 +80,7 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty()
   @IsArray()
-  @ArrayMinSize(2)
+  @ArrayMinSize(1)
   public labels: string[];
 
   @ApiProperty()
@@ -587,6 +587,12 @@ export class HCaptchaManifestDto {
 
   @IsNumber()
   oracle_stake: number;
+
+  @IsString()
+  repo_uri: string;
+
+  @IsString()
+  ro_uri: string;
 
   @IsObject()
   @ValidateNested()
