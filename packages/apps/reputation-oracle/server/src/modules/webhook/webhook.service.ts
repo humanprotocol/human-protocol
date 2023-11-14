@@ -89,7 +89,6 @@ export class WebhookService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processes a pending webhook. Validates and processes incoming data,
    * then sends payments based on the processing results.
@@ -363,7 +362,6 @@ export class WebhookService {
     return intermediateResults;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processing a webhook of an entity with a paid status.
    * @returns {Promise<boolean>} - Return the boolean result of the method.

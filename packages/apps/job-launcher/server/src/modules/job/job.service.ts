@@ -602,7 +602,6 @@ export class JobService {
     return finalResultUrl;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async launchCronJob() {
     this.logger.log('Launch jobs START');
     try {
@@ -656,7 +655,6 @@ export class JobService {
     this.logger.log('Launch jobs STOP');
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     this.logger.log('Cancel jobs START');
     const jobEntity = await this.jobRepository.findOne(
