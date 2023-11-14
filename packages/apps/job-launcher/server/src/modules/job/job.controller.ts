@@ -92,7 +92,7 @@ export class JobController {
   @Public()
   @Get('/cron/launch')
   public async launchCronJob(): Promise<any> {
-    this.jobService.launchCronJob();
+    await this.jobService.launchCronJob();
     return;
   }
 
@@ -107,7 +107,7 @@ export class JobController {
   @Public()
   @Get('/cron/cancel')
   public async cancelCronJob(): Promise<any> {
-    this.jobService.cancelCronJob();
+    await this.jobService.cancelCronJob();
     return;
   }
 
