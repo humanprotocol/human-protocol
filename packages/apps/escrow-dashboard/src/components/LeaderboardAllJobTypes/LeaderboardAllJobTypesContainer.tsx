@@ -6,7 +6,7 @@ import { JobTypesView } from './JobTypesView';
 export const LeaderboardAllJobTypesContainer: FC = () => {
   return (
     <Box>
-      <Box display="flex" justifyContent="center" alignItems="start" mb={13}>
+      <Box display="flex" justifyContent="center" alignItems="start">
         <Typography fontWeight={800} variant="h2" color="primary">
           Leaderboard
         </Typography>

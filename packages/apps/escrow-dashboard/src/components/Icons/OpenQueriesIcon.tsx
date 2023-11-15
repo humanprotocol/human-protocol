@@ -9,7 +9,7 @@ export const OpenQueriesIcon: FC<SvgIconProps> = (props) => {
           d="M29.1575 13.6666V13.6672L29.1653 27.7511L27.2071 25.7929L26.9142 25.5H26.5H13.6667C13.2106 25.5 12.8333 25.1227 12.8333 24.6666V13.6666C12.8333 13.2106 13.2106 12.8333 13.6667 12.8333H28.3333C28.7829 12.8333 29.1575 13.2041 29.1575 13.6666Z"
           stroke="#24046D"
           strokeWidth="2"
-          fill="#ffffff"
+          fill="none"
         />
       </g>
       <g clipPath="url(#clip1_569_553)">
@@ -27,20 +27,10 @@ export const OpenQueriesIcon: FC<SvgIconProps> = (props) => {
       </g>
       <defs>
         <clipPath id="clip0_569_553">
-          <rect
-            width="22"
-            height="22"
-            fill="#ffffff"
-            transform="translate(10 10)"
-          />
+          <rect width="22" height="22" transform="translate(10 10)" />
         </clipPath>
         <clipPath id="clip1_569_553">
-          <rect
-            width="22"
-            height="22"
-            fill="#ffffff"
-            transform="matrix(-1 0 0 1 22 1)"
-          />
+          <rect width="22" height="22" transform="matrix(-1 0 0 1 22 1)" />
         </clipPath>
       </defs>
     </SvgIcon>

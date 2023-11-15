@@ -23,13 +23,13 @@ import { ViewTitle } from '../ViewTitle';
 import launchTaskImg from 'src/assets/leaderboard/launch-task.png';
 import {
   ImageLabelingJobType,
-  ImageLabelingJobTypeLabels,
+  ImageLabelingJobTypeData,
   MarketMakingJobType,
-  MarketMakingJobTypeLabels,
+  MarketMakingJobTypeData,
   OpenQueriesJobType,
-  OpenQueriesJobTypeLabels,
+  OpenQueriesJobTypeData,
   TextLabelingJobType,
-  TextLabelingJobTypeLabels,
+  TextLabelingJobTypeData,
 } from 'src/constants/leaderboard';
 
 const SelectContainer = styled(Box)({
@@ -63,6 +63,7 @@ const FormControl = styled(MuiFormControl)({
     fontSize: '20px',
     fontWeight: 500,
     lineHeight: '32px',
+    color: '#6309FF',
   },
   '& .MuiSelect-icon': {
     color: '#6309FF',
@@ -84,13 +85,17 @@ const JobTypeSelect = ({
       <FormControl variant="standard" sx={{ flex: 1 }}>
         <Select
           displayEmpty
-          renderValue={(selected: any) => labelMap[selected] ?? placeholder}
+          renderValue={(selected: any) =>
+            labelMap[selected]?.label ?? (
+              <Box sx={{ color: '#320a8d' }}>{placeholder}</Box>
+            )
+          }
           value={selectedValue as any}
           onChange={onChange}
         >
           {values.map((jobType: any) => (
             <MenuItem key={jobType} value={jobType}>
-              {labelMap[jobType]}
+              {labelMap[jobType].label}
             </MenuItem>
           ))}
         </Select>
@@ -103,8 +108,8 @@ export const LaunchJobView = () => {
   const [selectedJobType, setSelectedJobType] = useState('');
 
   return (
-    <Box mt={10}>
-      <ViewTitle title="Launch job" iconUrl={launchTaskImg} fontSize={50} />
+    <Box mt="58px">
+      <ViewTitle title="Launch job" iconUrl={launchTaskImg} fontSize={45} />
       <CardContainer sxProps={{ mt: '52px' }}>
         <Box
           display="flex"
@@ -113,7 +118,7 @@ export const LaunchJobView = () => {
         >
           <Box>
             <Typography color="primary" variant="h4" fontWeight={600} mb={2}>
-              Select your job type
+              Choose your job type
             </Typography>
             <Typography variant="h6" fontWeight={500} color="#5E69A6">
               Choose your data annotation task type from the types available
@@ -139,7 +144,7 @@ export const LaunchJobView = () => {
                 color="secondary"
                 endIcon={<ArrowForwardIcon />}
               >
-                Explore jobs
+                Explore
               </Button>
             </Link>
           </Box>
@@ -149,7 +154,7 @@ export const LaunchJobView = () => {
             <Grid item xs={12} sm={12} md={6}>
               <JobTypeSelect
                 values={Object.values(TextLabelingJobType)}
-                labelMap={TextLabelingJobTypeLabels}
+                labelMap={TextLabelingJobTypeData}
                 icon={<TextLabelingIcon />}
                 placeholder="Text labeling"
                 selectedValue={selectedJobType}
@@ -159,7 +164,7 @@ export const LaunchJobView = () => {
             <Grid item xs={12} sm={12} md={6}>
               <JobTypeSelect
                 values={Object.values(ImageLabelingJobType)}
-                labelMap={ImageLabelingJobTypeLabels}
+                labelMap={ImageLabelingJobTypeData}
                 icon={<ImageLabelingIcon />}
                 placeholder="Image labeling"
                 selectedValue={selectedJobType}
@@ -169,7 +174,7 @@ export const LaunchJobView = () => {
             <Grid item xs={12} sm={12} md={6}>
               <JobTypeSelect
                 values={Object.values(MarketMakingJobType)}
-                labelMap={MarketMakingJobTypeLabels}
+                labelMap={MarketMakingJobTypeData}
                 icon={<MarketMakingIcon />}
                 placeholder="Market Making"
                 selectedValue={selectedJobType}
@@ -179,7 +184,7 @@ export const LaunchJobView = () => {
             <Grid item xs={12} sm={12} md={6}>
               <JobTypeSelect
                 values={Object.values(OpenQueriesJobType)}
-                labelMap={OpenQueriesJobTypeLabels}
+                labelMap={OpenQueriesJobTypeData}
                 icon={<OpenQueriesIcon />}
                 placeholder="Open Queries"
                 selectedValue={selectedJobType}
@@ -208,10 +213,7 @@ export const LaunchJobView = () => {
             color="primary"
             sx={{ background: 'rgba(2, 136, 209, 0.04)' }}
           >
-            Get started and launch tasks with newbie{' '}
-            <Typography fontSize="13px" component="span" color="secondary">
-              budget for free
-            </Typography>
+            Get started, and launch your first tasks for free
           </Typography>
         </Box>
       </CardContainer>

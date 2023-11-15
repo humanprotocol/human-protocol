@@ -14,10 +14,20 @@ export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
 }) => {
   return (
     <Box>
-      <Box display="flex" justifyContent="center" alignItems="start" mb={13}>
-        <Typography fontWeight={800} variant="h2" color="primary">
-          Leaderboard
-        </Typography>
+      <Box display="flex" justifyContent="center" alignItems="start">
+        <Box>
+          <Typography
+            fontWeight={800}
+            variant="h2"
+            color="primary"
+            textAlign="center"
+          >
+            Launchpad
+          </Typography>
+          <Typography variant="h6" color="primary" textAlign="center">
+            All HUMAN activity. In one place.
+          </Typography>
+        </Box>
         <Chip label="NEW" sx={{ m: '10px' }} />
       </Box>
       <LaunchJobView />

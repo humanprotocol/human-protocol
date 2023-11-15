@@ -40,9 +40,9 @@ const Oracle = styled(Box)({
 
 export const OraclesView = () => {
   return (
-    <Box mt={18}>
+    <Box mt={13}>
       <Box display="flex" justifyContent="space-between" alignItems="flex-end">
-        <ViewTitle title="Oracles" iconUrl={oraclesImg} fontSize={50} />
+        <ViewTitle title="Oracles" iconUrl={oraclesImg} fontSize={45} />
         <Typography
           component="div"
           variant="body2"

@@ -16,6 +16,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  Typography,
 } from '@mui/material';
 import { FC, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -91,7 +92,16 @@ const LeaderRole = ({ role }: { role?: string }) => {
     if (role === 'Exchange Oracle') return <ExchangeOracleIcon />;
     if (role === 'Recording Oracle') return <RecordingOracleIcon />;
 
-    return <></>;
+    const roleInitials = role
+      ?.split(' ')
+      .map((word) => word.charAt(0).toUpperCase())
+      .join('');
+
+    return (
+      <Typography variant="h6" color="primary" fontWeight={600}>
+        {roleInitials}
+      </Typography>
+    );
   }, [role]);
 
   return (
@@ -182,7 +192,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
   return (
     <Box mt={13}>
       <Box display="flex" alignItems="center" flexWrap="wrap">
-        <ViewTitle title="Leaderboard" iconUrl={leaderboardImg} fontSize={50} />
+        <ViewTitle title="Leaderboard" iconUrl={leaderboardImg} fontSize={45} />
         {!showAll && (
           <Button
             variant="outlined"

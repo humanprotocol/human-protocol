@@ -23,10 +23,13 @@ const theme = createTheme({
   typography: {
     fontFamily: 'Inter',
     h2: {
-      fontSize: '80px',
+      fontSize: '60px',
       lineHeight: 1.5,
       letterSpacing: '-0.5px',
       fontWeight: 800,
+      '@media (max-width: 576px)': {
+        fontSize: '40px',
+      },
     },
     h4: {
       fontSize: '34px',
