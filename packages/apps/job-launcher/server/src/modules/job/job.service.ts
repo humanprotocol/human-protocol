@@ -198,8 +198,7 @@ export class JobService {
                   }
                 ]
               },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: {},
-              requester_question_example: jobDto.annotations.exampleImages || [],
+              requester_restricted_answer_set: {}
           };
 
           categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
