@@ -1,5 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import CloseIcon from '@mui/icons-material/Close';
 import CloudIcon from '@mui/icons-material/Cloud';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
@@ -9,6 +10,7 @@ import {
   FormControl,
   FormHelperText,
   Grid,
+  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -71,11 +73,11 @@ export const HCaptchaJobRequestForm = () => {
     // Advanced
     workerLanguage: null,
     workerLocation: null,
-    targetBrowser: 'modern_browser',
+    targetBrowser: 'desktop',
     // Annotation
     type: HCaptchaJobType.COMPARISON,
     taskBidPrice: null,
-    label: null,
+    label: '',
     labelingPrompt: null,
     groundTruths: null,
     minWorkerConfidence: 85,
@@ -100,7 +102,7 @@ export const HCaptchaJobRequestForm = () => {
       annotations: {
         typeOfJob: data.type,
         taskBidPrice: Number(data.taskBidPrice),
-        label: data.label,
+        label: data.label ?? '',
         labelingPrompt: data.labelingPrompt,
         groundTruths: data.groundTruths,
         exampleImages: data.images,
@@ -290,76 +292,73 @@ export const HCaptchaJobRequestForm = () => {
                       />
                     </FormControl>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Box
-                      sx={{
-                        width: '50%',
-                        py: 2,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 4,
-                      }}
-                    >
-                      <Box>
-                        <Typography>Add Image</Typography>
-                        <Typography variant="body2">Add up to 3 images to be shown by the capcha</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 2,
-                        }}
-                      >
-                        {values.images.map((image, index) => (
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Box
-                              sx={{
-                                width: '32px',
-                                height: '32px',
-                                background: 'rgba(203, 207, 232, 0.28)',
-                                borderRadius: '100%',
-                                mr: 1,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                            >
-                              {index + 1}
+                  {values.type !== HCaptchaJobType.CATEGORIZATION && (
+                    <Grid item xs={12}>
+                      <Box sx={{ width: '50%', py: 2, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <Box>
+                          <Typography>Add Image</Typography>
+                          <Typography variant="body2">Add up to 3 images to be shown by the capcha</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          {values.images.map((image, index) => (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box
+                                sx={{
+                                  width: '32px',
+                                  height: '32px',
+                                  background: 'rgba(203, 207, 232, 0.28)',
+                                  borderRadius: '100%',
+                                  mr: 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                {index + 1}
+                              </Box>
+                              <TextField
+                                fullWidth
+                                name="images"
+                                placeholder="Place link to an example image"
+                                sx={{ flex: 1 }}
+                                value={image}
+                                onChange={(e) => {
+                                  const newImages: string[] = [...values.images];
+                                  newImages[index] = e.target.value;
+                                  setFieldValue('images', newImages);
+                                }}
+                                onBlur={handleBlur}
+                                error={touched.images && Boolean(errors.images)}
+                              />
+                              <IconButton
+                                onClick={() => {
+                                  const newImages: string[] = [...values.images];
+                                  newImages.splice(index, 1);
+                                  setFieldValue('images', newImages);
+                                }}
+                              >
+                                <CloseIcon color="primary" />
+                              </IconButton>
                             </Box>
-                            <TextField
-                              fullWidth
-                              name="images"
-                              placeholder="Place link to an example image"
-                              sx={{ flex: 1 }}
-                              value={image}
-                              onChange={(e) => {
-                                const newImages: string[] = [...values.images];
-                                newImages[index] = e.target.value;
-                                setFieldValue('images', newImages);
-                              }}
-                              onBlur={handleBlur}
-                              error={touched.images && Boolean(errors.images)}
-                            />
-                          </Box>
-                        ))}
+                          ))}
+                        </Box>
+                        <Box>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            onClick={() => {
+                              if (values.images.length < 3) {
+                                setFieldValue('images', [...values.images, '']);
+                              }
+                            }}
+                          >
+                            Add Image
+                          </Button>
+                        </Box>
                       </Box>
-                      <Box>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          startIcon={<AddIcon />}
-                          onClick={() => {
-                            if (values.images.length < 3) {
-                              setFieldValue('images', [...values.images, '']);
-                            }
-                          }}
-                        >
-                          Add Image
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Grid>
+                    </Grid>
+                  )}
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <TextField
