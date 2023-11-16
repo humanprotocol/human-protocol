@@ -9,6 +9,7 @@ import {
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { createDataSavedEvent } from './fixtures';
+import { Leader } from '../../generated/schema';
 
 describe('KVStore', () => {
   afterAll(() => {
@@ -233,9 +234,34 @@ describe('KVStore', () => {
       'https://operator.example.com'
     );
     assert.fieldEquals(
+      'LeaderURL',
+      `${data1.params.sender.toHexString()}-webhookurl`,
+      'key',
+      'webhookurl'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data1.params.sender.toHexString()}-webhookurl`,
+      'url',
+      'https://operator.example.com'
+    );
+
+    assert.fieldEquals(
       'Leader',
       data2.params.sender.toHexString(),
       'webhookUrl',
+      'https://validator.example.com'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data2.params.sender.toHexString()}-webhookurl`,
+      'key',
+      'webhookurl'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data2.params.sender.toHexString()}-webhookurl`,
+      'url',
       'https://validator.example.com'
     );
   });
@@ -264,8 +290,33 @@ describe('KVStore', () => {
       'https://operator.example.com'
     );
     assert.fieldEquals(
+      'LeaderURL',
+      `${data1.params.sender.toHexString()}-url`,
+      'key',
+      'url'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data1.params.sender.toHexString()}-url`,
+      'url',
+      'https://operator.example.com'
+    );
+
+    assert.fieldEquals(
       'Leader',
       data2.params.sender.toHexString(),
+      'url',
+      'https://validator.example.com'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data2.params.sender.toHexString()}-url`,
+      'key',
+      'url'
+    );
+    assert.fieldEquals(
+      'LeaderURL',
+      `${data2.params.sender.toHexString()}-url`,
       'url',
       'https://validator.example.com'
     );
