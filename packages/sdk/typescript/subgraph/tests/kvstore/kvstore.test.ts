@@ -9,7 +9,6 @@ import {
 
 import { handleDataSaved } from '../../src/mapping/KVStore';
 import { createDataSavedEvent } from './fixtures';
-import { Leader } from '../../generated/schema';
 
 describe('KVStore', () => {
   afterAll(() => {
