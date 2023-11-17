@@ -28,3 +28,9 @@ publish-package:
 
 run-example:
 	pipenv run python3 example.py
+
+clean-doc-md:
+	rm -rf docs/_build && rm -rf ../../../../docs/sdk/python/*
+
+generate-doc-md:
+	make clean-doc-md && cd docs && make markdown && cp -r _build/markdown/* ../../../../../docs/sdk/python
