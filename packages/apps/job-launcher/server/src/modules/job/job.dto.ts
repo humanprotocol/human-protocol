@@ -566,6 +566,7 @@ export class HCaptchaManifestDto {
 
   @IsArray()
   @IsUrl({}, { each: true })
+  @IsOptional()
   requester_question_example?: string[];
 
   @IsObject()

@@ -185,7 +185,7 @@ export class JobService {
           };
 
         case JobCaptchaShapeType.CATEGORAZATION:
-          const categorizationManifest = {
+          return {
               ...commonManifestProperties,
               request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
               groundtruth_uri: jobDto.annotations.groundTruths,
@@ -198,12 +198,8 @@ export class JobService {
                   }
                 ]
               },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: {}
+              requester_restricted_answer_set: this.buildHCaptchaRestrictedAnswerSet(groundTruthsData)
           };
-
-          categorizationManifest.requester_restricted_answer_set = this.buildHCaptchaRestrictedAnswerSet(groundTruthsData);
-
-          return categorizationManifest;
 
         case JobCaptchaShapeType.POLYGON:
           if (!jobDto.annotations.label) {
@@ -349,16 +345,11 @@ export class JobService {
   }
 
   private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
-    const maxElements = 3;
     const outputObject: any = {};
 
     let elementCount = 0;
 
     for (const key of Object.keys(groundTruthsData)) {
-        if (elementCount >= maxElements) {
-            break;
-        }
-
         const value = groundTruthsData[key][0][0];
         outputObject[value] = { en: value, answer_example_uri: key };
         elementCount++;
