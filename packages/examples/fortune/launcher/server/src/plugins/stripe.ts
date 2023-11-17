@@ -27,7 +27,7 @@ class StripeClient {
   public publishableKey = process.env.STRIPE_PUBLISHABLE_KEY as string;
   constructor() {
     this.stripeClient = new Stripe(this.secretKey, {
-      apiVersion: '2022-11-15',
+      apiVersion: '2023-08-16',
       appInfo: {
         // For sample support and debugging, not required for production:
         name: 'Fortune Launcher Server',

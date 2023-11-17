@@ -20,22 +20,19 @@ def confidence_intervals(
 ) -> Tuple[Tuple[float, float], np.ndarray]:
     """Returns a tuple, containing the confidence interval for the boostrap estimates of the given statistic and statistics of the bootstrap samples.
 
-    Args:
-        data: Data to estimate the statistic.
-        statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
-        n_iterations: Number of bootstrap samples to use for the estimate.
-        n_sample: If provided, determines the size of each bootstrap sample
-            drawn from the data. If omitted, is equal to the length of the
-            data.
-        confidence_level: Size of the confidence interval.
-        algorithm: Which algorithm to use for the confidence interval
-            estimation. "bca" uses the "Bias Corrected Bootstrap with
-            Acceleration", "percentile" simply takes the appropriate
-            percentiles from the bootstrap distribution.
-        seed: Random seed to use.
+    :param data: Data to estimate the statistic.
+    :param statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
+    :param n_iterations: Number of bootstrap samples to use for the estimate.
+    :param n_sample: If provided, determines the size of each bootstrap sample
+        drawn from the data. If omitted, is equal to the length of the data.
+    :param confidence_level: Size of the confidence interval.
+    :param algorithm: Which algorithm to use for the confidence interval
+        estimation. "bca" uses the "Bias Corrected Bootstrap with
+        Acceleration", "percentile" simply takes the appropriate
+        percentiles from the bootstrap distribution.
+    :param seed: Random seed to use.
 
-    Returns:
-        Confidence interval and bootstrap distribution.
+    :return: Confidence interval and bootstrap distribution.
     """
     # set random seed for reproducibility
     if seed is not None:

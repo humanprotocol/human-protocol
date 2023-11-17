@@ -41,22 +41,23 @@ class Credentials:
     """
     A class to represent the credentials required to authenticate with an S3-compatible service.
 
-    Args:
-        access_key (str): The access key for the S3-compatible service.
-        secret_key (str): The secret key for the S3-compatible service.
+    Example::
 
-    Attributes:
-        access_key (str): The access key for the S3-compatible service.
-        secret_key (str): The secret key for the S3-compatible service.
-
-    Example:
         credentials = Credentials(
             access_key='my-access-key',
             secret_key='my-secret-key'
         )
+
     """
 
     def __init__(self, access_key: str, secret_key: str):
+        """
+        Initializes a Credentials instance.
+
+        :param access_key: The access key for the S3-compatible service.
+        :param secret_key: The secret key for the S3-compatible service.
+        """
+
         self.access_key = access_key
         self.secret_key = secret_key
 
@@ -65,24 +66,24 @@ class StorageClient:
     """
     A class for downloading files from an S3-compatible service.
 
-    Args:
-        endpoint_url (str): The URL of the S3-compatible service.
-        region (Optional[str]): The region of the S3-compatible service. Defaults to None.
-        credentials (Optional[Credentials]): The credentials required to authenticate with the S3-compatible service.
-                                             Defaults to None for anonymous access.
-        secure (Optional[bool]): Flag to indicate to use secure (TLS) connection to S3 service or not. Defaults to True.
+    :attribute:
+        - client (Minio): The S3-compatible client used for interacting with the service.
 
-    Attributes:
-        client (Minio): The S3-compatible client used for interacting with the service.
+    Example::
 
-    Example:
         # Download a list of files from an S3-compatible service
-        client = StorageClient(endpoint_url='https://s3.us-west-2.amazonaws.com',
-                               region='us-west-2',
-                               credentials=Credentials(access_key='my-access-key', secret_key='my-secret-key'))
+        client = StorageClient(
+            endpoint_url='https://s3.us-west-2.amazonaws.com',
+            region='us-west-2',
+            credentials=Credentials(
+                access_key='my-access-key',
+                secret_key='my-secret-key'
+            )
+        )
         files = ['file1.txt', 'file2.txt']
         bucket = 'my-bucket'
         result_files = client.download_files(files=files, bucket=bucket)
+
     """
 
     def __init__(
@@ -97,12 +98,12 @@ class StorageClient:
 
         If credentials are not provided, anonymous access will be used.
 
-        Args:
-            endpoint_url (str): The URL of the S3-compatible service.
-            region (Optional[str]): The region of the S3-compatible service. Defaults to None.
-            credentials (Optional[Credentials]): The credentials required to authenticate with the S3-compatible service.
-                                                 Defaults to None for anonymous access.
-            secure (Optional[bool]): Flag to indicate to use secure (TLS) connection to S3 service or not. Defaults to True.
+        :param endpoint_url: The URL of the S3-compatible service.
+        :param region: The region of the S3-compatible service. Defaults to None.
+        :param credentials: The credentials required to authenticate with the S3-compatible service.
+            Defaults to None for anonymous access.
+        :param secure: Flag to indicate to use secure (TLS) connection to S3 service or not.
+            Defaults to True.
         """
         try:
             self.client = (
@@ -131,14 +132,11 @@ class StorageClient:
         """
         Downloads a file from the specified URL.
 
-        Args:
-            url (str): The URL of the file to download.
+        :param url: The URL of the file to download.
 
-        Returns:
-            bytes: The content of the downloaded file.
+        :return: The content of the downloaded file.
 
-        Raises:
-            StorageClientError: If an error occurs while downloading the file.
+        :raise StorageClientError: If an error occurs while downloading the file.
         """
         if not validate_url(url):
             raise StorageClientError(f"Invalid URL: {url}")
@@ -155,16 +153,13 @@ class StorageClient:
         """
         Downloads a list of files from the specified S3-compatible bucket.
 
-        Args:
-            files (list[str]): A list of file keys to download.
-            bucket (str): The name of the S3-compatible bucket to download from.
+        :param files: A list of file keys to download.
+        :param bucket: The name of the S3-compatible bucket to download from.
 
-        Returns:
-            list: A list of file contents (bytes) downloaded from the bucket.
+        :return: A list of file contents (bytes) downloaded from the bucket.
 
-        Raises:
-            StorageClientError: If an error occurs while downloading the files.
-            StorageFileNotFoundError: If one of the specified files is not found in the bucket.
+        :raise StorageClientError: If an error occurs while downloading the files.
+        :raise StorageFileNotFoundError: If one of the specified files is not found in the bucket.
         """
         result_files = []
         for file in files:
@@ -184,15 +179,12 @@ class StorageClient:
         """
         Uploads a list of files to the specified S3-compatible bucket.
 
-        Args:
-            files (list[dict]): A list of files to upload.
-            bucket (str): The name of the S3-compatible bucket to upload to.
+        :param files: A list of files to upload.
+        :param bucket: The name of the S3-compatible bucket to upload to.
 
-        Returns:
-            list: List of dict with key, url, hash fields
+        :return: List of dict with key, url, hash fields
 
-        Raises:
-            StorageClientError: If an error occurs while uploading the files.
+        :raise StorageClientError: If an error occurs while uploading the files.
         """
         result_files = []
         for file in files:
@@ -251,14 +243,11 @@ class StorageClient:
         """
         Check if a given bucket exists.
 
-        Args:
-            bucket (str): The name of the bucket to check.
+        :param bucket: The name of the bucket to check.
 
-        Returns:
-            bool: True if the bucket exists, False otherwise.
+        :return: True if the bucket exists, False otherwise.
 
-        Raises:
-            StorageClientError: If an error occurs while checking the bucket.
+        :raise StorageClientError: If an error occurs while checking the bucket.
         """
         try:
             return self.client.bucket_exists(bucket_name=bucket)
@@ -272,14 +261,11 @@ class StorageClient:
         """
         Return a list of all objects in a given bucket.
 
-        Args:
-            bucket (str): The name of the bucket to list objects from.
+        :param bucket: The name of the bucket to list objects from.
 
-        Returns:
-            List[str]: A list of object keys in the given bucket.
+        :return: A list of object keys in the given bucket.
 
-        Raises:
-            StorageClientError: If an error occurs while listing the objects.
+        :raise StorageClientError: If an error occurs while listing the objects.
         """
         try:
             objects = list(self.client.list_objects(bucket_name=bucket))

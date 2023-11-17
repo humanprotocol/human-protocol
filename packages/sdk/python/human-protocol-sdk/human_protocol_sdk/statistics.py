@@ -36,10 +36,9 @@ class StatisticsParam:
         """
         Initializes a StatisticsParam instance.
 
-        Args:
-            date_from (Optional[datetime]): Statistical data from date
-            date_to (Optional[datetime]): Statistical data to date
-            limit (Optional[int]): Limit of statistical data
+        :param date_from: Statistical data from date
+        :param date_to: Statistical data to date
+        :param limit: Limit of statistical data
         """
 
         self.date_from = date_from
@@ -64,13 +63,12 @@ class DailyEscrowData:
         """
         Initializes a DailyEscrowData instance.
 
-        Args:
-            timestamp (datetime): Timestamp
-            escrows_total (int): Total escrows
-            escrows_pending (int): Pending escrows
-            escrows_solved (int): Solved escrows
-            escrows_paid (int): Paid escrows
-            escrows_cancelled (int): Cancelled escrows
+        :param timestamp: Timestamp
+        :param escrows_total: Total escrows
+        :param escrows_pending: Pending escrows
+        :param escrows_solved: Solved escrows
+        :param escrows_paid: Paid escrows
+        :param escrows_cancelled: Cancelled escrows
         """
 
         self.timestamp = timestamp
@@ -94,9 +92,8 @@ class EscrowStatistics:
         """
         Initializes a EscrowStatistics instance.
 
-        Args:
-            total_escrows (int): Total escrows
-            daily_escrows_data (List[DailyEscrowData]): Daily escrows data
+        :param total_escrows: Total escrows
+        :param daily_escrows_data: Daily escrows data
         """
 
         self.total_escrows = total_escrows
@@ -116,9 +113,8 @@ class DailyWorkerData:
         """
         Initializes a DailyWorkerData instance.
 
-        Args:
-            timestamp (datetime): Timestamp
-            active_workers (int): Active workers
+        :param timestamp: Timestamp
+        :param active_workers: Active workers
         """
 
         self.timestamp = timestamp
@@ -137,8 +133,7 @@ class WorkerStatistics:
         """
         Initializes a WorkerStatistics instance.
 
-        Args:
-            daily_workers_data (List[DailyWorkerData]): Daily workers data
+        :param daily_workers_data: Daily workers data
         """
 
         self.daily_workers_data = daily_workers_data
@@ -159,11 +154,10 @@ class DailyPaymentData:
         """
         Initializes a DailyPaymentData instance.
 
-        Args:
-            timestamp (datetime): Timestamp
-            total_amount_paid (int): Total amount paid
-            total_count (int): Total count
-            average_amount_per_worker (int): Average amount per worker
+        :param timestamp: Timestamp
+        :param total_amount_paid: Total amount paid
+        :param total_count: Total count
+        :param average_amount_per_worker: Average amount per worker
         """
 
         self.timestamp = timestamp
@@ -184,8 +178,7 @@ class PaymentStatistics:
         """
         Initializes a PaymentStatistics instance.
 
-        Args:
-            daily_payments_data (List[DailyPaymentData]): Daily payments data
+        :param daily_payments_data: Daily payments data
         """
 
         self.daily_payments_data = daily_payments_data
@@ -204,9 +197,8 @@ class HMTHolder:
         """
         Initializes a HMTHolder instance.
 
-        Args:
-            address (str): Address
-            balance (int): Balance
+        :param address: Holder address
+        :param balance: Holder balance
         """
 
         self.address = address
@@ -227,10 +219,9 @@ class DailyHMTData:
         """
         Initializes a DailyHMTData instance.
 
-        Args:
-            timestamp (datetime): Timestamp
-            total_transaction_amount (int): Total transaction amount
-            total_transaction_count (int): Total transaction count
+        :param timestamp: Timestamp
+        :param total_transaction_amount: Total transaction amount
+        :param total_transaction_count: Total transaction count
         """
 
         self.timestamp = timestamp
@@ -254,12 +245,11 @@ class HMTStatistics:
         """
         Initializes a HMTStatistics instance.
 
-        Args:
-            total_transfer_amount (int): Total transfer amount
-            total_transfer_count (int): Total transfer count
-            total_holders (int): Total holders
-            holders (List[HMTHolder]): Holders
-            daily_hmt_data (List[DailyHMTData]): Daily HMT data
+        :param total_transfer_amount: Total transfer amount
+        :param total_transfer_count: Total transfer count
+        :param total_holders: Total holders
+        :param holders: Holders
+        :param daily_hmt_data: Daily HMT data
         """
 
         self.total_transfer_amount = total_transfer_amount
@@ -277,7 +267,7 @@ class StatisticsClient:
     def __init__(self, chain_id: ChainId = ChainId.POLYGON_MUMBAI):
         """Initializes a Statistics instance
 
-        Args:
+        :param chain_id: Chain ID to get statistical data from
 
         """
 
@@ -294,12 +284,11 @@ class StatisticsClient:
     ) -> EscrowStatistics:
         """Get escrow statistics data for the given date range.
 
-        Args:
-            param (StatisticsParam): Object containing the date range
+        :param param: Object containing the date range
 
-        Returns:
-            dict: Escrow statistics data
+        :return: Escrow statistics data
         """
+
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
             get_escrow_statistics_query,
@@ -351,11 +340,9 @@ class StatisticsClient:
     ) -> WorkerStatistics:
         """Get worker statistics data for the given date range.
 
-        Args:
-            param (StatisticsParam): Object containing the date range
+        :param param: Object containing the date range
 
-        Returns:
-            dict: Worker statistics data
+        :return: Worker statistics data
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -388,11 +375,9 @@ class StatisticsClient:
     ) -> PaymentStatistics:
         """Get payment statistics data for the given date range.
 
-        Args:
-            param (StatisticsParam): Object containing the date range
+        :param param: Object containing the date range
 
-        Returns:
-            dict: Payment statistics data
+        :return: Payment statistics data
 
         """
 
@@ -434,11 +419,9 @@ class StatisticsClient:
     ) -> HMTStatistics:
         """Get HMT statistics data for the given date range.
 
-        Args:
-            param (StatisticsParam): Object containing the date range
+        :param param: Object containing the date range
 
-        Returns:
-            dict: HMT statistics data
+        :return: HMT statistics data
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
