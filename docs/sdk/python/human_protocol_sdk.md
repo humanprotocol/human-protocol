@@ -43,6 +43,10 @@ Enum for chain IDs.
 
 #### BSC_TESTNET *= 97*
 
+#### CELO *= 42220*
+
+#### CELO_ALFAJORES *= 44787*
+
 #### GOERLI *= 5*
 
 #### LOCALHOST *= 1338*
@@ -662,6 +666,18 @@ Gets the value of a key-value pair in the contract.
 * **Returns:**
   The value of the key-value pair if it exists
 
+#### get_url(address, key='url')
+
+Gets the URL value of the given address.
+
+* **Parameters:**
+  * **address** (`str`) – The Ethereum address associated with the URL
+  * **key** (`Optional`[`str`]) – The key of the URL. url by default
+* **Return url:**
+  The URL value of the given address if exists, and content is valid
+* **Return type:**
+  `str`
+
 #### set(key, value)
 
 Sets the value of a key-value pair in the contract.
@@ -681,6 +697,19 @@ Sets multiple key-value pairs in the contract.
 * **Parameters:**
   * **keys** (`List`[`str`]) – A list of keys to set
   * **values** (`List`[`str`]) – A list of values to set
+* **Return type:**
+  `None`
+* **Returns:**
+  None
+
+#### set_url(url, key='url')
+
+Sets the URL value.
+
+* **Parameters:**
+  **url** (`str`) – URL to set
+* **Key:**
+  The key of the URL. url by default.
 * **Return type:**
   `None`
 * **Returns:**
