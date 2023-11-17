@@ -345,7 +345,7 @@ export class JobService {
   }
 
   private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
-    const maxElements = 4;
+    const maxElements = 3;
     const outputObject: any = {};
 
     let elementCount = 0;
@@ -359,6 +359,9 @@ export class JobService {
         outputObject[value] = { en: value, answer_example_uri: key };
         elementCount++;
     }
+
+    // Default case
+    outputObject["0"] = { "en": "Not presented" }
 
     return outputObject;
   }
