@@ -33,7 +33,5 @@ export const HCaptchaJobRequesteValidationSchema = Yup.object().shape({
     .required('Accuracy target is required')
     .moreThan(0, 'Accuracy target must be greater than 0')
     .max(100, 'Accuracy target must be less than or equal to 100'),
-  workerLanguage: Yup.string().required('Worker Language is required'),
   targetBrowser: Yup.string().required('Target Browser is required'),
-  workerLocation: Yup.string().required('Worker Location is required'),
 });

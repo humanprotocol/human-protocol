@@ -23,13 +23,17 @@ export const PayJob = () => {
   };
 
   const handleError = (err: any) => {
-    if (
-      err.code === 'UNPREDICTABLE_GAS_LIMIT' ||
-      err.code === 'ACTION_REJECTED'
-    ) {
+    if (err.code === 'UNPREDICTABLE_GAS_LIMIT' || err.code === 'ACTION_REJECTED') {
       openSnackbar(err.code, 'error');
     } else {
-      openSnackbar(err?.response?.data?.message, 'error');
+      const message = err?.response?.data?.message;
+      if (message) {
+        if (typeof message === 'string') {
+          openSnackbar(err?.response?.data?.message, 'error');
+        } else {
+          openSnackbar('Something went wrong', 'error');
+        }
+      }
     }
   };
 
@@ -57,9 +61,7 @@ export const PayJob = () => {
         }}
       >
         <StyledTab value={PayMethod.Crypto} label="Crypto" />
-        {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
-          <StyledTab value={PayMethod.Fiat} label="Fiat" />
-        )}
+        {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
       </StyledTabs>
       <Box
         display="flex"
@@ -79,18 +81,10 @@ export const PayJob = () => {
         }}
       >
         {payMethod === PayMethod.Crypto && (
-          <CryptoPayForm
-            onStart={handleStart}
-            onFinish={handleFinish}
-            onError={handleError}
-          />
+          <CryptoPayForm onStart={handleStart} onFinish={handleFinish} onError={handleError} />
         )}
         {payMethod === PayMethod.Fiat && (
-          <FiatPayForm
-            onStart={handleStart}
-            onFinish={handleFinish}
-            onError={handleError}
-          />
+          <FiatPayForm onStart={handleStart} onFinish={handleFinish} onError={handleError} />
         )}
       </Box>
     </Box>

@@ -42,7 +42,6 @@ export const createHCaptchaJob = async (chainId: number, data: HCaptchaRequest, 
   await api.post('/job/hCaptcha', {
     chainId,
     ...data,
-    fundAmount: amount,
   });
 };
 
