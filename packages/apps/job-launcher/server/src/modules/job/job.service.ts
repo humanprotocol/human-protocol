@@ -345,11 +345,16 @@ export class JobService {
   }
 
   private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
+    const maxElements = 4;
     const outputObject: any = {};
 
     let elementCount = 0;
 
     for (const key of Object.keys(groundTruthsData)) {
+        if (elementCount >= maxElements) {
+            break;
+        }
+
         const value = groundTruthsData[key][0][0];
         outputObject[value] = { en: value, answer_example_uri: key };
         elementCount++;
