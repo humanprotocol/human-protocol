@@ -1,7 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import hummingbot from 'src/assets/hummingbot.svg';
-import humanlogo from 'src/assets/logo.svg';
+import powered from 'src/assets/powered.svg';
 import { AuthFooter } from 'src/components/Footer/AuthFooter';
 
 export default function DefaultLayout() {
@@ -50,26 +49,10 @@ export default function DefaultLayout() {
                 <Box sx={{ display: 'flex', justifyContent: 'left', mt: 2 }}>
                   <Box
                     component="img"
-                    src={humanlogo}
+                    src={powered}
                     alt="Human"
-                    sx={{ width: '100px', height: '50px' }}
+                    sx={{ width: '250px', height: '120px' }}
                   />
-                  <Box
-                    component="img"
-                    src={hummingbot}
-                    alt="Hummingbot"
-                    sx={{ width: '100px', height: '40px' }}
-                  />
-                  <Box
-                    sx={{
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      color: 'black',
-                      mt: 1,
-                    }}
-                  >
-                    Hummingbot
-                  </Box>
                 </Box>
               </Box>
             </Box>

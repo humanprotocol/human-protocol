@@ -8,9 +8,6 @@ import Participating from './pages/Campaigns/Participating';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
-import CreateJob from './pages/Job/CreateJob';
-import JobDetail from './pages/Job/JobDetail';
-import JobList from './pages/Job/JobList';
 import TopUpAccount from './pages/Profile/TopUpAccount';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
@@ -55,30 +52,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Participating />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="jobs/create"
-            element={
-              <ProtectedRoute>
-                <CreateJob />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="jobs/details/:jobId"
-            element={
-              <ProtectedRoute>
-                <JobDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="jobs/:status"
-            element={
-              <ProtectedRoute>
-                <JobList />
               </ProtectedRoute>
             }
           />

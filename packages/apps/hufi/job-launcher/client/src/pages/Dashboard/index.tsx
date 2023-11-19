@@ -1,80 +1,41 @@
 import { Box, Button, Pagination, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
-import { CampaignData } from '../../types';
+import { DeployedCampaign } from '../../types';
 import bagImg from 'src/assets/bag.png';
 import Campaigns from 'src/components/Campaigns/Campaign';
 import { CreateCampaignModal } from 'src/components/Campaigns/Create/CreateCampaign';
 import { EmptyCampaign } from 'src/components/Campaigns/EmptyCampaign';
 import { InfoBoxes } from 'src/components/Campaigns/InfoBoxes';
 import { NoCampaigns } from 'src/components/Campaigns/NoCampaigns';
+import { useCampaignsPolling } from 'src/hooks/useCampaignsPolling';
 // import { FundCampaignModal } from 'src/components/Campaigns/Fund/FundCampaign';
 
 export default function Dashboard() {
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const navigate = useNavigate();
+  const { campaigns } = useCampaignsPolling();
   const [createCampaignModalOpen, setCreateCampaignModalOpen] = useState(false);
+  const [myCampaigns, setMyCampaigns] = useState(Array<DeployedCampaign>);
   // const [fundCampaignModalOpen, setfundCampaignModalOpen] = useState(false);
   const handleClickCreate = () => {
     setCreateCampaignModalOpen(true);
   };
-  // const handleClickFund = () => {
-  //   setfundCampaignModalOpen(true);
-  // }
+
+  useEffect(() => {
+    const filteredCamps = campaigns.filter((item) => {
+      return item.manifest.requesterDescription === address;
+    });
+    setMyCampaigns(filteredCamps);
+  }, [campaigns, isConnected]);
 
   const data = [
     { title: 'Rewards Paid', value: '$ 23,000' },
     { title: 'Total Liquidity Provided', value: '$ 1,000,000' },
     { title: 'Volume Traded', value: '$ 99,000' },
     { title: 'Number of Active Campaigns', value: '50' },
-  ];
-
-  const campdata: CampaignData[] = [
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    // ... add more campaigns here
   ];
 
   return (
@@ -110,10 +71,10 @@ export default function Dashboard() {
         </Box>
         {!isConnected ? (
           <EmptyCampaign />
+        ) : myCampaigns.length > 0 ? (
+          <Campaigns campaigndata={myCampaigns} />
         ) : (
-          <>
-            <NoCampaigns message="At the moment you are not running any campaign." />
-          </>
+          <NoCampaigns message="At the moment you are not running any campaign." />
         )}
       </Box>
 
@@ -153,7 +114,8 @@ export default function Dashboard() {
             Launch Campaign
           </Button>
         </Box>
-        <Campaigns campaigndata={campdata} />
+
+        <Campaigns campaigndata={campaigns} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
             onClick={() => {

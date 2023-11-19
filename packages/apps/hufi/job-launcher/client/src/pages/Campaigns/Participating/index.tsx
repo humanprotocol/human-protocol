@@ -2,17 +2,19 @@ import { Box, Button, Pagination, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
-import { CampaignData } from '../../../types';
+
 import bagImg from 'src/assets/bag.png';
 import Campaigns from 'src/components/Campaigns/Campaign';
 import { CreateCampaignModal } from 'src/components/Campaigns/Create/CreateCampaign';
 import { EmptyCampaign } from 'src/components/Campaigns/EmptyCampaign';
 import { InfoBoxes } from 'src/components/Campaigns/InfoBoxes';
 import { NoCampaigns } from 'src/components/Campaigns/NoCampaigns';
+import { useCampaignsPolling } from 'src/hooks/useCampaignsPolling';
 
-export default function Dashboard() {
+export default function Participating() {
   const { isConnected } = useAccount();
   const navigate = useNavigate();
+  const { campaigns } = useCampaignsPolling();
   const [createCampaignModalOpen, setCreateCampaignModalOpen] = useState(false);
   const handleClickCreate = () => {
     setCreateCampaignModalOpen(true);
@@ -22,52 +24,6 @@ export default function Dashboard() {
     { title: 'Pending Rewards', value: '$ 493' },
     { title: 'Total Liquidity', value: '1,424 ETH' },
     { title: 'Number of Participating Campaigns', value: '3' },
-  ];
-
-  const campdata: CampaignData[] = [
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    // ... add more campaigns here
   ];
 
   return (
@@ -126,7 +82,7 @@ export default function Dashboard() {
             Launch Campaign
           </Button>
         </Box>
-        <Campaigns campaigndata={campdata} />
+        <Campaigns campaigndata={campaigns} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
             onClick={() => {

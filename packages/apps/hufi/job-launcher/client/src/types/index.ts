@@ -32,24 +32,43 @@ export type FiatPaymentRequest = {
   currency: string;
 };
 
-export type CreateFortuneJobRequest = {
-  chainId: number;
-  submissionsRequired: number;
-  requesterTitle: string;
-  requesterDescription: string;
-  fundAmount: number;
+export type DeployedCampaign = {
+  escrowAddress: string;
+  chainId: string;
+  manifest: {
+    chainId: string;
+    startBlock: number;
+    requesterDescription: string;
+    endBlock: number;
+    exchangeName: string;
+    tokenA: string;
+    tokenB: string;
+    campaignDuration: 3110400;
+    fundAmount: 22.074065996601036;
+    type: string;
+    requestType: string;
+  };
 };
 
-export type CreateCvatJobRequest = {
-  chainId: number;
+export type CreateCampaign = {
+  chainId?: ChainId;
+  startBlock: number;
+  endBlock: number;
+  exchangeName: string;
   requesterDescription: string;
+  tokenA: string;
+  tokenB: string;
+  campaignDuration: number;
   fundAmount: number;
-  dataUrl: string;
-  labels: string[];
-  minQuality: number;
-  gtUrl: string;
-  type: CvatJobType;
+  type: string;
 };
+
+export enum Exchange {
+  UNISWAP_ETHEREUM = 'uniswap-ethereum',
+  UNISWAP_POLYGON = 'uniswap-polygon',
+  PANCAKESWAP_BSC = 'pancakeswap-bsc',
+  BINANCE = 'binance',
+}
 
 export enum CreateJobStep {
   FundingMethod,
@@ -73,27 +92,14 @@ export enum CvatJobType {
   IMAGE_BOXES = 'IMAGE_BOXES',
 }
 
+export enum Campaign {
+  Campaign = 'CAMPAIGN',
+}
+
 export type FortuneRequest = {
   title: string;
   fortunesRequested: number;
   description: string;
-};
-
-export type CvatRequest = {
-  labels: string[];
-  type: CvatJobType;
-  description: string;
-  dataUrl: string;
-  groundTruthUrl: string;
-  userGuide: string;
-  accuracyTarget: number;
-};
-
-export type JobRequest = {
-  jobType: JobType;
-  chainId?: ChainId;
-  fortuneRequest?: FortuneRequest;
-  cvatRequest?: CvatRequest;
 };
 
 export enum JobStatus {

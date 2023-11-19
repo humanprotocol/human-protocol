@@ -1,19 +1,22 @@
 import { Box, Button, Pagination, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
-import { CampaignData } from '../../../types';
+import { DeployedCampaign } from '../../../types';
 import bagImg from 'src/assets/bag.png';
 import Campaigns from 'src/components/Campaigns/Campaign';
 import { CreateCampaignModal } from 'src/components/Campaigns/Create/CreateCampaign';
 import { EmptyCampaign } from 'src/components/Campaigns/EmptyCampaign';
 import { InfoBoxes } from 'src/components/Campaigns/InfoBoxes';
 import { NoCampaigns } from 'src/components/Campaigns/NoCampaigns';
+import { useCampaignsPolling } from 'src/hooks/useCampaignsPolling';
 
-export default function Dashboard() {
-  const { isConnected } = useAccount();
+export default function MyCampaigns() {
+  const { address, isConnected } = useAccount();
   const navigate = useNavigate();
+  const { campaigns } = useCampaignsPolling();
   const [createCampaignModalOpen, setCreateCampaignModalOpen] = useState(false);
+  const [myCampaigns, setMyCampaigns] = useState(Array<DeployedCampaign>);
   const handleClickCreate = () => {
     setCreateCampaignModalOpen(true);
   };
@@ -24,51 +27,12 @@ export default function Dashboard() {
     { title: 'Number of Active Campaigns', value: '0' },
   ];
 
-  const campdata: CampaignData[] = [
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    {
-      name: 'WETH/HMT',
-      exchange: 'Uniswap (ETH)',
-      apr: '35 %',
-      rewardPool: '2,304 HMT',
-      rewardToken: {
-        symbol: 'HMT',
-        quantity: '1,424 ETH',
-        total: '2,232,002 HMT',
-      },
-      tvl: '~$140,024',
-      endDate: '1st Aug 2023',
-      status: 'ACTIVE',
-    },
-    // ... add more campaigns here
-  ];
+  useEffect(() => {
+    const filteredCamps = campaigns.filter((item) => {
+      return item.manifest.requesterDescription === address;
+    });
+    setMyCampaigns(filteredCamps);
+  }, [campaigns, isConnected]);
 
   return (
     <Box>
@@ -103,6 +67,8 @@ export default function Dashboard() {
         </Box>
         {!isConnected ? (
           <EmptyCampaign />
+        ) : myCampaigns.length > 0 ? (
+          <Campaigns campaigndata={myCampaigns} />
         ) : (
           <NoCampaigns message="At the moment you are not running any campaign." />
         )}
@@ -126,7 +92,7 @@ export default function Dashboard() {
             Launch Campaign
           </Button>
         </Box>
-        <Campaigns campaigndata={campdata} />
+        <Campaigns campaigndata={campaigns} />
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
             onClick={() => {

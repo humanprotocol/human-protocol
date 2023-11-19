@@ -1,16 +1,18 @@
 import { Box, Typography, Button, Card, CardContent } from '@mui/material';
 import React, { useState } from 'react';
-import { FundCampaignModal } from './Fund/FundCampaign';
-import { CampaignData } from 'src/types';
+import { JoinCampaignModal } from './JoinCampaignModal';
+import { DeployedCampaign } from 'src/types';
 
 interface CampaignProps {
-  campaigndata: CampaignData[];
+  campaigndata: DeployedCampaign[];
 }
 
 const Campaigns: React.FC<CampaignProps> = ({ campaigndata }) => {
-  const [fundCampaignModalOpen, setfundCampaignModalOpen] = useState(false);
-  const handleClickFund = () => {
-    setfundCampaignModalOpen(true);
+  const [joinCampaignModalOpen, setJoinCampaignModalOpen] = useState(false);
+  const [exchange, setExchange] = useState('');
+  const handleClickJoin = (exchange: React.SetStateAction<string>) => {
+    setExchange(exchange);
+    setJoinCampaignModalOpen(true);
   };
   return (
     <Box>
@@ -24,62 +26,80 @@ const Campaigns: React.FC<CampaignProps> = ({ campaigndata }) => {
         <Typography>End Date</Typography>
         <Typography>Status</Typography>
       </Box>
-      {campaigndata.map((campaign: CampaignData, index: number) => (
-        <Box sx={{ mt: 0 }}>
-          <Card sx={{ marginBottom: '20px' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <img
-                    src="../../src/assets/campaignlogo.svg"
-                    alt="Campaign Logo"
-                    style={{ width: '50px', height: '50px' }}
-                  />
-                  <Box>
-                    <Typography variant="h6">{campaign.name}</Typography>
-                    <Typography
-                      sx={{ color: 'secondary.light' }}
-                      variant="subtitle2"
-                    >
-                      {campaign.exchange}
-                    </Typography>
-                    <Button
-                      sx={{
-                        borderColor: 'secondary.light',
-                        color: 'secondary.light',
-                      }}
-                      onClick={handleClickFund}
-                      variant="outlined"
-                    >
-                      Fund Campaign
-                    </Button>
+      {campaigndata.map((campaign: DeployedCampaign, index: number) => {
+        const milliseconds = campaign.manifest.endBlock * 1000; // Convert to milliseconds
+        const dateObject = new Date(milliseconds);
+        const today = new Date();
+        // Format date (according to local timezone)
+        const enddate = dateObject.toLocaleDateString();
+        const checkEndDate = new Date(enddate);
+        const check = checkEndDate > today ? 'Active' : 'Expired';
+        return (
+          <Box key={index} sx={{ mt: 0 }}>
+            <Card sx={{ marginBottom: '20px' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <img
+                      src="../../src/assets/campaignlogo.svg"
+                      alt="Campaign Logo"
+                      style={{ width: '50px', height: '50px' }}
+                    />
+                    <Box>
+                      <Typography variant="h6">
+                        {campaign.manifest.tokenA}/{campaign.manifest.tokenB}
+                      </Typography>
+                      <Typography
+                        sx={{ color: 'secondary.light' }}
+                        variant="subtitle2"
+                      >
+                        {campaign.manifest.exchangeName}
+                      </Typography>
+                      <Button
+                        sx={{
+                          borderColor: 'secondary.light',
+                          color: 'secondary.light',
+                        }}
+                        variant="outlined"
+                        disabled
+                      >
+                        Fund Campaign
+                      </Button>
+                    </Box>
+                  </Box>
+
+                  <Typography>-</Typography>
+                  <Typography>HMT</Typography>
+                  <Typography>{campaign.manifest.fundAmount}</Typography>
+                  <Typography>N/A</Typography>
+                  <Typography>{enddate}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box>
+                      <Typography sx={{ color: 'success.main', mb: 5 }}>
+                        {check}
+                      </Typography>
+
+                      <Button
+                        sx={{ backgroundColor: 'secondary.light' }}
+                        onClick={() =>
+                          handleClickJoin(campaign.manifest.exchangeName)
+                        }
+                        variant="contained"
+                      >
+                        Join
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
-
-                <Typography>{campaign.apr}</Typography>
-                <Typography>{campaign.rewardPool}</Typography>
-                <Typography>{campaign.rewardToken?.quantity}</Typography>
-                <Typography>{campaign.tvl}</Typography>
-                <Typography>{campaign.endDate}</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box>
-                    <Typography sx={{ color: 'success.main', mb: 5 }}>
-                      {campaign.status}
-                    </Typography>
-
-                    <Button onClick={handleClickFund} variant="contained">
-                      Join
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      ))}
-      <FundCampaignModal
-        open={fundCampaignModalOpen}
-        onClose={() => setfundCampaignModalOpen(false)}
+              </CardContent>
+            </Card>
+          </Box>
+        );
+      })}
+      <JoinCampaignModal
+        exchange={exchange}
+        open={joinCampaignModalOpen}
+        onClose={() => setJoinCampaignModalOpen(false)}
       />
     </Box>
   );
