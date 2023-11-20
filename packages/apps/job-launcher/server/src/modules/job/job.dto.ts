@@ -19,7 +19,6 @@ import {
   IsDefined,
   IsNotEmptyObject,
   ArrayMinSize,
-  ArrayNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
@@ -34,8 +33,6 @@ import {
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
-import { isEmpty } from 'rxjs';
-import { IsNull } from 'typeorm';
 
 export class JobCreateDto {
   public chainId: ChainId;

@@ -10,7 +10,7 @@ import {
   EncryptionUtils,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 import {
   BadRequestException,
   ConflictException,
@@ -21,7 +21,7 @@ import {
   ValidationError,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { validate, validateSync } from 'class-validator';
+import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
 import { LessThanOrEqual, QueryFailedError } from 'typeorm';
@@ -52,7 +52,6 @@ import {
   getRate,
   hashString,
   isValidJSON,
-  parseUrl,
 } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
@@ -1171,9 +1170,6 @@ export class JobService {
       allocation = await stakingClient.getAllocation(escrowAddress);
       jobEntity = await this.updateCompletedStatus(jobEntity, escrow);
     }
-
-    const status =
-      escrow?.status === 'Completed' ? JobStatus.COMPLETED : jobEntity.status;
 
     let manifestData = await this.storageService.download(manifestUrl);
     if (!manifestData) {

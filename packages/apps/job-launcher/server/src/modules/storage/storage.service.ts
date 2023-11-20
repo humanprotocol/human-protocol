@@ -2,14 +2,10 @@ import { StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';
-import { PassThrough } from 'stream';
 import axios from 'axios';
-import { Logger } from '@nestjs/common';
-import { hashStream, hashString } from '../../common/utils';
 import { ErrorBucket } from '../../common/constants/errors';
 import { parseString } from 'xml2js';
 import stringify from 'json-stable-stringify';
-import { v4 as uuidv4 } from 'uuid';
 import { ContentType, Extension } from '../../common/enums/storage';
 import { UploadedFile } from '../../common/interfaces';
 

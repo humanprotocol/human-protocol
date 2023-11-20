@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
-import { Encryption, EncryptionUtils } from '@human-protocol/sdk';
+import { Encryption } from '@human-protocol/sdk';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {

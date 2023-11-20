@@ -11,18 +11,13 @@ import {
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import {
-  ErrorBucket,
-  ErrorJob,
-  ErrorWeb3,
-} from '../../common/constants/errors';
+import { ErrorJob, ErrorWeb3 } from '../../common/constants/errors';
 import {
   PaymentSource,
   PaymentStatus,
@@ -30,8 +25,6 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import {
-  JobCaptchaMode,
-  JobCaptchaRequestType,
   JobCaptchaShapeType,
   JobRequestType,
   JobStatus,
@@ -45,12 +38,10 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
-  MOCK_ENCRYPTED_MANIFEST,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
-  MOCK_FILE_KEY,
   MOCK_FILE_URL,
   MOCK_HCAPTCHA_ORACLE_ADDRESS,
   MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
@@ -75,11 +66,9 @@ import { Web3Service } from '../web3/web3.service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
-  CvatManifestDto,
   JobFortuneDto,
   JobCvatDto,
   JobDetailsDto,
-  HCaptchaManifestDto,
   JobCaptchaDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
