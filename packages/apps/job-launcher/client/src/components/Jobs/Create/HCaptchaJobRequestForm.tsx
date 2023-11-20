@@ -151,6 +151,7 @@ export const HCaptchaJobRequestForm = () => {
                         >
                           <MenuItem value={HCaptchaJobType.COMPARISON}>Comparison</MenuItem>
                           <MenuItem value={HCaptchaJobType.CATEGORIZATION}>Categorization</MenuItem>
+                          <MenuItem value={HCaptchaJobType.POINT}>Landmark</MenuItem>
                           <MenuItem value={HCaptchaJobType.POLYGON}>Polygon</MenuItem>
                           <MenuItem value={HCaptchaJobType.BOUNDING_BOX}>Bounding Box</MenuItem>
                         </Select>
