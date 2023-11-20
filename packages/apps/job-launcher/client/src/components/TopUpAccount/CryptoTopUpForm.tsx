@@ -14,7 +14,6 @@ import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { useAccount, useSigner, useNetwork } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
-import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../constants/addresses';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
 import { useSnackbar } from '../../providers/SnackProvider';
@@ -51,7 +50,7 @@ export const CryptoTopUpForm = () => {
       const tokenAmount = ethers.utils.parseUnits(amount, 18);
 
       const tx = await contract.transfer(
-        JOB_LAUNCHER_OPERATOR_ADDRESS,
+        import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
         tokenAmount
       );
 

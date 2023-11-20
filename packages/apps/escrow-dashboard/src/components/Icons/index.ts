@@ -1,6 +1,7 @@
 export { AvalancheIcon } from './AvalancheIcon';
 export { BinanceSmartChainIcon } from './BinanceSmartChainIcon';
 export { BitfinexIcon } from './BitfinexIcon';
+export { CeloIcon } from './CeloIcon';
 export { CopyFilledIcon } from './CopyFilledIcon';
 export { CopyLinkIcon } from './CopyLinkIcon';
 export { DiscordIcon } from './DiscordIcon';

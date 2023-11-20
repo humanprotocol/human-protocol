@@ -17,7 +17,7 @@ export const networkMap: NetworkMapDto = {
   polygon: {
     chainId: ChainId.POLYGON,
     rpcUrl:
-      'https://polygon-mainnet.g.alchemy.com/v2/0Lorh5KRkGl5FsRwy2epTg8fEFFoqUfY',
+      'https://polygon-mainnet.g.alchemy.com/v2/ApMluTj0_OBDUcLV01MYMHbxI7EmCJ6r',
     tokens: {
       hmt: NETWORKS[ChainId.POLYGON]?.hmtAddress,
       usdt: '0x170a18b9190669cda08965562745a323c907e5ec',
