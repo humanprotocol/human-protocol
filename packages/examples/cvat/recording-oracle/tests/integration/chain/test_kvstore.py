@@ -1,10 +1,9 @@
 import unittest
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import Mock, patch
 
 import pytest
-from human_protocol_sdk.kvstore import KVStoreClientError
 from human_protocol_sdk.escrow import EscrowClientError
-
+from human_protocol_sdk.kvstore import KVStoreClientError
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 
@@ -31,18 +30,18 @@ class ServiceIntegrationTest(unittest.TestCase):
         escrow_address = create_escrow(self.w3)
         store_kvstore_value("webhook_url", DEFAULT_URL)
 
-        with (patch("src.chain.kvstore.get_web3") as mock_get_web3,
-              patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
-              patch("human_protocol_sdk.escrow.EscrowUtils.get_escrow") as ge):
+        with (
+            patch("src.chain.kvstore.get_web3") as mock_get_web3,
+            patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
+            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+        ):
             mock_get_web3.return_value = self.w3
             mock_escrow = Mock()
             mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
             mock_get_escrow.return_value = mock_escrow
-            ge.return_value = mock_escrow
+            mock_leader.return_value = {"webhook_url": DEFAULT_URL}
 
-            reputation_url = get_reputation_oracle_url(
-                self.w3.eth.chain_id, escrow_address
-            )
+            reputation_url = get_reputation_oracle_url(self.w3.eth.chain_id, escrow_address)
             self.assertEqual(reputation_url, DEFAULT_URL)
 
     def test_get_reputation_oracle_url_invalid_escrow(self):
@@ -54,8 +53,17 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_get_reputation_oracle_url_invalid_address(self):
         create_escrow(self.w3)
         store_kvstore_value("webhook_url", "")
-        with patch("src.chain.kvstore.get_web3") as mock_function:
-            mock_function.return_value = self.w3
+        with (
+            patch("src.chain.kvstore.get_web3") as mock_get_web3,
+            patch("src.chain.kvstore.get_escrow") as mock_get_escrow,
+            patch("src.chain.kvstore.StakingClient.get_leader") as mock_leader,
+        ):
+            mock_get_web3.return_value = self.w3
+            mock_escrow = Mock()
+            mock_escrow.reputationOracle = REPUTATION_ORACLE_ADDRESS
+            mock_get_escrow.return_value = mock_escrow
+            mock_leader.return_value = {"webhook_url": ""}
+
             reputation_url = get_reputation_oracle_url(
                 self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
             )
