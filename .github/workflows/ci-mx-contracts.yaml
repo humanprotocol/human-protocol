@@ -9,9 +9,9 @@ on:
       - 'packages/core/mx'
 
 env:
-  RUST_TOOLCHAIN: nightly-2022-12-08
+  RUST_TOOLCHAIN: nightly-2023-05-26
   VMTOOLS_VERSION: v1.4.60
-  PIP_MXPY_ARGS: multiversx-sdk-cli==v6.0.0
+  PIP_MXPY_ARGS: multiversx-sdk-cli==v8.1.5
   CLIPPY_ARGS: --all-targets --all-features
 
 defaults:
