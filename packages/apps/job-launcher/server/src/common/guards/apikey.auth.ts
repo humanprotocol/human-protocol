@@ -36,7 +36,6 @@ export class ApiKeyGuard implements CanActivate {
             return true;
           }
         } catch (error) {
-          console.error(error);
           throw new UnauthorizedException('Invalid API Key');
         }
       } else {
