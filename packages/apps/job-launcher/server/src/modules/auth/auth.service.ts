@@ -278,9 +278,9 @@ export class AuthService {
     const apiKey = crypto.randomBytes(32).toString('hex');
     const hashedAPIKey = await generateHash(apiKey, salt, this.iterations, this.keyLength);
 
-    await this.apiKeyRepository.createOrUpdateAPIKey(userId, hashedAPIKey, salt);
+    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(userId, hashedAPIKey, salt);
 
-    return apiKey;
+    return `${apiKey}-${apiKeyEntity.id}`;
   }
 
   async validateAPIKey(userId: number, apiKey: string): Promise<boolean> {
