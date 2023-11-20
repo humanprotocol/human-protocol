@@ -77,6 +77,7 @@ import {
   HCAPTCHA_MAX_SHAPES_PER_IMAGE,
   HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
   HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+  HCAPTCHA_NOT_PRESENTED_LABEL,
   HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
@@ -361,7 +362,7 @@ export class JobService {
     }
 
     // Default case
-    outputObject["0"] = { "en": "Not presented" }
+    outputObject['0'] = { en: HCAPTCHA_NOT_PRESENTED_LABEL }
 
     return outputObject;
   }
@@ -386,7 +387,6 @@ export class JobService {
     requestType: JobRequestType,
     dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
-    console.log(dto)
     const { chainId } = dto;
   
     if (chainId) {
@@ -433,8 +433,6 @@ export class JobService {
         dto
       );
 
-
-      console.log(manifestOrigin)
       manifestEncrypted = await EncryptionUtils.encrypt(
         stringify(manifestOrigin), 
         [
@@ -453,8 +451,6 @@ export class JobService {
       manifestOrigin = await this.createCvatManifest(dto, requestType, tokenFundAmount);
     }
 
-    console.log(manifestOrigin)
-    console.log(manifestOrigin)
     const hash = hashString(stringify(manifestOrigin));
     const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
 
@@ -980,7 +976,10 @@ export class JobService {
         },
         true,
       );
-    } else {
+    } else if (
+      (manifest as CvatManifestDto)?.annotation?.type === JobRequestType.IMAGE_BOXES ||
+      (manifest as CvatManifestDto)?.annotation?.type === JobRequestType.IMAGE_POINTS
+    ) {
       await this.sendWebhook(
         this.configService.get<string>(
           ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,

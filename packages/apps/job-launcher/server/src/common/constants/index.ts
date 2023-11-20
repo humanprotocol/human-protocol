@@ -46,3 +46,5 @@ export const SENDGRID_TEMPLATES = {
 export const HCAPTCHA_MIN_SHAPES_PER_IMAGE = 1;
 export const HCAPTCHA_MAX_SHAPES_PER_IMAGE = 1;
 export const HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE = 5;
+
+export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';

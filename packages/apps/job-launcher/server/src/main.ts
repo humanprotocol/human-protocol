@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { ConfigNames } from './common/config';
+import { Encryption, EncryptionUtils } from '@human-protocol/sdk';
 
 async function bootstrap() {
   const app = await NestFactory.create<INestApplication>(AppModule, {
@@ -68,7 +69,14 @@ async function bootstrap() {
 
   const host = configService.get<string>(ConfigNames.HOST, 'localhost');
   const port = +configService.get<string>(ConfigNames.PORT, '5000');
-  
+
+
+  console.log(configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!)
+  let encryption = await Encryption.build(configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!)
+  let res = await encryption.decrypt(configService.get<string>(ConfigNames.S3_USE_SSL)!)
+  console.log(res);
+
+
   app.use(helmet());
   await app.listen(port, host, async () => {
     console.info(`API server is running on http://${host}:${port}`);
