@@ -59,7 +59,11 @@ export class JobController {
     @Request() req: RequestWithUser,
     @Body() data: JobCaptchaDto,
   ): Promise<number> {
-    return this.jobService.createJob(req.user.id, JobRequestType.HCAPTCHA, data);
+    return this.jobService.createJob(
+      req.user.id,
+      JobRequestType.HCAPTCHA,
+      data,
+    );
   }
 
   @Get('/list')

@@ -180,15 +180,14 @@ describe('JobService', () => {
             return MOCK_BUCKET_NAME;
           case 'CVAT_JOB_SIZE':
             return 1;
-          case 'PGP_PRIVATE_KEY': 
+          case 'PGP_PRIVATE_KEY':
             return MOCK_PGP_PRIVATE_KEY;
-          case 'PGP_PUBLIC_KEY': 
+          case 'PGP_PUBLIC_KEY':
             return MOCK_PGP_PUBLIC_KEY;
-          case 'HCAPTCHA_PGP_PUBLIC_KEY': 
+          case 'HCAPTCHA_PGP_PUBLIC_KEY':
             return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
           case 'HCAPTCHA_ORACLE_ADDRESS':
-            return MOCK_HCAPTCHA_ORACLE_ADDRESS
-          
+            return MOCK_HCAPTCHA_ORACLE_ADDRESS;
         }
       }),
     };
@@ -228,12 +227,10 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
 
-    storageService.uploadFile = jest.fn().mockResolvedValue(
-      {
-        url: MOCK_FILE_URL,
-        hash: MOCK_FILE_HASH,
-      },
-    );
+    storageService.uploadFile = jest.fn().mockResolvedValue({
+      url: MOCK_FILE_URL,
+      hash: MOCK_FILE_HASH,
+    });
 
     storageService.download = jest.fn();
   });
@@ -352,7 +349,9 @@ describe('JobService', () => {
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
@@ -375,7 +374,9 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
       const tokenFundAmount = 0.013997056833333334;
       const result = await jobService['calculateJobBounty'](
         MOCK_FILE_URL,
@@ -419,7 +420,9 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
@@ -471,7 +474,9 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -531,7 +536,9 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -550,7 +557,7 @@ describe('JobService', () => {
     const jobId = 123;
 
     const hCaptchaJobDto: JobCaptchaDto = {
-      dataUrl: MOCK_FILE_URL,  
+      dataUrl: MOCK_FILE_URL,
       accuracyTarget: 0.9,
       completionDate: new Date(),
       minRequests: 1,
@@ -558,17 +565,15 @@ describe('JobService', () => {
       advanced: {
         workerLanguage: WorkerLanguage.EN,
         workerLocation: WorkerLocation.FR,
-        targetBrowser: WorkerBrowser.DESKTOP
+        targetBrowser: WorkerBrowser.DESKTOP,
       },
       annotations: {
         typeOfJob: JobCaptchaShapeType.COMPARISON,
         taskBidPrice: 1,
-        labelingPrompt: "Test description",
+        labelingPrompt: 'Test description',
         groundTruths: MOCK_FILE_URL,
-        exampleImages: [
-          MOCK_FILE_URL
-        ]
-      }
+        exampleImages: [MOCK_FILE_URL],
+      },
     };
 
     let getUserBalanceMock: any;
@@ -583,7 +588,10 @@ describe('JobService', () => {
     });
 
     it('should create a job successfully', async () => {
-      const fundAmount = div(hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length, rate);
+      const fundAmount = div(
+        hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length,
+        rate,
+      );
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
@@ -602,8 +610,10 @@ describe('JobService', () => {
       };
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
-      
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
+
       await jobService.createJob(
         userId,
         JobRequestType.HCAPTCHA,
@@ -634,12 +644,17 @@ describe('JobService', () => {
     });
 
     it('should create a job successfully on network selected from round robin logic', async () => {
-      const fundAmount = div(hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length, rate);
+      const fundAmount = div(
+        hCaptchaJobDto.annotations.taskBidPrice * MOCK_BUCKET_FILES.length,
+        rate,
+      );
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -671,14 +686,12 @@ describe('JobService', () => {
         .mockResolvedValue(userBalance);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       await expect(
-        jobService.createJob(
-          userId,
-          JobRequestType.HCAPTCHA,
-          hCaptchaJobDto,
-        ),
+        jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
       ).rejects.toThrowError(ErrorJob.NotEnoughFunds);
     });
 
@@ -686,16 +699,14 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest.fn().mockResolvedValue(MOCK_BUCKET_FILES);
+      storageService.listObjectsInBucket = jest
+        .fn()
+        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
       await expect(
-        jobService.createJob(
-          userId,
-          JobRequestType.HCAPTCHA,
-          hCaptchaJobDto,
-        ),
+        jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
     });
   });

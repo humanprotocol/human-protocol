@@ -72,12 +72,12 @@ describe('Web3Service', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = hashString(stringify(MOCK_MANIFEST))
+      const hash = hashString(stringify(MOCK_MANIFEST));
 
       const fileData = await storageService.uploadFile(MOCK_MANIFEST, hash);
       expect(fileData).toEqual({
         url: expect.any(String),
-        hash: expect.any(String)
+        hash: expect.any(String),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,

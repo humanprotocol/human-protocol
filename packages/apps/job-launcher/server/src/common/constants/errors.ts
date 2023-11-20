@@ -48,7 +48,7 @@ export enum ErrorAuth {
   NotFound = 'Auth not found',
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
-  UserNotActive = 'User not active'
+  UserNotActive = 'User not active',
 }
 
 /**
@@ -92,7 +92,7 @@ export enum ErrorBucket {
   NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
-  FailedToFetchBucketContents = 'Failed to fetch bucket contents'
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents',
 }
 
 /**

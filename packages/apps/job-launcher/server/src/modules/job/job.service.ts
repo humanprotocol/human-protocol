@@ -47,7 +47,13 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { isPGPMessage, getRate, hashString, isValidJSON, parseUrl } from '../../common/utils';
+import {
+  isPGPMessage,
+  getRate,
+  hashString,
+  isValidJSON,
+  parseUrl,
+} from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -92,7 +98,7 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import stringify from 'json-stable-stringify'
+import stringify from 'json-stable-stringify';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
@@ -111,7 +117,11 @@ export class JobService {
     private readonly storageService: StorageService,
   ) {}
 
-  private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType, tokenFundAmount: number): Promise<CvatManifestDto> {
+  private async createCvatManifest(
+    dto: JobCvatDto,
+    requestType: JobRequestType,
+    tokenFundAmount: number,
+  ): Promise<CvatManifestDto> {
     return {
       data: {
         data_url: dto.dataUrl,
@@ -139,28 +149,38 @@ export class JobService {
     };
   }
 
-  async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifestDto> {
-    const objectsInBucket = await this.storageService.listObjectsInBucket(jobDto.dataUrl);
+  async createHCaptchaManifest(
+    jobType: JobCaptchaShapeType,
+    jobDto: JobCaptchaDto,
+  ): Promise<HCaptchaManifestDto> {
+    const objectsInBucket = await this.storageService.listObjectsInBucket(
+      jobDto.dataUrl,
+    );
 
     const commonManifestProperties = {
-        job_mode: JobCaptchaMode.BATCH,
-        requester_accuracy_target: jobDto.accuracyTarget,
-        request_config: {},
-        requester_max_repeats: jobDto.maxRequests,
-        requester_min_repeats: jobDto.minRequests,
-        requester_question: { en: jobDto.annotations.labelingPrompt },
-        job_total_tasks: objectsInBucket.length,
-        task_bid_price: jobDto.annotations.taskBidPrice,
-        taskdata_uri: await this.generateAndUploadTaskData(jobDto.dataUrl, objectsInBucket),
-        public_results: true,
-        oracle_stake: 0.05,
-        repo_uri: "http://reporacle.yellow.svc.cluster.local:5000",
-        ro_uri: "http://recoracle:5000/rocheck"
+      job_mode: JobCaptchaMode.BATCH,
+      requester_accuracy_target: jobDto.accuracyTarget,
+      request_config: {},
+      requester_max_repeats: jobDto.maxRequests,
+      requester_min_repeats: jobDto.minRequests,
+      requester_question: { en: jobDto.annotations.labelingPrompt },
+      job_total_tasks: objectsInBucket.length,
+      task_bid_price: jobDto.annotations.taskBidPrice,
+      taskdata_uri: await this.generateAndUploadTaskData(
+        jobDto.dataUrl,
+        objectsInBucket,
+      ),
+      public_results: true,
+      oracle_stake: 0.05,
+      repo_uri: 'http://reporacle.yellow.svc.cluster.local:5000',
+      ro_uri: 'http://recoracle:5000/rocheck',
     };
 
     let groundTruthsData;
     if (jobDto.annotations.groundTruths) {
-      groundTruthsData = await this.storageService.download(jobDto.annotations.groundTruths)
+      groundTruthsData = await this.storageService.download(
+        jobDto.annotations.groundTruths,
+      );
 
       if (isValidJSON(groundTruthsData)) {
         groundTruthsData = JSON.parse(groundTruthsData);
@@ -168,163 +188,183 @@ export class JobService {
     }
 
     switch (jobType) {
-        case JobCaptchaShapeType.COMPARISON:
-          return {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
-              groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {
-                sitekey: [
-                  {
-                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
-                      score: 1
-                    }
-                  }
-                ]
-              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: {},
-              requester_question_example: jobDto.annotations.exampleImages || [],
-          };
-
-        case JobCaptchaShapeType.CATEGORAZATION:
-          return {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
-              groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {
-                sitekey: [
-                  {
-                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
-                      score: 1
-                    }
-                  }
-                ]
-              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: this.buildHCaptchaRestrictedAnswerSet(groundTruthsData)
-          };
-
-        case JobCaptchaShapeType.POLYGON:
-          if (!jobDto.annotations.label) {
-            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
-            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
-          }
-          
-          const polygonManifest = {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-              request_config: {
-                  shape_type: JobCaptchaShapeType.POLYGON,
-                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 4,
-                  max_points: 4,
-                  minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+      case JobCaptchaShapeType.COMPARISON:
+        return {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          restricted_audience: {
+            sitekey: [
+              {
+                [this.configService.get<number>(
+                  ConfigNames.HCAPTCHA_SITE_KEY,
+                )!]: {
+                  score: 1,
+                },
               },
-              groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {
-                sitekey: [
-                  {
-                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
-                      score: 1
-                    }
-                  }
-                ]
-              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
-              requester_question_example: jobDto.annotations.exampleImages || [],
-          };
+            ],
+          }, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set: {},
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
 
-          return polygonManifest;
-
-        case JobCaptchaShapeType.POINT:
-          if (!jobDto.annotations.label) {
-            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
-            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
-          }
-
-          const pointManifest = {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-              request_config: {
-                  shape_type: jobType,
-                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 1,
-                  max_points: 8,
+      case JobCaptchaShapeType.CATEGORAZATION:
+        return {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          restricted_audience: {
+            sitekey: [
+              {
+                [this.configService.get<number>(
+                  ConfigNames.HCAPTCHA_SITE_KEY,
+                )!]: {
+                  score: 1,
+                },
               },
-              groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {
-                sitekey: [
-                  {
-                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
-                      score: 1
-                    }
-                  }
-                ]
-              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
-              requester_question_example: jobDto.annotations.exampleImages || [],
-          };
+            ],
+          }, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set:
+            this.buildHCaptchaRestrictedAnswerSet(groundTruthsData),
+        };
 
-          return pointManifest;
-        case JobCaptchaShapeType.BOUNDING_BOX:
-          if (!jobDto.annotations.label) {
-            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
-            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
-          }
+      case JobCaptchaShapeType.POLYGON:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
 
-          const boundingBoxManifest = {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
-              request_config: {
-                  shape_type: jobType,
-                  min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
-                  max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 4,
-                  max_points: 4,
+        const polygonManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: JobCaptchaShapeType.POLYGON,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: 4,
+            max_points: 4,
+            minimum_selection_area_per_shape:
+              HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          restricted_audience: {
+            sitekey: [
+              {
+                [this.configService.get<number>(
+                  ConfigNames.HCAPTCHA_SITE_KEY,
+                )!]: {
+                  score: 1,
+                },
               },
-              groundtruth_uri: jobDto.annotations.groundTruths,
-              restricted_audience: {
-                sitekey: [
-                  {
-                    [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
-                      score: 1
-                    }
-                  }
-                ]
-              },// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
-              requester_question_example: jobDto.annotations.exampleImages || [],
-          };
+            ],
+          }, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
 
-            return boundingBoxManifest;
-        case JobCaptchaShapeType.IMMO:
-          if (!jobDto.annotations.label) {
-            this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
-            throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
-          }
+        return polygonManifest;
 
-          const immoManifest = {
-              ...commonManifestProperties,
-              request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
-              request_config: {
-                  multiple_choice_max_choices:1,
-                  multiple_choice_min_choices:1,
-                  overlap_threshold: null,
-                  answer_type: "str",
-                  max_length: 100,
-                  min_length: 1
+      case JobCaptchaShapeType.POINT:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const pointManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: jobType,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: 1,
+            max_points: 8,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          restricted_audience: {
+            sitekey: [
+              {
+                [this.configService.get<number>(
+                  ConfigNames.HCAPTCHA_SITE_KEY,
+                )!]: {
+                  score: 1,
+                },
               },
-              restricted_audience: {},// this.buildHCaptchaRestrictedAudience(jobDto.advanced),
-              requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
-              taskdata: []
-          };
+            ],
+          }, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
 
-          return immoManifest;
+        return pointManifest;
+      case JobCaptchaShapeType.BOUNDING_BOX:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
 
-        default:
-            this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
-            throw new ConflictException(ErrorJob.HCaptchaInvalidJobType);
+        const boundingBoxManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: jobType,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: 4,
+            max_points: 4,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          restricted_audience: {
+            sitekey: [
+              {
+                [this.configService.get<number>(
+                  ConfigNames.HCAPTCHA_SITE_KEY,
+                )!]: {
+                  score: 1,
+                },
+              },
+            ],
+          }, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
+
+        return boundingBoxManifest;
+      case JobCaptchaShapeType.IMMO:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const immoManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
+          request_config: {
+            multiple_choice_max_choices: 1,
+            multiple_choice_min_choices: 1,
+            overlap_threshold: null,
+            answer_type: 'str',
+            max_length: 100,
+            min_length: 1,
+          },
+          restricted_audience: {}, // this.buildHCaptchaRestrictedAudience(jobDto.advanced),
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          taskdata: [],
+        };
+
+        return immoManifest;
+
+      default:
+        this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
+        throw new ConflictException(ErrorJob.HCaptchaInvalidJobType);
     }
   }
 
@@ -332,15 +372,17 @@ export class JobService {
     const restrictedAudience: RestrictedAudience = {};
 
     if (advanced.workerLanguage) {
-        restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
+      restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
     }
 
     if (advanced.workerLocation) {
-        restrictedAudience.country = [{ [advanced.workerLocation]: { score: 1 } }];
+      restrictedAudience.country = [
+        { [advanced.workerLocation]: { score: 1 } },
+      ];
     }
 
     if (advanced.targetBrowser) {
-        restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
+      restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
     }
 
     return restrictedAudience;
@@ -353,30 +395,32 @@ export class JobService {
     let elementCount = 0;
 
     for (const key of Object.keys(groundTruthsData)) {
-        if (elementCount >= maxElements) {
-            break;
-        }
+      if (elementCount >= maxElements) {
+        break;
+      }
 
-        const value = groundTruthsData[key][0][0];
-        outputObject[value] = { en: value, answer_example_uri: key };
-        elementCount++;
+      const value = groundTruthsData[key][0][0];
+      outputObject[value] = { en: value, answer_example_uri: key };
+      elementCount++;
     }
 
     // Default case
-    outputObject['0'] = { en: HCAPTCHA_NOT_PRESENTED_LABEL }
+    outputObject['0'] = { en: HCAPTCHA_NOT_PRESENTED_LABEL };
 
     return outputObject;
   }
 
-  private async generateAndUploadTaskData(dataUrl: string, objectNames: string[]) {
-    const data = objectNames.map(objectName => {
-        return {
-            datapoint_uri: `${dataUrl}/${objectName}`,
-            datapoint_hash: 'undefined-hash',
-            task_key: uuidv4(),
-        };
+  private async generateAndUploadTaskData(
+    dataUrl: string,
+    objectNames: string[],
+  ) {
+    const data = objectNames.map((objectName) => {
+      return {
+        datapoint_uri: `${dataUrl}/${objectName}`,
+        datapoint_hash: 'undefined-hash',
+        task_key: uuidv4(),
+      };
     });
-
 
     const hash = hashString(stringify(data));
     const { url } = await this.storageService.uploadFile(data, hash);
@@ -389,7 +433,7 @@ export class JobService {
     dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
     const { chainId } = dto;
-  
+
     if (chainId) {
       this.web3Service.validateChainId(chainId);
     }
@@ -397,26 +441,34 @@ export class JobService {
     let manifestOrigin, manifestEncrypted, fundAmount;
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
-    if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
+    if (requestType === JobRequestType.HCAPTCHA) {
+      // hCaptcha
       dto = dto as JobCaptchaDto;
-      const objectsInBucket = await this.storageService.listObjectsInBucket(dto.dataUrl);
-      fundAmount = div(dto.annotations.taskBidPrice * objectsInBucket.length, rate);
-      
-    } else if (requestType === JobRequestType.FORTUNE) { // Fortune
+      const objectsInBucket = await this.storageService.listObjectsInBucket(
+        dto.dataUrl,
+      );
+      fundAmount = div(
+        dto.annotations.taskBidPrice * objectsInBucket.length,
+        rate,
+      );
+    } else if (requestType === JobRequestType.FORTUNE) {
+      // Fortune
       dto = dto as JobFortuneDto;
       fundAmount = dto.fundAmount;
-
-    } else { // CVAT
+    } else {
+      // CVAT
       dto = dto as JobCvatDto;
       fundAmount = dto.fundAmount;
     }
 
     const userBalance = await this.paymentService.getUserBalance(userId);
-    const feePercentage = this.configService.get<number>(ConfigNames.JOB_LAUNCHER_FEE)!;
-  
+    const feePercentage = this.configService.get<number>(
+      ConfigNames.JOB_LAUNCHER_FEE,
+    )!;
+
     const fee = mul(div(feePercentage, 100), fundAmount);
     const usdTotalAmount = add(fundAmount, fee);
-  
+
     if (lt(userBalance, usdTotalAmount)) {
       this.logger.log(ErrorJob.NotEnoughFunds, JobService.name);
       throw new BadRequestException(ErrorJob.NotEnoughFunds);
@@ -425,35 +477,43 @@ export class JobService {
     const tokenFundAmount = mul(fundAmount, rate);
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
-  
-    if (requestType === JobRequestType.HCAPTCHA) { // hCaptcha
-      dto = dto as JobCaptchaDto
-      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
+
+    if (requestType === JobRequestType.HCAPTCHA) {
+      // hCaptcha
+      dto = dto as JobCaptchaDto;
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '');
       manifestOrigin = await this.createHCaptchaManifest(
         dto.annotations.typeOfJob,
-        dto
+        dto,
       );
 
       manifestEncrypted = await EncryptionUtils.encrypt(
-        stringify(manifestOrigin), 
+        stringify(manifestOrigin),
         [
           this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!
-        ]
+          this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!,
+        ],
       );
-
-    } else if (requestType === JobRequestType.FORTUNE) { // Fortune
+    } else if (requestType === JobRequestType.FORTUNE) {
+      // Fortune
       dto = dto as JobFortuneDto;
       manifestOrigin = { ...dto, requestType, fundAmount: tokenTotalAmount };
-
-    } else { // CVAT
+    } else {
+      // CVAT
       dto = dto as JobCvatDto;
-      dto.dataUrl = dto.dataUrl.replace(/\/$/, '')
-      manifestOrigin = await this.createCvatManifest(dto, requestType, tokenFundAmount);
+      dto.dataUrl = dto.dataUrl.replace(/\/$/, '');
+      manifestOrigin = await this.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
     }
 
     const hash = hashString(stringify(manifestOrigin));
-    const { url } = await this.storageService.uploadFile(manifestEncrypted || manifestOrigin, hash)
+    const { url } = await this.storageService.uploadFile(
+      manifestEncrypted || manifestOrigin,
+      hash,
+    );
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
@@ -465,7 +525,7 @@ export class JobService {
       status: JobStatus.PENDING,
       waitUntil: new Date(),
     });
-  
+
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotCreated, JobService.name);
       throw new NotFoundException(ErrorJob.NotCreated);
@@ -494,10 +554,10 @@ export class JobService {
         throw new ConflictException(ErrorPayment.NotSuccess);
       }
     }
-  
+
     jobEntity.status = JobStatus.PAID;
     await jobEntity.save();
-  
+
     return jobEntity.id;
   }
 
@@ -505,9 +565,10 @@ export class JobService {
     endpointUrl: string,
     fundAmount: number,
   ): Promise<string> {
-    const totalImages = (await this.storageService.listObjectsInBucket(endpointUrl))
-      .length;
-    
+    const totalImages = (
+      await this.storageService.listObjectsInBucket(endpointUrl)
+    ).length;
+
     const totalJobs = Math.ceil(
       div(
         totalImages,
@@ -527,10 +588,12 @@ export class JobService {
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
-      const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
-      manifest = await encription.decrypt(manifest as any)
-    } 
-    
+      const encription = await Encryption.build(
+        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
+      );
+      manifest = await encription.decrypt(manifest as any);
+    }
+
     if (isValidJSON(manifest)) {
       manifest = JSON.parse(manifest);
     }
@@ -540,10 +603,14 @@ export class JobService {
     let recordingOracleConfigKey;
     let exchangeOracleConfigKey;
 
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
       recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
       recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
       exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
     } else {
@@ -552,12 +619,22 @@ export class JobService {
     }
 
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(recordingOracleConfigKey)!,
-      reputationOracle: this.configService.get<string>(ConfigNames.REPUTATION_ORACLE_ADDRESS)!,
+      recordingOracle: this.configService.get<string>(
+        recordingOracleConfigKey,
+      )!,
+      reputationOracle: this.configService.get<string>(
+        ConfigNames.REPUTATION_ORACLE_ADDRESS,
+      )!,
       exchangeOracle: this.configService.get<string>(exchangeOracleConfigKey)!,
-      recordingOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!),
-      reputationOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!),
-      exchangeOracleFee: BigNumber.from(this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!),
+      recordingOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
+      ),
+      reputationOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      ),
+      exchangeOracleFee: BigNumber.from(
+        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
+      ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
     };
@@ -566,27 +643,27 @@ export class JobService {
     await jobEntity.save();
 
     const escrowAddress = await escrowClient.createAndSetupEscrow(
-        NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-        [
-          "0x40042D27Df0745e5e0cb619C0CfD7D51D59535DC",
-          "0x117AD648f29AFEc3aE313826DA3356dB1040ae4F",
-          "0xaE1FE9f8927AEEE885bbD4aFEFB02741B317902E",
-          "0x8b48d9908A80508A7Aa5900008Ab176987f418E2",
-          "0x3f12aF5134f44f2247aCca6c43b3ee6775abd914",
-          "0x26E7Ef2D05793c6D47c678f1F4B246856236F089",
-          "0xb56c770c2FA5222947a9e3C5Beb8dc46Dd656b5F",
-          "0x10c01D6B0396D9F3B2F06Fc5D3F60bc6Dc9cB1F6",
-          "0x93920Dbc3dcb192F1713d344Fb4Db6BD714A9ab9",
-          "0x727cB81C955e1De954473B5939Eda0dfDFe07281",
-          "0x6a13E0280740CC5bd35eeee33B470b5bBb93dF37"
-        ],
-        jobEntity.userId.toString(),
-        escrowConfig,
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      [
+        '0x40042D27Df0745e5e0cb619C0CfD7D51D59535DC',
+        '0x117AD648f29AFEc3aE313826DA3356dB1040ae4F',
+        '0xaE1FE9f8927AEEE885bbD4aFEFB02741B317902E',
+        '0x8b48d9908A80508A7Aa5900008Ab176987f418E2',
+        '0x3f12aF5134f44f2247aCca6c43b3ee6775abd914',
+        '0x26E7Ef2D05793c6D47c678f1F4B246856236F089',
+        '0xb56c770c2FA5222947a9e3C5Beb8dc46Dd656b5F',
+        '0x10c01D6B0396D9F3B2F06Fc5D3F60bc6Dc9cB1F6',
+        '0x93920Dbc3dcb192F1713d344Fb4Db6BD714A9ab9',
+        '0x727cB81C955e1De954473B5939Eda0dfDFe07281',
+        '0x6a13E0280740CC5bd35eeee33B470b5bBb93dF37',
+      ],
+      jobEntity.userId.toString(),
+      escrowConfig,
     );
 
     if (!escrowAddress) {
-        this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-        throw new NotFoundException(ErrorEscrow.NotCreated);
+      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
+      throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
     jobEntity.escrowAddress = escrowAddress;
@@ -652,10 +729,14 @@ export class JobService {
   ): Promise<boolean> {
     let dtoCheck;
 
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
-      dtoCheck = new FortuneManifestDto()
-    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
-      dtoCheck = new HCaptchaManifestDto()
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
+      dtoCheck = new FortuneManifestDto();
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
+      dtoCheck = new HCaptchaManifestDto();
     } else {
       dtoCheck = new CvatManifestDto();
     }
@@ -902,7 +983,9 @@ export class JobService {
 
       if (!jobEntity) return;
 
-      const manifest = await this.storageService.download(jobEntity.manifestUrl);
+      const manifest = await this.storageService.download(
+        jobEntity.manifestUrl,
+      );
 
       if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);
@@ -986,8 +1069,10 @@ export class JobService {
         true,
       );
     } else if (
-      (manifest as CvatManifestDto)?.annotation?.type === JobRequestType.IMAGE_BOXES ||
-      (manifest as CvatManifestDto)?.annotation?.type === JobRequestType.IMAGE_POINTS
+      (manifest as CvatManifestDto)?.annotation?.type ===
+        JobRequestType.IMAGE_BOXES ||
+      (manifest as CvatManifestDto)?.annotation?.type ===
+        JobRequestType.IMAGE_POINTS
     ) {
       await this.sendWebhook(
         this.configService.get<string>(
@@ -1097,20 +1182,27 @@ export class JobService {
 
     let manifest;
     if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
-      const encription = await Encryption.build(this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!);
-      manifestData = await encription.decrypt(manifestData as any)
-    } 
-    
+      const encription = await Encryption.build(
+        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
+      );
+      manifestData = await encription.decrypt(manifestData as any);
+    }
+
     if (isValidJSON(manifestData)) {
       manifestData = JSON.parse(manifestData);
     }
 
-    if ((manifestData as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
-      manifest = (manifestData as FortuneManifestDto)
-    } else if ((manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH) {
-      manifest = (manifestData as HCaptchaManifestDto)
+    if (
+      (manifestData as FortuneManifestDto).requestType ===
+      JobRequestType.FORTUNE
+    ) {
+      manifest = manifestData as FortuneManifestDto;
+    } else if (
+      (manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH
+    ) {
+      manifest = manifestData as HCaptchaManifestDto;
     } else {
-      manifest = (manifestData as CvatManifestDto)
+      manifest = manifestData as CvatManifestDto;
     }
 
     const baseManifestDetails = {
@@ -1118,33 +1210,38 @@ export class JobService {
       tokenAddress: escrow ? escrow.token : ethers.constants.AddressZero,
       requesterAddress: signer.address,
       fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
-      exchangeOracleAddress: escrow?.exchangeOracle || ethers.constants.AddressZero,
-      recordingOracleAddress: escrow?.recordingOracle || ethers.constants.AddressZero,
-      reputationOracleAddress: escrow?.reputationOracle || ethers.constants.AddressZero,
+      exchangeOracleAddress:
+        escrow?.exchangeOracle || ethers.constants.AddressZero,
+      recordingOracleAddress:
+        escrow?.recordingOracle || ethers.constants.AddressZero,
+      reputationOracleAddress:
+        escrow?.reputationOracle || ethers.constants.AddressZero,
     };
 
     let specificManifestDetails;
-    if ((manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE) {
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
       manifest = manifest as FortuneManifestDto;
       specificManifestDetails = {
         title: manifest.requesterTitle,
         description: manifest.requesterDescription,
         requestType: JobRequestType.FORTUNE,
-        submissionsRequired: manifest
-          .submissionsRequired,
+        submissionsRequired: manifest.submissionsRequired,
       };
-    } else if ((manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH) {
-      manifest = (manifest as HCaptchaManifestDto);
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
+      manifest = manifest as HCaptchaManifestDto;
       specificManifestDetails = {
         requestType: JobRequestType.HCAPTCHA,
-        submissionsRequired: manifest.job_total_tasks
+        submissionsRequired: manifest.job_total_tasks,
       };
     } else {
-      manifest = (manifest as CvatManifestDto);
+      manifest = manifest as CvatManifestDto;
       specificManifestDetails = {
         requestType: manifest.annotation.type,
-        submissionsRequired: manifest.annotation
-          .job_size,
+        submissionsRequired: manifest.annotation.job_size,
       };
     }
 

@@ -35,13 +35,15 @@ export async function getRate(from: string, to: string): Promise<number> {
   return reversed ? 1 / rate : rate;
 }
 
-export const parseUrl = (url: string): {
-  endPoint: string,
-  bucket: string,
-  region: string,
-  useSSL: boolean,
-  filename?: string,
-  port?: number,
+export const parseUrl = (
+  url: string,
+): {
+  endPoint: string;
+  bucket: string;
+  region: string;
+  useSSL: boolean;
+  filename?: string;
+  port?: number;
 } => {
   const patterns = [
     {
@@ -55,13 +57,12 @@ export const parseUrl = (url: string): {
     {
       regex: /^https:\/\/s3\.([a-z0-9-]+)\.amazonaws\.com\/([^/]+)\/?$/,
       endPoint: 's3.amazonaws.com',
-      
     },
     {
       regex: /^https:\/\/([^\.]+)\.s3\.([a-z0-9-]+)\.amazonaws\.com\/?$/,
       endPoint: 's3.amazonaws.com',
     },
-    { 
+    {
       regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
       endPoint: '$1',
       port: '$2',
@@ -73,8 +74,9 @@ export const parseUrl = (url: string): {
 
     if (match) {
       const [, param1, param2, path] = match;
-      const parts = path ? path.split('/').filter(part => part) : [];
-      const bucket = parts[0] || (patterns[2].regex === regex ? param2 : param1);
+      const parts = path ? path.split('/').filter((part) => part) : [];
+      const bucket =
+        parts[0] || (patterns[2].regex === regex ? param2 : param1);
       const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
 
       let region = '';
@@ -83,7 +85,7 @@ export const parseUrl = (url: string): {
       } else if (regex === patterns[3].regex) {
         region = param2;
       }
-      
+
       return {
         useSSL: url.startsWith('https:'),
         endPoint: endPoint.replace('$1', param1),
@@ -130,6 +132,7 @@ export function isValidJSON(str: string): boolean {
 }
 
 export function isPGPMessage(str: string): boolean {
-  const pattern = /-----BEGIN PGP MESSAGE-----\n\n[\s\S]+?\n-----END PGP MESSAGE-----/;
+  const pattern =
+    /-----BEGIN PGP MESSAGE-----\n\n[\s\S]+?\n-----END PGP MESSAGE-----/;
   return pattern.test(str);
 }

@@ -19,7 +19,7 @@ import { StorageModule } from '../storage/storage.module';
     HttpModule,
     PaymentModule,
     Web3Module,
-    StorageModule
+    StorageModule,
   ],
   controllers: [JobController],
   providers: [Logger, JobService, JobRepository, RoutingProtocolService],
