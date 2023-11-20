@@ -35,7 +35,9 @@ export default function TopUpAccount() {
             onChange={(e, newValue) => setPayMethod(newValue)}
           >
             <StyledTab value={PayMethod.Crypto} label="Crypto" />
-            <StyledTab value={PayMethod.Fiat} label="Fiat" />
+            {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
+              <StyledTab value={PayMethod.Fiat} label="Fiat" />
+            )}
           </StyledTabs>
           <Box
             display="flex"

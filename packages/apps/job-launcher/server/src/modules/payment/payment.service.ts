@@ -198,24 +198,24 @@ export class PaymentService {
     }
 
     const signer = this.web3Service.getSigner(dto.chainId);
-
-    const recipientAddress = transaction.logs[0].topics.some(
-      (topic) =>
-        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
-    );
-    if (!recipientAddress) {
-      this.logger.error(ErrorPayment.InvalidRecipient);
-      throw new ConflictException(ErrorPayment.InvalidRecipient);
-    }
-
-    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
       signer,
     );
+    tokenContract.interface.parseLog(transaction.logs[0]);
+    if (
+      ethers.utils.hexValue(
+        tokenContract.interface.parseLog(transaction.logs[0]).args['_to'],
+      ) !== ethers.utils.hexValue(signer.address)
+    ) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const tokenId = (await tokenContract.symbol()).toLowerCase();
+    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
 
     if (
       network?.tokens[tokenId] != tokenAddress ||

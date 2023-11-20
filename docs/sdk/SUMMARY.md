@@ -2,7 +2,7 @@
 
 ## Typescript SDK​
 
-* [Encryption](README.md)
+* [Encryption](typescript/modules/encryption.md)
   * [Encryption](typescript/classes/encryption.Encryption.md)
   * [EncryptionUtils](typescript/classes/encryption.EncryptionUtils.md)
 * [Escrow](typescript/modules/escrow.md)
@@ -16,3 +16,7 @@
   * [StorageClient](typescript/classes/storage.StorageClient.md)
 * [Statistics](typescript/modules/statistics.md)
   * [StakingClient](typescript/classes/statistics.StatisticsClient.md)
+
+## Python SDK
+
+* [human_protocol_sdk](python/index.md)

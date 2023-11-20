@@ -93,6 +93,7 @@ import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import stringify from 'json-stable-stringify'
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class JobService {
@@ -561,6 +562,9 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
+    jobEntity.status = JobStatus.LAUNCHING;
+    await jobEntity.save();
+
     const escrowAddress = await escrowClient.createAndSetupEscrow(
         NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
         [
@@ -878,7 +882,9 @@ export class JobService {
     return finalResultUrl;
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async launchCronJob() {
+    this.logger.log('Launch jobs START');
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
       let jobEntity = await this.jobRepository.findOne(
@@ -901,7 +907,7 @@ export class JobService {
       if (!jobEntity.escrowAddress) {
         jobEntity = await this.launchJob(jobEntity);
       }
-      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
+      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHING) {
         jobEntity = await this.fundJob(jobEntity);
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
@@ -924,9 +930,12 @@ export class JobService {
       this.logger.error(e);
       return;
     }
+    this.logger.log('Launch jobs STOP');
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
+    this.logger.log('Cancel jobs START');
     const jobEntity = await this.jobRepository.findOne(
       {
         status: JobStatus.TO_CANCEL,
@@ -993,6 +1002,7 @@ export class JobService {
       );
     }
 
+    this.logger.log('Cancel jobs STOP');
     return true;
   }
 
