@@ -43,6 +43,10 @@ Enum for chain IDs.
 
 #### BSC_TESTNET *= 97*
 
+#### CELO *= 42220*
+
+#### CELO_ALFAJORES *= 44787*
+
 #### GOERLI *= 5*
 
 #### LOCALHOST *= 1338*
@@ -662,6 +666,18 @@ Gets the value of a key-value pair in the contract.
 * **Returns:**
   The value of the key-value pair if it exists
 
+#### get_url(address, key='url')
+
+Gets the URL value of the given entity.
+
+* **Parameters:**
+  * **address** (`str`) – Address from which to get the URL value.
+  * **key** (`Optional`[`str`]) – Configurable URL key. url by default.
+* **Return url:**
+  The URL value of the given address if exists, and the content is valid
+* **Return type:**
+  `str`
+
 #### set(key, value)
 
 Sets the value of a key-value pair in the contract.
@@ -685,6 +701,21 @@ Sets multiple key-value pairs in the contract.
   `None`
 * **Returns:**
   None
+
+#### set_url(url, key='url')
+
+Sets a URL value for the address that submits the transaction.
+
+* **Parameters:**
+  **url** (`str`) – URL to set
+* **Key:**
+  Configurable URL key. url by default.
+* **Return type:**
+  `None`
+* **Returns:**
+  None
+* **Raises:**
+  [**KVStoreClientError**](#human_protocol_sdk.kvstore.KVStoreClientError) – If an error occurs while validating URL, or handling transaction
 
 ### *exception* human_protocol_sdk.kvstore.KVStoreClientError
 
