@@ -112,12 +112,14 @@ class KVStoreClient:
 
     def set_url(self, url: str, key: Optional[str] = "url") -> None:
         """
-        Sets the URL value.
+        Sets a URL value for the address that submits the transaction.
 
         :param url: URL to set
-        :key: The key of the URL. `url` by default.
+        :key: Configurable URL key. `url` by default.
 
         :return: None
+
+        :raise KVStoreClientError: If an error occurs while validating URL, or handling transaction
         """
         if not validate_url(url):
             raise KVStoreClientError(f"Invalid URL: {url}")
@@ -152,12 +154,12 @@ class KVStoreClient:
         return result
 
     def get_url(self, address: str, key: Optional[str] = "url") -> str:
-        """Gets the URL value of the given address.
+        """Gets the URL value of the given entity.
 
-        :param address: The Ethereum address associated with the URL
-        :param key: The key of the URL. `url` by default
+        :param address: Address from which to get the URL value.
+        :param key: Configurable URL key. `url` by default.
 
-        :return url: The URL value of the given address if exists, and content is valid
+        :return url: The URL value of the given address if exists, and the content is valid
         """
 
         if not Web3.is_address(address):

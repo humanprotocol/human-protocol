@@ -668,13 +668,13 @@ Gets the value of a key-value pair in the contract.
 
 #### get_url(address, key='url')
 
-Gets the URL value of the given address.
+Gets the URL value of the given entity.
 
 * **Parameters:**
-  * **address** (`str`) – The Ethereum address associated with the URL
-  * **key** (`Optional`[`str`]) – The key of the URL. url by default
+  * **address** (`str`) – Address from which to get the URL value.
+  * **key** (`Optional`[`str`]) – Configurable URL key. url by default.
 * **Return url:**
-  The URL value of the given address if exists, and content is valid
+  The URL value of the given address if exists, and the content is valid
 * **Return type:**
   `str`
 
@@ -704,16 +704,18 @@ Sets multiple key-value pairs in the contract.
 
 #### set_url(url, key='url')
 
-Sets the URL value.
+Sets a URL value for the address that submits the transaction.
 
 * **Parameters:**
   **url** (`str`) – URL to set
 * **Key:**
-  The key of the URL. url by default.
+  Configurable URL key. url by default.
 * **Return type:**
   `None`
 * **Returns:**
   None
+* **Raises:**
+  [**KVStoreClientError**](#human_protocol_sdk.kvstore.KVStoreClientError) – If an error occurs while validating URL, or handling transaction
 
 ### *exception* human_protocol_sdk.kvstore.KVStoreClientError
 

@@ -310,7 +310,7 @@ export class KVStoreClient {
    *
    * @param {string} address Address from which to get the URL value.
    * @param {string} urlKey  Configurable URL key. `url` by default.
-   * @returns {string} URL value for the given address.
+   * @returns {string} URL value for the given address if exists, and the content is valid
    *
    *
    * **Code example**
