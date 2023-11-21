@@ -48,3 +48,6 @@ export const HCAPTCHA_MAX_SHAPES_PER_IMAGE = 1;
 export const HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE = 5;
 
 export const HCAPTCHA_NOT_PRESENTED_LABEL = 'Not presented';
+
+export const HCAPTCHA_REPO_URI = "http://reporacle.yellow.svc.cluster.local:5000";
+export const HCAPTCHA_RO_URI = "http://recoracle:5000/rocheck";
