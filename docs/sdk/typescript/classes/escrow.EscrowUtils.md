@@ -134,7 +134,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x12345678
 
 #### Defined in
 
-[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/cae7ebc7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
+[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/c23d0f6c/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
 
 ___
 
@@ -247,4 +247,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1503](https://github.com/humanprotocol/human-protocol/blob/cae7ebc7/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1503)
+[escrow.ts:1503](https://github.com/humanprotocol/human-protocol/blob/c23d0f6c/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1503)

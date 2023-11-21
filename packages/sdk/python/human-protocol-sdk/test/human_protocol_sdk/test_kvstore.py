@@ -162,7 +162,7 @@ class KVStoreTestCase(unittest.TestCase):
 
     def test_set_url(self):
         mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.set = mock_function
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
 
         url = "https://example.com"
         content = "example"
@@ -179,12 +179,13 @@ class KVStoreTestCase(unittest.TestCase):
 
             self.kvstore.set_url(url)
 
-            mock_function.assert_any_call("url", url)
-            mock_function.assert_any_call("urlHash", content_hash)
+            mock_function.assert_called_once_with(
+                ["url", "urlHash"], [url, content_hash]
+            )
 
-            mock_handle_transaction.assert_any_call(
+            mock_handle_transaction.assert_called_once_with(
                 self.w3,
-                "Set",
+                "Set Bulk",
                 mock_function.return_value,
                 KVStoreClientError,
                 None,
@@ -192,7 +193,7 @@ class KVStoreTestCase(unittest.TestCase):
 
     def test_set_url_with_key(self):
         mock_function = MagicMock()
-        self.kvstore.kvstore_contract.functions.set = mock_function
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
 
         url = "https://example.com"
         content = "example"
@@ -206,12 +207,13 @@ class KVStoreTestCase(unittest.TestCase):
 
             self.kvstore.set_url(url, "linkedinUrl")
 
-            mock_function.assert_any_call("linkedinUrl", url)
-            mock_function.assert_any_call("linkedinUrlHash", content_hash)
+            mock_function.assert_called_once_with(
+                ["linkedinUrl", "linkedinUrlHash"], [url, content_hash]
+            )
 
-            mock_handle_transaction.assert_any_call(
+            mock_handle_transaction.assert_called_once_with(
                 self.w3,
-                "Set",
+                "Set Bulk",
                 mock_function.return_value,
                 KVStoreClientError,
                 None,

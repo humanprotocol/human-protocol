@@ -136,13 +136,12 @@ describe('KVStoreClient', () => {
 
       expect(await kvStoreClient.setURL('https://example.com')).toBeUndefined();
 
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'url',
-        'https://example.com'
-      );
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'urlHash',
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example'))
+      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+        ['url', 'urlHash'],
+        [
+          'https://example.com',
+          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+        ]
       );
     });
 
@@ -153,13 +152,12 @@ describe('KVStoreClient', () => {
         await kvStoreClient.setURL('https://example.com', 'linkedinUrl')
       ).toBeUndefined();
 
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'linkedinUrl',
-        'https://example.com'
-      );
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'linkedinUrlHash',
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example'))
+      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+        ['linkedinUrl', 'linkedinUrlHash'],
+        [
+          'https://example.com',
+          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+        ]
       );
     });
 
@@ -178,17 +176,20 @@ describe('KVStoreClient', () => {
     });
 
     test('should throw an error when a network error occurs', async () => {
-      mockKVStoreContract.set.mockRejectedValue(
+      mockKVStoreContract.setBulk.mockRejectedValue(
         new Error('could not detect network')
       );
 
       await expect(kvStoreClient.setURL('https://example.com')).rejects.toThrow(
-        Error('Failed to set URL: could not detect network')
+        Error('Failed to set URL and hash: could not detect network')
       );
 
-      expect(mockKVStoreContract.set).toHaveBeenCalledWith(
-        'url',
-        'https://example.com'
+      expect(mockKVStoreContract.setBulk).toHaveBeenCalledWith(
+        ['url', 'urlHash'],
+        [
+          'https://example.com',
+          ethers.utils.keccak256(ethers.utils.toUtf8Bytes('example')),
+        ]
       );
     });
   });

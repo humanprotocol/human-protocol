@@ -127,16 +127,10 @@ class KVStoreClient:
 
         handle_transaction(
             self.w3,
-            "Set",
-            self.kvstore_contract.functions.set(key, url),
-            KVStoreClientError,
-            self.gas_limit,
-        )
-
-        handle_transaction(
-            self.w3,
-            "Set",
-            self.kvstore_contract.functions.set(key + "Hash", content_hash),
+            "Set Bulk",
+            self.kvstore_contract.functions.setBulk(
+                [key, key + "Hash"], [url, content_hash]
+            ),
             KVStoreClientError,
             self.gas_limit,
         )

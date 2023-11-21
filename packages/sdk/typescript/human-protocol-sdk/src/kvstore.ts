@@ -261,15 +261,10 @@ export class KVStoreClient {
     const hashKey = key + 'Hash';
 
     try {
-      await this.contract.set(key, url);
+      await this.contract.setBulk([key, hashKey], [url, contentHash]);
     } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to set URL: ${e.message}`);
-    }
-
-    try {
-      await this.contract.set(hashKey, contentHash);
-    } catch (e) {
-      if (e instanceof Error) throw Error(`Failed to set Hash: ${e.message}`);
+      if (e instanceof Error)
+        throw Error(`Failed to set URL and hash: ${e.message}`);
     }
   }
 
