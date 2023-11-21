@@ -160,6 +160,84 @@ class KVStoreTestCase(unittest.TestCase):
             kvstore.set_bulk(keys, values)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
+    def test_set_url(self):
+        mock_function = MagicMock()
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+
+        url = "https://example.com"
+        content = "example"
+        content_hash = self.w3.keccak(text=content).hex()
+
+        with (
+            patch(
+                "human_protocol_sdk.kvstore.handle_transaction"
+            ) as mock_handle_transaction,
+            patch("requests.get") as mock_get,
+        ):
+            mock_response = mock_get.return_value
+            mock_response.text = content
+
+            self.kvstore.set_url(url)
+
+            mock_function.assert_called_once_with(
+                ["url", "urlHash"], [url, content_hash]
+            )
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Set Bulk",
+                mock_function.return_value,
+                KVStoreClientError,
+                None,
+            )
+
+    def test_set_url_with_key(self):
+        mock_function = MagicMock()
+        self.kvstore.kvstore_contract.functions.setBulk = mock_function
+
+        url = "https://example.com"
+        content = "example"
+        content_hash = self.w3.keccak(text=content).hex()
+
+        with patch(
+            "human_protocol_sdk.kvstore.handle_transaction"
+        ) as mock_handle_transaction, patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = content
+
+            self.kvstore.set_url(url, "linkedinUrl")
+
+            mock_function.assert_called_once_with(
+                ["linkedinUrl", "linkedinUrlHash"], [url, content_hash]
+            )
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Set Bulk",
+                mock_function.return_value,
+                KVStoreClientError,
+                None,
+            )
+
+    def test_set_invalid_url(self):
+        invalid_url = "example.com"
+        with self.assertRaises(KVStoreClientError) as cm:
+            self.kvstore.set_url(invalid_url)
+        self.assertEqual("Invalid URL: example.com", str(cm.exception))
+
+    def test_set_url_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        kvstore = KVStoreClient(w3)
+
+        url = "https://example.com"
+        with self.assertRaises(KVStoreClientError) as cm:
+            kvstore.set_url(url)
+        self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
+
     def test_get(self):
         mock_function = MagicMock()
         mock_function.return_value.call.return_value = "mock_value"
@@ -220,6 +298,127 @@ class KVStoreTestCase(unittest.TestCase):
         mock_function.assert_called_once_with(address, key)
         mock_function.return_value.call.assert_called_once_with()
         self.assertEqual(result, "mock_value")
+
+    def test_get_url(self):
+        mock_function = MagicMock(
+            side_effect=[
+                MagicMock(call=MagicMock(return_value="https://example.com")),
+                MagicMock(
+                    call=MagicMock(return_value=self.w3.keccak(text="example").hex())
+                ),
+            ]
+        )
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "example"
+
+            result = self.kvstore.get_url(address)
+
+            mock_function.assert_any_call(address, "url")
+            mock_function.assert_any_call(address, "urlHash")
+
+            self.assertEqual(result, "https://example.com")
+
+    def test_get_url_with_key(self):
+        mock_function = MagicMock(
+            side_effect=[
+                MagicMock(call=MagicMock(return_value="https://example.com")),
+                MagicMock(
+                    call=MagicMock(return_value=self.w3.keccak(text="example").hex())
+                ),
+            ]
+        )
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "example"
+
+            result = self.kvstore.get_url(address, "linkedinUrl")
+
+            mock_function.assert_any_call(address, "linkedinUrl")
+            mock_function.assert_any_call(address, "linkedinUrlHash")
+
+            self.assertEqual(result, "https://example.com")
+
+    def test_get_invalid_address(self):
+        address = "invalid_address"
+        with self.assertRaises(KVStoreClientError) as cm:
+            self.kvstore.get_url(address)
+        self.assertEqual("Invalid address: invalid_address", str(cm.exception))
+
+    def test_get_empty_value(self):
+        mock_function = MagicMock()
+        mock_function.return_value.call.return_value = ""
+        self.kvstore.kvstore_contract.functions.get = mock_function
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+
+        result = self.kvstore.get_url(address)
+
+        mock_function.assert_any_call(address, "url")
+        mock_function.return_value.call.assert_any_call()
+        self.assertEqual(result, "")
+
+    def test_get_without_account(self):
+        mock_provider = MagicMock(spec=HTTPProvider)
+        w3 = Web3(mock_provider)
+        mock_chain_id = ChainId.LOCALHOST.value
+        type(w3.eth).chain_id = PropertyMock(return_value=mock_chain_id)
+
+        kvstore = KVStoreClient(w3)
+
+        mock_function = MagicMock(
+            side_effect=[
+                MagicMock(call=MagicMock(return_value="https://example.com")),
+                MagicMock(
+                    call=MagicMock(return_value=self.w3.keccak(text="example").hex())
+                ),
+            ]
+        )
+        kvstore.kvstore_contract.functions.get = mock_function
+
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "example"
+
+            result = kvstore.get_url(address)
+
+            mock_function.assert_any_call(address, "url")
+            mock_function.assert_any_call(address, "urlHash")
+
+            self.assertEqual(result, "https://example.com")
+
+    def test_get_invalid_hash(self):
+        mock_function = MagicMock(
+            side_effect=[
+                MagicMock(call=MagicMock(return_value="https://example.com")),
+                MagicMock(
+                    call=MagicMock(
+                        return_value=self.w3.keccak(text="invalid-hash").hex()
+                    )
+                ),
+            ]
+        )
+        self.kvstore.kvstore_contract.functions.get = mock_function
+
+        address = Web3.to_checksum_address("0x1234567890123456789012345678901234567890")
+
+        with patch("requests.get") as mock_get:
+            mock_response = mock_get.return_value
+            mock_response.text = "example"
+
+            with self.assertRaises(KVStoreClientError) as cm:
+                self.kvstore.get_url(address)
+            self.assertEqual("Invalid hash", str(cm.exception))
+
+            mock_function.assert_any_call(address, "url")
+            mock_function.assert_any_call(address, "urlHash")
 
 
 if __name__ == "__main__":

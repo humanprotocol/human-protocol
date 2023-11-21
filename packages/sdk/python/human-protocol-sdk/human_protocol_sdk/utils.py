@@ -21,22 +21,16 @@ def with_retry(fn, retries=3, delay=5, backoff=2):
     Mainly used with handle_transaction to retry on case of failure.
     Uses expnential backoff.
 
-     Args:
-        fn: <Partial> to run with retry logic.
-        retries: number of times to retry the transaction
-        delay: time to wait (exponentially)
-        backoff: defines the rate of grow for the exponential wait.
+    :param fn: <Partial> to run with retry logic.
+    :param retries: number of times to retry the transaction
+    :param delay: time to wait (exponentially)
+    :param backoff: defines the rate of grow for the exponential wait.
 
-    Returns:
-        False if transaction never succeeded, the return of the function
-        otherwise
+    :return: False if transaction never succeeded,
+        otherwise the return of the function
 
-    Raises:
-        No error
-
-    NOTE:
-        If the partial returns a Boolean and it happens to be False,
-    we would not know if the tx succeeded and it will retry.
+    :note: If the partial returns a Boolean and it happens to be False,
+        we would not know if the tx succeeded and it will retry.
     """
 
     wait_time = delay
@@ -61,14 +55,13 @@ def with_retry(fn, retries=3, delay=5, backoff=2):
 def get_hmt_balance(wallet_addr, token_addr, w3):
     """Get hmt balance
 
-    Args:
-        wallet_addr: wallet address
-        token_addr: ERC-20 contract
-        w3: Web3 instance
+    :param wallet_addr: wallet address
+    :param token_addr: ERC-20 contract
+    :param w3: Web3 instance
 
-    Return:
-        Decimal with HMT balance
+    :return: Decimal with HMT balance
     """
+
     abi = [
         {
             "constant": True,
@@ -104,13 +97,11 @@ def parse_transfer_transaction(
 def get_contract_interface(contract_entrypoint):
     """Retrieve the contract interface of a given contract.
 
-    Args:
-        contract_entrypoint: the entrypoint of the JSON.
+    :param contract_entrypoint: the entrypoint of the JSON.
 
-    Returns:
-        returns the contract interface containing the contract abi.
-
+    :return: The contract interface containing the contract abi.
     """
+
     with open(contract_entrypoint) as f:
         contract_interface = json.load(f)
     return contract_interface
@@ -119,9 +110,7 @@ def get_contract_interface(contract_entrypoint):
 def get_erc20_interface():
     """Retrieve the ERC20 interface.
 
-    Returns:
-        Contract interface: returns the ERC20 interface solidity contract.
-
+    :return: The ERC20 interface of smart contract.
     """
 
     return get_contract_interface(
@@ -134,8 +123,7 @@ def get_erc20_interface():
 def get_factory_interface():
     """Retrieve the EscrowFactory interface.
 
-    Returns:
-        Contract interface: returns the EscrowFactory interface solidity contract.
+    :return: The EscrowFactory interface of smart contract.
 
     """
 
@@ -147,8 +135,7 @@ def get_factory_interface():
 def get_staking_interface():
     """Retrieve the Staking interface.
 
-    Returns:
-        Contract interface: returns the Staking interface solidity contract.
+    :return: The Staking interface of smart contract.
 
     """
 
@@ -160,8 +147,7 @@ def get_staking_interface():
 def get_reward_pool_interface():
     """Retrieve the RewardPool interface.
 
-    Returns:
-        Contract interface: returns the RewardPool interface solidity contract.
+    :return: The RewardPool interface of smart contract.
 
     """
 
@@ -173,8 +159,7 @@ def get_reward_pool_interface():
 def get_escrow_interface():
     """Retrieve the RewardPool interface.
 
-    Returns:
-        Contract interface: returns the RewardPool interface solidity contract.
+    :return: The RewardPool interface of smart contract.
 
     """
 
@@ -186,8 +171,7 @@ def get_escrow_interface():
 def get_kvstore_interface():
     """Retrieve the KVStore interface.
 
-    Returns:
-        Contract interface: returns the KVStore interface solidity contract.
+    :return: The KVStore interface of smart contract.
 
     """
 
@@ -217,16 +201,14 @@ def handle_transaction(
 ):
     """Executes the transaction and waits for the receipt.
 
-    Args:
-        w3 (Web3): Web3 instance
-        tx_name (str): Name of the transaction
-        tx (obj): Transaction object
-        exception (Exception): Exception class to raise in case of error
+    :param w3: Web3 instance
+    :param tx_name: Name of the transaction
+    :param tx: Transaction object
+    :param exception: Exception class to raise in case of error
 
-    Returns:
-        obj: The transaction receipt
+    :return: The transaction receipt
 
-    Validations:
+    :validate:
         - There must be a default account
 
     """
@@ -252,12 +234,12 @@ def handle_transaction(
 
 def validate_url(url: str) -> bool:
     """Gets the url string.
-    Args:
-        url (str): Public or private url address
-    Returns:
-        bool: Returns True if url is valid
-    Raises:
-        ValidationFailure: If the url is invalid
+
+    :param url: Public or private url address
+
+    :return: True if url is valid
+
+    :raise ValidationFailure: If the url is invalid
     """
 
     # validators.url tracks docker network URL as ivalid

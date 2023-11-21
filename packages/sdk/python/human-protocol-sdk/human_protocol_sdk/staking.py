@@ -46,12 +46,11 @@ class AllocationData:
         """
         Initializes an AllocationData instance.
 
-        Args:
-            escrow_address (str): Escrow address
-            staker (str): Staker address
-            tokens (str): Amount allocated
-            created_at (str): Creation date
-            closed_at (str): Closing date
+        :param escrow_address: Escrow address
+        :param staker: Staker address
+        :param tokens: Amount allocated
+        :param created_at: Creation date
+        :param closed_at: Closing date
         """
 
         self.escrow_address = escrow_address
@@ -69,7 +68,7 @@ class StakingClient:
     def __init__(self, w3: Web3):
         """Initializes a Staking instance
 
-        Args:
+        :param w3: Web3 instance
 
         """
 
@@ -117,14 +116,12 @@ class StakingClient:
     def approve_stake(self, amount: Decimal) -> None:
         """Approves HMT token for Staking.
 
-        Args:
-            amount (Decimal): Amount to approve
+        :param amount: Amount to approve
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
-            - Amount must be greater than 0
+        :validate:
+            Amount must be greater than 0
         """
 
         if amount <= 0:
@@ -142,13 +139,11 @@ class StakingClient:
     def stake(self, amount: Decimal) -> None:
         """Stakes HMT token.
 
-        Args:
-            amount (Decimal): Amount to stake
+        :param amount: Amount to stake
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Amount must be greater than 0
             - Amount must be less than or equal to the approved amount (on-chain)
             - Amount must be less than or equal to the balance of the staker (on-chain)
@@ -167,14 +162,12 @@ class StakingClient:
     def allocate(self, escrow_address: str, amount: Decimal) -> None:
         """Allocates HMT token to the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
-            amount (Decimal): Amount to allocate
+        :param escrow_address: Address of the escrow
+        :param amount: Amount to allocate
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Amount must be greater than 0
             - Escrow address must be valid
             - Amount must be less than or equal to the staked amount (on-chain)
@@ -196,13 +189,11 @@ class StakingClient:
     def close_allocation(self, escrow_address: str) -> None:
         """Closes allocated HMT token from the escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Escrow address must be valid
             - Escrow should be cancelled / completed (on-chain)
         """
@@ -220,13 +211,11 @@ class StakingClient:
     def unstake(self, amount: Decimal) -> None:
         """Unstakes HMT token.
 
-        Args:
-            amount (Decimal): Amount to unstake
+        :param amount: Amount to unstake
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Amount must be greater than 0
             - Amount must be less than or equal to the staked amount which is not locked / allocated (on-chain)
         """
@@ -244,10 +233,9 @@ class StakingClient:
     def withdraw(self) -> None:
         """Withdraws HMT token.
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - There must be unstaked tokens which is unlocked (on-chain)
         """
 
@@ -263,16 +251,14 @@ class StakingClient:
     ) -> None:
         """Slashes HMT token.
 
-        Args:
-            slasher (str): Address of the slasher
-            staker (str): Address of the staker
-            escrow_address (str): Address of the escrow
-            amount (Decimal): Amount to slash
+        :param slasher: Address of the slasher
+        :param staker: Address of the staker
+        :param escrow_address: Address of the escrow
+        :param amount: Amount to slash
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Amount must be greater than 0
             - Amount must be less than or equal to the amount allocated to the escrow (on-chain)
             - Escrow address must be valid
@@ -296,13 +282,11 @@ class StakingClient:
     def distribute_reward(self, escrow_address: str) -> None:
         """Pays out rewards to the slashers for the specified escrow address.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            None
+        :return: None
 
-        Validations:
+        :validate:
             - Escrow address must be valid
         """
 
@@ -319,11 +303,9 @@ class StakingClient:
     def get_allocation(self, escrow_address: str) -> Optional[AllocationData]:
         """Gets the allocation info for the specified escrow.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            Optional[AllocationData]: Allocation info if escrow exists, otherwise None
+        :return: Allocation info if escrow exists, otherwise None
         """
 
         [
@@ -348,11 +330,9 @@ class StakingClient:
     def _is_valid_escrow(self, escrow_address: str) -> bool:
         """Checks if the escrow address is valid.
 
-        Args:
-            escrow_address (str): Address of the escrow
+        :param escrow_address: Address of the escrow
 
-        Returns:
-            bool: True if the escrow address is valid, False otherwise
+        :return: True if the escrow address is valid, False otherwise
         """
 
         # TODO: Use Escrow/Job Module once implemented
@@ -372,9 +352,8 @@ class LeaderFilter:
         """
         Initializes a LeaderFilter instance.
 
-        Args:
-            networks (List[ChainId]): Networks to request data
-            role (Optional[str]): Leader role
+        :param networks: Networks to request data
+        :param role: Leader role
         """
 
         if not networks or any(
@@ -411,24 +390,23 @@ class LeaderData:
         """
         Initializes an LeaderData instance.
 
-        Args:
-            chain_id (ChainId): Chain Identifier
-            id (str): Identifier
-            address (str): Address
-            amount_staked (int): Amount staked
-            amount_allocated (int): Amount allocated
-            amount_locked (int): Amount locked
-            locked_until_timestamp (int): Locked until timestamp
-            amount_withdrawn (int): Amount withdrawn
-            amount_slashed (int): Amount slashed
-            reputation (int): Reputation
-            reward (int): Reward
-            amount_jobs_launched (int): Amount of jobs launched
-            role (Optional[str]): Role
-            fee (Optional[int]): Fee
-            public_key (Optional[str]): Public key
-            webhook_url (Optional[str]): Webhook url
-            url (Optional[str]): Url
+        :param chain_id: Chain Identifier
+        :param id: Identifier
+        :param address: Address
+        :param amount_staked: Amount staked
+        :param amount_allocated: Amount allocated
+        :param amount_locked: Amount locked
+        :param locked_until_timestamp: Locked until timestamp
+        :param amount_withdrawn: Amount withdrawn
+        :param amount_slashed: Amount slashed
+        :param reputation: Reputation
+        :param reward: Reward
+        :param amount_jobs_launched: Amount of jobs launched
+        :param role: Role
+        :param fee: Fee
+        :param public_key: Public key
+        :param webhook_url: Webhook url
+        :param url: Url
         """
 
         self.chain_id = chain_id
@@ -459,9 +437,8 @@ class RewardData:
         """
         Initializes an RewardData instance.
 
-        Args:
-            escrow_address (str): Escrow address
-            amount (int): Amount
+        :param escrow_address: Escrow address
+        :param amount: Amount
         """
 
         self.escrow_address = escrow_address
@@ -479,9 +456,11 @@ class StakingUtils:
     ) -> List[LeaderData]:
         """Get leaders data of the protocol
 
-        Returns:
-            List[LeaderData]: List of leaders data
+        :param filter: Leader filter
+
+        :return: List of leaders data
         """
+
         from human_protocol_sdk.gql.staking import get_leaders_query
 
         leaders = []
@@ -531,13 +510,12 @@ class StakingUtils:
     ) -> Optional[LeaderData]:
         """Get the leader details.
 
-        Args:
-            chain_id (ChainId): Network in which the leader exists
-            leader_address (str): Address of the leader
+        :param chain_id: Network in which the leader exists
+        :param leader_address: Address of the leader
 
-        Returns:
-            Optional[LeaderData]: Leader data if exists, otherwise None
+        :return: Leader data if exists, otherwise None
         """
+
         from human_protocol_sdk.gql.staking import get_leader_query
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):
@@ -582,12 +560,10 @@ class StakingUtils:
     def get_rewards_info(chain_id: ChainId, slasher: str) -> List[RewardData]:
         """Get rewards of the given slasher
 
-        Args:
-            chain_id (ChainId): Network in which the slasher exists
-            slasher (str): Address of the slasher
+        :param chain_id: Network in which the slasher exists
+        :param slasher: Address of the slasher
 
-        Returns:
-            List[RewardData]: List of rewards info
+        :return: List of rewards info
         """
 
         if chain_id.value not in set(chain_id.value for chain_id in ChainId):

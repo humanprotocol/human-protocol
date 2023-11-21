@@ -77,6 +77,8 @@ enum ChainId {
   MOONBASE_ALPHA = 1287,
   AVALANCHE = 43114,
   AVALANCHE_TESTNET = 43113,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
   LOCALHOST = 1338,
 }
@@ -132,7 +134,7 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x12345678
 
 #### Defined in
 
-[escrow.ts:1635](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1635)
+[escrow.ts:1640](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1640)
 
 ___
 
@@ -172,6 +174,8 @@ enum ChainId {
   MOONBASE_ALPHA = 1287,
   AVALANCHE = 43114,
   AVALANCHE_TESTNET = 43113,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
   LOCALHOST = 1338,
 }
@@ -243,4 +247,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1501](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1501)
+[escrow.ts:1503](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1503)
