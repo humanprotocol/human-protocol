@@ -113,7 +113,7 @@ export class JobService {
     private readonly storageService: StorageService,
   ) {}
 
-  private async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType, tokenFundAmount: number): Promise<CvatManifestDto> {
+  public async createCvatManifest(dto: JobCvatDto, requestType: JobRequestType, tokenFundAmount: number): Promise<CvatManifestDto> {
     return {
       data: {
         data_url: dto.dataUrl,
@@ -466,7 +466,7 @@ export class JobService {
     return jobEntity.id;
   }
 
-  private async calculateJobBounty(
+  public async calculateJobBounty(
     endpointUrl: string,
     fundAmount: number,
   ): Promise<string> {

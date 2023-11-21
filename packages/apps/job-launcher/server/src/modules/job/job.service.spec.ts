@@ -11,7 +11,6 @@ import {
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   NotFoundException,
@@ -19,7 +18,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
-  ErrorBucket,
   ErrorJob,
   ErrorWeb3,
 } from '../../common/constants/errors';
@@ -30,8 +28,6 @@ import {
   TokenId,
 } from '../../common/enums/payment';
 import {
-  JobCaptchaMode,
-  JobCaptchaRequestType,
   JobCaptchaShapeType,
   JobRequestType,
   JobStatus,
@@ -45,12 +41,10 @@ import {
   MOCK_BUCKET_FILES,
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
-  MOCK_ENCRYPTED_MANIFEST,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
   MOCK_EXCHANGE_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
-  MOCK_FILE_KEY,
   MOCK_FILE_URL,
   MOCK_HCAPTCHA_ORACLE_ADDRESS,
   MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
@@ -69,17 +63,18 @@ import {
   MOCK_SUBMISSION_REQUIRED,
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
+  MOCK_CVAT_JOB_SIZE,
+  MOCK_CVAT_MAX_TIME,
+  MOCK_CVAT_VAL_SIZE,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
-  CvatManifestDto,
   JobFortuneDto,
   JobCvatDto,
   JobDetailsDto,
-  HCaptchaManifestDto,
   JobCaptchaDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
@@ -187,8 +182,13 @@ describe('JobService', () => {
           case 'HCAPTCHA_PGP_PUBLIC_KEY': 
             return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
           case 'HCAPTCHA_ORACLE_ADDRESS':
-            return MOCK_HCAPTCHA_ORACLE_ADDRESS
-          
+            return MOCK_HCAPTCHA_ORACLE_ADDRESS;
+          case 'CVAT_JOB_SIZE':
+            return MOCK_CVAT_JOB_SIZE;
+          case 'CVAT_MAX_TIME':
+            return MOCK_CVAT_MAX_TIME;
+          case 'CVAT_VAL_SIZE':
+            return MOCK_CVAT_VAL_SIZE;
         }
       }),
     };
@@ -370,6 +370,51 @@ describe('JobService', () => {
       await expect(
         jobService.createJob(userId, JobRequestType.FORTUNE, fortuneJobDto),
       ).rejects.toThrowError(ErrorJob.NotCreated);
+    });
+  });
+
+  describe('createCvatManifest', () => {
+    it.only('should create a valid CVAT manifest', async () => {
+      jest.spyOn(jobService, 'calculateJobBounty').mockResolvedValueOnce(ethers.utils.formatEther(10000));
+
+      // Sample input data
+      const dto = {
+        dataUrl: 'sampleDataUrl',
+        labels: ['label1', 'label2'],
+        requesterDescription: 'sampleDescription',
+        userGuide: 'sampleUserGuide',
+        minQuality: 0.8,
+        gtUrl: 'sampleGtUrl',
+        type: JobRequestType.IMAGE_BOXES,
+        fundAmount: 10
+      };
+
+      const requestType = JobRequestType.IMAGE_BOXES;
+      const tokenFundAmount = 100;
+
+      // Call the method
+      const result = await jobService.createCvatManifest(dto, requestType, tokenFundAmount);
+
+      // Assert the result
+      expect(result).toEqual({
+        data: {
+          data_url: 'sampleDataUrl',
+        },
+        annotation: {
+          labels: [{ name: 'label1' }, { name: 'label2' }],
+          description: 'sampleDescription',
+          user_guide: 'sampleUserGuide',
+          type: 'sampleRequestType',
+          job_size: 100, // Mocked configService.get value
+          max_time: 100, // Mocked configService.get value
+        },
+        validation: {
+          min_quality: 0.8,
+          val_size: 100, // Mocked configService.get value
+          gt_url: 'sampleGtUrl',
+        },
+        job_bounty: 50, // Mocked calculateJobBounty value
+      });
     });
   });
 
