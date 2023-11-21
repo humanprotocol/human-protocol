@@ -243,7 +243,7 @@ export class KVStoreClient {
    * ```
    */
   @requiresSigner
-  public async setURL(url: string, urlKey?: string): Promise<void> {
+  public async setURL(url: string, urlKey = 'url'): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) {
       throw ErrorSigner;
     }
@@ -257,11 +257,10 @@ export class KVStoreClient {
       ethers.utils.toUtf8Bytes(content)
     );
 
-    const key = urlKey || 'url';
-    const hashKey = key + 'Hash';
+    const hashKey = urlKey + 'Hash';
 
     try {
-      await this.contract.setBulk([key, hashKey], [url, contentHash]);
+      await this.contract.setBulk([urlKey, hashKey], [url, contentHash]);
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);
@@ -331,16 +330,15 @@ export class KVStoreClient {
    * );
    * ```
    */
-  public async getURL(address: string, urlKey?: string): Promise<string> {
+  public async getURL(address: string, urlKey = 'url'): Promise<string> {
     if (!ethers.utils.isAddress(address)) throw ErrorInvalidAddress;
-    const key = urlKey || 'url';
-    const hashKey = key + 'Hash';
+    const hashKey = urlKey + 'Hash';
 
     let url = '',
       hash = '';
 
     try {
-      url = await this.contract?.get(address, key);
+      url = await this.contract?.get(address, urlKey);
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to get URL: ${e.message}`);
     }
