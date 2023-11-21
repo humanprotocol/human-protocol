@@ -111,3 +111,6 @@ export const MOCK_HCAPTCHA_ORACLE_ADDRESS=0xA62a1c18571B869e43EEAbD217e233E7F027
 export const MOCK_CVAT_JOB_SIZE = '10'
 export const MOCK_CVAT_MAX_TIME = '300'
 export const MOCK_CVAT_VAL_SIZE = '2'
+export const MOCK_HCAPTCHA_SITE_KEY = '1234'
+export const MOCK_HCAPTCHA_IMAGE_URL = 'http://mockedFileUrl.test/bucket/img_1.jpg';
+export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';

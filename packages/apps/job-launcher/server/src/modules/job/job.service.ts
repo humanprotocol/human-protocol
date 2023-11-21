@@ -141,7 +141,7 @@ export class JobService {
     };
   }
 
-  async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifestDto> {
+  public async createHCaptchaManifest(jobType: JobCaptchaShapeType, jobDto: JobCaptchaDto): Promise<HCaptchaManifestDto> {
     const objectsInBucket = await this.storageService.listObjectsInBucket(jobDto.dataUrl);
 
     const commonManifestProperties = {
@@ -333,7 +333,7 @@ export class JobService {
     return outputObject;
   }
 
-  private async generateAndUploadTaskData(dataUrl: string, objectNames: string[]) {
+  public async generateAndUploadTaskData(dataUrl: string, objectNames: string[]) {
     const data = objectNames.map(objectName => {
         return {
             datapoint_uri: `${dataUrl}/${objectName}`,
