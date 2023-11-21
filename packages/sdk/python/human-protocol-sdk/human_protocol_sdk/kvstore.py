@@ -32,8 +32,7 @@ class KVStoreClient:
         """
         Initializes a KVStore instance.
 
-        Args:
-            web3 (Web3): The Web3 object
+        :param web3: The Web3 object
         """
 
         # Initialize web3 instance
@@ -63,12 +62,10 @@ class KVStoreClient:
         """
         Sets the value of a key-value pair in the contract.
 
-        Args:
-            key (str): The key of the key-value pair to set
-            value (str): The value of the key-value pair to set
+        :param key: The key of the key-value pair to set
+        :param value: The value of the key-value pair to set
 
-        Returns:
-            None
+        :return: None
         """
 
         if not key:
@@ -86,12 +83,10 @@ class KVStoreClient:
         """
         Sets multiple key-value pairs in the contract.
 
-        Args:
-            keys (List[str]): A list of keys to set
-            values (List[str]): A list of values to set
+        :param keys: A list of keys to set
+        :param values: A list of values to set
 
-        Returns:
-            None
+        :return: None
         """
 
         if "" in keys:
@@ -112,12 +107,10 @@ class KVStoreClient:
     def get(self, address: str, key: str) -> str:
         """Gets the value of a key-value pair in the contract.
 
-        Args:
-            address (str): The Ethereum address associated with the key-value pair
-            key (str): The key of the key-value pair to get
+        :param address: The Ethereum address associated with the key-value pair
+        :param key: The key of the key-value pair to get
 
-        Returns:
-            value (str): The value of the key-value pair if it exists
+        :return: The value of the key-value pair if it exists
         """
 
         if not key:
