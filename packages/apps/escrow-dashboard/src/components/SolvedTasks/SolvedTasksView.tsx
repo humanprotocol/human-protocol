@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         }}
       >
         <Typography color="text.primary" variant="h6" fontWeight={500}>
-          {numeral(payload[0].value).format('0a').toUpperCase()}
+          {numeral(payload[0].value).format('0.00 a').toUpperCase()}
         </Typography>
       </Box>
     );
@@ -139,7 +139,7 @@ export const SolvedTasksView: FC = () => {
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    width={40}
+                    width={80}
                     tick={{
                       fill: '#320A8D',
                       fontSize: '10px',
@@ -147,7 +147,7 @@ export const SolvedTasksView: FC = () => {
                       fontWeight: 500,
                     }}
                     tickFormatter={(value: any) =>
-                      numeral(value).format('0a').toUpperCase()
+                      numeral(value).format('0.00 a').toUpperCase()
                     }
                   />
                   <Tooltip
