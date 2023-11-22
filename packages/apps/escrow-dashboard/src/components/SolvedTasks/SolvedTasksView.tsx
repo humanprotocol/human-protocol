@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         }}
       >
         <Typography color="text.primary" variant="h6" fontWeight={500}>
-          {numeral(payload[0].value).format('0.00 a').toUpperCase()}
+          {numeral(payload[0].value).format('0.[00] a').toUpperCase()}
         </Typography>
       </Box>
     );
@@ -97,7 +97,7 @@ export const SolvedTasksView: FC = () => {
                   sx={{ whiteSpace: 'nowrap' }}
                   fontSize={{ xs: '40px', lg: '55px' }}
                 >
-                  {numeral(solvedTasksCount).format('0.00 a').toUpperCase()}
+                  {numeral(solvedTasksCount).format('0.[00] a').toUpperCase()}
                 </Typography>
               </Box>
             </Grid>
@@ -147,7 +147,7 @@ export const SolvedTasksView: FC = () => {
                       fontWeight: 500,
                     }}
                     tickFormatter={(value: any) =>
-                      numeral(value).format('0.00 a').toUpperCase()
+                      numeral(value).format('0.[00] a').toUpperCase()
                     }
                   />
                   <Tooltip
