@@ -5,8 +5,14 @@ import os
 from decimal import Decimal
 from typing import List, Optional
 
+import requests
+
 from human_protocol_sdk.constants import NETWORKS, ChainId
-from human_protocol_sdk.utils import get_kvstore_interface, handle_transaction
+from human_protocol_sdk.utils import (
+    get_kvstore_interface,
+    handle_transaction,
+    validate_url,
+)
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -104,6 +110,33 @@ class KVStoreClient:
             self.gas_limit,
         )
 
+    def set_url(self, url: str, key: Optional[str] = "url") -> None:
+        """
+        Sets a URL value for the address that submits the transaction.
+
+        :param url: URL to set
+        :key: Configurable URL key. `url` by default.
+
+        :return: None
+
+        :raise KVStoreClientError: If an error occurs while validating URL, or handling transaction
+        """
+        if not validate_url(url):
+            raise KVStoreClientError(f"Invalid URL: {url}")
+
+        content = requests.get(url).text
+        content_hash = self.w3.keccak(text=content).hex()
+
+        handle_transaction(
+            self.w3,
+            "Set Bulk",
+            self.kvstore_contract.functions.setBulk(
+                [key, key + "Hash"], [url, content_hash]
+            ),
+            KVStoreClientError,
+            self.gas_limit,
+        )
+
     def get(self, address: str, key: str) -> str:
         """Gets the value of a key-value pair in the contract.
 
@@ -119,3 +152,29 @@ class KVStoreClient:
             raise KVStoreClientError(f"Invalid address: {address}")
         result = self.kvstore_contract.functions.get(address, key).call()
         return result
+
+    def get_url(self, address: str, key: Optional[str] = "url") -> str:
+        """Gets the URL value of the given entity.
+
+        :param address: Address from which to get the URL value.
+        :param key: Configurable URL key. `url` by default.
+
+        :return url: The URL value of the given address if exists, and the content is valid
+        """
+
+        if not Web3.is_address(address):
+            raise KVStoreClientError(f"Invalid address: {address}")
+
+        url = self.kvstore_contract.functions.get(address, key).call()
+        hash = self.kvstore_contract.functions.get(address, key + "Hash").call()
+
+        if len(url) == 0:
+            return url
+
+        content = requests.get(url).text
+        content_hash = self.w3.keccak(text=content).hex()
+
+        if hash != content_hash:
+            raise KVStoreClientError(f"Invalid hash")
+
+        return url

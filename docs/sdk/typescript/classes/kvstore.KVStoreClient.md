@@ -86,8 +86,10 @@ const kvstoreClient = await KVStoreClient.build(signer);
 ### Methods
 
 - [get](kvstore.KVStoreClient.md#get)
+- [getURL](kvstore.KVStoreClient.md#geturl)
 - [set](kvstore.KVStoreClient.md#set)
 - [setBulk](kvstore.KVStoreClient.md#setbulk)
+- [setURL](kvstore.KVStoreClient.md#seturl)
 - [build](kvstore.KVStoreClient.md#build)
 
 ## Constructors
@@ -107,7 +109,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
+[kvstore.ts:103](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L103)
 
 ## Properties
 
@@ -117,7 +119,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:91](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L91)
+[kvstore.ts:94](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L94)
 
 ___
 
@@ -127,7 +129,7 @@ ___
 
 #### Defined in
 
-[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
+[kvstore.ts:95](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L95)
 
 ## Methods
 
@@ -168,7 +170,50 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:241](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L241)
+[kvstore.ts:295](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L295)
+
+___
+
+### getURL
+
+▸ **getURL**(`address`, `urlKey?`): `Promise`<`string`\>
+
+This function returns the URL value for the given entity.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `address` | `string` | Address from which to get the URL value. |
+| `urlKey?` | `string` | Configurable URL key. `url` by default. |
+
+#### Returns
+
+`Promise`<`string`\>
+
+URL value for the given address if exists, and the content is valid
+
+**Code example**
+
+```ts
+import { providers } from 'ethers';
+import { KVStoreClient } from '@human-protocol/sdk';
+
+const rpcUrl = 'YOUR_RPC_URL';
+
+const provider = new providers.JsonRpcProvider(rpcUrl);
+const kvstoreClient = await KVStoreClient.build(provider);
+
+const url = await kvstoreClient.getURL('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
+const linkedinUrl = await kvstoreClient.getURL(
+   '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+   'linkedinUrl'
+);
+```
+
+#### Defined in
+
+[kvstore.ts:334](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L334)
 
 ___
 
@@ -211,7 +256,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:165](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L165)
+[kvstore.ts:168](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L168)
 
 ___
 
@@ -256,7 +301,49 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:204](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L204)
+[kvstore.ts:207](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L207)
+
+___
+
+### setURL
+
+▸ **setURL**(`url`, `urlKey?`): `Promise`<`void`\>
+
+This function sets a URL value for the address that submits the transaction.
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `url` | `string` | URL to set |
+| `urlKey?` | `string` | Configurable URL key. `url` by default. |
+
+#### Returns
+
+`Promise`<`void`\>
+
+Returns void if successful. Throws error if any.
+
+**Code example**
+
+```ts
+import { Wallet, providers } from 'ethers';
+import { KVStoreClient } from '@human-protocol/sdk';
+
+const rpcUrl = 'YOUR_RPC_URL';
+const privateKey = 'YOUR_PRIVATE_KEY'
+
+const provider = new providers.JsonRpcProvider(rpcUrl);
+const signer = new Wallet(privateKey, provider);
+const kvstoreClient = await KVStoreClient.build(signer);
+
+await kvstoreClient.setURL('example.com');
+await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
+```
+
+#### Defined in
+
+[kvstore.ts:246](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L246)
 
 ___
 
@@ -288,4 +375,4 @@ Creates an instance of KVStoreClient from a Signer or Provider.
 
 #### Defined in
 
-[kvstore.ts:116](https://github.com/humanprotocol/human-protocol/blob/84bbb73d/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L116)
+[kvstore.ts:119](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L119)
