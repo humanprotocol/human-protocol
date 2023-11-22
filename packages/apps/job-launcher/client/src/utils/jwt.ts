@@ -1,4 +1,4 @@
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 export function getJwtPayload(token: string) {
   const { email } = jwtDecode<{ email: string }>(token);
@@ -6,7 +6,6 @@ export function getJwtPayload(token: string) {
 }
 
 export function isJwtExpired(token: string) {
-  const { sub, exp } = jwtDecode<JwtPayload>(token);
-  console.log(sub, exp);
+  const { exp } = jwtDecode<JwtPayload>(token);
   return Date.now() >= Number(exp) * 1000;
 }
