@@ -23,16 +23,16 @@ export const PayJob = () => {
   };
 
   const handleError = (err: any) => {
-    if (err.code === 'UNPREDICTABLE_GAS_LIMIT' || err.code === 'ACTION_REJECTED') {
-      openSnackbar(err.code, 'error');
+    if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
+      openSnackbar('Insufficient token amount or the gas limit is too low', 'error');
+    } else if (err.code === 'ACTION_REJECTED') {
+      openSnackbar('The transaction was rejected', 'error');
     } else {
       const message = err?.response?.data?.message;
-      if (message) {
-        if (typeof message === 'string') {
-          openSnackbar(err?.response?.data?.message, 'error');
-        } else {
-          openSnackbar('Something went wrong', 'error');
-        }
+      if (message && typeof message === 'string') {
+        openSnackbar(err?.response?.data?.message, 'error');
+      } else {
+        openSnackbar('Something went wrong', 'error');
       }
     }
   };
