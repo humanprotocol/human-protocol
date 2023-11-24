@@ -15,7 +15,6 @@ export const ConfigNames = {
   POSTGRES_PASSWORD: 'POSTGRES_PASSWORD',
   POSTGRES_DATABASE: 'POSTGRES_DATABASE',
   POSTGRES_PORT: 'POSTGRES_PORT',
-  POSTGRES_SYNC: 'POSTGRES_SYNC',
   POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
@@ -64,13 +63,11 @@ export const envValidator = Joi.object({
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   // Database
-  DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
-  POSTGRES_SYNC: Joi.string().default('false'),
   POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
