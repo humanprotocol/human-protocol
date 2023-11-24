@@ -231,42 +231,38 @@ def test_register_401(client: TestClient) -> None:
 def test_create_assignment_200(client: TestClient) -> None:
     session = SessionLocal()
     session.begin()
-    try:
-        cvat_project_1, _, cvat_job_1 = create_project_task_and_job(
-            session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
-        )
-        user = User(
-            wallet_address=user_address,
-            cvat_email="test@hmt.ai",
-            cvat_id=1,
-        )
-        session.add(user)
-        session.commit()
-        with (
-            open("tests/utils/manifest.json") as data,
-            patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
-            patch("src.services.exchange.cvat_api"),
-        ):
-            manifest = json.load(data)
-            mock_get_manifest.return_value = manifest
+    cvat_project_1, _, cvat_job_1 = create_project_task_and_job(
+        session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
+    )
+    user = User(
+        wallet_address=user_address,
+        cvat_email="test@hmt.ai",
+        cvat_id=1,
+    )
+    session.add(user)
+    session.commit()
+    with (
+        open("tests/utils/manifest.json") as data,
+        patch("src.services.exchange.get_escrow_manifest") as mock_get_manifest,
+        patch("src.services.exchange.cvat_api"),
+    ):
+        manifest = json.load(data)
+        mock_get_manifest.return_value = manifest
 
-            response = client.post(
-                "/tasks/" + cvat_project_1.id + "/assignment",
-                headers={"signature": "sample"},
-                json={"wallet_address": user_address},
-            )
-
-        assert response.status_code == 200
-        db_assignment = (
-            session.query(Assignment).filter_by(user_wallet_address=user_address).first()
+        response = client.post(
+            "/tasks/" + cvat_project_1.id + "/assignment",
+            headers={"signature": "sample"},
+            json={"wallet_address": user_address},
         )
 
-        assert db_assignment.cvat_job_id == cvat_job_1.cvat_id
-        assert db_assignment.user_wallet_address == user_address
-        assert db_assignment.status == AssignmentStatus.created
-        assert response.json()["assignment"]
-    finally:
-        session.commit()
+    assert response.status_code == 200
+    db_assignment = session.query(Assignment).filter_by(user_wallet_address=user_address).first()
+
+    assert db_assignment.cvat_job_id == cvat_job_1.cvat_id
+    assert db_assignment.user_wallet_address == user_address
+    assert db_assignment.status == AssignmentStatus.created
+    assert response.json()["assignment"]
+    session.close()
 
 
 def test_create_assignment_401(client: TestClient) -> None:

@@ -80,11 +80,11 @@ services:
       PG_PASSWORD: 'test'
       PG_DB: 'exchange_oracle_test'
       WEB3_HTTP_PROVIDER_URI: 'http://blockchain-node:8545'
-      ENDPOINT_URL: 'host.docker.internal:9000'
-      ACCESS_KEY: 'dev'
-      SECRET_KEY: 'devdevdev'
-      RESULTS_BUCKET_NAME: 'results'
-      USE_SSL: False
+      STORAGE_ENDPOINT_URL: 'host.docker.internal:9000'
+      STORAGE_ACCESS_KEY: 'dev'
+      STORAGE_SECRET_KEY: 'devdevdev'
+      STORAGE_RESULTS_BUCKET_NAME: 'results'
+      STORAGE_USE_SSL: False
     depends_on:
       postgres:
         condition: service_started
