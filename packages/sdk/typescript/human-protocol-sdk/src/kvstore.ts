@@ -5,6 +5,7 @@ import {
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
 import { Signer, ethers } from 'ethers';
+import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -90,33 +91,43 @@ import { isValidUrl } from './utils';
  * const kvstoreClient = await KVStoreClient.build(signer);
  * ```
  */
-export class KVStoreClient {
+export class KVStoreClient extends BaseEthersClient {
   private contract: KVStore;
-  private signerOrProvider: Signer | Provider;
 
   /**
    * **KVStoreClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the KVStore contract
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    */
-  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
+  constructor(
+    signerOrProvider: Signer | Provider,
+    networkData: NetworkData,
+    gasPriceMultiplier?: number
+  ) {
+    super(signerOrProvider, networkData, gasPriceMultiplier);
+
     this.contract = KVStore__factory.connect(
-      network.kvstoreAddress,
+      networkData.kvstoreAddress,
       signerOrProvider
     );
-    this.signerOrProvider = signerOrProvider;
   }
 
   /**
    * Creates an instance of KVStoreClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
+   *
    * @returns {Promise<KVStoreClient>} - An instance of KVStoreClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
+  public static async build(
+    signerOrProvider: Signer | Provider,
+    gasPriceMultiplier?: number
+  ) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -135,7 +146,7 @@ export class KVStoreClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new KVStoreClient(signerOrProvider, networkData);
+    return new KVStoreClient(signerOrProvider, networkData, gasPriceMultiplier);
   }
 
   /**
@@ -169,7 +180,9 @@ export class KVStoreClient {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
-      await this.contract?.set(key, value);
+      await this.contract?.set(key, value, {
+        ...(await this.gasPriceOptions()),
+      });
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -210,7 +223,9 @@ export class KVStoreClient {
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
     try {
-      await this.contract?.setBulk(keys, values);
+      await this.contract?.setBulk(keys, values, {
+        ...(await this.gasPriceOptions()),
+      });
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -260,7 +275,9 @@ export class KVStoreClient {
     const hashKey = urlKey + 'Hash';
 
     try {
-      await this.contract.setBulk([urlKey, hashKey], [url, contentHash]);
+      await this.contract.setBulk([urlKey, hashKey], [url, contentHash], {
+        ...(await this.gasPriceOptions()),
+      });
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);

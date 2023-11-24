@@ -11,6 +11,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
+import { BaseEthersClient } from './base';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -116,36 +117,43 @@ import {
  * const escrowClient = await EscrowClient.build(provider);
  * ```
  */
-export class EscrowClient {
+export class EscrowClient extends BaseEthersClient {
   private escrowFactoryContract: EscrowFactory;
-  private escrowContract?: Escrow;
-  private signerOrProvider: Signer | Provider;
-  public network: NetworkData;
 
   /**
    * **EscrowClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network The network information required to connect to the Escrow contract
+   * @param {number | undefined} gasPriceMultiplier The multiplier to apply to the gas price
    */
-  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
+  constructor(
+    signerOrProvider: Signer | Provider,
+    networkData: NetworkData,
+    gasPriceMultiplier?: number
+  ) {
+    super(signerOrProvider, networkData, gasPriceMultiplier);
+
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      network.factoryAddress,
+      networkData.factoryAddress,
       signerOrProvider
     );
-    this.network = network;
-    this.signerOrProvider = signerOrProvider;
   }
 
   /**
    * Creates an instance of EscrowClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
+   * @param {number | undefined} gasPriceMultiplier The multiplier to apply to the gas price
+   *
    * @returns {Promise<EscrowClient>} An instance of EscrowClient
    * @throws {ErrorProviderDoesNotExist} Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
+  public static async build(
+    signerOrProvider: Signer | Provider,
+    gasPriceMultiplier?: number
+  ) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -164,7 +172,20 @@ export class EscrowClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new EscrowClient(signerOrProvider, networkData);
+    return new EscrowClient(signerOrProvider, networkData, gasPriceMultiplier);
+  }
+
+  /**
+   * Connects to the escrow contract
+   *
+   * @param escrowAddress Escrow address to connect to
+   */
+  private getEscrowContract(escrowAddress: string): Escrow {
+    try {
+      return Escrow__factory.connect(escrowAddress, this.signerOrProvider);
+    } catch (e) {
+      return throwError(e);
+    }
   }
 
   /**
@@ -218,7 +239,10 @@ export class EscrowClient {
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
           trustedHandlers,
-          jobRequesterId
+          jobRequesterId,
+          {
+            ...(await this.gasPriceOptions()),
+          }
         )
       ).wait();
 
@@ -336,11 +360,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      await this.escrowContract.setup(
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      await escrowContract.setup(
         reputationOracle,
         recordingOracle,
         exchangeOracle,
@@ -348,7 +370,10 @@ export class EscrowClient {
         recordingOracleFee,
         exchangeOracleFee,
         manifestUrl,
-        manifestHash
+        manifestHash,
+        {
+          ...(await this.gasPriceOptions()),
+        }
       );
 
       return;
@@ -460,19 +485,18 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
+      const escrowContract = this.getEscrowContract(escrowAddress);
 
-      const tokenAddress = await this.escrowContract.token();
+      const tokenAddress = await escrowContract.token();
 
       const tokenContract: HMToken = HMToken__factory.connect(
         tokenAddress,
         this.signerOrProvider
       );
 
-      await tokenContract.transfer(escrowAddress, amount);
+      await tokenContract.transfer(escrowAddress, amount, {
+        ...(await this.gasPriceOptions()),
+      });
 
       return;
     } catch (e) {
@@ -534,11 +558,11 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      await this.escrowContract.storeResults(url, hash);
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      await escrowContract.storeResults(url, hash, {
+        ...(await this.gasPriceOptions()),
+      });
 
       return;
     } catch (e) {
@@ -582,11 +606,11 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      await this.escrowContract.complete();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      await escrowContract.complete({
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -685,17 +709,18 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
+      const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await this.escrowContract.bulkPayOut(
+      await escrowContract.bulkPayOut(
         recipients,
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID
+        DEFAULT_TX_ID,
+
+        {
+          ...(await this.gasPriceOptions()),
+        }
       );
       return;
     } catch (e) {
@@ -739,15 +764,15 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      const tx = await this.escrowContract.cancel();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      const tx = await escrowContract.cancel({
+        ...(await this.gasPriceOptions()),
+      });
       const transactionReceipt = await tx.wait();
 
       let amountTransferred: BigNumber | undefined = undefined;
-      const tokenAddress = await this.escrowContract.token();
+      const tokenAddress = await escrowContract.token();
 
       const tokenContract: HMToken = HMToken__factory.connect(
         tokenAddress,
@@ -817,11 +842,11 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      await this.escrowContract.abort();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      await escrowContract.abort({
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -879,11 +904,11 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      await this.escrowContract.addTrustedHandlers(trustedHandlers);
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      await escrowContract.addTrustedHandlers(trustedHandlers, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -920,11 +945,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.getBalance();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.getBalance();
     } catch (e) {
       return throwError(e);
     }
@@ -960,11 +983,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.manifestHash();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.manifestHash();
     } catch (e) {
       return throwError(e);
     }
@@ -1000,11 +1021,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.manifestUrl();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.manifestUrl();
     } catch (e) {
       return throwError(e);
     }
@@ -1040,11 +1059,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.finalResultsUrl();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.finalResultsUrl();
     } catch (e) {
       return throwError(e);
     }
@@ -1080,11 +1097,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.intermediateResultsUrl();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.intermediateResultsUrl();
     } catch (e: any) {
       return throwError(e);
     }
@@ -1120,11 +1135,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.token();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.token();
     } catch (e) {
       return throwError(e);
     }
@@ -1160,11 +1173,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.status();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.status();
     } catch (e) {
       return throwError(e);
     }
@@ -1200,11 +1211,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.recordingOracle();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.recordingOracle();
     } catch (e: any) {
       return throwError(e);
     }
@@ -1240,11 +1249,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.launcher();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.launcher();
     } catch (e: any) {
       return throwError(e);
     }
@@ -1280,11 +1287,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.reputationOracle();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.reputationOracle();
     } catch (e: any) {
       return throwError(e);
     }
@@ -1320,11 +1325,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.exchangeOracle();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.exchangeOracle();
     } catch (e: any) {
       return throwError(e);
     }
@@ -1360,11 +1363,9 @@ export class EscrowClient {
     }
 
     try {
-      this.escrowContract = Escrow__factory.connect(
-        escrowAddress,
-        this.signerOrProvider
-      );
-      return this.escrowContract.escrowFactory();
+      const escrowContract = this.getEscrowContract(escrowAddress);
+
+      return escrowContract.escrowFactory();
     } catch (e: any) {
       return throwError(e);
     }

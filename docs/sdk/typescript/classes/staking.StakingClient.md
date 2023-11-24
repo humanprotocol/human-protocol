@@ -72,6 +72,12 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const stakingClient = await StakingClient.build(provider);
 ```
 
+## Hierarchy
+
+- [`BaseEthersClient`](base.BaseEthersClient.md)
+
+  ↳ **`StakingClient`**
+
 ## Table of contents
 
 ### Constructors
@@ -81,7 +87,9 @@ const stakingClient = await StakingClient.build(provider);
 ### Properties
 
 - [escrowFactoryContract](staking.StakingClient.md#escrowfactorycontract)
-- [network](staking.StakingClient.md#network)
+- [gasPriceMultiplier](staking.StakingClient.md#gaspricemultiplier)
+- [networkData](staking.StakingClient.md#networkdata)
+- [rewardPoolContract](staking.StakingClient.md#rewardpoolcontract)
 - [signerOrProvider](staking.StakingClient.md#signerorprovider)
 - [stakingContract](staking.StakingClient.md#stakingcontract)
 - [tokenContract](staking.StakingClient.md#tokencontract)
@@ -90,8 +98,10 @@ const stakingClient = await StakingClient.build(provider);
 
 - [allocate](staking.StakingClient.md#allocate)
 - [approveStake](staking.StakingClient.md#approvestake)
+- [checkValidEscrow](staking.StakingClient.md#checkvalidescrow)
 - [closeAllocation](staking.StakingClient.md#closeallocation)
-- [distributeRewards](staking.StakingClient.md#distributerewards)
+- [distributeReward](staking.StakingClient.md#distributereward)
+- [gasPriceOptions](staking.StakingClient.md#gaspriceoptions)
 - [getAllocation](staking.StakingClient.md#getallocation)
 - [getLeader](staking.StakingClient.md#getleader)
 - [getLeaders](staking.StakingClient.md#getleaders)
@@ -106,7 +116,7 @@ const stakingClient = await StakingClient.build(provider);
 
 ### constructor
 
-• **new StakingClient**(`signerOrProvider`, `network`)
+• **new StakingClient**(`signerOrProvider`, `networkData`, `gasPriceMultiplier?`)
 
 **StakingClient constructor**
 
@@ -115,11 +125,16 @@ const stakingClient = await StakingClient.build(provider);
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
-| `network` | `NetworkData` | The network information required to connect to the Staking contract |
+| `networkData` | `NetworkData` | - |
+| `gasPriceMultiplier?` | `number` | The multiplier to apply to the gas price |
+
+#### Overrides
+
+[BaseEthersClient](base.BaseEthersClient.md).[constructor](base.BaseEthersClient.md#constructor)
 
 #### Defined in
 
-[staking.ts:118](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L118)
+[staking.ts:119](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L119)
 
 ## Properties
 
@@ -129,27 +144,59 @@ const stakingClient = await StakingClient.build(provider);
 
 #### Defined in
 
-[staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
+[staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
 
 ___
 
-### network
+### gasPriceMultiplier
 
-• **network**: `NetworkData`
+• `Protected` `Optional` **gasPriceMultiplier**: `number`
+
+#### Inherited from
+
+[BaseEthersClient](base.BaseEthersClient.md).[gasPriceMultiplier](base.BaseEthersClient.md#gaspricemultiplier)
 
 #### Defined in
 
-[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
+base.ts:14
+
+___
+
+### networkData
+
+• **networkData**: `NetworkData`
+
+#### Inherited from
+
+[BaseEthersClient](base.BaseEthersClient.md).[networkData](base.BaseEthersClient.md#networkdata)
+
+#### Defined in
+
+base.ts:15
+
+___
+
+### rewardPoolContract
+
+• **rewardPoolContract**: `RewardPool`
+
+#### Defined in
+
+[staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
 
 ___
 
 ### signerOrProvider
 
-• **signerOrProvider**: `Signer` \| `Provider`
+• `Protected` **signerOrProvider**: `Signer` \| `Provider`
+
+#### Inherited from
+
+[BaseEthersClient](base.BaseEthersClient.md).[signerOrProvider](base.BaseEthersClient.md#signerorprovider)
 
 #### Defined in
 
-[staking.ts:106](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L106)
+base.ts:13
 
 ___
 
@@ -159,7 +206,7 @@ ___
 
 #### Defined in
 
-[staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
+[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
 
 ___
 
@@ -169,7 +216,7 @@ ___
 
 #### Defined in
 
-[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
+[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
 
 ## Methods
 
@@ -213,7 +260,7 @@ await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amoun
 
 #### Defined in
 
-[staking.ts:428](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L428)
+[staking.ts:461](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L461)
 
 ___
 
@@ -254,7 +301,29 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:193](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L193)
+[staking.ts:222](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L222)
+
+___
+
+### checkValidEscrow
+
+▸ `Private` **checkValidEscrow**(`escrowAddress`): `Promise`<`void`\>
+
+Check if escrow exists
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `escrowAddress` | `string` | Escrow address to check against |
+
+#### Returns
+
+`Promise`<`void`\>
+
+#### Defined in
+
+[staking.ts:187](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L187)
 
 ___
 
@@ -297,13 +366,13 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
 #### Defined in
 
-[staking.ts:483](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L483)
+[staking.ts:512](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L512)
 
 ___
 
-### distributeRewards
+### distributeReward
 
-▸ **distributeRewards**(`escrowAddress`): `Promise`<`void`\>
+▸ **distributeReward**(`escrowAddress`): `Promise`<`void`\>
 
 This function drops the allocation from a specific escrow.
 
@@ -334,12 +403,34 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-await stakingClient.distributeRewards('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
 ```
 
 #### Defined in
 
-[staking.ts:526](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L526)
+[staking.ts:551](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L551)
+
+___
+
+### gasPriceOptions
+
+▸ `Protected` **gasPriceOptions**(): `Promise`<`Partial`<`Overrides`\>\>
+
+Adjust the gas price, and return as an option to be passed to a transaction
+
+#### Returns
+
+`Promise`<`Partial`<`Overrides`\>\>
+
+Returns the gas price options
+
+#### Inherited from
+
+[BaseEthersClient](base.BaseEthersClient.md).[gasPriceOptions](base.BaseEthersClient.md#gaspriceoptions)
+
+#### Defined in
+
+base.ts:39
 
 ___
 
@@ -377,7 +468,7 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 
 #### Defined in
 
-[staking.ts:643](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L643)
+[staking.ts:659](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L659)
 
 ___
 
@@ -415,7 +506,7 @@ const leaders = await stakingClient.getLeaders();
 
 #### Defined in
 
-[staking.ts:569](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L569)
+[staking.ts:585](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L585)
 
 ___
 
@@ -453,7 +544,7 @@ const leader = await stakingClient.getLeader('0x62dD51230A30401C455c8398d06F85e4
 
 #### Defined in
 
-[staking.ts:608](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L608)
+[staking.ts:624](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L624)
 
 ___
 
@@ -491,7 +582,7 @@ const rewards = await stakingClient.getRewards('0x62dD51230A30401C455c8398d06F85
 
 #### Defined in
 
-[staking.ts:681](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L681)
+[staking.ts:691](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L691)
 
 ___
 
@@ -535,7 +626,7 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 
 #### Defined in
 
-[staking.ts:361](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L361)
+[staking.ts:398](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L398)
 
 ___
 
@@ -579,7 +670,7 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:238](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L238)
+[staking.ts:269](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L269)
 
 ___
 
@@ -622,7 +713,7 @@ await stakingClient.unstake(amount);
 
 #### Defined in
 
-[staking.ts:282](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L282)
+[staking.ts:315](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L315)
 
 ___
 
@@ -658,13 +749,13 @@ await stakingClient.withdraw();
 
 #### Defined in
 
-[staking.ts:324](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L324)
+[staking.ts:359](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L359)
 
 ___
 
 ### build
 
-▸ `Static` **build**(`signerOrProvider`): `Promise`<[`StakingClient`](staking.StakingClient.md)\>
+▸ `Static` **build**(`signerOrProvider`, `gasPriceMultiplier?`): `Promise`<[`StakingClient`](staking.StakingClient.md)\>
 
 Creates an instance of StakingClient from a Signer or Provider.
 
@@ -673,6 +764,7 @@ Creates an instance of StakingClient from a Signer or Provider.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `gasPriceMultiplier?` | `number` | The multiplier to apply to the gas price |
 
 #### Returns
 
@@ -690,4 +782,4 @@ Creates an instance of StakingClient from a Signer or Provider.
 
 #### Defined in
 
-[staking.ts:146](https://github.com/humanprotocol/human-protocol/blob/930bec07/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L146)
+[staking.ts:157](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L157)
