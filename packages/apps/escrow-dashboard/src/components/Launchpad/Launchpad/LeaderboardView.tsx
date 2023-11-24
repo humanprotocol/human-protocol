@@ -1,7 +1,6 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
 import {
   Box,
-  Button,
   Chip,
   FormControl,
   IconButton,
@@ -20,11 +19,11 @@ import {
   Typography,
 } from '@mui/material';
 import copy from 'copy-to-clipboard';
-import { FC, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { CardContainer } from '../Cards';
+import { CardContainer } from '../../Cards';
 import {
   CopyLinkIcon,
   CvatIcon,
@@ -32,18 +31,14 @@ import {
   HCaptchaIcon,
   RecordingOracleIcon,
   ReputationOracleIcon,
-} from '../Icons';
-import { CHAIN_ICONS } from '../Icons/chains';
-import { ViewTitle } from '../ViewTitle';
-import leaderboardImg from 'src/assets/leaderboard/leaderboard.png';
+} from '../../Icons';
+import { CHAIN_ICONS } from '../../Icons/chains';
+import { ViewTitle } from '../../ViewTitle';
+import leaderboardImg from 'src/assets/launchpad/leaderboard.png';
 import { V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
 import { AppState } from 'src/state';
 import { useLeadersData, useLeadersByChainID } from 'src/state/leader/hooks';
 import { shortenAddress } from 'src/utils';
-
-type LeaderboardViewProps = {
-  showAll?: boolean;
-};
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   const aVal = a[orderBy] ?? '';
@@ -145,9 +140,7 @@ const LeaderRole = ({ role }: { role?: string }) => {
   );
 };
 
-export const LeaderboardView: FC<LeaderboardViewProps> = ({
-  showAll = true,
-}) => {
+export const LeaderboardView = () => {
   const { leadersLoaded } = useSelector((state: AppState) => state.leader);
 
   useLeadersData();
@@ -214,15 +207,6 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
     <Box mt={13}>
       <Box display="flex" alignItems="center" flexWrap="wrap">
         <ViewTitle title="Leaderboard" iconUrl={leaderboardImg} fontSize={45} />
-        {!showAll && (
-          <Button
-            variant="outlined"
-            sx={{ ml: { xs: 'auto', sm: 3 }, mr: { xs: 'auto', sm: 0 } }}
-            href="/leaderboard"
-          >
-            See More
-          </Button>
-        )}
       </Box>
       <Box mt={{ xs: 4, md: 8 }}>
         <CardContainer sxProps={{ padding: '42px 52px 28px' }}>

@@ -2,14 +2,14 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Box, Button, Chip, Grid, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React from 'react';
-import { CardContainer } from '../Cards';
+import { CardContainer } from '../../Cards';
 import {
   ExchangeOracleIcon,
   RecordingOracleIcon,
   ReputationOracleIcon,
-} from '../Icons';
-import { ViewTitle } from '../ViewTitle';
-import oraclesImg from 'src/assets/leaderboard/oracles.png';
+} from '../../Icons';
+import { ViewTitle } from '../../ViewTitle';
+import oraclesImg from 'src/assets/launchpad/oracles.png';
 
 const OracleIcon = styled(Box)({
   borderRadius: '100%',

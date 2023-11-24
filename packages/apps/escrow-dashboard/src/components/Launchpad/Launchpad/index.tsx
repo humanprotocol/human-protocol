@@ -1,17 +1,10 @@
 import { Box, Chip, Typography } from '@mui/material';
-import { FC } from 'react';
 
 import { LaunchJobView } from './LaunchJobView';
 import { LeaderboardView } from './LeaderboardView';
 import { OraclesView } from './OraclesView';
 
-type LeaderboardContainerProps = {
-  showAll?: boolean;
-};
-
-export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
-  showAll = true,
-}) => {
+export const Launchpad = () => {
   return (
     <Box>
       <Box display="flex" justifyContent="center" alignItems="start">
@@ -36,7 +29,7 @@ export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
         />
       </Box>
       <LaunchJobView />
-      <LeaderboardView showAll={showAll} />
+      <LeaderboardView />
       <OraclesView />
     </Box>
   );

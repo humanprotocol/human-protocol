@@ -16,8 +16,8 @@ import {
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ViewTitle } from '../ViewTitle';
 import tasksSvg from 'src/assets/tasks.svg';
+import { ViewTitle } from 'src/components/ViewTitle';
 import {
   ImageLabelingJobType,
   ImageLabelingJobTypeData,
@@ -27,7 +27,7 @@ import {
   OpenQueriesJobTypeData,
   TextLabelingJobType,
   TextLabelingJobTypeData,
-} from 'src/constants/leaderboard';
+} from 'src/constants/launchpad';
 
 const JobTypeList = ({ label, values, labelMap, open, onClick }: any) => {
   return (
@@ -138,11 +138,9 @@ export const JobTypesView = () => {
     return [];
   }, [filter]);
 
-  console.log(filteredMapData.flatMap((d) => Object.values(d)));
-
   return (
     <Box mt="58px">
-      <Link to="/leaderboard">
+      <Link to="/launchpad">
         <Button
           variant="outlined"
           color="primary"

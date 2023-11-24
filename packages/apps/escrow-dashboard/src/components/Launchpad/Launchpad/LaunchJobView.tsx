@@ -12,15 +12,15 @@ import {
 import { styled } from '@mui/material/styles';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CardContainer } from '../Cards';
+import { CardContainer } from '../../Cards';
 import {
   ImageLabelingIcon,
   MarketMakingIcon,
   OpenQueriesIcon,
   TextLabelingIcon,
-} from '../Icons';
-import { ViewTitle } from '../ViewTitle';
-import launchTaskImg from 'src/assets/leaderboard/launch-task.png';
+} from '../../Icons';
+import { ViewTitle } from '../../ViewTitle';
+import launchTaskImg from 'src/assets/launchpad/launch-task.png';
 import {
   ImageLabelingJobType,
   ImageLabelingJobTypeData,
@@ -30,7 +30,7 @@ import {
   OpenQueriesJobTypeData,
   TextLabelingJobType,
   TextLabelingJobTypeData,
-} from 'src/constants/leaderboard';
+} from 'src/constants/launchpad';
 
 const SelectContainer = styled(Box)({
   borderRadius: '10px',
@@ -138,7 +138,7 @@ export const LaunchJobView = () => {
             <Typography variant="body2" color="#013654" sx={{ ml: '12px' }}>
               Unsure what job type to choose?
             </Typography>
-            <Link to="/leaderboard-all-job-types">
+            <Link to="/launchpad/explore-jobs">
               <Button
                 sx={{ ml: 2 }}
                 color="secondary"

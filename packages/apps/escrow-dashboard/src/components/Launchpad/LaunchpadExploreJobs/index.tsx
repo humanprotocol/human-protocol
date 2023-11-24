@@ -1,9 +1,8 @@
 import { Box, Chip, Typography } from '@mui/material';
-import { FC } from 'react';
 
 import { JobTypesView } from './JobTypesView';
 
-export const LeaderboardAllJobTypesContainer: FC = () => {
+export const LaunchpadExploreJobs = () => {
   return (
     <Box>
       <Box display="flex" justifyContent="center" alignItems="start">

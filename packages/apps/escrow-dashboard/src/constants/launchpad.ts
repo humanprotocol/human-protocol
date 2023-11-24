@@ -1,12 +1,12 @@
-import imageBinaryImg from '../assets/leaderboard/task-types/image_binary.png';
-import imageBoundingBoxImg from '../assets/leaderboard/task-types/image_bounding_box.png';
-import imageMultipleChoiceImg from '../assets/leaderboard/task-types/image_multiple_choice.png';
-import imageRedoBBImg from '../assets/leaderboard/task-types/image_redo_bb.png';
-import imageSemanticSegmentationImg from '../assets/leaderboard/task-types/image_semantic_segmentation.png';
-import marketMakingHuFiImg from '../assets/leaderboard/task-types/market_making_hufi.png';
-import openQueriesMarketResearchImg from '../assets/leaderboard/task-types/open_queries_market_research.png';
-import textFreeEntryOcrImg from '../assets/leaderboard/task-types/text_free_entry_ocr.png';
-import textMultipleChoiceImg from '../assets/leaderboard/task-types/text_multiple_choice.png';
+import imageBinaryImg from '../assets/launchpad/task-types/image_binary.png';
+import imageBoundingBoxImg from '../assets/launchpad/task-types/image_bounding_box.png';
+import imageMultipleChoiceImg from '../assets/launchpad/task-types/image_multiple_choice.png';
+import imageRedoBBImg from '../assets/launchpad/task-types/image_redo_bb.png';
+import imageSemanticSegmentationImg from '../assets/launchpad/task-types/image_semantic_segmentation.png';
+import marketMakingHuFiImg from '../assets/launchpad/task-types/market_making_hufi.png';
+import openQueriesMarketResearchImg from '../assets/launchpad/task-types/open_queries_market_research.png';
+import textFreeEntryOcrImg from '../assets/launchpad/task-types/text_free_entry_ocr.png';
+import textMultipleChoiceImg from '../assets/launchpad/task-types/text_multiple_choice.png';
 
 export enum TextLabelingJobType {
   FREE_ENTRY_OCR = 'FREE_ENTRY_OCR',
