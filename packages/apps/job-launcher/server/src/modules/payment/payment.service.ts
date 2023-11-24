@@ -204,7 +204,7 @@ export class PaymentService {
       tokenAddress,
       signer,
     );
-    tokenContract.interface.parseLog(transaction.logs[0]);
+
     if (
       ethers.utils.hexValue(
         tokenContract.interface.parseLog(transaction.logs[0]).args['_to'],

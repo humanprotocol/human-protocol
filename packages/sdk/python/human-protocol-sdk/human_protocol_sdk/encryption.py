@@ -13,9 +13,8 @@ class Encryption:
         """
         Initializes an Encryption instance.
 
-        Args:
-            private_key_armored (str): Armored representation of the private key
-            passphrase (str, optional): Passphrase to unlock the private key. Defaults to None.
+        :param private_key_armored: Armored representation of the private key
+        :param passphrase: Passphrase to unlock the private key. Defaults to None.
         """
         try:
             self.private_key, _ = PGPKey.from_blob(private_key_armored)
@@ -37,12 +36,10 @@ class Encryption:
         """
         Signs and encrypts a message using the private key and recipient's public keys.
 
-        Args:
-            message (str): Message to sign and encrypt
-            public_keys (list[str]): List of armored public keys of the recipients
+        :param message: Message to sign and encrypt
+        :param public_keys: List of armored public keys of the recipients
 
-        Returns:
-            str: Armored and signed/encrypted message
+        :return: Armored and signed/encrypted message
         """
         pgp_message = PGPMessage.new(message)
         if not self.private_key.is_unlocked:
@@ -68,12 +65,10 @@ class Encryption:
         """
         Decrypts a message using the private key.
 
-        Args:
-            message (str): Armored message to decrypt
-            public_key (str, optional): Armored public key used for signature verification. Defaults to None.
+        :param message: Armored message to decrypt
+        :param public_key: Armored public key used for signature verification. Defaults to None.
 
-        Returns:
-            str: Decrypted message
+        :return: Decrypted message
         """
         pgp_message = PGPMessage.from_blob(message)
         decrypted_message = ""
@@ -106,11 +101,9 @@ class Encryption:
         """
         Signs a message using the private key.
 
-        Args:
-            message (str): Message to sign
+        :param message: Message to sign
 
-        Returns:
-            str: Armored and signed message
+        :return: Armored and signed message
         """
         message = PGPMessage.new(message, cleartext=True)
         if not self.private_key.is_unlocked:
@@ -134,12 +127,10 @@ class EncryptionUtils:
         """
         Encrypts a message using the recipient's public keys.
 
-        Args:
-            message (str): Message to encrypt
-            public_keys (list[str]): List of armored public keys of the recipients
+        :param message: Message to encrypt
+        :param public_keys: List of armored public keys of the recipients
 
-        Returns:
-            str: Armored and encrypted message
+        :return: Armored and encrypted message
         """
         pgp_message = PGPMessage.new(message)
         cipher = SymmetricKeyAlgorithm.AES256
@@ -157,12 +148,10 @@ class EncryptionUtils:
         """
         Verifies the signature of a message using the corresponding public key.
 
-        Args:
-            message (str): Armored message to verify
-            public_key (str): Armored public key
+        :param message: Armored message to verify
+        :param public_key: Armored public key
 
-        Returns:
-            bool: True if the signature is valid, False otherwise
+        :return: True if the signature is valid, False otherwise
         """
         try:
             signed_message = (
@@ -179,11 +168,9 @@ class EncryptionUtils:
         """
         Extracts the signed data from an armored signed message.
 
-        Args:
-            message (str): Armored message
+        :param message: Armored message
 
-        Returns:
-            str: Extracted signed data
+        :return: Extracted signed data
         """
         try:
             signed_message = (
