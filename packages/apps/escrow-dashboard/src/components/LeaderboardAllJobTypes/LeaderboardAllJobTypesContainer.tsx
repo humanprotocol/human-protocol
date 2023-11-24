@@ -8,9 +8,14 @@ export const LeaderboardAllJobTypesContainer: FC = () => {
     <Box>
       <Box display="flex" justifyContent="center" alignItems="start">
         <Typography fontWeight={800} variant="h2" color="primary">
-          Leaderboard
+          Launchpad
         </Typography>
-        <Chip label="NEW" sx={{ m: '10px' }} />
+        <Chip
+          label="NEW"
+          sx={{ m: '10px' }}
+          variant="outlined"
+          color="primary"
+        />
       </Box>
       <JobTypesView />
     </Box>

@@ -207,12 +207,7 @@ export const LaunchJobView = () => {
           >
             Launch
           </Button>
-          <Typography
-            fontSize="13px"
-            marginTop="10px"
-            color="primary"
-            sx={{ background: 'rgba(2, 136, 209, 0.04)' }}
-          >
+          <Typography fontSize="13px" marginTop="10px" color="primary">
             Get started, and launch your first tasks for free
           </Typography>
         </Box>

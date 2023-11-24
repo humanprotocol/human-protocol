@@ -28,7 +28,12 @@ export const LeaderboardContainer: FC<LeaderboardContainerProps> = ({
             All HUMAN activity. In one place.
           </Typography>
         </Box>
-        <Chip label="NEW" sx={{ m: '10px' }} />
+        <Chip
+          label="NEW"
+          sx={{ m: '10px' }}
+          variant="outlined"
+          color="primary"
+        />
       </Box>
       <LaunchJobView />
       <LeaderboardView showAll={showAll} />

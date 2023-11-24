@@ -66,7 +66,12 @@ export const OraclesView = () => {
               <Box>
                 <Chip label="HUMAN Protocol core architecture" />
               </Box>
-              <Typography variant="h4" fontWeight={600} color="primary">
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                color="primary"
+                textAlign="center"
+              >
                 Exchange Oracle
               </Typography>
               <Typography color="primary" component="div">
@@ -94,7 +99,12 @@ export const OraclesView = () => {
               <Box>
                 <Chip label="HUMAN Protocol core architecture" />
               </Box>
-              <Typography variant="h4" fontWeight={600} color="primary">
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                color="primary"
+                textAlign="center"
+              >
                 Recording Oracle
               </Typography>
               <Typography color="primary" component="div">
@@ -105,7 +115,7 @@ export const OraclesView = () => {
                   </li>
                   <li>
                     It is storing, and recording task solutions on the
-                    blockchain
+                    blockchain.
                   </li>
                   <li>
                     From quality checks to reputation adjustments, it's the
@@ -125,7 +135,12 @@ export const OraclesView = () => {
               <Box>
                 <Chip label="HUMAN Protocol core architecture" />
               </Box>
-              <Typography variant="h4" fontWeight={600} color="primary">
+              <Typography
+                variant="h4"
+                fontWeight={600}
+                color="primary"
+                textAlign="center"
+              >
                 Reputation Oracle
               </Typography>
               <Typography color="primary" component="div">

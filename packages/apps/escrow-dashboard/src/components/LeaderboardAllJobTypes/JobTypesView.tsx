@@ -34,7 +34,7 @@ const JobTypeList = ({ label, values, labelMap, open, onClick }: any) => {
     <>
       <ListItemButton onClick={onClick}>
         <ListItemText>
-          <Typography variant="body1" color="primary">
+          <Typography variant="body1" color="primary" fontWeight={500}>
             {label}
           </Typography>
         </ListItemText>
@@ -167,7 +167,7 @@ export const JobTypesView = () => {
           component="nav"
         >
           <ListItemButton onClick={() => setFilter(JobTypeFilter.All)}>
-            <Typography variant="body1" color="primary">
+            <Typography variant="body1" color="primary" fontWeight={500}>
               {JobTypeFilter.All}
             </Typography>
           </ListItemButton>
@@ -182,7 +182,7 @@ export const JobTypesView = () => {
             />
           ))}
         </List>
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {filteredMapData
             .flatMap((d) => Object.values(d))
             .map(({ label, description, image }, i) => (

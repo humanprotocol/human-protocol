@@ -4,6 +4,7 @@ import {
   Button,
   Chip,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
@@ -18,12 +19,14 @@ import {
   TableSortLabel,
   Typography,
 } from '@mui/material';
+import copy from 'copy-to-clipboard';
 import { FC, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { CardContainer } from '../Cards';
 import {
+  CopyLinkIcon,
   CvatIcon,
   ExchangeOracleIcon,
   HCaptchaIcon,
@@ -119,7 +122,25 @@ const LeaderRole = ({ role }: { role?: string }) => {
       >
         {IconComponent}
       </Box>
-      <Box>{role}</Box>
+      <Box>
+        <Box sx={{ fontSize: '17px', fontWeight: 500 }}>{role}</Box>
+        {role === 'hCaptcha' && (
+          <Typography variant="body2">
+            <Typography variant="body2" component="span" color="secondary">
+              8 task types
+            </Typography>{' '}
+            supported
+          </Typography>
+        )}
+        {role === 'CVAT' && (
+          <Typography variant="body2">
+            <Typography variant="body2" component="span" color="secondary">
+              3 task types
+            </Typography>{' '}
+            supported
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 };
@@ -139,10 +160,10 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
     navigate(`/leader/${chainId}/${address}`);
   };
 
-  const [order, setOrder] = useState<Order>('asc');
-  const [orderBy, setOrderBy] = useState<string | undefined>();
+  const [order, setOrder] = useState<Order>('desc');
+  const [orderBy, setOrderBy] = useState<string | undefined>('reputation');
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(12);
   const [networkFilter, setNetworkFilter] = useState<ChainId>(ChainId.ALL);
 
   const handleRequestSort = (property: string) => {
@@ -217,7 +238,18 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                   ':first-child': { borderBottomLeftRadius: '4px' },
                   ':last-child': { borderBottomRightRadius: '4px' },
                 },
-                td: { border: 'none' },
+                td: {
+                  border: 'none',
+                  ':first-child': {
+                    borderTopLeftRadius: '4px',
+                    borderBottomLeftRadius: '4px',
+                  },
+                  ':last-child': {
+                    borderTopRightRadius: '4px',
+                    borderBottomRightRadius: '4px',
+                  },
+                },
+                'tr:hover': { td: { background: '#F6F5FC' } },
               }}
             >
               <TableHead>
@@ -231,7 +263,12 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                     >
                       <Box display="flex" alignItems="center" gap="10px">
                         Operator
-                        <Chip label="on HUMAN Protocol" size="small" />
+                        <Chip
+                          label="on HUMAN Protocol"
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                        />
                       </Box>
                     </TableSortLabel>
                   </TableCell>
@@ -306,6 +343,7 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                 <TableBody>
                   {visibleRows.map((staker, i) => (
                     <TableRow
+                      tabIndex={-1}
                       key={`${staker.chainId}-${staker.address}`}
                       sx={{ cursor: 'pointer' }}
                       onClick={() =>
@@ -316,16 +354,55 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
                       <TableCell>
                         <LeaderRole role={staker.role} />
                       </TableCell>
-                      <TableCell>{shortenAddress(staker.address)}</TableCell>
-                      <TableCell>{staker.amountStaked} HMT</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          {shortenAddress(staker.address)}
+                          <IconButton
+                            sx={{ ml: '10px', color: '#858EC6' }}
+                            onClick={(e) => {
+                              copy(staker.address);
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <CopyLinkIcon />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          component="span"
+                          fontWeight={500}
+                        >
+                          {staker.amountStaked}
+                        </Typography>{' '}
+                        HMT
+                      </TableCell>
                       <TableCell>
                         <Box display="flex" alignItems="center" gap={1}>
                           {CHAIN_ICONS[staker.chainId]}
                           {NETWORKS[staker.chainId]?.title}
                         </Box>
                       </TableCell>
-                      <TableCell>{staker.reputation}</TableCell>
-                      <TableCell>0 HMT</TableCell>
+                      <TableCell>
+                        <Chip
+                          label="Coming soon"
+                          size="small"
+                          variant="outlined"
+                          color="primary"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          component="span"
+                          fontWeight={500}
+                        >
+                          0
+                        </Typography>{' '}
+                        HMT
+                      </TableCell>
                     </TableRow>
                   ))}
                   {emptyRows > 0 && (
@@ -345,15 +422,17 @@ export const LeaderboardView: FC<LeaderboardViewProps> = ({
               )}
             </Table>
           </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={filteredLeaders?.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          {filteredLeaders?.length > 12 && (
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredLeaders?.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          )}
         </CardContainer>
       </Box>
     </Box>

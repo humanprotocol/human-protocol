@@ -134,6 +134,9 @@ const theme = createTheme({
           color: '#304FFE',
           textTransform: 'none',
         },
+        outlinedPrimary: {
+          border: '1px solid #8C9EFF',
+        },
       },
     },
   },
