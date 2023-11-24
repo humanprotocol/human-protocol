@@ -6,7 +6,11 @@ import { PaymentRepository } from './payment.repository';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { createMock } from '@golevelup/ts-jest';
-import { ErrorPayment, ErrorPostgres, ErrorSignature } from '../../common/constants/errors';
+import {
+  ErrorPayment,
+  ErrorPostgres,
+  ErrorSignature,
+} from '../../common/constants/errors';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
@@ -307,6 +311,9 @@ describe('PaymentService', () => {
 
     const mockTokenContract: any = {
       symbol: jest.fn(),
+      interface: {
+        parseLog: jest.fn().mockReturnValue({ args: { _to: MOCK_ADDRESS } }),
+      },
     };
 
     beforeEach(() => {
@@ -666,9 +673,13 @@ describe('PaymentService', () => {
     };
 
     it('should successfully create a refund payment', async () => {
-      jest.spyOn(paymentRepository, 'create').mockResolvedValueOnce(undefined as any);
+      jest
+        .spyOn(paymentRepository, 'create')
+        .mockResolvedValueOnce(undefined as any);
 
-      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).resolves.not.toThrow();
+      await expect(
+        paymentService.createRefundPayment(mockPaymentRefundCreateDto),
+      ).resolves.not.toThrow();
     });
 
     it('should throw IncorrectAmount error when overflow occurs', async () => {
@@ -676,13 +687,19 @@ describe('PaymentService', () => {
       mockError.message = ErrorPostgres.NumericFieldOverflow.toLowerCase();
       jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(mockError);
 
-      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).rejects.toThrow(ConflictException);
+      await expect(
+        paymentService.createRefundPayment(mockPaymentRefundCreateDto),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should throw NotSuccess error on other database errors', async () => {
-      jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(new Error());
+      jest
+        .spyOn(paymentRepository, 'create')
+        .mockRejectedValueOnce(new Error());
 
-      await expect(paymentService.createRefundPayment(mockPaymentRefundCreateDto)).rejects.toThrow(ConflictException);
+      await expect(
+        paymentService.createRefundPayment(mockPaymentRefundCreateDto),
+      ).rejects.toThrow(ConflictException);
     });
   });
 });
