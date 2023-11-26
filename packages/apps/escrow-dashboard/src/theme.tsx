@@ -139,6 +139,18 @@ const theme = createTheme({
         },
       },
     },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: 'rgba(50, 10, 141, 0.08)',
+          },
+          '&.Mui-selected': {
+            backgroundColor: 'rgba(218, 222, 240, 0.80)',
+          },
+        },
+      },
+    },
   },
 });
 

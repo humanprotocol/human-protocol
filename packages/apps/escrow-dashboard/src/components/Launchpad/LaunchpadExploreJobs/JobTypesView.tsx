@@ -1,9 +1,7 @@
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import {
   Box,
-  Button,
   Card,
   CardMedia,
   Collapse,
@@ -14,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import tasksSvg from 'src/assets/tasks.svg';
 import { ViewTitle } from 'src/components/ViewTitle';
@@ -29,10 +26,17 @@ import {
   TextLabelingJobTypeData,
 } from 'src/constants/launchpad';
 
-const JobTypeList = ({ label, values, labelMap, open, onClick }: any) => {
+const JobTypeList = ({
+  label,
+  values,
+  labelMap,
+  open,
+  selected,
+  onClick,
+}: any) => {
   return (
     <>
-      <ListItemButton onClick={onClick}>
+      <ListItemButton onClick={onClick} selected={selected}>
         <ListItemText>
           <Typography variant="body1" color="primary" fontWeight={500}>
             {label}
@@ -69,26 +73,38 @@ export const JobTypeCard = ({
   description?: string;
 }) => {
   return (
-    <Card sx={{ boxShadow: '0px 0px 0px 1px #E9EBFA;', height: '100%' }}>
-      <CardMedia sx={{ height: 200 }} image={image} title={label} />
-      <Box sx={{ padding: '16px' }}>
-        <Typography
-          gutterBottom
-          variant="h6"
-          component="div"
-          fontWeight={500}
-          my={1}
-        >
-          {label}
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          lineHeight={1.5}
-          mb={2}
-        >
-          {description}
-        </Typography>
+    <Card
+      sx={{
+        boxShadow:
+          '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
+        height: '100%',
+        borderRadius: '16px',
+      }}
+    >
+      <Box sx={{ padding: 2 }}>
+        <CardMedia
+          sx={{ height: 200, borderRadius: '8px' }}
+          image={image}
+          title={label}
+        />
+        <Box sx={{ mt: 3, pt: 1 }}>
+          <Typography
+            gutterBottom
+            variant="h6"
+            component="div"
+            fontWeight={500}
+          >
+            {label}
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            lineHeight={1.5}
+            mb={2}
+          >
+            {description}
+          </Typography>
+        </Box>
       </Box>
     </Card>
   );
@@ -140,31 +156,16 @@ export const JobTypesView = () => {
 
   return (
     <Box mt="58px">
-      <Link to="/launchpad">
-        <Button
-          variant="outlined"
-          color="primary"
-          sx={{ mb: '58px' }}
-          startIcon={<ArrowBackIcon />}
-        >
-          Back
-        </Button>
-      </Link>
       <ViewTitle title="Job types" iconUrl={tasksSvg} fontSize={45} />
       <Box sx={{ mt: '54px', display: 'flex' }}>
         <List
-          sx={{
-            width: '100%',
-            maxWidth: 240,
-            bgcolor: 'background.paper',
-            borderRadius: '4px',
-            boxShadow:
-              '0px 3px 64px 2px rgba(233, 235, 250, 0.20), 0px 8px 20px 1px rgba(133, 142, 198, 0.10), 0px 5px 5px -3px rgba(203, 207, 232, 0.50);',
-            marginRight: '52px',
-          }}
+          sx={{ width: '100%', maxWidth: 240, marginRight: '52px' }}
           component="nav"
         >
-          <ListItemButton onClick={() => setFilter(JobTypeFilter.All)}>
+          <ListItemButton
+            onClick={() => setFilter(JobTypeFilter.All)}
+            selected={filter === JobTypeFilter.All}
+          >
             <Typography variant="body1" color="primary" fontWeight={500}>
               {JobTypeFilter.All}
             </Typography>
@@ -176,6 +177,7 @@ export const JobTypesView = () => {
               values={values}
               labelMap={labelMap}
               open={filter === filterKey || filter === JobTypeFilter.All}
+              selected={filter === filterKey}
               onClick={() => setFilter(filterKey)}
             />
           ))}
