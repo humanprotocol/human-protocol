@@ -56,9 +56,6 @@ export default function JobDetail() {
     data?.details.status === JobStatus.PENDING ||
     data?.details.status === JobStatus.LAUNCHED;
 
-  const secureProtocol =
-    window.location.protocol === 'https:' ? 'https://' : 'http://';
-
   if (isLoading) return <>Loading...</>;
 
   if (!data || error) return <>Failed to fetch job details. Try again later.</>;
@@ -270,10 +267,8 @@ export default function JobDetail() {
                         textDecoration: 'underline',
                         alignItems: 'left',
                       }}
-                      to={(data.results as string).replace(
-                        'http://',
-                        secureProtocol
-                      )}
+                      to={data.results as string}
+                      replace
                     >
                       {data.results as string}
                     </Link>
