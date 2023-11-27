@@ -268,7 +268,6 @@ export default function JobDetail() {
                         alignItems: 'left',
                       }}
                       to={data.results as string}
-                      replace
                     >
                       {data.results as string}
                     </Link>
