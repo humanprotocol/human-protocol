@@ -1,3 +1,32 @@
+"""
+**This modules contains an s3 client and utilities for files sharing.**
+
+This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
+Google Cloud Storage and others.
+If credentials are not provided, anonymous access will be used (for downloading files).
+
+A simple example
+----------------
+
+.. code-block:: python
+
+    from human_protocol_sdk.storage import (
+        Credentials,
+        StorageClient,
+    )
+
+    credentials = Credentials(
+        access_key="my-access-key",
+        secret_key="my-secret-key",
+    )
+
+    storage_client = StorageClient(
+        endpoint_url="s3.us-west-2.amazonaws.com",
+        region="us-west-2",
+        credentials=credentials,
+    )
+"""
+
 import hashlib
 import io
 import json
@@ -69,20 +98,21 @@ class StorageClient:
     :attribute:
         - client (Minio): The S3-compatible client used for interacting with the service.
 
-    Example::
+    :example:
+        .. code-block:: python
 
-        # Download a list of files from an S3-compatible service
-        client = StorageClient(
-            endpoint_url='https://s3.us-west-2.amazonaws.com',
-            region='us-west-2',
-            credentials=Credentials(
-                access_key='my-access-key',
-                secret_key='my-secret-key'
+            # Download a list of files from an S3-compatible service
+            client = StorageClient(
+                endpoint_url='https://s3.us-west-2.amazonaws.com',
+                region='us-west-2',
+                credentials=Credentials(
+                    access_key='my-access-key',
+                    secret_key='my-secret-key'
+                )
             )
-        )
-        files = ['file1.txt', 'file2.txt']
-        bucket = 'my-bucket'
-        result_files = client.download_files(files=files, bucket=bucket)
+            files = ['file1.txt', 'file2.txt']
+            bucket = 'my-bucket'
+            result_files = client.download_files(files=files, bucket=bucket)
 
     """
 
@@ -137,6 +167,15 @@ class StorageClient:
         :return: The content of the downloaded file.
 
         :raise StorageClientError: If an error occurs while downloading the file.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.storage import StorageClient
+
+                result = StorageClient.download_file_from_url(
+                    "https://www.example.com/file.txt"
+                )
         """
         if not validate_url(url):
             raise StorageClientError(f"Invalid URL: {url}")
@@ -160,6 +199,30 @@ class StorageClient:
 
         :raise StorageClientError: If an error occurs while downloading the files.
         :raise StorageFileNotFoundError: If one of the specified files is not found in the bucket.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.storage import (
+                    Credentials,
+                    StorageClient,
+                )
+
+                credentials = Credentials(
+                    access_key="my-access-key",
+                    secret_key="my-secret-key",
+                )
+
+                storage_client = StorageClient(
+                    endpoint_url="s3.us-west-2.amazonaws.com",
+                    region="us-west-2",
+                    credentials=credentials,
+                )
+
+                result = storage_client.download_files(
+                    files = ["file1.txt", "file2.txt"],
+                    bucket = "my-bucket"
+                )
         """
         result_files = []
         for file in files:
@@ -185,6 +248,30 @@ class StorageClient:
         :return: List of dict with key, url, hash fields
 
         :raise StorageClientError: If an error occurs while uploading the files.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.storage import (
+                    Credentials,
+                    StorageClient,
+                )
+
+                credentials = Credentials(
+                    access_key="my-access-key",
+                    secret_key="my-secret-key",
+                )
+
+                storage_client = StorageClient(
+                    endpoint_url="s3.us-west-2.amazonaws.com",
+                    region="us-west-2",
+                    credentials=credentials,
+                )
+
+                result = storage_client.upload_files(
+                    files = ["file content"],
+                    bucket = "my-bucket"
+                )
         """
         result_files = []
         for file in files:
@@ -248,6 +335,29 @@ class StorageClient:
         :return: True if the bucket exists, False otherwise.
 
         :raise StorageClientError: If an error occurs while checking the bucket.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.storage import (
+                    Credentials,
+                    StorageClient,
+                )
+
+                credentials = Credentials(
+                    access_key="my-access-key",
+                    secret_key="my-secret-key",
+                )
+
+                storage_client = StorageClient(
+                    endpoint_url="s3.us-west-2.amazonaws.com",
+                    region="us-west-2",
+                    credentials=credentials,
+                )
+
+                is_exists = storage_client.bucket_exists(
+                    bucket = "my-bucket"
+                )
         """
         try:
             return self.client.bucket_exists(bucket_name=bucket)
@@ -266,6 +376,29 @@ class StorageClient:
         :return: A list of object keys in the given bucket.
 
         :raise StorageClientError: If an error occurs while listing the objects.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.storage import (
+                    Credentials,
+                    StorageClient,
+                )
+
+                credentials = Credentials(
+                    access_key="my-access-key",
+                    secret_key="my-secret-key",
+                )
+
+                storage_client = StorageClient(
+                    endpoint_url="s3.us-west-2.amazonaws.com",
+                    region="us-west-2",
+                    credentials=credentials,
+                )
+
+                result = storage_client.list_objects(
+                    bucket = "my-bucket"
+                )
         """
         try:
             objects = list(self.client.list_objects(bucket_name=bucket))

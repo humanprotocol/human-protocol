@@ -1,4 +1,69 @@
-#!/usr/bin/env python3
+"""
+**This module enables to perform actions on Escrow contracts
+and obtain information from both the contracts and subgraph.**
+
+Internally, the SDK will use one network or another according to the network ID of the web3.
+To use this client, you need to create Web3 instance, and configure default account,
+as well as some middlewares.
+
+A simple example
+----------------
+
+* With Signer
+
+.. code-block:: python
+
+    from eth_typing import URI
+    from web3 import Web3
+    from web3.middleware import construct_sign_and_send_raw_middleware
+    from web3.providers.auto import load_provider_from_uri
+
+    from human_protocol_sdk.escrow import EscrowClient
+
+    def get_w3_with_priv_key(priv_key: str):
+        w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+        gas_payer = w3.eth.account.from_key(priv_key)
+        w3.eth.default_account = gas_payer.address
+        w3.middleware_onion.add(
+            construct_sign_and_send_raw_middleware(gas_payer),
+            "construct_sign_and_send_raw_middleware",
+        )
+        return (w3, gas_payer)
+
+    (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+    escrow_client = EscrowClient(w3)
+
+* Without Signer (For read operations only)
+
+.. code-block:: python
+
+    from eth_typing import URI
+    from web3 import Web3
+    from web3.providers.auto import load_provider_from_uri
+
+    from human_protocol_sdk.escrow import EscrowClient
+
+    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+    escrow_client = EscrowClient(w3)
+
+* EscrowUtils
+
+.. code-block:: python
+
+    from human_protocol_sdk.constants import ChainId
+    from human_protocol_sdk.escrow import EscrowUtils, EscorwFilter, Status
+
+    print(
+        EscrowUtils.get_escrows(
+            EscrowFilter(
+                networks=[ChainId.POLYGON_MUMBAI],
+                status=Status.Pending,
+                date_from=datetime.datetime(2023, 5, 8),
+                date_to=datetime.datetime(2023, 6, 8),
+            )
+        )
+    )
+"""
 
 from datetime import datetime
 import logging
@@ -221,6 +286,41 @@ class EscrowClient:
         :return: The address of the escrow created
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                token_address = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
+                trusted_handlers = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+                ]
+                job_requester_id = 'job-requester'
+                escrow_address = escrow_client.create_escrow(
+                    token_address,
+                    trusted_handlers,
+                    job_requester_id
+                )
         """
         if not Web3.is_address(token_address):
             raise EscrowClientError(f"Invalid token address: {token_address}")
@@ -257,6 +357,42 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_address = "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                escrow_config = EscrowConfig(
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    10,
+                    10,
+                    10,
+                    "htttp://localhost/manifest.json",
+                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+                )
+                escrow_client.setup(escrow_address, escrow_config)
         """
 
         if not Web3.is_address(escrow_address):
@@ -297,6 +433,52 @@ class EscrowClient:
         :return: The address of the escrow created
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                token_address = '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4'
+                trusted_handlers = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+                ]
+                job_requester_id = 'job-requester'
+                escrow_config = EscrowConfig(
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+                    10,
+                    10,
+                    10,
+                    "htttp://localhost/manifest.json",
+                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079",
+                )
+                escrow_address = escrow_client.create_and_setup_escrow(
+                    token_address,
+                    trusted_handlers,
+                    job_requester_id,
+                    escrow_config
+                )
         """
 
         escrow_address = self.create_escrow(
@@ -316,6 +498,32 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                amount = Web3.to_wei(5, 'ether') # convert from ETH to WEI
+                escrow_client.fund("0x62dD51230A30401C455c8398d06F85e4EaB6309f", amount)
         """
 
         if not Web3.is_address(escrow_address):
@@ -346,6 +554,35 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_client.store_results(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    "http://localhost/results.json",
+                    "b5dad76bf6772c0f07fd5e048f6e75a5f86ee079"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -373,6 +610,31 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_client.complete("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
         """
 
         if not Web3.is_address(escrow_address):
@@ -407,6 +669,49 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                recipients = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92267'
+                ]
+                amounts = [
+                    Web3.to_wei(5, 'ether'),
+                    Web3.to_wei(10, 'ether')
+                ]
+                results_url = 'http://localhost/results.json'
+                results_hash = 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079'
+
+                escrow_client.bulk_payout(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    recipients,
+                    amounts,
+                    results_url,
+                    results_hash,
+                    1
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -451,6 +756,33 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                transaction_hash = escrow_client.cancel(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -473,6 +805,31 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                escrow_client.abort("0x62dD51230A30401C455c8398d06F85e4EaB6309f")
         """
 
         if not Web3.is_address(escrow_address):
@@ -495,6 +852,38 @@ class EscrowClient:
         :return: None
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.middleware import construct_sign_and_send_raw_middleware
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                def get_w3_with_priv_key(priv_key: str):
+                    w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                    gas_payer = w3.eth.account.from_key(priv_key)
+                    w3.eth.default_account = gas_payer.address
+                    w3.middleware_onion.add(
+                        construct_sign_and_send_raw_middleware(gas_payer),
+                        "construct_sign_and_send_raw_middleware",
+                    )
+                    return (w3, gas_payer)
+
+                (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
+                escrow_client = EscrowClient(w3)
+
+                trusted_handlers = [
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+                    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+                ]
+                escrow_client.add_trusted_handlers(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f",
+                    trusted_handlers
+                )
         """
         if not Web3.is_address(escrow_address):
             raise EscrowClientError(f"Invalid escrow address: {escrow_address}")
@@ -520,6 +909,22 @@ class EscrowClient:
         :return: Value of the balance
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                balance = escrow_client.get_balance(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -535,6 +940,22 @@ class EscrowClient:
         :return: Manifest file hash
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                manifest_hash = escrow_client.get_manifest_hash(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -550,6 +971,22 @@ class EscrowClient:
         :return str: Manifest file url
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                url = escrow_client.get_manifest_url(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -565,6 +1002,22 @@ class EscrowClient:
         :return: Results file url
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                url = escrow_client.get_results_url(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -582,6 +1035,22 @@ class EscrowClient:
         :return: Intermediate results file url
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                url = escrow_client.get_intermediate_results_url(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -601,6 +1070,22 @@ class EscrowClient:
         :return: Address of the token
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                token_address = escrow_client.get_token_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -616,6 +1101,22 @@ class EscrowClient:
         :return: Current escrow status
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                status = escrow_client.get_status(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -633,6 +1134,22 @@ class EscrowClient:
         :return: Recording oracle address
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                recording_oracle = escrow_client.get_recording_oracle_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -650,6 +1167,22 @@ class EscrowClient:
         :return: Reputation oracle address
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                reputation_oracle = escrow_client.get_reputation_oracle_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -669,6 +1202,22 @@ class EscrowClient:
         :return: Exchange oracle address
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                exchange_oracle = escrow_client.get_exchange_oracle_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -686,6 +1235,22 @@ class EscrowClient:
         :return: Job launcher address
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                job_launcher = escrow_client.get_job_launcher_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -701,6 +1266,22 @@ class EscrowClient:
         :return: Escrow factory address
 
         :raise EscrowClientError: If an error occurs while checking the parameters
+
+        :example:
+            .. code-block:: python
+
+                from eth_typing import URI
+                from web3 import Web3
+                from web3.providers.auto import load_provider_from_uri
+
+                from human_protocol_sdk.escrow import EscrowClient
+
+                w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
+                escrow_client = EscrowClient(w3)
+
+                escrow_factory = escrow_client.get_factory_address(
+                    "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
+                )
         """
 
         if not Web3.is_address(escrow_address):
@@ -740,6 +1321,23 @@ class EscrowUtils:
         :param filter: Object containing all the necessary parameters to filter
 
         :return: List of escrows
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.constants import ChainId
+                from human_protocol_sdk.escrow import EscrowUtils, EscrowFilter, Status
+
+                print(
+                    EscrowUtils.get_escrows(
+                        EscrowFilter(
+                            networks=[ChainId.POLYGON_MUMBAI],
+                            status=Status.Pending,
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrows_query,
@@ -825,6 +1423,19 @@ class EscrowUtils:
         :param escrow_address: Address of the escrow
 
         :return: Escrow data
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.constants import ChainId
+                from human_protocol_sdk.escrow import EscrowUtils
+
+                print(
+                    EscrowUtils.get_escrow(
+                        ChainId.POLYGON_MUMBAI,
+                        "0x1234567890123456789012345678901234567890"
+                    )
+                )
         """
         from human_protocol_sdk.gql.escrow import (
             get_escrow_query,

@@ -1,4 +1,16 @@
-#!/usr/bin/env python3
+"""
+**This module allows to read statistical data from the subgraph.**
+
+A simple example
+----------------
+
+.. code-block:: python
+
+    from human_protocol_sdk.constants import ChainId
+    from human_protocol_sdk.statistics import StatisticsClient
+
+    statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+"""
 
 from datetime import datetime
 import logging
@@ -287,6 +299,24 @@ class StatisticsClient:
         :param param: Object containing the date range
 
         :return: Escrow statistics data
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+
+                print(statistics_client.get_escrow_statistics())
+                print(
+                    statistics_client.get_escrow_statistics(
+                        StatisticsParam(
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
         """
 
         from human_protocol_sdk.gql.statistics import (
@@ -343,6 +373,24 @@ class StatisticsClient:
         :param param: Object containing the date range
 
         :return: Worker statistics data
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+
+                print(statistics_client.get_worker_statistics())
+                print(
+                    statistics_client.get_worker_statistics(
+                        StatisticsParam(
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
@@ -379,6 +427,23 @@ class StatisticsClient:
 
         :return: Payment statistics data
 
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+
+                print(statistics_client.get_payment_statistics())
+                print(
+                    statistics_client.get_payment_statistics(
+                        StatisticsParam(
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
         """
 
         from human_protocol_sdk.gql.statistics import (
@@ -422,6 +487,24 @@ class StatisticsClient:
         :param param: Object containing the date range
 
         :return: HMT statistics data
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.contants import ChainId
+                from human_protocol_sdk.statistics import StatisticsClient, StatisticsParam
+
+                statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+
+                print(statistics_client.get_hmt_statistics())
+                print(
+                    statistics_client.get_hmt_statistics(
+                        StatisticsParam(
+                            date_from=datetime.datetime(2023, 5, 8),
+                            date_to=datetime.datetime(2023, 6, 8),
+                        )
+                    )
+                )
         """
         from human_protocol_sdk.gql.statistics import (
             get_event_day_data_query,
