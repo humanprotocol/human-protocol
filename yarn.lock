@@ -2080,10 +2080,10 @@
   resolved "https://registry.yarnpkg.com/@golevelup/ts-jest/-/ts-jest-0.4.0.tgz#e36551ecbb37fcf3e4143a1ba9f78a649649dc91"
   integrity sha512-ehgllV/xU8PC+yVyEUtTzhiSQKsr7k5Jz74B6dtCaVJz7/Vo7JiaACsCLvD7/iATlJUAEqvBson0OHewD3JDzQ==
 
-"@graphprotocol/graph-cli@^0.60.0":
-  version "0.60.0"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.60.0.tgz#afcae7a966ad348886f49372d36c4ca6c35b9434"
-  integrity sha512-8tGaQJ0EzAPtkDXCAijFGoVdJXM+pKFlGxjiU31TdG5bS4cIUoSB6yWojVsFFod0yETAwf+giel/0/8sudYsDw==
+"@graphprotocol/graph-cli@^0.62.0":
+  version "0.62.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.62.0.tgz#948d3861d9ff027728097deac5d8751924ec0c8a"
+  integrity sha512-dyjhkCSXbdcul5h1wY2CmorjM4k+tjjzEFs5GFBSSdLC2VodKXEWJo9RzrpFSmRBJzwc7ywDf8Pbmy1cJTCXRA==
   dependencies:
     "@float-capital/float-subgraph-uncrashable" "^0.0.0-alpha.4"
     "@oclif/core" "2.8.6"
