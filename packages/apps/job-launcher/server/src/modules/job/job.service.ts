@@ -74,12 +74,19 @@ import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
+  HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
+  HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+  HCAPTCHA_IMMO_MAX_LENGTH,
+  HCAPTCHA_IMMO_MIN_LENGTH,
+  HCAPTCHA_LANDMARK_MAX_POINTS,
+  HCAPTCHA_LANDMARK_MIN_POINTS,
   HCAPTCHA_MAX_SHAPES_PER_IMAGE,
   HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
   HCAPTCHA_MIN_SHAPES_PER_IMAGE,
   HCAPTCHA_NOT_PRESENTED_LABEL,
-  HCAPTCHA_REPO_URI,
-  HCAPTCHA_RO_URI,
+  HCAPTCHA_ORACLE_STAKE,
+  HCAPTCHA_POLYGON_MAX_POINTS,
+  HCAPTCHA_POLYGON_MIN_POINTS,
   HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
@@ -156,9 +163,9 @@ export class JobService {
         task_bid_price: jobDto.annotations.taskBidPrice,
         taskdata_uri: await this.generateAndUploadTaskData(jobDto.dataUrl, objectsInBucket),
         public_results: true,
-        oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI
+        oracle_stake: HCAPTCHA_ORACLE_STAKE,
+        repo_uri: this.configService.get<string>(ConfigNames.HCAPTCHA_REPUTATION_ORACLE_ADDRESS)!,
+        ro_uri: this.configService.get<string>(ConfigNames.HCAPTCHA_RECORDING_ORACLE_ADDRESS)!,
     };
 
     let groundTruthsData;
@@ -201,8 +208,8 @@ export class JobService {
                   shape_type: JobCaptchaShapeType.POLYGON,
                   min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
                   max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 4,
-                  max_points: 4,
+                  min_points: HCAPTCHA_POLYGON_MIN_POINTS,
+                  max_points: HCAPTCHA_POLYGON_MAX_POINTS,
                   minimum_selection_area_per_shape: HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
@@ -225,8 +232,8 @@ export class JobService {
                   shape_type: jobType,
                   min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
                   max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 1,
-                  max_points: 8,
+                  min_points: HCAPTCHA_LANDMARK_MIN_POINTS,
+                  max_points: HCAPTCHA_LANDMARK_MAX_POINTS,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
@@ -247,8 +254,8 @@ export class JobService {
                   shape_type: jobType,
                   min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
                   max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
-                  min_points: 4,
-                  max_points: 4,
+                  min_points: HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+                  max_points: HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
               },
               groundtruth_uri: jobDto.annotations.groundTruths,
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
@@ -270,8 +277,8 @@ export class JobService {
                   multiple_choice_min_choices:1,
                   overlap_threshold: null,
                   answer_type: "str",
-                  max_length: 100,
-                  min_length: 1
+                  max_length: HCAPTCHA_IMMO_MAX_LENGTH,
+                  min_length: HCAPTCHA_IMMO_MIN_LENGTH
               },
               requester_restricted_answer_set: { [jobDto.annotations.label!]: { en: jobDto.annotations.label } },
               taskdata: []
