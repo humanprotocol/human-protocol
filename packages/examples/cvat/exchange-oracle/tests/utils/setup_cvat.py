@@ -1,13 +1,14 @@
 import hmac
 import json
 import uuid
+from datetime import datetime
 from hashlib import sha256
 
 from sqlalchemy.sql import select
 
 from src.core.config import CvatConfig
 from src.db import SessionLocal
-from src.models.cvat import Assignment, Job, Project, Task
+from src.models.cvat import Assignment, Job, Project, Task, User
 
 
 def generate_cvat_signature(data: dict):
@@ -74,6 +75,29 @@ def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, st
         session.add(job)
 
     return job_id
+
+
+def add_asignment_to_db(
+    wallet_address: str, cvat_id: int, cvat_job_id: int, expires_at: datetime
+) -> str:
+    with SessionLocal.begin() as session:
+        user = User(
+            wallet_address=wallet_address,
+            cvat_email="test" + str(cvat_id) + "@hmt.ai",
+            cvat_id=cvat_id,
+        )
+        session.add(user)
+        assignment_id = str(uuid.uuid4())
+        assignment = Assignment(
+            id=assignment_id,
+            user_wallet_address=wallet_address,
+            cvat_job_id=cvat_job_id,
+            expires_at=expires_at,
+        )
+
+        session.add(assignment)
+
+    return assignment_id
 
 
 def get_cvat_job_from_db(cvat_id: int) -> tuple:
