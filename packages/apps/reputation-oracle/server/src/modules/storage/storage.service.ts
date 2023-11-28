@@ -91,7 +91,6 @@ export class StorageService {
       };
     } catch (error) {
       Logger.error('Error copying file:', error);
-      console.log(error);
       throw new Error('File not uploaded');
     }
   }

@@ -68,7 +68,10 @@ describe('Web3Service', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = crypto.createHash('sha1').update(JSON.stringify(MOCK_MANIFEST)).digest('hex');
+      const hash = crypto
+        .createHash('sha1')
+        .update(JSON.stringify(MOCK_MANIFEST))
+        .digest('hex');
 
       const fileData = await storageService.uploadManifest(MOCK_MANIFEST);
       expect(fileData).toEqual({
@@ -84,6 +87,7 @@ describe('Web3Service', () => {
         expect.any(String),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
     });
@@ -166,6 +170,7 @@ describe('Web3Service', () => {
         MOCK_S3_BUCKET,
         expect.any(String),
         expect.any(stream),
+        { 'Cache-Control': 'no-store' },
       );
     });
 
