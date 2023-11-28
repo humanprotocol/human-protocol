@@ -82,6 +82,7 @@ export class JobController {
     );
   }
 
+  @ApiKey()
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
