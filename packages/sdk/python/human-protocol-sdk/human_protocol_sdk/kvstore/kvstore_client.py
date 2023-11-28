@@ -1,12 +1,13 @@
 """
-**This module allows the contract interaction with the key value storage on chain.**
+**This client enables to perform actions on KVStore contract and
+obtain information from both the contracts and subgraph.**
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
 To use this client, you need to create Web3 instance, and configure default account,
 as well as some middlewares.
 
-A simple example
-----------------
+Code Example
+------------
 
 * With Signer
 
@@ -48,7 +49,6 @@ A simple example
 
 import logging
 import os
-from decimal import Decimal
 from typing import List, Optional
 
 import requests

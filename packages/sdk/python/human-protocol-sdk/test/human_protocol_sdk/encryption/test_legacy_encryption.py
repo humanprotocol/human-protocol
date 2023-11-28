@@ -6,7 +6,7 @@ from test.human_protocol_sdk.utils.encryption import message
 from eth_keys import keys as eth_keys
 
 
-class EncryptionServiceTest(unittest.TestCase):
+class TestLegacyEncryption(unittest.TestCase):
     """Encryption Seric test."""
 
     def setUp(self) -> None:

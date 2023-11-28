@@ -11,7 +11,7 @@ from web3.providers.rpc import HTTPProvider
 from web3.middleware import construct_sign_and_send_raw_middleware
 
 
-class KVStoreTestCase(unittest.TestCase):
+class TestKVStoreClient(unittest.TestCase):
     def setUp(self):
         self.mock_provider = MagicMock(spec=HTTPProvider)
         self.w3 = Web3(self.mock_provider)
@@ -71,7 +71,7 @@ class KVStoreTestCase(unittest.TestCase):
         value = "value"
 
         with patch(
-            "human_protocol_sdk.kvstore.handle_transaction"
+            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
         ) as mock_handle_transaction:
             self.kvstore.set(key, value)
 
@@ -112,7 +112,7 @@ class KVStoreTestCase(unittest.TestCase):
         values = ["value1", "value2", "value3"]
 
         with patch(
-            "human_protocol_sdk.kvstore.handle_transaction"
+            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
         ) as mock_handle_transaction:
             self.kvstore.set_bulk(keys, values)
 
@@ -170,7 +170,7 @@ class KVStoreTestCase(unittest.TestCase):
 
         with (
             patch(
-                "human_protocol_sdk.kvstore.handle_transaction"
+                "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
             ) as mock_handle_transaction,
             patch("requests.get") as mock_get,
         ):
@@ -200,7 +200,7 @@ class KVStoreTestCase(unittest.TestCase):
         content_hash = self.w3.keccak(text=content).hex()
 
         with patch(
-            "human_protocol_sdk.kvstore.handle_transaction"
+            "human_protocol_sdk.kvstore.kvstore_client.handle_transaction"
         ) as mock_handle_transaction, patch("requests.get") as mock_get:
             mock_response = mock_get.return_value
             mock_response.text = content

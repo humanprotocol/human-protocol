@@ -15,7 +15,7 @@ from human_protocol_sdk.statistics import (
 )
 
 
-class StatisticsTestCase(unittest.TestCase):
+class TestStatisticsClient(unittest.TestCase):
     def setUp(self):
         self.statistics = StatisticsClient(ChainId.LOCALHOST)
 
@@ -32,7 +32,7 @@ class StatisticsTestCase(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -97,7 +97,7 @@ class StatisticsTestCase(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -137,7 +137,7 @@ class StatisticsTestCase(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {
@@ -186,7 +186,7 @@ class StatisticsTestCase(unittest.TestCase):
         mock_function = MagicMock()
 
         with patch(
-            "human_protocol_sdk.statistics.get_data_from_subgraph"
+            "human_protocol_sdk.statistics.statistics_client.get_data_from_subgraph"
         ) as mock_function:
             mock_function.side_effect = [
                 {

@@ -1,8 +1,8 @@
 """
-**This module allows to read statistical data from the subgraph.**
+**This client enables to obtain statistical information from the subgraph.**
 
-A simple example
-----------------
+Code Example
+------------
 
 .. code-block:: python
 
@@ -14,7 +14,6 @@ A simple example
 
 from datetime import datetime
 import logging
-import os
 
 from typing import List, Optional
 

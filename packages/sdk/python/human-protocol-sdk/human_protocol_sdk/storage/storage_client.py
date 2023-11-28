@@ -1,12 +1,11 @@
 """
-**This modules contains an s3 client and utilities for files sharing.**
+**This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
+Google Cloud Storage and others.**
 
-This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
-Google Cloud Storage and others.
 If credentials are not provided, anonymous access will be used (for downloading files).
 
-A simple example
-----------------
+Code Example
+------------
 
 .. code-block:: python
 
@@ -35,10 +34,7 @@ import os
 from typing import List, Optional
 from warnings import warn
 
-import requests
 from minio import Minio
-
-from .utils import validate_url
 
 logging.getLogger("minio").setLevel(logging.INFO)
 
@@ -156,37 +152,6 @@ class StorageClient:
         except Exception as e:
             LOG.error(f"Connection with S3 failed because of: {e}")
             raise e
-
-    @staticmethod
-    def download_file_from_url(url: str) -> bytes:
-        """
-        Downloads a file from the specified URL.
-
-        :param url: The URL of the file to download.
-
-        :return: The content of the downloaded file.
-
-        :raise StorageClientError: If an error occurs while downloading the file.
-
-        :example:
-            .. code-block:: python
-
-                from human_protocol_sdk.storage import StorageClient
-
-                result = StorageClient.download_file_from_url(
-                    "https://www.example.com/file.txt"
-                )
-        """
-        if not validate_url(url):
-            raise StorageClientError(f"Invalid URL: {url}")
-
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-
-            return response.content
-        except Exception as e:
-            raise StorageClientError(str(e))
 
     def download_files(self, files: List[str], bucket: str) -> List[bytes]:
         """
