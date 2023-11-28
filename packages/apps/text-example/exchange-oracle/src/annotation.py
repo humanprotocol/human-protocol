@@ -69,7 +69,7 @@ def create_projects(manifest: Manifest, data_dir: Path):
 def create_user(username: str, password: str):
     client = get_client()
     try:
-        user = client.create_user(username, password)
+        client.create_user(username, password)
     except DoccanoAPIError:
         raise ValueError(f"User with username '{username}' already exists.")
 
@@ -77,3 +77,8 @@ def create_user(username: str, password: str):
 def register_annotator(username: str, project_id: int):
     client = get_client()
     client.add_member(project_id=project_id, username=username, role_name="annotator")
+
+def is_done(project_id: int):
+    client = get_client()
+    return client.get_progress(project_id).remaining == 0
+
