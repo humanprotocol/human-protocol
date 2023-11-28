@@ -7,7 +7,8 @@ from pathlib import Path
 import json
 from dataclasses import dataclass
 from random import shuffle
-
+from zipfile import ZipFile
+from itertools import count
 
 @dataclass
 class S3Info:
@@ -94,17 +95,44 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
 
     return doccano_filepath
 
+def convert_annotations_to_raw_results(job_dir: Path, job_id: str):
+    outfile = job_dir / f'{job_id}.jsonl'
+    anno_ids = count()
+    for project_zip in job_dir.glob("*.zip"):
+        with ZipFile(project_zip) as zip_file:
+            for anno_file in zip_file.filelist:
+                annotator_id = anno_file.filename.split('.jsonl')[0]
+                with zip_file.open(anno_file) as af, open(outfile, 'a') as of:
+                    for line in af.readlines():
+                        try:
+                            annotation = json.loads(line)
+                        except json.decoder.JSONDecodeError:
+                            continue
+                        for span in annotation["label"]:
+                            start, end, label = span
+                            record = {
+                                "task_key": annotation["task_key"],
+                                "annotator_id": annotator_id,
+                                "annotation_id": next(anno_ids),
+                                "value": { "span": [start, end], "label": label }
+                            }
+                            json_line = json.dumps(record) + '\n'
+                            of.write(json_line)
+    return outfile
+
 
 def upload_data(
     path: Path,
     client=Config.storage_config.client(),
     bucket_name: str = Config.storage_config.results_bucket_name,
+    glob_pattern: str = "*.txt",
+    content_type: str = "text/plain"
 ):
     files = []
     if path.is_file():
         files.append(path)
     elif path.is_dir():
-        files.extend(path.glob("*.txt"))
+        files.extend(path.glob(glob_pattern))
 
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
@@ -113,6 +141,6 @@ def upload_data(
         client.fput_object(
             bucket_name=bucket_name,
             object_name=file_path.name,
-            content_type="text/plain",
+            content_type=content_type,
             file_path=file_path,
         )

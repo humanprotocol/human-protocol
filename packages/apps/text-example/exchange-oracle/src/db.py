@@ -25,6 +25,8 @@ class Statuses(str, Enum):
     in_progress = "in_progress"
     completed = "completed"
     awaiting_upload = "awaiting_upload"
+    awaiting_closure = "awaiting_closure"
+    closed = "closed"
     failed = "failed"
 
 

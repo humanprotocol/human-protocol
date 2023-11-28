@@ -1,8 +1,8 @@
 import shutil
 
-from sqlalchemy import select
+from urllib3.exceptions import MaxRetryError
 
-from annotation import create_projects, is_done, download_annotations, delete_project
+from src.annotation import create_projects, is_done, download_annotations, delete_project
 from src.chain import EscrowInfo, get_manifest_url
 from src.config import Config
 from src.db import (
@@ -11,8 +11,8 @@ from src.db import (
     JobRequest,
     AnnotationProject,
 )
-from storage import download_manifest, download_datasets, convert_taskdata_to_doccano
-
+from storage import download_manifest, download_datasets, convert_taskdata_to_doccano, convert_annotations_to_raw_results, upload_data
+from urllib3 import request
 
 def process_pending_job_requests():
     with Session() as session:
@@ -81,10 +81,46 @@ def process_completed_job_requests():
         for request in requests:
             for project in request.projects:
                 try:
-                    download_annotations(project=project)
-                    project.status = Statuses.awaiting_upload
+                    download_annotations(project_id=project.id, job_request_id=project.job_request_id)
+                    project.status = Statuses.closed
                 except Exception:
                     project.status = Statuses.failed
                 delete_project(project.id)
             request.status = Statuses.awaiting_upload
         session.commit()
+
+def upload_completed_job_requests():
+    with Session() as session:
+        requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_upload)
+        for request in requests:
+            data_dir = Config.storage_config.dataset_dir / request.id
+
+            # convert doccano annotations into raw results format
+            raw_results_file = convert_annotations_to_raw_results(data_dir, request.id)
+
+            # upload to s3
+            upload_data(raw_results_file, content_type="application/json")
+
+            # remove unused files
+            shutil.rmtree(data_dir)
+
+            request.status = Statuses.awaiting_closure
+        session.commit()
+
+def notify_recording_oracle():
+    with Session() as session:
+        requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_closure)
+        for request in requests:
+            s3_url = Config.storage_config.results_s3_url(request.id)
+            try:
+                response = Config.http.request(
+                    method='POST',
+                    url=Config.recording_oracle_url,
+                    json={"escrow_address": request.escrow_address, "chain_id": request.chain_id, "s3_url": s3_url}
+                )
+                if response.status == 200:
+                    request.status = Statuses.closed
+                else:
+                    request.status = Statuses.failed
+            except MaxRetryError:
+                request.status = Statuses.failed

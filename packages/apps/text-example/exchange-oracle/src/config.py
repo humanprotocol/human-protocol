@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from minio import Minio
 from pathlib import Path
+from urllib3 import PoolManager
 
 if not load_dotenv():
     raise IOError("Could not read dotenv file.")
@@ -83,6 +84,10 @@ class StorageConfig:
             secure=cls.secure,
         )
 
+    @classmethod
+    def results_s3_url(cls, job_id, extension='.jsonl'):
+        return "/".join([cls.endpoint_url, cls.results_bucket_name, job_id]) + extension
+
 
 class DoccanoConfig:
     host = os.environ.get("DOCCANO_HOST")
@@ -103,6 +108,9 @@ class Config:
     workers_amount = int(os.environ.get("WORKERS_AMOUNT"))
     webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES"))
     webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED"))
+
+    http = PoolManager()
+    recording_oracle_url=os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_mumbai = PolygonMumbaiConfig

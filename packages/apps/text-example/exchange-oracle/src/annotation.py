@@ -84,10 +84,11 @@ def is_done(project_id: int):
     client = get_client()
     return client.get_progress(project_id).remaining == 0
 
-def download_annotations(project: AnnotationProject):
+def download_annotations(project_id: int, job_request_id: str):
     client = get_client()
-    dir_name = Config.storage_config.dataset_dir / project.job_request_id / project.id
-    client.download(project.id, format='JSONL', dir_name=dir_name, only_approved=True)
+    dir_name = Config.storage_config.dataset_dir / job_request_id / project_id
+    client.download(project_id, format='JSONL', dir_name=dir_name, only_approved=True)
+    return dir_name
 
 def delete_project(project_id: int):
     client = get_client()
