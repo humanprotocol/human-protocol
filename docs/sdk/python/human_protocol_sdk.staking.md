@@ -1,12 +1,13 @@
 # human_protocol_sdk.staking package
 
-**This module enables to perform actions on staking contracts and
-obtain staking information from both the contracts and subgraph.**
+This module enables to perform actions on staking contracts and
+obtain staking information from both the contracts and subgraph.
 
 ## Submodules
 
 * [human_protocol_sdk.staking.staking_client module](human_protocol_sdk.staking.staking_client.md)
   * [Code Example](human_protocol_sdk.staking.staking_client.md#code-example)
+  * [Module](human_protocol_sdk.staking.staking_client.md#module)
   * [`AllocationData`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.AllocationData)
     * [`AllocationData.__init__()`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.AllocationData.__init__)
   * [`StakingClient`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClient)
@@ -23,6 +24,7 @@ obtain staking information from both the contracts and subgraph.**
   * [`StakingClientError`](human_protocol_sdk.staking.staking_client.md#human_protocol_sdk.staking.staking_client.StakingClientError)
 * [human_protocol_sdk.staking.staking_utils module](human_protocol_sdk.staking.staking_utils.md)
   * [Code Example](human_protocol_sdk.staking.staking_utils.md#code-example)
+  * [Module](human_protocol_sdk.staking.staking_utils.md#module)
   * [`LeaderData`](human_protocol_sdk.staking.staking_utils.md#human_protocol_sdk.staking.staking_utils.LeaderData)
     * [`LeaderData.__init__()`](human_protocol_sdk.staking.staking_utils.md#human_protocol_sdk.staking.staking_utils.LeaderData.__init__)
   * [`LeaderFilter`](human_protocol_sdk.staking.staking_utils.md#human_protocol_sdk.staking.staking_utils.LeaderFilter)

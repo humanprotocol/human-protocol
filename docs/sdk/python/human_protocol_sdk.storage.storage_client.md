@@ -1,7 +1,7 @@
 # human_protocol_sdk.storage.storage_client module
 
-**This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
-Google Cloud Storage and others.**
+This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
+Google Cloud Storage and others.
 
 If credentials are not provided, anonymous access will be used (for downloading files).
 
@@ -24,6 +24,8 @@ storage_client = StorageClient(
     credentials=credentials,
 )
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.storage.storage_client.Credentials(access_key, secret_key)
 

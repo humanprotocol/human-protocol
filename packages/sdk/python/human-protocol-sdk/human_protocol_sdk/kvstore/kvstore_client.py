@@ -1,6 +1,6 @@
 """
-**This client enables to perform actions on KVStore contract and
-obtain information from both the contracts and subgraph.**
+This client enables to perform actions on KVStore contract and
+obtain information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
 To use this client, you need to create Web3 instance, and configure default account,
@@ -45,6 +45,9 @@ Code Example
 
     w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
     kvstore_client = KVStoreClient(w3)
+
+Module
+------
 """
 
 import logging

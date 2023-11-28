@@ -1,5 +1,5 @@
 """
-**Utility class for escrow-related operations.**
+Utility class for escrow-related operations.
 
 Code Example
 ------------
@@ -19,6 +19,9 @@ Code Example
             )
         )
     )
+
+Module
+------
 """
 
 from datetime import datetime

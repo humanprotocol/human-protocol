@@ -1,5 +1,5 @@
 """
-**This client enables to obtain statistical information from the subgraph.**
+This client enables to obtain statistical information from the subgraph.
 
 Code Example
 ------------
@@ -10,6 +10,9 @@ Code Example
     from human_protocol_sdk.statistics import StatisticsClient
 
     statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
+
+Module
+------
 """
 
 from datetime import datetime

@@ -1,5 +1,5 @@
 """
-**Utility class for encryption-related operations.**
+Utility class for encryption-related operations.
 
 Code Example
 ------------
@@ -40,6 +40,9 @@ Code Example
         "MESSAGE",
         [public_key2, public_key3]
     )
+
+Module
+------
 """
 
 from typing import List

@@ -1,7 +1,7 @@
 # human_protocol_sdk.escrow.escrow_client module
 
-**This client enables to perform actions on Escrow contracts and
-obtain information from both the contracts and subgraph.**
+This client enables to perform actions on Escrow contracts and
+obtain information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
 To use this client, you need to create Web3 instance, and configure default account,
@@ -45,6 +45,8 @@ from human_protocol_sdk.escrow import EscrowClient
 w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
 escrow_client = EscrowClient(w3)
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.escrow.escrow_client.EscrowClient(web3, gas_limit=None)
 

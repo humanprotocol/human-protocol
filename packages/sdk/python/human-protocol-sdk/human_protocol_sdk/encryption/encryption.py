@@ -1,6 +1,6 @@
 """
-**This class allows to sign, verify, encrypt and
-decrypt messages at all levels of escrow processing.**
+This class allows to sign, verify, encrypt and
+decrypt messages at all levels of escrow processing.
 
 The algorithm includes the implementation of the
 [PGP encryption algorithm](https://github.com/openpgpjs/openpgpjs)
@@ -35,6 +35,9 @@ Code Example
     passphrase = "passphrase"
 
     encryption = Encryption(private_key, passphrase)
+
+Module
+------
 """
 
 from typing import Optional, List

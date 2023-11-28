@@ -1,4 +1,5 @@
 """Module containing Inter Rater Agreement Measures."""
+
 from copy import copy
 from functools import partial
 from typing import Sequence, Optional, Callable, Union

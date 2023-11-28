@@ -1,5 +1,5 @@
 """
-**Utility class for storage-related operations.**
+Utility class for storage-related operations.
 """
 
 import logging

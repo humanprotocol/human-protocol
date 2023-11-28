@@ -1,5 +1,5 @@
 """
-**Utility class for staking-related operations.**
+Utility class for staking-related operations.
 
 Code Example
 ------------
@@ -14,6 +14,9 @@ Code Example
             LeaderFilter(networks=[ChainId.POLYGON_MUMBAI], role="Job Launcher")
         )
     )
+
+Module
+------
 """
 
 import logging

@@ -1,6 +1,6 @@
 # human_protocol_sdk.statistics.statistics_client module
 
-**This client enables to obtain statistical information from the subgraph.**
+This client enables to obtain statistical information from the subgraph.
 
 ## Code Example
 
@@ -10,6 +10,8 @@ from human_protocol_sdk.statistics import StatisticsClient
 
 statistics_client = StatisticsClient(ChainId.POLYGON_MUMBAI)
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.statistics.statistics_client.DailyEscrowData(timestamp, escrows_total, escrows_pending, escrows_solved, escrows_paid, escrows_cancelled)
 

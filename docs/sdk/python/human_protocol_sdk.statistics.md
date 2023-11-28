@@ -1,11 +1,12 @@
 # human_protocol_sdk.statistics package
 
-**This module allows to read statistical data from the subgraph.**
+This module allows to read statistical data from the subgraph.
 
 ## Submodules
 
 * [human_protocol_sdk.statistics.statistics_client module](human_protocol_sdk.statistics.statistics_client.md)
   * [Code Example](human_protocol_sdk.statistics.statistics_client.md#code-example)
+  * [Module](human_protocol_sdk.statistics.statistics_client.md#module)
   * [`DailyEscrowData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyEscrowData)
     * [`DailyEscrowData.__init__()`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyEscrowData.__init__)
   * [`DailyHMTData`](human_protocol_sdk.statistics.statistics_client.md#human_protocol_sdk.statistics.statistics_client.DailyHMTData)

@@ -1,11 +1,12 @@
 # human_protocol_sdk.storage package
 
-**This modules contains an s3 client and utilities for files sharing.**
+This modules contains an s3 client and utilities for files sharing.
 
 ## Submodules
 
 * [human_protocol_sdk.storage.storage_client module](human_protocol_sdk.storage.storage_client.md)
   * [Code Example](human_protocol_sdk.storage.storage_client.md#code-example)
+  * [Module](human_protocol_sdk.storage.storage_client.md#module)
   * [`Credentials`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.Credentials)
     * [`Credentials.__init__()`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.Credentials.__init__)
   * [`StorageClient`](human_protocol_sdk.storage.storage_client.md#human_protocol_sdk.storage.storage_client.StorageClient)

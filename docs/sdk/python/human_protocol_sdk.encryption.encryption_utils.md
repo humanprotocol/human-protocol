@@ -1,6 +1,6 @@
 # human_protocol_sdk.encryption.encryption_utils module
 
-**Utility class for encryption-related operations.**
+Utility class for encryption-related operations.
 
 ## Code Example
 
@@ -40,6 +40,8 @@ encrypted_message = EncryptionUtils.encrypt(
     [public_key2, public_key3]
 )
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.encryption.encryption_utils.EncryptionUtils
 

@@ -1,7 +1,7 @@
 # human_protocol_sdk.encryption.encryption module
 
-**This class allows to sign, verify, encrypt and
-decrypt messages at all levels of escrow processing.**
+This class allows to sign, verify, encrypt and
+decrypt messages at all levels of escrow processing.
 
 The algorithm includes the implementation of the
 [PGP encryption algorithm]([https://github.com/openpgpjs/openpgpjs](https://github.com/openpgpjs/openpgpjs))
@@ -35,6 +35,8 @@ passphrase = "passphrase"
 
 encryption = Encryption(private_key, passphrase)
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.encryption.encryption.Encryption(private_key_armored, passphrase=None)
 

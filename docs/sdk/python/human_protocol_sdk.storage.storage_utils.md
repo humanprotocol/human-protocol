@@ -1,6 +1,6 @@
 # human_protocol_sdk.storage.storage_utils module
 
-**Utility class for storage-related operations.**
+Utility class for storage-related operations.
 
 ### *class* human_protocol_sdk.storage.storage_utils.StorageUtils
 

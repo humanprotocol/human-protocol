@@ -1,7 +1,7 @@
 # human_protocol_sdk.staking.staking_client module
 
-**This client enables to perform actions on staking contracts and
-obtain staking information from both the contracts and subgraph.**
+This client enables to perform actions on staking contracts and
+obtain staking information from both the contracts and subgraph.
 
 Internally, the SDK will use one network or another according to the network ID of the web3.
 To use this client, you need to create Web3 instance, and configure default account,
@@ -45,6 +45,8 @@ from human_protocol_sdk.staking import StakingClient
 w3 = Web3(load_provider_from_uri(URI("http://localhost:8545")))
 staking_client = StakingClient(w3)
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.staking.staking_client.AllocationData(escrow_address, staker, tokens, created_at, closed_at)
 

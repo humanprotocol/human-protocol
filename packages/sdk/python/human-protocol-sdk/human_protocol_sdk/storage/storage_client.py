@@ -1,6 +1,6 @@
 """
-**This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
-Google Cloud Storage and others.**
+This client enables to interact with S3 cloud storage services like Amazon S3 Bucket,
+Google Cloud Storage and others.
 
 If credentials are not provided, anonymous access will be used (for downloading files).
 
@@ -24,6 +24,9 @@ Code Example
         region="us-west-2",
         credentials=credentials,
     )
+
+Module
+------
 """
 
 import hashlib

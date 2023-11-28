@@ -1,6 +1,6 @@
 # human_protocol_sdk.staking.staking_utils module
 
-**Utility class for staking-related operations.**
+Utility class for staking-related operations.
 
 ## Code Example
 
@@ -14,6 +14,8 @@ print(
     )
 )
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.staking.staking_utils.LeaderData(chain_id, id, address, amount_staked, amount_allocated, amount_locked, locked_until_timestamp, amount_withdrawn, amount_slashed, reputation, reward, amount_jobs_launched, role=None, fee=None, public_key=None, webhook_url=None, url=None)
 

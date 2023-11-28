@@ -1,6 +1,6 @@
 # human_protocol_sdk.escrow.escrow_utils module
 
-**Utility class for escrow-related operations.**
+Utility class for escrow-related operations.
 
 ## Code Example
 
@@ -19,6 +19,8 @@ print(
     )
 )
 ```
+
+## Module
 
 ### *class* human_protocol_sdk.escrow.escrow_utils.EscrowData(chain_id, id, address, amount_paid, balance, count, factory_address, launcher, status, token, total_funded_amount, created_at, final_results_url=None, intermediate_results_url=None, manifest_hash=None, manifest_url=None, recording_oracle=None, recording_oracle_fee=None, reputation_oracle=None, reputation_oracle_fee=None, exchange_oracle=None, exchange_oracle_fee=None)
 
