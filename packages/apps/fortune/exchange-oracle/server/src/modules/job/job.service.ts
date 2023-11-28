@@ -80,6 +80,7 @@ export class JobService {
     workerAddress: string,
   ): Promise<string[]> {
     const escrows = await EscrowUtils.getEscrows({
+      exchangeOracle: this.web3Service.getSigner(chainId).address,
       status: EscrowStatus.Pending,
       networks: [chainId],
     });
