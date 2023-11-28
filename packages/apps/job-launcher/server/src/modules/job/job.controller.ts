@@ -25,7 +25,7 @@ import {
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
-import { Public } from '../../common/decorators';
+import { Public, ApiKey } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
@@ -37,6 +37,7 @@ import { Role } from '../../common/enums/role';
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
+  @ApiKey()
   @Post('/fortune')
   public async createFortuneJob(
     @Request() req: RequestWithUser,
@@ -81,6 +82,7 @@ export class JobController {
     );
   }
 
+  @ApiKey()
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,

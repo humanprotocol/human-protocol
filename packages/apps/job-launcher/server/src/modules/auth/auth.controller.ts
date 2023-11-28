@@ -3,10 +3,15 @@ import {
   ClassSerializerInterceptor,
   Controller,
   HttpCode,
+  HttpStatus,
   Post,
   Req,
   UseGuards,
   UseInterceptors,
+  Request,
+  UnprocessableEntityException,
+  Logger,
+
 } from '@nestjs/common';
 
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -23,10 +28,13 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
+import { ErrorAuth } from '../../common/constants/errors';
 
 @ApiTags('Auth')
 @Controller('/auth')
 export class AuthJwtController {
+  private readonly logger = new Logger(AuthJwtController.name);
+
   constructor(private readonly authService: AuthService) {}
 
   @Public()
@@ -88,5 +96,26 @@ export class AuthJwtController {
     @Body() data: ResendEmailVerificationDto,
   ): Promise<void> {
     return this.authService.resendEmailVerification(data);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('/api-key')
+  @HttpCode(HttpStatus.CREATED)
+  public async createOrUpdateAPIKey(
+    @Request() req: RequestWithUser,
+  ): Promise<{ apiKey: string }> {
+    try {
+      const apiKey = await this.authService.createOrUpdateAPIKey(req.user.id);
+      return { apiKey };
+    } catch (e) {
+      this.logger.log(
+        e.message,
+        `${AuthJwtController.name} - ${ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated}`,
+      );
+      throw new UnprocessableEntityException(
+        ErrorAuth.ApiKeyCouldNotBeCreatedOrUpdated,
+      );
+    }
   }
 }
