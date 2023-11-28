@@ -10,7 +10,7 @@ from sqlalchemy.exc import NoResultFound, IntegrityError
 from annotation import create_user, register_annotator
 from src.chain import EscrowInfo
 from src.config import Config
-from src.cron_jobs import process_pending_job_requests
+import src.cron_jobs as cron_jobs
 from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
@@ -46,7 +46,7 @@ async def get_job_details():
 @exchange_oracle.post("user/register")
 async def register_worker(worker_address: str):
     """Registers a new user with the given wallet address."""
-    if not validate_worker(worker_address):
+    if not await validate_worker(worker_address):
         # TODO: return failed response
         raise NotImplementedError
 
@@ -131,8 +131,16 @@ def get_password():
 @exchange_oracle.on_event("startup")
 def startup():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(
-        process_pending_job_requests,
-        "interval",
-        seconds=Config.cron_config.task_interval,
-    )
+    tasks = [
+        cron_jobs.process_pending_job_requests,
+        cron_jobs.process_in_progress_job_requests,
+        cron_jobs.process_completed_job_requests,
+        cron_jobs.upload_completed_job_requests,
+        cron_jobs.notify_recording_oracle,
+    ]
+    for task in tasks:
+        scheduler.add_job(
+            task,
+            "interval",
+            seconds=Config.cron_config.task_interval,
+        )
