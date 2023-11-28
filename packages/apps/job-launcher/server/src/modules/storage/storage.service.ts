@@ -41,31 +41,27 @@ export class StorageService {
   }
 
   public async uploadManifest(
-    manifest: FortuneManifestDto | CvatManifestDto | string
+    manifest: FortuneManifestDto | CvatManifestDto | string,
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
       throw new BadRequestException('Bucket not found');
     }
 
-    const isString = typeof manifest === "string";
+    const isString = typeof manifest === 'string';
 
-    const contentType = isString ? 'text/plain' : 'application/json'
+    const contentType = isString ? 'text/plain' : 'application/json';
 
     const content = isString ? manifest : JSON.stringify(manifest);
 
     const hash = crypto.createHash('sha1').update(content).digest('hex');
-    const key = isString ? `s3${hash}`: `s3${hash}.json`;
+    const key = isString ? `s3${hash}` : `s3${hash}.json`;
 
     try {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
-      await this.minioClient.putObject(
-        this.s3Config.bucket,
-        key,
-        content,
-        {
-          'Content-Type': contentType,
-        },
-      );
+      await this.minioClient.putObject(this.s3Config.bucket, key, content, {
+        'Content-Type': contentType,
+        'Cache-Control': 'no-store',
+      });
 
       return { url: this.getUrl(key), hash };
     } catch (e) {
@@ -88,7 +84,9 @@ export class StorageService {
       const hash = await hashStream(data);
       const key = `s3${hash}.zip`;
 
-      await this.minioClient.putObject(this.s3Config.bucket, key, stream);
+      await this.minioClient.putObject(this.s3Config.bucket, key, stream, {
+        'Cache-Control': 'no-store',
+      });
 
       Logger.log(`File from ${url} copied to ${this.s3Config.bucket}/${key}`);
 

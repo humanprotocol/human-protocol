@@ -217,6 +217,7 @@ export class StorageClient {
         try {
           await this.client.putObject(bucket, key, content, {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
           });
 
           return {
