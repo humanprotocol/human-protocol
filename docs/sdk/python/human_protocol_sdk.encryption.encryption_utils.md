@@ -91,7 +91,6 @@ Encrypts a message using the recipient’s public keys.
   25TEAP4m0jWfjq8w+0dM9U+/+r1FqMk/q7RU8Ib8HJXUOMaGBw==
   =62qY
   -----END PGP PUBLIC KEY BLOCK-----"""
-  ```
 
   encrypted_message = EncryptionUtils.encrypt(
       "MESSAGE",
