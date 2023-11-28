@@ -54,16 +54,17 @@ async def register_worker(worker_address: str):
     worker = Worker(worker_id=worker_address, password=password)
     with Session() as session:
         try:
-            session.add(worker)
-            session.commit()
             create_user(worker.id, worker.password)
+            session.add(worker)
+
         except IntegrityError:
             # TODO: return failed response
             session.rollback()
             raise NotImplementedError
         except ValueError:
+            session.rollback()
             raise NotImplementedError
-
+        session.commit()
     return {"username": worker_address, "password": password}
 
 

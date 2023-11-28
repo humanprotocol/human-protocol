@@ -24,6 +24,7 @@ class Statuses(str, Enum):
     pending = "pending"
     in_progress = "in_progress"
     completed = "completed"
+    awaiting_upload = "awaiting_upload"
     failed = "failed"
 
 

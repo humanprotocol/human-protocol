@@ -6,6 +6,7 @@ from doccano_client.exceptions import DoccanoAPIError
 from doccano_client.models.data_upload import Task
 
 from src.config import Config
+from src.db import AnnotationProject
 
 
 def get_client():
@@ -78,7 +79,16 @@ def register_annotator(username: str, project_id: int):
     client = get_client()
     client.add_member(project_id=project_id, username=username, role_name="annotator")
 
+
 def is_done(project_id: int):
     client = get_client()
     return client.get_progress(project_id).remaining == 0
 
+def download_annotations(project: AnnotationProject):
+    client = get_client()
+    dir_name = Config.storage_config.dataset_dir / project.job_request_id / project.id
+    client.download(project.id, format='JSONL', dir_name=dir_name, only_approved=True)
+
+def delete_project(project_id: int):
+    client = get_client()
+    client.delete_project(project_id)

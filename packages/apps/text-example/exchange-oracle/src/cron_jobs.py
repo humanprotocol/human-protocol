@@ -2,7 +2,7 @@ import shutil
 
 from sqlalchemy import select
 
-from annotation import create_projects, is_done
+from annotation import create_projects, is_done, download_annotations, delete_project
 from src.chain import EscrowInfo, get_manifest_url
 from src.config import Config
 from src.db import (
@@ -77,15 +77,14 @@ def process_in_progress_job_requests():
 
 def process_completed_job_requests():
     with Session() as session:
-        # check and update project completion
-        projects = session.query(AnnotationProject).where(AnnotationProject.status == Statuses.in_progress)
-        for project in projects:
-            if is_done(project.id):
-                project.status = Statuses.completed.value
-
-        # check and update request completion
-        requests = session.query(JobRequest).where(JobRequest.status == Statuses.in_progress)
+        requests = session.query(JobRequest).where(JobRequest.status == Statuses.in_progress).limit(Config.cron_config.task_chunk_size)
         for request in requests:
-            if all(project.status == Statuses.completed for project in request.projects):
-                request.status = Statuses.completed
+            for project in request.projects:
+                try:
+                    download_annotations(project=project)
+                    project.status = Statuses.awaiting_upload
+                except Exception:
+                    project.status = Statuses.failed
+                delete_project(project.id)
+            request.status = Statuses.awaiting_upload
         session.commit()
