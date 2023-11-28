@@ -30,6 +30,7 @@ import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { ApiKeyRepository } from './apikey.repository';
 
 jest.mock('@human-protocol/sdk');
 
@@ -44,7 +45,8 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
-
+  let apiKeyRepository: ApiKeyRepository;
+  
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
@@ -76,6 +78,7 @@ describe('AuthService', () => {
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
+        { provide: ApiKeyRepository, useValue: createMock<ApiKeyRepository>() },
       ],
     }).compile();
 
@@ -85,6 +88,7 @@ describe('AuthService', () => {
     userService = moduleRef.get<UserService>(UserService);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
+    apiKeyRepository = moduleRef.get<ApiKeyRepository>(ApiKeyRepository);
   });
 
   afterEach(() => {
