@@ -13,18 +13,18 @@ scalar I64
 
 type Leader implements Node {
   id: String!,
-  address: String!, #Bytes
-  amountStaked: ID!, #BigInt
-  amountAllocated: ID!, #BigInt
-  amountLocked: ID!, #BigInt
-  lockedUntilTimestamp: ID!, #BigInt
-  amountWithdrawn: ID!, #BigInt
-  amountSlashed: ID!, #BigInt
-  reputation: ID!, #BigInt
-  reward: ID!, #BigInt
-  amountJobsLaunched: ID!, #BigInt
+  address: String!,
+  amountStaked: ID!,
+  amountAllocated: ID!,
+  amountLocked: ID!,
+  lockedUntilTimestamp: ID!,
+  amountWithdrawn: ID!,
+  amountSlashed: ID!,
+  reputation: ID!,
+  reward: ID!,
+  amountJobsLaunched: ID!,
   role: String,
-  fee: ID, #BigInt
+  fee: ID,
   publicKey: String,
   webhookUrl: String,
   url: String,

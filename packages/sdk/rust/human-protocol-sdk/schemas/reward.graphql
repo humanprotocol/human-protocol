@@ -10,14 +10,10 @@ interface Node {
 directive @ifdef on FIELD
 
 type Reward implements Node {
-  #id: ID!
-  #block: ID! # BigInt
-  #timestamp: ID! # BigInt
-  #txHash: String! # Bytes
-  escrowAddress: String!, # Bytes
-  staker: String!, # Bytes
-  slasher: String, # Bytes
-  amount: ID! # BigInt
+  escrowAddress: String!,
+  staker: String!,
+  slasher: String,
+  amount: ID!
 }
 
 type Root {

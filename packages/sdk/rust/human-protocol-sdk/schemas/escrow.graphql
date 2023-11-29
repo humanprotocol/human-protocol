@@ -11,30 +11,29 @@ directive @ifdef on FIELD
 
 scalar I64
 
-type EscrowData implements Node { #Escrow
-  #chainId: String!
-  address: String! #Bytes
-  amountPaid: ID! #BigInt
-  balance: ID! #BigInt
-  count: ID! #BigInt
-  factoryAddress: String! #Bytes
-  finalResultsUrl: String #String
-  id: String! #ID
-  intermediateResultsUrl: String #String
-  jobRequesterId: String #String
-  launcher: String! #Bytes
+type EscrowData implements Node {
+  address: String!
+  amountPaid: ID!
+  balance: ID!
+  count: ID!
+  factoryAddress: String!
+  finalResultsUrl: String
+  id: String!
+  intermediateResultsUrl: String
+  jobRequesterId: String
+  launcher: String!
   manifestHash: String
   manifestUrl: String
-  recordingOracle: String #Bytes
-  recordingOracleFee: ID #BigInt
-  reputationOracle: String #Bytes
-  reputationOracleFee: ID #BigInt
-  exchangeOracle: String #Bytes
-  exchangeOracleFee: ID #BigInt
-  status: String # String!
-  token: String! #Bytes
-  totalFundedAmount: ID! #BigInt
-  createdAt: String! #BigInt
+  recordingOracle: String
+  recordingOracleFee: ID
+  reputationOracle: String
+  reputationOracleFee: ID
+  exchangeOracle: String
+  exchangeOracleFee: ID
+  status: String
+  token: String!
+  totalFundedAmount: ID!
+  createdAt: String!
 }
 
 type Root {
