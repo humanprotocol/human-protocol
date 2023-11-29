@@ -611,6 +611,7 @@ export class JobService {
         {
           status: JobStatus.PAID,
           retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
         },
         {
           order: {
