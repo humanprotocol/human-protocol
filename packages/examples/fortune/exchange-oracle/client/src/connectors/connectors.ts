@@ -14,6 +14,8 @@ import {
   skaleHumanProtocol,
   moonbeam,
   moonbaseAlpha,
+  celo,
+  celoAlfajores,
 } from 'wagmi/chains';
 import { fortune } from './chains';
 
@@ -35,9 +37,11 @@ const chains = [
   goerli,
   polygonMumbai,
   bscTestnet,
-  fortune,
   moonbeam,
   moonbaseAlpha,
+  celo,
+  celoAlfajores,
+  fortune,
 ];
 
 const { provider } = configureChains(chains, [w3mProvider({ projectId })]);
@@ -46,7 +50,6 @@ export const wagmiClient = createClient({
   autoConnect: true,
   connectors: w3mConnectors({
     projectId,
-    version: 1,
     chains,
   }),
   provider,

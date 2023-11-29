@@ -1,6 +1,8 @@
 import { Buffer } from 'buffer';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import React from 'react';
@@ -25,10 +27,10 @@ import { publicProvider } from 'wagmi/providers/public';
 
 import App from './App';
 import { LOCAL_STORAGE_KEYS } from './constants';
+import SnackbarProvider from './providers/SnackProvider';
 import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 import { fetchUserBalanceAsync, signIn } from './state/auth/reducer';
-import { fetchUserJobsAsync } from './state/jobs/reducer';
 import theme from './theme';
 // import { isJwtExpired } from './utils/jwt';
 
@@ -109,7 +111,6 @@ loadStripe(publishableKey).then((stripePromise) => {
       })
     );
     store.dispatch(fetchUserBalanceAsync());
-    store.dispatch(fetchUserJobsAsync());
   }
 
   root.render(
@@ -117,10 +118,14 @@ loadStripe(publishableKey).then((stripePromise) => {
       <WagmiConfig client={client}>
         <Provider store={store}>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Elements stripe={stripePromise}>
-              <App />
-            </Elements>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <CssBaseline />
+              <Elements stripe={stripePromise}>
+                <SnackbarProvider>
+                  <App />
+                </SnackbarProvider>
+              </Elements>
+            </LocalizationProvider>
           </ThemeProvider>
         </Provider>
       </WagmiConfig>

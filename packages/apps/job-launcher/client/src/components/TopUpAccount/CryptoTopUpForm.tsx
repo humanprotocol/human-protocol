@@ -1,23 +1,13 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import { LoadingButton } from '@mui/lab';
-import {
-  Alert,
-  Box,
-  FormControl,
-  Grid,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-  Snackbar,
-} from '@mui/material';
+import { Alert, Box, FormControl, Grid, Link, Stack, TextField, Typography } from '@mui/material';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { useAccount, useSigner, useNetwork } from 'wagmi';
 import { TokenSelect } from '../../components/TokenSelect';
-import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../constants/addresses';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { useTokenRate } from '../../hooks/useTokenRate';
+import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
 import { useAppDispatch } from '../../state';
 import { fetchUserBalanceAsync } from '../../state/auth/reducer';
@@ -31,9 +21,9 @@ export const CryptoTopUpForm = () => {
   const [amount, setAmount] = useState<string>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { data: signer } = useSigner();
   const { data: rate } = useTokenRate('hmt', 'usd');
+  const { openSnackbar } = useSnackbar();
 
   const totalAmount = useMemo(() => {
     if (!amount) return 0;
@@ -50,17 +40,14 @@ export const CryptoTopUpForm = () => {
       const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
       const tokenAmount = ethers.utils.parseUnits(amount, 18);
 
-      const tx = await contract.transfer(
-        JOB_LAUNCHER_OPERATOR_ADDRESS,
-        tokenAmount
-      );
+      const tx = await contract.transfer(import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS, tokenAmount);
 
       await tx.wait();
 
       const transactionHash = tx.hash;
 
       // create crypto payment record
-      await paymentService.createCryptoPayment({
+      await paymentService.createCryptoPayment(signer, {
         chainId: chain?.id,
         transactionHash,
       });
@@ -69,7 +56,7 @@ export const CryptoTopUpForm = () => {
 
       setIsSuccess(true);
     } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message ?? err?.message);
+      openSnackbar(err?.response?.data?.message ?? err?.message, 'error');
       setIsSuccess(false);
     }
 
@@ -79,10 +66,7 @@ export const CryptoTopUpForm = () => {
   if (!chain || chain.unsupported || !SUPPORTED_CHAIN_IDS.includes(chain.id))
     return (
       <Box>
-        <Typography>
-          You are on wrong network, please switch to one of the supported
-          networks.
-        </Typography>
+        <Typography>You are on wrong network, please switch to one of the supported networks.</Typography>
       </Box>
     );
 
@@ -127,9 +111,7 @@ export const CryptoTopUpForm = () => {
           </Box>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <Box
-            sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}
-          >
+          <Box sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}>
             <Box sx={{ py: 2 }}>
               <Typography mb={1}>Transaction details</Typography>
               <Stack
@@ -140,23 +122,12 @@ export const CryptoTopUpForm = () => {
                   pb: 2,
                 }}
               >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography color="text.secondary">HMT Price</Typography>
-                  <Typography color="text.secondary">
-                    {rate?.toFixed(2)} USD
-                  </Typography>
+                  <Typography color="text.secondary">{rate?.toFixed(2)} USD</Typography>
                 </Stack>
               </Stack>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ py: 2 }}
-              >
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 2 }}>
                 <Typography>You receive</Typography>
                 <Typography>{totalAmount.toFixed(2)} USD</Typography>
               </Stack>
@@ -183,25 +154,12 @@ export const CryptoTopUpForm = () => {
         >
           Top up account
         </LoadingButton>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-        >
+        <Link href="https://humanprotocol.org/app/terms-and-conditions" target="_blank">
           <Typography variant="caption" mt={4} component="p">
             Terms & conditions
           </Typography>
         </Link>
       </Box>
-      <Snackbar
-        open={errorMessage !== null}
-        autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

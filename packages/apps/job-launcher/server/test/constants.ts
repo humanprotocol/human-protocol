@@ -1,9 +1,12 @@
+import { JobRequestType } from '../src/common/enums/job';
+import { FortuneManifestDto } from '../src/modules/job/job.dto';
+
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
 export const MOCK_SUBMISSION_REQUIRED = 5;
 export const MOCK_CHAIN_ID = 1;
 export const MOCK_ADDRESS = '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
-export const MOCK_FILE_URL = 'http://mockedFileUrl.test';
+export const MOCK_FILE_URL = 'http://mockedFileUrl.test/bucket/file.json';
 export const MOCK_FILE_HASH = 'mockedFileHash';
 export const MOCK_FILE_KEY = 'manifest.json';
 export const MOCK_BUCKET_FILES = [
@@ -17,19 +20,21 @@ export const MOCK_BUCKET_FILES = [
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
 export const MOCK_BUCKET_NAME = 'bucket-name';
+export const MOCK_EXCHANGE_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_RECORDING_ORACLE_ADDRESS =
   '0xCf88b3f1992458C2f5a229573c768D0E9F70C44e';
 export const MOCK_REPUTATION_ORACLE_ADDRESS =
   '0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473';
-export const MOCK_EXCHANGE_ORACLE_ADDRESS =
-  '0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473';
 export const MOCK_EXCHANGE_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
 export const MOCK_JOB_LAUNCHER_FEE = 5;
+export const MOCK_EXCHANGE_ORACLE_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
-export const MOCK_EXCHANGE_ORACLE_FEE = 5;
 export const MOCK_TRANSACTION_HASH =
   '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc';
+export const MOCK_SIGNATURE =
+  '0x1502ec7e795ed9c96b215e80d46d87e26141bc8d41f69ee1bfbc8d8ed9a700db62136da8ee35eadbfd678817342444dff0239508be51c1fae55d62fcdba2867e1b';
 export const MOCK_EMAIL = 'test@example.com';
 export const MOCK_PASSWORD = 'password123';
 export const MOCK_HASHED_PASSWORD = 'hashedPassword';
@@ -47,3 +52,16 @@ export const MOCK_SENDGRID_API_KEY =
   'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
 export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
 export const MOCK_SENDGRID_FROM_NAME = 'John Doe';
+export const MOCK_S3_ENDPOINT = 'localhost';
+export const MOCK_S3_PORT = 9000;
+export const MOCK_S3_ACCESS_KEY = 'access_key';
+export const MOCK_S3_SECRET_KEY = 'secret_key';
+export const MOCK_S3_BUCKET = 'solution';
+export const MOCK_S3_USE_SSL = false;
+export const MOCK_MANIFEST: FortuneManifestDto = {
+  submissionsRequired: 2,
+  requesterTitle: 'Fortune',
+  requesterDescription: 'Some desc',
+  fundAmount: 10,
+  requestType: JobRequestType.FORTUNE,
+};

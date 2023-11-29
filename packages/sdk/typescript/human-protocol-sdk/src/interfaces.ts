@@ -43,6 +43,7 @@ export interface IEscrowsFilter {
   reputationOracle?: string;
   recordingOracle?: string;
   exchangeOracle?: string;
+  jobRequesterId?: string;
   status?: EscrowStatus;
   from?: Date;
   to?: Date;
@@ -71,4 +72,11 @@ export interface IStatisticsParams {
   from?: Date;
   to?: Date;
   limit?: number;
+}
+
+export interface IPayoutFilter {
+  escrowAddress?: string;
+  recipient?: string;
+  from?: Date;
+  to?: Date;
 }

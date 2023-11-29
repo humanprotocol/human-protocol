@@ -25,6 +25,14 @@ export type EscrowData = {
   chainId: number;
 };
 
+export type PayoutData = {
+  id: string;
+  escrowAddress: string;
+  recipient: string;
+  amount: string;
+  createdAt: string;
+};
+
 export type HMTStatisticsData = {
   totalTransferEventCount: string;
   totalBulkTransferEventCount: string;
@@ -92,7 +100,6 @@ export type EscrowStatistics = {
 export type DailyWorkerData = {
   timestamp: Date;
   activeWorkers: number;
-  averageJobsSolved: number;
 };
 
 export type WorkerStatistics = {
@@ -103,7 +110,6 @@ export type DailyPaymentData = {
   timestamp: Date;
   totalAmountPaid: BigNumber;
   totalCount: number;
-  averageAmountPerJob: BigNumber;
   averageAmountPerWorker: BigNumber;
 };
 
@@ -129,7 +135,25 @@ export type DailyHMTData = {
 
 export type HMTStatistics = {
   totalTransferAmount: BigNumber;
+  totalTransferCount: number;
   totalHolders: number;
   holders: HMTHolder[];
   dailyHMTData: DailyHMTData[];
+};
+
+export type IMDataEntity = {
+  served: number;
+  solved: number;
+};
+
+export type IMData = Record<string, IMDataEntity>;
+
+export type DailyTaskData = {
+  timestamp: Date;
+  tasksTotal: number;
+  tasksSolved: number;
+};
+
+export type TaskStatistics = {
+  dailyTasksData: DailyTaskData[];
 };

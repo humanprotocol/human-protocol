@@ -13,6 +13,7 @@ export enum ErrorJob {
   InvalidRequestType = 'Invalid job type',
   JobParamsValidationFailed = 'Job parameters validation failed',
   InvalidEventType = 'Invalid event type',
+  InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
 }
 
@@ -45,6 +46,8 @@ export enum ErrorAuth {
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
+  ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
+  ApiKeyNotFound = 'API key not found'
 }
 
 /**
@@ -85,6 +88,7 @@ export enum ErrorCurrency {
  * Represents error messages related to bucket.
  */
 export enum ErrorBucket {
+  NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
 }

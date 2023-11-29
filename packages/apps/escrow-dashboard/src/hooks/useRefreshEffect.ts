@@ -1,6 +1,5 @@
 import { DependencyList, EffectCallback, useEffect } from 'react';
 import useSWR from 'swr';
-
 import { FAST_INTERVAL, SLOW_INTERVAL } from 'src/constants';
 
 type BlockEffectCallback = (blockNumber: number) => ReturnType<EffectCallback>;

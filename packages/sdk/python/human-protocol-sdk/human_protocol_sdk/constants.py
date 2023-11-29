@@ -17,6 +17,8 @@ class ChainId(Enum):
     AVALANCHE_TESTNET = 43113
     AVALANCHE = 43114
     SKALE = 1273227453
+    CELO = 42220
+    CELO_ALFAJORES = 44787
     LOCALHOST = 1338
 
 
@@ -120,24 +122,48 @@ NETWORKS = {
     ChainId.AVALANCHE: {
         "title": "Avalanche C-Chain Mainnet",
         "scan_url": "https://snowtrace.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche-v2",
         "hmt_address": "0x12365293cb6477d4fc2686e46BB97E3Fb64f1550",
-        "factory_address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
-        "staking_address": "",
-        "reward_pool_address": "",
-        "kvstore_address": "0x4B79eaD28F52eD5686bf0e379717e85fc7aD10Df",
-        "old_subgraph_url": "",
-        "old_factory_address": "",
+        "factory_address": "0xD9c75a1Aa4237BB72a41E5E26bd8384f10c1f55a",
+        "staking_address": "0x05398211bA2046E296fBc9a9D3EB49e3F15C3123",
+        "reward_pool_address": "0x4A5963Dd6792692e9147EdC7659936b96251917a",
+        "kvstore_address": "0x70671167176C4934204B1C7e97F5e86695857ef2",
+        "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche",
+        "old_factory_address": "0x9767a578ba7a5FA1563c8229943cB01cd8446BB4",
     },
     ChainId.AVALANCHE_TESTNET: {
         "title": "Fuji C-Chain",
         "scan_url": "https://testnet.snowtrace.io",
-        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji-v2",
         "hmt_address": "0x9406d5c635AD22b0d76c75E52De57A2177919ca3",
-        "factory_address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
-        "staking_address": "",
-        "reward_pool_address": "",
-        "kvstore_address": "0xd232c1426CF0653cE8a71DC98bCfDf10c471c114",
+        "factory_address": "0x56C2ba540726ED4f46E7a134b6b9Ee9C867FcF92",
+        "staking_address": "0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3",
+        "reward_pool_address": "0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18",
+        "kvstore_address": "0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB",
+        "old_subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/fuji",
+        "old_factory_address": "0xfb4469201951C3B9a7F1996c477cb7BDBEcE0A88",
+    },
+    ChainId.CELO: {
+        "title": "Celo",
+        "scan_url": "https://celoscan.io/",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/celo",
+        "hmt_address": "0x19Ead835951493A763c96910255d5eeF147E914F",
+        "factory_address": "0xc90B43a5d576D9d8026c48904dfbaED50C15Fa08",
+        "staking_address": "0x34cD3Bd6B16c559f321799b516dE61E12017fFd1",
+        "reward_pool_address": "0xb9344bAD98E3d26a4d83900922baf395a2Ec154c",
+        "kvstore_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
+        "old_subgraph_url": "",
+        "old_factory_address": "",
+    },
+    ChainId.CELO_ALFAJORES: {
+        "title": "Celo",
+        "scan_url": "https://alfajores.celoscan.io/",
+        "subgraph_url": "https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores",
+        "hmt_address": "0x2736B33455A872dC478E1E004106D04c35472468",
+        "factory_address": "0x86Af9f6Cd34B69Db1B202223C6d6D109f2491569",
+        "staking_address": "0x003548Df34be8836cF0F9673403a1E40ba449a0F",
+        "reward_pool_address": "0xA9545C2530BD5bdb464d5E274F59ACceAa73eD86",
+        "kvstore_address": "0x938335006ea6F9Eb0e8020969cFF94404425e298",
         "old_subgraph_url": "",
         "old_factory_address": "",
     },
@@ -190,3 +216,5 @@ class Role(Enum):
 
 
 ARTIFACTS_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), "artifacts")
+
+GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))

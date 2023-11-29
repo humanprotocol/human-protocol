@@ -13,6 +13,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
+import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -33,48 +34,130 @@ import { GET_REWARD_ADDED_EVENTS_QUERY } from './graphql/queries/reward';
 import { RewardAddedEventData } from './graphql';
 import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
 
-export class StakingClient {
-  public signerOrProvider: Signer | Provider;
-  public network: NetworkData;
+/**
+ * ## Introduction
+ *
+ * This client enables to perform actions on staking contracts and obtain staking information from both the contracts and subgraph.
+ *
+ * Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+ * To use this client, it is recommended to initialize it using the static `build` method.
+ *
+ * ```ts
+ * static async build(signerOrProvider: Signer | Provider);
+ * ```
+ *
+ * A `Signer` or a `Provider` should be passed depending on the use case of this module:
+ *
+ * - **Signer**: when the user wants to use this model in order to send transactions caling the contract functions.
+ * - **Provider**: when the user wants to use this model in order to get information from the contracts or subgraph.
+ *
+ * ## Installation
+ *
+ * ### npm
+ * ```bash
+ * npm install @human-protocol/sdk
+ * ```
+ *
+ * ### yarn
+ * ```bash
+ * yarn install @human-protocol/sdk
+ * ```
+ *
+ * ## Code example
+ *
+ * ### Signer
+ *
+ * **Using private key(backend)**
+ *
+ * ```ts
+ * import { StakingClient } from '@human-protocol/sdk';
+ * import { Wallet, providers } from 'ethers';
+ *
+ * const rpcUrl = 'YOUR_RPC_URL';
+ * const privateKey = 'YOUR_PRIVATE_KEY'
+ *
+ * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const signer = new Wallet(privateKey, provider);
+ * const stakingClient = await StakingClient.build(signer);
+ * ```
+ *
+ * **Using Wagmi(frontend)**
+ *
+ * ```ts
+ * import { useSigner, useChainId } from 'wagmi';
+ * import { StakingClient } from '@human-protocol/sdk';
+ *
+ * const { data: signer } = useSigner();
+ * const stakingClient = await StakingClient.build(signer);
+ * ```
+ *
+ * ### Provider
+ *
+ * ```ts
+ * import { StakingClient } from '@human-protocol/sdk';
+ * import { providers } from 'ethers';
+ *
+ * const rpcUrl = 'YOUR_RPC_URL';
+ *
+ * const provider = new providers.JsonRpcProvider(rpcUrl);
+ * const stakingClient = await StakingClient.build(provider);
+ * ```
+ */
+export class StakingClient extends BaseEthersClient {
   public tokenContract: HMToken;
   public stakingContract: Staking;
   public escrowFactoryContract: EscrowFactory;
+  public rewardPoolContract: RewardPool;
 
   /**
    * **StakingClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the Staking contract
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    */
-  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
+  constructor(
+    signerOrProvider: Signer | Provider,
+    networkData: NetworkData,
+    gasPriceMultiplier?: number
+  ) {
+    super(signerOrProvider, networkData, gasPriceMultiplier);
+
     this.stakingContract = Staking__factory.connect(
-      network.stakingAddress,
+      networkData.stakingAddress,
       signerOrProvider
     );
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      network.factoryAddress,
+      networkData.factoryAddress,
       signerOrProvider
     );
 
     this.tokenContract = HMToken__factory.connect(
-      network.hmtAddress,
+      networkData.hmtAddress,
       signerOrProvider
     );
 
-    this.signerOrProvider = signerOrProvider;
-    this.network = network;
+    this.rewardPoolContract = RewardPool__factory.connect(
+      networkData.rewardPoolAddress,
+      this.signerOrProvider
+    );
   }
 
   /**
    * Creates an instance of StakingClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
+   *
    * @returns {Promise<StakingClient>} - An instance of StakingClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
+  public static async build(
+    signerOrProvider: Signer | Provider,
+    gasPriceMultiplier?: number
+  ) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -93,16 +176,47 @@ export class StakingClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new StakingClient(signerOrProvider, networkData);
+    return new StakingClient(signerOrProvider, networkData, gasPriceMultiplier);
   }
 
   /**
-   * **Approves the staking contract to transfer a specified amount of tokens when the user stakes.
-   * **It increases the allowance for the staking contract.*
+   * Check if escrow exists
    *
-   * @param {BigNumber} amount - Amount of tokens to approve for stake
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * @param escrowAddress Escrow address to check against
+   */
+  private async checkValidEscrow(escrowAddress: string) {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
+  }
+
+  /**
+   * This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
+   *
+   * @param {BigNumber} amount Amount in WEI of tokens to approve for stake.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * await stakingClient.approveStake(amount);
+   * ```
    */
   @requiresSigner
   public async approveStake(amount: BigNumber): Promise<void> {
@@ -115,7 +229,9 @@ export class StakingClient {
     }
 
     try {
-      await this.tokenContract.approve(this.stakingContract.address, amount);
+      await this.tokenContract.approve(this.stakingContract.address, amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -123,11 +239,31 @@ export class StakingClient {
   }
 
   /**
-   * **Stakes a specified amount of tokens on a specific network.*
+   * This function stakes a specified amount of tokens on a specific network.
    *
-   * @param {BigNumber} amount - Amount of tokens to stake
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > `approveStake` must be called before
+   *
+   * @param {BigNumber} amount Amount in WEI of tokens to stake.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * await stakingClient.approveStake(amount); // if it was already approved before, this is not necessary
+   * await stakingClient.approveStake(amount);
+   * ```
    */
   @requiresSigner
   public async stake(amount: BigNumber): Promise<void> {
@@ -140,7 +276,9 @@ export class StakingClient {
     }
 
     try {
-      await this.stakingContract.stake(amount);
+      await this.stakingContract.stake(amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -148,12 +286,30 @@ export class StakingClient {
   }
 
   /**
-   * **Unstakes tokens from staking contract.
-   * **The unstaked tokens stay locked for a period of time.*
+   * This function unstakes tokens from staking contract. The unstaked tokens stay locked for a period of time.
    *
-   * @param {BigNumber} amount - Amount of tokens to unstake
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > Must have tokens available to unstake
+   *
+   * @param {BigNumber} amount Amount in WEI of tokens to unstake.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * await stakingClient.unstake(amount);
+   * ```
    */
   @requiresSigner
   public async unstake(amount: BigNumber): Promise<void> {
@@ -166,7 +322,9 @@ export class StakingClient {
     }
 
     try {
-      await this.stakingContract.unstake(amount);
+      await this.stakingContract.unstake(amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -174,15 +332,35 @@ export class StakingClient {
   }
 
   /**
-   * **Withdraws unstaked and non locked tokens form staking contract to the user wallet.*
+   * This function withdraws unstaked and non locked tokens form staking contract to the user wallet.
    *
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > Must have tokens available to withdraw
+   *
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * await stakingClient.withdraw();
+   * ```
    */
   @requiresSigner
   public async withdraw(): Promise<void> {
     try {
-      await this.stakingContract.withdraw();
+      await this.stakingContract.withdraw({
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -190,15 +368,31 @@ export class StakingClient {
   }
 
   /**
-   * **Slash the allocated amount by an staker in an escrow and transfers those tokens to the reward pool.
-   * **This allows the slasher to claim them later.*
+   * This function reduces the allocated amount by an staker in an escrow and transfers those tokens to the reward pool. This allows the slasher to claim them later.
    *
-   * @param {string} slasher - Wallet address from who requested the slash
-   * @param {string} staker - Wallet address from who is going to be slashed
-   * @param {string} escrowAddress - Address of the escrow which allocation will be slashed
-   * @param {BigNumber} amount - Amount of tokens to slash
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * @param {string} slasher Wallet address from who requested the slash
+   * @param {string} staker Wallet address from who is going to be slashed
+   * @param {string} escrowAddress Address of the escrow which allocation will be slashed
+   * @param {BigNumber} amount Amount in WEI of tokens to unstake.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
+   * ```
    */
   @requiresSigner
   public async slash(
@@ -223,16 +417,12 @@ export class StakingClient {
       throw ErrorInvalidStakerAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
+      await this.stakingContract.slash(slasher, staker, escrowAddress, amount, {
+        ...(await this.gasPriceOptions()),
+      });
 
       return;
     } catch (e) {
@@ -241,12 +431,31 @@ export class StakingClient {
   }
 
   /**
-   * **Allocates a portion of the staked tokens to a specific escrow.*
+   * This function allocates a portion of the staked tokens to a specific escrow.
    *
-   * @param {string} escrowAddress - Address of the escrow contract
-   * @param {BigNumber} amount - Amount of tokens to allocate
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > Must have tokens staked
+   *
+   * @param {string} escrowAddress Address of the escrow contract to allocate in.
+   * @param {BigNumber} amount Amount in WEI of tokens to allocate.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { ethers, Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
+   * ```
    */
   @requiresSigner
   public async allocate(
@@ -261,16 +470,12 @@ export class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.allocate(escrowAddress, amount);
+      await this.stakingContract.allocate(escrowAddress, amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -278,24 +483,39 @@ export class StakingClient {
   }
 
   /**
-   * **Drops the allocation from a specific escrow.*
+   * This function drops the allocation from a specific escrow.
    *
-   * @param {string} escrowAddress - Address of the escrow contract.
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > The escrow must have allocation
+   * > The escrow must be cancelled or completed.
+   *
+   * @param {string} escrowAddress Address of the escrow contract to close allocation from.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
    */
   @requiresSigner
   public async closeAllocation(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.closeAllocation(escrowAddress);
+      await this.stakingContract.closeAllocation(escrowAddress, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -303,29 +523,38 @@ export class StakingClient {
   }
 
   /**
-   * **Pays out rewards to the slashers for the specified escrow address.*
+   * This function drops the allocation from a specific escrow.
    *
-   * @param {string} escrowAddress - Escrow address from which rewards are distributed.
-   * @returns {Promise<void>}
-   * @throws {Error} - An error object if an error occurred, void otherwise
+   * > The escrow must have rewards added
+   *
+   * @param {string} escrowAddress Escrow address from which rewards are distributed.
+   * @returns Returns void if successful. Throws error if any.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { Wallet, providers } from 'ethers';
+   * import { StakingClient } from '@human-protocol/sdk';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   * const privateKey = 'YOUR_PRIVATE_KEY'
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const signer = new Wallet(privateKey, provider);
+   * const stakingClient = await StakingClient.build(signer);
+   *
+   * await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
    */
   @requiresSigner
-  public async distributeRewards(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+  public async distributeReward(escrowAddress: string): Promise<void> {
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      const rewardPoolContract: RewardPool = RewardPool__factory.connect(
-        await this.stakingContract.rewardPool(),
-        this.signerOrProvider
-      );
-
-      await rewardPoolContract.distributeReward(escrowAddress);
+      this.rewardPoolContract.distributeReward(escrowAddress, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -333,11 +562,25 @@ export class StakingClient {
   }
 
   /**
-   * **Returns the leader details for a given address**
+   * This function returns all the leader details of the protocol.
    *
-   * @param {string} address - Leader address
-   * @returns {Promise<ILeader>} - Return leader details
-   * @throws {Error} - An error object if an error occurred, result otherwise
+   * @param {ILeadersFilter} filter Filter for the leaders.
+   * @returns {ILeader[]} Returns an array with all the leader details.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const stakingClient = await StakingClient.build(provider);
+   *
+   * const leaders = await stakingClient.getLeaders();
+   * ```
    */
   public async getLeader(address: string): Promise<ILeader> {
     if (!ethers.utils.isAddress(address)) {
@@ -347,8 +590,8 @@ export class StakingClient {
     try {
       const { leader } = await gqlFetch<{
         leader: ILeader;
-      }>(this.network.subgraphUrl, GET_LEADER_QUERY, {
-        address,
+      }>(this.networkData.subgraphUrl, GET_LEADER_QUERY, {
+        address: address.toLowerCase(),
       });
 
       return leader;
@@ -358,16 +601,31 @@ export class StakingClient {
   }
 
   /**
-   * **Returns the leaders data **
+   * This function returns the leader data for the given address.
    *
-   * @returns {Promise<ILeader[]>} - Return an array with leaders data
-   * @throws {Error} - An error object if an error occurred, results otherwise
+   * @param {string} address Leader address.
+   * @returns {ILeader} Returns the leader details.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const stakingClient = await StakingClient.build(provider);
+   *
+   * const leader = await stakingClient.getLeader('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
    */
   public async getLeaders(filter: ILeadersFilter = {}): Promise<ILeader[]> {
     try {
       const { leaders } = await gqlFetch<{
         leaders: ILeader[];
-      }>(this.network.subgraphUrl, GET_LEADERS_QUERY(filter), {
+      }>(this.networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
         role: filter.role,
       });
 
@@ -378,20 +636,28 @@ export class StakingClient {
   }
 
   /**
-   * **Returns information about the allocation of the specified escrow.*
+   * This function returns information about the allocation of the specified escrow.
    *
-   * @param {string} escrowAddress - The escrow address for the received allocation data
-   * @returns {Promise<IAllocation>} - Returns allocation info if exists
-   * @throws {Error} - An error object if an error occurred, result otherwise
+   * @param {string} escrowAddress Escrow address from which we want to get allocation information.
+   * @returns {IAllocation} Returns allocation info if exists.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const stakingClient = await StakingClient.build(provider);
+   *
+   * const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
    */
   public async getAllocation(escrowAddress: string): Promise<IAllocation> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
@@ -402,11 +668,25 @@ export class StakingClient {
   }
 
   /**
-   * **Returns information about the rewards for a given escrow address.*
+   * This function returns information about the rewards for a given slasher address.
    *
-   * @param {string} slasherAddress - Address of the slasher
-   * @returns {Promise<IReward[]>} - Returns rewards info if exists
-   * @throws {Error} - An error object if an error occurred, results otherwise
+   * @param {string} slasherAddress Slasher address.
+   * @returns {IReward[]} Returns an array of Reward objects that contain the rewards earned by the user through slashing other users.
+   *
+   *
+   * **Code example**
+   *
+   * ```ts
+   * import { StakingClient } from '@human-protocol/sdk';
+   * import { providers } from 'ethers';
+   *
+   * const rpcUrl = 'YOUR_RPC_URL';
+   *
+   * const provider = new providers.JsonRpcProvider(rpcUrl);
+   * const stakingClient = await StakingClient.build(provider);
+   *
+   * const rewards = await stakingClient.getRewards('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * ```
    */
   public async getRewards(slasherAddress: string): Promise<IReward[]> {
     if (!ethers.utils.isAddress(slasherAddress)) {
@@ -416,8 +696,8 @@ export class StakingClient {
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(this.network.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
-        slasherAddress,
+      }>(this.networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+        slasherAddress: slasherAddress.toLowerCase(),
       });
 
       return rewardAddedEvents.map((reward: any) => {

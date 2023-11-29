@@ -13,7 +13,7 @@ export const networkMap: NetworkMapDto = {
   polygon: {
     chainId: ChainId.POLYGON,
     rpcUrl:
-      'https://polygon-mainnet.g.alchemy.com/v2/0Lorh5KRkGl5FsRwy2epTg8fEFFoqUfY',
+      'https://polygon-mainnet.g.alchemy.com/v2/ApMluTj0_OBDUcLV01MYMHbxI7EmCJ6r',
   },
   bsc: {
     chainId: ChainId.BSC_MAINNET,

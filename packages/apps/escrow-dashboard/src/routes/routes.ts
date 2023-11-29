@@ -5,12 +5,13 @@ import {
   Faucet,
   Kvstore,
   LeaderDetail,
-  Leaderboard,
+  // Leaderboard,
   Main,
   Owner,
   Profile,
   MyHMT,
   ConfigureOracle,
+  HowToHuman,
 } from 'src/pages';
 
 interface Route {
@@ -27,12 +28,12 @@ export const routes: Array<Route> = [
     path: '/',
     component: Main,
   },
-  {
-    key: 'leaderboard-route',
-    title: 'Leaderboard',
-    path: '/leaderboard',
-    component: Leaderboard,
-  },
+  // {
+  //   key: 'leaderboard-route',
+  //   title: 'Leaderboard',
+  //   path: '/leaderboard',
+  //   component: Leaderboard,
+  // },
   {
     key: 'leader-detail-route',
     title: 'Leader',
@@ -80,5 +81,11 @@ export const routes: Array<Route> = [
     title: 'Configure Oracle',
     path: '/configure-oracle',
     component: ConfigureOracle,
+  },
+  {
+    key: 'how-to-human',
+    title: 'How To HUMAN',
+    path: '/how-to-human',
+    component: HowToHuman,
   },
 ];

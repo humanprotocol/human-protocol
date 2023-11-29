@@ -38,6 +38,9 @@ yarn-error.log*
 # Built Visual Studio Code extensions
 *.vsix
 
+# IDE - IntelliJ
+.idea/
+
 # OS
 .DS_Store
 

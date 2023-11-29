@@ -1,14 +1,13 @@
-from src.agreement import percent_agreement, cohens_kappa, fleiss_kappa
-import pytest
-
 import numpy as np
-
+import pytest
 from hypothesis import given, note, settings
 
+from src.agreement import cohens_kappa, fleiss_kappa, percent_agreement
+
 from tests.unit.agreement.conftest import (
-    _incidence_matrix_generator,
     _confusion_matrix_generator,
     _eq_rounded,
+    _incidence_matrix_generator,
 )
 
 

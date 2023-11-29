@@ -281,11 +281,6 @@ export function handleBulkTransfer(event: BulkTransfer): void {
       eventDayData.dailyTotalEventCount.plus(ONE_BI);
   }
 
-  // Update Daily worker count
-  eventDayData.dailyWorkerCount = eventDayData.dailyWorkerCount.plus(
-    BigInt.fromI32(event.params._recipients.length)
-  );
-
   // Save statistics, and event day data
   statsEntity.save();
   eventDayData.save();
@@ -352,7 +347,7 @@ export function handleCompleted(event: Completed): void {
   // Update escrow entity
   const escrowEntity = Escrow.load(dataSource.address().toHex());
   if (escrowEntity) {
-    escrowEntity.status = 'Completed';
+    escrowEntity.status = 'Complete';
     escrowEntity.save();
   }
 }

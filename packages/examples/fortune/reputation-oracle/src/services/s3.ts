@@ -25,7 +25,7 @@ export async function uploadResults(result: string[], escrowAddress: string) {
     minioBucketName,
     fileName,
     JSON.stringify(result),
-    { 'Content-Type': 'application/json' }
+    { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
   );
 
   // the url is available for 7 days since the issue

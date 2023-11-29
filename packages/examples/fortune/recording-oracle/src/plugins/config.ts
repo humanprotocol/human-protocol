@@ -30,14 +30,21 @@ export type Config = Static<typeof ConfigSchema>;
 
 const configPlugin: FastifyPluginAsync = async (server) => {
   const validate = ajv.compile(ConfigSchema);
-  const valid = validate(process.env);
-  if (!valid) {
+  if (!validate(process.env)) {
     throw new Error(
       '.env file validation failed - ' +
         JSON.stringify(validate.errors, null, 2)
     );
   }
-  server.decorate('config', process.env);
+
+  const config: Config = {
+    NODE_ENV: process.env.NODE_ENV as NodeEnv,
+    LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+    API_HOST: process.env.API_HOST || 'localhost',
+    API_PORT: process.env.API_PORT || '3005',
+  };
+
+  server.decorate('config', config);
 };
 
 declare module 'fastify' {

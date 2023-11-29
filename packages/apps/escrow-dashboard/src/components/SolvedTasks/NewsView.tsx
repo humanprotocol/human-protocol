@@ -1,4 +1,5 @@
 import { Box, CardActionArea, Typography } from '@mui/material';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { CardContainer } from '../Cards';
 import { useHumanProtocolNews } from 'src/hooks/useHumanProtocolNews';
 
@@ -8,7 +9,46 @@ export const NewsView = () => {
   return (
     <CardContainer sxProps={{ padding: 0 }}>
       {isLoading ? (
-        <></>
+        <Box
+          sx={{
+            px: { xs: '24px', lg: '34px', xl: '40px' },
+            pt: { xs: '26px', lg: '34px', xl: '36px' },
+            pb: '16px',
+          }}
+        >
+          <Box sx={{ mb: '20px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="72px" height="32px" />
+            </SkeletonTheme>
+          </Box>
+          <Box sx={{ mb: '14px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="72px" />
+            </SkeletonTheme>
+          </Box>
+          <Box sx={{ mb: '38px' }}>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="40px" />
+            </SkeletonTheme>
+          </Box>
+          <Box>
+            <SkeletonTheme
+              baseColor="rgba(0, 0, 0, 0.1)"
+              highlightColor="rgba(0, 0, 0, 0.18)"
+            >
+              <Skeleton count={1} width="100%" height="200px" />
+            </SkeletonTheme>
+          </Box>
+        </Box>
       ) : (
         <CardActionArea
           href={data?.link ?? ''}
@@ -17,9 +57,9 @@ export const NewsView = () => {
         >
           <Box
             sx={{
-              padding: '24px',
+              padding: '16px',
               display: 'flex',
-              flexDirection: { xs: 'row', md: 'column' },
+              flexDirection: 'column',
               justifyContent: 'space-between',
               height: '100%',
               boxSizing: 'border-box',
@@ -30,8 +70,8 @@ export const NewsView = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                px: { xs: 0, md: 3 },
-                pt: { xs: 0, md: 2 },
+                px: { xs: '8px', lg: '18px', xl: '24px' },
+                pt: { xs: '10px', lg: '18px', xl: '20px' },
               }}
             >
               <Box
@@ -41,13 +81,15 @@ export const NewsView = () => {
                   background: '#fff',
                   boxShadow:
                     '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
-                  px: 2,
                   color: '#320A8D',
                   fontSize: '12px',
+                  letterSpacing: '0.4px',
                   lineHeight: '266%',
                   mb: '20px',
-                  position: { xs: 'absolute', md: 'relative' },
-                  top: { xs: '-16px', md: 'auto' },
+                  width: '72px',
+                  height: '32px',
+                  textAlign: 'center',
+                  boxSizing: 'border-box',
                 }}
               >
                 NEWS
@@ -55,33 +97,39 @@ export const NewsView = () => {
               <Typography
                 sx={{
                   lineHeight: '150%',
-                  fontSize: { xs: '14px', sm: '20px', md: '24px' },
+                  fontSize: '24px',
+                  maxWidth: '375px',
                 }}
                 color="primary"
-                mb={2}
+                mb="14px"
               >
                 {data?.title}
               </Typography>
               <Typography
-                variant="body2"
+                sx={{
+                  lineHeight: '143%',
+                  fontSize: '14px',
+                  maxWidth: '375px',
+                  letterSpacing: '0.17px',
+                }}
                 color="primary"
-                maxWidth={450}
-                mb={4}
-                sx={{ display: { xs: 'none', md: 'block' } }}
+                mb="38px"
               >
                 {data?.description}
               </Typography>
             </Box>
             {data?.image && (
               <Box
+                component="img"
+                src={data?.image}
+                alt="news"
                 sx={{
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  maxWidth: { xs: '40%', md: '100%' },
+                  width: { xs: 'calc(100% - 20px)', md: '100%' },
+                  mx: { xs: '10px', md: 0 },
                 }}
-              >
-                <img src={data?.image} alt="news" style={{ width: '100%' }} />
-              </Box>
+              />
             )}
           </Box>
         </CardActionArea>

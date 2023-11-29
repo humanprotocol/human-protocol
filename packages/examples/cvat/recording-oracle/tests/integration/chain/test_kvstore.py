@@ -1,19 +1,15 @@
 import unittest
 from unittest.mock import patch
 
-from src.chain.kvstore import get_reputation_oracle_url, get_role_by_address
-from tests.utils.setup_kvstore import store_kvstore_value
-from tests.utils.setup_escrow import create_escrow
-from tests.utils.constants import (
-    DEFAULT_GAS_PAYER_PRIV,
-    DEFAULT_URL,
-    REPUTATION_ORACLE_ADDRESS,
-)
-
 from human_protocol_sdk.kvstore import KVStoreClientError
-
-from web3 import Web3, HTTPProvider
+from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
+
+from src.chain.kvstore import get_reputation_oracle_url, get_role_by_address
+
+from tests.utils.constants import DEFAULT_GAS_PAYER_PRIV, DEFAULT_URL, REPUTATION_ORACLE_ADDRESS
+from tests.utils.setup_escrow import create_escrow
+from tests.utils.setup_kvstore import store_kvstore_value
 
 
 class ServiceIntegrationTest(unittest.TestCase):
@@ -58,9 +54,7 @@ class ServiceIntegrationTest(unittest.TestCase):
         store_kvstore_value("role", "Reputation Oracle")
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(
-                self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
-            )
+            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
             self.assertEqual(reputation_url, "Reputation Oracle")
 
     def test_get_role_by_address_invalid_escrow(self):
@@ -75,7 +69,5 @@ class ServiceIntegrationTest(unittest.TestCase):
         store_kvstore_value("role", "")
         with patch("src.chain.kvstore.get_web3") as mock_function:
             mock_function.return_value = self.w3
-            reputation_url = get_role_by_address(
-                self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS
-            )
+            reputation_url = get_role_by_address(self.w3.eth.chain_id, REPUTATION_ORACLE_ADDRESS)
             self.assertEqual(reputation_url, "")

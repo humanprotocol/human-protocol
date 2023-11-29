@@ -23,13 +23,13 @@ export const ConfigNames = {
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
   EXCHANGE_ORACLE_FEE: 'EXCHANGE_ORACLE_FEE',
-  FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
-  CVAT_EXCHANGE_ORACLE_ADDRESS: 'CVAT_EXCHANGE_ORACLE_ADDRESS',
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL',
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL',
-  RECORDING_ORACLE_ADDRESS: 'RECORDING_ORACLE_ADDRESS',
   REPUTATION_ORACLE_ADDRESS: 'REPUTATION_ORACLE_ADDRESS',
-  EXCHANGE_ORACLE_ADDRESS: 'EXCHANGE_ORACLE_ADDRESS',
+  FORTUNE_EXCHANGE_ORACLE_ADDRESS: 'FORTUNE_EXCHANGE_ORACLE_ADDRESS',
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: 'FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL',
+  FORTUNE_RECORDING_ORACLE_ADDRESS: 'FORTUNE_RECORDING_ORACLE_ADDRESS',
+  CVAT_EXCHANGE_ORACLE_ADDRESS: 'CVAT_EXCHANGE_ORACLE_ADDRESS',
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: 'CVAT_EXCHANGE_ORACLE_WEBHOOK_URL',
+  CVAT_RECORDING_ORACLE_ADDRESS: 'CVAT_RECORDING_ORACLE_ADDRESS',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -47,6 +47,8 @@ export const ConfigNames = {
   CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
   CVAT_MAX_TIME: 'CVAT_MAX_TIME',
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
+  APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
+  APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
 };
 
 export const envValidator = Joi.object({
@@ -68,8 +70,8 @@ export const envValidator = Joi.object({
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
-  POSTGRES_SYNC: Joi.string().default(false),
-  POSTGRES_SSL: Joi.string().default(false),
+  POSTGRES_SYNC: Joi.string().default('false'),
+  POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
@@ -77,23 +79,18 @@ export const envValidator = Joi.object({
   RECORDING_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
   EXCHANGE_ORACLE_FEE: Joi.string().default(10),
-  FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
-  CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
-    'http://localhost:3004',
-  ),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
-    'http://localhost:3005',
-  ),
-  RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
+  FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
+  FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
+  CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
+  CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),
   S3_ACCESS_KEY: Joi.string().required(),
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string().default('launcher'),
-  S3_USE_SSL: Joi.string().default(false),
+  S3_USE_SSL: Joi.string().default('false'),
   // Stripe
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_API_VERSION: Joi.string().default('2022-11-15'),
@@ -108,4 +105,7 @@ export const envValidator = Joi.object({
   CVAT_JOB_SIZE: Joi.string().default('10'),
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
+  // APIKey
+  APIKEY_ITERATIONS: Joi.number().default(1000),
+  APIKEY_KEY_LENGTH: Joi.number().default(64),
 });

@@ -19,9 +19,12 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      localStorage.removeItem('HUMAN_JOB_LAUNCHER_REFRESH_TOKEN');
-      localStorage.removeItem('HUMAN_JOB_LAUNCHER_ACCESS_TOKEN');
-      window.location.href = '/';
+      const message = error?.response?.data?.message;
+      if (message !== 'User not found' && message !== 'User not active') {
+        localStorage.removeItem('HUMAN_JOB_LAUNCHER_REFRESH_TOKEN');
+        localStorage.removeItem('HUMAN_JOB_LAUNCHER_ACCESS_TOKEN');
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }

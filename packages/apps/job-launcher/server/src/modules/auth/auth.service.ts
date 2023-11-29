@@ -26,6 +26,11 @@ import { ConfigNames } from '../../common/config';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
+import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { promisify } from 'util';
+import { generateHash } from '../../common/utils/crypto';
+import { ApiKeyRepository } from './apikey.repository';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +38,8 @@ export class AuthService {
   private readonly refreshTokenExpiresIn: string;
   private readonly salt: string;
   private readonly feURL: string;
+  private readonly iterations: number;
+  private readonly keyLength: number;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -41,6 +48,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
+    private readonly apiKeyRepository: ApiKeyRepository,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -55,6 +63,8 @@ export class AuthService {
       ConfigNames.FE_URL,
       'http://localhost:3005',
     );
+    this.iterations = this.configService.get<number>(ConfigNames.APIKEY_ITERATIONS, 1000);
+    this.keyLength = this.configService.get<number>(ConfigNames.APIKEY_KEY_LENGTH, 64);
   }
 
   public async signin(data: SignInDto): Promise<AuthDto> {
@@ -83,12 +93,16 @@ export class AuthService {
     });
 
     await this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
-Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
-Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/verify?token=${tokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.signup,
     });
 
     return userEntity;
@@ -142,16 +156,31 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     if (userEntity.status !== UserStatus.ACTIVE)
       throw new UnauthorizedException(ErrorAuth.UserNotActive);
 
-    const tokenEntity = await this.tokenRepository.create({
+    const existingToken = await this.tokenRepository.findOne({
+      userId: userEntity.id,
+      tokenType: TokenType.PASSWORD,
+    });
+
+    if (existingToken) {
+      await existingToken.remove();
+    }
+
+    const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.PASSWORD,
       user: userEntity,
     });
 
-    this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Reset password',
-      html: `Click <a href="${this.feURL}/reset-password?token=${tokenEntity.uuid}">here</a> to reset the password.`,
-      text: `Click ${this.feURL}/reset-password?token=${tokenEntity.uuid} to reset the password.`,
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/reset-password?token=${newTokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.resetPassword,
     });
   }
 
@@ -166,11 +195,16 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
     }
 
     await this.userService.updatePassword(tokenEntity.user, data);
-
-    this.sendgridService.sendEmail({
-      to: tokenEntity.user.email,
-      subject: 'Password changed',
-      text: 'Password has been changed successfully!',
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: tokenEntity.user.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.passwordChanged,
     });
 
     await tokenEntity.remove();
@@ -201,18 +235,31 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
       throw new NotFoundException(ErrorUser.NotFound);
     }
 
-    const tokenEntity = await this.tokenRepository.create({
+    const existingToken = await this.tokenRepository.findOne({
+      userId: userEntity.id,
+      tokenType: TokenType.EMAIL,
+    });
+
+    if (existingToken) {
+      await existingToken.remove();
+    }
+
+    const newTokenEntity = await this.tokenRepository.create({
       tokenType: TokenType.EMAIL,
       user: userEntity,
     });
 
-    this.sendgridService.sendEmail({
-      to: data.email,
-      subject: 'Verify your email',
-      html: `Welcome to the Job Launcher Service.<br />
-Click <a href="${this.feURL}/verify?token=${tokenEntity.uuid}">here</a> to complete sign up.`,
-      text: `Welcome to the Job Launcher Service.
-Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
+    await this.sendgridService.sendEmail({
+      personalizations: [
+        {
+          to: data.email,
+          dynamicTemplateData: {
+            service_name: SERVICE_NAME,
+            url: `${this.feURL}/verify?token=${newTokenEntity.uuid}`,
+          },
+        },
+      ],
+      templateId: SENDGRID_TEMPLATES.signup,
     });
   }
 
@@ -224,5 +271,45 @@ Click ${this.feURL}/verify?token=${tokenEntity.uuid} to complete sign up.`,
 
   public compareToken(token: string, hashedToken: string): boolean {
     return this.hashToken(token) === hashedToken;
+  }
+
+  async createOrUpdateAPIKey(userId: number): Promise<string> {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const apiKey = crypto.randomBytes(32).toString('hex');
+    const hashedAPIKey = await generateHash(apiKey, salt, this.iterations, this.keyLength);
+
+    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(userId, hashedAPIKey, salt);
+
+    return `${apiKey}-${apiKeyEntity.id}`;
+  }
+
+  async validateAPIKey(userId: number, apiKey: string): Promise<boolean> {
+    const apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+  
+    if (!apiKeyEntity) {
+      this.logger.log('API Key Entity not found', AuthService.name);
+      throw new NotFoundException('API Key Entity not found');
+    }
+    
+    const hash = await generateHash(apiKey, apiKeyEntity.salt, this.iterations, this.keyLength);
+
+    return hash === apiKeyEntity.hashedAPIKey;
+  }
+
+  async validateAPIKeyAndGetUser(apiKeyId: number, apiKey: string): Promise<UserEntity | null> {
+    const apiKeyEntity = await this.apiKeyRepository.findAPIKeyById(apiKeyId);
+  
+    if (!apiKeyEntity) {
+      this.logger.log('API Key Entity not found', AuthService.name);
+      throw new NotFoundException('API Key Entity not found');
+    }
+    const hash = await generateHash(apiKey, apiKeyEntity.salt, this.iterations, this.keyLength);
+
+    const isValid = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(apiKeyEntity.hashedAPIKey));
+    if (isValid) {
+      return apiKeyEntity.user;
+    }
+  
+    return null;
   }
 }

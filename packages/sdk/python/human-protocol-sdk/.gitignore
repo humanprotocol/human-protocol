@@ -9,6 +9,7 @@ pip-wheel-metadata/
 
 # Build
 build
+_build
 dist
 *.egg-info
 .eggs
@@ -16,3 +17,6 @@ dist
 # ABIs
 artifacts
 contracts
+
+# Hypothesis
+.hypothesis

@@ -3,15 +3,7 @@ import { StatisticsClient } from '../src/statistics';
 import { NETWORKS } from '../src/constants';
 import { ChainId } from '../src/enums';
 
-export const getStatistics = async () => {
-  if (!NETWORKS[ChainId.POLYGON_MUMBAI]) {
-    return;
-  }
-
-  const statisticsClient = new StatisticsClient(
-    NETWORKS[ChainId.POLYGON_MUMBAI]
-  );
-
+const getEscrowStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Escrow statistics:',
     await statisticsClient.getEscrowStatistics()
@@ -24,7 +16,9 @@ export const getStatistics = async () => {
       to: new Date(2023, 5, 8),
     })
   );
+};
 
+const getWorkerStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Worker statistics:',
     await statisticsClient.getWorkerStatistics()
@@ -37,15 +31,15 @@ export const getStatistics = async () => {
       to: new Date(2023, 5, 8),
     })
   );
+};
 
+const getPaymentStatistics = async (statisticsClient: StatisticsClient) => {
   console.log(
     'Payment statistics:',
     (await statisticsClient.getPaymentStatistics()).dailyPaymentsData.map(
       (p) => ({
         ...p,
         totalAmountPaid: p.totalAmountPaid.toString(),
-        averageAmountPerJob: p.averageAmountPerJob.toString(),
-        averageAmountPerWorker: p.averageAmountPerWorker.toString(),
       })
     )
   );
@@ -60,16 +54,17 @@ export const getStatistics = async () => {
     ).dailyPaymentsData.map((p) => ({
       ...p,
       totalAmountPaid: p.totalAmountPaid.toString(),
-      averageAmountPerJob: p.averageAmountPerJob.toString(),
-      averageAmountPerWorker: p.averageAmountPerWorker.toString(),
     }))
   );
+};
 
+const getHMTStatistics = async (statisticsClient: StatisticsClient) => {
   const hmtStatistics = await statisticsClient.getHMTStatistics();
 
   console.log('HMT statistics:', {
     ...hmtStatistics,
     totalTransferAmount: hmtStatistics.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatistics.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
@@ -88,6 +83,7 @@ export const getStatistics = async () => {
   console.log('HMT statistics from 5/8 - 6/8:', {
     ...hmtStatisticsRange,
     totalTransferAmount: hmtStatisticsRange.totalTransferAmount.toString(),
+    totalTransferCount: hmtStatistics.totalTransferCount,
     holders: hmtStatisticsRange.holders.map((h) => ({
       ...h,
       balance: h.balance.toString(),
@@ -100,5 +96,14 @@ export const getStatistics = async () => {
 };
 
 (async () => {
-  getStatistics();
+  if (!NETWORKS[ChainId.POLYGON]) {
+    return;
+  }
+
+  const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON]);
+
+  await getEscrowStatistics(statisticsClient);
+  await getWorkerStatistics(statisticsClient);
+  await getPaymentStatistics(statisticsClient);
+  await getHMTStatistics(statisticsClient);
 })();

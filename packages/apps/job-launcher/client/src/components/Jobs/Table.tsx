@@ -1,18 +1,13 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, Button, IconButton, Typography } from '@mui/material';
+import copy from 'copy-to-clipboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
-import { useJobs } from '../../state/jobs/hooks';
+import { useJobs } from '../../hooks/useJobs';
 import { JobStatus } from '../../types';
 
-export const JobTable = ({
-  status,
-  chainId,
-}: {
-  status: JobStatus;
-  chainId: ChainId;
-}) => {
+export const JobTable = ({ status, chainId }: { status: JobStatus; chainId: ChainId }) => {
   const { data, isLoading } = useJobs({ status, chainId });
   const navigate = useNavigate();
 
@@ -20,14 +15,14 @@ export const JobTable = ({
     <Table
       columns={[
         {
-          id: 'address',
+          id: 'escrowAddress',
           label: 'Address',
           sortable: true,
-          render: ({ address }) =>
-            address ? (
+          render: ({ escrowAddress }) =>
+            escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {address}
-                <IconButton color="primary" sx={{ ml: 3 }}>
+                {escrowAddress}
+                <IconButton color="primary" sx={{ ml: 3 }} onClick={() => copy(escrowAddress)}>
                   <CopyLinkIcon />
                 </IconButton>
               </Box>
@@ -38,7 +33,7 @@ export const JobTable = ({
         { id: 'network', label: 'Network', sortable: true },
         {
           id: 'fundAmount',
-          label: 'Balance',
+          label: 'Fund Amount',
           sortable: true,
           render: ({ fundAmount }) => `${fundAmount} HMT`,
         },
@@ -47,10 +42,7 @@ export const JobTable = ({
           id: 'action',
           label: '',
           render: ({ jobId }) => (
-            <Link
-              style={{ fontWeight: 600, textDecoration: 'underline' }}
-              to={`/jobs/details/${jobId}`}
-            >
+            <Link style={{ fontWeight: 600, textDecoration: 'underline' }} to={`/jobs/details/${jobId}`}>
               Details
             </Link>
           ),
@@ -64,12 +56,7 @@ export const JobTable = ({
             There are no Jobs at the moment, click the button
             <br /> below to create a new Job
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ mt: 3 }}
-            onClick={() => navigate('/jobs/create')}
-          >
+          <Button variant="contained" size="large" sx={{ mt: 3 }} onClick={() => navigate('/jobs/create')}>
             + Create a Job
           </Button>
         </>

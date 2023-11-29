@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { BigNumber } from 'ethers';
 import * as gqlFetch from 'graphql-request';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { NETWORKS } from '../src/constants';
@@ -8,20 +9,19 @@ import {
   GET_ESCROW_STATISTICS_QUERY,
   GET_EVENT_DAY_DATA_QUERY,
 } from '../src/graphql/queries';
-import { BigNumber } from 'ethers';
 
-vi.mock('graphql-request', () => {
-  return {
-    default: vi.fn(),
-  };
-});
+vi.mock('axios');
 
-describe('EscrowClient', () => {
+vi.mock('graphql-request', () => ({
+  default: vi.fn(),
+}));
+
+describe('StatisticsClient', () => {
   let statisticsClient: any;
 
   beforeEach(async () => {
-    if (NETWORKS[ChainId.MAINNET]) {
-      statisticsClient = new StatisticsClient(NETWORKS[ChainId.MAINNET]);
+    if (NETWORKS[ChainId.POLYGON]) {
+      statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON]);
     }
   });
 
@@ -61,11 +61,11 @@ describe('EscrowClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
         GET_ESCROW_STATISTICS_QUERY
       );
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -110,8 +110,7 @@ describe('EscrowClient', () => {
         eventDayDatas: [
           {
             timestamp: 1,
-            dailyBulkPayoutEventCount: '1',
-            dailyWorkerCount: '2',
+            dailyWorkerCount: '4',
           },
         ],
       });
@@ -125,7 +124,7 @@ describe('EscrowClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -137,8 +136,7 @@ describe('EscrowClient', () => {
         dailyWorkersData: [
           {
             timestamp: new Date(1000),
-            activeWorkers: 2,
-            averageJobsSolved: 0.5,
+            activeWorkers: 4,
           },
         ],
       });
@@ -169,7 +167,6 @@ describe('EscrowClient', () => {
             dailyPayoutCount: '4',
             dailyPayoutAmount: '100',
             dailyWorkerCount: '4',
-            dailyBulkPayoutEventCount: '2',
           },
         ],
       });
@@ -183,7 +180,7 @@ describe('EscrowClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -197,7 +194,6 @@ describe('EscrowClient', () => {
             timestamp: new Date(1000),
             totalAmountPaid: BigNumber.from(100),
             totalCount: 4,
-            averageAmountPerJob: BigNumber.from(50),
             averageAmountPerWorker: BigNumber.from(25),
           },
         ],
@@ -227,6 +223,7 @@ describe('EscrowClient', () => {
         .mockResolvedValueOnce({
           hmtokenStatistics: {
             totalValueTransfered: '100',
+            totalTransferEventCount: '4',
             holders: '2',
           },
         })
@@ -257,7 +254,7 @@ describe('EscrowClient', () => {
       });
 
       expect(gqlFetchSpy).toHaveBeenCalledWith(
-        'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
+        'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
         GET_EVENT_DAY_DATA_QUERY({ from, to }),
         {
           from: from.getTime() / 1000,
@@ -267,6 +264,7 @@ describe('EscrowClient', () => {
 
       expect(result).toEqual({
         totalTransferAmount: BigNumber.from(100),
+        totalTransferCount: 4,
         totalHolders: 2,
         holders: [
           {

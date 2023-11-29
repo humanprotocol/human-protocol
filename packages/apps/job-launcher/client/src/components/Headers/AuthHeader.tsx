@@ -1,18 +1,9 @@
 import { LoadingButton } from '@mui/lab';
-import {
-  AppBar,
-  Box,
-  Breadcrumbs,
-  Button,
-  IconButton,
-  Menu,
-  MenuProps,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { AppBar, Box, Breadcrumbs, Button, IconButton, Menu, MenuProps, Toolbar, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { MouseEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCreateJobPageUI } from '../../providers/CreateJobPageUIProvider';
 import * as authServices from '../../services/auth';
 import { useAppDispatch, useAppSelector } from '../../state';
 import { signOut } from '../../state/auth/reducer';
@@ -52,6 +43,7 @@ export const AuthHeader = () => {
   const dispatch = useAppDispatch();
   const { user, refreshToken } = useAppSelector((state) => state.auth);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { reset } = useCreateJobPageUI();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -102,7 +94,10 @@ export const AuthHeader = () => {
           <Button
             variant="contained"
             sx={{ mr: 1 }}
-            onClick={() => navigate('/jobs/create')}
+            onClick={() => {
+              reset?.();
+              navigate('/jobs/create');
+            }}
           >
             + Create a Job
           </Button>
@@ -152,8 +147,7 @@ export const AuthHeader = () => {
                 Balance
               </Typography>
               <Typography variant="body1" lineHeight={1.5}>
-                {user?.balance?.amount || 0}{' '}
-                {user?.balance?.currency?.toUpperCase()}
+                {user?.balance?.amount || 0} {user?.balance?.currency?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -202,12 +196,7 @@ export const AuthHeader = () => {
             </Link>
           </Box>
           <Box sx={{ padding: '8px 16px' }}>
-            <LoadingButton
-              variant="contained"
-              fullWidth
-              onClick={handleLogOut}
-              loading={isLoggingOut}
-            >
+            <LoadingButton variant="contained" fullWidth onClick={handleLogOut} loading={isLoggingOut}>
               Log out
             </LoadingButton>
           </Box>

@@ -1,61 +1,84 @@
 import httpx
-import logging
 
-from src.db import SessionLocal
-from src.core.config import CronConfig
-
-from src.chain.escrow import get_reputation_oracle_address
+import src.services.webhook as oracle_db_service
 from src.chain.kvstore import get_reputation_oracle_url
+from src.core.config import CronConfig
+from src.core.types import OracleWebhookTypes
+from src.db import SessionLocal
+from src.db.utils import ForUpdateParams
+from src.log import ROOT_LOGGER_NAME
+from src.utils.logging import get_function_logger
+from src.utils.webhooks import prepare_outgoing_webhook_body, prepare_signed_message
 
-from src.core.constants import OracleWebhookTypes
-from src.utils.helpers import prepare_reputation_oracle_webhook_body
-
-import src.services.webhook as db_service
+module_logger_name = f"{ROOT_LOGGER_NAME}.cron.webhook"
 
 
-LOG_MODULE = "[cron][webhook][process_reputation_oracle_webhooks]"
-
-
-def process_reputation_oracle_webhooks() -> None:
+def process_outgoing_reputation_oracle_webhooks():
     """
-    Process webhooks that needs to be sent to recording oracle:
+    Process webhooks that needs to be sent to reputation oracle:
       * Retrieves `webhook_url` from KVStore
-      * Sends webhook to recording oracle
+      * Sends webhook to reputation oracle
     """
+    logger = get_function_logger(module_logger_name)
+
     try:
-        logger = logging.getLogger("app")
-        logger.info(f"{LOG_MODULE} Starting cron job")
+        logger.debug("Starting cron job")
+
         with SessionLocal.begin() as session:
-            webhooks = db_service.get_pending_webhooks(
+            webhooks = oracle_db_service.outbox.get_pending_webhooks(
                 session,
-                OracleWebhookTypes.reputation_oracle.value,
-                CronConfig.process_reputation_oracle_webhooks_chunk_size,
+                OracleWebhookTypes.reputation_oracle,
+                limit=CronConfig.process_reputation_oracle_webhooks_chunk_size,
+                for_update=ForUpdateParams(skip_locked=True),
             )
             for webhook in webhooks:
                 try:
-                    reputation_oracle_address = get_reputation_oracle_address(
+                    logger.debug(
+                        "Processing webhook "
+                        f"{webhook.type}.{webhook.event_type} "
+                        f"in escrow_address={webhook.escrow_address} "
+                        f"(attempt {webhook.attempts + 1})"
+                    )
+
+                    body = prepare_outgoing_webhook_body(
+                        webhook.escrow_address,
+                        webhook.chain_id,
+                        webhook.event_type,
+                        webhook.event_data,
+                        timestamp=None,  # TODO: reputation oracle doesn't support
+                    )
+
+                    # FIXME: For a sake of compatability with the current
+                    # version of Reputation Oracle keep this
+                    body["escrowAddress"] = body.pop("escrow_address")
+                    body["chainId"] = body.pop("chain_id")
+                    body["eventType"] = body.pop("event_type")
+
+                    # TODO: remove compatibility code
+                    # vvv
+                    body.pop("event_data")
+                    # ^^^
+
+                    _, signature = prepare_signed_message(
+                        webhook.escrow_address,
+                        webhook.chain_id,
+                        body=body,
+                    )
+
+                    headers = {"human-signature": signature}
+                    webhook_url = get_reputation_oracle_url(
                         webhook.chain_id, webhook.escrow_address
                     )
-                    webhook_url = get_reputation_oracle_url(
-                        webhook.chain_id, reputation_oracle_address
-                    )
-
-                    headers = {"human-signature": webhook.signature}
-                    body = prepare_reputation_oracle_webhook_body(
-                        webhook.escrow_address, webhook.chain_id
-                    )
-
                     with httpx.Client() as client:
                         response = client.post(webhook_url, headers=headers, json=body)
                         response.raise_for_status()
-                    db_service.handle_webhook_success(session, webhook.id)
-                except Exception as e:
-                    logger.error(
-                        f"{LOG_MODULE} Webhook: {webhook.id} failed during execution. Error {e}"
-                    )
-                    db_service.handle_webhook_fail(session, webhook.id)
 
-        logger.info(f"{LOG_MODULE} Finishing cron job")
-        return None
+                    oracle_db_service.outbox.handle_webhook_success(session, webhook.id)
+                    logger.debug("Webhook handled successfully")
+                except Exception as e:
+                    logger.exception(f"Webhook {webhook.id} sending failed: {e}")
+                    oracle_db_service.outbox.handle_webhook_fail(session, webhook.id)
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
+    finally:
+        logger.debug("Finishing cron job")

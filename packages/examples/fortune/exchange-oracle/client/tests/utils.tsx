@@ -1,4 +1,5 @@
 import { Provider, WebSocketProvider } from '@wagmi/core';
+import { EthereumClient } from '@web3modal/ethereum';
 import { Wallet, providers } from 'ethers';
 import {
   CreateClientConfig,
@@ -182,3 +183,8 @@ export function Providers({
 }: ProvidersProps) {
   return <WagmiConfig client={client}>{children}</WagmiConfig>;
 }
+
+export const ethereumClient = new EthereumClient(setupClient(), [
+  mainnet,
+  goerli,
+]);

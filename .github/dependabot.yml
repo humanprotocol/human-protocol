@@ -21,3 +21,10 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "develop"
+
+  # Maintain dependencies for rust
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "develop"

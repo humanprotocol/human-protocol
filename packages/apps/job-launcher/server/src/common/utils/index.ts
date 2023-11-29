@@ -5,6 +5,8 @@ import { COINGECKO_API_URL } from '../constants';
 import { NotFoundException } from '@nestjs/common';
 import { ErrorCurrency } from '../constants/errors';
 import { HttpService } from '@nestjs/axios';
+import * as crypto from 'crypto';
+import { Readable } from 'stream';
 
 export async function getRate(from: string, to: string): Promise<number> {
   if (from === to) {
@@ -36,6 +38,7 @@ export async function getRate(from: string, to: string): Promise<number> {
 export const parseUrl = (url: string): {
   endPoint: string,
   bucket: string,
+  region: string,
   useSSL: boolean,
   filename?: string,
   port?: number,
@@ -50,6 +53,15 @@ export const parseUrl = (url: string): {
       endPoint: 'storage.googleapis.com',
     },
     {
+      regex: /^https:\/\/s3\.([a-z0-9-]+)\.amazonaws\.com\/([^/]+)\/?$/,
+      endPoint: 's3.amazonaws.com',
+      
+    },
+    {
+      regex: /^https:\/\/([^\.]+)\.s3\.([a-z0-9-]+)\.amazonaws\.com\/?$/,
+      endPoint: 's3.amazonaws.com',
+    },
+    { 
       regex: /^https?:\/\/([^/:]+)(?::(\d+))?(\/.*)?/,
       endPoint: '$1',
       port: '$2',
@@ -58,15 +70,25 @@ export const parseUrl = (url: string): {
 
   for (const { regex, endPoint, port } of patterns) {
     const match = url.match(regex);
+
     if (match) {
-      const parts = match[3] ? match[3].split('/').filter(part => part) : [];
-      const bucket = parts[0] || '';
+      const [, param1, param2, path] = match;
+      const parts = path ? path.split('/').filter(part => part) : [];
+      const bucket = parts[0] || (patterns[2].regex === regex ? param2 : param1);
       const filename = parts.length > 1 ? parts[parts.length - 1] : undefined;
 
+      let region = '';
+      if (regex === patterns[2].regex) {
+        region = param1;
+      } else if (regex === patterns[3].regex) {
+        region = param2;
+      }
+      
       return {
         useSSL: url.startsWith('https:'),
-        endPoint: endPoint.replace('$1', match[1]),
-        port: port && match[2] ? Number(match[2]) : undefined,
+        endPoint: endPoint.replace('$1', param1),
+        region,
+        port: port && param2 ? Number(param2) || undefined : undefined,
         bucket,
         filename,
       };
@@ -75,3 +97,21 @@ export const parseUrl = (url: string): {
 
   throw new Error('Invalid URL');
 };
+
+export function hashStream(stream: Readable): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha1');
+
+    stream.on('data', (chunk) => {
+      hash.update(chunk);
+    });
+
+    stream.on('end', () => {
+      resolve(hash.digest('hex'));
+    });
+
+    stream.on('error', (error) => {
+      reject(error);
+    });
+  });
+}
