@@ -95,6 +95,7 @@ export class WebhookService {
    * @param webhookEntity The entity representing the webhook data.
    * @throws {Error} Will throw an error if processing fails at any step.
    */
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingCronJob(): Promise<boolean> {
     this.logger.log('Pending webhooks START');
     const webhookEntity = await this.webhookRepository.findOne(
@@ -367,6 +368,7 @@ export class WebhookService {
    * @returns {Promise<boolean>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPaidCronJob(): Promise<boolean> {
     this.logger.log('Paid jobs START');
     const webhookEntity = await this.webhookRepository.findOne(
