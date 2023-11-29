@@ -1,0 +1,48 @@
+---
+source: src/graphql/staking_leader_query.rs
+expression: result.data
+---
+Some(
+    GetLeaderQuery {
+        leader: Some(
+            Leader {
+                id: "0x9d1f5d4c4aa1764bf63583c3392f626e2ffbe5f7",
+                address: "0x9d1f5d4c4aa1764bf63583c3392f626e2ffbe5f7",
+                amount_staked: Id(
+                    "2",
+                ),
+                amount_allocated: Id(
+                    "0",
+                ),
+                amount_locked: Id(
+                    "0",
+                ),
+                locked_until_timestamp: Id(
+                    "0",
+                ),
+                amount_withdrawn: Id(
+                    "0",
+                ),
+                amount_slashed: Id(
+                    "4",
+                ),
+                reputation: Id(
+                    "0",
+                ),
+                reward: Id(
+                    "0",
+                ),
+                amount_jobs_launched: Id(
+                    "569",
+                ),
+                role: Some(
+                    "Job Launcher",
+                ),
+                fee: None,
+                public_key: None,
+                webhook_url: None,
+                url: None,
+            },
+        ),
+    },
+)

@@ -1,0 +1,11 @@
+---
+source: src/graphql/staking_rewards_query.rs
+expression: result.data
+---
+Some(
+    GetRewardsQuery {
+        reward_added_events: Some(
+            [],
+        ),
+    },
+)

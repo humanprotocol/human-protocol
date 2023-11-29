@@ -1,0 +1,31 @@
+schema {
+  query: Root
+}
+
+interface Node {
+  id: String!
+}
+
+# Directs the executor to query only when the field exists.
+directive @ifdef on FIELD
+
+type Reward implements Node {
+  #id: ID!
+  #block: ID! # BigInt
+  #timestamp: ID! # BigInt
+  #txHash: String! # Bytes
+  escrowAddress: String!, # Bytes
+  staker: String!, # Bytes
+  slasher: String, # Bytes
+  amount: ID! # BigInt
+}
+
+type Root {
+  rewardAddedEvents(where: RewardWhereInput): [Reward!]
+}
+
+input RewardWhereInput {
+  slasher: String
+  slasher_in: [String!]
+  slasher_contains: String
+}

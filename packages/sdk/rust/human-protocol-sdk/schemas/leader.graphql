@@ -1,0 +1,42 @@
+schema {
+  query: Root
+}
+
+interface Node {
+  id: String!
+}
+
+# Directs the executor to query only when the field exists.
+directive @ifdef on FIELD
+
+scalar I64
+
+type Leader implements Node {
+  id: String!,
+  address: String!, #Bytes
+  amountStaked: ID!, #BigInt
+  amountAllocated: ID!, #BigInt
+  amountLocked: ID!, #BigInt
+  lockedUntilTimestamp: ID!, #BigInt
+  amountWithdrawn: ID!, #BigInt
+  amountSlashed: ID!, #BigInt
+  reputation: ID!, #BigInt
+  reward: ID!, #BigInt
+  amountJobsLaunched: ID!, #BigInt
+  role: String,
+  fee: ID, #BigInt
+  publicKey: String,
+  webhookUrl: String,
+  url: String,
+}
+
+type Root {
+  leader(id: String!): Leader
+  leaders(where: LeaderWhereInput): [Leader!]
+}
+
+input LeaderWhereInput {
+  role: String
+  role_in: [String!]
+  role_contains: String
+}
