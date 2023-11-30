@@ -19,15 +19,20 @@ import {
   IsDefined,
   IsNotEmptyObject,
   ArrayMinSize,
-  ArrayNotEmpty
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
-import { JobCaptchaRequestType, JobCaptchaShapeType, JobRequestType, JobStatus, WorkerBrowser, WorkerLanguage, WorkerLocation } from '../../common/enums/job';
+import {
+  JobCaptchaRequestType,
+  JobCaptchaShapeType,
+  JobRequestType,
+  JobStatus,
+  WorkerBrowser,
+  WorkerLanguage,
+  WorkerLocation,
+} from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
-import { isEmpty } from 'rxjs';
-import { IsNull } from 'typeorm';
 
 export class JobCreateDto {
   public chainId: ChainId;
@@ -105,7 +110,7 @@ export class JobCvatDto extends JobDto {
   @IsPositive()
   public fundAmount: number;
 }
- 
+
 export class JobCancelDto {
   @ApiProperty()
   @IsNumberString()
@@ -452,7 +457,7 @@ export class JobCaptchaDto extends JobDto {
   @IsPositive()
   @Max(100)
   minRequests: number;
-  
+
   @ApiProperty()
   @IsNumber()
   @IsPositive()

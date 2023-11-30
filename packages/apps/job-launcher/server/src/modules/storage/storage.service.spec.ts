@@ -13,12 +13,10 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
-import axios from 'axios';
-import stream from 'stream';
 import stringify from 'json-stable-stringify';
 import { ErrorBucket } from '../../common/constants/errors';
 import { hashString } from '../../common/utils';
-import { ContentType, Extension } from '../../common/enums/storage';
+import { ContentType } from '../../common/enums/storage';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -72,12 +70,12 @@ describe('Web3Service', () => {
         .fn()
         .mockResolvedValueOnce(true);
 
-      const hash = hashString(stringify(MOCK_MANIFEST))
+      const hash = hashString(stringify(MOCK_MANIFEST));
 
       const fileData = await storageService.uploadFile(MOCK_MANIFEST, hash);
       expect(fileData).toEqual({
         url: expect.any(String),
-        hash: expect.any(String)
+        hash: expect.any(String),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,

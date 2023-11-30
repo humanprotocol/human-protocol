@@ -46,7 +46,7 @@ describe('AuthService', () => {
   let jwtService: JwtService;
   let sendGridService: SendGridService;
   let apiKeyRepository: ApiKeyRepository;
-  
+
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {

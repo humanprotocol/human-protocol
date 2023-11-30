@@ -10,7 +10,6 @@ import { UserService } from './user.service';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { ethers } from 'ethers';
 import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 
@@ -20,8 +19,6 @@ describe('UserService', () => {
   let userService: UserService;
   let paymentService: PaymentService;
   let userRepository: UserRepository;
-  let configService: ConfigService;
-  let httpService: HttpService;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {};
@@ -38,8 +35,6 @@ describe('UserService', () => {
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
-    configService = moduleRef.get(ConfigService);
-    httpService = moduleRef.get(HttpService);
     paymentService = moduleRef.get(PaymentService);
   });
 

@@ -41,10 +41,8 @@ export class UserEntity extends BaseEntity implements IUser {
   @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
 
-  @OneToOne(() => ApiKeyEntity, apiKey => apiKey.user, {
+  @OneToOne(() => ApiKeyEntity, (apiKey) => apiKey.user, {
     nullable: true,
   })
   public apiKey: ApiKeyEntity;
-
 }
-

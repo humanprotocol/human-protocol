@@ -89,10 +89,14 @@ export const envValidator = Joi.object({
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
   EXCHANGE_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3004'),
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3004',
+  ),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3005',
+  ),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   HCAPTCHA_RECORDING_ORACLE_ADDRESS: Joi.string().required(),

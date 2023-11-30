@@ -63,8 +63,14 @@ export class AuthService {
       ConfigNames.FE_URL,
       'http://localhost:3005',
     );
-    this.iterations = this.configService.get<number>(ConfigNames.APIKEY_ITERATIONS, 1000);
-    this.keyLength = this.configService.get<number>(ConfigNames.APIKEY_KEY_LENGTH, 64);
+    this.iterations = this.configService.get<number>(
+      ConfigNames.APIKEY_ITERATIONS,
+      1000,
+    );
+    this.keyLength = this.configService.get<number>(
+      ConfigNames.APIKEY_KEY_LENGTH,
+      64,
+    );
   }
 
   public async signin(data: SignInDto): Promise<AuthDto> {
@@ -276,40 +282,65 @@ export class AuthService {
   async createOrUpdateAPIKey(userId: number): Promise<string> {
     const salt = crypto.randomBytes(16).toString('hex');
     const apiKey = crypto.randomBytes(32).toString('hex');
-    const hashedAPIKey = await generateHash(apiKey, salt, this.iterations, this.keyLength);
+    const hashedAPIKey = await generateHash(
+      apiKey,
+      salt,
+      this.iterations,
+      this.keyLength,
+    );
 
-    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(userId, hashedAPIKey, salt);
+    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(
+      userId,
+      hashedAPIKey,
+      salt,
+    );
 
     return `${apiKey}-${apiKeyEntity.id}`;
   }
 
   async validateAPIKey(userId: number, apiKey: string): Promise<boolean> {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
-  
+
     if (!apiKeyEntity) {
       this.logger.log('API Key Entity not found', AuthService.name);
       throw new NotFoundException('API Key Entity not found');
     }
-    
-    const hash = await generateHash(apiKey, apiKeyEntity.salt, this.iterations, this.keyLength);
+
+    const hash = await generateHash(
+      apiKey,
+      apiKeyEntity.salt,
+      this.iterations,
+      this.keyLength,
+    );
 
     return hash === apiKeyEntity.hashedAPIKey;
   }
 
-  async validateAPIKeyAndGetUser(apiKeyId: number, apiKey: string): Promise<UserEntity | null> {
+  async validateAPIKeyAndGetUser(
+    apiKeyId: number,
+    apiKey: string,
+  ): Promise<UserEntity | null> {
     const apiKeyEntity = await this.apiKeyRepository.findAPIKeyById(apiKeyId);
-  
+
     if (!apiKeyEntity) {
       this.logger.log('API Key Entity not found', AuthService.name);
       throw new NotFoundException('API Key Entity not found');
     }
-    const hash = await generateHash(apiKey, apiKeyEntity.salt, this.iterations, this.keyLength);
+    const hash = await generateHash(
+      apiKey,
+      apiKeyEntity.salt,
+      this.iterations,
+      this.keyLength,
+    );
 
-    const isValid = crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(apiKeyEntity.hashedAPIKey));
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(hash),
+      Buffer.from(apiKeyEntity.hashedAPIKey),
+    );
     if (isValid) {
       return apiKeyEntity.user;
     }
-  
+
     return null;
   }
 }

@@ -5,5 +5,5 @@ export enum ContentType {
 
 export enum Extension {
   JSON = '.json',
-  ZIP = '.zip'
+  ZIP = '.zip',
 }

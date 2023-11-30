@@ -1,5 +1,5 @@
-import { JobRequestType } from "../src/common/enums/job";
-import { FortuneManifestDto } from "../src/modules/job/job.dto";
+import { JobRequestType } from '../src/common/enums/job';
+import { FortuneManifestDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -65,8 +65,8 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   fundAmount: 10,
   requestType: JobRequestType.FORTUNE,
 };
-export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest'
-export const MOCK_PGP_PRIVATE_KEY=`-----BEGIN PGP PRIVATE KEY BLOCK-----
+export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest';
+export const MOCK_PGP_PRIVATE_KEY = `-----BEGIN PGP PRIVATE KEY BLOCK-----
 
 xVgEZTveLhYJKwYBBAHaRw8BAQdAD7pTrDk129glXoPH+rMofQwsQuyuo1j0
 Q1fXrBmoPwcAAP4qsdYoTBZ7fXhaP9sjJMhGtYLg2Ux7ODQ5Ix6Ws7/V4A/M
@@ -80,8 +80,8 @@ gmU73i4JkPrbn/1In65jApsMFiEEYoWdH5uijPP2z1re+tuf/UifrmMAAMZQ
 AQDGveM6dh1co+7vkCsYs4vCoDBRQcSByD6FSbBmq8JJugD7Bpk0bm95Oi9M
 UJgXNi74umGlLKtWNrbJIYiY1yHFSA4=
 =27X/
------END PGP PRIVATE KEY BLOCK-----`
-export const MOCK_PGP_PUBLIC_KEY=`-----BEGIN PGP PUBLIC KEY BLOCK-----
+-----END PGP PRIVATE KEY BLOCK-----`;
+export const MOCK_PGP_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 xjMEZTveLhYJKwYBBAHaRw8BAQdAD7pTrDk129glXoPH+rMofQwsQuyuo1j0
 Q1fXrBmoPwfNFmV1Z2VuZSA8ZXVnZW5lQGhtdC5haT7CjAQQFgoAPgWCZTve
@@ -93,8 +93,8 @@ ZSBJAwEIB8J4BBgWCAAqBYJlO94uCZD625/9SJ+uYwKbDBYhBGKFnR+boozz
 9s9a3vrbn/1In65jAADGUAEAxr3jOnYdXKPu75ArGLOLwqAwUUHEgcg+hUmw
 ZqvCSboA+waZNG5veTovTFCYFzYu+LphpSyrVja2ySGImNchxUgO
 =uLQK
------END PGP PUBLIC KEY BLOCK-----`
-export const MOCK_HCAPTCHA_PGP_PUBLIC_KEY=`-----BEGIN PGP PUBLIC KEY BLOCK-----
+-----END PGP PUBLIC KEY BLOCK-----`;
+export const MOCK_HCAPTCHA_PGP_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 xjMEZTFB7RYJKwYBBAHaRw8BAQdAEqnF7yvbnHaL5nM7uryCts/FAnBazgBA
 ldusotlPEgnNGWFsaWR6bSA8cWFyejg5QGdtYWlsLmNvbT7CjAQQFgoAPgWC
@@ -106,13 +106,15 @@ ZTFB7RIKKwYBBAGXVQEFAQEHQB8t/IZJLOiA0erKV7qyXWpvdiUegoDpdeDU
 oT02XD9wsbIkRVyufcpsAADvXAEAu9cf+VXbCe5Kj+7G3gRQnO+smX/gySHj
 Cj8wO9Ii68YA/1EpYseshTKcNncCad8Npro313/PpE3SzsCP1b+58mkD
 =XWPr
------END PGP PUBLIC KEY BLOCK-----`
-export const MOCK_HCAPTCHA_ORACLE_ADDRESS=0xA62a1c18571B869e43EEAbD217e233E7F0275AF3
-export const MOCK_CVAT_JOB_SIZE = '10'
-export const MOCK_CVAT_MAX_TIME = '300'
-export const MOCK_CVAT_VAL_SIZE = '2'
-export const MOCK_HCAPTCHA_SITE_KEY = '1234'
-export const MOCK_HCAPTCHA_IMAGE_URL = 'http://mockedFileUrl.test/bucket/img_1.jpg';
+-----END PGP PUBLIC KEY BLOCK-----`;
+export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
+  '0xa62a1c18571b869e43eeabd217e233e7f0275af3';
+export const MOCK_CVAT_JOB_SIZE = '10';
+export const MOCK_CVAT_MAX_TIME = '300';
+export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_HCAPTCHA_SITE_KEY = '1234';
+export const MOCK_HCAPTCHA_IMAGE_URL =
+  'http://mockedFileUrl.test/bucket/img_1.jpg';
 export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
-export const MOCK_HCAPTCHA_REPO_URI = "http://recoracle:3000";
-export const MOCK_HCAPTCHA_RO_URI="http://recoracle:3000";
+export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
+export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';
