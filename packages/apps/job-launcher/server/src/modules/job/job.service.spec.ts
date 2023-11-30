@@ -41,7 +41,7 @@ import {
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_FEE,
+  MOCK_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_KEY,
@@ -51,9 +51,7 @@ import {
   MOCK_MANIFEST,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
-  MOCK_RECORDING_ORACLE_FEE,
   MOCK_REPUTATION_ORACLE_ADDRESS,
-  MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
@@ -149,14 +147,6 @@ describe('JobService', () => {
         switch (key) {
           case 'JOB_LAUNCHER_FEE':
             return MOCK_JOB_LAUNCHER_FEE;
-          case 'EXCHANGE_ORACLE_FEE':
-            return MOCK_EXCHANGE_ORACLE_FEE;
-          case 'RECORDING_ORACLE_FEE':
-            return MOCK_RECORDING_ORACLE_FEE;
-          case 'REPUTATION_ORACLE_FEE':
-            return MOCK_REPUTATION_ORACLE_FEE;
-          case 'EXCHANGE_ORACLE_FEE':
-            return MOCK_EXCHANGE_ORACLE_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
@@ -271,6 +261,10 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -1521,6 +1515,30 @@ describe('JobService', () => {
       );
 
       expect(result).toBe(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL);
+    });
+  });
+
+  describe('getOracleFee', () => {
+    it('should get the oracle fee', async () => {
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([{}]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
+      const result = await (jobService as any).getOracleFee(
+        MOCK_EXCHANGE_ORACLE_ADDRESS,
+        ChainId.LOCALHOST,
+      );
+
+      expect(result.toNumber()).toBe(MOCK_ORACLE_FEE);
+      expect(result).toBeInstanceOf(BigNumber);
     });
   });
 });

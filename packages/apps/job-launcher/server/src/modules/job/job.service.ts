@@ -264,22 +264,32 @@ export class JobService {
         ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
         : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
 
+    const recordingOracleAddress = this.configService.get<string>(
+      recordingOracleConfigKey,
+    )!;
+
+    const reputationOracleAddress = this.configService.get<string>(
+      ConfigNames.REPUTATION_ORACLE_ADDRESS,
+    )!;
+
+    const exchangeOracleAddress = this.configService.get<string>(
+      exchangeOracleConfigKey,
+    )!;
     const escrowConfig = {
-      recordingOracle: this.configService.get<string>(
-        recordingOracleConfigKey,
-      )!,
-      reputationOracle: this.configService.get<string>(
-        ConfigNames.REPUTATION_ORACLE_ADDRESS,
-      )!,
-      exchangeOracle: this.configService.get<string>(exchangeOracleConfigKey)!,
-      recordingOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
+      recordingOracle: recordingOracleAddress,
+      reputationOracle: recordingOracleAddress,
+      exchangeOracle: exchangeOracleAddress,
+      recordingOracleFee: await this.getOracleFee(
+        recordingOracleAddress,
+        jobEntity.chainId,
       ),
-      reputationOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
+      reputationOracleFee: await this.getOracleFee(
+        reputationOracleAddress,
+        jobEntity.chainId,
       ),
-      exchangeOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
+      exchangeOracleFee: await this.getOracleFee(
+        exchangeOracleAddress,
+        jobEntity.chainId,
       ),
       manifestUrl: jobEntity.manifestUrl,
       manifestHash: jobEntity.manifestHash,
@@ -955,6 +965,19 @@ export class JobService {
     );
 
     return exchangeOracleUrl;
+  }
+
+  private async getOracleFee(
+    oracleAddress: string,
+    chainId: ChainId,
+  ): Promise<BigNumber> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const kvStoreClient = await KVStoreClient.build(signer);
+
+    return BigNumber.from(
+      await kvStoreClient.get(oracleAddress, KVStoreKeys.fee),
+    );
   }
 
   private async updateCompletedStatus(
