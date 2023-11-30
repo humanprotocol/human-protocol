@@ -4,7 +4,6 @@ export const ConfigNames = {
   NODE_ENV: 'NODE_ENV',
   HOST: 'HOST',
   PORT: 'PORT',
-  FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   REPUTATION_ORACLE_WEBHOOK_URL: 'REPUTATION_ORACLE_WEBHOOK_URL',
@@ -21,7 +20,6 @@ export const envValidator = Joi.object({
   NODE_ENV: Joi.string().default('development'),
   HOST: Joi.string().default('localhost'),
   PORT: Joi.string().default(5000),
-  FE_URL: Joi.string().default('http://localhost:3001'),
   SESSION_SECRET: Joi.string().default('session_key'),
   // Web3
   WEB3_PRIVATE_KEY: Joi.string().required(),
