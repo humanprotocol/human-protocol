@@ -41,7 +41,7 @@ export class JobRepository {
     where: FindOptionsWhere<JobEntity>,
     options?: FindOneOptions<JobEntity>,
   ): Promise<JobEntity | null> {
-    return await this.jobEntityRepository.findOne({
+    return this.jobEntityRepository.findOne({
       where,
       ...options,
     });
@@ -72,7 +72,7 @@ export class JobRepository {
         ? In([JobStatus.PENDING, JobStatus.PAID])
         : In([status]);
 
-    return await this.find(
+    return this.find(
       { userId, status: statusFilter, chainId: In(chainIds) },
       { skip, take: limit },
     );
@@ -82,7 +82,7 @@ export class JobRepository {
     userId: number,
     escrowAddresses: string[],
   ): Promise<JobEntity[]> {
-    return await this.find({
+    return this.find({
       userId,
       escrowAddress: In(escrowAddresses),
     });
