@@ -35,8 +35,6 @@ describe('UserService', () => {
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
-    configService = moduleRef.get(ConfigService);
-    httpService = moduleRef.get(HttpService);
     paymentService = moduleRef.get(PaymentService);
   });
 

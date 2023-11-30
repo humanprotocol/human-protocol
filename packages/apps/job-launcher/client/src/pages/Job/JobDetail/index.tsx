@@ -2,7 +2,7 @@ import { LoadingButton } from '@mui/lab';
 import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
 import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
@@ -42,10 +42,7 @@ export default function JobDetail() {
       }
       openSnackbar('Job canceled', 'success');
     } catch (err: any) {
-      openSnackbar(
-        err?.response?.data?.message ?? 'Job cancellation failed.',
-        'error'
-      );
+      openSnackbar(err?.response?.data?.message ?? 'Job cancellation failed.', 'error');
     }
     setIsCancelling(false);
   };
@@ -83,31 +80,14 @@ export default function JobDetail() {
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <CardContainer>
-              <Typography
-                variant="body2"
-                color="primary"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
+              <Typography variant="body2" color="primary" fontWeight={600} sx={{ mb: 2 }}>
                 Job details
               </Typography>
               <Stack spacing={2}>
-                <CardTextRow
-                  label="Manifest URL"
-                  value={data.details.manifestUrl}
-                />
-                <CardTextRow
-                  label="Manifest Hash"
-                  value={data.details.manifestHash}
-                />
-                <CardTextRow
-                  label="Balance of"
-                  value={`${data.details.balance} HMT`}
-                />
-                <CardTextRow
-                  label="Paid Out HMT"
-                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
-                />
+                <CardTextRow label="Manifest URL" value={data.details.manifestUrl} />
+                <CardTextRow label="Manifest Hash" value={data.details.manifestHash} />
+                <CardTextRow label="Balance of" value={`${data.details.balance} HMT`} />
+                <CardTextRow label="Paid Out HMT" value={`${formatAmount(data.details.paidOut.toString())} HMT`} />
                 <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
               </Stack>
@@ -115,85 +95,41 @@ export default function JobDetail() {
           </Grid>
           <Grid item xs={12} md={6}>
             <CardContainer>
-              <Typography
-                variant="body2"
-                color="primary"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
+              <Typography variant="body2" color="primary" fontWeight={600} sx={{ mb: 2 }}>
                 Stake details
               </Typography>
               <Stack spacing={2}>
                 <CardTextRow label="Staker" value={data.staking.staker} />
-                <CardTextRow
-                  label="Staked HMT"
-                  value={`${formatAmount(
-                    data.staking.allocated.toString()
-                  )} HMT`}
-                />
-                <CardTextRow
-                  label="Slashed HMT"
-                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
-                />
+                <CardTextRow label="Staked HMT" value={`${formatAmount(data.staking.allocated.toString())} HMT`} />
+                <CardTextRow label="Slashed HMT" value={`${formatAmount(data.staking.slashed.toString())} HMT`} />
               </Stack>
             </CardContainer>
           </Grid>
           <Grid item xs={12}>
             <CardContainer>
-              <Typography
-                variant="body2"
-                color="primary"
-                fontWeight={600}
-                sx={{ mb: 2 }}
-              >
+              <Typography variant="body2" color="primary" fontWeight={600} sx={{ mb: 2 }}>
                 Job Manifest
               </Typography>
               <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
-                    <CardTextRow
-                      label="Chain Id"
-                      value={data.manifest.chainId}
-                    />
+                    <CardTextRow label="Chain Id" value={data.manifest.chainId} />
                     <CardTextRow label="Title" value={data.manifest.title} />
-                    <CardTextRow
-                      label="Description"
-                      value={data.manifest.description}
-                    />
-                    <CardTextRow
-                      label="Fortune's request"
-                      value={data.manifest.submissionsRequired}
-                    />
-                    <CardTextRow
-                      label="Token"
-                      value={data.manifest.tokenAddress}
-                    />
+                    <CardTextRow label="Description" value={data.manifest.description} />
+                    <CardTextRow label="Fortune's request" value={data.manifest.submissionsRequired} />
+                    <CardTextRow label="Token" value={data.manifest.tokenAddress} />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${formatAmount(
-                        data.manifest.fundAmount.toString()
-                      )} HMT`}
+                      value={`${formatAmount(data.manifest.fundAmount.toString())} HMT`}
                     />
-                    <CardTextRow
-                      label="Job Requester"
-                      value={data.manifest.requesterAddress}
-                    />
+                    <CardTextRow label="Job Requester" value={data.manifest.requesterAddress} />
                   </Stack>
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={2}>
-                    <CardTextRow
-                      label="Recording Oracle"
-                      value={data.manifest.recordingOracleAddress}
-                    />
-                    <CardTextRow
-                      label="Reputation Oracle"
-                      value={data.manifest.reputationOracleAddress}
-                    />
-                    <CardTextRow
-                      label="Exchange Oracle"
-                      value={data.manifest.exchangeOracleAddress}
-                    />
+                    <CardTextRow label="Recording Oracle" value={data.manifest.recordingOracleAddress} />
+                    <CardTextRow label="Reputation Oracle" value={data.manifest.reputationOracleAddress} />
+                    <CardTextRow label="Exchange Oracle" value={data.manifest.exchangeOracleAddress} />
                     <CardTextRow label="Recording URL" value="" />
                     <CardTextRow label="Reputation URL" value="" />
                     <CardTextRow label="Exchange URL" value="" />
@@ -249,7 +185,22 @@ export default function JobDetail() {
                   alignItems: 'center',
                 }}
               >
-                <CardTextRow label="URL" value={data.results as string} />
+                <Stack direction="row" spacing={3}>
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 130 }}>
+                    URL :
+                  </Typography>
+                  <Typography variant="body2" color="primary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Link
+                      style={{
+                        textDecoration: 'underline',
+                        alignItems: 'left',
+                      }}
+                      to={data.results as string}
+                    >
+                      {data.results as string}
+                    </Link>
+                  </Typography>
+                </Stack>
               </Box>
             )}
           </Box>

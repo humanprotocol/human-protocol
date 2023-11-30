@@ -67,11 +67,20 @@ export enum PayMethod {
 export enum JobType {
   Fortune,
   CVAT,
+  HCAPTCHA,
 }
 
 export enum CvatJobType {
   IMAGE_POINTS = 'IMAGE_POINTS',
   IMAGE_BOXES = 'IMAGE_BOXES',
+}
+
+export enum HCaptchaJobType {
+  POLYGON = 'polygon',
+  CATEGORIZATION = 'categorization',
+  POINT = 'point',
+  BOUNDING_BOX = 'bounding_box',
+  COMPARISON = 'comparison',
 }
 
 export type FortuneRequest = {
@@ -90,11 +99,33 @@ export type CvatRequest = {
   accuracyTarget: number;
 };
 
+export type HCaptchaRequest = {
+  dataUrl: string;
+  accuracyTarget: number;
+  completionDate: Date;
+  minRequests: number;
+  maxRequests: number;
+  advanced: {
+    workerLanguage: string;
+    workerLocation: string;
+    targetBrowser: string;
+  };
+  annotations: {
+    typeOfJob: string;
+    taskBidPrice: number;
+    label: string;
+    labelingPrompt: string;
+    groundTruths: string;
+    exampleImages: string[];
+  };
+};
+
 export type JobRequest = {
   jobType: JobType;
   chainId?: ChainId;
   fortuneRequest?: FortuneRequest;
   cvatRequest?: CvatRequest;
+  hCaptchaRequest?: HCaptchaRequest;
 };
 
 export enum JobStatus {

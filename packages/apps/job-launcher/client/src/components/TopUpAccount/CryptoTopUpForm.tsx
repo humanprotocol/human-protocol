@@ -1,15 +1,6 @@
 import HMTokenABI from '@human-protocol/core/abis/HMToken.json';
 import { LoadingButton } from '@mui/lab';
-import {
-  Alert,
-  Box,
-  FormControl,
-  Grid,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, FormControl, Grid, Link, Stack, TextField, Typography } from '@mui/material';
 import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { useAccount, useSigner, useNetwork } from 'wagmi';
@@ -49,10 +40,7 @@ export const CryptoTopUpForm = () => {
       const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
       const tokenAmount = ethers.utils.parseUnits(amount, 18);
 
-      const tx = await contract.transfer(
-        import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
-        tokenAmount
-      );
+      const tx = await contract.transfer(import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS, tokenAmount);
 
       await tx.wait();
 
@@ -78,10 +66,7 @@ export const CryptoTopUpForm = () => {
   if (!chain || chain.unsupported || !SUPPORTED_CHAIN_IDS.includes(chain.id))
     return (
       <Box>
-        <Typography>
-          You are on wrong network, please switch to one of the supported
-          networks.
-        </Typography>
+        <Typography>You are on wrong network, please switch to one of the supported networks.</Typography>
       </Box>
     );
 
@@ -126,9 +111,7 @@ export const CryptoTopUpForm = () => {
           </Box>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <Box
-            sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}
-          >
+          <Box sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}>
             <Box sx={{ py: 2 }}>
               <Typography mb={1}>Transaction details</Typography>
               <Stack
@@ -139,23 +122,12 @@ export const CryptoTopUpForm = () => {
                   pb: 2,
                 }}
               >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography color="text.secondary">HMT Price</Typography>
-                  <Typography color="text.secondary">
-                    {rate?.toFixed(2)} USD
-                  </Typography>
+                  <Typography color="text.secondary">{rate?.toFixed(2)} USD</Typography>
                 </Stack>
               </Stack>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ py: 2 }}
-              >
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ py: 2 }}>
                 <Typography>You receive</Typography>
                 <Typography>{totalAmount.toFixed(2)} USD</Typography>
               </Stack>
@@ -182,10 +154,7 @@ export const CryptoTopUpForm = () => {
         >
           Top up account
         </LoadingButton>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-        >
+        <Link href="https://humanprotocol.org/app/terms-and-conditions" target="_blank">
           <Typography variant="caption" mt={4} component="p">
             Terms & conditions
           </Typography>

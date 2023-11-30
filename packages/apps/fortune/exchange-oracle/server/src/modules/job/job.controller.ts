@@ -31,9 +31,9 @@ export class JobController {
   @Get('pending/:chainId/:workerAddress')
   getPendingJobs(
     @Param('chainId') chainId: number,
-    @Param('workerAddress') escrowAddress: string,
+    @Param('workerAddress') workerAddress: string,
   ): Promise<any> {
-    return this.jobService.getPendingJobs(chainId, escrowAddress);
+    return this.jobService.getPendingJobs(chainId, workerAddress);
   }
 
   @Post('solve')

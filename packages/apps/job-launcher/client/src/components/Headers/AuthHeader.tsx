@@ -1,15 +1,5 @@
 import { LoadingButton } from '@mui/lab';
-import {
-  AppBar,
-  Box,
-  Breadcrumbs,
-  Button,
-  IconButton,
-  Menu,
-  MenuProps,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { AppBar, Box, Breadcrumbs, Button, IconButton, Menu, MenuProps, Toolbar, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { MouseEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -157,8 +147,7 @@ export const AuthHeader = () => {
                 Balance
               </Typography>
               <Typography variant="body1" lineHeight={1.5}>
-                {user?.balance?.amount || 0}{' '}
-                {user?.balance?.currency?.toUpperCase()}
+                {user?.balance?.amount || 0} {user?.balance?.currency?.toUpperCase()}
               </Typography>
             </Box>
           </Box>
@@ -207,12 +196,7 @@ export const AuthHeader = () => {
             </Link>
           </Box>
           <Box sx={{ padding: '8px 16px' }}>
-            <LoadingButton
-              variant="contained"
-              fullWidth
-              onClick={handleLogOut}
-              loading={isLoggingOut}
-            >
+            <LoadingButton variant="contained" fullWidth onClick={handleLogOut} loading={isLoggingOut}>
               Log out
             </LoadingButton>
           </Box>

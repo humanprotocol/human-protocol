@@ -1,8 +1,22 @@
-import { KVStoreSetEvent } from '../../generated/schema';
+import { KVStoreSetEvent, Leader, LeaderURL } from '../../generated/schema';
 import { DataSaved } from '../../generated/KVStore/KVStore';
 import { createOrLoadLeader } from './Staking';
 import { toEventId } from './utils/event';
 import { BigInt } from '@graphprotocol/graph-ts';
+
+export function createOrLoadLeaderURL(leader: Leader, key: string): LeaderURL {
+  const entityId = `${leader.address.toHex()}-${key}`;
+  let leaderUrl = LeaderURL.load(entityId);
+
+  if (!leaderUrl) {
+    leaderUrl = new LeaderURL(entityId);
+
+    leaderUrl.key = key;
+    leaderUrl.leader = leader.id;
+  }
+
+  return leaderUrl;
+}
 
 export function handleDataSaved(event: DataSaved): void {
   // Create KVStoreSetEvent entity
@@ -29,6 +43,12 @@ export function handleDataSaved(event: DataSaved): void {
     leader.webhookUrl = event.params.value;
   } else if (key == 'url') {
     leader.url = event.params.value;
+  }
+
+  if (key.indexOf('url') > -1) {
+    const leaderUrl = createOrLoadLeaderURL(leader, key);
+    leaderUrl.url = event.params.value;
+    leaderUrl.save();
   }
 
   leader.save();

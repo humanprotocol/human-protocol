@@ -37,7 +37,7 @@ export enum JobCaptchaRequestType {
 
 export enum JobCaptchaShapeType {
   POLYGON = 'polygon',
-  CATEGORAZATION = 'categorization',
+  CATEGORIZATION = 'categorization',
   POINT = 'point',
   BOUNDING_BOX = 'bounding_box',
   COMPARISON = 'comparison',

@@ -57,6 +57,7 @@ export class StorageService {
     try {
       await this.minioClient.putObject(this.s3Config.bucket, key, content, {
         'Content-Type': contentType,
+        'Cache-Control': 'no-store',
       });
 
       return { url: this.formatUrl(key), hash };

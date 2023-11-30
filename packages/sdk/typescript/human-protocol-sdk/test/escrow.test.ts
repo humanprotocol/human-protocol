@@ -23,6 +23,7 @@ import {
   ErrorInvalidTokenAddress,
   ErrorInvalidUrl,
   ErrorListOfHandlersCannotBeEmpty,
+  ErrorMissingGasPrice,
   ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
@@ -223,7 +224,8 @@ describe('EscrowClient', () => {
       expect(createEscrowSpy).toHaveBeenCalledWith(
         tokenAddress,
         trustedHandlers,
-        jobRequesterId
+        jobRequesterId,
+        {}
       );
       expect(result).toBe(expectedEscrowAddress);
     });
@@ -243,7 +245,7 @@ describe('EscrowClient', () => {
 
       expect(
         escrowClient.escrowFactoryContract.createEscrow
-      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers, jobRequesterId);
+      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers, jobRequesterId, {});
     });
   });
 
@@ -493,7 +495,8 @@ describe('EscrowClient', () => {
         BigNumber.from(10),
         BigNumber.from(10),
         VALID_URL,
-        FAKE_HASH
+        FAKE_HASH,
+        {}
       );
     });
 
@@ -524,7 +527,8 @@ describe('EscrowClient', () => {
         BigNumber.from(10),
         BigNumber.from(10),
         VALID_URL,
-        FAKE_HASH
+        FAKE_HASH,
+        {}
       );
     });
   });
@@ -571,7 +575,8 @@ describe('EscrowClient', () => {
         BigNumber.from(10),
         BigNumber.from(10),
         VALID_URL,
-        FAKE_HASH
+        FAKE_HASH,
+        {}
       );
     });
 
@@ -602,7 +607,8 @@ describe('EscrowClient', () => {
         BigNumber.from(10),
         BigNumber.from(10),
         VALID_URL,
-        FAKE_HASH
+        FAKE_HASH,
+        {}
       );
     });
   });
@@ -652,7 +658,8 @@ describe('EscrowClient', () => {
       expect(escrowClient.escrowContract.token).toHaveBeenCalledWith();
       expect(escrowClient.tokenContract.transfer).toHaveBeenCalledWith(
         escrowAddress,
-        amount
+        amount,
+        {}
       );
     });
 
@@ -741,7 +748,8 @@ describe('EscrowClient', () => {
 
       expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
         url,
-        hash
+        hash,
+        {}
       );
     });
 
@@ -761,7 +769,8 @@ describe('EscrowClient', () => {
 
       expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
         url,
-        hash
+        hash,
+        {}
       );
     });
   });
@@ -792,7 +801,7 @@ describe('EscrowClient', () => {
 
       await escrowClient.complete(escrowAddress);
 
-      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith({});
     });
 
     test('should throw an error if the complete fails', async () => {
@@ -803,7 +812,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.complete(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith({});
     });
   });
 
@@ -1040,7 +1049,8 @@ describe('EscrowClient', () => {
         amounts,
         finalResultsUrl,
         finalResultsHash,
-        DEFAULT_TX_ID
+        DEFAULT_TX_ID,
+        {}
       );
     });
 
@@ -1052,7 +1062,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.abort(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({});
     });
   });
 
@@ -1116,7 +1126,7 @@ describe('EscrowClient', () => {
         amountRefunded,
         txHash: FAKE_HASH,
       });
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
 
     test('should throw an error if the cancel fails', async () => {
@@ -1127,7 +1137,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
 
     test('should throw an error if the wait fails', async () => {
@@ -1138,7 +1148,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
 
     test('should throw an error if transfer event not found in transaction logs', async () => {
@@ -1172,7 +1182,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({});
     });
   });
 
@@ -1202,7 +1212,7 @@ describe('EscrowClient', () => {
 
       await escrowClient.abort(escrowAddress);
 
-      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({});
     });
 
     test('should throw an error if abort fails', async () => {
@@ -1213,7 +1223,7 @@ describe('EscrowClient', () => {
 
       await expect(escrowClient.abort(escrowAddress)).rejects.toThrow();
 
-      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith();
+      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({});
     });
   });
 
@@ -1270,7 +1280,7 @@ describe('EscrowClient', () => {
 
       expect(
         escrowClient.escrowContract.addTrustedHandlers
-      ).toHaveBeenCalledWith(trustedHandlers);
+      ).toHaveBeenCalledWith(trustedHandlers, {});
     });
 
     test('should throw an error if addTrustedHandlers fails', async () => {
@@ -1288,7 +1298,7 @@ describe('EscrowClient', () => {
 
       expect(
         escrowClient.escrowContract.addTrustedHandlers
-      ).toHaveBeenCalledWith(trustedHandlers);
+      ).toHaveBeenCalledWith(trustedHandlers, {});
     });
   });
 
@@ -2128,6 +2138,1466 @@ describe('EscrowUtils', () => {
         GET_ESCROW_BY_ADDRESS_QUERY(),
         { escrowAddress: escrow.address }
       );
+    });
+  });
+});
+
+describe('EscrowClient with higher gas price', () => {
+  const gasPriceMultiplier = 1.5;
+  const defaultGasPrice = BigNumber.from(10);
+  const expectedGasPrice = BigNumber.from(15);
+
+  const provider = new ethers.providers.JsonRpcProvider();
+  let escrowClient: any,
+    mockProvider: any,
+    mockSigner: any,
+    mockEscrowContract: any,
+    mockEscrowFactoryContract: any,
+    mockTokenContract: any,
+    mockTx: any;
+
+  beforeEach(async () => {
+    mockProvider = {
+      ...provider,
+      getNetwork: vi.fn().mockReturnValue({ chainId: ChainId.LOCALHOST }),
+      getFeeData: vi.fn().mockResolvedValue({ gasPrice: defaultGasPrice }),
+    };
+    mockSigner = {
+      ...provider.getSigner(),
+      provider: {
+        ...mockProvider,
+      },
+      getAddress: vi.fn().mockReturnValue(ethers.constants.AddressZero),
+    };
+
+    mockEscrowContract = {
+      createEscrow: vi.fn(),
+      setup: vi.fn(),
+      createAndSetupEscrow: vi.fn(),
+      fund: vi.fn(),
+      storeResults: vi.fn(),
+      complete: vi.fn(),
+      bulkPayOut: vi.fn(),
+      cancel: vi.fn(),
+      abort: vi.fn(),
+      addTrustedHandlers: vi.fn(),
+      getBalance: vi.fn(),
+      manifestHash: vi.fn(),
+      manifestUrl: vi.fn(),
+      finalResultsUrl: vi.fn(),
+      token: vi.fn(),
+      status: vi.fn(),
+      getEscrow: vi.fn(),
+      getEscrows: vi.fn(),
+      address: ethers.constants.AddressZero,
+      canceler: vi.fn(),
+      recordingOracle: vi.fn(),
+      reputationOracle: vi.fn(),
+      exchangeOracle: vi.fn(),
+      intermediateResultsUrl: vi.fn(),
+      launcher: vi.fn(),
+      escrowFactory: vi.fn(),
+    };
+
+    mockEscrowFactoryContract = {
+      createEscrow: vi.fn(),
+      hasEscrow: vi.fn(),
+      lastEscrow: vi.fn(),
+    };
+
+    mockTokenContract = {
+      allowance: vi.fn(),
+      approve: vi.fn(),
+      transfer: vi.fn(),
+    };
+
+    mockTx = {
+      wait: vi.fn(),
+    };
+
+    // Mock EscrowFactory__factory.connect to return the mock EscrowFactory
+    vi.spyOn(EscrowFactory__factory, 'connect').mockReturnValue(
+      mockEscrowFactoryContract
+    );
+
+    // Mock Escrow__factory.connect to return the mock Escrow
+    vi.spyOn(Escrow__factory, 'connect').mockReturnValue(mockEscrowContract);
+
+    // Mock HMToken__factory.connect to return the mock HMToken
+    vi.spyOn(HMToken__factory, 'connect').mockReturnValue(mockTokenContract);
+
+    escrowClient = await EscrowClient.build(mockSigner, gasPriceMultiplier);
+    escrowClient.escrowContract = mockEscrowContract;
+    escrowClient.tokenContract = mockTokenContract;
+    escrowClient.escrowFactoryContract = mockEscrowFactoryContract;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('build', () => {
+    test('should create a new instance of EscrowClient with a Signer', async () => {
+      const escrowClient = await EscrowClient.build(
+        mockSigner,
+        gasPriceMultiplier
+      );
+
+      expect(escrowClient).toBeInstanceOf(EscrowClient);
+    });
+
+    test('should create a new instance of EscrowClient with a Provider', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      const escrowClient = await EscrowClient.build(
+        provider,
+        gasPriceMultiplier
+      );
+
+      expect(escrowClient).toBeInstanceOf(EscrowClient);
+    });
+
+    test('should throw an error if Signer provider does not exist', async () => {
+      const signer = new ethers.Wallet(DEFAULT_GAS_PAYER_PRIVKEY);
+
+      await expect(
+        EscrowClient.build(signer, gasPriceMultiplier)
+      ).rejects.toThrow(ErrorProviderDoesNotExist);
+    });
+
+    test('should throw an error if the chain ID is unsupported', async () => {
+      const provider = ethers.getDefaultProvider();
+
+      vi.spyOn(provider, 'getNetwork').mockResolvedValue({
+        chainId: 1337,
+      } as any);
+
+      await expect(
+        EscrowClient.build(provider, gasPriceMultiplier)
+      ).rejects.toThrow(ErrorUnsupportedChainID);
+    });
+  });
+
+  describe('createEscrow', () => {
+    test('should throw an error if tokenAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(
+        escrowClient.createEscrow(invalidAddress, [
+          ethers.constants.AddressZero,
+        ])
+      ).rejects.toThrow(ErrorInvalidTokenAddress);
+    });
+
+    test('should throw an error if trustedHandlers contains an invalid address', async () => {
+      await expect(
+        escrowClient.createEscrow(ethers.constants.AddressZero, [FAKE_ADDRESS])
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
+    });
+
+    test('should create an escrow and return its address', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+      const expectedEscrowAddress = ethers.constants.AddressZero;
+
+      // Create a spy object for the createEscrow method
+      const createEscrowSpy = vi
+        .spyOn(escrowClient.escrowFactoryContract, 'createEscrow')
+        .mockImplementation(() => ({
+          wait: async () => ({
+            events: [
+              {
+                topics: [ethers.utils.id('LaunchedV2(address,address,string)')],
+                args: {
+                  escrow: expectedEscrowAddress,
+                },
+              },
+            ],
+          }),
+        }));
+
+      const result = await escrowClient.createEscrow(
+        tokenAddress,
+        trustedHandlers,
+        jobRequesterId
+      );
+
+      expect(createEscrowSpy).toHaveBeenCalledWith(
+        tokenAddress,
+        trustedHandlers,
+        jobRequesterId,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+      expect(result).toBe(expectedEscrowAddress);
+    });
+
+    test('should throw an error if the create an escrow fails', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+
+      escrowClient.escrowFactoryContract.createEscrow.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowFactoryContract.createEscrow
+      ).toHaveBeenCalledWith(tokenAddress, trustedHandlers, jobRequesterId, {
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(
+        escrowClient.createEscrow(tokenAddress, trustedHandlers, jobRequesterId)
+      ).rejects.toThrow(new EthereumError(ErrorMissingGasPrice.message));
+    });
+  });
+
+  describe('setup', () => {
+    test('should throw an error if recordingOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: FAKE_ADDRESS,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidRecordingOracleAddressProvided);
+    });
+
+    test('should throw an error if reputationOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: FAKE_ADDRESS,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidReputationOracleAddressProvided);
+    });
+
+    test('should throw an error if exchangeOracle is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: FAKE_ADDRESS,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidExchangeOracleAddressProvided);
+    });
+
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      await expect(
+        escrowClient.setup(FAKE_ADDRESS, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should throw an error if 0 <= recordingOracleFee', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(0),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if 0 <= reputationOracleFee', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(0),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if 0 <= exchangeOracleFee', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(0),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should throw an error if total fee is greater than 100', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(40),
+        reputationOracleFee: BigNumber.from(40),
+        exchangeOracleFee: BigNumber.from(40),
+        manifestUrl: VALID_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorTotalFeeMustBeLessThanHundred);
+    });
+
+    test('should throw an error if manifestUrl is an empty string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: '',
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorUrlIsEmptyString);
+    });
+
+    test('should throw an error if manifestUrl is an invalid url', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: FAKE_URL,
+        hash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is an empty string', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        hash: '',
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should successfully setup escrow', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.setup.mockReturnValue(true);
+
+      await escrowClient.setup(ethers.constants.AddressZero, escrowConfig);
+
+      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
+        VALID_URL,
+        FAKE_HASH,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if setup escrow fails', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.setup.mockRejectedValueOnce(new Error());
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
+        VALID_URL,
+        FAKE_HASH,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow(new EthereumError(ErrorMissingGasPrice.message));
+    });
+  });
+
+  describe('createAndSetupEscrow', () => {
+    test('should successfully create and setup escrow', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const tokenAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+      const jobRequesterId = 'job-requester';
+
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.createEscrow = vi.fn().mockReturnValue(escrowAddress);
+      escrowClient.escrowContract.setup.mockReturnValue(true);
+
+      await escrowClient.createAndSetupEscrow(
+        tokenAddress,
+        trustedHandlers,
+        jobRequesterId,
+        escrowConfig
+      );
+
+      expect(escrowClient.createEscrow).toHaveBeenCalledWith(
+        tokenAddress,
+        trustedHandlers,
+        jobRequesterId
+      );
+      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
+        VALID_URL,
+        FAKE_HASH,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if setup escrow fails', async () => {
+      const escrowConfig = {
+        recordingOracle: ethers.constants.AddressZero,
+        reputationOracle: ethers.constants.AddressZero,
+        exchangeOracle: ethers.constants.AddressZero,
+        recordingOracleFee: BigNumber.from(10),
+        reputationOracleFee: BigNumber.from(10),
+        exchangeOracleFee: BigNumber.from(10),
+        manifestUrl: VALID_URL,
+        manifestHash: FAKE_HASH,
+      };
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.setup.mockRejectedValueOnce(new Error());
+
+      await expect(
+        escrowClient.setup(ethers.constants.AddressZero, escrowConfig)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.setup).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        BigNumber.from(10),
+        BigNumber.from(10),
+        BigNumber.from(10),
+        VALID_URL,
+        FAKE_HASH,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+  });
+
+  describe('fund', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+      const amount = BigNumber.from(10);
+
+      await expect(escrowClient.fund(invalidAddress, amount)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const amount = BigNumber.from(10);
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.fund(escrowAddress, amount)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should throw an error if 0 <= amount', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const invalidAmount = BigNumber.from(0);
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.fund(escrowAddress, invalidAmount)
+      ).rejects.toThrow(ErrorAmountMustBeGreaterThanZero);
+    });
+
+    test('should successfully fund escrow', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const escrowAddress = ethers.constants.AddressZero;
+      const amount = BigNumber.from(10);
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.token.mockReturnValue(tokenAddress);
+
+      await escrowClient.fund(escrowAddress, amount);
+
+      expect(escrowClient.escrowContract.token).toHaveBeenCalledWith();
+      expect(escrowClient.tokenContract.transfer).toHaveBeenCalledWith(
+        escrowAddress,
+        amount,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if setup escrow fails', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const escrowAddress = ethers.constants.AddressZero;
+      const amount = BigNumber.from(10);
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.token.mockReturnValue(tokenAddress);
+      escrowClient.tokenContract.transfer.mockRejectedValueOnce(new Error());
+
+      await expect(escrowClient.fund(escrowAddress, amount)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.token).toHaveBeenCalledWith();
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const tokenAddress = ethers.constants.AddressZero;
+      const escrowAddress = ethers.constants.AddressZero;
+      const amount = BigNumber.from(10);
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.token.mockReturnValue(tokenAddress);
+
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(escrowClient.fund(escrowAddress, amount)).rejects.toThrow(
+        new EthereumError(ErrorMissingGasPrice.message)
+      );
+
+      expect(escrowClient.escrowContract.token).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('storeResults', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      await expect(
+        escrowClient.storeResults(invalidAddress, url, hash)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should throw an error if url is an empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = '';
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow(ErrorUrlIsEmptyString);
+    });
+
+    test('should throw an error if results url is invalid url', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = FAKE_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is an empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
+      const hash = '';
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should successfully store results', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await escrowClient.storeResults(escrowAddress, url, hash);
+
+      expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
+        url,
+        hash,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if the store results fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.storeResults.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.storeResults).toHaveBeenCalledWith(
+        url,
+        hash,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const url = VALID_URL;
+      const hash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(
+        escrowClient.storeResults(escrowAddress, url, hash)
+      ).rejects.toThrow(new EthereumError(ErrorMissingGasPrice.message));
+    });
+  });
+
+  describe('complete', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.complete(invalidAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.complete(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully complete escrow', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await escrowClient.complete(escrowAddress);
+
+      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if the complete fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.complete.mockRejectedValueOnce(new Error());
+
+      await expect(escrowClient.complete(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.complete).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(escrowClient.complete(escrowAddress)).rejects.toThrow(
+        new EthereumError(ErrorMissingGasPrice.message)
+      );
+    });
+  });
+
+  describe('bulkPayOut', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      await expect(
+        escrowClient.bulkPayOut(
+          invalidAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should throw an error if recipients length is equal to 0', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients: string[] = [];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorRecipientCannotBeEmptyArray);
+    });
+
+    test('should throw an error if amounts length is equal to 0', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts: number[] = [];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorAmountsCannotBeEmptyArray);
+    });
+
+    test('should throw an error if recipients and amounts do not have the same length', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [
+        BigNumber.from(100),
+        BigNumber.from(100),
+        BigNumber.from(100),
+      ];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorRecipientAndAmountsMustBeSameLength);
+    });
+
+    test('should throw an error if recipients contains invalid addresses', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [FAKE_ADDRESS];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
+    });
+
+    test('should throw an error if url is an empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = '';
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorUrlIsEmptyString);
+    });
+
+    test('should throw an error if final results url is an invalid url', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = FAKE_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorInvalidUrl);
+    });
+
+    test('should throw an error if hash is an empty string', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [ethers.constants.AddressZero];
+      const amounts = [BigNumber.from(100)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = '';
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorHashIsEmptyString);
+    });
+
+    test('should throw an error if escrow does not have enough balance', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ];
+      const amounts = [BigNumber.from(90), BigNumber.from(20)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.getBalance = vi.fn().mockReturnValue(BigNumber.from(50));
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(ErrorEscrowDoesNotHaveEnoughBalance);
+    });
+
+    test('should successfully bulkPayOut escrow', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ];
+      const amounts = [BigNumber.from(10), BigNumber.from(10)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.getBalance = vi.fn().mockReturnValue(BigNumber.from(100));
+
+      await escrowClient.bulkPayOut(
+        escrowAddress,
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash
+      );
+
+      expect(escrowClient.escrowContract.bulkPayOut).toHaveBeenCalledWith(
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if bulkPayOut fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ];
+      const amounts = [BigNumber.from(10), BigNumber.from(10)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.getBalance = vi.fn().mockReturnValue(BigNumber.from(100));
+      escrowClient.escrowContract.bulkPayOut.mockRejectedValueOnce(new Error());
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.bulkPayOut).toHaveBeenCalledWith(
+        recipients,
+        amounts,
+        finalResultsUrl,
+        finalResultsHash,
+        DEFAULT_TX_ID,
+        {
+          gasPrice: expectedGasPrice,
+        }
+      );
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const recipients = [
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+      ];
+      const amounts = [BigNumber.from(10), BigNumber.from(10)];
+      const finalResultsUrl = VALID_URL;
+      const finalResultsHash = FAKE_HASH;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.getBalance = vi.fn().mockReturnValue(BigNumber.from(100));
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(
+        escrowClient.bulkPayOut(
+          escrowAddress,
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash
+        )
+      ).rejects.toThrow(new EthereumError(ErrorMissingGasPrice.message));
+    });
+  });
+
+  describe('cancel', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.cancel(invalidAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully cancel escrow', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const amountRefunded = BigNumber.from(1);
+
+      escrowClient.escrowContract.token.mockResolvedValueOnce(
+        ethers.constants.AddressZero
+      );
+
+      const log = {
+        address: ethers.constants.AddressZero,
+        name: 'Transfer',
+        args: [
+          ethers.constants.AddressZero,
+          ethers.constants.AddressZero,
+          amountRefunded,
+        ],
+      };
+      mockTx.wait.mockResolvedValueOnce({
+        transactionHash: FAKE_HASH,
+        logs: [log],
+      });
+
+      const mockHMTokenFactoryContract = {
+        interface: {
+          parseLog: vi.fn().mockReturnValueOnce(log),
+        },
+      };
+
+      vi.spyOn(HMToken__factory, 'connect').mockReturnValue(
+        mockHMTokenFactoryContract as any
+      );
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
+
+      const result = await escrowClient.cancel(escrowAddress);
+
+      expect(result).toStrictEqual({
+        amountRefunded,
+        txHash: FAKE_HASH,
+      });
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if the cancel fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockRejectedValueOnce(new Error());
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if the wait fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      mockTx.wait.mockRejectedValueOnce(new Error());
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if transfer event not found in transaction logs', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      mockTx.wait.mockResolvedValueOnce({
+        transactionHash: FAKE_HASH,
+        logs: [
+          {
+            address: ethers.constants.AddressZero,
+            name: 'NotTransfer',
+            args: [
+              ethers.constants.AddressZero,
+              ethers.constants.AddressZero,
+              undefined,
+            ],
+          },
+        ],
+      });
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.cancel.mockResolvedValueOnce(mockTx);
+
+      const mockHMTokenFactoryContract = {
+        interface: {
+          parseLog: vi.fn(),
+        },
+      };
+
+      vi.spyOn(HMToken__factory, 'connect').mockReturnValue(
+        mockHMTokenFactoryContract as any
+      );
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.cancel).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(escrowClient.cancel(escrowAddress)).rejects.toThrow(
+        new EthereumError(ErrorMissingGasPrice.message)
+      );
+    });
+  });
+
+  describe('abort', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const invalidAddress = FAKE_ADDRESS;
+
+      await expect(escrowClient.abort(invalidAddress)).rejects.toThrow(
+        ErrorInvalidEscrowAddressProvided
+      );
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow(
+        ErrorEscrowAddressIsNotProvidedByFactory
+      );
+    });
+
+    test('should successfully abort escrow', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await escrowClient.abort(escrowAddress);
+
+      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if abort fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.abort.mockRejectedValueOnce(new Error());
+
+      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow();
+
+      expect(escrowClient.escrowContract.abort).toHaveBeenCalledWith({
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(escrowClient.abort(escrowAddress)).rejects.toThrow(
+        new EthereumError(ErrorMissingGasPrice.message)
+      );
+    });
+  });
+
+  describe('addTrustedHandlers', () => {
+    test('should throw an error if escrowAddress is an invalid address', async () => {
+      const escrowAddress = FAKE_ADDRESS;
+      const trustedHandlers = [ethers.constants.AddressZero];
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
+    });
+
+    test('should throw an error if hasEscrow returns false', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(false);
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow(ErrorEscrowAddressIsNotProvidedByFactory);
+    });
+
+    test('should throw an error if trusted handlers length is equal to 0', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers: string[] = [];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow(ErrorListOfHandlersCannotBeEmpty);
+    });
+
+    test('should throw an error if trusted handlers contains invalid addresses', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [FAKE_ADDRESS];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow(new InvalidEthereumAddressError(FAKE_ADDRESS));
+    });
+
+    test('should successfully addTrustedHandlers', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+
+      await escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers);
+
+      expect(
+        escrowClient.escrowContract.addTrustedHandlers
+      ).toHaveBeenCalledWith(trustedHandlers, {
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if addTrustedHandlers fails', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      escrowClient.escrowContract.addTrustedHandlers.mockRejectedValueOnce(
+        new Error()
+      );
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow();
+
+      expect(
+        escrowClient.escrowContract.addTrustedHandlers
+      ).toHaveBeenCalledWith(trustedHandlers, {
+        gasPrice: expectedGasPrice,
+      });
+    });
+
+    test('should throw an error if gas price data is missing from provider/signer', async () => {
+      const escrowAddress = ethers.constants.AddressZero;
+      const trustedHandlers = [ethers.constants.AddressZero];
+
+      escrowClient.escrowFactoryContract.hasEscrow.mockReturnValue(true);
+      mockProvider.getFeeData.mockResolvedValueOnce({});
+
+      await expect(
+        escrowClient.addTrustedHandlers(escrowAddress, trustedHandlers)
+      ).rejects.toThrow(new EthereumError(ErrorMissingGasPrice.message));
     });
   });
 });

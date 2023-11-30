@@ -55,6 +55,66 @@ def label_counts(
         inferred.
 
     :return: A two-dimensional array of integers. Rows represent items, columns represent labels.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.utils import label_counts
+
+            annotations = [
+                ["white", "black", "white"],
+                ["white", "white", "white"],
+                ["black", "black", "black"],
+                ["white",   "nan", "black"],
+            ]
+
+            # infer labels automatically
+            counts, labels = label_counts(annotations, return_labels=True)
+            print(counts)
+            # [[1 2]
+            #  [0 3]
+            #  [3 0]
+            #  [1 1]]
+
+            # labels are inferred and sorted automatically
+            print(labels)
+            # ['black' 'white']
+
+        .. code-block:: python
+
+            # labels are provided, label order is preserved
+            counts, labels = label_counts(
+                annotations,
+                labels=['white', 'black'],
+                return_labels=True
+            )
+            print(counts)
+            # [[2 1]
+            #  [3 0]
+            #  [0 3]
+            #  [1 1]]
+
+            print(labels)
+            # ['white' 'black']
+
+        .. code-block:: python
+
+            # can be achieved using nan values
+            counts, labels = label_counts(
+                annotations,
+                nan_values=[''],
+                return_labels=True
+            )
+
+            print(counts)
+            # [[1 2]
+            #  [0 3]
+            #  [3 0]
+            #  [1 1]]
+
+            print(labels)
+            # ['black' 'white']
+
     """
     annotations = np.asarray(annotations)
 
@@ -92,6 +152,25 @@ def confusion_matrix(
 
     :return: A confusion matrix.
         Rows represent labels assigned by b, columns represent labels assigned by a.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.utils import confusion_matrix
+            import numpy as np
+
+            annotations = np.asarray([
+                ["a", "a"],
+                ["b", "a"],
+                ["c", "c"]
+            ])
+
+            # infer labels automatically
+            cm = confusion_matrix(annotations, return_labels=False)
+            print(cm)
+            # [[1 0 0]
+            #  [1 0 0]
+            #  [0 0 1]]
     """
     annotations = np.asarray(annotations)
 
@@ -268,6 +347,45 @@ def records_from_annotations(
     :param labels: The to be included in the matrix.
 
     :return: Tuple containing arrays of item value ids, item ids and annotator ids
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.utils import records_from_annotations
+            import numpy as np
+
+            annotations = np.asarray([
+                ["cat", "not", "cat"],
+                ["cat", "cat", "cat"],
+                ["not", "not", "not"],
+                ["cat", np.nan, "not"],
+            ])
+
+            # nan values are automatically filtered
+            values, items, annotators = records_from_annotations(annotations)
+            print(values)
+            # ['cat' 'not' 'cat' 'cat' 'cat' 'cat' 'not' 'not' 'not' 'cat' 'not']
+            print(items)
+            # [0 0 0 1 1 1 2 2 2 3 3]
+            print(annotators)
+            # [0 1 2 0 1 2 0 1 2 0 2]
+
+        .. code-block:: python
+
+            annotators = np.asarray(["bob", "alice", "charlie"])
+            items = np.asarray(["item_1", "item_2", "item_3", "item_4"])
+
+            values, items, annotators = records_from_annotations(
+                annotations,
+                annotators,
+                items
+            )
+            print(values)
+            # ['cat' 'not' 'cat' 'cat' 'cat' 'cat' 'not' 'not' 'not' 'cat' 'not']
+            print(items)
+            # ['item_1' 'item_1' 'item_1' 'item_2' 'item_2' 'item_2' 'item_3' 'item_3' 'item_3' 'item_4' 'item_4']
+            print(annotators)
+            # ['bob' 'alice' 'charlie' 'bob' 'alice' 'charlie' 'bob' 'alice' 'charlie' 'bob' 'charlie']
     """
     annotations = np.asarray(annotations)
     n_items, n_annotators = annotations.shape

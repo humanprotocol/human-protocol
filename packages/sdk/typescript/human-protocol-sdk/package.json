@@ -59,6 +59,7 @@
   },
   "typedocOptions": {
     "entryPoints": [
+      "./src/base.ts",
       "./src/encryption.ts",
       "./src/escrow.ts",
       "./src/kvstore.ts",

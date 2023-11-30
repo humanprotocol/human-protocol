@@ -1,6 +1,8 @@
 import { Buffer } from 'buffer';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import React from 'react';
@@ -56,18 +58,7 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [
-    goerli,
-    mainnet,
-    polygon,
-    skaleHumanProtocol,
-    polygonMumbai,
-    bsc,
-    bscTestnet,
-    fortune,
-    moonbeam,
-    moonbaseAlpha,
-  ],
+  [goerli, mainnet, polygon, skaleHumanProtocol, polygonMumbai, bsc, bscTestnet, fortune, moonbeam, moonbaseAlpha],
   [publicProvider()]
 );
 
@@ -116,12 +107,14 @@ loadStripe(publishableKey).then((stripePromise) => {
       <WagmiConfig client={client}>
         <Provider store={store}>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Elements stripe={stripePromise}>
-              <SnackbarProvider>
-                <App />
-              </SnackbarProvider>
-            </Elements>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <CssBaseline />
+              <Elements stripe={stripePromise}>
+                <SnackbarProvider>
+                  <App />
+                </SnackbarProvider>
+              </Elements>
+            </LocalizationProvider>
           </ThemeProvider>
         </Provider>
       </WagmiConfig>

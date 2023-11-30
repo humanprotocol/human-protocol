@@ -109,3 +109,12 @@ Cj8wO9Ii68YA/1EpYseshTKcNncCad8Npro313/PpE3SzsCP1b+58mkD
 -----END PGP PUBLIC KEY BLOCK-----`;
 export const MOCK_HCAPTCHA_ORACLE_ADDRESS =
   '0xa62a1c18571b869e43eeabd217e233e7f0275af3';
+export const MOCK_CVAT_JOB_SIZE = '10';
+export const MOCK_CVAT_MAX_TIME = '300';
+export const MOCK_CVAT_VAL_SIZE = '2';
+export const MOCK_HCAPTCHA_SITE_KEY = '1234';
+export const MOCK_HCAPTCHA_IMAGE_URL =
+  'http://mockedFileUrl.test/bucket/img_1.jpg';
+export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
+export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
+export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';

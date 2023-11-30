@@ -49,6 +49,8 @@ export enum ErrorAuth {
   InvalidEmailOrPassword = 'Invalid email or password',
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
+  ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
+  ApiKeyNotFound = 'API key not found',
 }
 
 /**

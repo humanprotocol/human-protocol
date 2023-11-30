@@ -37,7 +37,7 @@ import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { GraphQLClient, gql } from 'graphql-request';
 import crypto from "crypto";
-import { DEX } from '../../common/constants/exchange';
+import { CEX, DEX } from '../../common/constants/exchange';
 
 @Injectable()
 export class LiquidityService {
@@ -211,7 +211,53 @@ export class LiquidityService {
         chain,
       };
 
-      if (DEX.includes(manifest.exchangeName)) {
+      if (CEX.includes(manifest.exchangeName)) 
+      {
+        if (!liquidityRequest.liquidityProviderAPISecret || !liquidityRequest.liquidityProviderAPIKEY) {
+          throw new Error('Empty API keys');
+        }
+        const queryString = `symbol=${manifest.tokenA}${
+          manifest.tokenB
+        }&timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
+        const signature = crypto
+          .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
+          .update(queryString)
+          .digest('hex');
+        const signedQueryString = `${queryString}&signature=${signature}`;
+        const headers = {
+          'X-MBX-APIKEY': liquidityRequest.liquidityProviderAPIKEY,
+        };
+        const response = await this.httpService
+          .get(
+            `${this.configService.get(
+              ConfigNames.BINANCE_URL,
+            )}/v3/allOrders?${signedQueryString}`,
+            { headers },
+          )
+          .toPromise();
+        if (!response) {
+          throw new Error('Failed to get response from server');
+        }
+        const data = response.data;
+        if (data) {
+          const filteredOrders = data.filter(
+            (order: any) => order.status === 'FILLED' || order.type === 'LIMIT',
+          );
+          const liquidityScore =
+            this.calculateCentralizedLiquidityScore(filteredOrders);
+          if (liquidityRequest.save) {
+            await this.pushLiquidityScore(
+              liquidityRequest.escrowAddress,
+              liquidityRequest.chainId,
+              liquidityRequest.liquidityProvider,
+              liquidityScore,
+            );
+          }
+          return liquidityScore;
+        }
+      throw new Error('No data received from server');
+      }
+      else {
         const client = this.getGraphQLClient(variables.chain, variables.exchange);
         const result: any = await client.request(UniswapQuery, variables);
         let positionSnapshots = result?.positionSnapshots;
@@ -241,51 +287,7 @@ export class LiquidityService {
           liquidityProvider: liquidityRequest.liquidityProvider,
         };
         return response;
-      } else {
-        if (!liquidityRequest.liquidityProviderAPISecret || !liquidityRequest.liquidityProviderAPIKEY) {
-          throw new Error('Empty API keys');
-        }
-        const queryString = `symbol=${manifest.tokenA}${
-          manifest.tokenB
-        }&timestamp=${Date.now()}&startTime=${manifest.startBlock}`;
-        const signature = crypto
-          .createHmac('sha256', liquidityRequest.liquidityProviderAPISecret)
-          .update(queryString)
-          .digest('hex');
-        const signedQueryString = `${queryString}&signature=${signature}`;
-        const headers = {
-          'X-MBX-APIKEY': liquidityRequest.liquidityProviderAPIKEY,
-        };
-        const response = await this.httpService
-          .get(
-            `${this.configService.get(
-              ConfigNames.BINANCE_URL,
-            )}/api/v3/allOrders?${signedQueryString}`,
-            { headers },
-          )
-          .toPromise();
-        if (!response) {
-          throw new Error('Failed to get response from server');
-        }
-        const data = response.data;
-        if (data) {
-          const filteredOrders = data.filter(
-            (order: any) => order.status === 'FILLED' || order.type === 'LIMIT',
-          );
-          const liquidityScore =
-            this.calculateCentralizedLiquidityScore(filteredOrders);
-          if (liquidityRequest.save) {
-            await this.pushLiquidityScore(
-              liquidityRequest.escrowAddress,
-              liquidityRequest.chainId,
-              liquidityRequest.liquidityProvider,
-              liquidityScore,
-            );
-          }
-          return liquidityScore;
-        }
-      throw new Error('No data received from server');
-      }
+      }  
     } catch (error: any) {
       console.error(`Error in getLiquidityScore: ${error.message}`);
       throw error;

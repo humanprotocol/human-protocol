@@ -13,13 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import {
-  CardNumberElement,
-  CardExpiryElement,
-  CardCvcElement,
-  useElements,
-  useStripe,
-} from '@stripe/react-stripe-js';
+import { CardNumberElement, CardExpiryElement, CardCvcElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import React, { useMemo, useState } from 'react';
 import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -29,19 +23,17 @@ import { useAppDispatch, useAppSelector } from '../../../state';
 import { fetchUserBalanceAsync } from '../../../state/auth/reducer';
 import { JobType } from '../../../types';
 
-const StripeElement = styled(Box)<BoxProps & { disabled?: boolean }>(
-  (props) => ({
-    border: '1px solid rgba(50,10,141,0.5)',
-    borderRadius: '4px',
-    height: '56px',
-    padding: '18px 16px',
-    pointerEvents: props.disabled ? 'none' : 'auto',
-    opacity: props.disabled ? 0.2 : 1,
-    '&:focus-within': {
-      borderColor: '#32108D',
-    },
-  })
-);
+const StripeElement = styled(Box)<BoxProps & { disabled?: boolean }>((props) => ({
+  border: '1px solid rgba(50,10,141,0.5)',
+  borderRadius: '4px',
+  height: '56px',
+  padding: '18px 16px',
+  pointerEvents: props.disabled ? 'none' : 'auto',
+  opacity: props.disabled ? 0.2 : 1,
+  '&:focus-within': {
+    borderColor: '#32108D',
+  },
+}));
 
 export const FiatPayForm = ({
   onStart,
@@ -91,10 +83,7 @@ export const FiatPayForm = ({
     }
   }, [paymentData, payWithAccountBalance, creditCardPayAmount]);
 
-  const handlePaymentDataFormFieldChange = (
-    fieldName: string,
-    fieldValue: any
-  ) => {
+  const handlePaymentDataFormFieldChange = (fieldName: string, fieldValue: any) => {
     setPaymentData({ ...paymentData, [fieldName]: fieldValue });
   };
 
@@ -139,23 +128,20 @@ export const FiatPayForm = ({
         });
 
         // stripe payment
-        const { error: stripeError, paymentIntent } =
-          await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-              card: cardNumber,
-              billing_details: {
-                name: paymentData.name,
-              },
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardNumber,
+            billing_details: {
+              name: paymentData.name,
             },
-          });
+          },
+        });
         if (stripeError) {
           throw stripeError;
         }
 
         // confirm payment
-        const success = await paymentService.confirmFiatPayment(
-          paymentIntent.id
-        );
+        const success = await paymentService.confirmFiatPayment(paymentIntent.id);
 
         if (!success) {
           throw new Error('Payment confirmation failed.');
@@ -163,13 +149,15 @@ export const FiatPayForm = ({
       }
 
       // create job
-      const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
+      const { jobType, chainId, fortuneRequest, cvatRequest, hCaptchaRequest } = jobRequest;
       if (!chainId) return;
 
       if (jobType === JobType.Fortune && fortuneRequest) {
         await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
       } else if (jobType === JobType.CVAT && cvatRequest) {
         await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
+      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+        await jobService.createHCaptchaJob(chainId, hCaptchaRequest, fundAmount);
       }
 
       dispatch(fetchUserBalanceAsync());
@@ -199,9 +187,7 @@ export const FiatPayForm = ({
                     <Checkbox
                       defaultChecked
                       checked={payWithAccountBalance}
-                      onChange={(e) =>
-                        setPayWithAccountBalance(e.target.checked)
-                      }
+                      onChange={(e) => setPayWithAccountBalance(e.target.checked)}
                     />
                   }
                   label="I want to pay with my account balance"
@@ -229,9 +215,7 @@ export const FiatPayForm = ({
                 variant="outlined"
                 placeholder="Name on Card"
                 value={paymentData.name}
-                onChange={(e) =>
-                  handlePaymentDataFormFieldChange('name', e.target.value)
-                }
+                onChange={(e) => handlePaymentDataFormFieldChange('name', e.target.value)}
                 disabled={cardElementsDisabled}
               />
             </Grid>
@@ -243,9 +227,7 @@ export const FiatPayForm = ({
                   variant="outlined"
                   value={paymentData.amount}
                   type="number"
-                  onChange={(e) =>
-                    handlePaymentDataFormFieldChange('amount', e.target.value)
-                  }
+                  onChange={(e) => handlePaymentDataFormFieldChange('amount', e.target.value)}
                 />
               </FormControl>
             </Grid>
@@ -272,11 +254,7 @@ export const FiatPayForm = ({
               }}
             >
               <Typography>Account Balance</Typography>
-              {user?.balance && (
-                <Typography color="text.secondary">
-                  {user?.balance?.amount?.toFixed(2)} USD
-                </Typography>
-              )}
+              {user?.balance && <Typography color="text.secondary">{user?.balance?.amount?.toFixed(2)} USD</Typography>}
             </Box>
             {/* <Box
               sx={{
@@ -307,25 +285,13 @@ export const FiatPayForm = ({
             <Box sx={{ py: 1.5 }}>
               <Typography mb={2}>Payment method</Typography>
               <Stack direction="column" spacing={1}>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography color="text.secondary">Balance</Typography>
-                  <Typography color="text.secondary">
-                    {balancePayAmount.toFixed(2)} USD
-                  </Typography>
+                  <Typography color="text.secondary">{balancePayAmount.toFixed(2)} USD</Typography>
                 </Stack>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography color="text.secondary">Credit Card</Typography>
-                  <Typography color="text.secondary">
-                    {creditCardPayAmount.toFixed(2)} USD
-                  </Typography>
+                  <Typography color="text.secondary">{creditCardPayAmount.toFixed(2)} USD</Typography>
                 </Stack>
                 {/* <Stack
                   direction="row"
@@ -337,11 +303,7 @@ export const FiatPayForm = ({
                     ({JOB_LAUNCHER_FEE}%) {feeAmount} USD
                   </Typography>
                 </Stack> */}
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Typography>Total</Typography>
                   <Typography>{totalAmount.toFixed(2)} USD</Typography>
                 </Stack>
@@ -380,10 +342,7 @@ export const FiatPayForm = ({
             Cancel
           </Button>
         </Box>
-        <Link
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-        >
+        <Link href="https://humanprotocol.org/app/terms-and-conditions" target="_blank">
           <Typography variant="caption" mt={4} component="p">
             Terms & conditions
           </Typography>
