@@ -3,6 +3,7 @@ import { IsEmail, IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
+import { Currency } from 'src/common/enums/payment';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
@@ -28,4 +29,15 @@ export class UserUpdateDto {
   })
   @IsEnum(UserStatus)
   public status?: UserStatus;
+}
+
+export class UserBalanceDto {
+  @ApiProperty({ description: 'Amount of the user balance', type: Number })
+  amount: number;
+
+  @ApiProperty({
+    description: 'Currency of the user balance',
+    enum: Currency,
+  })
+  currency: Currency;
 }
