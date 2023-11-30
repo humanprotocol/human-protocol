@@ -477,6 +477,7 @@ describe('JobService', () => {
 
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
     });

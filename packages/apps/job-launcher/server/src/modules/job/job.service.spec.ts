@@ -71,6 +71,8 @@ import {
   MOCK_HCAPTCHA_SITE_KEY,
   MOCK_HCAPTCHA_IMAGE_LABEL,
   MOCK_HCAPTCHA_IMAGE_URL,
+  MOCK_HCAPTCHA_REPO_URI,
+  MOCK_HCAPTCHA_RO_URI,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -94,7 +96,7 @@ import { PaymentEntity } from '../payment/payment.entity';
 import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
-import { HCAPTCHA_MAX_SHAPES_PER_IMAGE, HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE, HCAPTCHA_MIN_SHAPES_PER_IMAGE, HCAPTCHA_NOT_PRESENTED_LABEL, HCAPTCHA_REPO_URI, HCAPTCHA_RO_URI } from '../../common/constants';
+import { HCAPTCHA_MAX_SHAPES_PER_IMAGE, HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE, HCAPTCHA_MIN_SHAPES_PER_IMAGE, HCAPTCHA_NOT_PRESENTED_LABEL } from '../../common/constants';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -197,6 +199,10 @@ describe('JobService', () => {
             return MOCK_CVAT_MAX_TIME;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
+          case 'HCAPTCHA_REPUTATION_ORACLE_ADDRESS':
+            return MOCK_HCAPTCHA_REPO_URI;
+          case 'HCAPTCHA_RECORDING_ORACLE_ADDRESS':
+            return MOCK_HCAPTCHA_RO_URI;
         }
       }),
     };
@@ -484,8 +490,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI,
+        repo_uri: MOCK_HCAPTCHA_REPO_URI,
+        ro_uri: MOCK_HCAPTCHA_RO_URI,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {},
@@ -545,8 +551,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI,
+        repo_uri: MOCK_HCAPTCHA_REPO_URI,
+        ro_uri: MOCK_HCAPTCHA_RO_URI,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: { 
@@ -622,8 +628,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI,
+        repo_uri: MOCK_HCAPTCHA_REPO_URI,
+        ro_uri: MOCK_HCAPTCHA_RO_URI,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: { [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL } },
@@ -695,8 +701,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI,
+        repo_uri: MOCK_HCAPTCHA_REPO_URI,
+        ro_uri: MOCK_HCAPTCHA_RO_URI,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: { [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL } },
@@ -767,8 +773,8 @@ describe('JobService', () => {
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
         oracle_stake: 0.05,
-        repo_uri: HCAPTCHA_REPO_URI,
-        ro_uri: HCAPTCHA_RO_URI,
+        repo_uri: MOCK_HCAPTCHA_REPO_URI,
+        ro_uri: MOCK_HCAPTCHA_RO_URI,
         request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: { [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL } },

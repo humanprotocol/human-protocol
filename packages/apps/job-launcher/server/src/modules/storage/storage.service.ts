@@ -63,6 +63,7 @@ export class StorageService {
         content,
         {
           'Content-Type': contentType,
+          'Cache-Control': 'no-store'
         },
       );
 

@@ -54,6 +54,8 @@ export const ConfigNames = {
   CVAT_JOB_SIZE: 'CVAT_JOB_SIZE',
   CVAT_MAX_TIME: 'CVAT_MAX_TIME',
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
+  APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
+  APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
 };
 
 export const envValidator = Joi.object({
@@ -119,4 +121,7 @@ export const envValidator = Joi.object({
   CVAT_JOB_SIZE: Joi.string().default('10'),
   CVAT_MAX_TIME: Joi.string().default('300'),
   CVAT_VAL_SIZE: Joi.string().default('2'),
+  // APIKey
+  APIKEY_ITERATIONS: Joi.number().default(1000),
+  APIKEY_KEY_LENGTH: Joi.number().default(64),
 });

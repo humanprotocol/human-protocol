@@ -95,6 +95,7 @@ describe('Web3Service', () => {
         expect.stringContaining(solution),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
     });
@@ -199,6 +200,7 @@ describe('Web3Service', () => {
         MOCK_S3_BUCKET,
         expect.any(String),
         expect.any(stream),
+        { 'Cache-Control': 'no-store' },
       );
     });
 

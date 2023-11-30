@@ -55,6 +55,7 @@ export class StorageService {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       await this.minioClient.putObject(this.s3Config.bucket, key, content, {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
       });
 
       return { url: this.getUrl(key), hash };
@@ -78,7 +79,9 @@ export class StorageService {
       const hash = await hashStream(data);
       const key = `s3${hash}.zip`;
 
-      await this.minioClient.putObject(this.s3Config.bucket, key, stream);
+      await this.minioClient.putObject(this.s3Config.bucket, key, stream, {
+        'Cache-Control': 'no-store',
+      });
 
       Logger.log(`File from ${url} copied to ${this.s3Config.bucket}/${key}`);
 
@@ -88,7 +91,6 @@ export class StorageService {
       };
     } catch (error) {
       Logger.error('Error copying file:', error);
-      console.log(error);
       throw new Error('File not uploaded');
     }
   }

@@ -52,7 +52,7 @@ class S3Client {
       this.s3BucketName,
       fileName,
       JSON.stringify(escrowData),
-      { 'Content-Type': 'application/json' }
+      { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     );
     return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}`;
   }

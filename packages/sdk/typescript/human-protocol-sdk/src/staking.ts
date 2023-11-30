@@ -13,6 +13,7 @@ import {
 } from '@human-protocol/core/typechain-types';
 import { BigNumber, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
+import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -102,48 +103,61 @@ import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
  * const stakingClient = await StakingClient.build(provider);
  * ```
  */
-export class StakingClient {
-  public signerOrProvider: Signer | Provider;
-  public network: NetworkData;
+export class StakingClient extends BaseEthersClient {
   public tokenContract: HMToken;
   public stakingContract: Staking;
   public escrowFactoryContract: EscrowFactory;
+  public rewardPoolContract: RewardPool;
 
   /**
    * **StakingClient constructor**
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the Staking contract
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    */
-  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
+  constructor(
+    signerOrProvider: Signer | Provider,
+    networkData: NetworkData,
+    gasPriceMultiplier?: number
+  ) {
+    super(signerOrProvider, networkData, gasPriceMultiplier);
+
     this.stakingContract = Staking__factory.connect(
-      network.stakingAddress,
+      networkData.stakingAddress,
       signerOrProvider
     );
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      network.factoryAddress,
+      networkData.factoryAddress,
       signerOrProvider
     );
 
     this.tokenContract = HMToken__factory.connect(
-      network.hmtAddress,
+      networkData.hmtAddress,
       signerOrProvider
     );
 
-    this.signerOrProvider = signerOrProvider;
-    this.network = network;
+    this.rewardPoolContract = RewardPool__factory.connect(
+      networkData.rewardPoolAddress,
+      this.signerOrProvider
+    );
   }
 
   /**
    * Creates an instance of StakingClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
+   *
    * @returns {Promise<StakingClient>} - An instance of StakingClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
+  public static async build(
+    signerOrProvider: Signer | Provider,
+    gasPriceMultiplier?: number
+  ) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -162,7 +176,22 @@ export class StakingClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new StakingClient(signerOrProvider, networkData);
+    return new StakingClient(signerOrProvider, networkData, gasPriceMultiplier);
+  }
+
+  /**
+   * Check if escrow exists
+   *
+   * @param escrowAddress Escrow address to check against
+   */
+  private async checkValidEscrow(escrowAddress: string) {
+    if (!ethers.utils.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
   }
 
   /**
@@ -200,7 +229,9 @@ export class StakingClient {
     }
 
     try {
-      await this.tokenContract.approve(this.stakingContract.address, amount);
+      await this.tokenContract.approve(this.stakingContract.address, amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -245,7 +276,9 @@ export class StakingClient {
     }
 
     try {
-      await this.stakingContract.stake(amount);
+      await this.stakingContract.stake(amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -289,7 +322,9 @@ export class StakingClient {
     }
 
     try {
-      await this.stakingContract.unstake(amount);
+      await this.stakingContract.unstake(amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -323,7 +358,9 @@ export class StakingClient {
   @requiresSigner
   public async withdraw(): Promise<void> {
     try {
-      await this.stakingContract.withdraw();
+      await this.stakingContract.withdraw({
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -380,16 +417,12 @@ export class StakingClient {
       throw ErrorInvalidStakerAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
+      await this.stakingContract.slash(slasher, staker, escrowAddress, amount, {
+        ...(await this.gasPriceOptions()),
+      });
 
       return;
     } catch (e) {
@@ -437,16 +470,12 @@ export class StakingClient {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.allocate(escrowAddress, amount);
+      await this.stakingContract.allocate(escrowAddress, amount, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -481,16 +510,12 @@ export class StakingClient {
    */
   @requiresSigner
   public async closeAllocation(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.closeAllocation(escrowAddress);
+      await this.stakingContract.closeAllocation(escrowAddress, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -519,26 +544,17 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * await stakingClient.distributeRewards('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   @requiresSigner
-  public async distributeRewards(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+  public async distributeReward(escrowAddress: string): Promise<void> {
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      const rewardPoolContract: RewardPool = RewardPool__factory.connect(
-        await this.stakingContract.rewardPool(),
-        this.signerOrProvider
-      );
-
-      await rewardPoolContract.distributeReward(escrowAddress);
+      this.rewardPoolContract.distributeReward(escrowAddress, {
+        ...(await this.gasPriceOptions()),
+      });
       return;
     } catch (e) {
       return throwError(e);
@@ -574,7 +590,7 @@ export class StakingClient {
     try {
       const { leader } = await gqlFetch<{
         leader: ILeader;
-      }>(this.network.subgraphUrl, GET_LEADER_QUERY, {
+      }>(this.networkData.subgraphUrl, GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
@@ -609,7 +625,7 @@ export class StakingClient {
     try {
       const { leaders } = await gqlFetch<{
         leaders: ILeader[];
-      }>(this.network.subgraphUrl, GET_LEADERS_QUERY(filter), {
+      }>(this.networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
         role: filter.role,
       });
 
@@ -641,13 +657,7 @@ export class StakingClient {
    * ```
    */
   public async getAllocation(escrowAddress: string): Promise<IAllocation> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
@@ -686,7 +696,7 @@ export class StakingClient {
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(this.network.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+      }>(this.networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
         slasherAddress: slasherAddress.toLowerCase(),
       });
 

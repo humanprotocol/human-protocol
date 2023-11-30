@@ -58,15 +58,15 @@ import { throwError } from './utils';
  * ```
  */
 export class StatisticsClient {
-  public network: NetworkData;
+  public networkData: NetworkData;
 
   /**
    * **StatisticsClient constructor**
    *
-   * @param {NetworkData} network - The network information required to connect to the Statistics contract
+   * @param {NetworkData} networkData - The network information required to connect to the Statistics contract
    */
-  constructor(network: NetworkData) {
-    this.network = network;
+  constructor(networkData: NetworkData) {
+    this.networkData = networkData;
   }
 
   /**
@@ -124,11 +124,11 @@ export class StatisticsClient {
     try {
       const { escrowStatistics } = await gqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.network.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -199,7 +199,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -288,7 +288,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -398,15 +398,15 @@ export class StatisticsClient {
     try {
       const { hmtokenStatistics } = await gqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.network.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
 
       const { holders } = await gqlFetch<{
         holders: HMTHolderData[];
-      }>(this.network.subgraphUrl, GET_HOLDERS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_HOLDERS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });

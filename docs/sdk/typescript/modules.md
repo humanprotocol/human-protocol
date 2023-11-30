@@ -6,6 +6,7 @@
 
 ### Modules
 
+- [base](modules/base.md)
 - [encryption](modules/encryption.md)
 - [escrow](modules/escrow.md)
 - [kvstore](modules/kvstore.md)

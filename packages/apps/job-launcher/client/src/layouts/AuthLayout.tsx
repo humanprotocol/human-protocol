@@ -74,10 +74,7 @@ export default function AuthLayout() {
           </Collapse>
           <ListItem>
             <ListItemButton>
-              <Link
-                to="/jobs/create"
-                style={{ display: 'flex', alignItems: 'center' }}
-              >
+              <Link to="/jobs/create" style={{ display: 'flex', alignItems: 'center' }}>
                 <ListItemIcon>
                   <img src={PlusIcon} alt="Add New Job" />
                 </ListItemIcon>
@@ -96,11 +93,7 @@ export default function AuthLayout() {
           py: 5,
         }}
       >
-        <MuiLink
-          href="https://humanprotocol.org/app/terms-and-conditions"
-          target="_blank"
-          sx={{ mb: 4 }}
-        >
+        <MuiLink href="https://humanprotocol.org/app/terms-and-conditions" target="_blank" sx={{ mb: 4 }}>
           <Typography variant="caption" color="text.secondary">
             Terms and conditions
           </Typography>
@@ -117,10 +110,7 @@ export default function AuthLayout() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant="permanent"
           sx={{

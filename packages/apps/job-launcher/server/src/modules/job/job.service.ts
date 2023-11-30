@@ -859,7 +859,7 @@ export class JobService {
             waitUntil: SortDirection.ASC,
           },
         },
-      );
+      );      
 
       if (!jobEntity) return;
 

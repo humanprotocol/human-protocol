@@ -90,6 +90,7 @@ describe('Web3Service', () => {
 
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
     });

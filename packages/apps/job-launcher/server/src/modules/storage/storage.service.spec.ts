@@ -85,6 +85,7 @@ describe('Web3Service', () => {
         expect.any(String),
         {
           'Content-Type': ContentType.APPLICATION_JSON,
+          'Cache-Control': 'no-store',
         },
       );
     });
