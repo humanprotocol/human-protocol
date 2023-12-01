@@ -123,7 +123,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
+[kvstore.ts:104](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L104)
 
 ## Properties
 
@@ -133,7 +133,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:95](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L95)
+[kvstore.ts:95](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L95)
 
 ___
 
@@ -147,7 +147,7 @@ ___
 
 #### Defined in
 
-base.ts:14
+[base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
 
 ___
 
@@ -161,7 +161,7 @@ ___
 
 #### Defined in
 
-base.ts:15
+[base.ts:15](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L15)
 
 ___
 
@@ -175,7 +175,7 @@ ___
 
 #### Defined in
 
-base.ts:13
+[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
 
 ## Methods
 
@@ -197,7 +197,7 @@ Returns the gas price options
 
 #### Defined in
 
-base.ts:39
+[base.ts:39](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L39)
 
 ___
 
@@ -238,7 +238,7 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:311](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L311)
+[kvstore.ts:311](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L311)
 
 ___
 
@@ -281,7 +281,7 @@ const linkedinUrl = await kvstoreClient.getURL(
 
 #### Defined in
 
-[kvstore.ts:350](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L350)
+[kvstore.ts:350](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L350)
 
 ___
 
@@ -324,7 +324,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:179](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L179)
+[kvstore.ts:179](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L179)
 
 ___
 
@@ -369,7 +369,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:220](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L220)
+[kvstore.ts:220](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L220)
 
 ___
 
@@ -411,7 +411,7 @@ await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
 
 #### Defined in
 
-[kvstore.ts:261](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L261)
+[kvstore.ts:261](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L261)
 
 ___
 
@@ -444,4 +444,4 @@ Creates an instance of KVStoreClient from a Signer or Provider.
 
 #### Defined in
 
-[kvstore.ts:127](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L127)
+[kvstore.ts:127](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L127)
