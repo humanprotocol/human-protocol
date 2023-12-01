@@ -58,12 +58,10 @@ export class WebhookService {
   /**
    * Create a incoming webhook using the DTO data.
    * @param dto - Data to create an incoming webhook.
-   * @returns {Promise<boolean>} - Return the boolean result of the method.
+   * @returns {Promise<void>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
-  public async createIncomingWebhook(
-    dto: WebhookIncomingDto,
-  ): Promise<boolean> {
+  public async createIncomingWebhook(dto: WebhookIncomingDto): Promise<void> {
     try {
       if (dto.eventType !== EventType.TASK_COMPLETED) {
         this.logger.log(ErrorWebhook.InvalidEventType, WebhookService.name);
@@ -82,8 +80,6 @@ export class WebhookService {
         this.logger.log(ErrorWebhook.NotCreated, WebhookService.name);
         throw new NotFoundException(ErrorWebhook.NotCreated);
       }
-
-      return true;
     } catch (e) {
       throw new Error(e);
     }
@@ -96,7 +92,7 @@ export class WebhookService {
    * @throws {Error} Will throw an error if processing fails at any step.
    */
   @Cron(CronExpression.EVERY_10_MINUTES)
-  public async processPendingCronJob(): Promise<boolean> {
+  public async processPendingCronJob(): Promise<void> {
     this.logger.log('Pending webhooks START');
     const webhookEntity = await this.webhookRepository.findOne(
       {
@@ -113,7 +109,7 @@ export class WebhookService {
 
     if (!webhookEntity) {
       this.logger.log('Pending webhooks STOP');
-      return false;
+      return;
     }
 
     try {
@@ -183,7 +179,7 @@ export class WebhookService {
         },
       );
       this.logger.log('Pending webhooks STOP');
-      return true;
+      return;
     } catch (e) {
       return await this.handleWebhookError(webhookEntity, e);
     }
@@ -287,7 +283,7 @@ export class WebhookService {
   public async handleWebhookError(
     webhookEntity: WebhookIncomingEntity,
     error: any,
-  ): Promise<boolean> {
+  ): Promise<void> {
     if (webhookEntity.retriesCount >= RETRIES_COUNT_THRESHOLD) {
       await this.webhookRepository.updateOne(
         { id: webhookEntity.id },
@@ -308,7 +304,6 @@ export class WebhookService {
       error,
       WebhookService.name,
     );
-    return false;
   }
 
   /**
@@ -369,7 +364,7 @@ export class WebhookService {
    * @throws {Error} - An error object if an error occurred.
    */
   @Cron(CronExpression.EVERY_10_MINUTES)
-  public async processPaidCronJob(): Promise<boolean> {
+  public async processPaidCronJob(): Promise<void> {
     this.logger.log('Paid jobs START');
     const webhookEntity = await this.webhookRepository.findOne(
       {
@@ -384,7 +379,7 @@ export class WebhookService {
       },
     );
 
-    if (!webhookEntity) return false;
+    if (!webhookEntity) return;
 
     try {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
@@ -499,7 +494,7 @@ export class WebhookService {
         { status: WebhookStatus.COMPLETED },
       );
       this.logger.log('Paid jobs STOP');
-      return true;
+      return;
     } catch (e) {
       return await this.handleWebhookError(webhookEntity, e);
     }
