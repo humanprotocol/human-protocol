@@ -18,6 +18,7 @@ export const ConfigNames = {
   POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
+  GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
@@ -72,6 +73,7 @@ export const envValidator = Joi.object({
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   JOB_LAUNCHER_FEE: Joi.string().default(10),
   RECORDING_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
