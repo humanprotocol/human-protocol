@@ -52,7 +52,7 @@ export class S3Client {
       this.s3BucketName,
       `${fileName}.json`,
       JSON.stringify(data),
-      { 'Content-Type': 'application/json' }
+      { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     );
     return `${this.s3BaseUrl}${this.s3BucketName}/${fileName}.json`;
   }

@@ -90,6 +90,7 @@ describe('Web3Service', () => {
         expect.stringContaining(solution),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
     });

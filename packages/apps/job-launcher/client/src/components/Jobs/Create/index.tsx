@@ -1,14 +1,30 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
-import { CreateJobStep } from '../../../types';
+import { CreateJobStep, JobType, PayMethod } from '../../../types';
 import { CreateJob } from './CreateJob';
 import { FundingMethod } from './FundingMethod';
 import { LaunchSuccess } from './LaunchSuccess';
 import { PayJob } from './PayJob';
 
 export const CreateJobView = () => {
-  const { step } = useCreateJobPageUI();
+  const { step, changePayMethod, setStep, updateJobRequest } = useCreateJobPageUI();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const jobType = searchParams.get('jobType');
+    const supportedJobTypes = ['fortune', 'cvat', 'hcaptcha'];
+
+    if (jobType && supportedJobTypes.includes(jobType.toLowerCase())) {
+      changePayMethod?.(PayMethod.Fiat);
+      setStep(CreateJobStep.CreateJob);
+
+      updateJobRequest?.({
+        jobType: jobType === 'fortune' ? JobType.Fortune : jobType === 'cvat' ? JobType.CVAT : JobType.HCAPTCHA,
+      });
+    }
+  }, []);
 
   return (
     <Box mt={3}>

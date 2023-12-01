@@ -135,6 +135,7 @@ describe('Storage tests', () => {
         JSON.stringify(file),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         }
       );
       expect(uploadedResults[0].key).toEqual(key);
@@ -311,6 +312,7 @@ describe('Storage tests', () => {
         JSON.stringify(file),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         }
       );
       expect(uploadedResults[0].key).toEqual(key);

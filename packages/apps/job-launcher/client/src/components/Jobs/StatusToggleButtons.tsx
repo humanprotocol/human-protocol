@@ -1,7 +1,5 @@
 import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup, {
-  ToggleButtonGroupProps,
-} from '@mui/material/ToggleButtonGroup';
+import ToggleButtonGroup, { ToggleButtonGroupProps } from '@mui/material/ToggleButtonGroup';
 import React, { FC } from 'react';
 import { JobStatus } from '../../types';
 

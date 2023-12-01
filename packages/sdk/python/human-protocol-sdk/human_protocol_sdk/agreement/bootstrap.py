@@ -33,6 +33,25 @@ def confidence_intervals(
     :param seed: Random seed to use.
 
     :return: Confidence interval and bootstrap distribution.
+
+    :example:
+        .. code-block:: python
+
+                from human_protocol_sdk.agreement.bootstrap import confidence_interval
+                import numpy as np
+
+                np.random.seed(42)
+                data = np.random.randn(10_000)
+                fn = np.mean
+                sample_mean = fn(data)
+                print(f"Sample mean is {sample_mean:.3f}")
+                # Sample mean is -0.002
+
+                cl = 0.99
+                ci, _ = confidence_interval(data, fn, confidence_level=cl)
+                print(f"Population mean is between {ci[0]:.2f} and {ci[1]:.2f} with a probablity of {cl}")
+                # Population mean is between -0.02 and 0.02 with a probablity of 0.99
+
     """
     # set random seed for reproducibility
     if seed is not None:

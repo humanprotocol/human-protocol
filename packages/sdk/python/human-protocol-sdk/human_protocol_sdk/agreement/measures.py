@@ -1,4 +1,5 @@
 """Module containing Inter Rater Agreement Measures."""
+
 from copy import copy
 from functools import partial
 from typing import Sequence, Optional, Callable, Union
@@ -42,6 +43,41 @@ def agreement(
     :return: A dictionary containing the keys "results" and "config".
         Results contains the scores, while config contains parameters
         that produced the results.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement import agreement
+
+            annotations = [
+                ['cat', 'not', 'cat'],
+                ['cat', 'cat', 'cat'],
+                ['not', 'not', 'not'],
+                ['cat', 'nan', 'not'],
+            ]
+
+            agreement_report = agreement(annotations, measure="fleiss_kappa")
+            print(agreement_report)
+            # {
+            #     'results': {
+            #         'measure': 'fleiss_kappa',
+            #         'score': 0.3950000000000001,
+            #         'ci': None,
+            #         'confidence_level': None
+            #     },
+            #     'config': {
+            #         'measure': 'fleiss_kappa',
+            #         'labels': array(['cat', 'not'], dtype='<U3'),
+            #         'data': array([['cat', 'not', 'cat'],
+            #                        ['cat', 'cat', 'cat'],
+            #                        ['not', 'not', 'not'],
+            #                        ['cat', '', 'not']], dtype='<U3'),
+            #         'bootstrap_method': None,
+            #         'bootstrap_kwargs': {},
+            #         'measure_kwargs': {}
+            #     }
+            # }
+
     """
     orig_data = copy(annotations)  # copy of original data for config
     annotations = np.asarray(annotations)
@@ -123,6 +159,21 @@ def percentage(annotations: np.ndarray) -> float:
         M is the number of annotators. Missing values must be indicated by nan.
 
     :return: Value between 0.0 and 1.0, indicating the percentage of agreement.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.measures import percentage
+            import numpy as np
+
+            annotations = np.asarray([
+                ["cat", "not", "cat"],
+                ["cat", "cat", "cat"],
+                ["not", "not", "not"],
+                ["cat", "cat", "not"],
+            ])
+            print(percentage(annotations))
+            # 0.7
     """
     annotations = np.asarray(annotations)
     return _percentage_from_label_counts(label_counts(annotations))
@@ -170,6 +221,27 @@ def cohens_kappa(annotations: np.ndarray) -> float:
 
     :return: Value between -1.0 and 1.0,
         indicating the degree of agreement between both raters.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.measures import cohens_kappa
+            import numpy as np
+
+            annotations = np.asarray([
+                    ["cat", "cat"],
+                    ["cat", "cat"],
+                    ["not", "cat"],
+                    ["not", "cat"],
+                    ["cat", "not"],
+                    ["not", "not"],
+                    ["not", "not"],
+                    ["not", "not"],
+                    ["not", "not"],
+                    ["not", "not"],
+            ])
+            print(cohens_kappa(annotations))
+            # 0.348
     """
     annotations = np.asarray(annotations)
     cm = confusion_matrix(annotations)
@@ -190,6 +262,22 @@ def fleiss_kappa(annotations: np.ndarray) -> float:
 
     :return: Value between -1.0 and 1.0,
         indicating the degree of agreement between all raters.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.measures import fleiss_kappa
+            import numpy as np
+
+            # 3 raters, 2 classes
+            annotations = np.asarray([
+                ["cat", "not", "cat"],
+                ["cat", "cat", "cat"],
+                ["not", "not", "not"],
+                ["cat", "cat", "not"],
+            ])
+            print(f"{fleiss_kappa(annotations):.3f}")
+            # 0.395
     """
     annotations = np.asarray(annotations)
     im = label_counts(annotations)
@@ -219,6 +307,19 @@ def krippendorffs_alpha(
     :return: Value between -1.0 and 1.0,
         indicating the degree of agreement.
 
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.measures import krippendorffs_alpha
+            import numpy as np
+
+            annotations = np.asarray([
+                [0, 0, 0],
+                [0, 1, 1]]
+            )
+            print(krippendorffs_alpha(annotations, distance_function="nominal"))
+            # 0.375
+
     """
     difference_observed, difference_expected = observed_and_expected_differences(
         annotations, distance_function
@@ -245,6 +346,26 @@ def sigma(
         determining statistical significant difference. The lower, the stricter.
 
     :return: Value between 0.0 and 1.0, indicating the degree of agreement.
+
+    :example:
+        .. code-block:: python
+
+            from human_protocol_sdk.agreement.measures import sigma
+            import numpy as np
+
+            np.random.seed(42)
+            n_items = 500
+            n_annotators = 5
+
+            # create annotations
+            annotations = np.random.rand(n_items, n_annotators)
+            means = np.random.rand(n_items, 1) * 100
+            scales = np.random.randn(n_items, 1) * 10
+            annotations = annotations * scales + means
+            d = "interval"
+
+            print(sigma(annotations, d))
+            # 0.6538
     """
     if p < 0.0 or p > 1.0:
         raise ValueError(f"Parameter 'p' must be between 0.0 and 1.0")

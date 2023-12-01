@@ -39,21 +39,12 @@ export default function JobList() {
       >
         <Typography variant="h4" fontWeight={600}>
           Jobs{' '}
-          <Typography
-            variant="h4"
-            fontWeight={600}
-            component={'span'}
-            sx={{ textTransform: 'capitalize' }}
-          >
+          <Typography variant="h4" fontWeight={600} component={'span'} sx={{ textTransform: 'capitalize' }}>
             {item.label}
           </Typography>
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
-          <NetworkSelect
-            showAllNetwork
-            value={chainId}
-            onChange={(e) => setChainId(e.target.value as ChainId)}
-          />
+          <NetworkSelect showAllNetwork value={chainId} onChange={(e) => setChainId(e.target.value as ChainId)} />
         </Box>
       </Box>
       <JobTable status={item.status} chainId={chainId} />

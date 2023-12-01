@@ -7,13 +7,7 @@ import { Table } from '../../components/Table';
 import { useJobs } from '../../hooks/useJobs';
 import { JobStatus } from '../../types';
 
-export const JobTable = ({
-  status,
-  chainId,
-}: {
-  status: JobStatus;
-  chainId: ChainId;
-}) => {
+export const JobTable = ({ status, chainId }: { status: JobStatus; chainId: ChainId }) => {
   const { data, isLoading } = useJobs({ status, chainId });
   const navigate = useNavigate();
 
@@ -28,11 +22,7 @@ export const JobTable = ({
             escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 {escrowAddress}
-                <IconButton
-                  color="primary"
-                  sx={{ ml: 3 }}
-                  onClick={() => copy(escrowAddress)}
-                >
+                <IconButton color="primary" sx={{ ml: 3 }} onClick={() => copy(escrowAddress)}>
                   <CopyLinkIcon />
                 </IconButton>
               </Box>
@@ -52,10 +42,7 @@ export const JobTable = ({
           id: 'action',
           label: '',
           render: ({ jobId }) => (
-            <Link
-              style={{ fontWeight: 600, textDecoration: 'underline' }}
-              to={`/jobs/details/${jobId}`}
-            >
+            <Link style={{ fontWeight: 600, textDecoration: 'underline' }} to={`/jobs/details/${jobId}`}>
               Details
             </Link>
           ),
@@ -69,12 +56,7 @@ export const JobTable = ({
             There are no Jobs at the moment, click the button
             <br /> below to create a new Job
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ mt: 3 }}
-            onClick={() => navigate('/jobs/create')}
-          >
+          <Button variant="contained" size="large" sx={{ mt: 3 }} onClick={() => navigate('/jobs/create')}>
             + Create a Job
           </Button>
         </>

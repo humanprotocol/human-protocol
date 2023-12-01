@@ -43,6 +43,8 @@ import { ReputationEntityType } from '../../common/enums';
 import { LessThanOrEqual } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
+import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class WebhookService {
@@ -53,6 +55,7 @@ export class WebhookService {
     private readonly storageService: StorageService,
     private readonly webhookRepository: WebhookRepository,
     private readonly reputationService: ReputationService,
+    public readonly configService: ConfigService,
   ) {}
 
   /**
@@ -89,13 +92,13 @@ export class WebhookService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processes a pending webhook. Validates and processes incoming data,
    * then sends payments based on the processing results.
    * @param webhookEntity The entity representing the webhook data.
    * @throws {Error} Will throw an error if processing fails at any step.
    */
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingCronJob(): Promise<boolean> {
     this.logger.log('Pending webhooks START');
     const webhookEntity = await this.webhookRepository.findOne(
@@ -119,7 +122,7 @@ export class WebhookService {
     try {
       const { chainId, escrowAddress } = webhookEntity;
       const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
+      const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
       const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
       if (!manifestUrl) {
@@ -324,7 +327,7 @@ export class WebhookService {
   ): Promise<string> {
     const signer = this.web3Service.getSigner(chainId);
 
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
     const url = await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
@@ -363,12 +366,12 @@ export class WebhookService {
     return intermediateResults;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   /**
    * Processing a webhook of an entity with a paid status.
    * @returns {Promise<boolean>} - Return the boolean result of the method.
    * @throws {Error} - An error object if an error occurred.
    */
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPaidCronJob(): Promise<boolean> {
     this.logger.log('Paid jobs START');
     const webhookEntity = await this.webhookRepository.findOne(
@@ -388,7 +391,7 @@ export class WebhookService {
 
     try {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
-      const escrowClient = await EscrowClient.build(signer);
+      const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,

@@ -56,6 +56,7 @@ export class StorageService {
         JSON.stringify(content),
         {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
         },
       );
 
