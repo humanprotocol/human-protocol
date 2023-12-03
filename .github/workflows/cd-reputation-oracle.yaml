@@ -1,4 +1,4 @@
-name: Deploy CVAT Recording Oracle
+name: Deploy Reputation oracle
 
 on:
   push:
