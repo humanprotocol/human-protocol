@@ -1,12 +1,13 @@
 """Module containing all functions relating to blockchain operations."""
 import json
 
+from human_protocol_sdk.constants import Status
 from pydantic import BaseModel
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 from eth_account.messages import encode_defunct
-from human_protocol_sdk.escrow import EscrowClient
+from human_protocol_sdk.escrow import EscrowClient, EscrowData
 
 from src.config import BlockChainConfig, Config
 
@@ -78,3 +79,17 @@ def validate_address(escrow_address: str) -> str:
 def get_manifest_url(info: EscrowInfo) -> str:
     escrow_client = EscrowClient(get_web3(chain_id=info.chain_id))
     return escrow_client.get_manifest_url(info.escrow_address)
+
+def validate_escrow(
+    escrow: EscrowData,
+) -> bool:
+    status = Status[escrow.status]
+    if status != Status.Pending:
+        raise ValueError(
+            f"Escrow status must be {Status.Pending.value}, but was: {status.value}"
+        )
+
+    if int(escrow.balance) == 0:
+        raise ValueError("Escrow doesn't have funds")
+
+    return True
