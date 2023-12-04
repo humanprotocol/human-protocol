@@ -38,7 +38,7 @@
     "passport": "^0.6.0",
     "@types/passport-jwt": "^3.0.10",
     "passport-jwt": "^4.0.1",
-    "@nestjs/terminus": "^10.0.1",
+    "@nestjs/terminus": "^10.2.0",
     "@nestjs/schedule": "^3.0.1",
     "typeorm-naming-strategies": "^4.1.0",
     "zxcvbn": "^4.4.2",
