@@ -676,18 +676,21 @@ export class JobService {
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
         if ((manifest as CvatManifestDto)?.annotation?.type) {
-          await this.sendWebhook(
-            await this.getExchangeOracleWebhookUrl(
-              jobEntity.escrowAddress,
-              jobEntity.chainId,
-            ),
-            {
-              escrow_address: jobEntity.escrowAddress,
-              chain_id: jobEntity.chainId,
-              event_type: EventType.ESCROW_CREATED,
-            },
-            false,
+          const webhookUrl = await this.getExchangeOracleWebhookUrl(
+            jobEntity.escrowAddress,
+            jobEntity.chainId,
           );
+          if (webhookUrl) {
+            await this.sendWebhook(
+              webhookUrl,
+              {
+                escrow_address: jobEntity.escrowAddress,
+                chain_id: jobEntity.chainId,
+                event_type: EventType.ESCROW_CREATED,
+              },
+              false,
+            );
+          }
         }
       }
     } catch (e) {
@@ -736,36 +739,36 @@ export class JobService {
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
-      await this.sendWebhook(
-        await this.getExchangeOracleWebhookUrl(
-          jobEntity.escrowAddress,
-          jobEntity.chainId,
-        ),
-        {
-          escrowAddress: jobEntity.escrowAddress,
-          chainId: jobEntity.chainId,
-          eventType: EventType.ESCROW_CANCELED,
-        },
-        true,
-      );
-    } else {
-      await this.sendWebhook(
-        await this.getExchangeOracleWebhookUrl(
-          jobEntity.escrowAddress,
-          jobEntity.chainId,
-        ),
-        {
-          escrow_address: jobEntity.escrowAddress,
-          chain_id: jobEntity.chainId,
-          event_type: EventType.ESCROW_CANCELED,
-        },
-        false,
-      );
-    }
+    const webhookUrl = await this.getExchangeOracleWebhookUrl(
+      jobEntity.escrowAddress,
+      jobEntity.chainId,
+    );
 
+    if (webhookUrl) {
+      if (
+        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+      ) {
+        await this.sendWebhook(
+          webhookUrl,
+          {
+            escrowAddress: jobEntity.escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.ESCROW_CANCELED,
+          },
+          true,
+        );
+      } else {
+        await this.sendWebhook(
+          webhookUrl,
+          {
+            escrow_address: jobEntity.escrowAddress,
+            chain_id: jobEntity.chainId,
+            event_type: EventType.ESCROW_CANCELED,
+          },
+          false,
+        );
+      }
+    }
     this.logger.log('Cancel jobs STOP');
     return true;
   }
@@ -1007,9 +1010,9 @@ export class JobService {
 
     const kvStoreClient = await KVStoreClient.build(signer);
 
-    return BigNumber.from(
-      await kvStoreClient.get(oracleAddress, KVStoreKeys.fee),
-    );
+    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
+
+    return BigNumber.from(feeValue ? feeValue : 1);
   }
 
   private async updateCompletedStatus(
