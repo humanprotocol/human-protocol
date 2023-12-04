@@ -18,6 +18,7 @@ export const ConfigNames = {
   POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
+  GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
@@ -40,6 +41,8 @@ export const ConfigNames = {
   SENDGRID_API_KEY: 'SENDGRID_API_KEY',
   SENDGRID_FROM_EMAIL: 'SENDGRID_FROM_EMAIL',
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
+  APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
+  APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
 };
 
 export const envValidator = Joi.object({
@@ -55,7 +58,6 @@ export const envValidator = Joi.object({
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().default(1000000000),
   // Database
-  DB_TYPE: Joi.string().default('postgres'),
   POSTGRES_HOST: Joi.string().default('127.0.0.1'),
   POSTGRES_USER: Joi.string().default('operator'),
   POSTGRES_PASSWORD: Joi.string().default('qwerty'),
@@ -65,6 +67,7 @@ export const envValidator = Joi.object({
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   JOB_LAUNCHER_FEE: Joi.string().default(10),
   RECORDING_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
@@ -90,4 +93,7 @@ export const envValidator = Joi.object({
   SENDGRID_API_KEY: Joi.string().required(),
   SENDGRID_FROM_EMAIL: Joi.string().default('job-launcher@hmt.ai'),
   SENDGRID_FROM_NAME: Joi.string().default('Human Protocol Job Launcher'),
+  // APIKey
+  APIKEY_ITERATIONS: Joi.number().default(1000),
+  APIKEY_KEY_LENGTH: Joi.number().default(64),
 });

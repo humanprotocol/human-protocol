@@ -9,6 +9,7 @@ import { PaymentEntity } from '../payment/payment.entity';
 import { JobEntity } from '../job/job.entity';
 import { TokenEntity } from '../auth/token.entity';
 import { AuthEntity } from '../auth/auth.entity';
+import { ApiKeyEntity } from '../auth/apikey.entity';
 
 @Entity({ schema: NS, name: 'users' })
 export class UserEntity extends BaseEntity implements IUser {
@@ -39,4 +40,10 @@ export class UserEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => PaymentEntity, (payment) => payment.user)
   public payments: PaymentEntity[];
+
+  @OneToOne(() => ApiKeyEntity, apiKey => apiKey.user, {
+    nullable: true,
+  })
+  public apiKey: ApiKeyEntity;
+
 }

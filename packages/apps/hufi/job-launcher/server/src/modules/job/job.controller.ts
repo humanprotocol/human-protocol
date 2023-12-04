@@ -23,8 +23,8 @@ import {
   JobCampaignDto,
 } from './job.dto';
 import { JobService } from './job.service';
-import { JobStatusFilter } from '../../common/enums/job';
-import { Public } from '../../common/decorators';
+import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
+import { ApiKey, Public } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
@@ -35,7 +35,8 @@ import { Role } from '../../common/enums/role';
 @Controller('/job')
 export class JobController {
   constructor(private readonly jobService: JobService) {}
-
+  
+  @ApiKey()
   @Post('/campaign')
   public async createCampaignJob(
     @Request() req: RequestWithUser,
@@ -72,6 +73,7 @@ export class JobController {
     );
   }
 
+  @ApiKey()
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,

@@ -10,12 +10,14 @@ import { PaymentModule } from '../payment/payment.module';
 import { JobRepository } from './job.repository';
 import { Web3Module } from '../web3/web3.module';
 import { RoutingProtocolService } from './routing-protocol.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([JobEntity]),
     ConfigModule,
     HttpModule,
+    AuthModule,
     PaymentModule,
     Web3Module,
   ],
