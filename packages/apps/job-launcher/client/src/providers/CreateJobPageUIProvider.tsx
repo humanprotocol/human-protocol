@@ -10,30 +10,24 @@ export type CreateJobPageUIType = {
   updateJobRequest?: (jobRequest: JobRequest) => void;
   goToPrevStep?: () => void;
   goToNextStep?: () => void;
+  setStep: (step: CreateJobStep) => void;
 };
 
-const initialData: Omit<
-  CreateJobPageUIType,
-  'changePayMethod' | 'goToNextStep'
-> = {
+const initialData: Omit<CreateJobPageUIType, 'changePayMethod' | 'goToNextStep'> = {
   step: CreateJobStep.FundingMethod,
   payMethod: PayMethod.Crypto,
   jobRequest: {
     jobType: JobType.Fortune,
     chainId: undefined,
   },
+  setStep: () => {},
 };
 
-export const CreateJobPageUIContext =
-  createContext<CreateJobPageUIType>(initialData);
+export const CreateJobPageUIContext = createContext<CreateJobPageUIType>(initialData);
 
 export const useCreateJobPageUI = () => useContext(CreateJobPageUIContext);
 
-export const CreateJobPageUIProvider = ({
-  children,
-}: {
-  children: React.ReactElement;
-}) => {
+export const CreateJobPageUIProvider = ({ children }: { children: React.ReactElement }) => {
   const [step, setStep] = useState<CreateJobStep>(CreateJobStep.FundingMethod);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
@@ -50,8 +44,7 @@ export const CreateJobPageUIProvider = ({
 
   const changePayMethod = (method: PayMethod) => setPayMethod(method);
 
-  const updateJobRequest = (newJobRequest: JobRequest) =>
-    setJobRequest(newJobRequest);
+  const updateJobRequest = (newJobRequest: JobRequest) => setJobRequest(newJobRequest);
 
   const reset = () => {
     setStep(CreateJobStep.FundingMethod);
@@ -70,11 +63,8 @@ export const CreateJobPageUIProvider = ({
     changePayMethod,
     updateJobRequest,
     reset,
+    setStep,
   };
 
-  return (
-    <CreateJobPageUIContext.Provider value={value}>
-      {children}
-    </CreateJobPageUIContext.Provider>
-  );
+  return <CreateJobPageUIContext.Provider value={value}>{children}</CreateJobPageUIContext.Provider>;
 };

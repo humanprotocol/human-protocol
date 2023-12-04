@@ -4,6 +4,7 @@ import {
   EscrowStatus,
   EscrowUtils,
   StakingClient,
+  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -52,7 +53,7 @@ export class JobService {
     escrowAddress: string,
   ): Promise<JobDetailsDto> {
     const manifest = await this.getManifest(chainId, escrowAddress);
-
+    
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
       escrowAddress,
       chainId,
@@ -79,6 +80,7 @@ export class JobService {
     workerAddress: string,
   ): Promise<string[]> {
     const escrows = await EscrowUtils.getEscrows({
+      exchangeOracle: this.web3Service.getSigner(chainId).address,
       status: EscrowStatus.Pending,
       networks: [chainId],
     });
@@ -208,19 +210,11 @@ export class JobService {
     chainId: number,
     escrowAddress: string,
   ): Promise<ManifestDto> {
-    const reputationOracleURL = this.configService.get(
-      ConfigNames.REPUTATION_ORACLE_URL,
-    );
-
-    if (!reputationOracleURL)
-      throw new NotFoundException('Unable to get Reputation Oracle URL');
-
-    const manifest = await this.httpService.axiosRef
-      .get<any>(
-        reputationOracleURL +
-          `/manifest?chainId=${chainId}&escrowAddress=${escrowAddress}`,
-      )
-      .then((res) => res.data);
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    const manifest: ManifestDto =
+      await StorageClient.downloadFileFromUrl(manifestUrl);
 
     if (!manifest) {
       const signer = this.web3Service.getSigner(chainId);
