@@ -77,6 +77,7 @@ class Worker(Base):
     __tablename__ = "worker"
 
     id: Mapped[str] = mapped_column(primary_key=True, index=True)
+    username: Mapped[str]
     is_validated: Mapped[bool] = mapped_column(default=False)
     password: Mapped[str]
     projects: Mapped[List["AnnotationProject"]] = relationship(back_populates="worker")

@@ -2,11 +2,15 @@ from pathlib import Path
 
 from basemodels import Manifest
 from doccano_client import DoccanoClient
-from doccano_client.exceptions import DoccanoAPIError
 from doccano_client.models.data_upload import Task
+from pydantic import BaseModel, constr
 
 from src.config import Config
-from src.db import AnnotationProject
+
+
+class UserRegistrationInfo(BaseModel):
+    worker_address: constr(strip_whitespace=True, to_lower=True, min_length=42, max_length=42, regex="0x[a-f0-9]{40}")
+    name: constr(strip_whitespace=True, min_length=3, max_length=30, regex="[a-zA-Z0-9_-]{3,30}")
 
 
 def get_client():
@@ -69,10 +73,7 @@ def create_projects(manifest: Manifest, data_dir: Path):
 
 def create_user(username: str, password: str):
     client = get_client()
-    try:
-        client.create_user(username, password)
-    except DoccanoAPIError:
-        raise ValueError(f"User with username '{username}' already exists.")
+    client.create_user(username, password)
 
 
 def register_annotator(username: str, project_id: int):

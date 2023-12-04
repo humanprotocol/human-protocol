@@ -1,0 +1,264 @@
+import random
+import unittest
+import uuid
+from http import HTTPStatus
+from string import ascii_letters
+from unittest.mock import MagicMock, patch
+
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
+from human_protocol_sdk.constants import Status
+from starlette.responses import Response
+
+from src.config import Config
+from src.db import Session, Base, engine, JobRequest, Statuses, Worker
+from src.main import exchange_oracle, Endpoints, Errors
+
+_get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
+
+def _assert_http_error_response(response: Response, error: HTTPException):
+    assert response.status_code == error.status_code
+    assert response.json()["detail"] == error.detail
+
+def _assert_no_entries_in_db(entry_type):
+    with Session() as s:
+        jobs = s.query(entry_type).all()
+        assert len(jobs) == 0
+
+def _random_address(seed=None):
+    if seed is not None:
+        random.seed(seed)
+    return "0x" + "".join([str(random.randint(0, 9)) for _ in range(40)])
+
+def _random_username(seed=None):
+    if seed is not None:
+        random.seed(seed)
+    return "TEST_USER_" + ''.join(random.choices(ascii_letters, k=16))
+
+def _is_valid_uuid(obj):
+    try:
+        uuid.UUID(str(obj), version=4)
+        return True
+    except ValueError:
+        return False
+class APITest(unittest.TestCase):
+    def setUp(self):
+        self.client = TestClient(exchange_oracle)
+
+        self.escrow_address = _random_address()
+        self.chain_id = Config.localhost.chain_id
+        self.message = {
+            "escrow_address": self.escrow_address,
+            "chain_id": self.chain_id
+        }
+
+        self.mock_escrow = MagicMock()
+        self.mock_escrow.status = "Pending"
+        self.mock_escrow.balance = 1
+
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        Base.metadata.drop_all(engine)
+
+    @patch(_get_escrow_path)
+    def test_register_job_request(self, mock_get_escrow: MagicMock):
+        """When a valid job request is posted to /job/request, a new pending Job Request should be added to the database and its id returned by the api."""
+        mock_get_escrow.return_value = self.mock_escrow
+
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=self.message,
+            headers=None
+        )
+
+        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
+        assert response.status_code == HTTPStatus.OK
+
+        # check db status
+        with Session() as session:
+            job = session.query(JobRequest).where(
+                JobRequest.id == response.json()["id"]
+            ).one()
+
+        assert job is not None
+        assert job.status == Statuses.pending
+        assert job.chain_id == self.chain_id
+        assert job.escrow_address == self.escrow_address
+
+    def test_register_job_request_failing_due_to_invalid_escrow_info(self):
+        """When an invalid escrow info is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+        invalid_message = self.message.copy()
+        invalid_message["chain_id"] = -100
+
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=invalid_message
+        )
+
+        _assert_http_error_response(response, Errors.INVALID_ESCROW_INFO)
+
+        invalid_message = self.message.copy()
+        invalid_message["escrow_address"] = "not_a_valid_adress"
+
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=invalid_message
+        )
+
+        _assert_http_error_response(response, Errors.INVALID_ESCROW_INFO)
+        _assert_no_entries_in_db(JobRequest)
+
+    def test_register_job_request_failing_due_to_missing_escrow(self):
+        """When an escrow info that points to no escrow is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+
+        with patch(_get_escrow_path) as mock_get_escrow:
+            mock_get_escrow.return_value = None
+
+            response = self.client.post(
+                Endpoints.JOB_REQUEST,
+                json=self.message
+            )
+
+            mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
+            _assert_http_error_response(response, Errors.NO_ESCROW_FOUND)
+            _assert_no_entries_in_db(JobRequest)
+
+    @patch(_get_escrow_path)
+    def test_register_job_request_failing_due_to_invalid_escrow(self, mock_get_escrow: MagicMock):
+        """When an escrow info that points to an invalid escrow is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+        # insufficient funds
+        mock_escrow = MagicMock()
+        mock_escrow.balance = 0
+        mock_escrow.status = "Pending"
+        mock_get_escrow.return_value = mock_escrow
+
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=self.message
+        )
+
+        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
+        _assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
+        _assert_no_entries_in_db(JobRequest)
+
+        # wrong status
+        mock_escrow.balance = 1
+        mock_escrow.status = Status.Complete.name
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=self.message
+        )
+
+        _assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
+        _assert_no_entries_in_db(JobRequest)
+
+    def test_list_available_jobs(self):
+        """When a get request is made against /job/list, a list of uuids (v4) representing job ids of jobs in progress should be returned."""
+
+        n_statuses = len(Statuses) - 1 # one will be valid
+        n_returned_jobs = 3
+        n_entries = n_statuses + n_returned_jobs
+
+        with Session() as session:
+            jobs = [JobRequest(escrow_address=_random_address(), chain_id=self.chain_id, status=Statuses.in_progress.value) for _ in
+                    range(n_entries)]
+
+            # set to status other than in_progress
+            for i, status in enumerate(Statuses):
+                jobs[i].status = status
+
+            session.add_all(jobs)
+            session.commit()
+
+        response = self.client.get(
+            Endpoints.JOB_LIST
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+        job_ids = response.json()
+        assert len(job_ids) == n_returned_jobs
+        assert all(_is_valid_uuid(job_id) for job_id in job_ids)
+
+    def test_register_user(self):
+        """When a post request with appropriate UserRegistrationInfo is made against /user/register, a new user should be created and added as an annotator and doccano user."""
+
+        worker_address = _random_address()
+        username = _random_username()
+        user_info = {
+            "worker_address": worker_address,
+            "name": username
+        }
+
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+
+
+        assert response.status_code == HTTPStatus.OK
+
+        response_content = response.json()
+        assert response_content["username"] == user_info["username"]
+        assert response_content["password"] is not None
+
+        with Session() as session:
+            worker = session.query(Worker).where(Worker.id == worker_address).one()
+        assert worker.is_validated
+
+    def test_register_user_failing_due_to_wallett_already_registered(self):
+        """When a post request containing an already registered wallett adress in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
+
+        worker_address = _random_address()
+        username = _random_username()
+        user_info = {
+            "worker_address": worker_address,
+            "name": username
+        }
+
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+        user_info["name"] = _random_username()
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+
+        _assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
+
+    def test_register_user_failing_due_to_unavailable_username(self):
+        """When a post request containing an unavailable username in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
+        worker_address = _random_address()
+        username = _random_username()
+        user_info = {
+            "worker_address": worker_address,
+            "name": username
+        }
+
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        user_info["worker_address"] = _random_address()
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+
+        _assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
+        # make sure worker was not written to db
+        with Session() as session:
+            worker = session.query(Worker).where(Worker.id == user_info["worker_address"]).one_or_none()
+        assert worker is None
+
+if __name__ == '__main__':
+    unittest.main()

@@ -11,7 +11,7 @@ from src.db import (
     JobRequest,
     AnnotationProject,
 )
-from storage import download_manifest, download_datasets, convert_taskdata_to_doccano, convert_annotations_to_raw_results, upload_data
+from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, convert_annotations_to_raw_results, upload_data
 from urllib3 import request
 
 def process_pending_job_requests():

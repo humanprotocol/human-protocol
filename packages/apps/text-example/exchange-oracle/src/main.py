@@ -2,22 +2,41 @@ from http import HTTPStatus
 from random import choices, shuffle
 from string import ascii_letters, punctuation
 from typing import List
+from uuid import uuid4
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from doccano_client.exceptions import DoccanoAPIError
 from fastapi import FastAPI, HTTPException
-from human_protocol_sdk.escrow import EscrowUtils, ChainId, EscrowClientError
+from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from annotation import create_user, register_annotator
+import src.cron_jobs as cron_jobs
+from src.annotation import create_user, register_annotator, UserRegistrationInfo
 from src.chain import EscrowInfo, validate_escrow
 from src.config import Config
-import src.cron_jobs as cron_jobs
 from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
+
+
+class Endpoints:
+    JOB_REQUEST = "/job/request"
+    JOB_LIST = "/job/list"
+    JOB_APPLY = "/job/{job_id}/apply"
+    USER_REGISTER = "/user/register"
+
+class Errors:
+    INVALID_ESCROW_INFO = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow info contains invalid information.")
+    NO_ESCROW_FOUND = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="No escrow found under given address.")
+    ESCROW_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow invalid.")
+    WORKER_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
+    WORKER_CREATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. A user with the given username might already exist.")
+    WORKER_ALREADY_REGISTERED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. Wallet address already registered.")
+    ADDRESS_INVALID = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Address is not a valid address.")
+
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
-@exchange_oracle.post("/job/request")
+@exchange_oracle.post(Endpoints.JOB_REQUEST)
 async def register_job_request(escrow_info: EscrowInfo):
     """Adds a job request to the database, to be processed later."""
     # validate escrow info
@@ -27,60 +46,64 @@ async def register_job_request(escrow_info: EscrowInfo):
             escrow_info.escrow_address.lower()
         )
     except EscrowClientError as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow info contains invalid information.")
+        raise Errors.INVALID_ESCROW_INFO
 
     if escrow is None:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="No escrow found under given address.")
+        raise Errors.NO_ESCROW_FOUND
     try:
         validate_escrow(escrow)
     except ValueError as e:
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow invalid.")
+        raise Errors.ESCROW_VALIDATION_FAILED
 
     # add job once all validations were successful
     with Session() as session:
+        id = str(uuid4())
         job_request = JobRequest(
-            escrow_address=escrow_info.escrow_address, chain_id=escrow_info.chain_id
+            id=id, escrow_address=escrow_info.escrow_address, chain_id=escrow_info.chain_id
         )
         session.add(job_request)
         session.commit()
 
+    return {"id": id}
 
-@exchange_oracle.get("job/list")
+@exchange_oracle.get(Endpoints.JOB_LIST)
 async def list_available_jobs():
     """Lists available jobs."""
     # TODO: return more details
     # TODO: validate header
-    j = select(JobRequest).where(JobRequest.status == Statuses.in_progress.value)
     with Session() as session:
-        return [job.id for job in session.execute(j).all()]
+        return [job.id for job in session.query(JobRequest).where(JobRequest.status == Statuses.in_progress.value).all()]
 
 
-@exchange_oracle.post("user/register")
-async def register_worker(worker_address: str):
+@exchange_oracle.post(Endpoints.USER_REGISTER)
+async def register_worker(user_info: UserRegistrationInfo):
     """Registers a new user with the given wallet address."""
-    if not await validate_worker(worker_address):
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
+    if not await validate_worker(user_info.worker_address):
+        raise Errors.WORKER_VALIDATION_FAILED
 
-    password = choices(ascii_letters + punctuation, k=16)
-    worker = Worker(worker_id=worker_address, password=password)
-
-    error = HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Worker could not be added.")
     with Session() as session:
+        # check if wallet is already registered
+        if session.query(Worker).where(Worker.id == user_info.worker_address).one_or_none() is not None:
+            raise Errors.WORKER_ALREADY_REGISTERED
+
         try:
-            create_user(worker.id, worker.password)
+            password = ''.join(choices(ascii_letters + punctuation, k=16))
+            worker = Worker(id=user_info.worker_address, password=password, is_validated=True, username=user_info.name)
+            create_user(user_info.name, worker.password)
             session.add(worker)
-        except IntegrityError:
+            session.commit()
+        except DoccanoAPIError as e:
             session.rollback()
-            raise error
-        except ValueError:
+            raise Errors.WORKER_CREATION_FAILED
+        except IntegrityError as e:
             session.rollback()
-            raise error
+            print(e)
+            raise Errors.WORKER_CREATION_FAILED
 
-        session.commit()
-    return {"username": worker_address, "password": password}
+    return {"username": user_info.name, "password": password}
 
 
-@exchange_oracle.post("job/{job_id}/apply")
+@exchange_oracle.post(Endpoints.JOB_APPLY)
 async def apply_for_job(worker_id: str, job_id: str):
     """Applies the given worker for the job. Registers and validates them if necessary"""
     w = select(Worker).where(Worker.id == worker_id)
@@ -119,6 +142,7 @@ async def apply_for_job(worker_id: str, job_id: str):
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not assign worker to annotation project.")
 
         session.commit()
+
     return {
         "username": worker.id,
         "password": worker.password,
