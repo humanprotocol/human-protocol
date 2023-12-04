@@ -42,7 +42,7 @@
     "fastify-plugin": "^4.5.1",
     "store2": "^2.14.2",
     "uuid": "^9.0.0",
-    "web3": "^1.8.1"
+    "web3": "^4.2.2"
   },
   "devDependencies": {
     "@aws-sdk/types": "^3.226.0",

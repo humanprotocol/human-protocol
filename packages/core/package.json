@@ -55,7 +55,7 @@
     "@openzeppelin/contracts": "^4.9.2",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
     "@openzeppelin/hardhat-upgrades": "^1.22.0",
-    "@tenderly/hardhat-tenderly": "^1.5.3",
+    "@tenderly/hardhat-tenderly": "^2.0.1",
     "@typechain/ethers-v5": "^10.1.1",
     "@typechain/hardhat": "^6.1.4",
     "@types/chai": "^4.3.3",
@@ -71,7 +71,7 @@
     "openpgp": "5.10.2",
     "prettier-plugin-solidity": "^1.2.0",
     "solidity-coverage": "^0.8.2",
-    "tenderly": "^0.5.3",
+    "tenderly": "^0.7.0",
     "typechain": "^8.1.1",
     "xdeployer": "1.2.7"
   },
