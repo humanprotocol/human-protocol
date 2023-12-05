@@ -1,7 +1,13 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
-import { S3ConfigType, s3ConfigKey } from '../../common/config';
+import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
 
 @Injectable()
@@ -9,6 +15,7 @@ export class StorageService {
   public readonly minioClient: Minio.Client;
 
   constructor(
+    private readonly configService: ConfigService,
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
   ) {
@@ -34,7 +41,16 @@ export class StorageService {
   ): Promise<ISolution[]> {
     const url = this.getJobUrl(escrowAddress, chainId);
     try {
-      return await StorageClient.downloadFileFromUrl(url);
+      const encryption = await Encryption.build(
+        this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+        this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+      );
+
+      const encryptedSolution = await StorageClient.downloadFileFromUrl(url);
+
+      return JSON.parse(
+        await encryption.decrypt(encryptedSolution),
+      ) as ISolution[];
     } catch {
       return [];
     }
@@ -50,10 +66,21 @@ export class StorageService {
     }
 
     try {
+      const solutionsEncrypted = await EncryptionUtils.encrypt(
+        JSON.stringify(solutions),
+        [
+          this.configService.get<string>(ConfigNames.ENCRYPTION_PUBLIC_KEY, ''),
+          this.configService.get<string>(
+            ConfigNames.RECORDING_ORACLE_PUBLIC_KEY,
+            '',
+          ),
+        ],
+      );
+
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify(solutions),
+        solutionsEncrypted,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
