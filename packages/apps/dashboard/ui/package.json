@@ -1,8 +1,8 @@
 {
   "private": "true",
-  "name": "@human-protocol/escrow-dashboard",
+  "name": "@human-protocol/dashboard-ui",
   "version": "1.0.0",
-  "description": "Human Protocol Escrow Dashboard",
+  "description": "Human Protocol Dashboard",
   "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.10.5",
