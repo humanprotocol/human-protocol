@@ -12,7 +12,6 @@ from src.db import (
     AnnotationProject,
 )
 from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, convert_annotations_to_raw_results, upload_data
-from urllib3 import request
 
 def process_pending_job_requests():
     with Session() as session:
@@ -21,20 +20,20 @@ def process_pending_job_requests():
             session.query(JobRequest)
             .where(JobRequest.status == Statuses.pending.value)
             .limit(Config.cron_config.task_chunk_size)
-        )
+        ) # TODO: Log how much percent of the limit was actually processed
 
         # create annotation projects for each job request
         for job_request in requests:
             try:
                 projects = set_up_projects_for_job(job_request)
                 job_request.status = Statuses.in_progress.value
-            except Exception:
+            except Exception as e:
                 job_request.status = Statuses.failed.value
                 projects = []
 
             # link projects to job
             for project in projects:
-                session.add(AnnotationProject(id=project.id, job_request=job_request))
+                session.add(AnnotationProject(id=project.id, name=project.name, job_request=job_request))
         session.commit()
 
 

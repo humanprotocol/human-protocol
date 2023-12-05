@@ -64,6 +64,7 @@ class AnnotationProject(Base):
     __tablename__ = "annotation_projects"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str]
     job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_requests.id"))
     job_request: Mapped["JobRequest"] = relationship(back_populates="projects")
     worker_id = mapped_column(ForeignKey("worker.id"))

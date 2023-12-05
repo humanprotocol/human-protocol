@@ -11,10 +11,13 @@ from human_protocol_sdk.constants import Status
 from starlette.responses import Response
 
 from src.config import Config
-from src.db import Session, Base, engine, JobRequest, Statuses, Worker
+from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
 
+from src.cron_jobs import process_pending_job_requests
+
 _get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
+_get_manifest_url_path = "src.cron_jobs.get_manifest_url"
 
 def _assert_http_error_response(response: Response, error: HTTPException):
     assert response.status_code == error.status_code
@@ -35,12 +38,22 @@ def _random_username(seed=None):
         random.seed(seed)
     return "TEST_USER_" + ''.join(random.choices(ascii_letters, k=16))
 
+def _random_userinfo(seed=None):
+    if seed is not None:
+        random.seed(seed)
+    address = _random_address(seed)
+    name = _random_username(seed)
+    return {"worker_address": address, "name": name}, address, name
+
+
 def _is_valid_uuid(obj):
     try:
         uuid.UUID(str(obj), version=4)
         return True
     except ValueError:
         return False
+
+
 class APITest(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(exchange_oracle)
@@ -157,7 +170,7 @@ class APITest(unittest.TestCase):
     def test_list_available_jobs(self):
         """When a get request is made against /job/list, a list of uuids (v4) representing job ids of jobs in progress should be returned."""
 
-        n_statuses = len(Statuses) - 1 # one will be valid
+        n_statuses = len(Statuses) - 1 # one will be valid, so deduct it
         n_returned_jobs = 3
         n_entries = n_statuses + n_returned_jobs
 
@@ -185,23 +198,17 @@ class APITest(unittest.TestCase):
     def test_register_user(self):
         """When a post request with appropriate UserRegistrationInfo is made against /user/register, a new user should be created and added as an annotator and doccano user."""
 
-        worker_address = _random_address()
-        username = _random_username()
-        user_info = {
-            "worker_address": worker_address,
-            "name": username
-        }
+        user_info, worker_address, username = _random_userinfo()
 
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info
         )
 
-
         assert response.status_code == HTTPStatus.OK
 
         response_content = response.json()
-        assert response_content["username"] == user_info["username"]
+        assert response_content["username"] == user_info["name"]
         assert response_content["password"] is not None
 
         with Session() as session:
@@ -211,43 +218,34 @@ class APITest(unittest.TestCase):
     def test_register_user_failing_due_to_wallett_already_registered(self):
         """When a post request containing an already registered wallett adress in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
 
-        worker_address = _random_address()
-        username = _random_username()
-        user_info = {
-            "worker_address": worker_address,
-            "name": username
-        }
-
+        # normal registration
+        user_info, worker_address, username = _random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info
         )
-
         assert response.status_code == HTTPStatus.OK
 
+        # same wallet, different username
         user_info["name"] = _random_username()
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info
         )
-
         _assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
 
     def test_register_user_failing_due_to_unavailable_username(self):
         """When a post request containing an unavailable username in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
-        worker_address = _random_address()
-        username = _random_username()
-        user_info = {
-            "worker_address": worker_address,
-            "name": username
-        }
 
+        # normal registration
+        user_info, worker_address, username = _random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info
         )
         assert response.status_code == HTTPStatus.OK
 
+        # same username, different wallet
         user_info["worker_address"] = _random_address()
         response = self.client.post(
             Endpoints.USER_REGISTER,
@@ -255,10 +253,64 @@ class APITest(unittest.TestCase):
         )
 
         _assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
-        # make sure worker was not written to db
+        # make sure worker was NOT written to db
         with Session() as session:
             worker = session.query(Worker).where(Worker.id == user_info["worker_address"]).one_or_none()
         assert worker is None
+
+    @patch(_get_manifest_url_path)
+    @patch(_get_escrow_path)
+    def test_job_application(self, mock_get_escrow: MagicMock, mock_get_manifest_url: MagicMock):
+        """When a registered worker applies for a job that is in progress with a post request to /job/{jobid}/apply, they should be added to the project, the database should be updated and the result returned."""
+
+        # worker registration, adds worker to db
+        user_info, worker_address, username = _random_userinfo()
+        response = self.client.post(
+            Endpoints.USER_REGISTER,
+            json=user_info
+        )
+        assert response.status_code == HTTPStatus.OK
+        authentication = response.json()
+
+        # job registration, adds job to db
+        mock_get_escrow.return_value = self.mock_escrow
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=self.message,
+            headers=None
+        )
+        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
+        assert response.status_code == HTTPStatus.OK
+        job_id = response.json()["id"]
+
+        # TODO: needs to be set up manually for tests, better to mock?
+        # set up projects for jobs
+        mock_get_manifest_url.return_value = "http://127.0.0.1:9000/text-exo/manifest.json"
+        process_pending_job_requests()
+        mock_get_manifest_url.assert_called_once()
+
+        # make sure all projects have been created successfully
+        response = self.client.get(Endpoints.JOB_LIST)
+        available_jobs = response.json()
+        assert len(available_jobs) > 0
+        assert job_id in available_jobs
+        with Session() as session:
+            projects = session.query(AnnotationProject).where(AnnotationProject.job_request_id == job_id).all()
+        assert len(projects) > 0
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": worker_address, "job_id": job_id}
+        )
+        print(response.json())
+        assert response.status_code == HTTPStatus.OK
+
+        response_content = response.json()
+        assert response_content["username"] == username
+        assert response_content["password"] is not None
+        assert response_content["url"] is not None
+
+
 
 if __name__ == '__main__':
     unittest.main()

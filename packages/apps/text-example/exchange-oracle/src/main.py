@@ -8,15 +8,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from doccano_client.exceptions import DoccanoAPIError
 from fastapi import FastAPI, HTTPException
 from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
-from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
 import src.cron_jobs as cron_jobs
-from src.annotation import create_user, register_annotator, UserRegistrationInfo
+from src.annotation import create_user, register_annotator, UserRegistrationInfo, JobApplication
 from src.chain import EscrowInfo, validate_escrow
 from src.config import Config
 from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
-
 
 class Endpoints:
     JOB_REQUEST = "/job/request"
@@ -104,20 +102,18 @@ async def register_worker(user_info: UserRegistrationInfo):
 
 
 @exchange_oracle.post(Endpoints.JOB_APPLY)
-async def apply_for_job(worker_id: str, job_id: str):
+async def apply_for_job(job_application: JobApplication):
     """Applies the given worker for the job. Registers and validates them if necessary"""
-    w = select(Worker).where(Worker.id == worker_id)
-    j = select(JobRequest).where(JobRequest.id == job_id)
-    error_message = (
-        f"Job application by worker {worker_id} for job {job_id} is invalid.\n"
-    )
+    worker_id = job_application.worker_id
+    job_id = job_application.job_id
+
     with Session() as session:
         # get worker and job, make sure they exist
         try:
-            worker: Worker = session.execute(w).one()
-            job: JobRequest = session.execute(j).one()
+            worker: Worker = session.query(Worker).where(Worker.id == worker_id).one()
+            job: JobRequest = session.query(JobRequest).where(JobRequest.id == job_id).one()
         except NoResultFound:
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not register worker for job.")
+            raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Could not register worker for job.")
 
         if not worker.is_validated:
             raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker is not verified.")
@@ -127,7 +123,7 @@ async def apply_for_job(worker_id: str, job_id: str):
 
         # get project to assign worker to
         projects: List[AnnotationProject] = [
-            project for project in job.projects if project.status == Statuses.pending
+            project for project in job.projects if project.status == Statuses.pending.value
         ]
         if len(projects) == 0:
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not find suitable annotation project for worker.")
@@ -135,20 +131,19 @@ async def apply_for_job(worker_id: str, job_id: str):
         project = projects[0]
 
         try:
-            register_annotator(worker.id, project.id)
+            register_annotator(worker.username, project.id)
             project.worker = worker
-            project.id = worker.id
         except Exception:
             raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not assign worker to annotation project.")
 
         session.commit()
 
-    return {
-        "username": worker.id,
-        "password": worker.password,
-        "project_name": project.id,
-        "url": Config.doccano.url(),
-    }
+        return {
+            "username": worker.username,
+            "password": worker.password,
+            "project_name": project.name,
+            "url": Config.doccano.url(),
+        }
 
 
 async def validate_worker(worker_id: str):

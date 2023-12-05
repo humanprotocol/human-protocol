@@ -7,9 +7,15 @@ from pydantic import BaseModel, constr
 
 from src.config import Config
 
+EtheriumAddress = constr(strip_whitespace=True, to_lower=True, min_length=42, max_length=42, regex="0x[a-f0-9]{40}")
+
+class JobApplication(BaseModel):
+    worker_id: EtheriumAddress
+    job_id: str
+
 
 class UserRegistrationInfo(BaseModel):
-    worker_address: constr(strip_whitespace=True, to_lower=True, min_length=42, max_length=42, regex="0x[a-f0-9]{40}")
+    worker_address: EtheriumAddress
     name: constr(strip_whitespace=True, min_length=3, max_length=30, regex="[a-zA-Z0-9_-]{3,30}")
 
 
