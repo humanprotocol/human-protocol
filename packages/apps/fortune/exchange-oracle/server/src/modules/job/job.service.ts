@@ -216,17 +216,25 @@ export class JobService {
       manifestUrl,
     );
 
-    let manifest: ManifestDto | null = null;
+    let manifest: ManifestDto | null;
 
     try {
-      const encryption = await Encryption.build(
-        this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
-        this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
-      );
-
-      manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+      manifest = JSON.parse(manifestEncrypted);
     } catch {
-      throw new Error('Unable to decrypt manifest');
+      manifest = null;
+    }
+
+    if (!manifest) {
+      try {
+        const encryption = await Encryption.build(
+          this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+        );
+
+        manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+      } catch {
+        throw new Error('Unable to decrypt manifest');
+      }
     }
 
     if (!manifest) {

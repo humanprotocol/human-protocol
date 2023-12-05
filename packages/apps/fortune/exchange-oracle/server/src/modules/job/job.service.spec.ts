@@ -144,7 +144,7 @@ describe('JobService', () => {
       }));
     });
 
-    it('should return job details', async () => {
+    it('should return job details encrypted', async () => {
       const manifest: ManifestDto = {
         requesterTitle: 'Example Title',
         requesterDescription: 'Example Description',
@@ -154,12 +154,34 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(manifest)
+        .mockResolvedValueOnce('encrypted string')
         .mockResolvedValueOnce([]);
 
       (Encryption.build as any).mockImplementation(() => ({
         decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
       }));
+
+      const result = await jobService.getDetails(chainId, escrowAddress);
+
+      expect(result).toEqual({
+        escrowAddress,
+        chainId,
+        manifest,
+      });
+    });
+
+    it('should return job details not encrypted', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(JSON.stringify(manifest))
+        .mockResolvedValueOnce([]);
 
       const result = await jobService.getDetails(chainId, escrowAddress);
 
