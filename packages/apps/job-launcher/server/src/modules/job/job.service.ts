@@ -10,7 +10,6 @@ import {
   StorageClient,
   KVStoreKeys,
 } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
 import {
   BadGatewayException,
   BadRequestException,
@@ -24,7 +23,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
-import { firstValueFrom } from 'rxjs';
 import { IsNull, LessThanOrEqual, Not, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
@@ -62,19 +60,16 @@ import {
   JobFortuneDto,
   JobListDto,
   SaveManifestDto,
-  CVATWebhookDto,
-  FortuneWebhookDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
-  HEADER_SIGNATURE_KEY,
   JOB_RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
-import { EventType } from '../../common/enums/webhook';
+import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
   HMToken__factory,
@@ -82,9 +77,9 @@ import {
 import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
-import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
 import { UploadedFile } from 'src/common/interfaces/s3';
+import { WebhookService } from '../webhook/webhook.service';
 
 @Injectable()
 export class JobService {
@@ -96,10 +91,10 @@ export class JobService {
     public readonly jobRepository: JobRepository,
     private readonly paymentRepository: PaymentRepository,
     private readonly paymentService: PaymentService,
-    public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
+    private readonly webhookService: WebhookService,
   ) {}
 
   public async createJob(
@@ -415,36 +410,6 @@ export class JobService {
     return true;
   }
 
-  public async sendWebhook(
-    webhookUrl: string,
-    webhookData: FortuneWebhookDto | CVATWebhookDto,
-    hasSignature: boolean,
-  ): Promise<boolean> {
-    let config = {};
-
-    if (hasSignature) {
-      const signedBody = await signMessage(
-        webhookData,
-        this.configService.get(ConfigNames.WEB3_PRIVATE_KEY)!,
-      );
-
-      config = {
-        headers: { [HEADER_SIGNATURE_KEY]: signedBody },
-      };
-    }
-
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData, config),
-    );
-
-    if (!data) {
-      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
-      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
-    }
-
-    return true;
-  }
-
   public async getJobsByStatus(
     networks: ChainId[],
     userId: number,
@@ -494,7 +459,6 @@ export class JobService {
 
       return this.transformJobs(jobs, escrows);
     } catch (error) {
-      console.error(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -676,25 +640,16 @@ export class JobService {
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
         if ((manifest as CvatManifestDto)?.annotation?.type) {
-          const webhookUrl = await this.getExchangeOracleWebhookUrl(
-            jobEntity.escrowAddress,
-            jobEntity.chainId,
-          );
-          if (webhookUrl) {
-            await this.sendWebhook(
-              webhookUrl,
-              {
-                escrow_address: jobEntity.escrowAddress,
-                chain_id: jobEntity.chainId,
-                event_type: EventType.ESCROW_CREATED,
-              },
-              false,
-            );
-          }
+          await this.webhookService.createWebhook({
+            escrowAddress: jobEntity.escrowAddress,
+            chainId: jobEntity.chainId,
+            eventType: EventType.ESCROW_CREATED,
+            oracleType: OracleType.CVAT,
+            hasSignature: false,
+          });
         }
       }
     } catch (e) {
-      console.log(e);
       this.logger.error(e);
       return;
     }
@@ -739,36 +694,18 @@ export class JobService {
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
-    const webhookUrl = await this.getExchangeOracleWebhookUrl(
-      jobEntity.escrowAddress,
-      jobEntity.chainId,
-    );
-
-    if (webhookUrl) {
-      if (
+    await this.webhookService.createWebhook({
+      escrowAddress: jobEntity.escrowAddress,
+      chainId: jobEntity.chainId,
+      eventType: EventType.ESCROW_CANCELED,
+      oracleType:
         (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-      ) {
-        await this.sendWebhook(
-          webhookUrl,
-          {
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-          true,
-        );
-      } else {
-        await this.sendWebhook(
-          webhookUrl,
-          {
-            escrow_address: jobEntity.escrowAddress,
-            chain_id: jobEntity.chainId,
-            event_type: EventType.ESCROW_CANCELED,
-          },
-          false,
-        );
-      }
-    }
+          ? OracleType.FORTUNE
+          : OracleType.CVAT,
+      hasSignature:
+        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE,
+    });
+
     this.logger.log('Cancel jobs STOP');
     return true;
   }
@@ -978,28 +915,6 @@ export class JobService {
     });
 
     return Number(paidOutAmount);
-  }
-
-  private async getExchangeOracleWebhookUrl(
-    escrowAddress: string,
-    chainId: ChainId,
-  ): Promise<string> {
-    const signer = this.web3Service.getSigner(chainId);
-
-    const escrowClient = await EscrowClient.build(signer);
-
-    const exchangeAddress = await escrowClient.getExchangeOracleAddress(
-      escrowAddress,
-    );
-
-    const kvStoreClient = await KVStoreClient.build(signer);
-
-    const exchangeOracleUrl = await kvStoreClient.get(
-      exchangeAddress,
-      KVStoreKeys.webhookUrl,
-    );
-
-    return exchangeOracleUrl;
   }
 
   private async getOracleFee(

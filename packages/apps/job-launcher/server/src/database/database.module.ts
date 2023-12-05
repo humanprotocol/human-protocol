@@ -13,6 +13,7 @@ import { JobEntity } from '../modules/job/job.entity';
 import { PaymentEntity } from '../modules/payment/payment.entity';
 import { ConfigNames } from '../common/config';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
+import { WebhookEntity } from 'src/modules/webhook/webhook.entity';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ApiKeyEntity } from '../modules/auth/apikey.entity';
             UserEntity,
             JobEntity,
             PaymentEntity,
+            WebhookEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
