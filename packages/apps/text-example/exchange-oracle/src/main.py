@@ -19,17 +19,22 @@ from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
 class Endpoints:
     JOB_REQUEST = "/job/request"
     JOB_LIST = "/job/list"
-    JOB_APPLY = "/job/{job_id}/apply"
+    JOB_APPLY = "/job/apply"
     USER_REGISTER = "/user/register"
 
 class Errors:
-    INVALID_ESCROW_INFO = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow info contains invalid information.")
-    NO_ESCROW_FOUND = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="No escrow found under given address.")
-    ESCROW_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow invalid.")
-    WORKER_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
-    WORKER_CREATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. A user with the given username might already exist.")
-    WORKER_ALREADY_REGISTERED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. Wallet address already registered.")
     ADDRESS_INVALID = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Address is not a valid address.")
+    ESCROW_INFO_INVALID = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow info contains invalid information.")
+    ESCROW_NOT_FOUND = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="No escrow found under given address.")
+    ESCROW_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow invalid.")
+    JOB_OR_WORKER_MISSING = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Could not register worker for job.")
+    JOB_UNAVAILABLE = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Job is not available.")
+    TASKS_UNAVAILABLE = HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="No tasks available for worker.")
+    WORKER_ASSIGNMENT_FAILED = HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not assign tasks to worker.")
+    WORKER_ALREADY_REGISTERED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. Wallet address already registered.")
+    WORKER_CREATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. A user with the given username might already exist.")
+    WORKER_NOT_VALIDATED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker is not validated.")
+    WORKER_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
 
 
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
@@ -44,10 +49,10 @@ async def register_job_request(escrow_info: EscrowInfo):
             escrow_info.escrow_address.lower()
         )
     except EscrowClientError as e:
-        raise Errors.INVALID_ESCROW_INFO
+        raise Errors.ESCROW_INFO_INVALID
 
     if escrow is None:
-        raise Errors.NO_ESCROW_FOUND
+        raise Errors.ESCROW_NOT_FOUND
     try:
         validate_escrow(escrow)
     except ValueError as e:
@@ -113,20 +118,21 @@ async def apply_for_job(job_application: JobApplication):
             worker: Worker = session.query(Worker).where(Worker.id == worker_id).one()
             job: JobRequest = session.query(JobRequest).where(JobRequest.id == job_id).one()
         except NoResultFound:
-            raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Could not register worker for job.")
+            raise Errors.JOB_OR_WORKER_MISSING
 
         if not worker.is_validated:
-            raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker is not verified.")
+            raise Errors.WORKER_NOT_VALIDATED
 
         if job.status != Statuses.in_progress:
-            raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Job is not available.")
+            raise Errors.JOB_UNAVAILABLE
 
         # get project to assign worker to
         projects: List[AnnotationProject] = [
             project for project in job.projects if project.status == Statuses.pending.value
         ]
         if len(projects) == 0:
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not find suitable annotation project for worker.")
+            raise Errors.TASKS_UNAVAILABLE
+
         shuffle(projects)
         project = projects[0]
 
@@ -134,7 +140,7 @@ async def apply_for_job(job_application: JobApplication):
             register_annotator(worker.username, project.id)
             project.worker = worker
         except Exception:
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Could not assign worker to annotation project.")
+            raise Errors.WORKER_ASSIGNMENT_FAILED
 
         session.commit()
 

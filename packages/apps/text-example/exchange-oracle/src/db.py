@@ -82,18 +82,3 @@ class Worker(Base):
     is_validated: Mapped[bool] = mapped_column(default=False)
     password: Mapped[str]
     projects: Mapped[List["AnnotationProject"]] = relationship(back_populates="worker")
-
-
-class JobApplication(Base):
-    __tablename__ = "job_application"
-
-    id: Mapped[int] = mapped_column(
-        primary_key=True, default=Sequence("job_application_ids")
-    )
-    job_request_id: Mapped[UUID] = mapped_column(ForeignKey("job_requests.id"))
-    job_request: Mapped["JobRequest"] = relationship()
-    worker_id: Mapped[str] = mapped_column(ForeignKey("worker.id"))
-    worker: Mapped["Worker"] = relationship()
-    status: Mapped[Statuses] = mapped_column(
-        String, server_default=Statuses.pending.value
-    )

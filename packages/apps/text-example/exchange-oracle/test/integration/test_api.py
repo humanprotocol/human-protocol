@@ -110,7 +110,7 @@ class APITest(unittest.TestCase):
             json=invalid_message
         )
 
-        _assert_http_error_response(response, Errors.INVALID_ESCROW_INFO)
+        _assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
 
         invalid_message = self.message.copy()
         invalid_message["escrow_address"] = "not_a_valid_adress"
@@ -120,7 +120,7 @@ class APITest(unittest.TestCase):
             json=invalid_message
         )
 
-        _assert_http_error_response(response, Errors.INVALID_ESCROW_INFO)
+        _assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
         _assert_no_entries_in_db(JobRequest)
 
     def test_register_job_request_failing_due_to_missing_escrow(self):
@@ -135,7 +135,7 @@ class APITest(unittest.TestCase):
             )
 
             mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
-            _assert_http_error_response(response, Errors.NO_ESCROW_FOUND)
+            _assert_http_error_response(response, Errors.ESCROW_NOT_FOUND)
             _assert_no_entries_in_db(JobRequest)
 
     @patch(_get_escrow_path)
@@ -261,7 +261,7 @@ class APITest(unittest.TestCase):
     @patch(_get_manifest_url_path)
     @patch(_get_escrow_path)
     def test_job_application(self, mock_get_escrow: MagicMock, mock_get_manifest_url: MagicMock):
-        """When a registered worker applies for a job that is in progress with a post request to /job/{jobid}/apply, they should be added to the project, the database should be updated and the result returned."""
+        """When a registered worker applies for a job that is in progress with a post request to /job/apply, they should be added to the project, the database should be updated and the result returned."""
 
         # worker registration, adds worker to db
         user_info, worker_address, username = _random_userinfo()
@@ -302,7 +302,6 @@ class APITest(unittest.TestCase):
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id}
         )
-        print(response.json())
         assert response.status_code == HTTPStatus.OK
 
         response_content = response.json()
@@ -310,6 +309,84 @@ class APITest(unittest.TestCase):
         assert response_content["password"] is not None
         assert response_content["url"] is not None
 
+        with Session() as session:
+            session.query(AnnotationProject).where((AnnotationProject.job_request_id == job_id) & (AnnotationProject.worker_id == worker_address)).one()
+
+    def test_job_application_failing_due_to_missing_worker_or_job(self):
+        """When a job application contains an invalid worker address or job id, an appropriate error should be returned and the entities should not be linked."""
+        _, worker_address, username = _random_userinfo()
+        job_id = str(uuid.uuid4())
+
+        with Session() as session:
+            session.add(Worker(id=worker_address, is_validated=True, username=username, password="password1234"))
+            session.commit()
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": worker_address, "job_id": job_id}
+        )
+        _assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
+
+        with Session() as session:
+            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress))
+            session.commit()
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": _random_address(), "job_id": job_id}
+        )
+        _assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
+
+    def test_job_application_failing_due_to_unvalidated_worker(self):
+        """When a job application contains an unvalidated worker, an appropriate error should be returned and the entities should not be linked."""
+        _, worker_address, username = _random_userinfo()
+        job_id = str(uuid.uuid4())
+
+        with Session() as session:
+            session.add(Worker(id=worker_address, is_validated=False, username=username, password="password1234"))
+            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress))
+            session.commit()
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": worker_address, "job_id": job_id}
+        )
+        _assert_http_error_response(response, Errors.WORKER_NOT_VALIDATED)
+
+    def test_job_application_failing_due_to_unavailable_job(self):
+        """When a job application includes a job that is not in the right status, an appropriate error should be returned and the entities should not be linked."""
+        _, worker_address, username = _random_userinfo()
+        job_id = str(uuid.uuid4())
+
+        with Session() as session:
+            session.add(Worker(id=worker_address, is_validated=True, username=username, password="password1234"))
+            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id))
+            session.commit()
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": worker_address, "job_id": job_id}
+        )
+        _assert_http_error_response(response, Errors.JOB_UNAVAILABLE)
+
+    def test_job_application_failing_due_to_worker_assignment_error(self):
+        """When a job application includes a job that is not in the right status, an appropriate error should be returned and the entities should not be linked."""
+        _, worker_address, username = _random_userinfo()
+        job_id = str(uuid.uuid4())
+        anno_project_id = job_id + '__1'
+        with Session() as session:
+            session.add(Worker(id=worker_address, is_validated=True, username="DOES_NOT_EXIST", password="password1234"))
+            jr = JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress)
+            session.add(jr)
+            session.add(AnnotationProject(id=1, name=anno_project_id, job_request=jr))
+            session.commit()
+
+        response = self.client.post(
+            Endpoints.JOB_APPLY,
+            json={"worker_id": worker_address, "job_id": job_id}
+        )
+
+        _assert_http_error_response(response, Errors.WORKER_ASSIGNMENT_FAILED)
 
 
 if __name__ == '__main__':
