@@ -1,12 +1,13 @@
 import random
 import uuid
 from string import ascii_letters
+from uuid import uuid4
 
 from fastapi import HTTPException
 from starlette.responses import Response
 
 from src.config import Config
-from src.db import Session
+from src.db import Session, Statuses, JobRequest, AnnotationProject
 
 
 def assert_http_error_response(response: Response, error: HTTPException):
@@ -31,6 +32,7 @@ def random_username(seed=None):
         random.seed(seed)
     return "TEST_USER_" + ''.join(random.choices(ascii_letters, k=16))
 
+
 def random_escrow_info(seed=None):
     if seed is not None:
         random.seed(seed)
@@ -41,6 +43,7 @@ def random_escrow_info(seed=None):
         "chain_id": chain_id
     }
     return info, escrow_address, chain_id
+
 
 def random_userinfo(seed=None):
     if seed is not None:
@@ -56,3 +59,25 @@ def is_valid_uuid(obj):
         return True
     except ValueError:
         return False
+
+
+def add_job_request(status: Statuses=Statuses.pending):
+    _, escrow_address, chain_id = random_escrow_info()
+    job_id = str(uuid4())
+
+    with Session() as session:
+        session.add(JobRequest(id=job_id, escrow_address=escrow_address, chain_id=chain_id, status=status))
+        session.commit()
+    return job_id
+
+
+def add_projects_to_job_request(job_id: str, n_projects: int, status: Statuses):
+    with Session() as session:
+        job = session.query(JobRequest).where(JobRequest.id == job_id).one()
+        projects = []
+        for i in range(n_projects):
+            project = AnnotationProject(id=i, name=str(job.id) + f'__{i}', job_request=job, status=status)
+            session.add(project)
+            projects.append(project)
+        session.commit()
+    return projects

@@ -11,7 +11,9 @@ from src.db import (
     JobRequest,
     AnnotationProject,
 )
-from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, convert_annotations_to_raw_results, upload_data
+from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, \
+    convert_annotations_to_raw_results, upload_data
+
 
 def process_pending_job_requests():
     with Session() as session:
@@ -66,7 +68,9 @@ def process_in_progress_job_requests():
         for project in projects:
             if is_done(project.id):
                 project.status = Statuses.completed.value
+        session.commit()
 
+    with Session() as session:
         # check and update request completion
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.in_progress)
         for request in requests:
@@ -76,41 +80,48 @@ def process_in_progress_job_requests():
 
 def process_completed_job_requests():
     with Session() as session:
-        requests = session.query(JobRequest).where(JobRequest.status == Statuses.in_progress).limit(Config.cron_config.task_chunk_size)
+        requests = session.query(JobRequest).where(JobRequest.status == Statuses.completed).limit(Config.cron_config.task_chunk_size)
         for request in requests:
             for project in request.projects:
                 try:
                     download_annotations(project_id=project.id, job_request_id=project.job_request_id)
                     project.status = Statuses.closed
+                    delete_project(project.id)
                 except Exception:
                     project.status = Statuses.failed
-                delete_project(project.id)
+
+            # TODO: add completed percentage depending on how many projects failed?
             request.status = Statuses.awaiting_upload
         session.commit()
 
+# TODO: combine with previous stage?
 def upload_completed_job_requests():
     with Session() as session:
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_upload)
         for request in requests:
-            data_dir = Config.storage_config.dataset_dir / request.id
+            try:
+                id = str(request.id)
+                data_dir = Config.storage_config.dataset_dir / id
 
-            # convert doccano annotations into raw results format
-            raw_results_file = convert_annotations_to_raw_results(data_dir, request.id)
+                # convert doccano annotations into raw results format
+                raw_results_file = convert_annotations_to_raw_results(data_dir, id)
 
-            # upload to s3
-            upload_data(raw_results_file, content_type="application/json")
+                # upload to s3
+                upload_data(raw_results_file, content_type="application/json")
 
-            # remove unused files
-            shutil.rmtree(data_dir)
+                # remove unused files
+                shutil.rmtree(data_dir)
 
-            request.status = Statuses.awaiting_closure
+                request.status = Statuses.awaiting_closure
+            except Exception:
+                request.status = Statuses.failed
         session.commit()
 
 def notify_recording_oracle():
     with Session() as session:
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_closure)
         for request in requests:
-            s3_url = Config.storage_config.results_s3_url(request.id)
+            s3_url = Config.storage_config.results_s3_url(str(request.id))
             try:
                 response = Config.http.request(
                     method='POST',
@@ -123,3 +134,4 @@ def notify_recording_oracle():
                     request.status = Statuses.failed
             except MaxRetryError:
                 request.status = Statuses.failed
+            session.commit()
