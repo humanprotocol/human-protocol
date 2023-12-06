@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
+from src.annotation import get_client
 from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
 
@@ -38,7 +39,10 @@ class APITest(unittest.TestCase):
 
     @patch(get_escrow_path)
     def test_register_job_request(self, mock_get_escrow: MagicMock):
-        """When a valid job request is posted to /job/request, a new pending Job Request should be added to the database and its id returned by the api."""
+        """When a valid job request is posted:
+            - a new pending Job Request should be added to the database
+            - its id returned by the api
+        """
         mock_get_escrow.return_value = self.mock_escrow
 
         response = self.client.post(
@@ -62,7 +66,10 @@ class APITest(unittest.TestCase):
         assert job.escrow_address == self.escrow_address
 
     def test_register_job_request_failing_due_to_invalid_escrow_info(self):
-        """When an invalid escrow info is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+        """When an invalid escrow info is posted:
+            - an appropriate error response should be returned
+            - NO Job Request should be added to the database.
+        """
         invalid_message = self.message.copy()
         invalid_message["chain_id"] = -100
 
@@ -85,7 +92,10 @@ class APITest(unittest.TestCase):
         assert_no_entries_in_db(JobRequest)
 
     def test_register_job_request_failing_due_to_missing_escrow(self):
-        """When an escrow info that points to no escrow is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+        """When a job request with an escrow info that points to no escrow is posted:
+            - an appropriate error response should be returned
+            - NO Job Request should be added to the database
+        """
 
         with patch(get_escrow_path) as mock_get_escrow:
             mock_get_escrow.return_value = None
@@ -101,7 +111,10 @@ class APITest(unittest.TestCase):
 
     @patch(get_escrow_path)
     def test_register_job_request_failing_due_to_invalid_escrow(self, mock_get_escrow: MagicMock):
-        """When an escrow info that points to an invalid escrow is posted to /job/request, an appropriate error response should be returned and NO Job Request should be added to the Database."""
+        """When a job request with an escrow info that points to an invalid escrow is posted:
+            - an appropriate error response should be returned
+            - NO Job Request should be added to the database
+        """
         # insufficient funds
         mock_escrow = MagicMock()
         mock_escrow.balance = 0
@@ -129,7 +142,9 @@ class APITest(unittest.TestCase):
         assert_no_entries_in_db(JobRequest)
 
     def test_list_available_jobs(self):
-        """When a get request is made against /job/list, a list of uuids (v4) representing job ids of jobs in progress should be returned."""
+        """When a list of available jobs is requested:
+            - a list of uuids (v4) representing job ids of Jobs in progress should be returned with the response
+        """
 
         n_statuses = len(Statuses) - 1 # one will be valid, so deduct it
         n_returned_jobs = 3
@@ -157,7 +172,11 @@ class APITest(unittest.TestCase):
         assert all(is_valid_uuid(job_id) for job_id in job_ids)
 
     def test_register_user(self):
-        """When a post request with appropriate UserRegistrationInfo is made against /user/register, a new user should be created and added as an annotator and doccano user."""
+        """When a valid user registration is posted:
+            - a new Worker should be created and added to the db
+            - a new doccano annotator should be created with the given username and a secure password
+            - the user credentials should be returned with the response
+        """
 
         user_info, worker_address, username = random_userinfo()
 
@@ -166,18 +185,28 @@ class APITest(unittest.TestCase):
             json=user_info
         )
 
-        assert response.status_code == HTTPStatus.OK
 
+        # check response
+        assert response.status_code == HTTPStatus.OK
         response_content = response.json()
         assert response_content["username"] == user_info["name"]
         assert response_content["password"] is not None
 
+        # check db
         with Session() as session:
             worker = session.query(Worker).where(Worker.id == worker_address).one()
         assert worker.is_validated
 
+        # check db
+        doccano_client = get_client()
+        doccano_client.find_user_by_name(user_info["name"])
+
     def test_register_user_failing_due_to_wallett_already_registered(self):
-        """When a post request containing an already registered wallett adress in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
+        """When it is attempted to register a user with the same wallet address as an existing user:
+            - an appropriate error response should be returned
+            - no new worker should be added to the db
+            - no new worker should be added to doccano
+        """
 
         # normal registration
         user_info, worker_address, username = random_userinfo()
@@ -196,7 +225,10 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
 
     def test_register_user_failing_due_to_unavailable_username(self):
-        """When a post request containing an unavailable username in UserRegistrationInfo is made against /user/register, an appropriate error response should be returned."""
+        """When it is attempted to register a user with the same username as an existing user:
+            - an appropriate error response should be returned
+            - no new worker should be added to the db
+        """
 
         # normal registration
         user_info, worker_address, username = random_userinfo()
@@ -214,6 +246,7 @@ class APITest(unittest.TestCase):
         )
 
         assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
+
         # make sure worker was NOT written to db
         with Session() as session:
             worker = session.query(Worker).where(Worker.id == user_info["worker_address"]).one_or_none()
@@ -222,7 +255,11 @@ class APITest(unittest.TestCase):
     @patch(get_manifest_url_path)
     @patch(get_escrow_path)
     def test_job_application(self, mock_get_escrow: MagicMock, mock_get_manifest_url: MagicMock):
-        """When a registered worker applies for a job that is in progress with a post request to /job/apply, they should be added to the project, the database should be updated and the result returned."""
+        """When applying for an available job with an existing worker
+            - the worker should be added to the project
+            - the database should be updated
+            - a response with the username and the link to the annotation tool should be returned
+        """
 
         # worker registration, adds worker to db
         user_info, worker_address, username = random_userinfo()
@@ -274,7 +311,10 @@ class APITest(unittest.TestCase):
             session.query(AnnotationProject).where((AnnotationProject.job_request_id == job_id) & (AnnotationProject.worker_id == worker_address)).one()
 
     def test_job_application_failing_due_to_missing_worker_or_job(self):
-        """When a job application contains an invalid worker address or job id, an appropriate error should be returned and the entities should not be linked."""
+        """When applying for an unavailable job or a worker that does not exist:
+            - an appropriate error should be returned
+            - the entities should not be linked
+        """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
@@ -299,7 +339,10 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
     def test_job_application_failing_due_to_unvalidated_worker(self):
-        """When a job application contains an unvalidated worker, an appropriate error should be returned and the entities should not be linked."""
+        """When applying for an available job with a worker that was not validated:
+            - an appropriate error should be returned
+            - the entities should not be linked
+        """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
@@ -315,7 +358,10 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.WORKER_NOT_VALIDATED)
 
     def test_job_application_failing_due_to_unavailable_job(self):
-        """When a job application includes a job that is not in the right status, an appropriate error should be returned and the entities should not be linked."""
+        """When a job application includes a job that is not in the right status:
+            - an appropriate error should be returned
+            - the entities should not be linked.
+        """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
@@ -331,7 +377,10 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.JOB_UNAVAILABLE)
 
     def test_job_application_failing_due_to_worker_assignment_error(self):
-        """When a job application includes a job that is not in the right status, an appropriate error should be returned and the entities should not be linked."""
+        """When a job application fails during the worker assignment stage:
+            - an appropriate error should be returned
+            - the entities should not be linked.
+        """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
         anno_project_id = job_id + '__1'
