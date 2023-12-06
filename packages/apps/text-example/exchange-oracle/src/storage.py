@@ -95,13 +95,16 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
 
     return doccano_filepath
 
-def convert_annotations_to_raw_results(job_dir: Path, job_id: str):
+def convert_annotations_to_raw_results(job_dir: Path, job_id: str, annotator_name_map: dict[str, str]=None):
+    if annotator_name_map is None:
+        annotator_name_map = {}
+
     outfile = job_dir / f'{job_id}.jsonl'
     anno_ids = count()
     for project_zip in job_dir.glob("*.zip"):
         with ZipFile(project_zip) as zip_file:
             for anno_file in zip_file.filelist:
-                annotator_id = anno_file.filename.split('.jsonl')[0]
+                username = anno_file.filename.split('.jsonl')[0]
                 with zip_file.open(anno_file) as af, open(outfile, 'a') as of:
                     for line in af.readlines():
                         try:
@@ -112,7 +115,7 @@ def convert_annotations_to_raw_results(job_dir: Path, job_id: str):
                             start, end, label = span
                             record = {
                                 "task_key": annotation["task_key"],
-                                "annotator_id": annotator_id,
+                                "annotator_id": annotator_name_map.get(username, "UNKNOWN"),
                                 "annotation_id": next(anno_ids),
                                 "value": { "span": [start, end], "label": label }
                             }

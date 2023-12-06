@@ -9,7 +9,7 @@ from src.db import (
     Session,
     Statuses,
     JobRequest,
-    AnnotationProject,
+    AnnotationProject, username_to_worker_address_map,
 )
 from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, \
     convert_annotations_to_raw_results, upload_data
@@ -104,7 +104,7 @@ def upload_completed_job_requests():
                 data_dir = Config.storage_config.dataset_dir / id
 
                 # convert doccano annotations into raw results format
-                raw_results_file = convert_annotations_to_raw_results(data_dir, id)
+                raw_results_file = convert_annotations_to_raw_results(data_dir, id, username_to_worker_address_map())
 
                 # upload to s3
                 upload_data(raw_results_file, content_type="application/json")

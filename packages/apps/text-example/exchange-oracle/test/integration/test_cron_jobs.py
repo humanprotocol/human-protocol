@@ -6,8 +6,8 @@ from unittest.mock import patch, MagicMock
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests, notify_recording_oracle, process_completed_job_requests, \
     process_in_progress_job_requests, upload_completed_job_requests
-from src.db import JobRequest, Session, Base, engine, Statuses, AnnotationProject
-from test.utils import add_job_request, add_projects_to_job_request
+from src.db import JobRequest, Session, Base, engine, Statuses, AnnotationProject, Worker
+from test.utils import add_job_request, add_projects_to_job_request, random_address
 
 
 class CRONJobTest(unittest.TestCase):
@@ -17,6 +17,7 @@ class CRONJobTest(unittest.TestCase):
 
     def tearDown(self):
         Base.metadata.drop_all(engine)
+
     @patch("src.cron_jobs.get_manifest_url")
     def test_process_pending_job_request(self, mock_get_manifest_url: MagicMock):
         """When a pending job is processed:
@@ -100,6 +101,13 @@ class CRONJobTest(unittest.TestCase):
             - the job status should be set to awaiting closure
         """
         job_id = add_job_request(Statuses.awaiting_upload)
+
+        # add workers with usernames in the test data
+        usernames = ["test", "admin", "bar"]
+        with Session() as session:
+            for username in usernames:
+                session.add(Worker(id=random_address(), username=username, password="12345password"))
+            session.commit()
 
         # prepare data as if it was previously downloaded
         file_path = Path(__file__).parent.parent / 'data/test_annotations.zip'

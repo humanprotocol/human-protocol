@@ -82,3 +82,12 @@ class Worker(Base):
     is_validated: Mapped[bool] = mapped_column(default=False)
     password: Mapped[str]
     projects: Mapped[List["AnnotationProject"]] = relationship(back_populates="worker")
+
+
+def username_to_worker_address_map() -> dict[str, str]:
+    """Returns a dictionary, mapping usernames to worker_ids"""
+    username_map = {}
+    with Session() as session:
+        for worker in session.query(Worker).all():
+            username_map[worker.username] = worker.id
+    return username_map
