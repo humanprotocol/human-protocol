@@ -1,0 +1,35 @@
+{
+  "name": "@human-protocol/dashboard-admin",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Human Dashboard Admin",
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "@human-protocol/sdk": "*",
+    "@strapi/plugin-i18n": "4.11.1",
+    "@strapi/plugin-users-permissions": "4.11.1",
+    "@strapi/strapi": "4.11.1",
+    "axios": "^1.5.1",
+    "dayjs": "^1.11.10",
+    "graphql-request": "^6.1.0",
+    "pg": "8.8.0",
+    "viem": "^1.16.6"
+  },
+  "author": {
+    "name": "Tony Wen"
+  },
+  "strapi": {
+    "uuid": "c9312fea-0fdd-4782-a77c-8484ae3a6abe"
+  },
+  "engines": {
+    "node": ">=14.19.1 <=18.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
