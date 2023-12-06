@@ -1,7 +1,12 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { ChainId, Encryption, StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { S3ConfigType, s3ConfigKey } from '../../common/config';
+import {
+  S3ConfigType,
+  ServerConfigType,
+  s3ConfigKey,
+  serverConfigKey,
+} from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
 import crypto from 'crypto';
 import { SaveSolutionsDto } from '../job/job.dto';
@@ -13,6 +18,8 @@ export class StorageService {
   constructor(
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
+    @Inject(serverConfigKey)
+    private serverConfig: ServerConfigType,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -32,7 +39,17 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      return await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      try {
+        return JSON.parse(fileContent);
+      } catch {
+        const encryption = await Encryption.build(
+          this.serverConfig.encryptionPrivateKey,
+          this.serverConfig.encryptionPassphrase,
+        );
+
+        return JSON.parse(await encryption.decrypt(fileContent));
+      }
     } catch {
       return [];
     }

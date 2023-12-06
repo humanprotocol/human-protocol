@@ -13,6 +13,8 @@ export const ConfigNames = {
   S3_SECRET_KEY: 'S3_SECRET_KEY',
   S3_BUCKET: 'S3_BUCKET',
   S3_USE_SSL: 'S3_USE_SSL',
+  ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
+  ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
 };
 
 export const envValidator = Joi.object({
@@ -31,4 +33,7 @@ export const envValidator = Joi.object({
   S3_SECRET_KEY: Joi.string().required(),
   S3_BUCKET: Joi.string().default('solution'),
   S3_USE_SSL: Joi.string().default(false),
+  // Encryption
+  ENCRYPTION_PRIVATE_KEY: Joi.string().required(),
+  ENCRYPTION_PASSPHRASE: Joi.string().required(),
 });
