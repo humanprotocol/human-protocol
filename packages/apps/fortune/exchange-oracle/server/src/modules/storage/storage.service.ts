@@ -2,6 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  StakingClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { ISolution } from '../../common/interfaces/job';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class StorageService {
@@ -16,6 +18,8 @@ export class StorageService {
 
   constructor(
     private readonly configService: ConfigService,
+    @Inject(Web3Service)
+    private readonly web3Service: Web3Service,
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
   ) {
@@ -65,16 +69,20 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
+    const signer = this.web3Service.getSigner(chainId);
+    const stakingClient = await StakingClient.build(signer);
+    const exchangeOracle = await stakingClient.getLeader(signer.address);
+    const recordingOracle = await stakingClient.getLeader(
+      this.configService.get<string>(ConfigNames.RECORDING_ORACLE_ADDRESS, ''),
+    );
+    if (!exchangeOracle.publicKey || !recordingOracle.publicKey) {
+      throw new BadRequestException('Missing public key');
+    }
+
     try {
       const solutionsEncrypted = await EncryptionUtils.encrypt(
         JSON.stringify(solutions),
-        [
-          this.configService.get<string>(ConfigNames.ENCRYPTION_PUBLIC_KEY, ''),
-          this.configService.get<string>(
-            ConfigNames.RECORDING_ORACLE_PUBLIC_KEY,
-            '',
-          ),
-        ],
+        [exchangeOracle.publicKey, recordingOracle.publicKey],
       );
 
       await this.minioClient.putObject(

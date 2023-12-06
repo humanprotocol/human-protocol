@@ -2,6 +2,7 @@ import {
   ChainId,
   Encryption,
   EncryptionUtils,
+  StakingClient,
   StorageClient,
 } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
@@ -15,9 +16,13 @@ import {
   MOCK_S3_USE_SSL,
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
+  StakingClient: {
+    build: jest.fn(),
+  },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
   },
@@ -46,6 +51,11 @@ jest.mock('minio', () => {
 describe('StorageService', () => {
   let storageService: StorageService;
 
+  const signerMock = {
+    address: '0x1234567890123456789012345678901234567892',
+    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
+
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -60,7 +70,15 @@ describe('StorageService', () => {
           })),
         ),
       ],
-      providers: [StorageService],
+      providers: [
+        StorageService,
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+          },
+        },
+      ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
@@ -77,6 +95,11 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
       EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
+      StakingClient.build = jest.fn().mockResolvedValue({
+        getLeader: jest.fn().mockResolvedValue({
+          publicKey: 'publicKey',
+        }),
+      });
 
       const jobSolution = {
         workerAddress,
@@ -121,6 +144,7 @@ describe('StorageService', () => {
         ]),
       ).rejects.toThrow('Bucket not found');
     });
+
     it('should fail if the file cannot be uploaded', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -144,6 +168,31 @@ describe('StorageService', () => {
           jobSolution,
         ]),
       ).rejects.toThrow('File not uploaded');
+    });
+
+    it('should fail if public key is missing', async () => {
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const chainId = ChainId.LOCALHOST;
+      const solution = 'test';
+
+      storageService.minioClient.bucketExists = jest
+        .fn()
+        .mockResolvedValue(true);
+      EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
+      StakingClient.build = jest.fn().mockResolvedValue({
+        getLeader: jest.fn().mockResolvedValue({}),
+      });
+
+      const jobSolution = {
+        workerAddress,
+        solution,
+      };
+      await expect(
+        storageService.uploadJobSolutions(escrowAddress, chainId, [
+          jobSolution,
+        ]),
+      ).rejects.toThrow('Missing public key');
     });
   });
 
