@@ -16,22 +16,13 @@ async function bootstrap() {
     cors: true,
   });
 
-  const { feUrl, sessionSecret, host, port }: ServerConfigType =
+  const { sessionSecret, host, port }: ServerConfigType =
     app.get(serverConfigKey);
 
   app.useGlobalFilters(new GlobalExceptionsFilter());
 
   app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging'
-        ? [
-            `http://localhost:3001`,
-            `http://127.0.0.1:3001`,
-            `http://0.0.0.0:3001`,
-            feUrl,
-          ]
-        : [feUrl],
+    origin: true,
     credentials: true,
     exposedHeaders: ['Content-Disposition'],
   });

@@ -24,7 +24,7 @@ import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
-import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { IsNull, LessThanOrEqual, Not, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorEscrow,
@@ -184,10 +184,10 @@ export class JobService {
       public_results: true,
       oracle_stake: HCAPTCHA_ORACLE_STAKE,
       repo_uri: this.configService.get<string>(
-        ConfigNames.HCAPTCHA_REPUTATION_ORACLE_ADDRESS,
+        ConfigNames.HCAPTCHA_REPUTATION_ORACLE_URI,
       )!,
       ro_uri: this.configService.get<string>(
-        ConfigNames.HCAPTCHA_RECORDING_ORACLE_ADDRESS,
+        ConfigNames.HCAPTCHA_RECORDING_ORACLE_URI,
       )!,
     };
 
@@ -551,7 +551,7 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
     let manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (typeof manifest === 'string' && isPGPMessage(manifest)) {
@@ -629,9 +629,12 @@ export class JobService {
   }
 
   public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+    jobEntity.status = JobStatus.FUNDING;
+    await jobEntity.save();
+    
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
@@ -874,7 +877,7 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -919,16 +922,19 @@ export class JobService {
     return finalResultUrl;
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  // @Cron(CronExpression.EVERY_10_MINUTES)
   public async launchCronJob() {
     this.logger.log('Launch jobs START');
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-      let jobEntity = await this.jobRepository.findOne(
+      let jobEntity;
+
+      jobEntity = await this.jobRepository.findOne(
         {
-          status: JobStatus.PAID,
+          status: JobStatus.LAUNCHING,
           retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
+          escrowAddress: Not(IsNull()),
         },
         {
           order: {
@@ -937,13 +943,28 @@ export class JobService {
         },
       );
 
+      if (!jobEntity) {
+        jobEntity = await this.jobRepository.findOne(
+          {
+            status: JobStatus.PAID,
+            retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+            waitUntil: LessThanOrEqual(new Date()),
+          },
+          {
+            order: {
+              waitUntil: SortDirection.ASC,
+            },
+          },
+        );
+      }  
+
       if (!jobEntity) return;
 
       const manifest = await this.storageService.download(
         jobEntity.manifestUrl,
       );
 
-      if (!jobEntity.escrowAddress) {
+      if (!jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
         jobEntity = await this.launchJob(jobEntity);
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHING) {
@@ -972,7 +993,7 @@ export class JobService {
     this.logger.log('Launch jobs STOP');
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  // @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     this.logger.log('Cancel jobs START');
     const jobEntity = await this.jobRepository.findOne(
@@ -1053,7 +1074,7 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (

@@ -1,9 +1,11 @@
 import {
   ChainId,
+  Encryption,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
   StakingClient,
+  StorageClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -68,9 +70,7 @@ export class JobService {
     return {
       escrowAddress,
       chainId,
-      manifest: {
-        ...manifest,
-      },
+      manifest,
     };
   }
 
@@ -79,6 +79,7 @@ export class JobService {
     workerAddress: string,
   ): Promise<string[]> {
     const escrows = await EscrowUtils.getEscrows({
+      exchangeOracle: this.web3Service.getSigner(chainId).address,
       status: EscrowStatus.Pending,
       networks: [chainId],
     });
@@ -208,19 +209,33 @@ export class JobService {
     chainId: number,
     escrowAddress: string,
   ): Promise<ManifestDto> {
-    const reputationOracleURL = this.configService.get(
-      ConfigNames.REPUTATION_ORACLE_URL,
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
+    const manifestEncrypted = await StorageClient.downloadFileFromUrl(
+      manifestUrl,
     );
 
-    if (!reputationOracleURL)
-      throw new NotFoundException('Unable to get Reputation Oracle URL');
+    let manifest: ManifestDto | null;
 
-    const manifest = await this.httpService.axiosRef
-      .get<any>(
-        reputationOracleURL +
-          `/manifest?chainId=${chainId}&escrowAddress=${escrowAddress}`,
-      )
-      .then((res) => res.data);
+    try {
+      manifest = JSON.parse(manifestEncrypted);
+    } catch {
+      manifest = null;
+    }
+
+    if (!manifest) {
+      try {
+        const encryption = await Encryption.build(
+          this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+        );
+
+        manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+      } catch {
+        throw new Error('Unable to decrypt manifest');
+      }
+    }
 
     if (!manifest) {
       const signer = this.web3Service.getSigner(chainId);

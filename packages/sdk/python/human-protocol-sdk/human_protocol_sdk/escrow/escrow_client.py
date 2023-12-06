@@ -1196,7 +1196,7 @@ class EscrowClient:
             self._get_escrow_contract(escrow_address).functions.escrowFactory().call()
         )
 
-    def _get_escrow_contract(self, address: str) -> contract:
+    def _get_escrow_contract(self, address: str) -> contract.Contract:
         """Returns the escrow contract instance.
 
         :param escrow_address: Address of the deployed escrow

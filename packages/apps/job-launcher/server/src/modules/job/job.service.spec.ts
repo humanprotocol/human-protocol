@@ -201,9 +201,9 @@ describe('JobService', () => {
             return MOCK_CVAT_MAX_TIME;
           case 'CVAT_VAL_SIZE':
             return MOCK_CVAT_VAL_SIZE;
-          case 'HCAPTCHA_REPUTATION_ORACLE_ADDRESS':
+          case 'HCAPTCHA_REPUTATION_ORACLE_URI':
             return MOCK_HCAPTCHA_REPO_URI;
-          case 'HCAPTCHA_RECORDING_ORACLE_ADDRESS':
+          case 'HCAPTCHA_RECORDING_ORACLE_URI':
             return MOCK_HCAPTCHA_RO_URI;
         }
       }),
