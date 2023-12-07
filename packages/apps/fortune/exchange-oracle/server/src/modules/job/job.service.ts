@@ -1,5 +1,6 @@
 import {
   ChainId,
+  Encryption,
   EscrowClient,
   EscrowStatus,
   EscrowUtils,
@@ -53,7 +54,7 @@ export class JobService {
     escrowAddress: string,
   ): Promise<JobDetailsDto> {
     const manifest = await this.getManifest(chainId, escrowAddress);
-    
+
     const existingJobSolutions = await this.storageService.downloadJobSolutions(
       escrowAddress,
       chainId,
@@ -69,9 +70,7 @@ export class JobService {
     return {
       escrowAddress,
       chainId,
-      manifest: {
-        ...manifest,
-      },
+      manifest,
     };
   }
 
@@ -213,8 +212,30 @@ export class JobService {
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
-    const manifest: ManifestDto =
-      await StorageClient.downloadFileFromUrl(manifestUrl);
+    const manifestEncrypted = await StorageClient.downloadFileFromUrl(
+      manifestUrl,
+    );
+
+    let manifest: ManifestDto | null;
+
+    try {
+      manifest = JSON.parse(manifestEncrypted);
+    } catch {
+      manifest = null;
+    }
+
+    if (!manifest) {
+      try {
+        const encryption = await Encryption.build(
+          this.configService.get(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+          this.configService.get(ConfigNames.ENCRYPTION_PASSPHRASE),
+        );
+
+        manifest = JSON.parse(await encryption.decrypt(manifestEncrypted));
+      } catch {
+        throw new Error('Unable to decrypt manifest');
+      }
+    }
 
     if (!manifest) {
       const signer = this.web3Service.getSigner(chainId);

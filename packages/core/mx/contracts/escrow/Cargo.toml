@@ -15,10 +15,10 @@ path = "src/lib.rs"
 path = "../common-structs"
 
 [dependencies.multiversx-sc]
-version = "0.43.3"
+version = "0.45.1"
 
 [dev-dependencies.multiversx-sc-scenario]
-version = "0.43.3"
+version = "0.45.1"
 
 [dev-dependencies]
 num-bigint = "0.4.2"
