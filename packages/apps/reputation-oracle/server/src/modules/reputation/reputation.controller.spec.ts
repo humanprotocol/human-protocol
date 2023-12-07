@@ -6,7 +6,7 @@ import { ReputationService } from './reputation.service';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
-import { IReputation } from '../../common/interfaces';
+import { ReputationDto } from './reputation.dto';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -60,7 +60,7 @@ describe('ReputationController', () => {
 
       jest
         .spyOn(reputationService, 'getAllReputations')
-        .mockResolvedValueOnce(results as IReputation[]);
+        .mockResolvedValueOnce(results as ReputationDto[]);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')
@@ -82,7 +82,7 @@ describe('ReputationController', () => {
 
       jest
         .spyOn(reputationService, 'getReputation')
-        .mockResolvedValueOnce(result as IReputation);
+        .mockResolvedValueOnce(result as ReputationDto);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')
