@@ -248,7 +248,10 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
@@ -307,10 +310,13 @@ export class JobService {
   public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
     jobEntity.status = JobStatus.FUNDING;
     await jobEntity.save();
-    
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
@@ -560,7 +566,10 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -605,7 +614,7 @@ export class JobService {
     return finalResultUrl;
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async launchCronJob() {
     this.logger.log('Launch jobs START');
     try {
@@ -639,7 +648,7 @@ export class JobService {
             },
           },
         );
-      }  
+      }
 
       if (!jobEntity) return;
 
@@ -677,7 +686,7 @@ export class JobService {
     this.logger.log('Launch jobs STOP');
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     this.logger.log('Cancel jobs START');
     const jobEntity = await this.jobRepository.findOne(
@@ -753,7 +762,10 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (
