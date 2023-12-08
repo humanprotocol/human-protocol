@@ -1,7 +1,7 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { Encryption, StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { S3ConfigType, s3ConfigKey } from '../../common/config';
+import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import crypto from 'crypto';
 import { UploadedFile } from '../../common/interfaces/s3';
 import { PassThrough } from 'stream';
@@ -9,6 +9,7 @@ import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import { hashStream } from '../../common/utils';
 import { CvatManifestDto, FortuneManifestDto } from '../job/job.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class StorageService {
@@ -17,6 +18,7 @@ export class StorageService {
   constructor(
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
+    public readonly configService: ConfigService,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -34,7 +36,20 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      return await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+      try {
+        return JSON.parse(fileContent);
+      } catch {
+        const encryption = await Encryption.build(
+          this.configService.get<string>(
+            ConfigNames.ENCRYPTION_PRIVATE_KEY,
+            '',
+          ),
+          this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
+        );
+
+        return JSON.parse(await encryption.decrypt(fileContent));
+      }
     } catch {
       return [];
     }

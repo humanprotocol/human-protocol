@@ -50,6 +50,8 @@ export const ConfigNames = {
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
   POSTGRES_LOGGING: 'POSTGRES_LOGGING',
+  ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
+  ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
 };
 
 export const envValidator = Joi.object({
@@ -115,4 +117,7 @@ export const envValidator = Joi.object({
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),
+  // Encryption
+  ENCRYPTION_PRIVATE_KEY: Joi.string().default(''),
+  ENCRYPTION_PASSPHRASE: Joi.string().default(''),
 });

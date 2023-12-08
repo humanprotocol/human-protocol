@@ -1,5 +1,5 @@
-import { JobRequestType } from "../src/common/enums/job";
-import { FortuneManifestDto } from "../src/modules/job/job.dto";
+import { JobRequestType } from '../src/common/enums/job';
+import { FortuneManifestDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -65,3 +65,6 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   fundAmount: 10,
   requestType: JobRequestType.FORTUNE,
 };
+
+export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private_key';
+export const MOCK_ENCRYPTION_PASSPHRASE = 'passphrase';
