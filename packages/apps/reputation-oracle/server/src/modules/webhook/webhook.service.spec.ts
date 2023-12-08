@@ -257,7 +257,7 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest);
+        .mockReturnValueOnce(JSON.stringify(fortuneManifest));
       jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue();
 
       jest.spyOn(webhookService, 'processFortune').mockImplementation(() => {
@@ -272,7 +272,7 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest);
+        .mockReturnValueOnce(JSON.stringify(fortuneManifest));
       jest
         .spyOn(webhookService, 'processFortune')
         .mockResolvedValue(results as any);
@@ -284,7 +284,7 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(cvatManifest);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(cvatManifest);
+        .mockReturnValueOnce(JSON.stringify(cvatManifest));
       jest
         .spyOn(webhookService, 'processCvat')
         .mockResolvedValue(results as any);
@@ -299,7 +299,7 @@ describe('WebhookService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest);
+        .mockReturnValueOnce(JSON.stringify(fortuneManifest));
       jest
         .spyOn(webhookService, 'processFortune')
         .mockResolvedValue(results as any);
@@ -442,24 +442,26 @@ describe('WebhookService', () => {
     it('should successfully process and return correct result values', async () => {
       const escrowAddress = MOCK_ADDRESS;
       const chainId = ChainId.LOCALHOST;
-      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce({
-        jobs: [
-          {
-            id: 1,
-            job_id: 1,
-            annotator_wallet_address: MOCK_ADDRESS,
-            annotation_quality: 0.96,
-          },
-        ],
-        results: [
-          {
-            id: 2,
-            job_id: 2,
-            annotator_wallet_address: MOCK_ADDRESS,
-            annotation_quality: 0.96,
-          },
-        ],
-      });
+      StorageClient.downloadFileFromUrl = jest.fn().mockReturnValueOnce(
+        JSON.stringify({
+          jobs: [
+            {
+              id: 1,
+              job_id: 1,
+              annotator_wallet_address: MOCK_ADDRESS,
+              annotation_quality: 0.96,
+            },
+          ],
+          results: [
+            {
+              id: 2,
+              job_id: 2,
+              annotator_wallet_address: MOCK_ADDRESS,
+              annotation_quality: 0.96,
+            },
+          ],
+        }),
+      );
 
       jest
         .spyOn(storageService, 'copyFileFromURLToBucket')
@@ -525,7 +527,7 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(fortuneManifest);
+        .mockReturnValueOnce(JSON.stringify(fortuneManifest));
       jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue();
 
       (EscrowClient.build as any).mockImplementation(() => ({
@@ -552,8 +554,8 @@ describe('WebhookService', () => {
       ];
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(fortuneManifest)
-        .mockResolvedValue(finalResults);
+        .mockResolvedValueOnce(JSON.stringify(fortuneManifest))
+        .mockResolvedValue(JSON.stringify(finalResults));
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
@@ -605,7 +607,7 @@ describe('WebhookService', () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(cvatManifest);
+        .mockResolvedValueOnce(JSON.stringify(cvatManifest));
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),

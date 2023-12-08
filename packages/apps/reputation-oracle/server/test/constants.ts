@@ -198,3 +198,6 @@ export const MOCK_S3_ACCESS_KEY = 'access_key';
 export const MOCK_S3_SECRET_KEY = 'secret_key';
 export const MOCK_S3_BUCKET = 'solution';
 export const MOCK_S3_USE_SSL = false;
+
+export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private_key';
+export const MOCK_ENCRYPTION_PASSPHRASE = 'passphrase';
