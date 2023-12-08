@@ -1,3 +1,4 @@
+import logging
 import unittest
 import uuid
 from http import HTTPStatus
@@ -7,6 +8,7 @@ from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
 from src.annotation import get_client
+from src.config import Config
 from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
 
@@ -290,11 +292,14 @@ class APITest(unittest.TestCase):
         # make sure all projects have been created successfully
         response = self.client.get(Endpoints.JOB_LIST)
         available_jobs = response.json()
-        assert len(available_jobs) > 0
+
         assert job_id in available_jobs
         with Session() as session:
-            projects = session.query(AnnotationProject).where(AnnotationProject.job_request_id == job_id).all()
-        assert len(projects) > 0
+            job = session.query(JobRequest).where(JobRequest.id == job_id).one()
+            projects = job.projects
+
+            assert job.status == Statuses.in_progress
+            assert len(projects) != 0
 
         response = self.client.post(
             Endpoints.JOB_APPLY,

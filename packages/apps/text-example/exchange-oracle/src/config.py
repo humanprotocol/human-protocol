@@ -99,7 +99,7 @@ class DoccanoConfig:
 
     @classmethod
     def url(cls):
-        return f"{cls.host}:{cls.port}"
+        return f"http://{cls.host}:{cls.port}"
 
 
 class Config:

@@ -24,3 +24,11 @@ poetry run uvicorn main:exchange_oracle --app-dir src
 ## API
 
 For details on the API, start the server and check the `/docs` route, e.g. http://127.0.0.1:8000/docs if you run the server locally.
+
+## Tests
+
+To run tests, navigate to the exchange oracle direcotry and run
+
+````shell
+docker compose -f docker/test/compose.yaml up --build test --attach test --exit-code-from test
+````

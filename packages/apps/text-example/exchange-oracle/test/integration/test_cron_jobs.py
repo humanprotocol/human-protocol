@@ -27,6 +27,7 @@ class CRONJobTest(unittest.TestCase):
         """
         job_id = add_job_request()
 
+        # TODO: needs to be uploaded before
         mock_get_manifest_url.return_value = "http://127.0.0.1:9000/text-exo/manifest.json"
         process_pending_job_requests()
         mock_get_manifest_url.assert_called_once()
