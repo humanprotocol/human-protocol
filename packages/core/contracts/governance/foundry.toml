@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+#[rpc_endpoints]
+#avalanche = "${AVALANCHE_RPC_URL}"
+#mumbai = "${POLYGON_MUMBAI_RPC_URL}"
+#moonbase = "${MOONBASE_RPC_URL}"
+#
+#[etherscan]
+#mumbai = { key = "${MUMBAI_ETHERSCAN_API_KEY}", url = "https://api-testnet.polygonscan.com/api" }
+#avalanche = { key = "${AVALANCHE_ETHERSCAN_API_KEY}", url = "https://api.snowtrace.io/api" }
+#moonbase = { key = "${MOONBASE_ETHERSCAN_API_KEY}", url = "https://api-moonbase.moonscan.io/api" }
+
+[doc]
+title = 'MetaHuman Governor Contracts'
+ignore = ['src/hm-token/*.sol','src/vhm-token/*.sol','contracts/*.sol']

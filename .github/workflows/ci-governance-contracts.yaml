@@ -1,0 +1,63 @@
+name: CI Governance smartcontracts
+
+on: 
+  workflow_dispatch:
+  # Inputs the workflow accepts.
+    inputs:
+      # SPOKE_PARAMS:
+      #   description: 'Json with parameters for spoke deploy'
+      #   required: true
+      #   type: string
+      HM_TOKEN_ADDRESS:
+        # description: 'HM Token Address'
+        required: true
+        type: string
+      TIMELOCK:
+        description: "Transfer governance ownership to timelock"
+        required: true
+        type: boolean
+        default: false
+
+defaults:
+  run:
+    working-directory: smartcontracts
+
+env:
+  FOUNDRY_PROFILE: ci
+  # user data
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+  HUB_RPC_URL: ${{ secrets.HUB_RPC_URL }}
+  HUB_VOTE_TOKEN_ADDRESS: ${{ vars.HUB_VOTE_TOKEN_ADDRESS }}
+  HUB_ETHERSCAN_API_KEY: ${{ secrets.HUB_ETHERSCAN_API_KEY }}
+  MAGISTRATE_ADDRESS: ${{ vars.MAGISTRATE_ADDRESS }}
+  # hub 
+  HUB_AUTOMATIC_RELAYER_ADDRESS: ${{ vars.HUB_AUTOMATIC_RELAYER_ADDRESS }}
+  HUB_WORMHOLE_CHAIN_ID: ${{ vars.HUB_WORMHOLE_CHAIN_ID }}
+  HUB_CHAIN_ID: ${{ vars.HUB_CHAIN_ID }}
+  VOTE_TOKEN_ADDRESS: ${{ vars.VOTE_TOKEN_ADDRESS }}
+  HUB_HM_TOKEN_ADDRESS: ${{ vars.HUB_HM_TOKEN_ADDRESS }}
+  HUB_SECONDS_PER_BLOCK: ${{ vars.HUB_SECONDS_PER_BLOCK }}
+  TIMELOCK: ${{ inputs.TIMELOCK }}
+  # spoke deployment
+  SPOKE_PARAMS: ${{ secrets.SPOKE_PARAMS }}
+
+
+jobs:
+  check:
+    strategy:
+      fail-fast: true
+
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-ca67d15f4abd46394b324c50e21e66f306a1162d
+
+     
+

@@ -1,0 +1,18 @@
+[
+  {
+    "SPOKE_RPC_URL": "xyz",
+    "SPOKE_ETHERSCAN_API_KEY": "asd",
+    "SPOKE_WORMHOLE_CHAIN_ID": "qwe",
+    "SPOKE_AUTOMATIC_RELAYER_ADDRESS": "123",
+    "SPOKE_HM_TOKEN_ADDRESS": "456",
+    "SPOKE_CHAIN_ID": "5"
+  },
+  {
+    "SPOKE_RPC_URL": "xyz",
+    "SPOKE_ETHERSCAN_API_KEY": "asd",
+    "SPOKE_WORMHOLE_CHAIN_ID": "qwe",
+    "SPOKE_AUTOMATIC_RELAYER_ADDRESS": "123",
+    "SPOKE_HM_TOKEN_ADDRESS": "456",
+    "SPOKE_CHAIN_ID": "5"
+  }
+]
