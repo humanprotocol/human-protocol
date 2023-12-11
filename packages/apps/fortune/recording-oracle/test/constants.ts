@@ -30,3 +30,4 @@ export const MOCK_MANIFEST: IManifest = {
 };
 export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private-key';
 export const MOCK_ENCRYPTION_PASSPHRASE = 'passphrase';
+export const MOCK_PUBLIC_KEY = 'public-key';

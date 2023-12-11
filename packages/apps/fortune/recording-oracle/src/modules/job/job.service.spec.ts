@@ -17,6 +17,7 @@ import {
   MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_URL,
+  MOCK_PUBLIC_KEY,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
@@ -72,6 +73,16 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
     })),
+  },
+  StakingClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getLeader: jest.fn().mockResolvedValue({
+        publicKey: MOCK_PUBLIC_KEY,
+      }),
+    })),
+  },
+  EncryptionUtils: {
+    encrypt: jest.fn().mockResolvedValue('encrypted'),
   },
 }));
 
