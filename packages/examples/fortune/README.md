@@ -65,7 +65,7 @@ To configure Metamask for the deployed playground example:
 
 2. Next we will need 3 accounts to represent each person in this example (Job requester, Worker 1 and Worker 2).
 
-3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the Token Contract Address from this [list](https://github.com/humanprotocol/human-protocol/blob/main/CONTRACTS_LIST.md) according to the network selected in step 1. Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
+3. The final step in configuring Metamask is to import the HMT Token for each of the accounts above. Click on 'Import tokens', located at the bottom of the 'Assets' tab on your wallet homepage and add the Token Contract Address from this [list](https://tech-docs.humanprotocol.org/contracts/contract-addresses) according to the network selected in step 1. Repeat this process for each of the 3 accounts. Congratulations we have successfully configured Metamask and can proceed to interact with the Job Launcher to create new Jobs!
 
 ### Creating a Job using crypto for deployed Playground
 
