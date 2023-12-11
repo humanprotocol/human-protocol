@@ -27,7 +27,8 @@ For details on the API, start the server and check the `/docs` route, e.g. http:
 
 ## Tests
 
-To run tests, navigate to the exchange oracle direcotry and run
+To run tests, unzip `test/data/txt_files/data.zip` in its folder. 
+Then, navigate to the exchange oracle direcotry and run
 
 ````shell
 docker compose -f docker/test/compose.yaml up --build test --attach test --exit-code-from test

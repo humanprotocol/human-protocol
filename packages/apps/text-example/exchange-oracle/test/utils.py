@@ -1,13 +1,16 @@
 import random
 import uuid
+from pathlib import Path
 from string import ascii_letters
 from uuid import uuid4
+import zipfile
 
 from fastapi import HTTPException
 from starlette.responses import Response
 
 from src.config import Config
 from src.db import Session, Statuses, JobRequest, AnnotationProject
+from src.storage import upload_data
 
 
 def assert_http_error_response(response: Response, error: HTTPException):
@@ -81,3 +84,11 @@ def add_projects_to_job_request(job_id: str, n_projects: int, status: Statuses):
             projects.append(project)
         session.commit()
     return projects
+
+def upload_manifest_and_task_data():
+    data_dir = Path(__file__).parent / 'data'
+    manifest_filepath = data_dir / 'manifest.json'
+    upload_data(manifest_filepath, content_type="application/json")
+    upload_data(data_dir / "taskdata.json", content_type="application/json")
+    upload_data(data_dir / "txt_files", content_type="text/plain", glob_pattern="*.txt")
+    return f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/{manifest_filepath.name}"

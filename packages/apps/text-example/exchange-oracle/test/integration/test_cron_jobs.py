@@ -7,7 +7,7 @@ from src.config import Config
 from src.cron_jobs import process_pending_job_requests, notify_recording_oracle, process_completed_job_requests, \
     process_in_progress_job_requests, upload_completed_job_requests
 from src.db import JobRequest, Session, Base, engine, Statuses, AnnotationProject, Worker
-from test.utils import add_job_request, add_projects_to_job_request, random_address
+from test.utils import add_job_request, add_projects_to_job_request, random_address, upload_manifest_and_task_data
 
 
 class CRONJobTest(unittest.TestCase):
@@ -28,7 +28,8 @@ class CRONJobTest(unittest.TestCase):
         job_id = add_job_request()
 
         # TODO: needs to be uploaded before
-        mock_get_manifest_url.return_value = "http://127.0.0.1:9000/text-exo/manifest.json"
+        manifest_s3_url = upload_manifest_and_task_data()
+        mock_get_manifest_url.return_value = manifest_s3_url
         process_pending_job_requests()
         mock_get_manifest_url.assert_called_once()
 

@@ -16,7 +16,7 @@
  "task_bidprice": 1.3,
  "start_date": 9001,
  "expiration_date": 18001,
- "taskdata_uri": "http://127.0.0.1:9000/text-exo/Movies_and_TV_5.sample.task.json",
+ "taskdata_uri": "http://127.0.0.1:9000/snickering-eric-fivepin/taskdata.json",
  "job_mode": "batch",
  "request_type": "text_label_multiple_span_select",
  "request_config": {},

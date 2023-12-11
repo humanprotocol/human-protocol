@@ -2,6 +2,7 @@ import logging
 import unittest
 import uuid
 from http import HTTPStatus
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
@@ -13,8 +14,9 @@ from src.db import Session, Base, engine, JobRequest, Statuses, Worker, Annotati
 from src.main import exchange_oracle, Endpoints, Errors
 
 from src.cron_jobs import process_pending_job_requests
+from src.storage import upload_data
 from test.utils import assert_http_error_response, assert_no_entries_in_db, random_address, random_username, \
-    random_userinfo, is_valid_uuid, random_escrow_info
+    random_userinfo, is_valid_uuid, random_escrow_info, upload_manifest_and_task_data
 
 get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
 get_manifest_url_path = "src.cron_jobs.get_manifest_url"
@@ -283,9 +285,11 @@ class APITest(unittest.TestCase):
         assert response.status_code == HTTPStatus.OK
         job_id = response.json()["id"]
 
-        # TODO: needs to be set up manually for tests, better to mock?
+        # upload manifest and data
+        manifest_s3_url = upload_manifest_and_task_data()
+
         # set up projects for jobs
-        mock_get_manifest_url.return_value = "http://127.0.0.1:9000/text-exo/manifest.json"
+        mock_get_manifest_url.return_value = manifest_s3_url
         process_pending_job_requests()
         mock_get_manifest_url.assert_called_once()
 
