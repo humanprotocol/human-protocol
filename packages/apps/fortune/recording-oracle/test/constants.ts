@@ -28,3 +28,5 @@ export const MOCK_MANIFEST: IManifest = {
   fundAmount: '8',
   requestType: JobRequestType.FORTUNE,
 };
+export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private-key';
+export const MOCK_ENCRYPTION_PASSPHRASE = 'passphrase';
