@@ -9,7 +9,6 @@ import 'xdeployer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
-import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
@@ -17,9 +16,6 @@ import 'hardhat-dependency-compiler';
 import 'hardhat-celo';
 
 dotenv.config();
-
-// Turning off the automatic Tenderly verification
-tdly.setup({ automaticVerifications: false });
 
 task('accounts', 'Prints the list of accounts', async (_, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -71,9 +67,6 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
-    },
-    tenderly: {
-      url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
     },
     mainnet: {
       chainId: 1,
