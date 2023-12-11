@@ -157,9 +157,5 @@ volumes:
     driver: local
 
 networks:
-  minio-network:
-    driver: bridge
   network-backend:
   network-frontend:
-  test-network:
-    driver: bridge

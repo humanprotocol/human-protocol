@@ -14,4 +14,4 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 
 # delay needed to wait for doccano_backend, as they have no proper healthcheck option
-CMD sleep 20 && pytest
+CMD sleep 15 && pytest
