@@ -27,7 +27,7 @@ HUMAN is a permissionless protocol to facilitate the exchange of HUMAN work, kno
 
 ### Documentation
 
-For a more detailed description of the HUMAN Protocol architecture and vision see [here](https://github.com/humanprotocol/.github/wiki)
+For a more detailed description of the HUMAN Protocol architecture and vision see [here](https://tech-docs.humanprotocol.org/)
 
 ### Description
 
@@ -61,6 +61,8 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   │   │   ├── human-protocol-sdk           # Node.js SDK to interact with Human Protocol
 │   │   │   ├── subgraph                     # Human Protocol Subgraph
 ```
+### Smart contracts
+To access comprehensive information about the smart contracts, please visit the following URL: https://tech-docs.humanprotocol.org/contracts. This resource provides detailed documentation that covers various aspects of the smart contracts used within the Human Protocol ecosystem.
 
 ### How To Use This Repo
 

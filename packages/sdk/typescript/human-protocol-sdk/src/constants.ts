@@ -59,7 +59,7 @@ export const NETWORKS: {
     hmtAddress: '0xd1ba9BAC957322D6e8c07a160a3A8dA11A0d2867',
     stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
-    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+    kvstoreAddress: '0xB6d36B1CDaD50302BCB3DB43bAb0D349458e1b8D',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mainnet-v2',
     oldSubgraphUrl: '',
@@ -86,7 +86,7 @@ export const NETWORKS: {
     hmtAddress: '0xd3A31D57FDD790725d0F6B78095F62E8CD4ab317',
     stakingAddress: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
     rewardPoolAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
-    kvstoreAddress: '0xc9Fe39c4b6e1d7A2991355Af159956982DADf842',
+    kvstoreAddress: '0x19Fc3e859C1813ac9427a7a78BeB9ae102CE96d3',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/goerli-v2',
     oldSubgraphUrl:
@@ -101,7 +101,7 @@ export const NETWORKS: {
     hmtAddress: '0x711Fd6ab6d65A98904522d4e3586F492B989c527',
     stakingAddress: '0xdFbB79dC35a3A53741be54a2C9b587d6BafAbd1C',
     rewardPoolAddress: '0xf376443BCc6d4d4D63eeC086bc4A9E4a83878e0e',
-    kvstoreAddress: '0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6',
+    kvstoreAddress: '0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1',
     subgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc-v2',
     oldSubgraphUrl: 'https://api.thegraph.com/subgraphs/name/humanprotocol/bsc',
     oldFactoryAddress: '0xc88bC422cAAb2ac8812de03176402dbcA09533f4',
@@ -114,7 +114,7 @@ export const NETWORKS: {
     hmtAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
     stakingAddress: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
     rewardPoolAddress: '0xB0A0500103eCEc431b73F6BAd923F0a2774E6e29',
-    kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
+    kvstoreAddress: '0x32e27177BA6Ea91cf28dfd91a0Da9822A4b74EcF',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest-v2',
     oldSubgraphUrl:
@@ -129,7 +129,7 @@ export const NETWORKS: {
     hmtAddress: '0xc748B2A084F8eFc47E086ccdDD9b7e67aEb571BF',
     stakingAddress: '0xcbAd56bE3f504E98bd70875823d3CC0242B7bB29',
     rewardPoolAddress: '0xa8e32d777a3839440cc7c24D591A64B9481753B3',
-    kvstoreAddress: '0x35Cf4beBD58F9C8D75B9eA2599479b6C173d406F',
+    kvstoreAddress: '0xbcB28672F826a50B03EE91B28145EAbddA73B2eD',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/polygon-v2',
     oldSubgraphUrl:
@@ -144,7 +144,7 @@ export const NETWORKS: {
     hmtAddress: '0x0376D26246Eb35FF4F9924cF13E6C05fd0bD7Fb4',
     stakingAddress: '0x7Fd3dF914E7b6Bd96B4c744Df32183b51368Bfac',
     rewardPoolAddress: '0xf0145eD99AC3c4f877aDa7dA4D1E059ec9116BAE',
-    kvstoreAddress: '0xD7F61E812e139a5a02eDae9Dfec146E1b8eA3807',
+    kvstoreAddress: '0xD96158c7267Ea658a4688F4aEf1c85659851625d',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/mumbai-v2',
     oldSubgraphUrl:
@@ -159,7 +159,7 @@ export const NETWORKS: {
     hmtAddress: '0x3b25BC1dC591D24d60560d0135D6750A561D4764',
     stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
-    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+    kvstoreAddress: '0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbeam-v2',
     oldSubgraphUrl:
@@ -174,7 +174,7 @@ export const NETWORKS: {
     hmtAddress: '0x2dd72db2bBA65cE663e476bA8b84A1aAF802A8e3',
     stakingAddress: '0xBFC7009F3371F93F3B54DdC8caCd02914a37495c',
     rewardPoolAddress: '0xf46B45Df3d956369726d8Bd93Ba33963Ab692920',
-    kvstoreAddress: '0xE3D74BBFa45B4bCa69FF28891fBE392f4B4d4e4d',
+    kvstoreAddress: '0xcC561f4482f4Ff051D2Dcc65c2cE1A0f291bbA46',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/moonbase-alpha-v2',
     oldSubgraphUrl: '',
@@ -188,7 +188,7 @@ export const NETWORKS: {
     hmtAddress: '0x9406d5c635AD22b0d76c75E52De57A2177919ca3',
     stakingAddress: '0x9890473B0b93E24d6D1a8Dfb739D577C6f25FFd3',
     rewardPoolAddress: '0x5517fE916Fe9F8dB15B0DDc76ebDf0BdDCd4ed18',
-    kvstoreAddress: '0x707fb5A5d36BC15275Af3f73262bf9a1D8C470EB',
+    kvstoreAddress: '0x3aD4B091E054f192a822D1406f4535eAd38580e4',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/fuji-v2',
     oldSubgraphUrl:
@@ -203,7 +203,7 @@ export const NETWORKS: {
     hmtAddress: '0x12365293cb6477d4fc2686e46BB97E3Fb64f1550',
     stakingAddress: '0x05398211bA2046E296fBc9a9D3EB49e3F15C3123',
     rewardPoolAddress: '0x4A5963Dd6792692e9147EdC7659936b96251917a',
-    kvstoreAddress: '0x70671167176C4934204B1C7e97F5e86695857ef2',
+    kvstoreAddress: '0x9Bc7bff35B2Be2413708d48c3B0aEF5c43646728',
     subgraphUrl:
       'https://api.thegraph.com/subgraphs/name/humanprotocol/avalanche-v2',
     oldSubgraphUrl:

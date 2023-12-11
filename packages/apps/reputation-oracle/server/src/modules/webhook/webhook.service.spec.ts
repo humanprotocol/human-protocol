@@ -172,7 +172,7 @@ describe('WebhookService', () => {
         .spyOn(webhookRepository, 'create')
         .mockResolvedValueOnce(webhookEntity as WebhookIncomingEntity);
 
-      const result = await webhookService.createIncomingWebhook(dto);
+      await webhookService.createIncomingWebhook(dto);
 
       expect(webhookRepository.create).toHaveBeenCalledWith({
         chainId: dto.chainId,
@@ -181,7 +181,6 @@ describe('WebhookService', () => {
         status: WebhookStatus.PENDING,
         waitUntil: expect.any(Date),
       });
-      expect(result).toBe(true);
     });
 
     it('should throw an error if incoming webhook entity is not created', async () => {
@@ -251,7 +250,7 @@ describe('WebhookService', () => {
 
     it('should return false if no pending webhook is found', async () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(null);
-      expect(await webhookService.processPendingCronJob()).toBe(false);
+      expect(await webhookService.processPendingCronJob()).toBeUndefined();
     });
 
     it('should handle error if any exception is thrown', async () => {
@@ -259,13 +258,13 @@ describe('WebhookService', () => {
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(fortuneManifest);
-      jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue(false);
+      jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue();
 
       jest.spyOn(webhookService, 'processFortune').mockImplementation(() => {
         throw new Error();
       });
 
-      expect(await webhookService.processPendingCronJob()).toBe(false);
+      expect(await webhookService.processPendingCronJob()).toBeUndefined();
       expect(webhookService.handleWebhookError).toBeCalled();
     });
 
@@ -278,7 +277,7 @@ describe('WebhookService', () => {
         .spyOn(webhookService, 'processFortune')
         .mockResolvedValue(results as any);
 
-      expect(await webhookService.processPendingCronJob()).toBe(true);
+      expect(await webhookService.processPendingCronJob()).toBeUndefined();
     });
 
     it('should successfully process a CVAT manifest', async () => {
@@ -290,7 +289,8 @@ describe('WebhookService', () => {
         .spyOn(webhookService, 'processCvat')
         .mockResolvedValue(results as any);
 
-      expect(await webhookService.processPendingCronJob()).toBe(true);
+      await webhookService.processPendingCronJob();
+      expect(await webhookService.processPendingCronJob()).toBeUndefined();
     });
 
     it('should update the webhook entity to Paid status if the balance is zero', async () => {
@@ -312,7 +312,7 @@ describe('WebhookService', () => {
         getBalance: jest.fn().mockResolvedValue(BigNumber.from(0)),
       }));
 
-      expect(await webhookService.processPendingCronJob()).toBe(true);
+      expect(await webhookService.processPendingCronJob()).toBeUndefined();
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: 1 },
         expect.objectContaining({ status: WebhookStatus.PAID }),
@@ -519,15 +519,14 @@ describe('WebhookService', () => {
 
     it('should return false if no pending webhook is found', async () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(null);
-      expect(await webhookService.processPaidCronJob()).toBe(false);
+      expect(await webhookService.processPaidCronJob()).toBeUndefined();
     });
-
     it('should handle error if any exception is thrown', async () => {
       webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockReturnValueOnce(fortuneManifest);
-      jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue(false);
+      jest.spyOn(webhookService, 'handleWebhookError').mockResolvedValue();
 
       (EscrowClient.build as any).mockImplementation(() => ({
         getResultsUrl: jest.fn().mockImplementation(() => {
@@ -535,7 +534,7 @@ describe('WebhookService', () => {
         }),
       }));
 
-      expect(await webhookService.processPaidCronJob()).toBe(false);
+      expect(await webhookService.processPaidCronJob()).toBeUndefined();
       expect(webhookService.handleWebhookError).toBeCalled();
     });
 
@@ -574,7 +573,7 @@ describe('WebhookService', () => {
       jest.spyOn(reputationService, 'increaseReputation');
       jest.spyOn(reputationService, 'decreaseReputation');
 
-      expect(await webhookService.processPaidCronJob()).toBe(true);
+      expect(await webhookService.processPaidCronJob()).toBeUndefined();
       expect(reputationService.increaseReputation).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         worker1,
@@ -626,7 +625,7 @@ describe('WebhookService', () => {
       jest.spyOn(reputationService, 'increaseReputation');
       jest.spyOn(reputationService, 'decreaseReputation');
 
-      expect(await webhookService.processPaidCronJob()).toBe(true);
+      expect(await webhookService.processPaidCronJob()).toBeUndefined();
       expect(reputationService.increaseReputation).toHaveBeenCalledWith(
         ChainId.LOCALHOST,
         MOCK_JOB_LAUNCHER_ADDRESS,

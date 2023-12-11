@@ -12,6 +12,7 @@ export const ConfigNames = {
   S3_USE_SSL: 'S3_USE_SSL',
   ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
+  RECORDING_ORACLE_ADDRESS: 'RECORDING_ORACLE_ADDRESS',
 };
 
 export const envValidator = Joi.object({
@@ -27,4 +28,5 @@ export const envValidator = Joi.object({
   S3_USE_SSL: Joi.string().default(false),
   ENCRYPTION_PRIVATE_KEY: Joi.string().default(''),
   ENCRYPTION_PASSPHRASE: Joi.string().default(''),
+  RECORDING_ORACLE_ADDRESS: Joi.string().required(),
 });

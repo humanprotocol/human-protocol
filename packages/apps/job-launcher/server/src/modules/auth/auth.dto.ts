@@ -76,3 +76,9 @@ export class TokenCreateDto {
   public tokenType: TokenType;
   public user: UserEntity;
 }
+
+export class ApiKeyDto {
+  @ApiProperty()
+  @IsString()
+  public apiKey: string;
+}

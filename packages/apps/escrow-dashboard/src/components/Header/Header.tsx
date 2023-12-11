@@ -36,7 +36,7 @@ type NavLink = {
 
 const NAV_LINKS: NavLink[] = [
   { title: 'How to HUMAN', href: '/how-to-human' },
-  // { title: 'Leaderboard', href: '/leaderboard' },
+  { title: 'Launchpad', href: '/launchpad' },
   { title: 'KV Store', href: '/kvstore' },
   { title: 'Faucet', href: '/faucet' },
   { title: 'HUMAN Website', href: 'https://humanprotocol.org', external: true },

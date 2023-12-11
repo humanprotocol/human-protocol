@@ -58,7 +58,12 @@ export class VerifyEmailDto {
 }
 
 export class AuthDto {
+  @ApiProperty()
+  @IsString()
   public refreshToken: string;
+
+  @ApiProperty()
+  @IsString()
   public accessToken: string;
 }
 

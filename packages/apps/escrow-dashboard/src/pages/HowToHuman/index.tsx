@@ -41,7 +41,6 @@ export const HowToHuman = () => {
         <>
           <Button
             color="primary"
-            size="large"
             variant="contained"
             endIcon={<KeyboardArrowDownIcon />}
             fullWidth
