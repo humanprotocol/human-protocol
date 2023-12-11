@@ -1,5 +1,5 @@
 {
-  "name": "job-launcher-server",
+  "name": "@human-protocol/job-launcher-server",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -58,6 +58,7 @@
     "pg": "8.11.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "stripe": "^14.8.0",
     "typeorm": "^0.3.17",
     "typeorm-naming-strategies": "^4.1.0",
     "zxcvbn": "^4.4.2"
