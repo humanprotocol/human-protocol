@@ -34,7 +34,7 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
 }
 
@@ -47,7 +47,7 @@ export enum ErrorAuth {
   RefreshTokenHasExpired = 'Refresh token has expired',
   UserNotActive = 'User not active',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
-  ApiKeyNotFound = 'API key not found'
+  ApiKeyNotFound = 'API key not found',
 }
 
 /**
