@@ -1,4 +1,10 @@
-import { ChainId, Encryption, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  StakingClient,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import {
@@ -10,6 +16,7 @@ import {
 import { ISolution } from '../../common/interfaces/job';
 import crypto from 'crypto';
 import { SaveSolutionsDto } from '../job/job.dto';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class StorageService {
@@ -20,6 +27,8 @@ export class StorageService {
     private s3Config: S3ConfigType,
     @Inject(serverConfigKey)
     private serverConfig: ServerConfigType,
+    @Inject(Web3Service)
+    private readonly web3Service: Web3Service,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -64,13 +73,27 @@ export class StorageService {
       throw new BadRequestException('Bucket not found');
     }
 
-    const content = JSON.stringify(solutions);
+    const signer = this.web3Service.getSigner(chainId);
+    const stakingClient = await StakingClient.build(signer);
+    const recordingOracle = await stakingClient.getLeader(signer.address);
+    const reputationOracle = await stakingClient.getLeader(
+      this.serverConfig.reputationOracleAddress,
+    );
+    if (!recordingOracle.publicKey || !reputationOracle.publicKey) {
+      throw new BadRequestException('Missing public key');
+    }
+
+    const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
+      recordingOracle.publicKey,
+      reputationOracle.publicKey,
+    ]);
+
     try {
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,
         `${escrowAddress}-${chainId}.json`,
-        JSON.stringify(content),
+        content,
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',

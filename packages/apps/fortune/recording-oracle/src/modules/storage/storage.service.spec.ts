@@ -1,4 +1,10 @@
-import { ChainId, Encryption, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  StakingClient,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -15,14 +21,21 @@ import {
 } from '../../../test/constants';
 import { StorageService } from './storage.service';
 import crypto from 'crypto';
+import { Web3Service } from '../web3/web3.service';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
   },
+  StakingClient: {
+    build: jest.fn(),
+  },
   Encryption: {
     build: jest.fn(),
+  },
+  EncryptionUtils: {
+    encrypt: jest.fn(),
   },
 }));
 
@@ -42,6 +55,11 @@ jest.mock('minio', () => {
 
 describe('StorageService', () => {
   let storageService: StorageService;
+
+  const signerMock = {
+    address: '0x1234567890123456789012345678901234567892',
+    getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
+  };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -64,7 +82,15 @@ describe('StorageService', () => {
           })),
         ),
       ],
-      providers: [StorageService],
+      providers: [
+        StorageService,
+        {
+          provide: Web3Service,
+          useValue: {
+            getSigner: jest.fn().mockReturnValue(signerMock),
+          },
+        },
+      ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
@@ -81,6 +107,13 @@ describe('StorageService', () => {
         .fn()
         .mockResolvedValue(true);
 
+      EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
+      StakingClient.build = jest.fn().mockResolvedValue({
+        getLeader: jest.fn().mockResolvedValue({
+          publicKey: 'publicKey',
+        }),
+      });
+
       const jobSolution = {
         workerAddress,
         solution,
@@ -92,15 +125,12 @@ describe('StorageService', () => {
       );
       expect(fileData).toEqual({
         url: `http://${MOCK_S3_ENDPOINT}:${MOCK_S3_PORT}/${MOCK_S3_BUCKET}/${escrowAddress}-${chainId}.json`,
-        hash: crypto
-          .createHash('sha1')
-          .update(JSON.stringify([jobSolution]))
-          .digest('hex'),
+        hash: crypto.createHash('sha1').update('encrypted').digest('hex'),
       });
       expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
         MOCK_S3_BUCKET,
         `${escrowAddress}-${chainId}.json`,
-        expect.stringContaining(solution),
+        'encrypted',
         {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-store',
@@ -128,6 +158,7 @@ describe('StorageService', () => {
         ]),
       ).rejects.toThrow('Bucket not found');
     });
+
     it('should fail if the file cannot be uploaded', async () => {
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const escrowAddress = '0x1234567890123456789012345678901234567890';
@@ -151,6 +182,31 @@ describe('StorageService', () => {
           jobSolution,
         ]),
       ).rejects.toThrow('File not uploaded');
+    });
+
+    it('should fail if public key is missing', async () => {
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const escrowAddress = '0x1234567890123456789012345678901234567890';
+      const chainId = ChainId.LOCALHOST;
+      const solution = 'test';
+
+      storageService.minioClient.bucketExists = jest
+        .fn()
+        .mockResolvedValue(true);
+      EncryptionUtils.encrypt = jest.fn().mockResolvedValue('encrypted');
+      StakingClient.build = jest.fn().mockResolvedValue({
+        getLeader: jest.fn().mockResolvedValue({}),
+      });
+
+      const jobSolution = {
+        workerAddress,
+        solution,
+      };
+      await expect(
+        storageService.uploadJobSolutions(escrowAddress, chainId, [
+          jobSolution,
+        ]),
+      ).rejects.toThrow('Missing public key');
     });
   });
 
