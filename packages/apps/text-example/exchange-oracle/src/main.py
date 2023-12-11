@@ -16,6 +16,7 @@ from src.chain import EscrowInfo, validate_escrow
 from src.config import Config
 from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
 
+
 class Endpoints:
     JOB_REQUEST = "/job/request"
     JOB_LIST = "/job/list"
@@ -37,25 +38,30 @@ class Errors:
     WORKER_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
 
 
+logger = Config.logging.get_logger()
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
 @exchange_oracle.post(Endpoints.JOB_REQUEST)
 async def register_job_request(escrow_info: EscrowInfo):
     """Adds a job request to the database, to be processed later."""
     # validate escrow info
+    logger.debug(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
     try:
         escrow = EscrowUtils.get_escrow(
             escrow_info.chain_id,
             escrow_info.escrow_address.lower()
         )
-    except EscrowClientError as e:
+    except EscrowClientError:
+        logger.exception(Errors.ESCROW_INFO_INVALID.detail + f" {escrow_info}")
         raise Errors.ESCROW_INFO_INVALID
 
     if escrow is None:
+        logger.error(Errors.ESCROW_NOT_FOUND.detail + f" {escrow_info}")
         raise Errors.ESCROW_NOT_FOUND
     try:
         validate_escrow(escrow)
-    except ValueError as e:
+    except ValueError:
+        logger.exception(Errors.ESCROW_VALIDATION_FAILED.detail + f" {escrow}")
         raise Errors.ESCROW_VALIDATION_FAILED
 
     # add job once all validations were successful
@@ -67,13 +73,13 @@ async def register_job_request(escrow_info: EscrowInfo):
         session.add(job_request)
         session.commit()
 
+    logger.debug(f"Successfully added new job. Id: {id}")
     return {"id": id}
 
 @exchange_oracle.get(Endpoints.JOB_LIST)
 async def list_available_jobs():
     """Lists available jobs."""
-    # TODO: return more details
-    # TODO: validate header
+    logger.debug(f"GET {Endpoints.JOB_LIST} called.")
     with Session() as session:
         return [job.id for job in session.query(JobRequest).where(JobRequest.status == Statuses.in_progress.value).all()]
 
@@ -81,12 +87,15 @@ async def list_available_jobs():
 @exchange_oracle.post(Endpoints.USER_REGISTER)
 async def register_worker(user_info: UserRegistrationInfo):
     """Registers a new user with the given wallet address."""
+    logger.debug(f"POST {Endpoints.USER_REGISTER} called with {user_info}.")
     if not await validate_worker(user_info.worker_address):
+        logger.exception(Errors.WORKER_VALIDATION_FAILED.detail + f" {user_info}")
         raise Errors.WORKER_VALIDATION_FAILED
 
     with Session() as session:
         # check if wallet is already registered
         if session.query(Worker).where(Worker.id == user_info.worker_address).one_or_none() is not None:
+            logger.error(Errors.WORKER_ALREADY_REGISTERED.detail + f" {user_info}")
             raise Errors.WORKER_ALREADY_REGISTERED
 
         try:
@@ -95,20 +104,23 @@ async def register_worker(user_info: UserRegistrationInfo):
             create_user(user_info.name, worker.password)
             session.add(worker)
             session.commit()
-        except DoccanoAPIError as e:
+        except DoccanoAPIError:
             session.rollback()
+            logger.exception(Errors.WORKER_CREATION_FAILED.detail + f" {user_info} {password}")
             raise Errors.WORKER_CREATION_FAILED
-        except IntegrityError as e:
+        except IntegrityError:
             session.rollback()
-            print(e)
+            logger.exception(Errors.WORKER_CREATION_FAILED.detail + f" {user_info} {password}")
             raise Errors.WORKER_CREATION_FAILED
 
+    logger.debug(f"Successfully registered worker {user_info}")
     return {"username": user_info.name, "password": password}
 
 
 @exchange_oracle.post(Endpoints.JOB_APPLY)
 async def apply_for_job(job_application: JobApplication):
     """Applies the given worker for the job. Registers and validates them if necessary"""
+    logger.debug(f"POST {Endpoints.JOB_APPLY} called with {job_application}.")
     worker_id = job_application.worker_id
     job_id = job_application.job_id
 
@@ -118,30 +130,38 @@ async def apply_for_job(job_application: JobApplication):
             worker: Worker = session.query(Worker).where(Worker.id == worker_id).one()
             job: JobRequest = session.query(JobRequest).where(JobRequest.id == job_id).one()
         except NoResultFound:
+            logger.exception(Errors.JOB_OR_WORKER_MISSING.detail + f" {job_application}")
             raise Errors.JOB_OR_WORKER_MISSING
 
         if not worker.is_validated:
+            logger.error(Errors.WORKER_NOT_VALIDATED.detail + f" {job_application.worker_id}")
             raise Errors.WORKER_NOT_VALIDATED
 
         if job.status != Statuses.in_progress:
+            logger.error(Errors.JOB_UNAVAILABLE.detail + f" {job_application.job_id}. Wrong status: {job.status}")
             raise Errors.JOB_UNAVAILABLE
 
         # get project to assign worker to
+        logger.debug("Fetching annotation projects to assign worker to.")
         projects: List[AnnotationProject] = [
             project for project in job.projects if project.status == Statuses.pending.value
         ]
         if len(projects) == 0:
+            logger.error(Errors.TASKS_UNAVAILABLE.detail + f" {job.id}")
             raise Errors.TASKS_UNAVAILABLE
 
         shuffle(projects)
         project = projects[0]
 
         try:
+            logger.debug(f"Registering {worker.username} for project {project.id}")
             register_annotator(worker.username, project.id)
             project.worker = worker
         except Exception:
+            logger.exception(Errors.WORKER_ASSIGNMENT_FAILED.detail + f" worker: {worker.username}, project: {project.id}")
             raise Errors.WORKER_ASSIGNMENT_FAILED
 
+        logger.debug(f"Successfully assigned worker {worker.id} to project {project.id}")
         session.commit()
 
         return {
@@ -163,6 +183,8 @@ async def validate_worker(worker_id: str):
 
 @exchange_oracle.on_event("startup")
 def startup():
+    logger.info("Exchange Oracle is up and running.")
+    logger.debug("Registering cron jobs.")
     scheduler = BackgroundScheduler()
     tasks = [
         cron_jobs.process_pending_job_requests,
@@ -177,3 +199,5 @@ def startup():
             "interval",
             seconds=Config.cron_config.task_interval,
         )
+
+    logger.debug("All cron jobs registered successfully.")

@@ -14,22 +14,28 @@ from src.db import (
 from src.storage import download_manifest, download_datasets, convert_taskdata_to_doccano, \
     convert_annotations_to_raw_results, upload_data
 
+logger = Config.logging.get_logger()
 
 def process_pending_job_requests():
+    """Fetches pending jobs from the database and creates annotation projects to be assigned to workers."""
+    logger.debug("Processing pending job requests.")
+
     with Session() as session:
         # get pending job requests
         requests = (
             session.query(JobRequest)
             .where(JobRequest.status == Statuses.pending.value)
             .limit(Config.cron_config.task_chunk_size)
-        ) # TODO: Log how much percent of the limit was actually processed
+        )
 
         # create annotation projects for each job request
         for job_request in requests:
             try:
+                logger.debug(f"Creating annotation projects for {job_request.id}")
                 projects = set_up_projects_for_job(job_request)
                 job_request.status = Statuses.in_progress.value
-            except Exception as e:
+            except Exception:
+                logger.exception(f"Could not set up annotation projects for {job_request.id}. Job failed.")
                 job_request.status = Statuses.failed.value
                 projects = []
 
@@ -62,11 +68,14 @@ def set_up_projects_for_job(job_request: JobRequest):
     return projects
 
 def process_in_progress_job_requests():
+    """Fetches jobs for which the annotation is currently in progress and checks if the job is finished and updates their status accordingly."""
+    logger.debug("Processing jobs in progress.")
     with Session() as session:
         # check and update project completion
         projects = session.query(AnnotationProject).where(AnnotationProject.status == Statuses.in_progress)
         for project in projects:
             if is_done(project.id):
+                logger.debug(f"Project {project.id} is done.")
                 project.status = Statuses.completed.value
         session.commit()
 
@@ -75,30 +84,39 @@ def process_in_progress_job_requests():
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.in_progress)
         for request in requests:
             if all(project.status == Statuses.completed for project in request.projects):
+                logger.debug(f"Job {request.id} is done.")
                 request.status = Statuses.completed
         session.commit()
 
 def process_completed_job_requests():
+    """Exports annotations from doccano and stores them locally. Cleans up unused projects in doccano."""
+    logger.debug("Processing completed jobs.")
     with Session() as session:
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.completed).limit(Config.cron_config.task_chunk_size)
         for request in requests:
+            logger.debug(f"Start data export of job {request.id}")
             for project in request.projects:
                 try:
+                    logger.debug(f"Exporting data of project {project.id} of job {request.id}")
                     download_annotations(project_id=project.id, job_request_id=project.job_request_id)
                     project.status = Statuses.closed
                     delete_project(project.id)
                 except Exception:
+                    logger.exception(f"Could not process {project.id} of job {request.id}")
                     project.status = Statuses.failed
 
             # TODO: add completed percentage depending on how many projects failed?
             request.status = Statuses.awaiting_upload
+            logger.debug(f"Finished data export {request.id}")
         session.commit()
 
 # TODO: combine with previous stage?
 def upload_completed_job_requests():
+    """Converts data of completed job requests in the correct format for the recording oracle and uploads it to s3."""
     with Session() as session:
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_upload)
         for request in requests:
+            logger.debug(f"Uploading data for {request.id}")
             try:
                 id = str(request.id)
                 data_dir = Config.storage_config.dataset_dir / id
@@ -114,24 +132,33 @@ def upload_completed_job_requests():
 
                 request.status = Statuses.awaiting_closure
             except Exception:
+                logger.exception(f"Could not upload data for job {request.id}.")
                 request.status = Statuses.failed
         session.commit()
 
 def notify_recording_oracle():
+    """Notifies the recording oracle about a completed job to process."""
     with Session() as session:
         requests = session.query(JobRequest).where(JobRequest.status == Statuses.awaiting_closure)
         for request in requests:
             s3_url = Config.storage_config.results_s3_url(str(request.id))
             try:
+                payload = {"escrow_address": request.escrow_address, "chain_id": request.chain_id, "s3_url": s3_url}
+                logger.debug(f"Notifying recording oracle about job {request.id}. payload: {payload}")
                 response = Config.http.request(
                     method='POST',
                     url=Config.recording_oracle_url,
-                    json={"escrow_address": request.escrow_address, "chain_id": request.chain_id, "s3_url": s3_url}
+                    json=payload
                 )
                 if response.status == 200:
                     request.status = Statuses.closed
                 else:
+                    logger.exception(f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}")
                     request.status = Statuses.failed
             except MaxRetryError:
+                logger.exception(f"Could not notify recording oracle about job {request.id}")
+                request.status = Statuses.failed
+            except Exception:
+                logger.exception(f"Could not notify recording oracle about job {request.id}")
                 request.status = Statuses.failed
             session.commit()

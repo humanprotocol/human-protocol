@@ -1,5 +1,9 @@
 """ Project configuration from env vars """
+import logging
 import os
+import sys
+from logging.config import dictConfig
+
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from minio import Minio
@@ -102,6 +106,60 @@ class DoccanoConfig:
         return f"http://{cls.host}:{cls.port}"
 
 
+class LoggingConfig:
+    _ready = False
+    root_logger_name = "app"
+    log_level = os.environ.get("LOG_LEVEL")
+
+    @classmethod
+    def get_logger(cls):
+        return logging.getLogger(cls.root_logger_name)
+
+    @classmethod
+    def setup_logging(cls, force_reset=False):
+        if not cls._ready or force_reset:
+            log_level_name = logging.getLevelName(
+                cls.log_level or (logging.DEBUG if Config.environment in ["development", "test"] else logging.INFO)
+            )
+
+            log_config = {
+                "version": 1,
+                "disable_existing_loggers": False,
+                "formatters": {
+                    "default": {
+                        "()": "uvicorn.logging.DefaultFormatter",
+                        "fmt": "%(levelprefix)s %(asctime)s [%(name)s] %(message)s",
+                        "datefmt": "%Y-%m-%d %H:%M:%S",
+                        "use_colors": True,
+                    },
+                },
+                "handlers": {
+                    "console": {"formatter": "default", "class": "logging.StreamHandler"},
+                },
+                "loggers": {
+                    cls.root_logger_name: {
+                        "handlers": ["console"],
+                        "level": log_level_name,
+                        "propagate": False,
+                    },
+                },
+            }
+
+            dictConfig(log_config)
+            logger = cls.get_logger()
+
+            def handle_exception(exc_type, exc_value, exc_traceback):
+                if issubclass(exc_type, KeyboardInterrupt):
+                    sys.__excepthook__(exc_type, exc_value, exc_traceback)
+                    return
+
+                logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+            sys.excepthook = handle_exception
+
+            cls._ready = True
+
+
 class Config:
     port = int(os.environ.get("PORT"))
     environment = os.environ.get("ENVIRONMENT")
@@ -121,3 +179,8 @@ class Config:
     storage_config = StorageConfig
 
     doccano = DoccanoConfig
+
+    logging = LoggingConfig
+
+
+Config.logging.setup_logging()

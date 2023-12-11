@@ -1,20 +1,15 @@
-import logging
 import unittest
 import uuid
 from http import HTTPStatus
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
 from src.annotation import get_client
-from src.config import Config
+from src.cron_jobs import process_pending_job_requests
 from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
-
-from src.cron_jobs import process_pending_job_requests
-from src.storage import upload_data
 from test.utils import assert_http_error_response, assert_no_entries_in_db, random_address, random_username, \
     random_userinfo, is_valid_uuid, random_escrow_info, upload_manifest_and_task_data
 
