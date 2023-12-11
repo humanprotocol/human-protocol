@@ -50,6 +50,7 @@ export const ConfigNames = {
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
+  POSTGRES_LOGGING: 'POSTGRES_LOGGING',
 };
 
 export const envValidator = Joi.object({
@@ -72,6 +73,7 @@ export const envValidator = Joi.object({
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SSL: Joi.string().default('false'),
+  POSTGRES_LOGGING: Joi.string(),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),

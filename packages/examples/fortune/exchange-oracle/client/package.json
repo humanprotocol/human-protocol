@@ -18,7 +18,7 @@
     "react-dom": "^18.2.0",
     "wagmi": "^0.12.2",
     "web-vitals": "^3.5.0",
-    "web3": "^1.8.1"
+    "web3": "^1.10.2"
   },
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}'",

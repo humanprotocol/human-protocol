@@ -14,6 +14,7 @@ import { PaymentEntity } from '../modules/payment/payment.entity';
 import { ConfigNames } from '../common/config';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from 'src/modules/webhook/webhook.entity';
+import { LoggerOptions } from 'typeorm';
 
 @Module({
   imports: [
@@ -24,7 +25,14 @@ import { WebhookEntity } from 'src/modules/webhook/webhook.entity';
         typeOrmLoggerService: TypeOrmLoggerService,
         configService: ConfigService,
       ) => {
-        typeOrmLoggerService.setOptions('all');
+        const loggerOptions = configService
+          .get<string>(ConfigNames.POSTGRES_LOGGING)
+          ?.split(', ');
+        typeOrmLoggerService.setOptions(
+          loggerOptions && loggerOptions[0] === 'all'
+            ? 'all'
+            : (loggerOptions as LoggerOptions) ?? false,
+        );
         return {
           name: 'default',
           type: 'postgres',
@@ -44,9 +52,7 @@ import { WebhookEntity } from 'src/modules/webhook/webhook.entity';
           migrationsTableName: NS,
           migrationsTransactionMode: 'each',
           namingStrategy: new SnakeNamingStrategy(),
-          logging:
-            process.env.NODE_ENV === 'development' ||
-            process.env.NODE_ENV === 'staging',
+          logging: true,
           // Allow both start:prod and start:dev to use migrations
           // __dirname is either dist or server folder, meaning either
           // the compiled js in prod or the ts in dev.

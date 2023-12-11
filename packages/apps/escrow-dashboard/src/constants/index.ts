@@ -9,8 +9,8 @@ export const V2_SUPPORTED_CHAIN_IDS = [
   ChainId.POLYGON_MUMBAI,
   ChainId.MOONBEAM,
   ChainId.MOONBASE_ALPHA,
-  ChainId.CELO,
-  ChainId.CELO_ALFAJORES,
+  // ChainId.CELO,
+  // ChainId.CELO_ALFAJORES,
   // ChainId.SKALE,
   // ChainId.AVALANCHE,
   // ChainId.AVALANCHE_TESTNET,
@@ -101,3 +101,7 @@ export const BITFINEX_SUPPORTED_CHAIN_IDS = [ChainId.MAINNET, ChainId.POLYGON];
 
 export const BITFINEX_HOT_WALLET_ADDRESS =
   '0x77134cbc06cb00b66f4c7e623d5fdbf6777635ec';
+
+export const HCAPTCHA_ADDRESS = '0x9bb83ab580e4db1263500c008aa5067448761c55';
+
+export const CVAT_ADDRESS = '0xa76507abfe3b67cb25f16dbc75a883d4190b7e46';
