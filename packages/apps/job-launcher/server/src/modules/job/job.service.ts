@@ -23,7 +23,7 @@ import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
 import { firstValueFrom } from 'rxjs';
-import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { IsNull, LessThanOrEqual, Not, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorBucket,
@@ -248,7 +248,10 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
@@ -305,9 +308,15 @@ export class JobService {
   }
 
   public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+    jobEntity.status = JobStatus.FUNDING;
+    await jobEntity.save();
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
@@ -551,7 +560,10 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -601,11 +613,14 @@ export class JobService {
     this.logger.log('Launch jobs START');
     try {
       // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-      let jobEntity = await this.jobRepository.findOne(
+      let jobEntity;
+
+      jobEntity = await this.jobRepository.findOne(
         {
-          status: JobStatus.PAID,
+          status: JobStatus.LAUNCHING,
           retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
+          escrowAddress: Not(IsNull()),
         },
         {
           order: {
@@ -614,6 +629,21 @@ export class JobService {
         },
       );
 
+      if (!jobEntity) {
+        jobEntity = await this.jobRepository.findOne(
+          {
+            status: JobStatus.PAID,
+            retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+            waitUntil: LessThanOrEqual(new Date()),
+          },
+          {
+            order: {
+              waitUntil: SortDirection.ASC,
+            },
+          },
+        );
+      }
+
       if (!jobEntity) return;
 
       const manifest = await this.storageService.download(
@@ -621,7 +651,7 @@ export class JobService {
       );
       await this.validateManifest(manifest);
 
-      if (!jobEntity.escrowAddress) {
+      if (!jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
         jobEntity = await this.launchJob(jobEntity);
       }
       if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHING) {
@@ -725,7 +755,10 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (

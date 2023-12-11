@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ChainId } from '@human-protocol/sdk';
-import { ReputationEntityType } from '../../common/enums';
+import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { Transform } from 'class-transformer';
 
 export class ReputationCreateDto {
@@ -56,4 +56,21 @@ export class ReputationGetQueryDto {
   @IsEnum(ChainId)
   @Transform(({ value }) => Number(value))
   public chainId: ChainId;
+}
+
+export class ReputationDto {
+  @ApiProperty({ enum: ChainId })
+  @IsEnum(ChainId)
+  @Transform(({ value }) => Number(value))
+  chainId: ChainId;
+
+  @ApiProperty()
+  @IsString()
+  @IsEthereumAddress()
+  address: string;
+
+  @ApiProperty({ enum: ReputationLevel })
+  @IsEnum(ReputationLevel)
+  @Transform(({ value }) => Number(value))
+  reputation: ReputationLevel;
 }

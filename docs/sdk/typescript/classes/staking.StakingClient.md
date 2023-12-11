@@ -134,7 +134,7 @@ const stakingClient = await StakingClient.build(provider);
 
 #### Defined in
 
-[staking.ts:119](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L119)
+[staking.ts:119](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L119)
 
 ## Properties
 
@@ -144,7 +144,7 @@ const stakingClient = await StakingClient.build(provider);
 
 #### Defined in
 
-[staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
+[staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-base.ts:14
+[base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
 
 ___
 
@@ -172,7 +172,7 @@ ___
 
 #### Defined in
 
-base.ts:15
+[base.ts:15](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L15)
 
 ___
 
@@ -182,7 +182,7 @@ ___
 
 #### Defined in
 
-[staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
+[staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
 
 ___
 
@@ -196,7 +196,7 @@ ___
 
 #### Defined in
 
-base.ts:13
+[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
 
 ___
 
@@ -206,7 +206,7 @@ ___
 
 #### Defined in
 
-[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
+[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
 
 ___
 
@@ -216,7 +216,7 @@ ___
 
 #### Defined in
 
-[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
+[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
 
 ## Methods
 
@@ -260,7 +260,7 @@ await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amoun
 
 #### Defined in
 
-[staking.ts:461](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L461)
+[staking.ts:461](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L461)
 
 ___
 
@@ -301,7 +301,7 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:222](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L222)
+[staking.ts:222](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L222)
 
 ___
 
@@ -323,7 +323,7 @@ Check if escrow exists
 
 #### Defined in
 
-[staking.ts:187](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L187)
+[staking.ts:187](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L187)
 
 ___
 
@@ -366,7 +366,7 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
 #### Defined in
 
-[staking.ts:512](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L512)
+[staking.ts:512](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L512)
 
 ___
 
@@ -408,7 +408,7 @@ await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f
 
 #### Defined in
 
-[staking.ts:551](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L551)
+[staking.ts:551](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L551)
 
 ___
 
@@ -430,7 +430,7 @@ Returns the gas price options
 
 #### Defined in
 
-base.ts:39
+[base.ts:39](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L39)
 
 ___
 
@@ -468,7 +468,7 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 
 #### Defined in
 
-[staking.ts:659](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L659)
+[staking.ts:659](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L659)
 
 ___
 
@@ -506,7 +506,7 @@ const leaders = await stakingClient.getLeaders();
 
 #### Defined in
 
-[staking.ts:585](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L585)
+[staking.ts:585](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L585)
 
 ___
 
@@ -544,7 +544,7 @@ const leader = await stakingClient.getLeader('0x62dD51230A30401C455c8398d06F85e4
 
 #### Defined in
 
-[staking.ts:624](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L624)
+[staking.ts:624](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L624)
 
 ___
 
@@ -582,7 +582,7 @@ const rewards = await stakingClient.getRewards('0x62dD51230A30401C455c8398d06F85
 
 #### Defined in
 
-[staking.ts:691](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L691)
+[staking.ts:691](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L691)
 
 ___
 
@@ -626,7 +626,7 @@ await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd
 
 #### Defined in
 
-[staking.ts:398](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L398)
+[staking.ts:398](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L398)
 
 ___
 
@@ -670,7 +670,7 @@ await stakingClient.approveStake(amount);
 
 #### Defined in
 
-[staking.ts:269](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L269)
+[staking.ts:269](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L269)
 
 ___
 
@@ -713,7 +713,7 @@ await stakingClient.unstake(amount);
 
 #### Defined in
 
-[staking.ts:315](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L315)
+[staking.ts:315](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L315)
 
 ___
 
@@ -749,7 +749,7 @@ await stakingClient.withdraw();
 
 #### Defined in
 
-[staking.ts:359](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L359)
+[staking.ts:359](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L359)
 
 ___
 
@@ -782,4 +782,4 @@ Creates an instance of StakingClient from a Signer or Provider.
 
 #### Defined in
 
-[staking.ts:157](https://github.com/humanprotocol/human-protocol/blob/b4448a8b/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L157)
+[staking.ts:157](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L157)

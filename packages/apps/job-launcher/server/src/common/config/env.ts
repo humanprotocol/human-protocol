@@ -18,6 +18,7 @@ export const ConfigNames = {
   POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_ENV: 'WEB3_ENV',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
+  GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
@@ -48,6 +49,7 @@ export const ConfigNames = {
   CVAT_VAL_SIZE: 'CVAT_VAL_SIZE',
   APIKEY_ITERATIONS: 'APIKEY_ITERATIONS',
   APIKEY_KEY_LENGTH: 'APIKEY_KEY_LENGTH',
+  POSTGRES_LOGGING: 'POSTGRES_LOGGING',
 };
 
 export const envValidator = Joi.object({
@@ -69,18 +71,24 @@ export const envValidator = Joi.object({
   POSTGRES_DATABASE: Joi.string().default('job-launcher'),
   POSTGRES_PORT: Joi.string().default('5432'),
   POSTGRES_SSL: Joi.string().default('false'),
+  POSTGRES_LOGGING: Joi.string(),
   // Web3
   WEB3_ENV: Joi.string().default('testnet'),
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   JOB_LAUNCHER_FEE: Joi.string().default(10),
   RECORDING_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_FEE: Joi.string().default(10),
   EXCHANGE_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3004'),
+  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3004',
+  ),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default('http://localhost:3005'),
+  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
+    'http://localhost:3005',
+  ),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   // S3

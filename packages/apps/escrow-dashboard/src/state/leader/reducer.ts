@@ -1,4 +1,9 @@
-import { ChainId, EscrowClient, StakingClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  EscrowClient,
+  ILeader,
+  StakingClient,
+} from '@human-protocol/sdk';
 import {
   createAction,
   createAsyncThunk,
@@ -13,7 +18,12 @@ import {
 import { providers } from 'ethers';
 import stringify from 'fast-json-stable-stringify';
 import { LeaderData, LeaderEscrowData } from './types';
-import { RPC_URLS, V2_SUPPORTED_CHAIN_IDS } from 'src/constants';
+import {
+  CVAT_ADDRESS,
+  HCAPTCHA_ADDRESS,
+  RPC_URLS,
+  V2_SUPPORTED_CHAIN_IDS,
+} from 'src/constants';
 import { AppState } from 'src/state';
 import { formatAmount } from 'src/utils';
 
@@ -40,6 +50,14 @@ const initialState: LeaderState = {
   leadersLoaded: false,
 };
 
+function formatLeaderRole(staker: ILeader) {
+  const address = staker.address.toLowerCase();
+  if (address === HCAPTCHA_ADDRESS) return 'hCaptcha';
+  if (address === CVAT_ADDRESS) return 'CVAT';
+
+  return staker.role;
+}
+
 export const fetchLeadersAsync = createAsyncThunk<
   LeadersType,
   void,
@@ -54,19 +72,21 @@ export const fetchLeadersAsync = createAsyncThunk<
 
         return {
           chainId,
-          leaders: leaders.map((leader) => ({
-            chainId,
-            address: leader.address,
-            role: leader.role,
-            amountStaked: formatAmount(leader.amountStaked),
-            amountAllocated: formatAmount(leader.amountAllocated),
-            amountLocked: formatAmount(leader.amountLocked),
-            amountSlashed: formatAmount(leader.amountSlashed),
-            amountWithdrawn: formatAmount(leader.amountWithdrawn),
-            lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
-            reputation: Number(leader.reputation),
-            amountJobsLaunched: Number(leader.amountJobsLaunched),
-          })),
+          leaders: leaders
+            .map((leader) => ({
+              chainId,
+              address: leader.address,
+              role: formatLeaderRole(leader),
+              amountStaked: formatAmount(leader.amountStaked),
+              amountAllocated: formatAmount(leader.amountAllocated),
+              amountLocked: formatAmount(leader.amountLocked),
+              amountSlashed: formatAmount(leader.amountSlashed),
+              amountWithdrawn: formatAmount(leader.amountWithdrawn),
+              lockedUntilTimestamp: Number(leader.lockedUntilTimestamp),
+              reputation: Number(leader.reputation),
+              amountJobsLaunched: Number(leader.amountJobsLaunched),
+            }))
+            .filter((leader) => !!leader.role),
         };
       })
     )

@@ -52,7 +52,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 #### Defined in
 
-base.ts:24
+[base.ts:24](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L24)
 
 ## Properties
 
@@ -62,7 +62,7 @@ base.ts:24
 
 #### Defined in
 
-base.ts:14
+[base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
 
 ___
 
@@ -72,7 +72,7 @@ ___
 
 #### Defined in
 
-base.ts:15
+[base.ts:15](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L15)
 
 ___
 
@@ -82,7 +82,7 @@ ___
 
 #### Defined in
 
-base.ts:13
+[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
 
 ## Methods
 
@@ -100,4 +100,4 @@ Returns the gas price options
 
 #### Defined in
 
-base.ts:39
+[base.ts:39](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L39)
