@@ -83,12 +83,12 @@ export class StorageService {
       throw new BadRequestException('Missing public key');
     }
 
-    const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
-      recordingOracle.publicKey,
-      reputationOracle.publicKey,
-    ]);
-
     try {
+      const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
+        recordingOracle.publicKey,
+        reputationOracle.publicKey,
+      ]);
+
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       await this.minioClient.putObject(
         this.s3Config.bucket,
