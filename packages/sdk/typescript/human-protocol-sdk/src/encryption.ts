@@ -437,4 +437,44 @@ export class EncryptionUtils {
 
     return encrypted as string;
   }
+
+  /**
+   * Verifies if a message appears to be encrypted with OpenPGP.
+   *
+   * @param {string} message Message to verify.
+   * @returns {Promise<boolean>} `true` if the message appears to be encrypted, `false` if not.
+   *
+   * **Code example:**
+   *
+   * ```ts
+   * const message = `-----BEGIN PGP MESSAGE-----
+   *
+   * wV4DqdeRpqH+jaISAQdAsvBFxikvjxRqC7ZlDe98cLd7/aeCEI/AcL8PpVKK
+   * mC0wKlwxNg/ADi55z9jcYFuMC4kKE+C/teM+JqiI8DO9AwassQUvKFtULnpx
+   * h2jaOjC/0sAQASjUsIFK8zbuDgk/P8T9Npn6px+GlJPg9K90iwtPWiIp0eyW
+   * 4zXamJZT51k2DyaUX/Rsc6P4PYhQRKjt0yxtH0jHPmKkLC/9eBeFf4GP0zlZ
+   * 18xMZ8uCpQCma708Gz0sJYxEz3u/eZdHD7Mc7tWQKyJG8MsTwM1P+fdK1X75
+   * L9UryJG2AY+6kKZhG4dqjNxiO4fWluiB2u7iMF+iLEyE3SQCEYorWMC+NDWi
+   * QIJZ7oQ2w7BaPo1a991gvTOSNm5v2x44KfqPI1uj859BjsQTCA==
+   * =tsmI
+   * -----END PGP MESSAGE-----`;
+   *
+   * const isEncrypted = await EncriptionUtils.isEncrypted(message);
+   *
+   * if (isEncrypted) {
+   *   console.log('The message is encrypted with OpenPGP.');
+   * } else {
+   *   console.log('The message is not encrypted with OpenPGP.');
+   * }
+   * ```
+   */
+  public static isEncrypted(message: string) {
+    const startMarker = '-----BEGIN PGP MESSAGE-----';
+    const endMarker = '-----END PGP MESSAGE-----';
+
+    const hasStartMarker = message.includes(startMarker);
+    const hasEndMarker = message.includes(endMarker);
+
+    return hasStartMarker && hasEndMarker;
+  }
 }

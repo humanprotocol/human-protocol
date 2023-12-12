@@ -135,6 +135,59 @@ describe('EncryptionUtils', async () => {
       );
     });
   });
+
+  describe('isEncrypted', () => {
+    test('should return true for a valid encrypted message', async () => {
+      const encryptedMessage = `-----BEGIN PGP MESSAGE-----
+wV4DqdeRpqH+jaISAQdAsvBFxikvjxRqC7ZlDe98cLd7/aeCEI/AcL8PpVKK
+mC0wKlwxNg/ADi55z9jcYFuMC4kKE+C/teM+JqiI8DO9AwassQUvKFtULnpx
+h2jaOjC/0sAQASjUsIFK8zbuDgk/P8T9Npn6px+GlJPg9K90iwtPWiIp0eyW
+4zXamJZT51k2DyaUX/Rsc6P4PYhQRKjt0yxtH0jHPmKkLC/9eBeFf4GP0zlZ
+18xMZ8uCpQCma708Gz0sJYxEz3u/eZdHD7Mc7tWQKyJG8MsTwM1P+fdK1X75
+L9UryJG2AY+6kKZhG4dqjNxiO4fWluiB2u7iMF+iLEyE3SQCEYorWMC+NDWi
+QIJZ7oQ2w7BaPo1a991gvTOSNm5v2x44KfqPI1uj859BjsQTCA==
+=tsmI
+-----END PGP MESSAGE-----`;
+      const isEncrypted = EncryptionUtils.isEncrypted(encryptedMessage);
+      expect(isEncrypted).toBe(true);
+    });
+
+    test('should return false for a message without start marker', async () => {
+      const invalidMessage = `wV4DqdeRpqH+jaISAQdAsvBFxikvjxRqC7ZlDe98cLd7/aeCEI/AcL8PpVKK
+mC0wKlwxNg/ADi55z9jcYFuMC4kKE+C/teM+JqiI8DO9AwassQUvKFtULnpx
+h2jaOjC/0sAQASjUsIFK8zbuDgk/P8T9Npn6px+GlJPg9K90iwtPWiIp0eyW
+4zXamJZT51k2DyaUX/Rsc6P4PYhQRKjt0yxtH0jHPmKkLC/9eBeFf4GP0zlZ
+18xMZ8uCpQCma708Gz0sJYxEz3u/eZdHD7Mc7tWQKyJG8MsTwM1P+fdK1X75
+L9UryJG2AY+6kKZhG4dqjNxiO4fWluiB2u7iMF+iLEyE3SQCEYorWMC+NDWi
+QIJZ7oQ2w7BaPo1a991gvTOSNm5v2x44KfqPI1uj859BjsQTCA==
+=tsmI
+-----END PGP MESSAGE-----`;
+      const isEncrypted = EncryptionUtils.isEncrypted(invalidMessage);
+      expect(isEncrypted).toBe(false);
+    });
+
+    test('should return false for a message without end marker', async () => {
+      const invalidMessage = `-----BEGIN PGP MESSAGE-----
+wV4DqdeRpqH+jaISAQdAsvBFxikvjxRqC7ZlDe98cLd7/aeCEI/AcL8PpVKK
+mC0wKlwxNg/ADi55z9jcYFuMC4kKE+C/teM+JqiI8DO9AwassQUvKFtULnpx
+h2jaOjC/0sAQASjUsIFK8zbuDgk/P8T9Npn6px+GlJPg9K90iwtPWiIp0eyW
+4zXamJZT51k2DyaUX/Rsc6P4PYhQRKjt0yxtH0jHPmKkLC/9eBeFf4GP0zlZ
+18xMZ8uCpQCma708Gz0sJYxEz3u/eZdHD7Mc7tWQKyJG8MsTwM1P+fdK1X75
+L9UryJG2AY+6kKZhG4dqjNxiO4fWluiB2u7iMF+iLEyE3SQCEYorWMC+NDWi
+QIJZ7oQ2w7BaPo1a991gvTOSNm5v2x44KfqPI1uj859BjsQTCA==
+=tsmI`;
+      const isEncrypted = await EncryptionUtils.isEncrypted(invalidMessage);
+      expect(isEncrypted).toBe(false);
+    });
+
+    test('should return false for an invalid message', async () => {
+      const invalidEncryptedMessage = 'Invalid encrypted message';
+      const isEncrypted = await EncryptionUtils.isEncrypted(
+        invalidEncryptedMessage
+      );
+      expect(isEncrypted).toBe(false);
+    });
+  });
 });
 
 describe('Encryption', async () => {

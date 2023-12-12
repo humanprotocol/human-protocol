@@ -1,9 +1,9 @@
-import { ChainId, Encryption, StorageClient } from '@human-protocol/sdk';
+import { ChainId, EncryptionUtils, StorageClient } from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
-  MOCK_ENCRYPTION_PASSPHRASE,
   MOCK_ENCRYPTION_PRIVATE_KEY,
+  MOCK_ENCRYPTION_PUBLIC_KEY,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
   MOCK_S3_ACCESS_KEY,
@@ -22,9 +22,6 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
-  },
-  Encryption: {
-    build: jest.fn(),
   },
 }));
 
@@ -53,8 +50,6 @@ describe('StorageService', () => {
         switch (key) {
           case 'ENCRYPTION_PRIVATE_KEY':
             return MOCK_ENCRYPTION_PRIVATE_KEY;
-          case 'ENCRYPTION_PASSPHRASE':
-            return MOCK_ENCRYPTION_PASSPHRASE;
         }
       }),
     };
@@ -183,7 +178,7 @@ describe('StorageService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(JSON.stringify(expectedJobFile));
+        .mockResolvedValueOnce(expectedJobFile);
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
     });
@@ -203,14 +198,13 @@ describe('StorageService', () => {
         ],
       };
 
+      const encryptedMessage = await EncryptionUtils.encrypt(
+        JSON.stringify(expectedJobFile),
+        [MOCK_ENCRYPTION_PUBLIC_KEY],
+      );
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce('encrypted');
-      Encryption.build = jest.fn().mockResolvedValue({
-        decrypt: jest
-          .fn()
-          .mockResolvedValueOnce(JSON.stringify(expectedJobFile)),
-      });
+        .mockResolvedValueOnce(encryptedMessage);
 
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
