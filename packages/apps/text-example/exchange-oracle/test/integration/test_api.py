@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
 from src.annotation import get_client
+from src.config import Config
 from src.cron_jobs import process_pending_job_requests
 from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
@@ -25,6 +26,7 @@ class APITest(unittest.TestCase):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.message = escrow_info
+        self.headers = {"Signature": Config.human.human_app_signature}
 
         self.mock_escrow = MagicMock()
         self.mock_escrow.status = "Pending"
@@ -161,7 +163,8 @@ class APITest(unittest.TestCase):
             session.commit()
 
         response = self.client.get(
-            Endpoints.JOB_LIST
+            Endpoints.JOB_LIST,
+            headers=self.headers
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -181,7 +184,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
 
 
@@ -211,7 +215,8 @@ class APITest(unittest.TestCase):
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -219,7 +224,8 @@ class APITest(unittest.TestCase):
         user_info["name"] = random_username()
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
         assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
 
@@ -233,7 +239,8 @@ class APITest(unittest.TestCase):
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -241,7 +248,8 @@ class APITest(unittest.TestCase):
         user_info["worker_address"] = random_address()
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
 
         assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
@@ -264,7 +272,8 @@ class APITest(unittest.TestCase):
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
-            json=user_info
+            json=user_info,
+            headers=self.headers
         )
         assert response.status_code == HTTPStatus.OK
         authentication = response.json()
@@ -289,7 +298,7 @@ class APITest(unittest.TestCase):
         mock_get_manifest_url.assert_called_once()
 
         # make sure all projects have been created successfully
-        response = self.client.get(Endpoints.JOB_LIST)
+        response = self.client.get(Endpoints.JOB_LIST, headers=self.headers)
         available_jobs = response.json()
 
         assert job_id in available_jobs
@@ -302,7 +311,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": worker_address, "job_id": job_id}
+            json={"worker_id": worker_address, "job_id": job_id},
+            headers=self.headers
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -328,7 +338,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": worker_address, "job_id": job_id}
+            json={"worker_id": worker_address, "job_id": job_id},
+            headers=self.headers
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
@@ -338,7 +349,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": random_address(), "job_id": job_id}
+            json={"worker_id": random_address(), "job_id": job_id},
+            headers=self.headers
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
@@ -357,7 +369,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": worker_address, "job_id": job_id}
+            json={"worker_id": worker_address, "job_id": job_id},
+            headers=self.headers
         )
         assert_http_error_response(response, Errors.WORKER_NOT_VALIDATED)
 
@@ -376,7 +389,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": worker_address, "job_id": job_id}
+            json={"worker_id": worker_address, "job_id": job_id},
+            headers=self.headers
         )
         assert_http_error_response(response, Errors.JOB_UNAVAILABLE)
 
@@ -397,11 +411,26 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
-            json={"worker_id": worker_address, "job_id": job_id}
+            json={"worker_id": worker_address, "job_id": job_id},
+            headers=self.headers
         )
 
         assert_http_error_response(response, Errors.WORKER_ASSIGNMENT_FAILED)
 
+    def test_endpoints_failing_due_to_invalid_signature(self):
+        user_info, worker_address, username = random_userinfo()
+        job_id = str(uuid.uuid4())
+        job_application = {"worker_id": worker_address, "job_id": job_id}
+        header = {"Signature": "nonsense"}
+
+        response = self.client.get(Endpoints.JOB_LIST, headers=header)
+        assert_http_error_response(response, Errors.SIGNATURE_INVALID)
+
+        response = self.client.post(Endpoints.USER_REGISTER, json=user_info, headers=header)
+        assert_http_error_response(response, Errors.SIGNATURE_INVALID)
+
+        response = self.client.post(Endpoints.JOB_APPLY, json=job_application, headers=header)
+        assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
 if __name__ == '__main__':
     unittest.main()

@@ -147,7 +147,7 @@ def notify_recording_oracle():
                 logger.debug(f"Notifying recording oracle about job {request.id}. payload: {payload}")
                 response = Config.http.request(
                     method='POST',
-                    url=Config.recording_oracle_url,
+                    url=Config.human.recording_oracle_url,
                     json=payload
                 )
                 if response.status == 200:

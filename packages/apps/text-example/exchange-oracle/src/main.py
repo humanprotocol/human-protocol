@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from doccano_client.exceptions import DoccanoAPIError
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
@@ -36,14 +36,19 @@ class Errors:
     WORKER_CREATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be registered. A user with the given username might already exist.")
     WORKER_NOT_VALIDATED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker is not validated.")
     WORKER_VALIDATION_FAILED = HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Worker could not be verified.")
-
+    SIGNATURE_INVALID = HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
 
 logger = Config.logging.get_logger()
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
+def validate_human_app_signature(signature: str):
+    return signature == Config.human.human_app_signature
+
 @exchange_oracle.post(Endpoints.JOB_REQUEST)
 async def register_job_request(escrow_info: EscrowInfo):
     """Adds a job request to the database, to be processed later."""
+    # TODO: add and validate job launcher signature
+
     # validate escrow info
     logger.debug(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
     try:
@@ -77,17 +82,26 @@ async def register_job_request(escrow_info: EscrowInfo):
     return {"id": id}
 
 @exchange_oracle.get(Endpoints.JOB_LIST)
-async def list_available_jobs():
+async def list_available_jobs(signature: str=Header(description="Calling service signature")):
     """Lists available jobs."""
+    if not validate_human_app_signature(signature):
+        logger.exception("Invalid signature.")
+        raise Errors.SIGNATURE_INVALID
+
     logger.debug(f"GET {Endpoints.JOB_LIST} called.")
     with Session() as session:
         return [job.id for job in session.query(JobRequest).where(JobRequest.status == Statuses.in_progress.value).all()]
 
 
 @exchange_oracle.post(Endpoints.USER_REGISTER)
-async def register_worker(user_info: UserRegistrationInfo):
+async def register_worker(user_info: UserRegistrationInfo, signature: str=Header(description="Calling service signature")):
     """Registers a new user with the given wallet address."""
     logger.debug(f"POST {Endpoints.USER_REGISTER} called with {user_info}.")
+
+    if not validate_human_app_signature(signature):
+        logger.exception("Invalid signature.")
+        raise Errors.SIGNATURE_INVALID
+
     if not await validate_worker(user_info.worker_address):
         logger.exception(Errors.WORKER_VALIDATION_FAILED.detail + f" {user_info}")
         raise Errors.WORKER_VALIDATION_FAILED
@@ -118,11 +132,15 @@ async def register_worker(user_info: UserRegistrationInfo):
 
 
 @exchange_oracle.post(Endpoints.JOB_APPLY)
-async def apply_for_job(job_application: JobApplication):
+async def apply_for_job(job_application: JobApplication, signature: str=Header(description="Calling service signature")):
     """Applies the given worker for the job. Registers and validates them if necessary"""
     logger.debug(f"POST {Endpoints.JOB_APPLY} called with {job_application}.")
     worker_id = job_application.worker_id
     job_id = job_application.job_id
+
+    if not validate_human_app_signature(signature):
+        logger.exception("Invalid signature.")
+        raise Errors.SIGNATURE_INVALID
 
     with Session() as session:
         # get worker and job, make sure they exist

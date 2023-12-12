@@ -159,6 +159,9 @@ class LoggingConfig:
 
             cls._ready = True
 
+class HumanConfig:
+    recording_oracle_url=os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
+    human_app_signature=os.environ.get("HUMAN_APP_SIGNATURE")
 
 class Config:
     port = int(os.environ.get("PORT"))
@@ -168,7 +171,6 @@ class Config:
     webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED"))
 
     http = PoolManager()
-    recording_oracle_url=os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
 
     polygon_mainnet = PolygonMainnetConfig
     polygon_mumbai = PolygonMumbaiConfig
@@ -177,10 +179,9 @@ class Config:
     postgres_config = Postgres
     cron_config = CronConfig
     storage_config = StorageConfig
-
     doccano = DoccanoConfig
-
     logging = LoggingConfig
+    human=HumanConfig
 
 
 Config.logging.setup_logging()

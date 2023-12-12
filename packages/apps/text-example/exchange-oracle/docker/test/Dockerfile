@@ -14,4 +14,5 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 COPY docker/test/.env src/.env
 
-CMD ["pytest", "-s"]
+CMD sleep 12 && pytest -s
+#CMD ["pytest", "-s"]
