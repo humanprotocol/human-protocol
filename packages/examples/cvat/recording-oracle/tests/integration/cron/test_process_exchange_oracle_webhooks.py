@@ -79,11 +79,9 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.add(webhook)
         self.session.commit()
 
-        with (
-            patch(
-                "src.crons.process_exchange_oracle_webhooks.handle_exchange_oracle_event"
-            ) as mock_handler
-        ):
+        with patch(
+            "src.crons.process_exchange_oracle_webhooks.handle_exchange_oracle_event"
+        ) as mock_handler:
             mock_handler.side_effect = Exception(f"Can't find escrow {escrow_address}")
             process_incoming_exchange_oracle_webhooks()
             mock_handler.assert_called_once()
@@ -102,11 +100,9 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (
-            patch(
-                "src.crons.process_exchange_oracle_webhooks.handle_exchange_oracle_event"
-            ) as mock_handler
-        ):
+        with patch(
+            "src.crons.process_exchange_oracle_webhooks.handle_exchange_oracle_event"
+        ) as mock_handler:
             mock_handler.side_effect = ValueError("Escrow doesn't have funds")
             process_incoming_exchange_oracle_webhooks()
 

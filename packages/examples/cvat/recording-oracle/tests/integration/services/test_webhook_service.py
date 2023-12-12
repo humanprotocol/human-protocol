@@ -93,14 +93,14 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.commit()
 
         pending_webhooks = inbox.get_pending_webhooks(
-            self.session, OracleWebhookTypes.exchange_oracle, 10
+            self.session, OracleWebhookTypes.exchange_oracle
         )
         self.assertEqual(len(pending_webhooks), 2)
         self.assertEqual(pending_webhooks[0].id, webhook1.id)
         self.assertEqual(pending_webhooks[1].id, webhook2.id)
 
         pending_webhooks = inbox.get_pending_webhooks(
-            self.session, OracleWebhookTypes.reputation_oracle, 10
+            self.session, OracleWebhookTypes.reputation_oracle
         )
         self.assertEqual(len(pending_webhooks), 1)
         self.assertEqual(pending_webhooks[0].id, webhook4.id)
