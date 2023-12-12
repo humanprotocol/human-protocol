@@ -95,6 +95,7 @@ export const SolvedTasksView: FC = () => {
                   fontWeight={800}
                   lineHeight={1.125}
                   sx={{ whiteSpace: 'nowrap' }}
+                  fontSize={{ xs: '40px', lg: '55px' }}
                 >
                   {numeral(solvedTasksCount).format('0.[00] a').toUpperCase()}
                 </Typography>

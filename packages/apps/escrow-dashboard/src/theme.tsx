@@ -23,13 +23,10 @@ const theme = createTheme({
   typography: {
     fontFamily: 'Inter',
     h2: {
-      fontSize: '60px',
+      fontSize: '80px',
       lineHeight: 1.5,
       letterSpacing: '-0.5px',
       fontWeight: 800,
-      '@media (max-width: 576px)': {
-        fontSize: '40px',
-      },
     },
     h4: {
       fontSize: '34px',
@@ -61,9 +58,6 @@ const theme = createTheme({
           paddingBottom: '8px',
           fontWeight: 600,
           textTransform: 'none',
-        },
-        sizeLarge: {
-          height: '48px',
         },
       },
     },
@@ -124,29 +118,6 @@ const theme = createTheme({
         root: {
           '&:hover': {
             backgroundColor: 'rgba(20, 6, 178, 0.08)',
-          },
-        },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          color: '#304FFE',
-          textTransform: 'none',
-        },
-        outlinedPrimary: {
-          border: '1px solid #8C9EFF',
-        },
-      },
-    },
-    MuiListItemButton: {
-      styleOverrides: {
-        root: {
-          '&:hover': {
-            backgroundColor: 'rgba(50, 10, 141, 0.08)',
-          },
-          '&.Mui-selected': {
-            backgroundColor: 'rgba(218, 222, 240, 0.80)',
           },
         },
       },
