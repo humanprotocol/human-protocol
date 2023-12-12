@@ -11,9 +11,8 @@ out/
 # Docs
 docs/
 
-
 #Ignore libraries and dependencies
-/lib/
+lib/
 
 # Dotenv file
 .env
