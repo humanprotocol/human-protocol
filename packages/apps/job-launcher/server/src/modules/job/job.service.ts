@@ -82,7 +82,7 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()

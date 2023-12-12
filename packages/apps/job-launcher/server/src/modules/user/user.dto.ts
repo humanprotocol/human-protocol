@@ -3,7 +3,7 @@ import { IsEmail, IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserStatus, UserType } from '../../common/enums/user';
 import { ValidatePasswordDto } from '../auth/auth.dto';
-import { Currency } from 'src/common/enums/payment';
+import { Currency } from '../../common/enums/payment';
 
 export class UserCreateDto extends ValidatePasswordDto {
   @ApiProperty()
