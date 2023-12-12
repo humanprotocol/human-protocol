@@ -1,6 +1,5 @@
 version: "3.8"
 
-
 services:
   # EXCHANGE ORACLE
   test:
@@ -18,8 +17,6 @@ services:
       postgres_exchange_oracle:
         condition: service_started
       backend:
-        condition: service_started
-      nginx:
         condition: service_started
     tty: true
   postgres_exchange_oracle:
@@ -68,6 +65,7 @@ services:
       - 4358:8000
     depends_on:
       - postgres
+      - celery
     networks:
       - network-backend
       - network-frontend

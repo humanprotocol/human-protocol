@@ -14,5 +14,4 @@ RUN poetry config virtualenvs.create false \
 COPY . .
 COPY docker/test/.env src/.env
 
-# delay needed to wait for doccano_backend, as they have no proper healthcheck option
-CMD sleep 10 && pytest
+CMD ["pytest", "-s"]
