@@ -26,15 +26,15 @@ services:
     image: postgres:14.4
     restart: on-failure
     environment:
-      POSTGRES_PASSWORD: '${POSTGRES_USER}'
-      POSTGRES_USER: '${POSTGRES_PASSWORD}'
-      POSTGRES_DB: '${POSTGRES_DB_EXCHANGE_ORACLE}'
+      POSTGRES_PASSWORD: '${PG_USER}'
+      POSTGRES_USER: '${PG_PASSWORD}'
+      POSTGRES_DB: '${PG_DB}'
       PGDATA: '/var/lib/postgresql/data/pgdata'
     volumes:
       - postgres:/var/lib/postgresql/data/pgdata
     ports:
-      - ${POSTGRES_PORT_EXCHANGE_ORACLE}:${POSTGRES_PORT_EXCHANGE_ORACLE}
-    command: ["postgres", "-c", "log_statement=all", "-p", "${POSTGRES_PORT_EXCHANGE_ORACLE}"]
+      - ${PG_PORT}:${PG_PORT}
+    command: ["postgres", "-c", "log_statement=all", "-p", "${PG_PORT}"]
   minio:
     image: quay.io/minio/minio
     network_mode: "host"
@@ -56,11 +56,11 @@ services:
       - media:/backend/media
       - tmp_file:/backend/filepond-temp-uploads
     environment:
-      ADMIN_USERNAME: "${ADMIN_USERNAME}"
-      ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_USERNAME: "${DOCCANO_ADMIN}"
+      ADMIN_PASSWORD: "${DOCCANO_ADMIN_PASS}"
+      ADMIN_EMAIL: ${DOCCANO_ADMIN_EMAIL}
       CELERY_BROKER_URL: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq"
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT_DOCCANO}/${POSTGRES_DB_DOCCANO}?sslmode=disable"
+      DATABASE_URL: "postgres://${PG_USER}:${PG_PASSWORD}@postgres:${PG_PORT_DOCCANO}/${PG_DB_DOCCANO}?sslmode=disable"
       ALLOW_SIGNUP: "False"
       DEBUG: "False"
       DJANGO_SETTINGS_MODULE: "config.settings.production"
@@ -80,7 +80,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       CELERY_BROKER_URL: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq"
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT_DOCCANO}/${POSTGRES_DB_DOCCANO}?sslmode=disable"
+      DATABASE_URL: "postgres://${PG_USER}:${PG_PASSWORD}@postgres:${PG_PORT_DOCCANO}/${PG_DB_DOCCANO}?sslmode=disable"
       DJANGO_SETTINGS_MODULE: "config.settings.production"
     depends_on:
       - postgres
@@ -93,7 +93,7 @@ services:
     environment:
       PYTHONUNBUFFERED: "1"
       CELERY_BROKER_URL: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq"
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT_DOCCANO}/${POSTGRES_DB_DOCCANO}?sslmode=disable"
+      DATABASE_URL: "postgres://${PG_USER}:${PG_PASSWORD}@postgres:${PG_PORT_DOCCANO}/${PG_DB_DOCCANO}?sslmode=disable"
       DJANGO_SETTINGS_MODULE: "config.settings.production"
       FLOWER_BASIC_AUTH: "${FLOWER_BASIC_AUTH}" # Format "username:password"
     depends_on:
@@ -139,12 +139,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      POSTGRES_DB: "${POSTGRES_DB_DOCCANO}"
+      POSTGRES_USER: "${PG_USER}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD}"
+      POSTGRES_DB: "${PG_DB_DOCCANO}"
     networks:
       - network-backend
-    command: ["-p", "${POSTGRES_PORT_DOCCANO}"]
+    command: ["-p", "${PG_PORT_DOCCANO}"]
 
 
 volumes:
