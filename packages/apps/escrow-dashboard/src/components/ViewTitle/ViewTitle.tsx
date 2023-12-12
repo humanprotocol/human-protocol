@@ -4,14 +4,9 @@ import { FC } from 'react';
 type ViewTitleProps = {
   title: string;
   iconUrl: string;
-  fontSize?: number;
 };
 
-export const ViewTitle: FC<ViewTitleProps> = ({
-  title,
-  iconUrl,
-  fontSize = 34,
-}) => (
+export const ViewTitle: FC<ViewTitleProps> = ({ title, iconUrl }) => (
   <Box
     display="flex"
     alignItems="center"
@@ -30,7 +25,7 @@ export const ViewTitle: FC<ViewTitleProps> = ({
       variant="h4"
       color="primary"
       whiteSpace="nowrap"
-      sx={{ ml: '-1px', fontSize: `${fontSize}px` }}
+      sx={{ ml: '-1px' }}
     >
       {title}
     </Typography>
