@@ -20,7 +20,6 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         patch("src.chain.web3.get_web3") as mock_get_web3,
         patch("src.chain.escrow.get_escrow") as mock_get_escrow,
     ):
-
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = JOB_LAUNCHER
@@ -127,7 +126,6 @@ def test_incoming_webhook_401(client: TestClient) -> None:
         patch("src.chain.web3.get_web3") as mock_get_web3,
         patch("src.chain.escrow.get_escrow") as mock_get_escrow,
     ):
-
         mock_get_web3.return_value = Web3(HTTPProvider(Networks.localhost))
         mock_escrow = Mock()
         mock_escrow.launcher = escrow_address

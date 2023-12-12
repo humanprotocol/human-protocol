@@ -35,7 +35,6 @@ def create_project_and_task(session: SessionLocal, escrow_address: str, cvat_id:
 
 
 def create_project_task_and_job(session: SessionLocal, escrow_address: str, cvat_id: int) -> tuple:
-
     cvat_project, cvat_task = create_project_and_task(session, escrow_address, cvat_id)
 
     cvat_job = Job(

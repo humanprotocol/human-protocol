@@ -110,7 +110,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (patch("src.chain.escrow.get_escrow") as mock_escrow):
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Complete.name
             mock_escrow.return_value = mock_escrow_data
@@ -140,7 +140,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (patch("src.chain.escrow.get_escrow") as mock_escrow):
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Complete.name
             mock_escrow.return_value = mock_escrow_data
@@ -246,8 +246,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (patch("src.chain.escrow.get_escrow") as mock_escrow):
-
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Pending.name
             mock_escrow_data.balance = 1
@@ -297,8 +296,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (patch("src.chain.escrow.get_escrow") as mock_escrow):
-
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Complete.name
             mock_escrow.return_value = mock_escrow_data
@@ -347,8 +345,7 @@ class ServiceIntegrationTest(unittest.TestCase):
 
         self.session.add(webhook)
         self.session.commit()
-        with (patch("src.chain.escrow.get_escrow") as mock_escrow):
-
+        with patch("src.chain.escrow.get_escrow") as mock_escrow:
             mock_escrow_data = Mock()
             mock_escrow_data.status = Status.Complete.name
             mock_escrow_data.balance = 0
@@ -371,7 +368,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(db_project.status, ProjectStatuses.annotation.value)
 
     def test_process_outgoing_job_launcher_webhooks(self):
-
         chain_id = Networks.localhost.value
 
         webhok_id = str(uuid.uuid4())
@@ -416,7 +412,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_httpx_post.assert_called_once()
 
     def test_process_outgoing_job_launcher_webhooks_invalid_type(self):
-
         chain_id = Networks.localhost.value
 
         webhok_id = str(uuid.uuid4())

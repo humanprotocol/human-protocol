@@ -39,7 +39,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.session.close()
 
     def test_process_incoming_recording_oracle_webhooks_task_completed_type(self):
-
         project_id = str(uuid.uuid4())
         cvat_project = Project(
             id=project_id,
@@ -83,7 +82,6 @@ class ServiceIntegrationTest(unittest.TestCase):
     def test_process_incoming_recording_oracle_webhooks_task_completed_type_invalid_project_status(
         self,
     ):
-
         project_id = str(uuid.uuid4())
         cvat_project = Project(
             id=project_id,
@@ -243,7 +241,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         self.assertEqual(db_project.status, ProjectStatuses.completed.value)
 
     def test_process_outgoing_recording_oracle_webhooks(self):
-
         chain_id = Networks.localhost.value
 
         webhok_id = str(uuid.uuid4())
@@ -288,7 +285,6 @@ class ServiceIntegrationTest(unittest.TestCase):
         mock_httpx_post.assert_called_once()
 
     def test_process_outgoing_recording_oracle_webhooks_invalid_type(self):
-
         chain_id = Networks.localhost.value
 
         webhok_id = str(uuid.uuid4())

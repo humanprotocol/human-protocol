@@ -40,7 +40,6 @@ def test_list_tasks_200(client: TestClient) -> None:
     assert len(response.json()) == 0
 
     with (SessionLocal.begin() as session,):
-
         _, _, cvat_job_1 = create_project_task_and_job(
             session, "0x86e83d346041E8806e352681f3F14549C0d2BC67", 1
         )
