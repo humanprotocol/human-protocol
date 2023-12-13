@@ -33,11 +33,10 @@ def get_client():
     return client
 
 
-def create_project(manifest: Manifest, dataset_path: Path, suffix=""):
-    client = get_client()
-
+def create_project(
+    manifest: Manifest, dataset_path: Path, suffix="", client=get_client()
+):
     allow_overlapping = False
-
     if manifest.request_config and manifest.request_config.overlap_threshold:
         allow_overlapping = manifest.request_config.overlap_threshold > 0.0
 
@@ -73,40 +72,37 @@ def create_project(manifest: Manifest, dataset_path: Path, suffix=""):
     return project
 
 
-def create_projects(manifest: Manifest, data_dir: Path):
+def create_projects(manifest: Manifest, data_dir: Path, client=get_client()):
     """Creates multiple projects by creating a number of projects for each jsonl file under data_dir."""
     project_replicas = list(range(manifest.requester_max_repeats))
     projects = []
     for dataset_path in data_dir.glob("*.jsonl"):
         for i in project_replicas:
-            project = create_project(manifest, dataset_path, suffix=f"-{i}")
+            project = create_project(
+                manifest, dataset_path, suffix=f"-{i}", client=client
+            )
             projects.append(project)
 
     return projects
 
 
-def create_user(username: str, password: str):
-    client = get_client()
+def create_user(username: str, password: str, client=get_client()):
     client.create_user(username, password)
 
 
-def register_annotator(username: str, project_id: int):
-    client = get_client()
+def register_annotator(username: str, project_id: int, client=get_client()):
     client.add_member(project_id=project_id, username=username, role_name="annotator")
 
 
-def is_done(project_id: int):
-    client = get_client()
+def is_done(project_id: int, client=get_client()):
     return client.get_progress(project_id).remaining == 0
 
 
-def download_annotations(project_id: int, job_request_id: str):
-    client = get_client()
+def download_annotations(project_id: int, job_request_id: str, client=get_client()):
     dir_name = Config.storage_config.dataset_dir / job_request_id / project_id
     client.download(project_id, format="JSONL", dir_name=dir_name, only_approved=True)
     return dir_name
 
 
-def delete_project(project_id: int):
-    client = get_client()
+def delete_project(project_id: int, client=get_client()):
     client.delete_project(project_id)

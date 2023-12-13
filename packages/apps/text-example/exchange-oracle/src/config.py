@@ -180,8 +180,6 @@ class Config:
     port = int(os.environ.get("PORT"))
     environment = os.environ.get("ENVIRONMENT")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT"))
-    webhook_max_retries = int(os.environ.get("WEBHOOK_MAX_RETRIES"))
-    webhook_delay_if_failed = int(os.environ.get("WEBHOOK_DELAY_IF_FAILED"))
 
     http = PoolManager()
 
