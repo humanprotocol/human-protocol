@@ -1,8 +1,8 @@
 import "forge-std/Test.sol";
-import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
-import "../src/MetaHumanGovernor.sol";
-import "../src/wormhole/IWormhole.sol";
+import "../contracts/vhm-token/VHMToken.sol";
+import "../contracts/hm-token/HMToken.sol";
+import "../contracts/MetaHumanGovernor.sol";
+import "../contracts/wormhole/IWormhole.sol";
 
 pragma solidity ^0.8.20;
 

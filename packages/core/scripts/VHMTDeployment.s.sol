@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/vhm-token/VHMToken.sol";
+import "../contracts/vhm-token/VHMToken.sol";
 import "./DeploymentUtils.sol";
 
 contract VHMTDeployment is Script, DeploymentUtils {

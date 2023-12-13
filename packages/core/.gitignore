@@ -1,6 +1,7 @@
 # Hardhat files
 abis
 cache
+cache_forge
 artifacts
 .deps
 
@@ -31,3 +32,6 @@ deployments_tenderly
 !.openzeppelin/unknown-1287.json
 # skale
 !.openzeppelin/unknown-1273227453.json
+
+#Lib Foundry 
+lib/

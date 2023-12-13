@@ -1,5 +1,7 @@
 artifacts/
 cache/
+cache_forge/
 coverage/
 typechain-types/
 dist/
+lib/

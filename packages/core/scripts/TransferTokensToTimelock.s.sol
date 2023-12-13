@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/MetaHumanGovernor.sol";
+import "../contracts/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
-import "../src/hm-token/HMToken.sol";
+import "../contracts/hm-token/HMToken.sol";
 
 contract TransferTokensToTimelock is Script {
     function run() external {

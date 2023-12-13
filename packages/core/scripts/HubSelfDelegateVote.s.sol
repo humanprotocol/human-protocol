@@ -2,15 +2,14 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/MetaHumanGovernor.sol";
+import "../contracts/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
-import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
+import "../contracts/vhm-token/VHMToken.sol";
 
-contract SpokeSelfDelegateVote is Script {
+contract HubSelfDelegateVote is Script {
     function run() external {
         uint256 secondPrivateKey = vm.envUint("SECOND_PRIVATE_KEY");
-        address voteTokenAddress = vm.envAddress("SPOKE_VOTE_TOKEN_ADDRESS");
+        address voteTokenAddress = vm.envAddress("HUB_VOTE_TOKEN_ADDRESS");
         vm.startBroadcast(secondPrivateKey);
         address secondAddress = vm.addr(secondPrivateKey);
         VHMToken vhmToken = VHMToken(voteTokenAddress);

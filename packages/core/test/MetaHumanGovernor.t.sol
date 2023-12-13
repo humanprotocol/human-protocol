@@ -1,10 +1,10 @@
 import "forge-std/Test.sol";
-import "../src/MetaHumanGovernor.sol";
+import "../contracts/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
-import "../src/wormhole/IWormholeRelayer.sol";
+import "../contracts/vhm-token/VHMToken.sol";
+import "../contracts/hm-token/HMToken.sol";
+import "../contracts/wormhole/IWormholeRelayer.sol";
 import "./TestUtil.sol";
 
 pragma solidity ^0.8.20;

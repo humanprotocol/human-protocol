@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/MetaHumanGovernor.sol";
+import "../contracts/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
-import "../src/vhm-token/VHMToken.sol";
-import "../src/hm-token/HMToken.sol";
+import "../contracts/vhm-token/VHMToken.sol";
+import "../contracts/hm-token/HMToken.sol";
 import "./DeploymentUtils.sol";
 
 contract PrepareSpokeTesting is Script, DeploymentUtils {

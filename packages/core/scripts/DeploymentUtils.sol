@@ -2,7 +2,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../src/wormhole/IWormholeRelayer.sol";
+import "../contracts/wormhole/IWormholeRelayer.sol";
 
 abstract contract DeploymentUtils is Script {
     address public magistrateAddress = vm.envAddress("MAGISTRATE_ADDRESS");

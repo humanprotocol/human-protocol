@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/MetaHumanGovernor.sol";
+import "../contracts/MetaHumanGovernor.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
 
 contract HubUpdateSpokeContracts is Script {

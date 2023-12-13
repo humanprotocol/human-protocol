@@ -2,8 +2,8 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "../src/MetaHumanGovernor.sol";
-import "../src/vhm-token/VHMToken.sol";
+import "../contracts/MetaHumanGovernor.sol";
+import "../contracts/vhm-token/VHMToken.sol";
 import "./DeploymentUtils.sol";
 
 contract SpokeDeployment is Script, DeploymentUtils {

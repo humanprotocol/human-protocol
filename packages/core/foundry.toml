@@ -1,7 +1,11 @@
 [profile.default]
-src = "src"
-out = "out"
-libs = ["lib"]
+src = 'contracts'
+out = 'dist'
+libs = ['../../node_modules/','lib']
+test = 'test'
+optimizer = true
+optimizer-runs = 10_000_000
+cache_path  = 'cache_forge'
 
 #[rpc_endpoints]
 #avalanche = "${AVALANCHE_RPC_URL}"
@@ -15,4 +19,6 @@ libs = ["lib"]
 
 [doc]
 title = 'Human Governor Contracts'
-ignore = ['src/hm-token/*.sol','src/vhm-token/*.sol','contracts/*.sol']
+ignore = ['contracts/hm-token/*.sol','contracts/vhm-token/*.sol']
+
+

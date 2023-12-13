@@ -12,7 +12,6 @@ import 'hardhat-contract-sizer';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
-import 'hardhat-dependency-compiler';
 import 'hardhat-celo';
 
 dotenv.config();
@@ -51,7 +50,7 @@ const config: HardhatUserConfig = {
       },
       {
         version: '0.8.9',
-        settings: { optimizer: { enabled: true, runs: 1000000 } },
+        settings: { optimizer: { enabled: true, runs: 1000 } },
       },
     ],
   },
@@ -170,7 +169,7 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     strict: true,
     only: [],
-    except: [],
+    except: ['MetaHumanGovernor.sol'],
   },
   abiExporter: [
     {
@@ -222,9 +221,6 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 200000,
-  },
-  dependencyCompiler: {
-    paths: ['@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol'],
   },
 };
 

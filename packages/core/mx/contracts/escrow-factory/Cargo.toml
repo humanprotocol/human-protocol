@@ -15,7 +15,7 @@ path = "src/lib.rs"
 num-bigint = "0.4.2"
 
 [dependencies.multiversx-sc]
-version = "0.45.1"
+version = "0.43.3"
 
 [dependencies.escrow]
 path = "../escrow"
@@ -24,5 +24,5 @@ path = "../escrow"
 path = "../staking-mock"
 
 [dev-dependencies.multiversx-sc-scenario]
-version = "0.45.1"
+version = "0.43.3"
 
