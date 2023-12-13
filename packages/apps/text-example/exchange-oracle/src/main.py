@@ -194,13 +194,13 @@ async def register_worker(
         except DoccanoAPIError:
             session.rollback()
             logger.exception(
-                Errors.WORKER_CREATION_FAILED.detail + f" {user_info} {password}"
+                Errors.WORKER_CREATION_FAILED.detail + f" {user_info}"
             )
             raise Errors.WORKER_CREATION_FAILED
         except IntegrityError:
             session.rollback()
             logger.exception(
-                Errors.WORKER_CREATION_FAILED.detail + f" {user_info} {password}"
+                Errors.WORKER_CREATION_FAILED.detail + f" {user_info}"
             )
             raise Errors.WORKER_CREATION_FAILED
 

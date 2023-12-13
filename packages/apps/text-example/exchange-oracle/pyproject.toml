@@ -19,6 +19,7 @@ psycopg2 = "^2.9.9"
 apscheduler = "^3.10.4"
 hmt-basemodels = "^0.2.6"
 httpx = "^0.25.2"
+aiohttp = "^3.9.1"
 
 
 [tool.poetry.group.dev.dependencies]
