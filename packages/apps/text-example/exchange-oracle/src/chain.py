@@ -1,15 +1,19 @@
 """Module containing all functions relating to blockchain operations."""
-import json
 
+import json
+from ast import literal_eval
+from typing import Any
+
+from eth_account.messages import encode_defunct
 from human_protocol_sdk.constants import Status
+from human_protocol_sdk.escrow import EscrowClient, EscrowData
 from pydantic import BaseModel
+from starlette.requests import Request
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
-from eth_account.messages import encode_defunct
-from human_protocol_sdk.escrow import EscrowClient, EscrowData
 
-from src.config import BlockChainConfig, Config
+from src.config import Config, BlockChainConfig
 
 
 class EscrowInfo(BaseModel):
@@ -24,25 +28,11 @@ class EscrowInfo(BaseModel):
     escrow_address: str
 
 
-def get_network_config(chain_id: int) -> BlockChainConfig:
-    network_configs: dict[int, BlockChainConfig] = {
-        Config.polygon_mainnet.chain_id: Config.polygon_mainnet,
-        Config.polygon_mumbai.chain_id: Config.polygon_mumbai,
-        Config.localhost.chain_id: Config.localhost,
-    }
-
-    cfg = network_configs.get(chain_id)
-
-    if cfg is None:
-        raise ValueError(f"{chain_id} is not in available list of networks.")
-
-    return cfg
-
-
 def get_web3(chain_id: int):
-    cfg = get_network_config(chain_id)
-    w3 = Web3(HTTPProvider(cfg.rpc_api))
-    gas_payer = w3.eth.account.from_key(cfg.private_key)
+    config: BlockChainConfig = Config.blockchain_config_from_id(chain_id)
+
+    w3 = Web3(HTTPProvider(config.rpc_api))
+    gas_payer = w3.eth.account.from_key(config.private_key)
     w3.middleware_onion.add(
         construct_sign_and_send_raw_middleware(gas_payer),
         "construct_sign_and_send_raw_middleware",
@@ -51,21 +41,21 @@ def get_web3(chain_id: int):
     return w3
 
 
-def sign_message(chain_id: int, message) -> str:
-    w3 = get_web3(chain_id)
-    cfg = get_network_config(chain_id)
-    private_key = cfg.private_key
+def serialize_message(message: Any) -> str:
+    return json.dumps(message, separators=(",", ":"))
 
+
+def sign_message(message, w3: Web3, private_key: str):
+    serialized_message = serialize_message(message)
     signed_message = w3.eth.account.sign_message(
-        encode_defunct(text=json.dumps(message, separators=(",", ":"))), private_key
+        encode_defunct(text=serialized_message), private_key
     )
 
-    return signed_message.signature.hex()
+    return signed_message.signature.hex(), serialized_message
 
 
-def recover_signer(chain_id: int, message, signature: str) -> str:
-    w3 = get_web3(chain_id)
-    message_hash = encode_defunct(text=json.dumps(message, separators=(",", ":")))
+def recover_signer(message, signature: str, w3: Web3) -> str:
+    message_hash = encode_defunct(text=serialize_message(message))
     signer = w3.eth.account.recover_message(message_hash, signature=signature)
     return signer
 
@@ -93,3 +83,15 @@ def validate_escrow(
         raise ValueError("Escrow doesn't have funds")
 
     return True
+
+
+def validate_human_app_signature(signature: str):
+    return signature == Config.human.human_app_signature
+
+
+async def validate_job_launcher_signature(escrow_info: EscrowInfo, request: Request, signature: str, escrow: EscrowData):
+    data: bytes = await request.body()
+    message: dict = literal_eval(data.decode("utf-8"))
+    w3 = get_web3(escrow_info.chain_id)
+    signer = recover_signer(message, signature, w3)
+    return signer.lower() == escrow.launcher.lower()

@@ -162,6 +162,7 @@ class LoggingConfig:
 class HumanConfig:
     recording_oracle_url=os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
     human_app_signature=os.environ.get("HUMAN_APP_SIGNATURE")
+    job_launcher_address=os.environ.get("JOB_LAUNCHER_ADDRESS")
 
 class Config:
     port = int(os.environ.get("PORT"))
@@ -182,6 +183,18 @@ class Config:
     doccano = DoccanoConfig
     logging = LoggingConfig
     human=HumanConfig
+
+    @classmethod
+    def blockchain_config_from_id(cls, chain_id):
+        match chain_id:
+            case cls.polygon_mainnet.chain_id:
+                return cls.polygon_mainnet
+            case cls.polygon_mumbai.chain_id:
+                return cls.polygon_mumbai
+            case cls.localhost.chain_id:
+                return cls.localhost
+            case _:
+                raise ValueError(f"{chain_id} is not in available list of networks.")
 
 
 Config.logging.setup_logging()

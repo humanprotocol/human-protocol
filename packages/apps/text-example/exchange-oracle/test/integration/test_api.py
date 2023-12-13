@@ -7,15 +7,18 @@ from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
 from src.annotation import get_client
+from src.chain import sign_message
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests
 from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
 from src.main import exchange_oracle, Endpoints, Errors
 from test.utils import assert_http_error_response, assert_no_entries_in_db, random_address, random_username, \
-    random_userinfo, is_valid_uuid, random_escrow_info, upload_manifest_and_task_data
+    random_userinfo, is_valid_uuid, random_escrow_info, upload_manifest_and_task_data, get_web3_from_private_key
+from test.constants import JOB_LAUNCHER
 
 get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
 get_manifest_url_path = "src.cron_jobs.get_manifest_url"
+get_web3_path = "src.chain.get_web3"
 
 
 class APITest(unittest.TestCase):
@@ -26,17 +29,22 @@ class APITest(unittest.TestCase):
         self.escrow_address = escrow_address
         self.chain_id = chain_id
         self.message = escrow_info
-        self.headers = {"Signature": Config.human.human_app_signature}
+
+        self.human_signature = {"Signature": Config.human.human_app_signature}
+        self.job_launcher = JOB_LAUNCHER
+        self.job_launcher_signature = {"Signature": self.job_launcher.sign(self.message)}
 
         self.mock_escrow = MagicMock()
         self.mock_escrow.status = "Pending"
         self.mock_escrow.balance = 1
+        self.mock_escrow.launcher = JOB_LAUNCHER.address
 
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
 
     def tearDown(self):
         Base.metadata.drop_all(engine)
+
 
     @patch(get_escrow_path)
     def test_register_job_request(self, mock_get_escrow: MagicMock):
@@ -49,7 +57,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=None
+            headers=self.job_launcher_signature
         )
 
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
@@ -76,7 +84,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
-            json=invalid_message
+            json=invalid_message,
+            headers={"Signature": self.job_launcher.sign(message=invalid_message)}
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
@@ -86,29 +95,30 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
-            json=invalid_message
+            json=invalid_message,
+            headers={"Signature": self.job_launcher.sign(message=invalid_message)}
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
         assert_no_entries_in_db(JobRequest)
 
-    def test_register_job_request_failing_due_to_missing_escrow(self):
+    @patch(get_escrow_path)
+    def test_register_job_request_failing_due_to_missing_escrow(self, mock_get_escrow: MagicMock):
         """When a job request with an escrow info that points to no escrow is posted:
             - an appropriate error response should be returned
             - NO Job Request should be added to the database
         """
+        mock_get_escrow.return_value = None
 
-        with patch(get_escrow_path) as mock_get_escrow:
-            mock_get_escrow.return_value = None
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=self.message,
+            headers=self.job_launcher_signature
+        )
 
-            response = self.client.post(
-                Endpoints.JOB_REQUEST,
-                json=self.message
-            )
-
-            mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
-            assert_http_error_response(response, Errors.ESCROW_NOT_FOUND)
-            assert_no_entries_in_db(JobRequest)
+        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
+        assert_http_error_response(response, Errors.ESCROW_NOT_FOUND)
+        assert_no_entries_in_db(JobRequest)
 
     @patch(get_escrow_path)
     def test_register_job_request_failing_due_to_invalid_escrow(self, mock_get_escrow: MagicMock):
@@ -124,7 +134,8 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
-            json=self.message
+            json=self.message,
+            headers=self.job_launcher_signature
         )
 
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
@@ -136,7 +147,8 @@ class APITest(unittest.TestCase):
         mock_escrow.status = Status.Complete.name
         response = self.client.post(
             Endpoints.JOB_REQUEST,
-            json=self.message
+            json=self.message,
+            headers=self.job_launcher_signature
         )
 
         assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
@@ -146,7 +158,6 @@ class APITest(unittest.TestCase):
         """When a list of available jobs is requested:
             - a list of uuids (v4) representing job ids of Jobs in progress should be returned with the response
         """
-
         n_statuses = len(Statuses) - 1 # one will be valid, so deduct it
         n_returned_jobs = 3
         n_entries = n_statuses + n_returned_jobs
@@ -164,7 +175,7 @@ class APITest(unittest.TestCase):
 
         response = self.client.get(
             Endpoints.JOB_LIST,
-            headers=self.headers
+            headers=self.human_signature
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -185,7 +196,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
 
 
@@ -216,7 +227,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -225,7 +236,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
         assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
 
@@ -240,7 +251,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -249,7 +260,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
 
         assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
@@ -267,13 +278,12 @@ class APITest(unittest.TestCase):
             - the database should be updated
             - a response with the username and the link to the annotation tool should be returned
         """
-
         # worker registration, adds worker to db
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
             Endpoints.USER_REGISTER,
             json=user_info,
-            headers=self.headers
+            headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
         authentication = response.json()
@@ -283,7 +293,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=None
+            headers=self.job_launcher_signature
         )
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
         assert response.status_code == HTTPStatus.OK
@@ -298,7 +308,7 @@ class APITest(unittest.TestCase):
         mock_get_manifest_url.assert_called_once()
 
         # make sure all projects have been created successfully
-        response = self.client.get(Endpoints.JOB_LIST, headers=self.headers)
+        response = self.client.get(Endpoints.JOB_LIST, headers=self.human_signature)
         available_jobs = response.json()
 
         assert job_id in available_jobs
@@ -312,7 +322,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -339,7 +349,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
@@ -350,7 +360,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": random_address(), "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
@@ -370,7 +380,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
         assert_http_error_response(response, Errors.WORKER_NOT_VALIDATED)
 
@@ -390,7 +400,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
         assert_http_error_response(response, Errors.JOB_UNAVAILABLE)
 
@@ -412,12 +422,17 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.headers
+            headers=self.human_signature
         )
 
         assert_http_error_response(response, Errors.WORKER_ASSIGNMENT_FAILED)
 
-    def test_endpoints_failing_due_to_invalid_signature(self):
+    @patch(get_escrow_path)
+    def test_endpoints_failing_due_to_invalid_signature(self, mock_get_escrow: MagicMock):
+        """When any endpoint that requires a signature from the calling service receives an invalid signature:
+            - an appropriate error response should be returned
+        """
+        # human app endpoints
         user_info, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
         job_application = {"worker_id": worker_address, "job_id": job_id}
@@ -431,6 +446,13 @@ class APITest(unittest.TestCase):
 
         response = self.client.post(Endpoints.JOB_APPLY, json=job_application, headers=header)
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
+
+        # job launcher endpoint
+        mock_get_escrow.return_value = self.mock_escrow
+        header = {"Signature": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+        response = self.client.post(Endpoints.JOB_REQUEST, json=self.message, headers=header)
+        assert_http_error_response(response, Errors.SIGNATURE_INVALID)
+
 
 if __name__ == '__main__':
     unittest.main()

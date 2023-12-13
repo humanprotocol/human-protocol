@@ -61,7 +61,6 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
         task_data = json.load(f)
 
     # add text and label fields, required for doccano
-    # TODO: ensure groundtruth entries in file
     entries = []
     for entry in task_data:
         try:

@@ -27,7 +27,6 @@ class CRONJobTest(unittest.TestCase):
         """
         job_id = add_job_request()
 
-        # TODO: needs to be uploaded before
         manifest_s3_url = upload_manifest_and_task_data()
         mock_get_manifest_url.return_value = manifest_s3_url
         process_pending_job_requests()

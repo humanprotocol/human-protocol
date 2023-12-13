@@ -1,5 +1,6 @@
 import random
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from string import ascii_letters
 from uuid import uuid4
@@ -7,7 +8,10 @@ import zipfile
 
 from fastapi import HTTPException
 from starlette.responses import Response
+from web3 import Web3, HTTPProvider
+from web3.middleware import construct_sign_and_send_raw_middleware
 
+from src.chain import sign_message
 from src.config import Config
 from src.db import Session, Statuses, JobRequest, AnnotationProject
 from src.storage import upload_data
@@ -98,3 +102,28 @@ def upload_manifest_and_task_data():
 
     upload_data(files_dir, content_type="text/plain", glob_pattern="*.txt")
     return f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/{manifest_filepath.name}"
+
+
+
+def get_web3_from_private_key(private_key: str):
+    w3 = Web3(HTTPProvider())
+    # Set default gas payer
+    gas_payer = w3.eth.account.from_key(private_key)
+    w3.middleware_onion.add(
+        construct_sign_and_send_raw_middleware(gas_payer),
+        "construct_sign_and_send_raw_middleware",
+    )
+    w3.eth.default_account = gas_payer.address
+    return w3
+
+@dataclass
+class Signer:
+    address: str
+    private_key: str
+
+    @property
+    def web3(self):
+        return get_web3_from_private_key(self.private_key)
+
+    def sign(self, message):
+        return sign_message(message, self.web3, self.private_key)[0]

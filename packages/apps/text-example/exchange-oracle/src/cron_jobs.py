@@ -105,12 +105,10 @@ def process_completed_job_requests():
                     logger.exception(f"Could not process {project.id} of job {request.id}")
                     project.status = Statuses.failed
 
-            # TODO: add completed percentage depending on how many projects failed?
             request.status = Statuses.awaiting_upload
             logger.debug(f"Finished data export {request.id}")
         session.commit()
 
-# TODO: combine with previous stage?
 def upload_completed_job_requests():
     """Converts data of completed job requests in the correct format for the recording oracle and uploads it to s3."""
     with Session() as session:

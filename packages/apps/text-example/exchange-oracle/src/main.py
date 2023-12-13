@@ -6,13 +6,14 @@ from uuid import uuid4
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from doccano_client.exceptions import DoccanoAPIError
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Header, Request
 from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
 import src.cron_jobs as cron_jobs
 from src.annotation import create_user, register_annotator, UserRegistrationInfo, JobApplication
-from src.chain import EscrowInfo, validate_escrow
+from src.chain import EscrowInfo, validate_escrow, validate_human_app_signature, \
+    validate_job_launcher_signature
 from src.config import Config
 from src.db import Session, JobRequest, Worker, Statuses, AnnotationProject
 
@@ -41,14 +42,9 @@ class Errors:
 logger = Config.logging.get_logger()
 exchange_oracle = FastAPI(title="Text Example Exchange Oracle", version="0.1.0")
 
-def validate_human_app_signature(signature: str):
-    return signature == Config.human.human_app_signature
-
 @exchange_oracle.post(Endpoints.JOB_REQUEST)
-async def register_job_request(escrow_info: EscrowInfo):
+async def register_job_request(escrow_info: EscrowInfo, request: Request, signature: str=Header(description="Calling service signature")):
     """Adds a job request to the database, to be processed later."""
-    # TODO: add and validate job launcher signature
-
     # validate escrow info
     logger.debug(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
     try:
@@ -68,6 +64,11 @@ async def register_job_request(escrow_info: EscrowInfo):
     except ValueError:
         logger.exception(Errors.ESCROW_VALIDATION_FAILED.detail + f" {escrow}")
         raise Errors.ESCROW_VALIDATION_FAILED
+
+    signature_valid = await validate_job_launcher_signature(escrow_info, request, signature, escrow)
+    if not signature_valid:
+        logger.error(f"Signature invalid for {escrow_info} with signature {signature}")
+        raise Errors.SIGNATURE_INVALID
 
     # add job once all validations were successful
     with Session() as session:
@@ -139,7 +140,7 @@ async def apply_for_job(job_application: JobApplication, signature: str=Header(d
     job_id = job_application.job_id
 
     if not validate_human_app_signature(signature):
-        logger.exception("Invalid signature.")
+        logger.error(f"Invalid signature: {signature}")
         raise Errors.SIGNATURE_INVALID
 
     with Session() as session:
