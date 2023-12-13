@@ -97,6 +97,7 @@
   "dependencies": {
     "@nomicfoundation/hardhat-foundry": "^1.1.1",
     "forge-std": "^1.1.2",
-    "hardhat": "^2.19.2"
+    "hardhat": "^2.19.2",
+    "hardhat-dependency-compiler": "^1.1.3"
   }
 }
