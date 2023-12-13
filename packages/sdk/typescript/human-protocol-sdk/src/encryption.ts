@@ -468,7 +468,7 @@ export class EncryptionUtils {
    * }
    * ```
    */
-  public static isEncrypted(message: string) : boolean {
+  public static isEncrypted(message: string): boolean {
     const startMarker = '-----BEGIN PGP MESSAGE-----';
     const endMarker = '-----END PGP MESSAGE-----';
 
