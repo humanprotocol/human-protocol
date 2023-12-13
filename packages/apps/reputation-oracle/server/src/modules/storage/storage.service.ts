@@ -1,4 +1,9 @@
-import { ChainId, Encryption, StorageClient } from '@human-protocol/sdk';
+import {
+  ChainId,
+  Encryption,
+  EncryptionUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
@@ -37,9 +42,10 @@ export class StorageService {
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-      try {
-        return JSON.parse(fileContent);
-      } catch {
+      if (
+        typeof fileContent === 'string' &&
+        EncryptionUtils.isEncrypted(fileContent)
+      ) {
         const encryption = await Encryption.build(
           this.configService.get<string>(
             ConfigNames.ENCRYPTION_PRIVATE_KEY,
@@ -49,6 +55,8 @@ export class StorageService {
         );
 
         return JSON.parse(await encryption.decrypt(fileContent));
+      } else {
+        return fileContent;
       }
     } catch {
       return [];
