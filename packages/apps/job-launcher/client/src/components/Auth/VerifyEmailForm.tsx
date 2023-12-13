@@ -1,4 +1,12 @@
-import { Alert, AlertTitle, Box, Button, CircularProgress, Grid, Typography } from '@mui/material';
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircleFilledIcon } from '../../components/Icons/CheckCircleFilledIcon';
@@ -45,15 +53,29 @@ export const VerifyEmailForm = () => {
         <Box sx={{ textAlign: 'center' }}>
           <CheckCircleFilledIcon sx={{ fontSize: 128 }} />
         </Box>
-        <Typography sx={{ mt: 6 }}>You are ready to go. Your email has been successfully verified!</Typography>
+        <Typography sx={{ mt: 6 }}>
+          You are ready to go. Your email has been successfully verified!
+        </Typography>
         <Grid container spacing={1} mt={5}>
           <Grid item xs={12} sm={6}>
-            <Button size="large" variant="outlined" color="primary" fullWidth onClick={() => navigate('/')}>
+            <Button
+              size="large"
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={() => navigate('/')}
+            >
               Cancel
             </Button>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Button size="large" variant="contained" color="primary" fullWidth onClick={() => navigate('/')}>
+            <Button
+              size="large"
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={() => navigate('/')}
+            >
               Sign in
             </Button>
           </Grid>
@@ -74,7 +96,13 @@ export const VerifyEmailForm = () => {
         </Alert>
       )}
       <Box sx={{ textAlign: 'center', width: '100%', mt: 4 }}>
-        <Button size="large" variant="outlined" color="primary" fullWidth onClick={() => navigate('/')}>
+        <Button
+          size="large"
+          variant="outlined"
+          color="primary"
+          fullWidth
+          onClick={() => navigate('/')}
+        >
           Cancel
         </Button>
       </Box>

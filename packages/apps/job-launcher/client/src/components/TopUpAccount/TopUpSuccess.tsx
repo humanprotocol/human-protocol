@@ -25,7 +25,12 @@ export const TopUpSuccess = () => {
         You have successfully added funds to your account.
       </Typography>
       <Box mt={4}>
-        <Button size="large" variant="contained" color="primary" onClick={() => navigate('/')}>
+        <Button
+          size="large"
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('/')}
+        >
           Go to dashboard
         </Button>
       </Box>

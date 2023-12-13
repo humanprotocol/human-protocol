@@ -58,7 +58,18 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, skaleHumanProtocol, polygonMumbai, bsc, bscTestnet, fortune, moonbeam, moonbaseAlpha],
+  [
+    goerli,
+    mainnet,
+    polygon,
+    skaleHumanProtocol,
+    polygonMumbai,
+    bsc,
+    bscTestnet,
+    fortune,
+    moonbeam,
+    moonbaseAlpha,
+  ],
   [publicProvider()]
 );
 

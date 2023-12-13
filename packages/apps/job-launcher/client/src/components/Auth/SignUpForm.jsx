@@ -1,6 +1,16 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
-import { Alert, AlertTitle, Box, Button, FormHelperText, Grid, Link, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  FormHelperText,
+  Grid,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import * as authService from '../../services/auth';
@@ -48,7 +58,11 @@ export const SignUpForm = ({ onFinish, onError }) => {
     return (
       <Box sx={{ maxWidth: '368px', mx: 'auto' }}>
         {alertMsg && alertMsg.length && (
-          <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ my: 2 }}>
+          <Alert
+            severity="error"
+            onClose={() => setAlertMsg('')}
+            sx={{ my: 2 }}
+          >
             <AlertTitle>Send email failed!</AlertTitle>
             {alertMsg}
           </Alert>
@@ -60,17 +74,30 @@ export const SignUpForm = ({ onFinish, onError }) => {
           Hi,
           <br />
           <br />
-          We’ve sent an email to {email}, please check your inbox and verify your email. If you can’t find our email,
-          please check junk junk/spam email folder.
+          We’ve sent an email to {email}, please check your inbox and verify
+          your email. If you can’t find our email, please check junk junk/spam
+          email folder.
         </Typography>
         <Box mt={6}>
-          <LoadingButton variant="outlined" size="large" fullWidth onClick={handleResend} loading={isLoading}>
+          <LoadingButton
+            variant="outlined"
+            size="large"
+            fullWidth
+            onClick={handleResend}
+            loading={isLoading}
+          >
             Resend verification email
           </LoadingButton>
         </Box>
         <Grid container mt={5} spacing={1}>
           <Grid item xs={12} sm={6}>
-            <Button size="large" variant="outlined" color="primary" fullWidth onClick={onFinish}>
+            <Button
+              size="large"
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={onFinish}
+            >
               Cancel
             </Button>
           </Grid>
@@ -86,9 +113,24 @@ export const SignUpForm = ({ onFinish, onError }) => {
 
   return (
     <Box sx={{ maxWidth: '303px', mx: 'auto' }}>
-      <Formik initialValues={initialValues} validationSchema={RegisterValidationSchema} onSubmit={handleRegister}>
-        {({ errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue }) => (
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={RegisterValidationSchema}
+        onSubmit={handleRegister}
+      >
+        {({
+          errors,
+          touched,
+          values,
+          dirty,
+          isValid,
+          handleSubmit,
+          handleBlur,
+          setFieldValue,
+        }) => (
+          <form
+            style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          >
             <TextField
               fullWidth
               name="email"

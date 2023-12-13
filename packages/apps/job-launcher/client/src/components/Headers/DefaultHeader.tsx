@@ -11,7 +11,10 @@ export function DefaultHeader() {
           <img src={logoImg} alt="HUMAN App" style={{ width: 192 }} />
         </Link>
         <Box sx={{ display: { xs: 'none', sm: 'block' }, ml: 'auto' }}>
-          <MuiLink sx={{ fontSize: '14px', fontWeight: 600 }} href="https://dashboard.humanprotocol.org">
+          <MuiLink
+            sx={{ fontSize: '14px', fontWeight: 600 }}
+            href="https://dashboard.humanprotocol.org"
+          >
             Dashboard
           </MuiLink>
           <MuiLink

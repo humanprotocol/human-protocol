@@ -1,6 +1,13 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
-import { Alert, AlertTitle, Box, FormHelperText, Link, Typography } from '@mui/material';
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  FormHelperText,
+  Link,
+  Typography,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -53,8 +60,19 @@ export const ResetPasswordForm = () => {
         validationSchema={ResetPasswordValidationSchema}
         onSubmit={handleResetPassword}
       >
-        {({ errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue }) => (
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        {({
+          errors,
+          touched,
+          values,
+          dirty,
+          isValid,
+          handleSubmit,
+          handleBlur,
+          setFieldValue,
+        }) => (
+          <form
+            style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+          >
             <Password
               onChange={(e) => setFieldValue('password', e.target.value)}
               onBlur={handleBlur}

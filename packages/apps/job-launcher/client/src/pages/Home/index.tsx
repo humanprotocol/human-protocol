@@ -60,7 +60,11 @@ export default function Home() {
         py={8}
       >
         {alertMsg && alertMsg.length && (
-          <Alert severity="error" onClose={() => setAlertMsg('')} sx={{ mb: 2, maxWidth: '303px', width: '100%' }}>
+          <Alert
+            severity="error"
+            onClose={() => setAlertMsg('')}
+            sx={{ mb: 2, maxWidth: '303px', width: '100%' }}
+          >
             {alertMsg}
           </Alert>
         )}
@@ -94,7 +98,10 @@ export default function Home() {
         {tabValue === 1 && (
           <>
             {mode === 'sign_up' ? (
-              <SignUpForm onFinish={handleSignUp} onError={(message: string) => setAlertMsg(message)} />
+              <SignUpForm
+                onFinish={handleSignUp}
+                onError={(message: string) => setAlertMsg(message)}
+              />
             ) : (
               <Box px={12} sx={{ textAlign: 'center', width: '100%' }}>
                 <Button

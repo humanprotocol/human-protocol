@@ -31,7 +31,10 @@ export default function DefaultLayout() {
                 <img src={userImg} alt="user" />
                 <img src={humanImg} alt="human" />
               </Box>
-              <Typography color="primary" sx={{ fontWeight: 400, fontSize: '80px', lineHeight: '80px' }}>
+              <Typography
+                color="primary"
+                sx={{ fontWeight: 400, fontSize: '80px', lineHeight: '80px' }}
+              >
                 <b>HUMAN</b>
                 <br /> Job Launcher
               </Typography>

@@ -1,7 +1,8 @@
 export const SUPPORTED_TOKEN_SYMBOLS = ['HMT'];
 
 export const ERROR_MESSAGES = {
-  weakPassword: 'Password must contain at least 1 uppercase, 1 lowercase, 1 numeric and 1 special character',
+  weakPassword:
+    'Password must contain at least 1 uppercase, 1 lowercase, 1 numeric and 1 special character',
   invalidPasswordLength: 'Password must be at least 8 characters',
   invalidPasswordMaxLength: 'Password must be less than 256 characters',
   invalidWalletAddress: 'Invalid Wallet Address',
@@ -20,7 +21,8 @@ export const ERROR_MESSAGES = {
   requireRestPasswordToken: 'Verification token required',
   requireAuthToken: 'Authentication token required',
   requireProfileDetails: 'Profile details required',
-  sactionListError: 'The app is not available in your location. Please refer to our T&Cs',
+  sactionListError:
+    'The app is not available in your location. Please refer to our T&Cs',
   tcRequired: 'The terms and conditions should be accepted',
 };
 

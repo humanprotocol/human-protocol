@@ -9,7 +9,10 @@ type CopyAddressButtonProps = {
   [prop: string]: any;
 };
 
-export const CopyAddressButton: FC<CopyAddressButtonProps> = ({ address, ...rest }) => {
+export const CopyAddressButton: FC<CopyAddressButtonProps> = ({
+  address,
+  ...rest
+}) => {
   const handleClickCopy = () => {
     copy(address);
   };

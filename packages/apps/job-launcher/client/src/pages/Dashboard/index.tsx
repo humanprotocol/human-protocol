@@ -28,7 +28,11 @@ export default function Dashboard() {
           Dashboard
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
-          <NetworkSelect showAllNetwork value={chainId} onChange={(e) => setChainId(e.target.value as ChainId)} />
+          <NetworkSelect
+            showAllNetwork
+            value={chainId}
+            onChange={(e) => setChainId(e.target.value as ChainId)}
+          />
         </Box>
       </Box>
 
@@ -60,7 +64,11 @@ export default function Dashboard() {
           }}
         >
           <Typography variant="h4">Jobs</Typography>
-          <StatusToggleButtons exclusive value={status} onChange={(e, value) => setStatus(value)} />
+          <StatusToggleButtons
+            exclusive
+            value={status}
+            onChange={(e, value) => setStatus(value)}
+          />
         </Box>
       </Box>
       <JobTable status={status} chainId={chainId} />

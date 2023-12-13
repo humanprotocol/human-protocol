@@ -9,7 +9,15 @@ const STEPS = [
   { value: CreateJobStep.Launch, title: 'Launch' },
 ];
 
-const Step = ({ index, selected, title }: { index: number; selected: boolean; title: string }) => {
+const Step = ({
+  index,
+  selected,
+  title,
+}: {
+  index: number;
+  selected: boolean;
+  title: string;
+}) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box
@@ -50,7 +58,12 @@ export const CreateJobSteps = () => {
       }}
     >
       {STEPS.map((s, i) => (
-        <Step key={s.value} index={i + 1} title={s.title} selected={s.value <= step} />
+        <Step
+          key={s.value}
+          index={i + 1}
+          title={s.title}
+          selected={s.value <= step}
+        />
       ))}
     </Box>
   );

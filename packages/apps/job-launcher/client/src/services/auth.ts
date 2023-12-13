@@ -1,4 +1,9 @@
-import { ResetPasswordRequest, SignInRequest, SignUpRequest, SignUpResponse } from '../types';
+import {
+  ResetPasswordRequest,
+  SignInRequest,
+  SignUpRequest,
+  SignUpResponse,
+} from '../types';
 import api from '../utils/api';
 
 export const signIn = async (body: SignInRequest) => {

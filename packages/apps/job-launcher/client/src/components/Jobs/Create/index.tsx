@@ -9,7 +9,8 @@ import { LaunchSuccess } from './LaunchSuccess';
 import { PayJob } from './PayJob';
 
 export const CreateJobView = () => {
-  const { step, changePayMethod, setStep, updateJobRequest } = useCreateJobPageUI();
+  const { step, changePayMethod, setStep, updateJobRequest } =
+    useCreateJobPageUI();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -21,7 +22,12 @@ export const CreateJobView = () => {
       setStep(CreateJobStep.CreateJob);
 
       updateJobRequest?.({
-        jobType: jobType === 'fortune' ? JobType.Fortune : jobType === 'cvat' ? JobType.CVAT : JobType.HCAPTCHA,
+        jobType:
+          jobType === 'fortune'
+            ? JobType.Fortune
+            : jobType === 'cvat'
+            ? JobType.CVAT
+            : JobType.HCAPTCHA,
       });
     }
   }, []);

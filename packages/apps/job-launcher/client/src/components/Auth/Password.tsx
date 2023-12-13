@@ -7,7 +7,8 @@ export const Password = (props: TextFieldProps) => {
     e.preventDefault();
     setHidden(!hidden);
   };
-  const { placeholder, name, value, onChange, onBlur, error, helperText } = props;
+  const { placeholder, name, value, onChange, onBlur, error, helperText } =
+    props;
   return (
     <Box sx={{ position: 'relative' }}>
       <TextField
@@ -21,8 +22,14 @@ export const Password = (props: TextFieldProps) => {
         error={error}
         helperText={helperText}
       />
-      <span onClick={ToogleShow} className="position-absolute d-flex flex-column justify-content-center h-100">
-        <i className={`fa ${hidden ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true" />
+      <span
+        onClick={ToogleShow}
+        className="position-absolute d-flex flex-column justify-content-center h-100"
+      >
+        <i
+          className={`fa ${hidden ? 'fa-eye-slash' : 'fa-eye'}`}
+          aria-hidden="true"
+        />
       </span>
     </Box>
   );

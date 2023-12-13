@@ -24,7 +24,10 @@ export const PayJob = () => {
 
   const handleError = (err: any) => {
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
-      openSnackbar('Insufficient token amount or the gas limit is too low', 'error');
+      openSnackbar(
+        'Insufficient token amount or the gas limit is too low',
+        'error'
+      );
     } else if (err.code === 'ACTION_REJECTED') {
       openSnackbar('The transaction was rejected', 'error');
     } else {
@@ -61,7 +64,9 @@ export const PayJob = () => {
         }}
       >
         <StyledTab value={PayMethod.Crypto} label="Crypto" />
-        {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
+        {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
+          <StyledTab value={PayMethod.Fiat} label="Fiat" />
+        )}
       </StyledTabs>
       <Box
         display="flex"
@@ -81,10 +86,18 @@ export const PayJob = () => {
         }}
       >
         {payMethod === PayMethod.Crypto && (
-          <CryptoPayForm onStart={handleStart} onFinish={handleFinish} onError={handleError} />
+          <CryptoPayForm
+            onStart={handleStart}
+            onFinish={handleFinish}
+            onError={handleError}
+          />
         )}
         {payMethod === PayMethod.Fiat && (
-          <FiatPayForm onStart={handleStart} onFinish={handleFinish} onError={handleError} />
+          <FiatPayForm
+            onStart={handleStart}
+            onFinish={handleFinish}
+            onError={handleError}
+          />
         )}
       </Box>
     </Box>

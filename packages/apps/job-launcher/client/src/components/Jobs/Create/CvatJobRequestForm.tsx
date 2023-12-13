@@ -22,7 +22,8 @@ import { CvatJobType } from '../../../types';
 import { CvatJobRequestValidationSchema } from './schema';
 
 export const CvatJobRequestForm = () => {
-  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } = useCreateJobPageUI();
+  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
+    useCreateJobPageUI();
   const [searchParams] = useSearchParams();
 
   const initialValues = {
@@ -35,7 +36,15 @@ export const CvatJobRequestForm = () => {
     accuracyTarget: 80,
   };
 
-  const handleNext = ({ labels, type, description, dataUrl, groundTruthUrl, userGuide, accuracyTarget }: any) => {
+  const handleNext = ({
+    labels,
+    type,
+    description,
+    dataUrl,
+    groundTruthUrl,
+    userGuide,
+    accuracyTarget,
+  }: any) => {
     updateJobRequest?.({
       ...jobRequest,
       cvatRequest: {
@@ -51,7 +60,16 @@ export const CvatJobRequestForm = () => {
     goToNextStep?.();
   };
 
-  const { errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue } = useFormik({
+  const {
+    errors,
+    touched,
+    values,
+    dirty,
+    isValid,
+    handleSubmit,
+    handleBlur,
+    setFieldValue,
+  } = useFormik({
     initialValues,
     validationSchema: CvatJobRequestValidationSchema,
     onSubmit: handleNext,
@@ -70,7 +88,9 @@ export const CvatJobRequestForm = () => {
         <Grid container spacing={4} mb={4}>
           <Grid item xs={12} sm={12} md={6}>
             <FormControl variant="standard" fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="cvat-job-type-select-label">Type of job</InputLabel>
+              <InputLabel id="cvat-job-type-select-label">
+                Type of job
+              </InputLabel>
               <Select
                 labelId="cvat-job-type-select-label"
                 id="cvat-job-type-select"
@@ -93,7 +113,9 @@ export const CvatJobRequestForm = () => {
                 onBlur={handleBlur}
               >
                 <MenuItem value={CvatJobType.IMAGE_POINTS}>Points</MenuItem>
-                <MenuItem value={CvatJobType.IMAGE_BOXES}>Bounding Boxes</MenuItem>
+                <MenuItem value={CvatJobType.IMAGE_BOXES}>
+                  Bounding Boxes
+                </MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -119,9 +141,13 @@ export const CvatJobRequestForm = () => {
                 freeSolo
                 multiple
                 renderTags={(value, props) =>
-                  value.map((option, index) => <Chip label={option} {...props({ index })} />)
+                  value.map((option, index) => (
+                    <Chip label={option} {...props({ index })} />
+                  ))
                 }
-                renderInput={(params) => <TextField label="Labels" {...params} />}
+                renderInput={(params) => (
+                  <TextField label="Labels" {...params} />
+                )}
                 onChange={(e, value) => setFieldValue('labels', value)}
                 onBlur={handleBlur}
                 placeholder="Labels"
@@ -148,7 +174,9 @@ export const CvatJobRequestForm = () => {
               <TextField
                 name="groundTruthUrl"
                 value={values.groundTruthUrl}
-                onChange={(e) => setFieldValue('groundTruthUrl', e.target.value)}
+                onChange={(e) =>
+                  setFieldValue('groundTruthUrl', e.target.value)
+                }
                 onBlur={handleBlur}
                 placeholder="Reference data for annotation accuracy"
                 label="Ground Truth URL"
@@ -158,7 +186,10 @@ export const CvatJobRequestForm = () => {
                   endAdornment: (
                     <InputAdornment position="end">
                       <Tooltip title="This field should contain a URL or link to the ground truth data. Ground truth data serves as the reference or gold standard for your annotations. It represents the correct or desired data, against which the annotations are compared for accuracy and quality assessment.">
-                        <HelpOutlineIcon color="secondary" sx={{ cursor: 'pointer' }} />
+                        <HelpOutlineIcon
+                          color="secondary"
+                          sx={{ cursor: 'pointer' }}
+                        />
                       </Tooltip>
                     </InputAdornment>
                   ),
@@ -179,7 +210,10 @@ export const CvatJobRequestForm = () => {
                   endAdornment: (
                     <InputAdornment position="end">
                       <Tooltip title="This field should contain a brief description of how data should be annotated. A user guide is a valuable resource that provides instructions, guidelines, and best practices for annotators, helping them understand how to accurately and consistently annotate the data.">
-                        <HelpOutlineIcon color="secondary" sx={{ cursor: 'pointer' }} />
+                        <HelpOutlineIcon
+                          color="secondary"
+                          sx={{ cursor: 'pointer' }}
+                        />
                       </Tooltip>
                     </InputAdornment>
                   ),
@@ -191,7 +225,9 @@ export const CvatJobRequestForm = () => {
                 name="accuracyTarget"
                 type="number"
                 value={values.accuracyTarget}
-                onChange={(e) => setFieldValue('accuracyTarget', e.target.value)}
+                onChange={(e) =>
+                  setFieldValue('accuracyTarget', e.target.value)
+                }
                 onBlur={handleBlur}
                 placeholder="Accuracy target %"
                 label="Accuracy target %"

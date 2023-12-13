@@ -1,6 +1,19 @@
 import { LoadingButton } from '@mui/lab';
-import { Box, FormControl, Grid, Link, TextField, Typography } from '@mui/material';
-import { CardCvcElement, CardExpiryElement, CardNumberElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import {
+  Box,
+  FormControl,
+  Grid,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  CardCvcElement,
+  CardExpiryElement,
+  CardNumberElement,
+  useElements,
+  useStripe,
+} from '@stripe/react-stripe-js';
 import React, { useState } from 'react';
 import { useSnackbar } from '../../providers/SnackProvider';
 import * as paymentService from '../../services/payment';
@@ -51,12 +64,13 @@ export const FiatTopUpForm = () => {
       });
 
       // stripe payment
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardNumber,
-          billing_details: { name },
-        },
-      });
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardNumber,
+            billing_details: { name },
+          },
+        });
 
       if (stripeError) {
         throw stripeError;
@@ -155,7 +169,10 @@ export const FiatTopUpForm = () => {
           </LoadingButton>
         </Grid>
         <Grid item xs={12}>
-          <Link href="https://humanprotocol.org/app/terms-and-conditions" target="_blank">
+          <Link
+            href="https://humanprotocol.org/app/terms-and-conditions"
+            target="_blank"
+          >
             <Typography variant="caption" component="p" textAlign="center">
               Terms & conditions
             </Typography>

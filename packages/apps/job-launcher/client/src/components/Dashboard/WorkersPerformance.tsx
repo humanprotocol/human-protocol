@@ -33,7 +33,12 @@ export const WorkersPerformance = () => {
                   {workersPerformance?.reputation}/10
                 </Typography>
               ) : (
-                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
                   ---
                 </Typography>
               )}
@@ -49,7 +54,12 @@ export const WorkersPerformance = () => {
                   {workersPerformance?.timeToComplete}h
                 </Typography>
               ) : (
-                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
                   ---
                 </Typography>
               )}
@@ -65,7 +75,12 @@ export const WorkersPerformance = () => {
                   {workersPerformance?.completionAccuracy}/10
                 </Typography>
               ) : (
-                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
+                <Typography
+                  fontWeight={600}
+                  variant="h4"
+                  color="#CBCFE6"
+                  mb={4}
+                >
                   ---
                 </Typography>
               )}

@@ -1,5 +1,12 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
-import { FormControl, InputLabel, ListItemIcon, MenuItem, Select, SelectProps } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  ListItemIcon,
+  MenuItem,
+  Select,
+  SelectProps,
+} from '@mui/material';
 import { FC } from 'react';
 import { SUPPORTED_CHAIN_IDS } from '../../constants/chains';
 import { CHAIN_ICONS } from '../Icons/chains';
@@ -32,7 +39,9 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
     >
       {props.showAllNetwork && (
         <MenuItem value={ChainId.ALL}>
-          <ListItemIcon sx={{ color: '#320a8d', fontSize: '0.8rem' }}>{CHAIN_ICONS[ChainId.ALL]}</ListItemIcon>
+          <ListItemIcon sx={{ color: '#320a8d', fontSize: '0.8rem' }}>
+            {CHAIN_ICONS[ChainId.ALL]}
+          </ListItemIcon>
           All Networks
         </MenuItem>
       )}
@@ -40,7 +49,11 @@ export const NetworkSelect: FC<NetworkSelectProps> = (props) => (
         const IconComponent = CHAIN_ICONS[chainId];
         return (
           <MenuItem value={chainId} key={chainId}>
-            {IconComponent && <ListItemIcon sx={{ color: '#320a8d' }}>{IconComponent}</ListItemIcon>}
+            {IconComponent && (
+              <ListItemIcon sx={{ color: '#320a8d' }}>
+                {IconComponent}
+              </ListItemIcon>
+            )}
             {NETWORKS[chainId]?.title}
           </MenuItem>
         );

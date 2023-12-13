@@ -60,7 +60,9 @@ export const SignInForm = ({ onError }) => {
           value={formik.values.email}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={formik.touched.email === true && formik.errors.email !== undefined}
+          error={
+            formik.touched.email === true && formik.errors.email !== undefined
+          }
           helperText={formik.errors.email}
         />
         <Box>
@@ -71,7 +73,10 @@ export const SignInForm = ({ onError }) => {
             value={formik.values.password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.password === true && formik.errors.password !== undefined}
+            error={
+              formik.touched.password === true &&
+              formik.errors.password !== undefined
+            }
             helperText={formik.errors.password}
           />
           <Link

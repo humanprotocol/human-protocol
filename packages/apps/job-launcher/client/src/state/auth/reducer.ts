@@ -1,4 +1,8 @@
-import { createAction, createAsyncThunk, createReducer } from '@reduxjs/toolkit';
+import {
+  createAction,
+  createAsyncThunk,
+  createReducer,
+} from '@reduxjs/toolkit';
 import { LOCAL_STORAGE_KEYS } from '../../constants';
 import { SignUpResponse } from '../../types';
 import api from '../../utils/api';
@@ -10,13 +14,14 @@ const initialState: AuthState = {
   isAuthed: false,
 };
 
-export const fetchUserBalanceAsync = createAsyncThunk<UserBalance, void, { state: AppState }>(
-  'auth/fetchUserBalanceAsync',
-  async () => {
-    const { data } = await api.get<UserBalance>(`/user/balance`);
-    return data;
-  }
-);
+export const fetchUserBalanceAsync = createAsyncThunk<
+  UserBalance,
+  void,
+  { state: AppState }
+>('auth/fetchUserBalanceAsync', async () => {
+  const { data } = await api.get<UserBalance>(`/user/balance`);
+  return data;
+});
 
 export const signIn = createAction<SignUpResponse>('auth/signIn');
 

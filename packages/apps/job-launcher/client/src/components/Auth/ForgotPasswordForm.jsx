@@ -1,6 +1,15 @@
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { LoadingButton } from '@mui/lab';
-import { Alert, AlertTitle, Box, Button, FormHelperText, Link, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  FormHelperText,
+  Link,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -43,7 +52,13 @@ export const ForgotPasswordForm = () => {
         Please check your email box for the link to reset your password.
       </Typography>
       <Box mt={13}>
-        <Button size="large" variant="contained" color="primary" fullWidth onClick={() => navigate('/')}>
+        <Button
+          size="large"
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={() => navigate('/')}
+        >
           Sign in
         </Button>
       </Box>
@@ -73,15 +88,27 @@ export const ForgotPasswordForm = () => {
         Reset Password
       </Typography>
       <Typography mb={7}>
-        Please enter your email so that we can sent you a reset link to reset your password
+        Please enter your email so that we can sent you a reset link to reset
+        your password
       </Typography>
       <Formik
         initialValues={initialValues}
         validationSchema={ForgotPasswordValidationSchema}
         onSubmit={handleForgotPassword}
       >
-        {({ errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue }) => (
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        {({
+          errors,
+          touched,
+          values,
+          dirty,
+          isValid,
+          handleSubmit,
+          handleBlur,
+          setFieldValue,
+        }) => (
+          <form
+            style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+          >
             <TextField
               fullWidth
               name="email"
