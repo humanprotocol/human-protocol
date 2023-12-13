@@ -203,6 +203,8 @@ async def validate_worker(worker_id: str):
 @exchange_oracle.on_event("startup")
 def startup():
     logger.info("Exchange Oracle is up and running.")
+    if Config.environment == "test":
+        logger.warn("You are running the server in the test environment. This might be an oversight.")
     logger.debug("Registering cron jobs.")
     scheduler = BackgroundScheduler()
     tasks = [
