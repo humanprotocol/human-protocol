@@ -29,7 +29,7 @@ logger = Config.logging.get_logger()
 
 def process_pending_job_requests():
     """Fetches pending jobs from the database and creates annotation projects to be assigned to workers."""
-    logger.debug("Processing pending job requests.")
+    logger.info("Processing pending job requests.")
 
     with Session() as session:
         # get pending job requests
@@ -42,7 +42,7 @@ def process_pending_job_requests():
         # create annotation projects for each job request
         for job_request in requests:
             try:
-                logger.debug(f"Creating annotation projects for {job_request.id}")
+                logger.info(f"Creating annotation projects for {job_request.id}")
                 projects = set_up_projects_for_job(job_request)
                 job_request.status = Statuses.in_progress.value
             except Exception:
@@ -87,7 +87,7 @@ def set_up_projects_for_job(job_request: JobRequest):
 
 def process_in_progress_job_requests():
     """Fetches jobs for which the annotation is currently in progress and checks if the job is finished and updates their status accordingly."""
-    logger.debug("Processing jobs in progress.")
+    logger.info("Processing jobs in progress. Checking status.")
     with Session() as session:
         # check and update project completion
         projects = session.query(AnnotationProject).where(
@@ -108,14 +108,14 @@ def process_in_progress_job_requests():
             if all(
                 project.status == Statuses.completed for project in request.projects
             ):
-                logger.debug(f"Job {request.id} is done.")
+                logger.info(f"Job {request.id} is done.")
                 request.status = Statuses.completed
         session.commit()
 
 
 def process_completed_job_requests():
     """Exports annotations from doccano and stores them locally. Cleans up unused projects in doccano."""
-    logger.debug("Processing completed jobs.")
+    logger.info("Processing completed annotation jobs.")
     with Session() as session:
         requests = (
             session.query(JobRequest)
@@ -141,12 +141,14 @@ def process_completed_job_requests():
                     project.status = Statuses.failed
 
             request.status = Statuses.awaiting_upload
-            logger.debug(f"Finished data export {request.id}")
+            logger.info(f"Data exported for job {request.id}.")
         session.commit()
 
 
 def upload_completed_job_requests():
     """Converts data of completed job requests in the correct format for the recording oracle and uploads it to s3."""
+    logger.info(f"Uploading data for completed job requests.")
+
     with Session() as session:
         requests = session.query(JobRequest).where(
             JobRequest.status == Statuses.awaiting_upload
@@ -169,6 +171,7 @@ def upload_completed_job_requests():
                 shutil.rmtree(data_dir)
 
                 request.status = Statuses.awaiting_closure
+                logger.info(f"Data uploaded for job {request.id}")
             except Exception:
                 logger.exception(f"Could not upload data for job {request.id}.")
                 request.status = Statuses.failed
@@ -177,6 +180,7 @@ def upload_completed_job_requests():
 
 def notify_recording_oracle():
     """Notifies the recording oracle about a completed job to process."""
+    logger.info(f"Notifying recording oracle about finished annotation jobs.")
     with Session() as session:
         requests = session.query(JobRequest).where(
             JobRequest.status == Statuses.awaiting_closure
@@ -197,6 +201,7 @@ def notify_recording_oracle():
                 )
                 if response.status == 200:
                     request.status = Statuses.closed
+                    logger.info(f"Recording oracle notified about job {request.id}. Job is complete.")
                 else:
                     logger.exception(
                         f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}"

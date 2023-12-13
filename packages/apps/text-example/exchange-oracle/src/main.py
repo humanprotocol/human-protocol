@@ -94,7 +94,7 @@ async def register_job_request(
 ):
     """Adds a job request to the database, to be processed later."""
     # validate escrow info
-    logger.debug(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
+    logger.info(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
     try:
         escrow = EscrowUtils.get_escrow(
             escrow_info.chain_id, escrow_info.escrow_address.lower()
@@ -130,7 +130,7 @@ async def register_job_request(
         session.add(job_request)
         session.commit()
 
-    logger.debug(f"Successfully added new job. Id: {id}")
+    logger.info(f"Successfully added new job. Id: {id}")
     return {"id": id}
 
 
@@ -139,11 +139,12 @@ async def list_available_jobs(
     signature: str = Header(description="Calling service signature"),
 ):
     """Lists available jobs."""
+    logger.debug(f"GET {Endpoints.JOB_LIST} called.")
+
     if not validate_human_app_signature(signature):
         logger.exception("Invalid signature.")
         raise Errors.SIGNATURE_INVALID
 
-    logger.debug(f"GET {Endpoints.JOB_LIST} called.")
     with Session() as session:
         return [
             job.id
@@ -159,7 +160,7 @@ async def register_worker(
     signature: str = Header(description="Calling service signature"),
 ):
     """Registers a new user with the given wallet address."""
-    logger.debug(f"POST {Endpoints.USER_REGISTER} called with {user_info}.")
+    logger.info(f"POST {Endpoints.USER_REGISTER} called with {user_info}.")
 
     if not validate_human_app_signature(signature):
         logger.exception("Invalid signature.")
@@ -204,7 +205,7 @@ async def register_worker(
             )
             raise Errors.WORKER_CREATION_FAILED
 
-    logger.debug(f"Successfully registered worker {user_info}")
+    logger.info(f"Successfully registered worker {user_info}")
     return {"username": user_info.name, "password": password}
 
 
@@ -214,7 +215,8 @@ async def apply_for_job(
     signature: str = Header(description="Calling service signature"),
 ):
     """Applies the given worker for the job. Registers and validates them if necessary"""
-    logger.debug(f"POST {Endpoints.JOB_APPLY} called with {job_application}.")
+    logger.info(f"POST {Endpoints.JOB_APPLY} called with {job_application}.")
+
     worker_id = job_application.worker_id
     job_id = job_application.job_id
 
@@ -273,7 +275,7 @@ async def apply_for_job(
             )
             raise Errors.WORKER_ASSIGNMENT_FAILED
 
-        logger.debug(
+        logger.info(
             f"Successfully assigned worker {worker.id} to project {project.id}"
         )
         session.commit()
