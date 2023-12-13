@@ -30,14 +30,9 @@ export default function TopUpAccount() {
             flexDirection: 'column',
           }}
         >
-          <StyledTabs
-            value={payMethod}
-            onChange={(e, newValue) => setPayMethod(newValue)}
-          >
+          <StyledTabs value={payMethod} onChange={(e, newValue) => setPayMethod(newValue)}>
             <StyledTab value={PayMethod.Crypto} label="Crypto" />
-            {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
-              <StyledTab value={PayMethod.Fiat} label="Fiat" />
-            )}
+            {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
           </StyledTabs>
           <Box
             display="flex"
@@ -49,10 +44,8 @@ export default function TopUpAccount() {
               background: '#fff',
               border: '1px solid #dbe1f6',
               borderRadius: '20px',
-              borderTopLeftRadius:
-                payMethod === PayMethod.Crypto ? '0px' : '20px',
-              borderTopRightRadius:
-                payMethod === PayMethod.Fiat ? '0px' : '20px',
+              borderTopLeftRadius: payMethod === PayMethod.Crypto ? '0px' : '20px',
+              borderTopRightRadius: payMethod === PayMethod.Fiat ? '0px' : '20px',
               px: '10%',
               pt: 10,
               pb: 5,

@@ -186,18 +186,10 @@ export default function JobDetail() {
                 }}
               >
                 <Stack direction="row" spacing={3}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ minWidth: 130 }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ minWidth: 130 }}>
                     URL :
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="primary"
-                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                  >
+                  <Typography variant="body2" color="primary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     <Link
                       style={{
                         textDecoration: 'underline',

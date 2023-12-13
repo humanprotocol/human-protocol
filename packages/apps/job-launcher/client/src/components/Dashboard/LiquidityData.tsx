@@ -33,12 +33,7 @@ export const LiquidityData = () => {
                   {liquidity?.avgTimeToComplete}h
                 </Typography>
               ) : (
-                <Typography
-                  fontWeight={600}
-                  variant="h4"
-                  color="#CBCFE6"
-                  mb={4}
-                >
+                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
                   ---
                 </Typography>
               )}
@@ -54,12 +49,7 @@ export const LiquidityData = () => {
                   {liquidity?.performanceAccuracy}/10
                 </Typography>
               ) : (
-                <Typography
-                  fontWeight={600}
-                  variant="h4"
-                  color="#CBCFE6"
-                  mb={4}
-                >
+                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
                   ---
                 </Typography>
               )}
@@ -108,12 +98,7 @@ export const LiquidityData = () => {
                   {liquidity?.totalJobs}
                 </Typography>
               ) : (
-                <Typography
-                  fontWeight={600}
-                  variant="h4"
-                  color="#CBCFE6"
-                  mb={4}
-                >
+                <Typography fontWeight={600} variant="h4" color="#CBCFE6" mb={4}>
                   ---
                 </Typography>
               )}

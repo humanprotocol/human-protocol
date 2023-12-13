@@ -21,7 +21,7 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule,
     PaymentModule,
     Web3Module,
-    StorageModule
+    StorageModule,
   ],
   controllers: [JobController],
   providers: [Logger, JobService, JobRepository, RoutingProtocolService],

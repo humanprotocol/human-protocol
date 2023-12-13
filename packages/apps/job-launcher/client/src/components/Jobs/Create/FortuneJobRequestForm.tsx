@@ -5,8 +5,7 @@ import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { FortuneJobRequestValidationSchema } from './schema';
 
 export const FortuneJobRequestForm = () => {
-  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
-    useCreateJobPageUI();
+  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } = useCreateJobPageUI();
 
   const initialValues = {
     title: '',
@@ -28,21 +27,8 @@ export const FortuneJobRequestForm = () => {
 
   return (
     <Box>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={FortuneJobRequestValidationSchema}
-        onSubmit={handleNext}
-      >
-        {({
-          errors,
-          touched,
-          values,
-          dirty,
-          isValid,
-          handleSubmit,
-          handleBlur,
-          setFieldValue,
-        }) => (
+      <Formik initialValues={initialValues} validationSchema={FortuneJobRequestValidationSchema} onSubmit={handleNext}>
+        {({ errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue }) => (
           <form>
             <Grid container spacing={2} mb={4}>
               <Grid item xs={12} sm={12} md={6}>
@@ -64,18 +50,13 @@ export const FortuneJobRequestForm = () => {
                   <TextField
                     name="fortunesRequested"
                     value={values.fortunesRequested}
-                    onChange={(e) =>
-                      setFieldValue('fortunesRequested', e.target.value)
-                    }
+                    onChange={(e) => setFieldValue('fortunesRequested', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="Fortunes Requested"
                     label="Fortunes Requested"
                     type="number"
                     inputProps={{ min: 0, step: 1 }}
-                    error={
-                      touched.fortunesRequested &&
-                      Boolean(errors.fortunesRequested)
-                    }
+                    error={touched.fortunesRequested && Boolean(errors.fortunesRequested)}
                     helperText={errors.fortunesRequested}
                   />
                 </FormControl>
@@ -85,9 +66,7 @@ export const FortuneJobRequestForm = () => {
                   <TextField
                     name="description"
                     value={values.description}
-                    onChange={(e) =>
-                      setFieldValue('description', e.target.value)
-                    }
+                    onChange={(e) => setFieldValue('description', e.target.value)}
                     onBlur={handleBlur}
                     placeholder="Description"
                     label="Description"

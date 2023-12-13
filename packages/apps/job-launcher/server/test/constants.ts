@@ -1,5 +1,5 @@
-import { JobRequestType } from "../src/common/enums/job";
-import { FortuneManifestDto } from "../src/modules/job/job.dto";
+import { JobRequestType } from '../src/common/enums/job';
+import { FortuneManifestDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';

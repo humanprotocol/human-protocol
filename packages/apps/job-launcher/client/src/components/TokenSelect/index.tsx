@@ -1,12 +1,5 @@
 import { ChainId, NETWORKS } from '@human-protocol/sdk';
-import {
-  FormControl,
-  InputLabel,
-  ListItemIcon,
-  MenuItem,
-  Select,
-  SelectProps,
-} from '@mui/material';
+import { FormControl, InputLabel, ListItemIcon, MenuItem, Select, SelectProps } from '@mui/material';
 import { FC } from 'react';
 import { TOKEN_ICONS } from '../../components/Icons/chains';
 import { SUPPORTED_TOKEN_SYMBOLS } from '../../constants';
@@ -38,19 +31,8 @@ export const TokenSelect: FC<TokenSelectProps> = (props) => {
         {SUPPORTED_TOKEN_SYMBOLS.map((symbol) => {
           const IconComponent = TOKEN_ICONS[symbol];
           return (
-            <MenuItem
-              value={
-                (NETWORKS[props.chainId] as any)[
-                  symbol.toLowerCase() + 'Address'
-                ]
-              }
-              key={symbol}
-            >
-              {IconComponent && (
-                <ListItemIcon sx={{ color: '#320a8d' }}>
-                  {IconComponent}
-                </ListItemIcon>
-              )}
+            <MenuItem value={(NETWORKS[props.chainId] as any)[symbol.toLowerCase() + 'Address']} key={symbol}>
+              {IconComponent && <ListItemIcon sx={{ color: '#320a8d' }}>{IconComponent}</ListItemIcon>}
               {symbol}
             </MenuItem>
           );

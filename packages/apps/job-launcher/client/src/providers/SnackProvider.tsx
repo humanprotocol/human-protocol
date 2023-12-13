@@ -2,23 +2,15 @@ import { Alert, Snackbar } from '@mui/material';
 import React, { createContext, useContext, useState } from 'react';
 
 export const SnackbarContext = createContext({
-  openSnackbar: (
-    message: string,
-    severity: 'success' | 'error' | 'warning' | 'info'
-  ) => {},
+  openSnackbar: (message: string, severity: 'success' | 'error' | 'warning' | 'info') => {},
 });
 
 const SnackbarProvider = ({ children }: { children: React.ReactElement }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<
-    'success' | 'error' | 'warning' | 'info'
-  >('success');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning' | 'info'>('success');
 
-  const openSnackbar = (
-    message: string,
-    severity: 'success' | 'error' | 'warning' | 'info'
-  ) => {
+  const openSnackbar = (message: string, severity: 'success' | 'error' | 'warning' | 'info') => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);

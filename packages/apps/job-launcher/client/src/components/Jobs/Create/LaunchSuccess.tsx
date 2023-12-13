@@ -29,13 +29,7 @@ export const LaunchSuccess = () => {
         Your request has been submitted
       </Typography>
       <Box mt={4}>
-        <Button
-          size="large"
-          variant="contained"
-          color="primary"
-          sx={{ width: 240 }}
-          onClick={() => reset?.()}
-        >
+        <Button size="large" variant="contained" color="primary" sx={{ width: 240 }} onClick={() => reset?.()}>
           Add New Job
         </Button>
       </Box>

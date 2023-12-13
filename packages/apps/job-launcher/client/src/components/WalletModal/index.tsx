@@ -1,12 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Button,
-  Dialog,
-  IconButton,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { Box, Button, Dialog, IconButton, Typography, useTheme } from '@mui/material';
 import React from 'react';
 import { useConnect } from 'wagmi';
 import coinbaseSvg from '../../assets/coinbase.svg';
@@ -19,15 +12,8 @@ const WALLET_ICONS: Record<string, any> = {
   walletConnect: walletConnectSvg,
 };
 
-export default function WalletModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  const { connect, connectors, error, isLoading, pendingConnector } =
-    useConnect();
+export default function WalletModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
 
   const theme = useTheme();
 
@@ -56,8 +42,7 @@ export default function WalletModal({
             <br /> your wallet
           </Typography>
           <Typography color="text.secondary" variant="caption">
-            By connecting a wallet, you agree to HUMAN Protocol Terms of Service
-            and consent to its Privacy Policy.
+            By connecting a wallet, you agree to HUMAN Protocol Terms of Service and consent to its Privacy Policy.
           </Typography>
         </Box>
         <Box
@@ -95,9 +80,7 @@ export default function WalletModal({
                 <span>
                   {connector.name}
                   {!connector.ready && ' (unsupported)'}
-                  {isLoading &&
-                    connector.id === pendingConnector?.id &&
-                    ' (connecting)'}
+                  {isLoading && connector.id === pendingConnector?.id && ' (connecting)'}
                 </span>
               </Button>
             ))}
