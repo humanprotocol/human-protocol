@@ -7,6 +7,7 @@ Make sure you have the following software installed and available on your path:
 
 - [Python](https://www.python.org/downloads/) (>=3.10)
 - [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer) (>=1.5.1)
+- [Docker](https://docs.docker.com/desktop) (>=24.0)
 
 and install all dependencies
 
@@ -15,11 +16,9 @@ poetry install
 ```
 
 ## Running the Oracle
-To run the oracle locally, change to the source directory and start the server using uvicorn.
 
-````shell
-poetry run uvicorn main:exchange_oracle --app-dir src
-````
+1. Create an appropriate ``.env`` file under `docker/prod/`. (See `docker/test/.env` for an example.)
+2. Run ``docker compose -f docker/prod/compose.yaml up``
 
 ## API
 
@@ -33,3 +32,10 @@ Then, navigate to the exchange oracle direcotry and run
 ````shell
 docker compose -f docker/test/compose.yaml up --build test --attach test --exit-code-from test
 ````
+
+## Contributing
+
+1. Make sure to install pre commit ``pre-commit install``
+2. Make sure you have postgres-devel packages installed on your OS. It is required for psycopg2 build phase.
+   `libpq-dev` in Debian/Ubuntu, `libpq-devel` on Centos/Fedora/Cygwin/Babun.)
+   `postgres` package in the homebrew for macO
