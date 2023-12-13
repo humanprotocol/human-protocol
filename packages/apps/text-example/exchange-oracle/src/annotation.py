@@ -4,10 +4,16 @@ from basemodels import Manifest
 from doccano_client import DoccanoClient
 from doccano_client.models.data_upload import Task
 from pydantic import BaseModel, constr
-
 from src.config import Config
 
-EtheriumAddress = constr(strip_whitespace=True, to_lower=True, min_length=42, max_length=42, regex="0x[a-f0-9]{40}")
+EtheriumAddress = constr(
+    strip_whitespace=True,
+    to_lower=True,
+    min_length=42,
+    max_length=42,
+    regex="0x[a-f0-9]{40}",
+)
+
 
 class JobApplication(BaseModel):
     worker_id: EtheriumAddress
@@ -16,7 +22,9 @@ class JobApplication(BaseModel):
 
 class UserRegistrationInfo(BaseModel):
     worker_address: EtheriumAddress
-    name: constr(strip_whitespace=True, min_length=3, max_length=30, regex="[a-zA-Z0-9_-]{3,30}")
+    name: constr(
+        strip_whitespace=True, min_length=3, max_length=30, regex="[a-zA-Z0-9_-]{3,30}"
+    )
 
 
 def get_client():
@@ -91,11 +99,13 @@ def is_done(project_id: int):
     client = get_client()
     return client.get_progress(project_id).remaining == 0
 
+
 def download_annotations(project_id: int, job_request_id: str):
     client = get_client()
     dir_name = Config.storage_config.dataset_dir / job_request_id / project_id
-    client.download(project_id, format='JSONL', dir_name=dir_name, only_approved=True)
+    client.download(project_id, format="JSONL", dir_name=dir_name, only_approved=True)
     return dir_name
+
 
 def delete_project(project_id: int):
     client = get_client()

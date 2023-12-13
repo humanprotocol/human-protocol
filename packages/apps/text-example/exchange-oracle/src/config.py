@@ -3,11 +3,11 @@ import logging
 import os
 import sys
 from logging.config import dictConfig
+from pathlib import Path
 
-from pydantic import BaseModel
 from dotenv import load_dotenv
 from minio import Minio
-from pathlib import Path
+from pydantic import BaseModel
 from urllib3 import PoolManager
 
 if not load_dotenv():
@@ -89,7 +89,7 @@ class StorageConfig:
         )
 
     @classmethod
-    def results_s3_url(cls, job_id, extension='.jsonl'):
+    def results_s3_url(cls, job_id, extension=".jsonl"):
         return "/".join([cls.endpoint_url, cls.results_bucket_name, job_id]) + extension
 
 
@@ -119,7 +119,12 @@ class LoggingConfig:
     def setup_logging(cls, force_reset=False):
         if not cls._ready or force_reset:
             log_level_name = logging.getLevelName(
-                cls.log_level or (logging.DEBUG if Config.environment in ["development", "test"] else logging.INFO)
+                cls.log_level
+                or (
+                    logging.DEBUG
+                    if Config.environment in ["development", "test"]
+                    else logging.INFO
+                )
             )
 
             log_config = {
@@ -134,7 +139,10 @@ class LoggingConfig:
                     },
                 },
                 "handlers": {
-                    "console": {"formatter": "default", "class": "logging.StreamHandler"},
+                    "console": {
+                        "formatter": "default",
+                        "class": "logging.StreamHandler",
+                    },
                 },
                 "loggers": {
                     cls.root_logger_name: {
@@ -153,16 +161,20 @@ class LoggingConfig:
                     sys.__excepthook__(exc_type, exc_value, exc_traceback)
                     return
 
-                logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+                logger.error(
+                    "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+                )
 
             sys.excepthook = handle_exception
 
             cls._ready = True
 
+
 class HumanConfig:
-    recording_oracle_url=os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
-    human_app_signature=os.environ.get("HUMAN_APP_SIGNATURE")
-    job_launcher_address=os.environ.get("JOB_LAUNCHER_ADDRESS")
+    recording_oracle_url = os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
+    human_app_signature = os.environ.get("HUMAN_APP_SIGNATURE")
+    job_launcher_address = os.environ.get("JOB_LAUNCHER_ADDRESS")
+
 
 class Config:
     port = int(os.environ.get("PORT"))
@@ -182,7 +194,7 @@ class Config:
     storage_config = StorageConfig
     doccano = DoccanoConfig
     logging = LoggingConfig
-    human=HumanConfig
+    human = HumanConfig
 
     @classmethod
     def blockchain_config_from_id(cls, chain_id):

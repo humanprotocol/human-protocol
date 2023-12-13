@@ -1,20 +1,36 @@
 import unittest
 import uuid
 from http import HTTPStatus
+from test.constants import JOB_LAUNCHER
+from test.utils import (
+    assert_http_error_response,
+    assert_no_entries_in_db,
+    get_web3_from_private_key,
+    is_valid_uuid,
+    random_address,
+    random_escrow_info,
+    random_userinfo,
+    random_username,
+    upload_manifest_and_task_data,
+)
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
-
 from src.annotation import get_client
 from src.chain import sign_message
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests
-from src.db import Session, Base, engine, JobRequest, Statuses, Worker, AnnotationProject
-from src.main import exchange_oracle, Endpoints, Errors
-from test.utils import assert_http_error_response, assert_no_entries_in_db, random_address, random_username, \
-    random_userinfo, is_valid_uuid, random_escrow_info, upload_manifest_and_task_data, get_web3_from_private_key
-from test.constants import JOB_LAUNCHER
+from src.db import (
+    AnnotationProject,
+    Base,
+    JobRequest,
+    Session,
+    Statuses,
+    Worker,
+    engine,
+)
+from src.main import Endpoints, Errors, exchange_oracle
 
 get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
 get_manifest_url_path = "src.cron_jobs.get_manifest_url"
@@ -32,7 +48,9 @@ class APITest(unittest.TestCase):
 
         self.human_signature = {"Signature": Config.human.human_app_signature}
         self.job_launcher = JOB_LAUNCHER
-        self.job_launcher_signature = {"Signature": self.job_launcher.sign(self.message)}
+        self.job_launcher_signature = {
+            "Signature": self.job_launcher.sign(self.message)
+        }
 
         self.mock_escrow = MagicMock()
         self.mock_escrow.status = "Pending"
@@ -45,19 +63,18 @@ class APITest(unittest.TestCase):
     def tearDown(self):
         Base.metadata.drop_all(engine)
 
-
     @patch(get_escrow_path)
     def test_register_job_request(self, mock_get_escrow: MagicMock):
         """When a valid job request is posted:
-            - a new pending Job Request should be added to the database
-            - its id returned by the api
+        - a new pending Job Request should be added to the database
+        - its id returned by the api
         """
         mock_get_escrow.return_value = self.mock_escrow
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=self.job_launcher_signature
+            headers=self.job_launcher_signature,
         )
 
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
@@ -65,9 +82,11 @@ class APITest(unittest.TestCase):
 
         # check db status
         with Session() as session:
-            job = session.query(JobRequest).where(
-                JobRequest.id == response.json()["id"]
-            ).one()
+            job = (
+                session.query(JobRequest)
+                .where(JobRequest.id == response.json()["id"])
+                .one()
+            )
 
         assert job is not None
         assert job.status == Statuses.pending
@@ -76,8 +95,8 @@ class APITest(unittest.TestCase):
 
     def test_register_job_request_failing_due_to_invalid_escrow_info(self):
         """When an invalid escrow info is posted:
-            - an appropriate error response should be returned
-            - NO Job Request should be added to the database.
+        - an appropriate error response should be returned
+        - NO Job Request should be added to the database.
         """
         invalid_message = self.message.copy()
         invalid_message["chain_id"] = -100
@@ -85,7 +104,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=invalid_message,
-            headers={"Signature": self.job_launcher.sign(message=invalid_message)}
+            headers={"Signature": self.job_launcher.sign(message=invalid_message)},
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
@@ -96,24 +115,26 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=invalid_message,
-            headers={"Signature": self.job_launcher.sign(message=invalid_message)}
+            headers={"Signature": self.job_launcher.sign(message=invalid_message)},
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
         assert_no_entries_in_db(JobRequest)
 
     @patch(get_escrow_path)
-    def test_register_job_request_failing_due_to_missing_escrow(self, mock_get_escrow: MagicMock):
+    def test_register_job_request_failing_due_to_missing_escrow(
+        self, mock_get_escrow: MagicMock
+    ):
         """When a job request with an escrow info that points to no escrow is posted:
-            - an appropriate error response should be returned
-            - NO Job Request should be added to the database
+        - an appropriate error response should be returned
+        - NO Job Request should be added to the database
         """
         mock_get_escrow.return_value = None
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=self.job_launcher_signature
+            headers=self.job_launcher_signature,
         )
 
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
@@ -121,10 +142,12 @@ class APITest(unittest.TestCase):
         assert_no_entries_in_db(JobRequest)
 
     @patch(get_escrow_path)
-    def test_register_job_request_failing_due_to_invalid_escrow(self, mock_get_escrow: MagicMock):
+    def test_register_job_request_failing_due_to_invalid_escrow(
+        self, mock_get_escrow: MagicMock
+    ):
         """When a job request with an escrow info that points to an invalid escrow is posted:
-            - an appropriate error response should be returned
-            - NO Job Request should be added to the database
+        - an appropriate error response should be returned
+        - NO Job Request should be added to the database
         """
         # insufficient funds
         mock_escrow = MagicMock()
@@ -135,7 +158,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=self.job_launcher_signature
+            headers=self.job_launcher_signature,
         )
 
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
@@ -148,7 +171,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=self.job_launcher_signature
+            headers=self.job_launcher_signature,
         )
 
         assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
@@ -156,15 +179,21 @@ class APITest(unittest.TestCase):
 
     def test_list_available_jobs(self):
         """When a list of available jobs is requested:
-            - a list of uuids (v4) representing job ids of Jobs in progress should be returned with the response
+        - a list of uuids (v4) representing job ids of Jobs in progress should be returned with the response
         """
-        n_statuses = len(Statuses) - 1 # one will be valid, so deduct it
+        n_statuses = len(Statuses) - 1  # one will be valid, so deduct it
         n_returned_jobs = 3
         n_entries = n_statuses + n_returned_jobs
 
         with Session() as session:
-            jobs = [JobRequest(escrow_address=random_address(), chain_id=self.chain_id, status=Statuses.in_progress.value) for _ in
-                    range(n_entries)]
+            jobs = [
+                JobRequest(
+                    escrow_address=random_address(),
+                    chain_id=self.chain_id,
+                    status=Statuses.in_progress.value,
+                )
+                for _ in range(n_entries)
+            ]
 
             # set to status other than in_progress
             for i, status in enumerate(Statuses):
@@ -173,10 +202,7 @@ class APITest(unittest.TestCase):
             session.add_all(jobs)
             session.commit()
 
-        response = self.client.get(
-            Endpoints.JOB_LIST,
-            headers=self.human_signature
-        )
+        response = self.client.get(Endpoints.JOB_LIST, headers=self.human_signature)
 
         assert response.status_code == HTTPStatus.OK
 
@@ -186,19 +212,16 @@ class APITest(unittest.TestCase):
 
     def test_register_user(self):
         """When a valid user registration is posted:
-            - a new Worker should be created and added to the db
-            - a new doccano annotator should be created with the given username and a secure password
-            - the user credentials should be returned with the response
+        - a new Worker should be created and added to the db
+        - a new doccano annotator should be created with the given username and a secure password
+        - the user credentials should be returned with the response
         """
 
         user_info, worker_address, username = random_userinfo()
 
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
-
 
         # check response
         assert response.status_code == HTTPStatus.OK
@@ -217,73 +240,69 @@ class APITest(unittest.TestCase):
 
     def test_register_user_failing_due_to_wallett_already_registered(self):
         """When it is attempted to register a user with the same wallet address as an existing user:
-            - an appropriate error response should be returned
-            - no new worker should be added to the db
-            - no new worker should be added to doccano
+        - an appropriate error response should be returned
+        - no new worker should be added to the db
+        - no new worker should be added to doccano
         """
 
         # normal registration
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
 
         # same wallet, different username
         user_info["name"] = random_username()
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
         assert_http_error_response(response, Errors.WORKER_ALREADY_REGISTERED)
 
     def test_register_user_failing_due_to_unavailable_username(self):
         """When it is attempted to register a user with the same username as an existing user:
-            - an appropriate error response should be returned
-            - no new worker should be added to the db
+        - an appropriate error response should be returned
+        - no new worker should be added to the db
         """
 
         # normal registration
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
 
         # same username, different wallet
         user_info["worker_address"] = random_address()
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
 
         assert_http_error_response(response, Errors.WORKER_CREATION_FAILED)
 
         # make sure worker was NOT written to db
         with Session() as session:
-            worker = session.query(Worker).where(Worker.id == user_info["worker_address"]).one_or_none()
+            worker = (
+                session.query(Worker)
+                .where(Worker.id == user_info["worker_address"])
+                .one_or_none()
+            )
         assert worker is None
 
     @patch(get_manifest_url_path)
     @patch(get_escrow_path)
-    def test_job_application(self, mock_get_escrow: MagicMock, mock_get_manifest_url: MagicMock):
+    def test_job_application(
+        self, mock_get_escrow: MagicMock, mock_get_manifest_url: MagicMock
+    ):
         """When applying for an available job with an existing worker
-            - the worker should be added to the project
-            - the database should be updated
-            - a response with the username and the link to the annotation tool should be returned
+        - the worker should be added to the project
+        - the database should be updated
+        - a response with the username and the link to the annotation tool should be returned
         """
         # worker registration, adds worker to db
         user_info, worker_address, username = random_userinfo()
         response = self.client.post(
-            Endpoints.USER_REGISTER,
-            json=user_info,
-            headers=self.human_signature
+            Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
         authentication = response.json()
@@ -293,7 +312,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=self.message,
-            headers=self.job_launcher_signature
+            headers=self.job_launcher_signature,
         )
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
         assert response.status_code == HTTPStatus.OK
@@ -322,7 +341,7 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
         assert response.status_code == HTTPStatus.OK
 
@@ -332,89 +351,145 @@ class APITest(unittest.TestCase):
         assert response_content["url"] is not None
 
         with Session() as session:
-            session.query(AnnotationProject).where((AnnotationProject.job_request_id == job_id) & (AnnotationProject.worker_id == worker_address)).one()
+            session.query(AnnotationProject).where(
+                (AnnotationProject.job_request_id == job_id)
+                & (AnnotationProject.worker_id == worker_address)
+            ).one()
 
     def test_job_application_failing_due_to_missing_worker_or_job(self):
         """When applying for an unavailable job or a worker that does not exist:
-            - an appropriate error should be returned
-            - the entities should not be linked
+        - an appropriate error should be returned
+        - the entities should not be linked
         """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
         with Session() as session:
-            session.add(Worker(id=worker_address, is_validated=True, username=username, password="password1234"))
+            session.add(
+                Worker(
+                    id=worker_address,
+                    is_validated=True,
+                    username=username,
+                    password="password1234",
+                )
+            )
             session.commit()
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
         with Session() as session:
-            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress))
+            session.add(
+                JobRequest(
+                    id=job_id,
+                    escrow_address=self.escrow_address,
+                    chain_id=self.chain_id,
+                    status=Statuses.in_progress,
+                )
+            )
             session.commit()
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": random_address(), "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
         assert_http_error_response(response, Errors.JOB_OR_WORKER_MISSING)
 
     def test_job_application_failing_due_to_unvalidated_worker(self):
         """When applying for an available job with a worker that was not validated:
-            - an appropriate error should be returned
-            - the entities should not be linked
+        - an appropriate error should be returned
+        - the entities should not be linked
         """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
         with Session() as session:
-            session.add(Worker(id=worker_address, is_validated=False, username=username, password="password1234"))
-            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress))
+            session.add(
+                Worker(
+                    id=worker_address,
+                    is_validated=False,
+                    username=username,
+                    password="password1234",
+                )
+            )
+            session.add(
+                JobRequest(
+                    id=job_id,
+                    escrow_address=self.escrow_address,
+                    chain_id=self.chain_id,
+                    status=Statuses.in_progress,
+                )
+            )
             session.commit()
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
         assert_http_error_response(response, Errors.WORKER_NOT_VALIDATED)
 
     def test_job_application_failing_due_to_unavailable_job(self):
         """When a job application includes a job that is not in the right status:
-            - an appropriate error should be returned
-            - the entities should not be linked.
+        - an appropriate error should be returned
+        - the entities should not be linked.
         """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
 
         with Session() as session:
-            session.add(Worker(id=worker_address, is_validated=True, username=username, password="password1234"))
-            session.add(JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id))
+            session.add(
+                Worker(
+                    id=worker_address,
+                    is_validated=True,
+                    username=username,
+                    password="password1234",
+                )
+            )
+            session.add(
+                JobRequest(
+                    id=job_id,
+                    escrow_address=self.escrow_address,
+                    chain_id=self.chain_id,
+                )
+            )
             session.commit()
 
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
         assert_http_error_response(response, Errors.JOB_UNAVAILABLE)
 
     def test_job_application_failing_due_to_worker_assignment_error(self):
         """When a job application fails during the worker assignment stage:
-            - an appropriate error should be returned
-            - the entities should not be linked.
+        - an appropriate error should be returned
+        - the entities should not be linked.
         """
         _, worker_address, username = random_userinfo()
         job_id = str(uuid.uuid4())
-        anno_project_id = job_id + '__1'
+        anno_project_id = job_id + "__1"
         with Session() as session:
-            session.add(Worker(id=worker_address, is_validated=True, username="DOES_NOT_EXIST", password="password1234"))
-            jr = JobRequest(id=job_id, escrow_address=self.escrow_address, chain_id=self.chain_id, status=Statuses.in_progress)
+            session.add(
+                Worker(
+                    id=worker_address,
+                    is_validated=True,
+                    username="DOES_NOT_EXIST",
+                    password="password1234",
+                )
+            )
+            jr = JobRequest(
+                id=job_id,
+                escrow_address=self.escrow_address,
+                chain_id=self.chain_id,
+                status=Statuses.in_progress,
+            )
             session.add(jr)
             session.add(AnnotationProject(id=1, name=anno_project_id, job_request=jr))
             session.commit()
@@ -422,15 +497,17 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_APPLY,
             json={"worker_id": worker_address, "job_id": job_id},
-            headers=self.human_signature
+            headers=self.human_signature,
         )
 
         assert_http_error_response(response, Errors.WORKER_ASSIGNMENT_FAILED)
 
     @patch(get_escrow_path)
-    def test_endpoints_failing_due_to_invalid_signature(self, mock_get_escrow: MagicMock):
+    def test_endpoints_failing_due_to_invalid_signature(
+        self, mock_get_escrow: MagicMock
+    ):
         """When any endpoint that requires a signature from the calling service receives an invalid signature:
-            - an appropriate error response should be returned
+        - an appropriate error response should be returned
         """
         # human app endpoints
         user_info, worker_address, username = random_userinfo()
@@ -441,18 +518,26 @@ class APITest(unittest.TestCase):
         response = self.client.get(Endpoints.JOB_LIST, headers=header)
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
-        response = self.client.post(Endpoints.USER_REGISTER, json=user_info, headers=header)
+        response = self.client.post(
+            Endpoints.USER_REGISTER, json=user_info, headers=header
+        )
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
-        response = self.client.post(Endpoints.JOB_APPLY, json=job_application, headers=header)
+        response = self.client.post(
+            Endpoints.JOB_APPLY, json=job_application, headers=header
+        )
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
         # job launcher endpoint
         mock_get_escrow.return_value = self.mock_escrow
-        header = {"Signature": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
-        response = self.client.post(Endpoints.JOB_REQUEST, json=self.message, headers=header)
+        header = {
+            "Signature": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+        response = self.client.post(
+            Endpoints.JOB_REQUEST, json=self.message, headers=header
+        )
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -3,17 +3,16 @@ from typing import List
 from uuid import uuid4
 
 import sqlalchemy
-from sqlalchemy import UniqueConstraint, String, DateTime, ForeignKey, Sequence
+from sqlalchemy import DateTime, ForeignKey, Sequence, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
-    sessionmaker,
     DeclarativeBase,
     Mapped,
     mapped_column,
     relationship,
+    sessionmaker,
 )
 from sqlalchemy.sql import func
-
 from src.config import Config
 
 engine = sqlalchemy.create_engine(Config.postgres_config.connection_url())

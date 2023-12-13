@@ -8,12 +8,11 @@ from eth_account.messages import encode_defunct
 from human_protocol_sdk.constants import Status
 from human_protocol_sdk.escrow import EscrowClient, EscrowData
 from pydantic import BaseModel
+from src.config import BlockChainConfig, Config
 from starlette.requests import Request
 from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
-
-from src.config import Config, BlockChainConfig
 
 
 class EscrowInfo(BaseModel):
@@ -70,6 +69,7 @@ def get_manifest_url(info: EscrowInfo) -> str:
     escrow_client = EscrowClient(get_web3(chain_id=info.chain_id))
     return escrow_client.get_manifest_url(info.escrow_address)
 
+
 def validate_escrow(
     escrow: EscrowData,
 ) -> bool:
@@ -89,7 +89,9 @@ def validate_human_app_signature(signature: str):
     return signature == Config.human.human_app_signature
 
 
-async def validate_job_launcher_signature(escrow_info: EscrowInfo, request: Request, signature: str, escrow: EscrowData):
+async def validate_job_launcher_signature(
+    escrow_info: EscrowInfo, request: Request, signature: str, escrow: EscrowData
+):
     data: bytes = await request.body()
     message: dict = literal_eval(data.decode("utf-8"))
     w3 = get_web3(escrow_info.chain_id)

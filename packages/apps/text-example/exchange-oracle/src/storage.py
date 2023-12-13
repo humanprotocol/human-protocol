@@ -1,14 +1,16 @@
 """Module for interaction with S3 storage."""
-from src.config import Config
-from urllib.parse import urlparse
-from basemodels import Manifest
-from basemodels.manifest.data.taskdata import TaskDataEntry
-from pathlib import Path
 import json
 from dataclasses import dataclass
-from random import shuffle
-from zipfile import ZipFile
 from itertools import count
+from pathlib import Path
+from random import shuffle
+from urllib.parse import urlparse
+from zipfile import ZipFile
+
+from basemodels import Manifest
+from basemodels.manifest.data.taskdata import TaskDataEntry
+from src.config import Config
+
 
 @dataclass
 class S3Info:
@@ -94,17 +96,20 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
 
     return doccano_filepath
 
-def convert_annotations_to_raw_results(job_dir: Path, job_id: str, annotator_name_map: dict[str, str]=None):
+
+def convert_annotations_to_raw_results(
+    job_dir: Path, job_id: str, annotator_name_map: dict[str, str] = None
+):
     if annotator_name_map is None:
         annotator_name_map = {}
 
-    outfile = job_dir / f'{job_id}.jsonl'
+    outfile = job_dir / f"{job_id}.jsonl"
     anno_ids = count()
     for project_zip in job_dir.glob("*.zip"):
         with ZipFile(project_zip) as zip_file:
             for anno_file in zip_file.filelist:
-                username = anno_file.filename.split('.jsonl')[0]
-                with zip_file.open(anno_file) as af, open(outfile, 'a') as of:
+                username = anno_file.filename.split(".jsonl")[0]
+                with zip_file.open(anno_file) as af, open(outfile, "a") as of:
                     for line in af.readlines():
                         try:
                             annotation = json.loads(line)
@@ -114,11 +119,13 @@ def convert_annotations_to_raw_results(job_dir: Path, job_id: str, annotator_nam
                             start, end, label = span
                             record = {
                                 "task_key": annotation["task_key"],
-                                "annotator_id": annotator_name_map.get(username, "UNKNOWN"),
+                                "annotator_id": annotator_name_map.get(
+                                    username, "UNKNOWN"
+                                ),
                                 "annotation_id": next(anno_ids),
-                                "value": { "span": [start, end], "label": label }
+                                "value": {"span": [start, end], "label": label},
                             }
-                            json_line = json.dumps(record) + '\n'
+                            json_line = json.dumps(record) + "\n"
                             of.write(json_line)
     return outfile
 
@@ -128,7 +135,7 @@ def upload_data(
     client=Config.storage_config.client(),
     bucket_name: str = Config.storage_config.results_bucket_name,
     glob_pattern: str = "*.txt",
-    content_type: str = "text/plain"
+    content_type: str = "text/plain",
 ):
     files = []
     if path.is_file():
