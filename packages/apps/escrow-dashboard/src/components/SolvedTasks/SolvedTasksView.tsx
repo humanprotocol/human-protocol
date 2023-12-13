@@ -65,7 +65,7 @@ export const SolvedTasksView: FC = () => {
 
   return (
     <CardContainer
-      sxProps={{ padding: { xs: '32px 32px 44px', md: '80px 59px 74px 78px' } }}
+      sxProps={{ padding: { xs: '42px 32px 32px', md: '74px 64px 64px' } }}
     >
       {isLoading ? (
         <SkeletonTheme
@@ -139,7 +139,7 @@ export const SolvedTasksView: FC = () => {
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    width={80}
+                    width={48}
                     tick={{
                       fill: '#320A8D',
                       fontSize: '10px',
