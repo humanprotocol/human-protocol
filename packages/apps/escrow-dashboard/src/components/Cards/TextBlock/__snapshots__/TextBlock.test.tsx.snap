@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TextBlock component renders correctly, corresponds to the snapshot 1`] = `
+<div
+  className="MuiBox-root css-19n1ffs"
+>
+  <p
+    className="MuiTypography-root MuiTypography-body2 css-ngc1bc-MuiTypography-root"
+  >
+    Title
+  </p>
+  <div
+    className="MuiBox-root css-h43ml6"
+  >
+    <h2
+      className="MuiTypography-root MuiTypography-h2 css-14wx86a-MuiTypography-root"
+    >
+      Value
+    </h2>
+  </div>
+</div>
+`;

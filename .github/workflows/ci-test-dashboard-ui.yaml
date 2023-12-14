@@ -1,4 +1,4 @@
-name: Escrow dashboard check
+name: Dashboard UI check
 
 on:
   push:
@@ -10,16 +10,16 @@ on:
       - '!packages/core/mx/**'
       - 'packages/sdk/typescript/human-protocol-sdk/**'
       - 'packages/sdk/typescript/subgraph/**'
-      - 'packages/apps/escrow-dashboard/**'
+      - 'packages/apps/dashboard/ui/**'
   workflow_dispatch:
 
 jobs:
   dashboard-test:
-    name: Escrow Dashboard Test
+    name: Dashboard UI Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global yarn && yarn
         name: Install dependencies
-      - run: yarn escrow-dashboard:test
-        name: Run escrow-dashboard test
+      - run: yarn dashboard-ui:test
+        name: Run dashboard-ui test
