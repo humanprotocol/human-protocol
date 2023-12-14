@@ -9,8 +9,10 @@ from validators import url as URL
 from web3 import Web3
 from web3.contract import Contract
 from web3.types import TxReceipt
+from web3.exceptions import ContractLogicError
+from web3.types import TxParams
 
-from human_protocol_sdk.constants import ARTIFACTS_FOLDER, GAS_LIMIT
+from human_protocol_sdk.constants import ARTIFACTS_FOLDER
 
 logger = logging.getLogger("human_protocol_sdk.utils")
 
@@ -193,11 +195,7 @@ def get_data_from_subgraph(url: str, query: str, params: dict = None):
 
 
 def handle_transaction(
-    w3: Web3,
-    tx_name: str,
-    tx,
-    exception: Exception,
-    gas_limit: Optional[int] = None,
+    w3: Web3, tx_name: str, tx, exception: Exception, tx_options: Optional[TxParams]
 ):
     """Executes the transaction and waits for the receipt.
 
@@ -205,6 +203,9 @@ def handle_transaction(
     :param tx_name: Name of the transaction
     :param tx: Transaction object
     :param exception: Exception class to raise in case of error
+    :param tx_options: (Optional) Additional transaction parameters
+        - If provided, can include values like 'gas', 'gas_price', 'nonce', etc
+        - If 'gas' is not specified or is None, it will be estimated using tx.estimate_gas()
 
     :return: The transaction receipt
 
@@ -219,8 +220,19 @@ def handle_transaction(
             "You must add construct_sign_and_send_raw_middleware middleware to Web3 instance"
         )
     try:
-        tx_hash = tx.transact({"gas": gas_limit or GAS_LIMIT})
+        if tx_options and tx_options.get("gas") is None:
+            tx_options["gas"] = tx.estimate_gas()
+        elif tx_options is None:
+            tx_options = {"gas": tx.estimate_gas()}
+        print(tx_options.get("gas"))
+        tx_hash = tx.transact(tx_options)
         return w3.eth.wait_for_transaction_receipt(tx_hash)
+    except ContractLogicError as e:
+        start_index = e.args[0].find("execution reverted: ") + len(
+            "execution reverted: "
+        )
+        message = e.args[0][start_index:]
+        raise exception(f"{tx_name} transaction failed: {message}")
     except Exception as e:
         logger.exception(f"Handle transaction error: {e}")
         if "reverted with reason string" in e.args[0]:

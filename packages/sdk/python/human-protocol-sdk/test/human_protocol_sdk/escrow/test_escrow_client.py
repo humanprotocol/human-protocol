@@ -2,7 +2,7 @@ from types import SimpleNamespace
 import unittest
 from datetime import datetime
 from test.human_protocol_sdk.utils import DEFAULT_GAS_PAYER_PRIV
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch, ANY
 
 from human_protocol_sdk.constants import NETWORKS, ChainId, Status
 from human_protocol_sdk.escrow import EscrowClient, EscrowClientError, EscrowConfig
@@ -404,6 +404,42 @@ class TestEscrowClient(unittest.TestCase):
             )
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
 
+    def test_create_escrow_with_tx_options(self):
+        mock_function_create = MagicMock()
+        self.escrow.factory_contract.functions.createEscrow = mock_function_create
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        token_address = "0x1234567890123456789012345678901234567890"
+        job_requester_id = "job-requester"
+        trusted_handlers = [self.w3.eth.default_account]
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            with patch(
+                "human_protocol_sdk.escrow.escrow_client.next"
+            ) as mock_function_next:
+                mock_function_next.return_value = SimpleNamespace(
+                    args=SimpleNamespace(escrow=escrow_address)
+                )
+                response = self.escrow.create_escrow(
+                    token_address, trusted_handlers, job_requester_id, tx_options
+                )
+
+                self.assertEqual(response, escrow_address)
+                mock_function_create.assert_called_once_with(
+                    token_address, trusted_handlers, job_requester_id
+                )
+                mock_function_next.assert_called_once()
+
+                mock_function.assert_called_once_with(
+                    self.w3,
+                    "Create Escrow",
+                    mock_function_create.return_value,
+                    EscrowClientError,
+                    tx_options,
+                )
+
     def test_setup(self):
         mock_contract = MagicMock()
         mock_contract.functions.setup = MagicMock()
@@ -555,6 +591,36 @@ class TestEscrowClient(unittest.TestCase):
             "Escrow address is not provided by the factory", str(cm.exception)
         )
 
+    def test_setup_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.setup = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        escrow_config = EscrowConfig(
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            "0x1234567890123456789012345678901234567890",
+            10,
+            10,
+            10,
+            "https://www.example.com/result",
+            "test",
+        )
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.escrow.setup(escrow_address, escrow_config, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Setup",
+                mock_contract.functions.setup.return_value,
+                EscrowClientError,
+                tx_options,
+            )
+
     def test_create_and_setup_escrow(self):
         mock_function_create = MagicMock()
         self.escrow.factory_contract.functions.createEscrow = mock_function_create
@@ -698,7 +764,9 @@ class TestEscrowClient(unittest.TestCase):
             self.escrow.fund(escrow_address, amount)
 
             self.escrow.get_token_address.assert_called_once_with(escrow_address)
-            mock_function.assert_called_once()
+            mock_function.assert_called_once_with(
+                self.w3, "Fund", ANY, EscrowClientError, None
+            )
 
     def test_fund_invalid_address(self):
         escrow_address = "invalid_address"
@@ -731,6 +799,28 @@ class TestEscrowClient(unittest.TestCase):
         with self.assertRaises(EscrowClientError) as cm:
             escrowClient.fund(escrow_address, amount)
         self.assertEqual("You must add an account to Web3 instance", str(cm.exception))
+
+    def test_fund_with_tx_options(self):
+        mock_function_create = MagicMock()
+        self.escrow.factory_contract.functions.createEscrow = mock_function_create
+        escrow_address = token_address = "0x1234567890123456789012345678901234567890"
+        amount = 100
+        self.escrow.get_token_address = MagicMock(return_value=token_address)
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.fund(escrow_address, amount, tx_options)
+
+            self.escrow.get_token_address.assert_called_once_with(escrow_address)
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Fund",
+                ANY,
+                EscrowClientError,
+                tx_options,
+            )
 
     def test_store_results(self):
         mock_contract = MagicMock()
@@ -846,6 +936,30 @@ class TestEscrowClient(unittest.TestCase):
             "Escrow address is not provided by the factory",
             str(cm.exception),
         )
+
+    def test_store_results_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.storeResults = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        url = "https://www.example.com/result"
+        hash = "test"
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.store_results(escrow_address, url, hash, tx_options)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.storeResults.assert_called_once_with(url, hash)
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Store Results",
+                mock_contract.functions.storeResults.return_value,
+                EscrowClientError,
+                tx_options,
+            )
 
     def test_bulk_payout(self):
         mock_contract = MagicMock()
@@ -1217,6 +1331,44 @@ class TestEscrowClient(unittest.TestCase):
             str(cm.exception),
         )
 
+    def test_bulk_payout_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.bulkPayOut = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        self.escrow.get_balance = MagicMock(return_value=100)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        recipients = ["0x1234567890123456789012345678901234567890"]
+        amounts = [100]
+        final_results_url = "https://www.example.com/result"
+        final_results_hash = "test"
+        txId = 1
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.bulk_payout(
+                escrow_address,
+                recipients,
+                amounts,
+                final_results_url,
+                final_results_hash,
+                txId,
+                tx_options,
+            )
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.bulkPayOut.assert_called_once_with(
+                recipients, amounts, final_results_url, final_results_hash, txId
+            )
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Bulk Payout",
+                mock_contract.functions.bulkPayOut.return_value,
+                EscrowClientError,
+                tx_options,
+            )
+
     def test_complete(self):
         mock_contract = MagicMock()
         mock_contract.functions.complete = MagicMock()
@@ -1300,6 +1452,28 @@ class TestEscrowClient(unittest.TestCase):
             "Escrow address is not provided by the factory", str(cm.exception)
         )
 
+    def test_complete_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.complete = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.complete(escrow_address, tx_options)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.complete.assert_called_once_with()
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Complete",
+                mock_contract.functions.complete.return_value,
+                EscrowClientError,
+                tx_options,
+            )
+
     def test_cancel(self):
         mock_contract = MagicMock()
         mock_contract.functions.cancel = MagicMock()
@@ -1382,6 +1556,28 @@ class TestEscrowClient(unittest.TestCase):
             "Escrow address is not provided by the factory", str(cm.exception)
         )
 
+    def test_cancel_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.cancel = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.cancel(escrow_address, tx_options)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.cancel.assert_called_once_with()
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Cancel",
+                mock_contract.functions.cancel.return_value,
+                EscrowClientError,
+                tx_options,
+            )
+
     def test_abort(self):
         mock_contract = MagicMock()
         mock_contract.functions.abort = MagicMock()
@@ -1463,6 +1659,28 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )
+
+    def test_abort_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.abort = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.abort(escrow_address, tx_options)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.abort.assert_called_once_with()
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Abort",
+                mock_contract.functions.abort.return_value,
+                EscrowClientError,
+                tx_options,
+            )
 
     def test_add_trusted_handlers(self):
         mock_contract = MagicMock()
@@ -1558,6 +1776,32 @@ class TestEscrowClient(unittest.TestCase):
         self.assertEqual(
             "Escrow address is not provided by the factory", str(cm.exception)
         )
+
+    def test_add_trusted_handlers_with_tx_options(self):
+        mock_contract = MagicMock()
+        mock_contract.functions.addTrustedHandlers = MagicMock()
+        self.escrow._get_escrow_contract = MagicMock(return_value=mock_contract)
+        escrow_address = "0x1234567890123456789012345678901234567890"
+        handlers = [
+            "0x1234567890123456789012345678901234567891",
+            "0x1234567890123456789012345678901234567892",
+        ]
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.escrow.escrow_client.handle_transaction"
+        ) as mock_function:
+            self.escrow.add_trusted_handlers(escrow_address, handlers, tx_options)
+
+            self.escrow._get_escrow_contract.assert_called_once_with(escrow_address)
+            mock_contract.functions.addTrustedHandlers.assert_called_once_with(handlers)
+            mock_function.assert_called_once_with(
+                self.w3,
+                "Add Trusted Handlers",
+                mock_contract.functions.addTrustedHandlers.return_value,
+                EscrowClientError,
+                tx_options,
+            )
 
     def test_get_balance(self):
         mock_contract = MagicMock()
