@@ -23,7 +23,7 @@ export const Container: FC<PropsWithChildren<ContainerProps>> = ({
         borderRadius: '16px',
         padding: densed
           ? { xs: '18px 24px', xl: '32px 40px' }
-          : { xs: '24px 32px', xl: '48px 62px 56px 62px' },
+          : { xs: '26px 32px', xl: '52px 64px' },
         height: '100%',
         position: 'relative',
         ...sxProps,

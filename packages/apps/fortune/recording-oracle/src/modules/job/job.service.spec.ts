@@ -13,8 +13,11 @@ import {
 import { JobRequestType } from '../../common/enums/job';
 import {
   MOCK_ADDRESS,
+  MOCK_ENCRYPTION_PASSPHRASE,
+  MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_URL,
+  MOCK_PUBLIC_KEY,
   MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
@@ -59,15 +62,27 @@ jest.mock('@human-protocol/sdk', () => ({
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
-    downloadFileFromUrl: jest.fn().mockResolvedValue({
-      submissionsRequired: 3,
-      requestType: JobRequestType.FORTUNE,
-    }),
+    downloadFileFromUrl: jest.fn().mockResolvedValue(
+      JSON.stringify({
+        submissionsRequired: 3,
+        requestType: JobRequestType.FORTUNE,
+      }),
+    ),
   })),
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
     })),
+  },
+  StakingClient: {
+    build: jest.fn().mockImplementation(() => ({
+      getLeader: jest.fn().mockResolvedValue({
+        publicKey: MOCK_PUBLIC_KEY,
+      }),
+    })),
+  },
+  EncryptionUtils: {
+    encrypt: jest.fn().mockResolvedValue('encrypted'),
   },
 }));
 
@@ -105,6 +120,8 @@ describe('JobService', () => {
         ConfigModule.forFeature(
           registerAs('server', () => ({
             reputationOracleWebhookUrl: MOCK_REPUTATION_ORACLE_WEBHOOK_URL,
+            encryptionPrivateKey: MOCK_ENCRYPTION_PRIVATE_KEY,
+            encryptionPassphrase: MOCK_ENCRYPTION_PASSPHRASE,
           })),
         ),
       ],
@@ -189,7 +206,7 @@ describe('JobService', () => {
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValue(invalidManifest);
+        .mockResolvedValue(JSON.stringify(invalidManifest));
 
       const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -218,7 +235,7 @@ describe('JobService', () => {
       (EscrowClient.build as jest.Mock).mockResolvedValue(escrowClient);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValue(invalidManifest);
+        .mockResolvedValue(JSON.stringify(invalidManifest));
 
       const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -280,9 +297,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(exchangeJobSolutions);
+        .mockResolvedValueOnce(JSON.stringify(manifest))
+        .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+        .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const newSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -336,9 +353,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(exchangeJobSolutions);
+        .mockResolvedValueOnce(JSON.stringify(manifest))
+        .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+        .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       httpServicePostMock.mockRejectedValueOnce(
         new Error(ErrorJob.WebhookWasNotSent),
@@ -394,9 +411,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(exchangeJobSolutions);
+        .mockResolvedValueOnce(JSON.stringify(manifest))
+        .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+        .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -448,9 +465,9 @@ describe('JobService', () => {
 
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockReturnValueOnce(manifest)
-        .mockReturnValueOnce(existingJobSolutions)
-        .mockReturnValue(exchangeJobSolutions);
+        .mockResolvedValueOnce(JSON.stringify(manifest))
+        .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+        .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
       const jobSolution: JobSolutionsRequestDto = {
         escrowAddress: MOCK_ADDRESS,
@@ -535,9 +552,9 @@ describe('JobService', () => {
     ];
     StorageClient.downloadFileFromUrl = jest
       .fn()
-      .mockReturnValueOnce(manifest)
-      .mockReturnValueOnce(existingJobSolutions)
-      .mockReturnValue(exchangeJobSolutions);
+      .mockResolvedValueOnce(JSON.stringify(manifest))
+      .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+      .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,
@@ -608,9 +625,9 @@ describe('JobService', () => {
     ];
     StorageClient.downloadFileFromUrl = jest
       .fn()
-      .mockReturnValueOnce(manifest)
-      .mockReturnValueOnce(existingJobSolutions)
-      .mockReturnValue(exchangeJobSolutions);
+      .mockResolvedValueOnce(JSON.stringify(manifest))
+      .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+      .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,
@@ -682,9 +699,9 @@ describe('JobService', () => {
     ];
     StorageClient.downloadFileFromUrl = jest
       .fn()
-      .mockReturnValueOnce(manifest)
-      .mockReturnValueOnce(existingJobSolutions)
-      .mockReturnValue(exchangeJobSolutions);
+      .mockResolvedValueOnce(JSON.stringify(manifest))
+      .mockResolvedValueOnce(JSON.stringify(existingJobSolutions))
+      .mockResolvedValue(JSON.stringify(exchangeJobSolutions));
 
     const jobSolution: JobSolutionsRequestDto = {
       escrowAddress: MOCK_ADDRESS,

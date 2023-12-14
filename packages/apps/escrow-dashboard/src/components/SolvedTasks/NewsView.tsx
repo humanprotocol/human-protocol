@@ -9,36 +9,32 @@ export const NewsView = () => {
   return (
     <CardContainer sxProps={{ padding: 0 }}>
       {isLoading ? (
-        <Box
-          sx={{
-            px: { xs: '24px', lg: '34px', xl: '40px' },
-            pt: { xs: '26px', lg: '34px', xl: '36px' },
-            pb: '16px',
-          }}
-        >
-          <Box sx={{ mb: '20px' }}>
-            <SkeletonTheme
-              baseColor="rgba(0, 0, 0, 0.1)"
-              highlightColor="rgba(0, 0, 0, 0.18)"
-            >
-              <Skeleton count={1} width="72px" height="32px" />
-            </SkeletonTheme>
-          </Box>
-          <Box sx={{ mb: '14px' }}>
-            <SkeletonTheme
-              baseColor="rgba(0, 0, 0, 0.1)"
-              highlightColor="rgba(0, 0, 0, 0.18)"
-            >
-              <Skeleton count={1} width="100%" height="72px" />
-            </SkeletonTheme>
-          </Box>
-          <Box sx={{ mb: '38px' }}>
-            <SkeletonTheme
-              baseColor="rgba(0, 0, 0, 0.1)"
-              highlightColor="rgba(0, 0, 0, 0.18)"
-            >
-              <Skeleton count={1} width="100%" height="40px" />
-            </SkeletonTheme>
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ px: 2 }}>
+            <Box sx={{ mb: '20px' }}>
+              <SkeletonTheme
+                baseColor="rgba(0, 0, 0, 0.1)"
+                highlightColor="rgba(0, 0, 0, 0.18)"
+              >
+                <Skeleton count={1} width="72px" height="32px" />
+              </SkeletonTheme>
+            </Box>
+            <Box sx={{ mb: '14px' }}>
+              <SkeletonTheme
+                baseColor="rgba(0, 0, 0, 0.1)"
+                highlightColor="rgba(0, 0, 0, 0.18)"
+              >
+                <Skeleton count={1} width="100%" height="72px" />
+              </SkeletonTheme>
+            </Box>
+            <Box sx={{ mb: '24px' }}>
+              <SkeletonTheme
+                baseColor="rgba(0, 0, 0, 0.1)"
+                highlightColor="rgba(0, 0, 0, 0.18)"
+              >
+                <Skeleton count={1} width="100%" height="40px" />
+              </SkeletonTheme>
+            </Box>
           </Box>
           <Box>
             <SkeletonTheme
@@ -70,8 +66,7 @@ export const NewsView = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                px: { xs: '8px', lg: '18px', xl: '24px' },
-                pt: { xs: '10px', lg: '18px', xl: '20px' },
+                px: 2,
               }}
             >
               <Box
@@ -113,7 +108,7 @@ export const NewsView = () => {
                   letterSpacing: '0.17px',
                 }}
                 color="primary"
-                mb="38px"
+                mb="24px"
               >
                 {data?.description}
               </Typography>
@@ -126,8 +121,8 @@ export const NewsView = () => {
                 sx={{
                   borderRadius: '8px',
                   overflow: 'hidden',
-                  width: { xs: 'calc(100% - 20px)', md: '100%' },
-                  mx: { xs: '10px', md: 0 },
+                  width: '100%',
+                  mx: 0,
                 }}
               />
             )}

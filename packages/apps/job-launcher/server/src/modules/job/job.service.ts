@@ -82,7 +82,7 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
@@ -330,10 +330,7 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(
-    userId: number,
-    id: number,
-  ): Promise<boolean> {
+  public async requestToCancelJob(userId: number, id: number): Promise<void> {
     const jobEntity = await this.jobRepository.findOne({ id, userId });
 
     if (!jobEntity) {
@@ -361,8 +358,6 @@ export class JobService {
     }
     jobEntity.retriesCount = 0;
     await jobEntity.save();
-
-    return true;
   }
 
   public async saveManifest(
@@ -483,7 +478,6 @@ export class JobService {
 
       return this.transformJobs(jobs, escrows);
     } catch (error) {
-      console.error(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -679,7 +673,6 @@ export class JobService {
         }
       }
     } catch (e) {
-      console.log(e);
       this.logger.error(e);
       return;
     }
@@ -786,9 +779,7 @@ export class JobService {
     return escrowClient.cancel(escrowAddress);
   }
 
-  public async escrowFailedWebhook(
-    dto: EscrowFailedWebhookDto,
-  ): Promise<boolean> {
+  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -812,8 +803,6 @@ export class JobService {
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason;
     await jobEntity.save();
-
-    return true;
   }
 
   public async getDetails(

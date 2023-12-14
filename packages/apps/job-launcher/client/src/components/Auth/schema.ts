@@ -2,21 +2,17 @@ import * as Yup from 'yup';
 import { ERROR_MESSAGES } from '../../constants';
 
 export const LoginValidationSchema = Yup.object().shape({
-  email: Yup.string()
-    .email(ERROR_MESSAGES.invalidEmail)
-    .required(ERROR_MESSAGES.requireEmail),
+  email: Yup.string().email(ERROR_MESSAGES.invalidEmail).required(ERROR_MESSAGES.requireEmail),
   password: Yup.string().required(ERROR_MESSAGES.requirePassword),
   token: Yup.string().required(ERROR_MESSAGES.captchaPassRequired),
 });
 
 export const RegisterValidationSchema = Yup.object().shape({
-  email: Yup.string()
-    .email(ERROR_MESSAGES.invalidEmail)
-    .required(ERROR_MESSAGES.requireEmail),
+  email: Yup.string().email(ERROR_MESSAGES.invalidEmail).required(ERROR_MESSAGES.requireEmail),
   password: Yup.string()
     .required(ERROR_MESSAGES.requirePassword)
     .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&+=!*]).*$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/,
       ERROR_MESSAGES.weakPassword
     )
     .min(8, ERROR_MESSAGES.invalidPasswordLength)
@@ -28,9 +24,7 @@ export const RegisterValidationSchema = Yup.object().shape({
 });
 
 export const ForgotPasswordValidationSchema = Yup.object().shape({
-  email: Yup.string()
-    .email(ERROR_MESSAGES.invalidEmail)
-    .required(ERROR_MESSAGES.requireEmail),
+  email: Yup.string().email(ERROR_MESSAGES.invalidEmail).required(ERROR_MESSAGES.requireEmail),
   hcaptchaToken: Yup.string().required(ERROR_MESSAGES.captchaPassRequired),
 });
 
@@ -38,7 +32,7 @@ export const ResetPasswordValidationSchema = Yup.object().shape({
   password: Yup.string()
     .required(ERROR_MESSAGES.requirePassword)
     .matches(
-      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&+=!*]).*$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/,
       ERROR_MESSAGES.weakPassword
     )
     .min(8, ERROR_MESSAGES.invalidPasswordLength)
@@ -50,7 +44,5 @@ export const ResetPasswordValidationSchema = Yup.object().shape({
 });
 
 export const ResendEmailVerificationSchema = Yup.object().shape({
-  email: Yup.string()
-    .email(ERROR_MESSAGES.invalidEmail)
-    .required(ERROR_MESSAGES.requireEmail),
+  email: Yup.string().email(ERROR_MESSAGES.invalidEmail).required(ERROR_MESSAGES.requireEmail),
 });

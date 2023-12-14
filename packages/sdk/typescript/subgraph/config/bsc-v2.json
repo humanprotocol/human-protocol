@@ -20,8 +20,8 @@
     "abi": "../../../../node_modules/@human-protocol/core/abis/Staking.json"
   },
   "KVStore": {
-    "address": "0x2B95bEcb6EBC4589f64CB000dFCF716b4aeF8aA6",
-    "startBlock": 28745627,
+    "address": "0x21A0C4CED7aE447fCf87D9FE3A29FA9B3AB20Ff1",
+    "startBlock": 33941535,
     "abi": "../../../../node_modules/@human-protocol/core/abis/KVStore.json"
   },
   "RewardPool": {
