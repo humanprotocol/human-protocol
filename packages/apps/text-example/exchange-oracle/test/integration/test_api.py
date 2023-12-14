@@ -30,7 +30,8 @@ from src.db import (
     Worker,
     engine,
 )
-from src.main import Endpoints, Errors, exchange_oracle
+from src.main import exchange_oracle
+from src.endpoints import Endpoints, Errors
 
 get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
 get_manifest_url_path = "src.cron_jobs.get_manifest_url"
