@@ -7,11 +7,9 @@ import { createMock } from '@golevelup/ts-jest';
 import { ErrorUser } from '../../common/constants/errors';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import { UserBalanceDto, UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { ethers } from 'ethers';
-import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 
 jest.mock('@human-protocol/sdk');
@@ -166,7 +164,7 @@ describe('UserService', () => {
   describe('getBalance', () => {
     it('should return the correct balance with currency for a user', async () => {
       const userId = 1;
-      const expectedBalance: IUserBalance = {
+      const expectedBalance: UserBalanceDto = {
         amount: 10,
         currency: Currency.USD,
       };

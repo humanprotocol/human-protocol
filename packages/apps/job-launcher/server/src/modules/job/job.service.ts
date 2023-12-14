@@ -80,6 +80,7 @@ import { filterToEscrowStatus } from '../../common/utils/status';
 import { StorageService } from '../storage/storage.service';
 import { UploadedFile } from 'src/common/interfaces/s3';
 import { WebhookService } from '../webhook/webhook.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class JobService {
@@ -336,10 +337,7 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(
-    userId: number,
-    id: number,
-  ): Promise<boolean> {
+  public async requestToCancelJob(userId: number, id: number): Promise<void> {
     const jobEntity = await this.jobRepository.findOne({ id, userId });
 
     if (!jobEntity) {
@@ -367,8 +365,6 @@ export class JobService {
     }
     jobEntity.retriesCount = 0;
     await jobEntity.save();
-
-    return true;
   }
 
   public async saveManifest(
@@ -740,9 +736,7 @@ export class JobService {
     return escrowClient.cancel(escrowAddress);
   }
 
-  public async escrowFailedWebhook(
-    dto: EscrowFailedWebhookDto,
-  ): Promise<boolean> {
+  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -766,8 +760,6 @@ export class JobService {
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason;
     await jobEntity.save();
-
-    return true;
   }
 
   public async getDetails(

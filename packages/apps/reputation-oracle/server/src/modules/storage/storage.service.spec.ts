@@ -1,7 +1,9 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
-import { ConfigModule, registerAs } from '@nestjs/config';
+import { ChainId, EncryptionUtils, StorageClient } from '@human-protocol/sdk';
+import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
+  MOCK_ENCRYPTION_PRIVATE_KEY,
+  MOCK_ENCRYPTION_PUBLIC_KEY,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
   MOCK_S3_ACCESS_KEY,
@@ -39,10 +41,19 @@ jest.mock('minio', () => {
 
 jest.mock('axios');
 
-describe('Web3Service', () => {
+describe('StorageService', () => {
   let storageService: StorageService;
 
   beforeAll(async () => {
+    const mockConfigService: Partial<ConfigService> = {
+      get: jest.fn((key: string) => {
+        switch (key) {
+          case 'ENCRYPTION_PRIVATE_KEY':
+            return MOCK_ENCRYPTION_PRIVATE_KEY;
+        }
+      }),
+    };
+
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forFeature(
@@ -56,7 +67,10 @@ describe('Web3Service', () => {
           })),
         ),
       ],
-      providers: [StorageService],
+      providers: [
+        StorageService,
+        { provide: ConfigService, useValue: mockConfigService },
+      ],
     }).compile();
 
     storageService = moduleRef.get<StorageService>(StorageService);
@@ -166,7 +180,34 @@ describe('Web3Service', () => {
         .fn()
         .mockResolvedValueOnce(expectedJobFile);
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
-      expect(solutionsFile).toBe(expectedJobFile);
+      expect(solutionsFile).toStrictEqual(expectedJobFile);
+    });
+
+    it('should download the encrypted file correctly', async () => {
+      const exchangeAddress = '0x1234567890123456789012345678901234567892';
+      const workerAddress = '0x1234567890123456789012345678901234567891';
+      const solution = 'test';
+
+      const expectedJobFile = {
+        exchangeAddress,
+        solutions: [
+          {
+            workerAddress,
+            solution,
+          },
+        ],
+      };
+
+      const encryptedMessage = await EncryptionUtils.encrypt(
+        JSON.stringify(expectedJobFile),
+        [MOCK_ENCRYPTION_PUBLIC_KEY],
+      );
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(encryptedMessage);
+
+      const solutionsFile = await storageService.download(MOCK_FILE_URL);
+      expect(solutionsFile).toStrictEqual(expectedJobFile);
     });
 
     it('should return empty array when file cannot be downloaded', async () => {

@@ -30,6 +30,8 @@ export const ConfigNames = {
   SENDGRID_FROM_NAME: 'SENDGRID_FROM_NAME',
   REPUTATION_LEVEL_LOW: 'REPUTATION_LEVEL_LOW',
   REPUTATION_LEVEL_HIGH: 'REPUTATION_LEVEL_HIGH',
+  ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
+  ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
 };
 
 export const envValidator = Joi.object({
@@ -70,4 +72,7 @@ export const envValidator = Joi.object({
   // Reputation Level
   REPUTATION_LEVEL_LOW: Joi.number().default(300),
   REPUTATION_LEVEL_HIGH: Joi.number().default(700),
+  // Encryption
+  ENCRYPTION_PRIVATE_KEY: Joi.string().default(''),
+  ENCRYPTION_PASSPHRASE: Joi.string().default(''),
 });

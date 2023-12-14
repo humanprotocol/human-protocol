@@ -12,7 +12,11 @@ export class ApiKeyRepository {
     private readonly apiKeyRepository: Repository<ApiKeyEntity>,
   ) {}
 
-  async createOrUpdateAPIKey(userId: number, hashedAPIKey: string, salt: string): Promise<ApiKeyEntity> {
+  async createOrUpdateAPIKey(
+    userId: number,
+    hashedAPIKey: string,
+    salt: string,
+  ): Promise<ApiKeyEntity> {
     let apiKeyEntity = await this.findAPIKeyByUserId(userId);
 
     if (!apiKeyEntity) {
@@ -25,7 +29,9 @@ export class ApiKeyRepository {
     return this.apiKeyRepository.save(apiKeyEntity);
   }
 
-  public async findAPIKeyByUserId(userId: number): Promise<ApiKeyEntity | null> {
+  public async findAPIKeyByUserId(
+    userId: number,
+  ): Promise<ApiKeyEntity | null> {
     return this.apiKeyRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user'],
@@ -44,5 +50,5 @@ export class ApiKeyRepository {
       where: { id: apiKeyId },
       relations: ['user'],
     });
-  }  
+  }
 }

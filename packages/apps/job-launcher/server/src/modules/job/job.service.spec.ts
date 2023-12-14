@@ -653,9 +653,8 @@ describe('JobService', () => {
 
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJob(userId, jobId);
 
-      expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
       expect(mockJobEntity.save).toHaveBeenCalled();
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
@@ -677,9 +676,8 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJob(userId, jobId);
 
-      expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
       expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
         jobId,
@@ -1260,8 +1258,8 @@ describe('JobService', () => {
       };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.escrowFailedWebhook(dto);
-      expect(result).toBe(true);
+      await jobService.escrowFailedWebhook(dto);
+
       expect(mockJobEntity.status).toBe(JobStatus.FAILED);
       expect(mockJobEntity.failedReason).toBe(dto.reason);
       expect(mockJobEntity.save).toHaveBeenCalled();

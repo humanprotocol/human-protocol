@@ -71,7 +71,12 @@ const TotalSupplyComponent = ({ value }: { value: number }) => {
         overflow: 'hidden',
       }}
     >
-      <Typography variant="h2" color="primary" lineHeight={1}>
+      <Typography
+        variant="h2"
+        color="primary"
+        lineHeight={1}
+        sx={{ fontSize: { xs: 40, xl: 60 } }}
+      >
         {number}
       </Typography>
       <Typography

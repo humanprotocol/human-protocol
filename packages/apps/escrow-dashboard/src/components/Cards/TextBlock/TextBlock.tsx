@@ -49,6 +49,7 @@ export const TextBlock: FC<TextBlockProps> = ({
               color="primary"
               lineHeight={1.2}
               marginTop={{ xs: '4px', md: 2 }}
+              sx={{ fontSize: { xs: 40, xl: 60 } }}
             >
               {Number.isNaN(Number(value))
                 ? value

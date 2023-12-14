@@ -17,6 +17,6 @@ export * from './WalletModal';
 export * from './HumanAppData';
 export * from './Faucet';
 export * from './Kvstore';
-export * from './Launchpad';
+export * from './Leaderboard';
 export * from './SolvedTasks';
 export * from './Token';
