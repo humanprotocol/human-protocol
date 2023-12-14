@@ -17,6 +17,8 @@ from src.db import (
     Session,
     Statuses,
     username_to_worker_address_map,
+    stage_success,
+    stage_failure,
 )
 from src.storage import (
     convert_annotations_to_raw_results,
@@ -47,7 +49,6 @@ def process_pending_job_requests():
             try:
                 logger.info(f"Creating annotation projects for {job_request.id}")
                 projects, manifest = set_up_projects_for_job(job_request)
-                job_request.status = Statuses.in_progress.value
 
                 if manifest.expiration_date is not None:
                     job_request.expires_at = datetime.utcfromtimestamp(
@@ -56,11 +57,12 @@ def process_pending_job_requests():
                     logger.info(
                         f"Updated expiration date for {job_request.id} to {job_request.expires_at}"
                     )
+                stage_success(job_request)
             except Exception:
                 logger.exception(
                     f"Could not set up annotation projects for {job_request.id}. Job failed."
                 )
-                job_request.status = Statuses.failed.value
+                stage_failure(job_request)
                 projects = []
 
             # link projects to job
@@ -120,12 +122,12 @@ def process_in_progress_job_requests():
                 project.status == Statuses.completed for project in request.projects
             ):
                 logger.info(f"All projects complete for job {request.id}. Job is done.")
-                request.status = Statuses.completed
+                stage_success(request)
             if request.expires_at.replace(tzinfo=UTC) <= datetime.now().replace(
                 tzinfo=UTC
             ):
                 logger.info(f"Job {request.id} expired. Updating status.")
-                request.status = Statuses.completed
+                stage_success(request)
         session.commit()
 
 
@@ -156,8 +158,8 @@ def process_completed_job_requests():
                     )
                     project.status = Statuses.failed
 
-            request.status = Statuses.awaiting_upload
             logger.info(f"Data exported for job {request.id}.")
+            stage_success(request)
         session.commit()
 
 
@@ -186,11 +188,11 @@ def upload_completed_job_requests():
                 # remove unused files
                 shutil.rmtree(data_dir)
 
-                request.status = Statuses.awaiting_closure
+                stage_success(request)
                 logger.info(f"Data uploaded for job {request.id}")
             except Exception:
                 logger.exception(f"Could not upload data for job {request.id}.")
-                request.status = Statuses.failed
+                stage_failure(request)
         session.commit()
 
 
@@ -216,7 +218,7 @@ def notify_recording_oracle():
                     method="POST", url=Config.human.recording_oracle_url, json=payload
                 )
                 if response.status == 200:
-                    request.status = Statuses.closed
+                    stage_success(request)
                     logger.info(
                         f"Recording oracle notified about job {request.id}. Job is complete."
                     )
@@ -224,15 +226,15 @@ def notify_recording_oracle():
                     logger.exception(
                         f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}"
                     )
-                    request.status = Statuses.failed
+                    stage_failure(request)
             except MaxRetryError:
                 logger.exception(
                     f"Could not notify recording oracle about job {request.id}"
                 )
-                request.status = Statuses.failed
+                stage_failure(request)
             except Exception:
                 logger.exception(
                     f"Could not notify recording oracle about job {request.id}"
                 )
-                request.status = Statuses.failed
+                stage_failure(request)
             session.commit()

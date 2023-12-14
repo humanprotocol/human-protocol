@@ -68,7 +68,9 @@ def is_valid_uuid(obj):
         return False
 
 
-def add_job_request(status: Statuses = Statuses.pending, expiration_date=None):
+def add_job_request(
+    status: Statuses = Statuses.pending, expiration_date=None, attempts=0
+):
     _, escrow_address, chain_id = random_escrow_info()
     job_id = str(uuid4())
 
@@ -78,6 +80,7 @@ def add_job_request(status: Statuses = Statuses.pending, expiration_date=None):
             escrow_address=escrow_address,
             chain_id=chain_id,
             status=status,
+            attempts=attempts,
         )
         if expiration_date is not None:
             job.expires_at = expiration_date

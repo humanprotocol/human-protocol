@@ -29,6 +29,13 @@ class Statuses(str, Enum):
     closed = "closed"
     failed = "failed"
 
+    def __next__(self):
+        if self == Statuses.failed:
+            return self
+        statuses = list(Statuses)
+        i = statuses.index(self)
+        return statuses[i + 1]
+
 
 class Base(DeclarativeBase):
     pass
@@ -55,6 +62,7 @@ class JobRequest(Base):
         default=lambda _: datetime.datetime.now()
         + datetime.timedelta(days=Config.default_job_expiry_days),
     )
+    attempts: Mapped[int] = mapped_column(default=0)
     projects: Mapped[List["AnnotationProject"]] = relationship(
         back_populates="job_request"
     )
@@ -97,3 +105,17 @@ def username_to_worker_address_map() -> dict[str, str]:
         for worker in session.query(Worker).all():
             username_map[worker.username] = worker.id
     return username_map
+
+
+def stage_success(job_request: JobRequest):
+    """Handles sucessful processing of a given stage by advancing the status and resetting retries"""
+    job_request.status = next(Statuses[job_request.status])
+    job_request.attempts = 0
+
+
+def stage_failure(job_request: JobRequest):
+    """Handles unsuccessful processing of a given stage by increasing attempts and setting status to failed, if necessary."""
+    job_request.attempts = job_request.attempts + 1
+
+    if job_request.attempts >= Config.max_attempts:
+        job_request.status = Statuses.failed

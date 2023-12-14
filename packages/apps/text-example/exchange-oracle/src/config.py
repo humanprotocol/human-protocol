@@ -181,6 +181,7 @@ class Config:
     environment = os.environ.get("ENVIRONMENT")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT"))
     default_job_expiry_days = int(os.environ.get("DEFAULT_JOB_EXPIRY_DAYS"))
+    max_attempts = int(os.environ.get("MAX_ATTEMPTS"))
     http = PoolManager()
 
     polygon_mainnet = PolygonMainnetConfig
