@@ -47,7 +47,7 @@ const client = createClient({
     new CoinbaseWalletConnector({
       chains,
       options: {
-        appName: 'escrow-dashboard',
+        appName: 'human-dashboard-ui',
       },
     }),
     new WalletConnectConnector({
