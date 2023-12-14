@@ -140,7 +140,7 @@ export class PaymentService {
 
     if (!paymentEntity) {
       this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new BadRequestException(ErrorPayment.NotFound);
+      throw new NotFoundException(ErrorPayment.NotFound);
     }
 
     if (

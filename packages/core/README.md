@@ -169,7 +169,7 @@ yarn deploy:proxy --network [NETWORK_NAME]
 npx hardhat verify --network [NETWORK_NAME] [CONTRACT_ADDRESS]
 ```
 
-5. Update the file `CONTRACTS_LIST.md` in the root of this monorepo.
+5. Request the Human Protocol team to include the new contract address in the document at https://tech-docs.humanprotocol.org/contracts/contract-addresses.
 
 ### Upgrade contracts with proxy
 

@@ -106,9 +106,7 @@ export const HumanAppDataView: FC = () => {
         background: '#FFF',
         boxShadow:
           '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA;',
-        pt: 5,
-        px: 4,
-        pb: 7,
+        padding: '42px 32px 32px',
         position: 'relative',
       }}
     >

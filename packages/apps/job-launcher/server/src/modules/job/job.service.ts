@@ -82,7 +82,7 @@ import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { signMessage } from '../../common/utils/signature';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from 'src/common/interfaces/s3';
+import { UploadedFile } from '../../common/interfaces/s3';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
@@ -248,7 +248,10 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
@@ -307,10 +310,13 @@ export class JobService {
   public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
     jobEntity.status = JobStatus.FUNDING;
     await jobEntity.save();
-    
+
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
@@ -324,10 +330,7 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(
-    userId: number,
-    id: number,
-  ): Promise<boolean> {
+  public async requestToCancelJob(userId: number, id: number): Promise<void> {
     const jobEntity = await this.jobRepository.findOne({ id, userId });
 
     if (!jobEntity) {
@@ -355,8 +358,6 @@ export class JobService {
     }
     jobEntity.retriesCount = 0;
     await jobEntity.save();
-
-    return true;
   }
 
   public async saveManifest(
@@ -477,7 +478,6 @@ export class JobService {
 
       return this.transformJobs(jobs, escrows);
     } catch (error) {
-      console.error(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -560,7 +560,10 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -605,7 +608,7 @@ export class JobService {
     return finalResultUrl;
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async launchCronJob() {
     this.logger.log('Launch jobs START');
     try {
@@ -639,7 +642,7 @@ export class JobService {
             },
           },
         );
-      }  
+      }
 
       if (!jobEntity) return;
 
@@ -670,14 +673,13 @@ export class JobService {
         }
       }
     } catch (e) {
-      console.log(e);
       this.logger.error(e);
       return;
     }
     this.logger.log('Launch jobs STOP');
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
     this.logger.log('Cancel jobs START');
     const jobEntity = await this.jobRepository.findOne(
@@ -753,7 +755,10 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer, this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER));
+    const escrowClient = await EscrowClient.build(
+      signer,
+      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
+    );
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (
@@ -774,9 +779,7 @@ export class JobService {
     return escrowClient.cancel(escrowAddress);
   }
 
-  public async escrowFailedWebhook(
-    dto: EscrowFailedWebhookDto,
-  ): Promise<boolean> {
+  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -800,8 +803,6 @@ export class JobService {
     jobEntity.status = JobStatus.FAILED;
     jobEntity.failedReason = dto.reason;
     await jobEntity.save();
-
-    return true;
   }
 
   public async getDetails(

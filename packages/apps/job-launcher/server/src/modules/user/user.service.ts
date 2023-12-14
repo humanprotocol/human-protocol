@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -10,12 +11,11 @@ import { Not } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 import { UserStatus, UserType } from '../../common/enums/user';
-import { UserCreateDto, UserUpdateDto } from './user.dto';
+import { UserBalanceDto, UserCreateDto, UserUpdateDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import { ValidatePasswordDto } from '../auth/auth.dto';
 import { ErrorUser } from '../../common/constants/errors';
 import { PaymentService } from '../payment/payment.service';
-import { IUserBalance } from '../../common/interfaces';
 import { Currency } from '../../common/enums/payment';
 
 @Injectable()
@@ -90,11 +90,11 @@ export class UserService {
 
     if (userEntity) {
       this.logger.log(ErrorUser.AccountCannotBeRegistered, UserService.name);
-      throw new ConflictException(ErrorUser.AccountCannotBeRegistered);
+      throw new BadRequestException(ErrorUser.AccountCannotBeRegistered);
     }
   }
 
-  public async getBalance(userId: number): Promise<IUserBalance> {
+  public async getBalance(userId: number): Promise<UserBalanceDto> {
     return {
       amount: await this.paymentService.getUserBalance(userId),
       currency: Currency.USD,
