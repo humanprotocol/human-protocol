@@ -43,7 +43,6 @@
 * [constants](python/human_protocol_sdk.constants.md)
 * [filter](python/human_protocol_sdk.filter.md)
 * [utils](python/human_protocol_sdk.utils.md)
-
-
-## 
+*** 
+ 
 * [CHANGELOG](./changelog.md)
