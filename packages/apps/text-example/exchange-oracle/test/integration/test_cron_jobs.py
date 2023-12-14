@@ -1,3 +1,4 @@
+import datetime
 import shutil
 import unittest
 from pathlib import Path
@@ -77,11 +78,32 @@ class CRONJobTest(unittest.TestCase):
         """When a job that is currently in progress is processed:
         - all of its constituent projects should be checked for completion and their status set to completed if so
         - if all projects for a job are completed, the job status should be set to completed
+        - if a job is expired it should be set to completed
+        - if none of the above applies, the job's status should remain as is.
         """
-        job_id = add_job_request(Statuses.in_progress)
-        add_projects_to_job_request(job_id, 3, Statuses.in_progress)
-        mock_is_done.return_value = True
+        projects_done = []
 
+        n_proj = 3
+        job_id = add_job_request(Statuses.in_progress)
+        add_projects_to_job_request(job_id, n_proj, Statuses.in_progress)
+        projects_done.extend([True] * n_proj)
+
+        n_proj = 1
+        expired_job_id = add_job_request(
+            Statuses.in_progress, datetime.datetime.now() - datetime.timedelta(days=1)
+        )
+        add_projects_to_job_request(expired_job_id, n_proj, Statuses.in_progress)
+        projects_done.extend([False] * n_proj)
+
+        n_proj = 3
+        in_progress_job_id = add_job_request(Statuses.in_progress)
+        add_projects_to_job_request(in_progress_job_id, n_proj, Statuses.in_progress)
+        projects_done.extend([False] * n_proj)
+
+        mock_is_done.side_effect = projects_done
+
+        logger = Config.logging.get_logger()
+        logger.debug(projects_done)
         process_in_progress_job_requests()
 
         with Session() as session:
@@ -91,8 +113,18 @@ class CRONJobTest(unittest.TestCase):
                 .where(AnnotationProject.job_request_id == job_id)
                 .all()
             )
+            expired_job = (
+                session.query(JobRequest).where(JobRequest.id == expired_job_id).one()
+            )
+            in_progress_job = (
+                session.query(JobRequest)
+                .where(JobRequest.id == in_progress_job_id)
+                .one()
+            )
 
             assert job.status == Statuses.completed
+            assert expired_job.status == Statuses.completed
+            assert in_progress_job.status == Statuses.in_progress
             assert all(project.status == Statuses.completed for project in projects)
 
     @patch("src.cron_jobs.is_done")

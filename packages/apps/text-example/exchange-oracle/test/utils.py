@@ -1,3 +1,5 @@
+import datetime
+import json
 import random
 import uuid
 import zipfile
@@ -14,6 +16,8 @@ from src.storage import upload_data
 from starlette.responses import Response
 from web3 import HTTPProvider, Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
+
+from itertools import count
 
 
 def assert_http_error_response(response: Response, error: HTTPException):
@@ -64,28 +68,33 @@ def is_valid_uuid(obj):
         return False
 
 
-def add_job_request(status: Statuses = Statuses.pending):
+def add_job_request(status: Statuses = Statuses.pending, expiration_date=None):
     _, escrow_address, chain_id = random_escrow_info()
     job_id = str(uuid4())
 
     with Session() as session:
-        session.add(
-            JobRequest(
-                id=job_id,
-                escrow_address=escrow_address,
-                chain_id=chain_id,
-                status=status,
-            )
+        job = JobRequest(
+            id=job_id,
+            escrow_address=escrow_address,
+            chain_id=chain_id,
+            status=status,
         )
+        if expiration_date is not None:
+            job.expires_at = expiration_date
+        session.add(job)
         session.commit()
     return job_id
+
+
+project_counter = count(start=1)
 
 
 def add_projects_to_job_request(job_id: str, n_projects: int, status: Statuses):
     with Session() as session:
         job = session.query(JobRequest).where(JobRequest.id == job_id).one()
         projects = []
-        for i in range(n_projects):
+        for _ in range(n_projects):
+            i = next(project_counter)
             project = AnnotationProject(
                 id=i, name=str(job.id) + f"__{i}", job_request=job, status=status
             )
@@ -98,6 +107,22 @@ def add_projects_to_job_request(job_id: str, n_projects: int, status: Statuses):
 def upload_manifest_and_task_data():
     data_dir = Path(__file__).parent / "data"
     manifest_filepath = data_dir / "manifest.json"
+
+    # update manifest times and s3 info
+    with open(manifest_filepath, "r") as f:
+        manifest_json = json.load(f)
+
+    manifest_json["start_date"] = datetime.datetime.now().timestamp()
+    manifest_json["expiration_date"] = (
+        datetime.datetime.now() + datetime.timedelta(days=1)
+    ).timestamp()
+    manifest_json[
+        "taskdata_uri"
+    ] = f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/taskdata.json"
+
+    with open(manifest_filepath, "w") as f:
+        json.dump(manifest_json, f)
+
     upload_data(manifest_filepath, content_type="application/json")
     upload_data(data_dir / "taskdata.json", content_type="application/json")
 

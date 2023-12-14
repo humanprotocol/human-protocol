@@ -180,7 +180,7 @@ class Config:
     port = int(os.environ.get("PORT"))
     environment = os.environ.get("ENVIRONMENT")
     workers_amount = int(os.environ.get("WORKERS_AMOUNT"))
-
+    default_job_expiry_days = int(os.environ.get("DEFAULT_JOB_EXPIRY_DAYS"))
     http = PoolManager()
 
     polygon_mainnet = PolygonMainnetConfig

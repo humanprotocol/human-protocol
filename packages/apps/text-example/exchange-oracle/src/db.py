@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 from typing import List
 from uuid import uuid4
@@ -48,6 +49,12 @@ class JobRequest(Base):
     )
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    expires_at = mapped_column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        default=lambda _: datetime.datetime.now()
+        + datetime.timedelta(days=Config.default_job_expiry_days),
+    )
     projects: Mapped[List["AnnotationProject"]] = relationship(
         back_populates="job_request"
     )

@@ -1,5 +1,8 @@
 import shutil
 
+from datetime import datetime
+from pytz import UTC
+
 from src.annotation import (
     create_projects,
     delete_project,
@@ -43,8 +46,16 @@ def process_pending_job_requests():
         for job_request in requests:
             try:
                 logger.info(f"Creating annotation projects for {job_request.id}")
-                projects = set_up_projects_for_job(job_request)
+                projects, manifest = set_up_projects_for_job(job_request)
                 job_request.status = Statuses.in_progress.value
+
+                if manifest.expiration_date is not None:
+                    job_request.expires_at = datetime.utcfromtimestamp(
+                        manifest.expiration_date
+                    )
+                    logger.info(
+                        f"Updated expiration date for {job_request.id} to {job_request.expires_at}"
+                    )
             except Exception:
                 logger.exception(
                     f"Could not set up annotation projects for {job_request.id}. Job failed."
@@ -82,7 +93,7 @@ def set_up_projects_for_job(job_request: JobRequest):
     # clean up directory
     shutil.rmtree(job_dir)
 
-    return projects
+    return projects, manifest
 
 
 def process_in_progress_job_requests():
@@ -108,7 +119,12 @@ def process_in_progress_job_requests():
             if all(
                 project.status == Statuses.completed for project in request.projects
             ):
-                logger.info(f"Job {request.id} is done.")
+                logger.info(f"All projects complete for job {request.id}. Job is done.")
+                request.status = Statuses.completed
+            if request.expires_at.replace(tzinfo=UTC) <= datetime.now().replace(
+                tzinfo=UTC
+            ):
+                logger.info(f"Job {request.id} expired. Updating status.")
                 request.status = Statuses.completed
         session.commit()
 
@@ -201,7 +217,9 @@ def notify_recording_oracle():
                 )
                 if response.status == 200:
                     request.status = Statuses.closed
-                    logger.info(f"Recording oracle notified about job {request.id}. Job is complete.")
+                    logger.info(
+                        f"Recording oracle notified about job {request.id}. Job is complete."
+                    )
                 else:
                     logger.exception(
                         f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}"
