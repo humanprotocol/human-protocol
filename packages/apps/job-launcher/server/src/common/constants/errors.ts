@@ -7,7 +7,6 @@ export enum ErrorJob {
   NotEnoughFunds = 'Not enough funds',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
-  WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
   InvalidRequestType = 'Invalid job type',
@@ -15,6 +14,16 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+}
+
+/**
+ * Represents error messages associated to webhook.
+ */
+export enum ErrorWebhook {
+  NotSent = 'Webhook was not sent',
+  NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook URL not found',
+  NotCreated = 'Webhook has not been created',
 }
 
 /**

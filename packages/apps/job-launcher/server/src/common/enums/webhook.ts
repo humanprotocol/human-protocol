@@ -8,3 +8,9 @@ export enum OracleType {
   FORTUNE = 'fortune',
   CVAT = 'cvat',
 }
+
+export enum WebhookStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
