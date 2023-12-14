@@ -45,4 +45,5 @@
 * [utils](python/human_protocol_sdk.utils.md)
 
 
-## [Changelog](./changelog.md)
+##
+* [Changelog](./changelog.md)
