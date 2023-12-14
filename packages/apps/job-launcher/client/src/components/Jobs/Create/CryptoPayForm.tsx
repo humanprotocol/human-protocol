@@ -50,7 +50,10 @@ export const CryptoPayForm = ({
     if (amount && rate) return Number(amount) * rate;
     return 0;
   }, [amount, rate]);
-  const feeAmount = fundAmount === 0 ? 0 : Math.max(0.01, fundAmount * (JOB_LAUNCHER_FEE / 100));
+  const feeAmount =
+    fundAmount === 0
+      ? 0
+      : Math.max(0.01, fundAmount * (JOB_LAUNCHER_FEE / 100));
   const totalAmount = fundAmount + feeAmount;
   const accountAmount = user?.balance ? Number(user?.balance?.amount) : 0;
 
@@ -74,7 +77,11 @@ export const CryptoPayForm = ({
           // send HMT token to operator and retrieve transaction hash
           const tokenAmount = walletPayAmount / rate;
 
-          const contract = new ethers.Contract(tokenAddress, HMTokenABI, signer);
+          const contract = new ethers.Contract(
+            tokenAddress,
+            HMTokenABI,
+            signer
+          );
 
           const tx = await contract.transfer(
             import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
@@ -91,13 +98,27 @@ export const CryptoPayForm = ({
         }
 
         // create job
-        const { jobType, chainId, fortuneRequest, cvatRequest, hCaptchaRequest } = jobRequest;
+        const {
+          jobType,
+          chainId,
+          fortuneRequest,
+          cvatRequest,
+          hCaptchaRequest,
+        } = jobRequest;
         if (jobType === JobType.Fortune && fortuneRequest) {
-          await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
+          await jobService.createFortuneJob(
+            chainId,
+            fortuneRequest,
+            fundAmount
+          );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
         } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
-          await jobService.createHCaptchaJob(chainId, hCaptchaRequest, fundAmount);
+          await jobService.createHCaptchaJob(
+            chainId,
+            hCaptchaRequest,
+            fundAmount
+          );
         }
         onFinish();
       } catch (err) {
@@ -111,7 +132,8 @@ export const CryptoPayForm = ({
     return (
       <Box textAlign="center">
         <Typography textAlign="center">
-          You are on wrong network, please switch to {NETWORKS[jobRequest.chainId!]?.title}.
+          You are on wrong network, please switch to{' '}
+          {NETWORKS[jobRequest.chainId!]?.title}.
         </Typography>
         <Button variant="outlined" onClick={() => goToPrevStep?.()}>
           Back
@@ -176,7 +198,9 @@ export const CryptoPayForm = ({
           </Box>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <Box sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}>
+          <Box
+            sx={{ borderRadius: '8px', background: '#F9FAFF', px: 4, py: 1.5 }}
+          >
             <Box
               sx={{
                 display: 'flex',
@@ -188,7 +212,8 @@ export const CryptoPayForm = ({
             >
               <Typography>Account Balance</Typography>
               <Typography color="text.secondary">
-                {user?.balance?.amount?.toFixed(2) ?? '0'} {user?.balance?.currency?.toUpperCase() ?? 'USD'}
+                {user?.balance?.amount?.toFixed(2) ?? '0'}{' '}
+                {user?.balance?.currency?.toUpperCase() ?? 'USD'}
               </Typography>
             </Box>
             <Box
@@ -201,7 +226,9 @@ export const CryptoPayForm = ({
               }}
             >
               <Typography>Fund Amount</Typography>
-              <Typography color="text.secondary">{fundAmount?.toFixed(2)} USD</Typography>
+              <Typography color="text.secondary">
+                {fundAmount?.toFixed(2)} USD
+              </Typography>
             </Box>
             <Box
               sx={{
@@ -220,13 +247,25 @@ export const CryptoPayForm = ({
             <Box sx={{ py: 1.5 }}>
               <Typography mb={2}>Payment method</Typography>
               <Stack direction="column" spacing={1}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography color="text.secondary">Balance</Typography>
-                  <Typography color="text.secondary">{balancePayAmount.toFixed(2)} USD</Typography>
+                  <Typography color="text.secondary">
+                    {balancePayAmount.toFixed(2)} USD
+                  </Typography>
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography color="text.secondary">Crypto Wallet</Typography>
-                  <Typography color="text.secondary">{walletPayAmount.toFixed(2)} USD</Typography>
+                  <Typography color="text.secondary">
+                    {walletPayAmount.toFixed(2)} USD
+                  </Typography>
                 </Stack>
                 {/* <Stack
                   direction="row"
@@ -236,7 +275,11 @@ export const CryptoPayForm = ({
                   <Typography color="text.secondary">Fees</Typography>
                   <Typography color="text.secondary">(3.1%) 9.3 USD</Typography>
                 </Stack> */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
                   <Typography>Total</Typography>
                   <Typography>{totalAmount?.toFixed(2)} USD</Typography>
                 </Stack>
@@ -260,7 +303,12 @@ export const CryptoPayForm = ({
             sx={{ width: '240px' }}
             size="large"
             onClick={handlePay}
-            disabled={!isConnected || !tokenAddress || !amount || jobRequest.chainId !== chain?.id}
+            disabled={
+              !isConnected ||
+              !tokenAddress ||
+              !amount ||
+              jobRequest.chainId !== chain?.id
+            }
             loading={isLoading}
           >
             Pay now
@@ -275,7 +323,10 @@ export const CryptoPayForm = ({
             Cancel
           </Button>
         </Box>
-        <Link href="https://humanprotocol.org/app/terms-and-conditions" target="_blank">
+        <Link
+          href="https://humanprotocol.org/app/terms-and-conditions"
+          target="_blank"
+        >
           <Typography variant="caption" mt={4} component="p">
             Terms & conditions
           </Typography>

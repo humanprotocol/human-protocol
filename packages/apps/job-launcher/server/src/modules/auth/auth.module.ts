@@ -36,7 +36,13 @@ import { ApiKeyEntity } from './apikey.entity';
     TypeOrmModule.forFeature([AuthEntity, TokenEntity, ApiKeyEntity]),
     SendGridModule,
   ],
-  providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository, ApiKeyRepository],
+  providers: [
+    JwtHttpStrategy,
+    AuthService,
+    AuthRepository,
+    TokenRepository,
+    ApiKeyRepository,
+  ],
   controllers: [AuthJwtController],
   exports: [AuthService],
 })
