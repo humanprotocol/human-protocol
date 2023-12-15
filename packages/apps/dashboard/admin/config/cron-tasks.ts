@@ -43,7 +43,7 @@ const fetchData = async () => {
     const hmtStats = await client.getHMTStatistics();
     const paymentStats = await client.getPaymentStatistics();
 
-    const publicClient = createPublicClient({
+    const publicClient: any = createPublicClient({
       chain: SUPPORTED_CHAINS[chainId],
       transport: http(),
     });

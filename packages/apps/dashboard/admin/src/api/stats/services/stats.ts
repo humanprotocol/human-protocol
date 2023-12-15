@@ -3,22 +3,14 @@
  */
 
 import { ChainId, IStatisticsParams, NETWORKS } from "@human-protocol/sdk";
-import {
-  GET_PAYOUTS_QUERY,
-  IMData,
-  PayoutData,
-} from "@human-protocol/sdk/dist/graphql";
+import { GET_PAYOUTS_QUERY, IMData, PayoutData } from "@human-protocol/sdk/dist/graphql";
 import gqlFetch from "graphql-request";
 import axios from "axios";
 
 const getIMData = async (params: IStatisticsParams): Promise<IMData> => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const defaultFromDate = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+  const defaultFromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   defaultFromDate.setDate(today.getDate() - 60);
 
   const from = params.from ? new Date(params.from) : defaultFromDate;
@@ -100,16 +92,12 @@ export default () => ({
               }
             );
 
-            const activeWorkers = new Set(
-              payouts.map(({ recipient }) => recipient)
-            ).size;
+            const activeWorkers = new Set(payouts.map(({ recipient }) => recipient)).size;
 
             return {
               timestamp,
               activeWorkers,
-              averageJobsSolved: activeWorkers
-                ? value.solved / activeWorkers
-                : 0,
+              averageJobsSolved: activeWorkers ? value.solved / activeWorkers : 0,
             };
           })
         ),
