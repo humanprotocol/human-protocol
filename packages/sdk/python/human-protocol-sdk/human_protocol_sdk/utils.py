@@ -224,7 +224,6 @@ def handle_transaction(
             tx_options["gas"] = tx.estimate_gas()
         elif tx_options is None:
             tx_options = {"gas": tx.estimate_gas()}
-        print(tx_options.get("gas"))
         tx_hash = tx.transact(tx_options)
         return w3.eth.wait_for_transaction_receipt(tx_hash)
     except ContractLogicError as e:
