@@ -70,6 +70,8 @@
     "node-fetch": "^2.6.7",
     "node-forge": "^1.0.0",
     "qrcode": "^1.5.0",
-    "semver": "^7.5.2"
+    "semver": "^7.5.2",
+    "vite": "^5.0.9",
+    "@koa/cors": "^5.0.0"
   }
 }
