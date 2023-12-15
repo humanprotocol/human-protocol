@@ -1,9 +1,11 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const SUPPORTED_CHAIN_IDS =
-  import.meta.env.VITE_APP_NETWORK === 'mainnet'
-    ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
-    : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
+export const IS_MAINNET = import.meta.env.VITE_APP_NETWORK === 'mainnet';
+export const IS_TESTNET = !IS_MAINNET;
+
+export const SUPPORTED_CHAIN_IDS = IS_MAINNET
+  ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
+  : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
   'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
