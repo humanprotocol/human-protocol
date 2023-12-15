@@ -49,13 +49,17 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 ### constructor
 
-• **new EscrowUtils**()
+• **new EscrowUtils**(): [`EscrowUtils`](escrow.EscrowUtils.md)
+
+#### Returns
+
+[`EscrowUtils`](escrow.EscrowUtils.md)
 
 ## Methods
 
 ### getEscrow
 
-▸ `Static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`<`EscrowData`\>
+▸ **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<`EscrowData`\>
 
 This function returns the escrow data for a given address.
 
@@ -120,7 +124,7 @@ type EscrowData = {
 
 #### Returns
 
-`Promise`<`EscrowData`\>
+`Promise`\<`EscrowData`\>
 
 Escrow data
 
@@ -134,13 +138,13 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x12345678
 
 #### Defined in
 
-[escrow.ts:1641](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1641)
+[escrow.ts:1645](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1645)
 
 ___
 
 ### getEscrows
 
-▸ `Static` **getEscrows**(`filter`): `Promise`<`EscrowData`[]\>
+▸ **getEscrows**(`filter`): `Promise`\<`EscrowData`[]\>
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -227,7 +231,7 @@ type EscrowData = {
 
 #### Returns
 
-`Promise`<`EscrowData`[]\>
+`Promise`\<`EscrowData`[]\>
 
 List of escrows that match the filter.
 
@@ -247,4 +251,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1504](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1504)
+[escrow.ts:1508](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1508)

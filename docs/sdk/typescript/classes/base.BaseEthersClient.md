@@ -26,19 +26,14 @@ This class is used as a base class for other clients making on-chain calls.
 
 ### Properties
 
-- [gasPriceMultiplier](base.BaseEthersClient.md#gaspricemultiplier)
 - [networkData](base.BaseEthersClient.md#networkdata)
 - [signerOrProvider](base.BaseEthersClient.md#signerorprovider)
-
-### Methods
-
-- [gasPriceOptions](base.BaseEthersClient.md#gaspriceoptions)
 
 ## Constructors
 
 ### constructor
 
-• **new BaseEthersClient**(`signerOrProvider`, `networkData`, `gasPriceMultiplier?`)
+• **new BaseEthersClient**(`signerOrProvider`, `networkData`): [`BaseEthersClient`](base.BaseEthersClient.md)
 
 **BaseClient constructor**
 
@@ -48,23 +43,16 @@ This class is used as a base class for other clients making on-chain calls.
 | :------ | :------ | :------ |
 | `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
 | `networkData` | `NetworkData` | The network information required to connect to the contracts |
-| `gasPriceMultiplier?` | `number` | The multiplier to apply to the gas price |
+
+#### Returns
+
+[`BaseEthersClient`](base.BaseEthersClient.md)
 
 #### Defined in
 
-[base.ts:24](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L24)
+[base.ts:21](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L21)
 
 ## Properties
-
-### gasPriceMultiplier
-
-• `Protected` `Optional` **gasPriceMultiplier**: `number`
-
-#### Defined in
-
-[base.ts:14](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L14)
-
-___
 
 ### networkData
 
@@ -72,7 +60,7 @@ ___
 
 #### Defined in
 
-[base.ts:15](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L15)
+[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
 
 ___
 
@@ -82,22 +70,4 @@ ___
 
 #### Defined in
 
-[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
-
-## Methods
-
-### gasPriceOptions
-
-▸ `Protected` **gasPriceOptions**(): `Promise`<`Partial`<`Overrides`\>\>
-
-Adjust the gas price, and return as an option to be passed to a transaction
-
-#### Returns
-
-`Promise`<`Partial`<`Overrides`\>\>
-
-Returns the gas price options
-
-#### Defined in
-
-[base.ts:39](https://github.com/humanprotocol/human-protocol/blob/fe3befbd/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L39)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)

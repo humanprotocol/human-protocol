@@ -64,7 +64,7 @@ Retrieve the Staking interface.
 * **Returns:**
   The Staking interface of smart contract.
 
-### human_protocol_sdk.utils.handle_transaction(w3, tx_name, tx, exception, gas_limit=None)
+### human_protocol_sdk.utils.handle_transaction(w3, tx_name, tx, exception, tx_options)
 
 Executes the transaction and waits for the receipt.
 
@@ -73,6 +73,9 @@ Executes the transaction and waits for the receipt.
   * **tx_name** (`str`) – Name of the transaction
   * **tx** – Transaction object
   * **exception** (`Exception`) – Exception class to raise in case of error
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
+    - If provided, can include values like ‘gas’, ‘gas_price’, ‘nonce’, etc
+    - If ‘gas’ is not specified or is None, it will be estimated using tx.estimate_gas()
 * **Returns:**
   The transaction receipt
 * **Validate:**
