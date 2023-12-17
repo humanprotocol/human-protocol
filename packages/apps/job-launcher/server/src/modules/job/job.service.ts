@@ -245,10 +245,7 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
@@ -320,10 +317,7 @@ export class JobService {
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
@@ -537,10 +531,7 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -712,10 +703,7 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (

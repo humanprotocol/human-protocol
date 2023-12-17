@@ -44,7 +44,6 @@ import { LessThanOrEqual } from 'typeorm';
 import { StorageService } from '../storage/storage.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
-import { ConfigNames } from '../../common/config';
 
 @Injectable()
 export class WebhookService {
@@ -118,10 +117,7 @@ export class WebhookService {
     try {
       const { chainId, escrowAddress } = webhookEntity;
       const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(
-        signer,
-        this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-      );
+      const escrowClient = await EscrowClient.build(signer);
 
       const manifestUrl = await escrowClient.getManifestUrl(escrowAddress);
       if (!manifestUrl) {
@@ -325,10 +321,7 @@ export class WebhookService {
   ): Promise<string> {
     const signer = this.web3Service.getSigner(chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const url = await escrowClient.getIntermediateResultsUrl(escrowAddress);
 
@@ -392,10 +385,7 @@ export class WebhookService {
 
     try {
       const signer = this.web3Service.getSigner(webhookEntity.chainId);
-      const escrowClient = await EscrowClient.build(
-        signer,
-        this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-      );
+      const escrowClient = await EscrowClient.build(signer);
 
       const manifestUrl = await escrowClient.getManifestUrl(
         webhookEntity.escrowAddress,
