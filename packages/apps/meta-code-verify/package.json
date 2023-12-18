@@ -32,7 +32,7 @@
     "assert": "^2.0.0",
     "eslint": "^8.55.0",
     "jest": "^27.1.0",
-    "jest-environment-jsdom": "^27.5.1",
+    "jest-environment-jsdom": "^29.7.0",
     "prettier": "^2.3.2",
     "rollup": "^2.56.3",
     "sinon-chrome": "^3.0.1",
