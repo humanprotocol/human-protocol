@@ -245,10 +245,7 @@ export class JobService {
   public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const manifest = await this.storageService.download(jobEntity.manifestUrl);
 
@@ -296,12 +293,18 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHING;
     await jobEntity.save();
 
-    const escrowAddress = await escrowClient.createAndSetupEscrow(
+    const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
       jobEntity.userId.toString(),
-      escrowConfig,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
     );
+
+    await escrowClient.setup(escrowAddress, escrowConfig, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
 
     if (!escrowAddress) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
@@ -320,16 +323,15 @@ export class JobService {
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const weiAmount = ethers.utils.parseUnits(
       jobEntity.fundAmount.toString(),
       'ether',
     );
-    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
 
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
@@ -537,10 +539,7 @@ export class JobService {
     }
 
     const signer = this.web3Service.getSigner(jobEntity.chainId);
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const finalResultUrl = await escrowClient.getResultsUrl(
       jobEntity.escrowAddress,
@@ -712,10 +711,7 @@ export class JobService {
     const { chainId, escrowAddress } = jobEntity;
 
     const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(
-      signer,
-      this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER),
-    );
+    const escrowClient = await EscrowClient.build(signer);
 
     const escrowStatus = await escrowClient.getStatus(escrowAddress);
     if (
@@ -733,7 +729,9 @@ export class JobService {
       throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    return escrowClient.cancel(escrowAddress);
+    return escrowClient.cancel(escrowAddress, {
+      gasPrice: await this.web3Service.calculateGasPrice(chainId),
+    });
   }
 
   public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
