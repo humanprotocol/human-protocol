@@ -18,6 +18,7 @@ import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
+import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
@@ -86,10 +87,21 @@ export class JobFortuneDto extends JobDto {
   public submissionsRequired: number;
 }
 
+export class storageDataDto {
+  @ApiProperty({ enum: StorageProviders })
+  @IsEnum(StorageProviders)
+  public provider: StorageProviders;
+  @ApiProperty({ enum: AWSRegions })
+  @IsEnum(AWSRegions)
+  public region: AWSRegions | null;
+  public bucketName: string;
+  public path: string;
+}
+
 export class JobCvatDto extends JobDto {
   @ApiProperty()
-  @IsUrl()
-  public dataUrl: string;
+  @IsObject()
+  public data: storageDataDto;
 
   @ApiProperty()
   @IsArray()
@@ -101,8 +113,8 @@ export class JobCvatDto extends JobDto {
   public minQuality: number;
 
   @ApiProperty()
-  @IsString()
-  public gtUrl: string;
+  @IsObject()
+  public groundTruth: storageDataDto;
 
   @ApiProperty()
   @IsUrl()

@@ -81,6 +81,7 @@ import { StorageService } from '../storage/storage.service';
 import { UploadedFile } from '../../common/interfaces/s3';
 import { WebhookService } from '../webhook/webhook.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { generateBucketUrl } from '../../common/utils/storage';
 
 @Injectable()
 export class JobService {
@@ -137,9 +138,10 @@ export class JobService {
       }));
     } else {
       dto = dto as JobCvatDto;
+      const data_url = generateBucketUrl(dto.data);
       ({ manifestUrl, manifestHash } = await this.saveManifest({
         data: {
-          data_url: dto.dataUrl,
+          data_url,
         },
         annotation: {
           labels: dto.labels.map((item) => ({ name: item })),
@@ -158,9 +160,9 @@ export class JobService {
           val_size: Number(
             this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
           ),
-          gt_url: dto.gtUrl,
+          gt_url: generateBucketUrl(dto.groundTruth),
         },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, tokenFundAmount),
+        job_bounty: await this.calculateJobBounty(data_url, tokenFundAmount),
       }));
     }
 
