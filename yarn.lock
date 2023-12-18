@@ -5356,14 +5356,18 @@
   resolved "https://registry.yarnpkg.com/@skaleproject/constants/-/constants-0.3.2.tgz#6e5d19733ebcc127f763362aad292d2240168a01"
   integrity sha512-S7WsVaaq+vNO/x5M6vB+VuSEvFKes96z0aJqwjr9poF+yFNdQ2s5yWnbB7nN+YzsMPEtrvMmby70CuIrdzNdyQ==
 
-"@skaleproject/pow-ethers@^0.2.4":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@skaleproject/pow-ethers/-/pow-ethers-0.2.4.tgz#8fcdd7ee4d2e389916804d7c6d077511f086a77d"
-  integrity sha512-Ld2luziwmVKTt2sm8JHfHMZC3SxzvMZyQIvLNS+b1TWriHamchqvNHAiCmnXZQvCOvWqiufPzUCOPVa4Izr3RQ==
+"@skaleproject/pow-ethers@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@skaleproject/pow-ethers/-/pow-ethers-0.3.3.tgz#c8dfbbf582f9d38ef93aa4cd9b3a5e1d1b1908a6"
+  integrity sha512-29V6GcF+R1k1VdZbakBA83Q5f+/HeWNI+gUkIcUpdLsuFBVx97aCez4LNWfa7atqI1TY9KLgZZh/T+nz606BSg==
   dependencies:
+    "@ethersproject/abi" "^5.7.0"
+    "@ethersproject/bignumber" "^5.7.0"
+    "@ethersproject/contracts" "^5.7.0"
     "@ethersproject/providers" "^5.7.2"
     "@ethersproject/wallet" "^5.7.0"
     "@skaleproject/pow" "*"
+    bn.js "^5.2.1"
 
 "@skaleproject/pow@*":
   version "0.3.2"
