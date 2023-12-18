@@ -64,7 +64,7 @@ export class GetRateDto {
 
 export class PaymentRefundCreateDto {
   @IsNumber()
-  public refundAmount: number
+  public refundAmount: number;
 
   @IsNumber()
   public userId: number;

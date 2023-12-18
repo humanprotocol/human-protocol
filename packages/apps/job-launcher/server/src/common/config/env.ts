@@ -6,6 +6,7 @@ export const ConfigNames = {
   PORT: 'PORT',
   FE_URL: 'FE_URL',
   SESSION_SECRET: 'SESSION_SECRET',
+  MAX_RETRY_COUNT: 'MAX_RETRY_COUNT',
   HASH_SECRET: 'HASH_SECRET',
   JWT_SECRET: 'JWT_SECRET',
   JWT_ACCESS_TOKEN_EXPIRES_IN: 'JWT_ACCESS_TOKEN_EXPIRES_IN',
@@ -59,6 +60,7 @@ export const envValidator = Joi.object({
   PORT: Joi.string().default(5000),
   FE_URL: Joi.string().default('http://localhost:3005'),
   SESSION_SECRET: Joi.string().default('session_key'),
+  MAX_RETRY_COUNT: Joi.number().default(5),
   // Auth
   HASH_SECRET: Joi.string().default('a328af3fc1dad15342cc3d68936008fa'),
   JWT_SECRET: Joi.string().default('secret'),
@@ -77,18 +79,9 @@ export const envValidator = Joi.object({
   WEB3_PRIVATE_KEY: Joi.string().required(),
   GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   JOB_LAUNCHER_FEE: Joi.string().default(10),
-  RECORDING_ORACLE_FEE: Joi.string().default(10),
-  REPUTATION_ORACLE_FEE: Joi.string().default(10),
-  EXCHANGE_ORACLE_FEE: Joi.string().default(10),
   REPUTATION_ORACLE_ADDRESS: Joi.string().required(),
-  FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
-    'http://localhost:3004',
-  ),
   FORTUNE_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   FORTUNE_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
-  CVAT_EXCHANGE_ORACLE_WEBHOOK_URL: Joi.string().default(
-    'http://localhost:3005',
-  ),
   CVAT_EXCHANGE_ORACLE_ADDRESS: Joi.string().required(),
   CVAT_RECORDING_ORACLE_ADDRESS: Joi.string().required(),
   // S3

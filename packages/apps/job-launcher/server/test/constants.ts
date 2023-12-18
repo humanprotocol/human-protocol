@@ -1,5 +1,5 @@
-import { JobRequestType } from "../src/common/enums/job";
-import { FortuneManifestDto } from "../src/modules/job/job.dto";
+import { JobRequestType } from '../src/common/enums/job';
+import { FortuneManifestDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -28,9 +28,7 @@ export const MOCK_REPUTATION_ORACLE_ADDRESS =
   '0x2E04d5D6cE3fF2261D0Cb04d41Fb4Cd67362A473';
 export const MOCK_EXCHANGE_ORACLE_WEBHOOK_URL = 'http://localhost:3000';
 export const MOCK_JOB_LAUNCHER_FEE = 5;
-export const MOCK_EXCHANGE_ORACLE_FEE = 5;
-export const MOCK_RECORDING_ORACLE_FEE = 5;
-export const MOCK_REPUTATION_ORACLE_FEE = 5;
+export const MOCK_ORACLE_FEE = 5;
 export const MOCK_TRANSACTION_HASH =
   '0xd28e4c40571530afcb25ea1890e77b2d18c35f06049980ca4fb71829f64d89dc';
 export const MOCK_SIGNATURE =
@@ -65,3 +63,4 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   fundAmount: 10,
   requestType: JobRequestType.FORTUNE,
 };
+export const MOCK_MAX_RETRY_COUNT = 5;

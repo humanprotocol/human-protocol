@@ -9,7 +9,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, ContractReceipt, Signer, ethers } from 'ethers';
+import { BigNumber, ContractReceipt, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
@@ -125,14 +125,9 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network The network information required to connect to the Escrow contract
-   * @param {number | undefined} gasPriceMultiplier The multiplier to apply to the gas price
    */
-  constructor(
-    signerOrProvider: Signer | Provider,
-    networkData: NetworkData,
-    gasPriceMultiplier?: number
-  ) {
-    super(signerOrProvider, networkData, gasPriceMultiplier);
+  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
+    super(signerOrProvider, networkData);
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
       networkData.factoryAddress,
@@ -144,16 +139,12 @@ export class EscrowClient extends BaseEthersClient {
    * Creates an instance of EscrowClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
-   * @param {number | undefined} gasPriceMultiplier The multiplier to apply to the gas price
    *
    * @returns {Promise<EscrowClient>} An instance of EscrowClient
    * @throws {ErrorProviderDoesNotExist} Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} Thrown if the network's chainId is not supported
    */
-  public static async build(
-    signerOrProvider: Signer | Provider,
-    gasPriceMultiplier?: number
-  ) {
+  public static async build(signerOrProvider: Signer | Provider) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -172,7 +163,7 @@ export class EscrowClient extends BaseEthersClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new EscrowClient(signerOrProvider, networkData, gasPriceMultiplier);
+    return new EscrowClient(signerOrProvider, networkData);
   }
 
   /**
@@ -194,6 +185,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} tokenAddress Token address to use for pay outs.
    * @param {string[]} trustedHandlers Array of addresses that can perform actions on the contract.
    * @param {string} jobRequesterId Job Requester Id
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns {Promise<string>} Return the address of the escrow created.
    *
    *
@@ -222,7 +214,8 @@ export class EscrowClient extends BaseEthersClient {
   public async createEscrow(
     tokenAddress: string,
     trustedHandlers: string[],
-    jobRequesterId: string
+    jobRequesterId: string,
+    txOptions: Overrides = {}
   ): Promise<string> {
     if (!ethers.utils.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
@@ -240,9 +233,7 @@ export class EscrowClient extends BaseEthersClient {
           tokenAddress,
           trustedHandlers,
           jobRequesterId,
-          {
-            ...(await this.gasPriceOptions()),
-          }
+          txOptions
         )
       ).wait();
 
@@ -265,6 +256,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} escrowAddress Address of the escrow to set up.
    * @param {IEscrowConfig} escrowConfig Escrow configuration parameters.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -300,7 +292,8 @@ export class EscrowClient extends BaseEthersClient {
   @requiresSigner
   async setup(
     escrowAddress: string,
-    escrowConfig: IEscrowConfig
+    escrowConfig: IEscrowConfig,
+    txOptions: Overrides = {}
   ): Promise<void> {
     const {
       recordingOracle,
@@ -362,19 +355,19 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.setup(
-        reputationOracle,
-        recordingOracle,
-        exchangeOracle,
-        reputationOracleFee,
-        recordingOracleFee,
-        exchangeOracleFee,
-        manifestUrl,
-        manifestHash,
-        {
-          ...(await this.gasPriceOptions()),
-        }
-      );
+      await (
+        await escrowContract.setup(
+          reputationOracle,
+          recordingOracle,
+          exchangeOracle,
+          reputationOracleFee,
+          recordingOracleFee,
+          exchangeOracleFee,
+          manifestUrl,
+          manifestHash,
+          txOptions
+        )
+      ).wait();
 
       return;
     } catch (e) {
@@ -450,6 +443,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} escrowAddress Address of the escrow to fund.
    * @param {BigNumber} amount Amount to be added as funds.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -471,7 +465,11 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  async fund(escrowAddress: string, amount: BigNumber): Promise<void> {
+  async fund(
+    escrowAddress: string,
+    amount: BigNumber,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -493,10 +491,9 @@ export class EscrowClient extends BaseEthersClient {
         tokenAddress,
         this.signerOrProvider
       );
-
-      await tokenContract.transfer(escrowAddress, amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await tokenContract.transfer(escrowAddress, amount, txOptions)
+      ).wait;
 
       return;
     } catch (e) {
@@ -510,6 +507,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {string} escrowAddress Address of the escrow.
    * @param {string} url Results file url.
    * @param {string} hash Results file hash.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -535,7 +533,8 @@ export class EscrowClient extends BaseEthersClient {
   async storeResults(
     escrowAddress: string,
     url: string,
-    hash: string
+    hash: string,
+    txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -560,9 +559,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.storeResults(url, hash, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (await escrowContract.storeResults(url, hash, txOptions)).wait();
 
       return;
     } catch (e) {
@@ -574,6 +571,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function sets the status of an escrow to completed.
    *
    * @param {string} escrowAddress Address of the escrow.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -596,7 +594,10 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  async complete(escrowAddress: string): Promise<void> {
+  async complete(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -608,9 +609,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.complete({
-        ...(await this.gasPriceOptions()),
-      });
+      await (await escrowContract.complete(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -625,6 +624,7 @@ export class EscrowClient extends BaseEthersClient {
    * @param {BigNumber[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file url.
    * @param {string} finalResultsHash Final results file hash.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -657,7 +657,8 @@ export class EscrowClient extends BaseEthersClient {
     recipients: string[],
     amounts: BigNumber[],
     finalResultsUrl: string,
-    finalResultsHash: string
+    finalResultsHash: string,
+    txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -711,17 +712,16 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.bulkPayOut(
-        recipients,
-        amounts,
-        finalResultsUrl,
-        finalResultsHash,
-        DEFAULT_TX_ID,
-
-        {
-          ...(await this.gasPriceOptions()),
-        }
-      );
+      await (
+        await escrowContract.bulkPayOut(
+          recipients,
+          amounts,
+          finalResultsUrl,
+          finalResultsHash,
+          DEFAULT_TX_ID,
+          txOptions
+        )
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -732,6 +732,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function cancels the specified escrow and sends the balance to the canceler.
    *
    * @param {string} escrowAddress Address of the escrow to cancel.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns {EscrowCancel} Returns the escrow cancellation data including transaction hash and refunded amount. Throws error if any.
    *
    *
@@ -754,7 +755,10 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  async cancel(escrowAddress: string): Promise<EscrowCancel> {
+  async cancel(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<EscrowCancel> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -766,10 +770,9 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      const tx = await escrowContract.cancel({
-        ...(await this.gasPriceOptions()),
-      });
-      const transactionReceipt = await tx.wait();
+      const transactionReceipt = await (
+        await escrowContract.cancel(txOptions)
+      ).wait();
 
       let amountTransferred: BigNumber | undefined = undefined;
       const tokenAddress = await escrowContract.token();
@@ -810,6 +813,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function cancels the specified escrow, sends the balance to the canceler and selfdestructs the escrow contract.
    *
    * @param {string} escrowAddress Address of the escrow.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -832,7 +836,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  async abort(escrowAddress: string): Promise<void> {
+  async abort(escrowAddress: string, txOptions: Overrides = {}): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
@@ -844,9 +848,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.abort({
-        ...(await this.gasPriceOptions()),
-      });
+      await (await escrowContract.abort(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -858,6 +860,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} escrowAddress Address of the escrow.
    * @param {string[]} trustedHandlers Array of addresses of trusted handlers to add.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -883,7 +886,8 @@ export class EscrowClient extends BaseEthersClient {
   @requiresSigner
   async addTrustedHandlers(
     escrowAddress: string,
-    trustedHandlers: string[]
+    trustedHandlers: string[],
+    txOptions: Overrides = {}
   ): Promise<void> {
     if (!ethers.utils.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
@@ -906,9 +910,9 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      await escrowContract.addTrustedHandlers(trustedHandlers, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await escrowContract.addTrustedHandlers(trustedHandlers, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);

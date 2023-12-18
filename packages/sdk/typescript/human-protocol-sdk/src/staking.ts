@@ -11,7 +11,7 @@ import {
   Staking,
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, Signer, ethers } from 'ethers';
+import { BigNumber, Overrides, Signer, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
@@ -114,14 +114,9 @@ export class StakingClient extends BaseEthersClient {
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the Staking contract
-   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    */
-  constructor(
-    signerOrProvider: Signer | Provider,
-    networkData: NetworkData,
-    gasPriceMultiplier?: number
-  ) {
-    super(signerOrProvider, networkData, gasPriceMultiplier);
+  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
+    super(signerOrProvider, networkData);
 
     this.stakingContract = Staking__factory.connect(
       networkData.stakingAddress,
@@ -154,10 +149,7 @@ export class StakingClient extends BaseEthersClient {
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(
-    signerOrProvider: Signer | Provider,
-    gasPriceMultiplier?: number
-  ) {
+  public static async build(signerOrProvider: Signer | Provider) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -176,7 +168,7 @@ export class StakingClient extends BaseEthersClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new StakingClient(signerOrProvider, networkData, gasPriceMultiplier);
+    return new StakingClient(signerOrProvider, networkData);
   }
 
   /**
@@ -198,6 +190,7 @@ export class StakingClient extends BaseEthersClient {
    * This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
    *
    * @param {BigNumber} amount Amount in WEI of tokens to approve for stake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -219,7 +212,10 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async approveStake(amount: BigNumber): Promise<void> {
+  public async approveStake(
+    amount: BigNumber,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -229,9 +225,13 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.tokenContract.approve(this.stakingContract.address, amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await this.tokenContract.approve(
+          this.stakingContract.address,
+          amount,
+          txOptions
+        )
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -244,6 +244,7 @@ export class StakingClient extends BaseEthersClient {
    * > `approveStake` must be called before
    *
    * @param {BigNumber} amount Amount in WEI of tokens to stake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -266,7 +267,10 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async stake(amount: BigNumber): Promise<void> {
+  public async stake(
+    amount: BigNumber,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -276,9 +280,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.stakingContract.stake(amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (await this.stakingContract.stake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -291,6 +293,7 @@ export class StakingClient extends BaseEthersClient {
    * > Must have tokens available to unstake
    *
    * @param {BigNumber} amount Amount in WEI of tokens to unstake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -312,7 +315,10 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async unstake(amount: BigNumber): Promise<void> {
+  public async unstake(
+    amount: BigNumber,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
     }
@@ -322,9 +328,7 @@ export class StakingClient extends BaseEthersClient {
     }
 
     try {
-      await this.stakingContract.unstake(amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (await this.stakingContract.unstake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -336,6 +340,7 @@ export class StakingClient extends BaseEthersClient {
    *
    * > Must have tokens available to withdraw
    *
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -356,11 +361,9 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async withdraw(): Promise<void> {
+  public async withdraw(txOptions: Overrides = {}): Promise<void> {
     try {
-      await this.stakingContract.withdraw({
-        ...(await this.gasPriceOptions()),
-      });
+      await (await this.stakingContract.withdraw(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -373,6 +376,7 @@ export class StakingClient extends BaseEthersClient {
    * @param {string} slasher Wallet address from who requested the slash
    * @param {string} staker Wallet address from who is going to be slashed
    * @param {string} escrowAddress Address of the escrow which allocation will be slashed
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @param {BigNumber} amount Amount in WEI of tokens to unstake.
    * @returns Returns void if successful. Throws error if any.
    *
@@ -399,7 +403,8 @@ export class StakingClient extends BaseEthersClient {
     slasher: string,
     staker: string,
     escrowAddress: string,
-    amount: BigNumber
+    amount: BigNumber,
+    txOptions: Overrides = {}
   ): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
@@ -420,9 +425,15 @@ export class StakingClient extends BaseEthersClient {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.slash(slasher, staker, escrowAddress, amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await this.stakingContract.slash(
+          slasher,
+          staker,
+          escrowAddress,
+          amount,
+          txOptions
+        )
+      ).wait();
 
       return;
     } catch (e) {
@@ -436,6 +447,7 @@ export class StakingClient extends BaseEthersClient {
    * > Must have tokens staked
    *
    * @param {string} escrowAddress Address of the escrow contract to allocate in.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @param {BigNumber} amount Amount in WEI of tokens to allocate.
    * @returns Returns void if successful. Throws error if any.
    *
@@ -460,7 +472,8 @@ export class StakingClient extends BaseEthersClient {
   @requiresSigner
   public async allocate(
     escrowAddress: string,
-    amount: BigNumber
+    amount: BigNumber,
+    txOptions: Overrides = {}
   ): Promise<void> {
     if (!BigNumber.isBigNumber(amount)) {
       throw ErrorInvalidStakingValueType;
@@ -473,9 +486,9 @@ export class StakingClient extends BaseEthersClient {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.allocate(escrowAddress, amount, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await this.stakingContract.allocate(escrowAddress, amount, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -489,6 +502,7 @@ export class StakingClient extends BaseEthersClient {
    * > The escrow must be cancelled or completed.
    *
    * @param {string} escrowAddress Address of the escrow contract to close allocation from.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -509,13 +523,16 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async closeAllocation(escrowAddress: string): Promise<void> {
+  public async closeAllocation(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.closeAllocation(escrowAddress, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await this.stakingContract.closeAllocation(escrowAddress, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -528,6 +545,7 @@ export class StakingClient extends BaseEthersClient {
    * > The escrow must have rewards added
    *
    * @param {string} escrowAddress Escrow address from which rewards are distributed.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -548,13 +566,16 @@ export class StakingClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async distributeReward(escrowAddress: string): Promise<void> {
+  public async distributeReward(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     await this.checkValidEscrow(escrowAddress);
 
     try {
-      this.rewardPoolContract.distributeReward(escrowAddress, {
-        ...(await this.gasPriceOptions()),
-      });
+      (
+        await this.rewardPoolContract.distributeReward(escrowAddress, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
