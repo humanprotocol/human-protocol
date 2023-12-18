@@ -14467,10 +14467,10 @@ hardhat-abi-exporter@^2.10.1:
     "@ethersproject/abi" "^5.5.0"
     delete-empty "^3.0.0"
 
-hardhat-celo@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/hardhat-celo/-/hardhat-celo-0.0.6.tgz#45030f230ee3403c52d7c7d8538b3219fadfab3c"
-  integrity sha512-OSZz0+Y0jQofnyC5kd8oztU6D0ZMrg+56Dopt5GCkECRXFnis9SYQFNkRonlwFko9v39CBMm5c12c2kx8HMgpg==
+hardhat-celo@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/hardhat-celo/-/hardhat-celo-0.0.7.tgz#fb08fe6afcb95487977ca10cd614a12d1f6c3c7a"
+  integrity sha512-//LB0KD9HMRUMO9MLHnr6ODLJCAbJK2e3OWIhQvJr8PTzms+1uELW/skAi5wUcO+gOASV4PTo45g/yipgHfzeA==
   dependencies:
     "@ethersproject/abi" "^5.4.7"
     "@ethersproject/providers" "^5.4.7"
