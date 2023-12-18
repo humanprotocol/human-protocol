@@ -27,7 +27,6 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { promisify } from 'util';
 import { generateHash } from '../../common/utils/crypto';
 import { ApiKeyRepository } from './apikey.repository';
 import * as crypto from 'crypto';

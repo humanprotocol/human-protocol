@@ -227,9 +227,8 @@ describe('StorageService', () => {
       streamResponseData.push(null);
       (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
 
-      const uploadedFile = await storageService.copyFileFromURLToBucket(
-        MOCK_FILE_URL,
-      );
+      const uploadedFile =
+        await storageService.copyFileFromURLToBucket(MOCK_FILE_URL);
 
       expect(
         uploadedFile.url.includes(

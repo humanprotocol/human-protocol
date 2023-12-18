@@ -18,8 +18,6 @@ describe('UserService', () => {
   let userService: UserService;
   let paymentService: PaymentService;
   let userRepository: UserRepository;
-  let configService: ConfigService;
-  let httpService: HttpService;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {};
@@ -36,8 +34,6 @@ describe('UserService', () => {
 
     userService = moduleRef.get<UserService>(UserService);
     userRepository = moduleRef.get(UserRepository);
-    configService = moduleRef.get(ConfigService);
-    httpService = moduleRef.get(HttpService);
     paymentService = moduleRef.get(PaymentService);
   });
 

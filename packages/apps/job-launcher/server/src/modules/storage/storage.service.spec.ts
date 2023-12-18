@@ -1,4 +1,4 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { StorageClient } from '@human-protocol/sdk';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
@@ -156,9 +156,8 @@ describe('Web3Service', () => {
       streamResponseData.push(null);
       (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
 
-      const uploadedFile = await storageService.copyFileFromURLToBucket(
-        MOCK_FILE_URL,
-      );
+      const uploadedFile =
+        await storageService.copyFileFromURLToBucket(MOCK_FILE_URL);
 
       expect(
         uploadedFile.url.includes(

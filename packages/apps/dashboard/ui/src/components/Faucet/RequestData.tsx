@@ -150,8 +150,8 @@ export const RequestData: FC<RequestDataProps> = ({
                 ? 'Mining sFUEL'
                 : 'Sending tokens'
               : network?.chainId === ChainId.SKALE
-              ? 'Send sFUEL'
-              : 'Send me'}
+                ? 'Send sFUEL'
+                : 'Send me'}
           </Button>
         </Grid>
         <Grid

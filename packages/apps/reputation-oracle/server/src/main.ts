@@ -17,7 +17,7 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>('FE_URL', 'http://localhost:3001');
+  // const baseUrl = configService.get<string>('FE_URL', 'http://localhost:3001');
 
   // app.enableCors({
   //   origin:

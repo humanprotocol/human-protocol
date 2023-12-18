@@ -16,8 +16,8 @@ export const RegisterValidationSchema = Yup.object().shape({
   password: Yup.string()
     .required(ERROR_MESSAGES.requirePassword)
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/,
-      ERROR_MESSAGES.weakPassword
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|'"/`[\]:;<>,.?~\\-]).*$/,
+      ERROR_MESSAGES.weakPassword,
     )
     .min(8, ERROR_MESSAGES.invalidPasswordLength)
     .max(255, ERROR_MESSAGES.invalidPasswordMaxLength),
@@ -38,8 +38,8 @@ export const ResetPasswordValidationSchema = Yup.object().shape({
   password: Yup.string()
     .required(ERROR_MESSAGES.requirePassword)
     .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/,
-      ERROR_MESSAGES.weakPassword
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|'"/`[\]:;<>,.?~\\-]).*$/,
+      ERROR_MESSAGES.weakPassword,
     )
     .min(8, ERROR_MESSAGES.invalidPasswordLength)
     .max(255, ERROR_MESSAGES.invalidPasswordMaxLength),

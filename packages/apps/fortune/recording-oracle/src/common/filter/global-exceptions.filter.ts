@@ -23,8 +23,8 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
         exception instanceof HttpException
           ? exception.getResponse()
           : exception instanceof Error
-          ? exception.message
-          : 'Internal Server Error',
+            ? exception.message
+            : 'Internal Server Error',
     });
   }
 }

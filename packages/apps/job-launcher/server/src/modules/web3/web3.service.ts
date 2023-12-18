@@ -55,9 +55,11 @@ export class Web3Service {
     return validChainIds;
   }
 
-  public async calculateGasPrice(chainId: number): Promise<BigNumberish>{
+  public async calculateGasPrice(chainId: number): Promise<BigNumberish> {
     const signer = this.getSigner(chainId);
-    const multiplier = this.configService.get<number>(ConfigNames.GAS_PRICE_MULTIPLIER);
+    const multiplier = this.configService.get<number>(
+      ConfigNames.GAS_PRICE_MULTIPLIER,
+    );
     if (multiplier) {
       return (await signer.provider.getGasPrice()).mul(multiplier);
     }
