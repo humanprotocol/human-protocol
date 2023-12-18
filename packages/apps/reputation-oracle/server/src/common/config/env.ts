@@ -18,6 +18,7 @@ export const ConfigNames = {
   POSTGRES_SYNC: 'POSTGRES_SYNC',
   POSTGRES_SSL: 'POSTGRES_SSL',
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
+  GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
   S3_ACCESS_KEY: 'S3_ACCESS_KEY',
@@ -56,6 +57,7 @@ export const envValidator = Joi.object({
   POSTGRES_SSL: Joi.string().default('false'),
   // Web3
   WEB3_PRIVATE_KEY: Joi.string().required(),
+  GAS_PRICE_MULTIPLIER: Joi.number().default(null),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
   S3_PORT: Joi.string().default(9000),

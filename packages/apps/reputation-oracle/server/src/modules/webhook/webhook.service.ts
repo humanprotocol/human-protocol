@@ -169,6 +169,9 @@ export class WebhookService {
         results.amounts,
         results.url,
         results.hash,
+        {
+          gasPrice: await this.web3Service.calculateGasPrice(chainId),
+        },
       );
 
       await this.webhookRepository.updateOne(
@@ -487,7 +490,11 @@ export class WebhookService {
         );
       }
 
-      await escrowClient.complete(webhookEntity.escrowAddress);
+      await escrowClient.complete(webhookEntity.escrowAddress, {
+        gasPrice: await this.web3Service.calculateGasPrice(
+          webhookEntity.chainId,
+        ),
+      });
 
       await this.webhookRepository.updateOne(
         {

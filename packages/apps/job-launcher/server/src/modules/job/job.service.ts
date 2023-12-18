@@ -293,12 +293,18 @@ export class JobService {
     jobEntity.status = JobStatus.LAUNCHING;
     await jobEntity.save();
 
-    const escrowAddress = await escrowClient.createAndSetupEscrow(
+    const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
       jobEntity.userId.toString(),
-      escrowConfig,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
     );
+
+    await escrowClient.setup(escrowAddress, escrowConfig, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
 
     if (!escrowAddress) {
       this.logger.log(ErrorEscrow.NotCreated, JobService.name);
@@ -323,7 +329,9 @@ export class JobService {
       jobEntity.fundAmount.toString(),
       'ether',
     );
-    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
 
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
@@ -721,7 +729,9 @@ export class JobService {
       throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
     }
 
-    return escrowClient.cancel(escrowAddress);
+    return escrowClient.cancel(escrowAddress, {
+      gasPrice: await this.web3Service.calculateGasPrice(chainId),
+    });
   }
 
   public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {

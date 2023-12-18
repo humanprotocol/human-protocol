@@ -32,4 +32,3 @@ export class Web3Controller {
     return this.web3Service.getValidChains();
   }
 }
-console.log(ChainId);
