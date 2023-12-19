@@ -63,7 +63,6 @@ export const MOCK_MANIFEST: FortuneManifestDto = {
   fundAmount: 10,
   requestType: JobRequestType.FORTUNE,
 };
-export const MOCK_MAX_RETRY_COUNT = 5;
 export const MOCK_ENCRYPTED_MANIFEST = 'encryptedManifest';
 export const MOCK_PGP_PRIVATE_KEY = `-----BEGIN PGP PRIVATE KEY BLOCK-----
 
