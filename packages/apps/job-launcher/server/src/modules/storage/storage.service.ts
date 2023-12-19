@@ -81,7 +81,7 @@ export class StorageService {
       const stream = new PassThrough();
       data.pipe(stream);
 
-      const hash = await hashStream(data);
+      const hash = await hashStream(stream);
       const key = `s3${hash}.zip`;
 
       await this.minioClient.putObject(this.s3Config.bucket, key, stream, {
