@@ -70,7 +70,6 @@ import {
   JobDetailsDto,
   JobFortuneDto,
   JobListDto,
-  SaveManifestDto,
   HCaptchaManifestDto,
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
@@ -106,7 +105,6 @@ import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
 import { StorageService } from '../storage/storage.service';
-import { UploadedFile } from '../../common/interfaces/s3';
 import { WebhookService } from '../webhook/webhook.service';
 import stringify from 'json-stable-stringify';
 import { Cron, CronExpression } from '@nestjs/schedule';
