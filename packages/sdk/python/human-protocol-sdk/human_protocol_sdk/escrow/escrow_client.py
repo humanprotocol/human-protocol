@@ -64,10 +64,9 @@ from human_protocol_sdk.utils import (
 )
 from web3 import Web3, contract
 from web3.middleware import geth_poa_middleware
+from web3.types import TxParams
 
 from human_protocol_sdk.utils import validate_url
-
-GAS_LIMIT = int(os.getenv("GAS_LIMIT", 4712388))
 
 LOG = logging.getLogger("human_protocol_sdk.escrow")
 
@@ -147,12 +146,11 @@ class EscrowClient:
     A class used to manage escrow on the HUMAN network.
     """
 
-    def __init__(self, web3: Web3, gas_limit: Optional[int] = None):
+    def __init__(self, web3: Web3):
         """
         Initializes a Escrow instance.
 
         :param web3: The Web3 object
-        :param gas_limit: Gas limit to be provided to transaction
         """
 
         # Initialize web3 instance
@@ -176,10 +174,13 @@ class EscrowClient:
         self.factory_contract = self.w3.eth.contract(
             address=self.network["factory_address"], abi=factory_interface["abi"]
         )
-        self.gas_limit = gas_limit
 
     def create_escrow(
-        self, token_address: str, trusted_handlers: List[str], job_requester_id: str
+        self,
+        token_address: str,
+        trusted_handlers: List[str],
+        job_requester_id: str,
+        tx_options: Optional[TxParams] = None,
     ) -> str:
         """
         Creates an escrow contract that uses the token passed to pay oracle fees and reward workers.
@@ -187,6 +188,7 @@ class EscrowClient:
         :param tokenAddress: The address of the token to use for payouts
         :param trusted_handlers: Array of addresses that can perform actions on the contract
         :param job_requester_id: The id of the job requester
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: The address of the escrow created
 
@@ -241,7 +243,7 @@ class EscrowClient:
                 token_address, trusted_handlers, job_requester_id
             ),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
         return next(
             (
@@ -252,12 +254,18 @@ class EscrowClient:
             None,
         ).args.escrow
 
-    def setup(self, escrow_address: str, escrow_config: EscrowConfig) -> None:
+    def setup(
+        self,
+        escrow_address: str,
+        escrow_config: EscrowConfig,
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """
         Sets up the parameters of the escrow.
 
         :param escrow_address: Address of the escrow to setup
         :param escrow_config: Object containing all the necessary information to setup an escrow
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -317,7 +325,7 @@ class EscrowClient:
                 escrow_config.hash,
             ),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
     def create_and_setup_escrow(
@@ -393,12 +401,18 @@ class EscrowClient:
 
         return escrow_address
 
-    def fund(self, escrow_address: str, amount: Decimal) -> None:
+    def fund(
+        self,
+        escrow_address: str,
+        amount: Decimal,
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """
         Adds funds to the escrow.
 
         :param escrow_address: Address of the escrow to setup
         :param amount: Amount to be added as funds
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -446,15 +460,22 @@ class EscrowClient:
             "Fund",
             token_contract.functions.transfer(escrow_address, amount),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def store_results(self, escrow_address: str, url: str, hash: str) -> None:
+    def store_results(
+        self,
+        escrow_address: str,
+        url: str,
+        hash: str,
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """Stores the results url.
 
         :param escrow_address: Address of the escrow
         :param url: Results file url
         :param hash: Results file hash
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -504,13 +525,16 @@ class EscrowClient:
             "Store Results",
             self._get_escrow_contract(escrow_address).functions.storeResults(url, hash),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def complete(self, escrow_address: str) -> None:
+    def complete(
+        self, escrow_address: str, tx_options: Optional[TxParams] = None
+    ) -> None:
         """Sets the status of an escrow to completed.
 
         :param escrow_address: Address of the escrow to complete
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -550,7 +574,7 @@ class EscrowClient:
             "Complete",
             self._get_escrow_contract(escrow_address).functions.complete(),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
     def bulk_payout(
@@ -561,6 +585,7 @@ class EscrowClient:
         final_results_url: str,
         final_results_hash: str,
         txId: Decimal,
+        tx_options: Optional[TxParams] = None,
     ) -> None:
         """Pays out the amounts specified to the workers and sets the URL of the final results file.
 
@@ -570,6 +595,7 @@ class EscrowClient:
         :param final_results_url: Final results file url
         :param final_results_hash: Final results file hash
         :param txId: Serial number of the bulks
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -650,13 +676,16 @@ class EscrowClient:
                 recipients, amounts, final_results_url, final_results_hash, txId
             ),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def cancel(self, escrow_address: str) -> None:
+    def cancel(
+        self, escrow_address: str, tx_options: Optional[TxParams] = None
+    ) -> None:
         """Cancels the specified escrow and sends the balance to the canceler.
 
         :param escrow_address: Address of the escrow to cancel
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -698,14 +727,15 @@ class EscrowClient:
             "Cancel",
             self._get_escrow_contract(escrow_address).functions.cancel(),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def abort(self, escrow_address: str) -> None:
+    def abort(self, escrow_address: str, tx_options: Optional[TxParams] = None) -> None:
         """Cancels the specified escrow,
         sends the balance to the canceler and selfdestructs the escrow contract.
 
         :param escrow_address: Address of the escrow to abort
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -745,14 +775,20 @@ class EscrowClient:
             "Abort",
             self._get_escrow_contract(escrow_address).functions.abort(),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
-    def add_trusted_handlers(self, escrow_address: str, handlers: List[str]) -> None:
+    def add_trusted_handlers(
+        self,
+        escrow_address: str,
+        handlers: List[str],
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """Adds an array of addresses to the trusted handlers list.
 
         :param escrow_address: Address of the escrow
         :param handlers: Array of trusted handler addresses
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -803,7 +839,7 @@ class EscrowClient:
                 handlers
             ),
             EscrowClientError,
-            self.gas_limit,
+            tx_options,
         )
 
     def get_balance(self, escrow_address: str) -> Decimal:

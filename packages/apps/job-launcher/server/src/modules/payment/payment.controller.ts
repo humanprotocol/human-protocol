@@ -8,7 +8,13 @@ import {
   UseGuards,
   Headers,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 
@@ -29,6 +35,28 @@ import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
+  @ApiOperation({
+    summary: 'Create a fiat payment',
+    description: 'Endpoint to create a new fiat payment.',
+  })
+  @ApiBody({ type: PaymentFiatCreateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment created successfully',
+    type: String,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Post('/fiat')
   public async createFiatPayment(
     @Request() req: RequestWithUser,
@@ -37,6 +65,28 @@ export class PaymentController {
     return this.paymentService.createFiatPayment(req.user.id, data);
   }
 
+  @ApiOperation({
+    summary: 'Confirm a fiat payment',
+    description: 'Endpoint to confirm a fiat payment.',
+  })
+  @ApiBody({ type: PaymentFiatConfirmDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Fiat payment confirmed successfully',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Post('/fiat/confirm-payment')
   public async confirmFiatPayment(
     @Request() req: RequestWithUser,
@@ -45,6 +95,28 @@ export class PaymentController {
     return this.paymentService.confirmFiatPayment(req.user.id, data);
   }
 
+  @ApiOperation({
+    summary: 'Create a crypto payment',
+    description: 'Endpoint to create a new crypto payment.',
+  })
+  @ApiBody({ type: PaymentCryptoCreateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Crypto payment created successfully',
+    type: Boolean,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Post('/crypto')
   public async createCryptoPayment(
     @Headers(HEADER_SIGNATURE_KEY) signature: string,
@@ -58,6 +130,23 @@ export class PaymentController {
     );
   }
 
+  @ApiOperation({
+    summary: 'Get exchange rates',
+    description: 'Endpoint to get exchange rates.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Exchange rates retrieved successfully',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   @Get('/rates')
   public async getRate(@Query() data: GetRateDto): Promise<number> {
     try {

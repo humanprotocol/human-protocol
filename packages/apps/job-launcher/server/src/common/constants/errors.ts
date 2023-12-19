@@ -7,7 +7,6 @@ export enum ErrorJob {
   NotEnoughFunds = 'Not enough funds',
   ManifestNotFound = 'Manifest not found',
   ManifestValidationFailed = 'Manifest validation failed',
-  WebhookWasNotSent = 'Webhook was not sent',
   ResultNotFound = 'Result not found',
   ResultValidationFailed = 'Result validation failed',
   InvalidRequestType = 'Invalid job type',
@@ -18,6 +17,16 @@ export enum ErrorJob {
   TaskDataNotFound = 'Task data not found',
   HCaptchaInvalidJobType = 'hCaptcha invalid job type',
   GroundThuthValidationFailed = 'Ground thuth validation failed',
+}
+
+/**
+ * Represents error messages associated to webhook.
+ */
+export enum ErrorWebhook {
+  NotSent = 'Webhook was not sent',
+  NotFound = 'Webhook not found',
+  UrlNotFound = 'Webhook URL not found',
+  NotCreated = 'Webhook has not been created',
 }
 
 /**
@@ -37,7 +46,7 @@ export enum ErrorEscrow {
 export enum ErrorUser {
   NotFound = 'User not found',
   AccountCannotBeRegistered = 'Account cannot be registered',
-  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  BalanceCouldNotBeRetrieved = 'User balance could not be retrieved',
   InvalidCredentials = 'Invalid credentials',
 }
 

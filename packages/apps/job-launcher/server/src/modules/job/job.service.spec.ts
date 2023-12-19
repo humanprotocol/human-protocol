@@ -8,6 +8,7 @@ import {
   IAllocation,
   EscrowUtils,
   NETWORKS,
+  KVStoreClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
@@ -41,7 +42,7 @@ import {
   MOCK_BUCKET_NAME,
   MOCK_CHAIN_ID,
   MOCK_EXCHANGE_ORACLE_ADDRESS,
-  MOCK_EXCHANGE_ORACLE_FEE,
+  MOCK_ORACLE_FEE,
   MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
@@ -54,9 +55,7 @@ import {
   MOCK_MANIFEST,
   MOCK_PRIVATE_KEY,
   MOCK_RECORDING_ORACLE_ADDRESS,
-  MOCK_RECORDING_ORACLE_FEE,
   MOCK_REPUTATION_ORACLE_ADDRESS,
-  MOCK_REPUTATION_ORACLE_FEE,
   MOCK_REQUESTER_DESCRIPTION,
   MOCK_REQUESTER_TITLE,
   MOCK_SUBMISSION_REQUIRED,
@@ -70,6 +69,7 @@ import {
   MOCK_HCAPTCHA_IMAGE_URL,
   MOCK_HCAPTCHA_REPO_URI,
   MOCK_HCAPTCHA_RO_URI,
+  MOCK_FILE_KEY,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -99,13 +99,15 @@ import {
   HCAPTCHA_MIN_SHAPES_PER_IMAGE,
   HCAPTCHA_NOT_PRESENTED_LABEL,
 } from '../../common/constants';
+import { WebhookService } from '../webhook/webhook.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      setup: jest.fn().mockResolvedValue(null),
     })),
   },
   EscrowUtils: {
@@ -115,6 +117,19 @@ jest.mock('@human-protocol/sdk', () => ({
   StakingClient: {
     build: jest.fn().mockImplementation(() => ({
       getAllocation: jest.fn(),
+    })),
+  },
+  StorageClient: jest.fn().mockImplementation(() => ({
+    uploadFiles: jest
+      .fn()
+      .mockResolvedValue([
+        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
+      ]),
+    listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
+  })),
+  KVStoreClient: {
+    build: jest.fn().mockImplementation(() => ({
+      get: jest.fn(),
     })),
   },
 }));
@@ -140,7 +155,8 @@ describe('JobService', () => {
     createPaymentMock: any,
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
-    storageService: StorageService;
+    storageService: StorageService,
+    webhookService: WebhookService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -153,12 +169,6 @@ describe('JobService', () => {
         switch (key) {
           case 'JOB_LAUNCHER_FEE':
             return MOCK_JOB_LAUNCHER_FEE;
-          case 'EXCHANGE_ORACLE_FEE':
-            return MOCK_EXCHANGE_ORACLE_FEE;
-          case 'RECORDING_ORACLE_FEE':
-            return MOCK_RECORDING_ORACLE_FEE;
-          case 'REPUTATION_ORACLE_FEE':
-            return MOCK_REPUTATION_ORACLE_FEE;
           case 'WEB3_JOB_LAUNCHER_PRIVATE_KEY':
             return MOCK_PRIVATE_KEY;
           case 'FORTUNE_EXCHANGE_ORACLE_ADDRESS':
@@ -228,6 +238,7 @@ describe('JobService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: StorageService, useValue: createMock<StorageService>() },
+        { provide: WebhookService, useValue: createMock<WebhookService>() },
         {
           provide: RoutingProtocolService,
           useValue: createMock<RoutingProtocolService>(),
@@ -243,6 +254,7 @@ describe('JobService', () => {
     createPaymentMock = jest.spyOn(paymentRepository, 'create');
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
+    webhookService = moduleRef.get<WebhookService>(WebhookService);
 
     storageService.uploadFile = jest.fn().mockResolvedValue({
       url: MOCK_FILE_URL,
@@ -250,6 +262,10 @@ describe('JobService', () => {
     });
 
     storageService.download = jest.fn();
+
+    web3Service.calculateGasPrice = jest
+      .fn()
+      .mockReturnValue(BigNumber.from(1000));
   });
 
   describe('createJob', () => {
@@ -293,6 +309,10 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -1279,9 +1299,8 @@ describe('JobService', () => {
 
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJob(userId, jobId);
 
-      expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
       expect(mockJobEntity.save).toHaveBeenCalled();
       expect(paymentService.createRefundPayment).not.toHaveBeenCalled();
@@ -1303,9 +1322,8 @@ describe('JobService', () => {
         .fn()
         .mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.requestToCancelJob(userId, jobId);
+      await jobService.requestToCancelJob(userId, jobId);
 
-      expect(result).toEqual(true);
       expect(jobRepository.findOne).toHaveBeenCalledWith({ id: jobId, userId });
       expect(paymentService.createRefundPayment).toHaveBeenCalledWith({
         jobId,
@@ -1345,7 +1363,6 @@ describe('JobService', () => {
   describe('cancelCronJob', () => {
     let findOneJobMock: any,
       findOnePaymentMock: any,
-      sendWebhookMock: any,
       jobEntityMock: Partial<JobEntity>,
       paymentEntityMock: Partial<PaymentEntity>;
 
@@ -1369,7 +1386,6 @@ describe('JobService', () => {
       };
       findOneJobMock = jest.spyOn(jobRepository, 'findOne');
       findOnePaymentMock = jest.spyOn(paymentRepository, 'findOne');
-      sendWebhookMock = jest.spyOn(jobService, 'sendWebhook');
       findOnePaymentMock.mockResolvedValueOnce(
         paymentEntityMock as PaymentEntity,
       );
@@ -1396,11 +1412,21 @@ describe('JobService', () => {
           txHash: MOCK_TRANSACTION_HASH,
           amountRefunded: BigNumber.from(1),
         });
+
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getExchangeOracleAddress: jest
+          .fn()
+          .mockResolvedValue(MOCK_EXCHANGE_ORACLE_ADDRESS),
+      }));
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_EXCHANGE_ORACLE_WEBHOOK_URL),
+      }));
+
       const manifestMock = {
         requestType: JobRequestType.FORTUNE,
       };
       storageService.download = jest.fn().mockResolvedValue(manifestMock);
-      sendWebhookMock.mockResolvedValue(true);
 
       const result = await jobService.cancelCronJob();
 
@@ -1409,6 +1435,7 @@ describe('JobService', () => {
         jobEntityMock,
       );
       expect(jobEntityMock.save).toHaveBeenCalled();
+      expect(webhookService.createWebhook).toHaveBeenCalled();
     });
 
     it('should not call process escrow cancellation when escrowAddress is not present', async () => {
@@ -1427,7 +1454,6 @@ describe('JobService', () => {
         requestType: JobRequestType.FORTUNE,
       };
       storageService.download = jest.fn().mockResolvedValue(manifestMock);
-      sendWebhookMock.mockResolvedValue(true);
 
       expect(await jobService.cancelCronJob()).toBe(true);
       expect(jobService.processEscrowCancellation).toHaveBeenCalledTimes(0);
@@ -1741,8 +1767,8 @@ describe('JobService', () => {
       };
       jobRepository.findOne = jest.fn().mockResolvedValue(mockJobEntity);
 
-      const result = await jobService.escrowFailedWebhook(dto);
-      expect(result).toBe(true);
+      await jobService.escrowFailedWebhook(dto);
+
       expect(mockJobEntity.status).toBe(JobStatus.FAILED);
       expect(mockJobEntity.failedReason).toBe(dto.reason);
       expect(mockJobEntity.save).toHaveBeenCalled();
@@ -1960,6 +1986,30 @@ describe('JobService', () => {
         MOCK_ADDRESS,
       );
       expect(result).toBe(1.5);
+    });
+  });
+
+  describe('getOracleFee', () => {
+    it('should get the oracle fee', async () => {
+      web3Service.getSigner = jest.fn().mockReturnValue({
+        ...signerMock,
+        provider: {
+          getLogs: jest.fn().mockResolvedValue([{}]),
+          getBlockNumber: jest.fn().mockResolvedValue(100),
+        },
+      });
+
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+
+      const result = await (jobService as any).getOracleFee(
+        MOCK_EXCHANGE_ORACLE_ADDRESS,
+        ChainId.LOCALHOST,
+      );
+
+      expect(result.toNumber()).toBe(MOCK_ORACLE_FEE);
+      expect(result).toBeInstanceOf(BigNumber);
     });
   });
 });

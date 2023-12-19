@@ -24,12 +24,18 @@ export class SignatureAuthGuard implements CanActivate {
         data.chainId,
         data.escrowAddress,
       );
-      if (this.role.includes(Role.JobLaucher))
-        oracleAdresses.push(escrowData.launcher!);
-      if (this.role.includes(Role.Exchange))
-        oracleAdresses.push(escrowData.exchangeOracle!);
-      if (this.role.includes(Role.Reputation))
-        oracleAdresses.push(escrowData.reputationOracle!);
+      if (this.role.includes(Role.JobLaucher) && escrowData.launcher?.length)
+        oracleAdresses.push(escrowData.launcher);
+      if (
+        this.role.includes(Role.Exchange) &&
+        escrowData.exchangeOracle?.length
+      )
+        oracleAdresses.push(escrowData.exchangeOracle);
+      if (
+        this.role.includes(Role.Reputation) &&
+        escrowData.reputationOracle?.length
+      )
+        oracleAdresses.push(escrowData.reputationOracle);
 
       const isVerified = verifySignature(data, signature, oracleAdresses);
 
@@ -37,6 +43,7 @@ export class SignatureAuthGuard implements CanActivate {
         return true;
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     }
 

@@ -58,8 +58,19 @@ const fortune: Chain = {
 // Configure chains & providers with the Alchemy provider.
 // Two popular providers are Alchemy (alchemy.com) and Infura (infura.io)
 const { chains, provider, webSocketProvider } = configureChains(
-  [goerli, mainnet, polygon, skaleHumanProtocol, polygonMumbai, bsc, bscTestnet, fortune, moonbeam, moonbaseAlpha],
-  [publicProvider()]
+  [
+    goerli,
+    mainnet,
+    polygon,
+    skaleHumanProtocol,
+    polygonMumbai,
+    bsc,
+    bscTestnet,
+    fortune,
+    moonbeam,
+    moonbaseAlpha,
+  ],
+  [publicProvider()],
 );
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
@@ -97,7 +108,7 @@ loadStripe(publishableKey).then((stripePromise) => {
       signIn({
         accessToken,
         refreshToken,
-      })
+      }),
     );
     store.dispatch(fetchUserBalanceAsync());
   }
@@ -118,7 +129,7 @@ loadStripe(publishableKey).then((stripePromise) => {
           </ThemeProvider>
         </Provider>
       </WagmiConfig>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 });
 

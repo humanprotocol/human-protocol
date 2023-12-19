@@ -5,8 +5,8 @@ import { INITIAL_REPUTATION } from '../../common/constants';
 import { ConfigNames } from '../../common/config';
 import { ReputationEntityType, ReputationLevel } from '../../common/enums';
 import { ReputationRepository } from './reputation.repository';
-import { IReputation } from '../../common/interfaces';
 import { ErrorReputation } from '../../common/constants/errors';
+import { ReputationDto } from './reputation.dto';
 
 @Injectable()
 export class ReputationService {
@@ -20,11 +20,13 @@ export class ReputationService {
   public getReputationLevel(reputationPoints: number): ReputationLevel {
     const reputationLevelLow = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_LOW,
-    )!;
+      300,
+    );
 
     const reputationLevelHigh = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_HIGH,
-    )!;
+      700,
+    );
 
     if (reputationPoints <= reputationLevelLow) {
       return ReputationLevel.LOW;
@@ -100,7 +102,7 @@ export class ReputationService {
   public async getReputation(
     chainId: ChainId,
     address: string,
-  ): Promise<IReputation> {
+  ): Promise<ReputationDto> {
     const reputationEntity = await this.reputationRepository.findOne({
       address,
       chainId,
@@ -118,7 +120,7 @@ export class ReputationService {
     };
   }
 
-  public async getAllReputations(chainId?: ChainId): Promise<IReputation[]> {
+  public async getAllReputations(chainId?: ChainId): Promise<ReputationDto[]> {
     const reputations = await this.reputationRepository.find({
       chainId,
     });

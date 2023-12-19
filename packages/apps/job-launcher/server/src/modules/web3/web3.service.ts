@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Wallet, providers } from 'ethers';
+import { BigNumberish, Wallet, providers } from 'ethers';
 import { ConfigNames, networks } from '../../common/config';
 import { Web3Env } from '../../common/enums/web3';
 import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constants';
@@ -53,5 +53,17 @@ export class Web3Service {
         : TESTNET_CHAIN_IDS;
 
     return validChainIds;
+  }
+
+  public async calculateGasPrice(chainId: number): Promise<BigNumberish> {
+    const signer = this.getSigner(chainId);
+    const multiplier = this.configService.get<number>(
+      ConfigNames.GAS_PRICE_MULTIPLIER,
+    );
+    if (multiplier) {
+      return (await signer.provider.getGasPrice()).mul(multiplier);
+    }
+
+    return 1;
   }
 }

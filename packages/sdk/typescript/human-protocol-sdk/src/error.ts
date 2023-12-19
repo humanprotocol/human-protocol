@@ -334,8 +334,3 @@ export class InvalidEthereumAddressError extends Error {
  * @constant {Error} - The Hash does not match
  */
 export const ErrorInvalidHash = new Error('Invalid hash');
-
-/**
- * @constant {Error} - The Hash does not match
- */
-export const ErrorMissingGasPrice = new Error('Missing gas price');

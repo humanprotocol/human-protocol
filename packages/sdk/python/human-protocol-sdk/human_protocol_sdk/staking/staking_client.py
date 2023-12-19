@@ -59,6 +59,7 @@ from typing import Optional
 import web3
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
+from web3.types import TxParams
 
 from human_protocol_sdk.constants import ChainId, NETWORKS
 from human_protocol_sdk.utils import (
@@ -161,10 +162,13 @@ class StakingClient:
             abi=reward_pool_interface["abi"],
         )
 
-    def approve_stake(self, amount: Decimal) -> None:
+    def approve_stake(
+        self, amount: Decimal, tx_options: Optional[TxParams] = None
+    ) -> None:
         """Approves HMT token for Staking.
 
         :param amount: Amount to approve
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -208,12 +212,14 @@ class StakingClient:
                 self.network["staking_address"], amount
             ),
             StakingClientError,
+            tx_options,
         )
 
-    def stake(self, amount: Decimal) -> None:
+    def stake(self, amount: Decimal, tx_options: Optional[TxParams] = None) -> None:
         """Stakes HMT token.
 
         :param amount: Amount to stake
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -260,13 +266,20 @@ class StakingClient:
             "Stake HMT",
             self.staking_contract.functions.stake(amount),
             StakingClientError,
+            tx_options,
         )
 
-    def allocate(self, escrow_address: str, amount: Decimal) -> None:
+    def allocate(
+        self,
+        escrow_address: str,
+        amount: Decimal,
+        tx_options: Optional[TxParams] = None,
+    ) -> None:
         """Allocates HMT token to the escrow.
 
         :param escrow_address: Address of the escrow
         :param amount: Amount to allocate
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -313,12 +326,16 @@ class StakingClient:
             "Allocate HMT",
             self.staking_contract.functions.allocate(escrow_address, amount),
             StakingClientError,
+            tx_options,
         )
 
-    def close_allocation(self, escrow_address: str) -> None:
+    def close_allocation(
+        self, escrow_address: str, tx_options: Optional[TxParams] = None
+    ) -> None:
         """Closes allocated HMT token from the escrow.
 
         :param escrow_address: Address of the escrow
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -360,12 +377,14 @@ class StakingClient:
             "Close allocation",
             self.staking_contract.functions.closeAllocation(escrow_address),
             StakingClientError,
+            tx_options,
         )
 
-    def unstake(self, amount: Decimal) -> None:
+    def unstake(self, amount: Decimal, tx_options: Optional[TxParams] = None) -> None:
         """Unstakes HMT token.
 
         :param amount: Amount to unstake
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -408,10 +427,13 @@ class StakingClient:
             "Unstake HMT",
             self.staking_contract.functions.unstake(amount),
             StakingClientError,
+            tx_options,
         )
 
-    def withdraw(self) -> None:
+    def withdraw(self, tx_options: Optional[TxParams] = None) -> None:
         """Withdraws HMT token.
+
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -449,10 +471,16 @@ class StakingClient:
             "Withdraw HMT",
             self.staking_contract.functions.withdraw(),
             StakingClientError,
+            tx_options,
         )
 
     def slash(
-        self, slasher: str, staker: str, escrow_address: str, amount: Decimal
+        self,
+        slasher: str,
+        staker: str,
+        escrow_address: str,
+        amount: Decimal,
+        tx_options: Optional[TxParams] = None,
     ) -> None:
         """Slashes HMT token.
 
@@ -460,6 +488,7 @@ class StakingClient:
         :param staker: Address of the staker
         :param escrow_address: Address of the escrow
         :param amount: Amount to slash
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -513,12 +542,16 @@ class StakingClient:
                 slasher, staker, escrow_address, amount
             ),
             StakingClientError,
+            tx_options,
         )
 
-    def distribute_reward(self, escrow_address: str) -> None:
+    def distribute_reward(
+        self, escrow_address: str, tx_options: Optional[TxParams] = None
+    ) -> None:
         """Pays out rewards to the slashers for the specified escrow address.
 
         :param escrow_address: Address of the escrow
+        :param tx_options: (Optional) Additional transaction parameters
 
         :return: None
 
@@ -559,6 +592,7 @@ class StakingClient:
             "Distribute reward",
             self.reward_pool_contract.functions.distributeReward(escrow_address),
             StakingClientError,
+            tx_options,
         )
 
     def get_allocation(self, escrow_address: str) -> Optional[AllocationData]:

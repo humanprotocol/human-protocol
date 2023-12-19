@@ -88,7 +88,6 @@ describe('AuthService', () => {
     userService = moduleRef.get<UserService>(UserService);
     jwtService = moduleRef.get<JwtService>(JwtService);
     sendGridService = moduleRef.get<SendGridService>(SendGridService);
-    apiKeyRepository = moduleRef.get<ApiKeyRepository>(ApiKeyRepository);
   });
 
   afterEach(() => {

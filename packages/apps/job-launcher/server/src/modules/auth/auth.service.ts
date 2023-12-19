@@ -27,7 +27,6 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
-import { promisify } from 'util';
 import { generateHash } from '../../common/utils/crypto';
 import { ApiKeyRepository } from './apikey.repository';
 import * as crypto from 'crypto';
@@ -190,7 +189,7 @@ export class AuthService {
     });
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
+  public async restorePassword(data: RestorePasswordDto): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,
@@ -214,8 +213,6 @@ export class AuthService {
     });
 
     await tokenEntity.remove();
-
-    return true;
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {

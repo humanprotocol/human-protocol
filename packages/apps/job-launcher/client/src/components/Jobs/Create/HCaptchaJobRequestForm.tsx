@@ -20,7 +20,9 @@ import {
 } from '@mui/material';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+} from '@mui/material/AccordionSummary';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -34,20 +36,23 @@ import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { HCaptchaJobType } from '../../../types';
 import { HCaptchaJobRequesteValidationSchema } from './schema';
 
-const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
-  ({ theme }) => ({
-    marginBottom: '42px',
-    '&:not(:last-child)': {
-      borderBottom: 0,
-    },
-    '&:before': {
-      display: 'none',
-    },
-  })
-);
+const Accordion = styled((props: AccordionProps) => (
+  <MuiAccordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+  marginBottom: '42px',
+  '&:not(:last-child)': {
+    borderBottom: 0,
+  },
+  '&:before': {
+    display: 'none',
+  },
+}));
 
 const AccordionSummary = styled((props: AccordionSummaryProps) => (
-  <MuiAccordionSummary expandIcon={<ArrowDropDownIcon sx={{ fontSize: '2rem' }} color="primary" />} {...props} />
+  <MuiAccordionSummary
+    expandIcon={<ArrowDropDownIcon sx={{ fontSize: '2rem' }} color="primary" />}
+    {...props}
+  />
 ))(({ theme }) => ({
   backgroundColor: `rgba(20, 6, 178, 0.08)`,
   borderRadius: '12px',
@@ -62,7 +67,8 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 export const HCaptchaJobRequestForm = () => {
-  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } = useCreateJobPageUI();
+  const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
+    useCreateJobPageUI();
   const [expanded, setExpanded] = useState<string | false>('panel1');
   const [searchParams] = useSearchParams();
 
@@ -86,9 +92,10 @@ export const HCaptchaJobRequestForm = () => {
     images: [],
   };
 
-  const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-    setExpanded(newExpanded ? panel : false);
-  };
+  const handleChange =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : false);
+    };
 
   const handleNext = (data: any) => {
     const hCaptchaRequest: any = {
@@ -120,7 +127,16 @@ export const HCaptchaJobRequestForm = () => {
     goToNextStep?.();
   };
 
-  const { errors, touched, values, dirty, isValid, handleSubmit, handleBlur, setFieldValue } = useFormik({
+  const {
+    errors,
+    touched,
+    values,
+    dirty,
+    isValid,
+    handleSubmit,
+    handleBlur,
+    setFieldValue,
+  } = useFormik({
     initialValues,
     validationSchema: HCaptchaJobRequesteValidationSchema,
     onSubmit: handleNext,
@@ -128,15 +144,22 @@ export const HCaptchaJobRequestForm = () => {
 
   useEffect(() => {
     const type = searchParams.get('type');
-    if (type && Object.values(HCaptchaJobType).includes(type as HCaptchaJobType)) {
+    if (
+      type &&
+      Object.values(HCaptchaJobType).includes(type as HCaptchaJobType)
+    ) {
       setFieldValue('type', type);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Box mt="42px">
       <form>
-        <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')}>
+        <Accordion
+          expanded={expanded === 'panel1'}
+          onChange={handleChange('panel1')}
+        >
           <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
             <CollectionsFilledIcon />
             <Typography variant="body2" fontWeight={700} ml={2}>
@@ -148,7 +171,9 @@ export const HCaptchaJobRequestForm = () => {
               <Grid item container spacing={2} xs={12} sm={12} md={6}>
                 <Grid item xs={12} sm={12} md={6}>
                   <FormControl variant="outlined" fullWidth>
-                    <InputLabel id="job-type-select-label">Select job type</InputLabel>
+                    <InputLabel id="job-type-select-label">
+                      Select job type
+                    </InputLabel>
                     <Select
                       labelId="job-type-select-label"
                       id="job-type-select"
@@ -158,11 +183,21 @@ export const HCaptchaJobRequestForm = () => {
                       error={touched.type && Boolean(errors.type)}
                       onBlur={handleBlur}
                     >
-                      <MenuItem value={HCaptchaJobType.COMPARISON}>Comparison</MenuItem>
-                      <MenuItem value={HCaptchaJobType.CATEGORIZATION}>Categorization</MenuItem>
-                      <MenuItem value={HCaptchaJobType.POINT}>Landmark</MenuItem>
-                      <MenuItem value={HCaptchaJobType.POLYGON}>Polygon</MenuItem>
-                      <MenuItem value={HCaptchaJobType.BOUNDING_BOX}>Bounding Box</MenuItem>
+                      <MenuItem value={HCaptchaJobType.COMPARISON}>
+                        Comparison
+                      </MenuItem>
+                      <MenuItem value={HCaptchaJobType.CATEGORIZATION}>
+                        Categorization
+                      </MenuItem>
+                      <MenuItem value={HCaptchaJobType.POINT}>
+                        Landmark
+                      </MenuItem>
+                      <MenuItem value={HCaptchaJobType.POLYGON}>
+                        Polygon
+                      </MenuItem>
+                      <MenuItem value={HCaptchaJobType.BOUNDING_BOX}>
+                        Bounding Box
+                      </MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -176,15 +211,22 @@ export const HCaptchaJobRequestForm = () => {
                         endAdornment: (
                           <InputAdornment position="end">
                             <Tooltip title="Task bid price tooltip here .">
-                              <HelpOutlineIcon color="secondary" sx={{ cursor: 'pointer' }} />
+                              <HelpOutlineIcon
+                                color="secondary"
+                                sx={{ cursor: 'pointer' }}
+                              />
                             </Tooltip>
                           </InputAdornment>
                         ),
                       }}
                       value={values.taskBidPrice}
-                      onChange={(e) => setFieldValue('taskBidPrice', e.target.value)}
+                      onChange={(e) =>
+                        setFieldValue('taskBidPrice', e.target.value)
+                      }
                       onBlur={handleBlur}
-                      error={touched.taskBidPrice && Boolean(errors.taskBidPrice)}
+                      error={
+                        touched.taskBidPrice && Boolean(errors.taskBidPrice)
+                      }
                       helperText={errors.taskBidPrice}
                       type="number"
                     />
@@ -192,7 +234,13 @@ export const HCaptchaJobRequestForm = () => {
                 </Grid>
               </Grid>
               <Grid item xs={12} sm={12} md={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                  }}
+                >
                   <Box
                     sx={{
                       display: 'flex',
@@ -203,7 +251,11 @@ export const HCaptchaJobRequestForm = () => {
                     }}
                   >
                     <InfoIcon color="secondary" />
-                    <Typography variant="body2" color="#0288D1" sx={{ ml: '12px' }}>
+                    <Typography
+                      variant="body2"
+                      color="#0288D1"
+                      sx={{ ml: '12px' }}
+                    >
                       Unsure what job type to choose?
                     </Typography>
                     <Button sx={{ ml: 2 }}>Explore jobs</Button>
@@ -216,9 +268,14 @@ export const HCaptchaJobRequestForm = () => {
                     name="minRequests"
                     label="Requests number minimum"
                     placeholder="Add the number of requests to complete the job"
-                    helperText={errors.minRequests ?? 'Minimum number of times the image is sent for annotation.'}
+                    helperText={
+                      errors.minRequests ??
+                      'Minimum number of times the image is sent for annotation.'
+                    }
                     value={values.minRequests}
-                    onChange={(e) => setFieldValue('minRequests', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('minRequests', e.target.value)
+                    }
                     onBlur={handleBlur}
                     error={touched.minRequests && Boolean(errors.minRequests)}
                     type="number"
@@ -231,9 +288,14 @@ export const HCaptchaJobRequestForm = () => {
                     name="maxRequests"
                     label="Requests number maximum"
                     placeholder="Add the number of requests to complete the job"
-                    helperText={errors.maxRequests ?? 'Maximum number of times the image is sent for annotation.'}
+                    helperText={
+                      errors.maxRequests ??
+                      'Maximum number of times the image is sent for annotation.'
+                    }
                     value={values.maxRequests}
-                    onChange={(e) => setFieldValue('maxRequests', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('maxRequests', e.target.value)
+                    }
                     onBlur={handleBlur}
                     error={touched.maxRequests && Boolean(errors.maxRequests)}
                     type="number"
@@ -243,8 +305,14 @@ export const HCaptchaJobRequestForm = () => {
             </Grid>
           </AccordionDetails>
         </Accordion>
-        <Accordion expanded={expanded === 'panel2'} onChange={handleChange('panel2')}>
-          <AccordionSummary aria-controls="panel2d -content" id="panel2d-header">
+        <Accordion
+          expanded={expanded === 'panel2'}
+          onChange={handleChange('panel2')}
+        >
+          <AccordionSummary
+            aria-controls="panel2d -content"
+            id="panel2d-header"
+          >
             <CollectionsFilledIcon />
             <Typography variant="body2" fontWeight={700} ml={2}>
               Job annotation details
@@ -273,7 +341,8 @@ export const HCaptchaJobRequestForm = () => {
                   />
                 </FormControl>
               </Grid>
-              {(values.type === HCaptchaJobType.POLYGON || values.type === HCaptchaJobType.BOUNDING_BOX) && (
+              {(values.type === HCaptchaJobType.POLYGON ||
+                values.type === HCaptchaJobType.BOUNDING_BOX) && (
                 <Grid item xs={12}>
                   <FormControl fullWidth>
                     <TextField
@@ -294,22 +363,40 @@ export const HCaptchaJobRequestForm = () => {
                     name="labelingPrompt"
                     label="Question for workers"
                     placeholder="Instructions for labeling the item"
-                    helperText={errors.labelingPrompt ?? '60 characters is optimal'}
+                    helperText={
+                      errors.labelingPrompt ?? '60 characters is optimal'
+                    }
                     value={values.labelingPrompt}
-                    onChange={(e) => setFieldValue('labelingPrompt', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('labelingPrompt', e.target.value)
+                    }
                     onBlur={handleBlur}
-                    error={touched.labelingPrompt && Boolean(errors.labelingPrompt)}
+                    error={
+                      touched.labelingPrompt && Boolean(errors.labelingPrompt)
+                    }
                   />
                 </FormControl>
               </Grid>
               {values.type !== HCaptchaJobType.CATEGORIZATION && (
                 <Grid item xs={12}>
-                  <Box sx={{ width: '50%', py: 2, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <Box
+                    sx={{
+                      width: '50%',
+                      py: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 4,
+                    }}
+                  >
                     <Box>
                       <Typography>Add Image</Typography>
-                      <Typography variant="body2">Add up to 3 images to be shown by the capcha</Typography>
+                      <Typography variant="body2">
+                        Add up to 3 images to be shown by the capcha
+                      </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                    >
                       {values.images.map((image, index) => (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Box
@@ -375,9 +462,14 @@ export const HCaptchaJobRequestForm = () => {
                     name="groundTruths"
                     label="Ground truth"
                     placeholder="Add URL to ground truth: Amazon S3, Google Cloud Platform, etc."
-                    helperText={errors.groundTruths ?? 'Provide ground truth to set the right ones images.'}
+                    helperText={
+                      errors.groundTruths ??
+                      'Provide ground truth to set the right ones images.'
+                    }
                     value={values.groundTruths}
-                    onChange={(e) => setFieldValue('groundTruths', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('groundTruths', e.target.value)
+                    }
                     onBlur={handleBlur}
                     error={touched.groundTruths && Boolean(errors.groundTruths)}
                   />
@@ -393,15 +485,22 @@ export const HCaptchaJobRequestForm = () => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <Tooltip title="Result accuracy tooltip here.">
-                            <HelpOutlineIcon color="secondary" sx={{ cursor: 'pointer' }} />
+                            <HelpOutlineIcon
+                              color="secondary"
+                              sx={{ cursor: 'pointer' }}
+                            />
                           </Tooltip>
                         </InputAdornment>
                       ),
                     }}
                     value={values.accuracyTarget}
-                    onChange={(e) => setFieldValue('accuracyTarget', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('accuracyTarget', e.target.value)
+                    }
                     onBlur={handleBlur}
-                    error={touched.accuracyTarget && Boolean(errors.accuracyTarget)}
+                    error={
+                      touched.accuracyTarget && Boolean(errors.accuracyTarget)
+                    }
                     helperText={errors.accuracyTarget}
                     type="number"
                   />
@@ -417,15 +516,23 @@ export const HCaptchaJobRequestForm = () => {
                       endAdornment: (
                         <InputAdornment position="end">
                           <Tooltip title="Minimum worker confidence  tooltip here.">
-                            <HelpOutlineIcon color="secondary" sx={{ cursor: 'pointer' }} />
+                            <HelpOutlineIcon
+                              color="secondary"
+                              sx={{ cursor: 'pointer' }}
+                            />
                           </Tooltip>
                         </InputAdornment>
                       ),
                     }}
                     value={values.minWorkerConfidence}
-                    onChange={(e) => setFieldValue('minWorkerConfidence', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('minWorkerConfidence', e.target.value)
+                    }
                     onBlur={handleBlur}
-                    error={touched.minWorkerConfidence && Boolean(errors.minWorkerConfidence)}
+                    error={
+                      touched.minWorkerConfidence &&
+                      Boolean(errors.minWorkerConfidence)
+                    }
                     type="number"
                   />
                 </FormControl>
@@ -433,7 +540,10 @@ export const HCaptchaJobRequestForm = () => {
             </Grid>
           </AccordionDetails>
         </Accordion>
-        <Accordion expanded={expanded === 'panel3'} onChange={handleChange('panel3')}>
+        <Accordion
+          expanded={expanded === 'panel3'}
+          onChange={handleChange('panel3')}
+        >
           <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
             <CollectionsFilledIcon />
             <Typography variant="body2" fontWeight={700} ml={2}>
@@ -447,20 +557,28 @@ export const HCaptchaJobRequestForm = () => {
                   <DatePicker
                     label="Job completion date"
                     value={values.completionDate}
-                    onChange={(newValue) => setFieldValue('completionDate', newValue)}
+                    onChange={(newValue) =>
+                      setFieldValue('completionDate', newValue)
+                    }
                   />
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="worker-language-select-label">Worker language</InputLabel>
+                  <InputLabel id="worker-language-select-label">
+                    Worker language
+                  </InputLabel>
                   <Select
                     labelId="worker-language-select-label"
                     id="worker-language-select"
                     label="Worker language"
                     value={values.workerLanguage}
-                    onChange={(e) => setFieldValue('workerLanguage', e.target.value)}
-                    error={touched.workerLanguage && Boolean(errors.workerLanguage)}
+                    onChange={(e) =>
+                      setFieldValue('workerLanguage', e.target.value)
+                    }
+                    error={
+                      touched.workerLanguage && Boolean(errors.workerLanguage)
+                    }
                     onBlur={handleBlur}
                   >
                     {languages.map((lang) => (
@@ -478,14 +596,20 @@ export const HCaptchaJobRequestForm = () => {
               </Grid>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="target-browser-select-label">Target browser</InputLabel>
+                  <InputLabel id="target-browser-select-label">
+                    Target browser
+                  </InputLabel>
                   <Select
                     labelId="target-browser-select-label"
                     id="target-browser-select"
                     label="Target browser"
                     value={values.targetBrowser}
-                    onChange={(e) => setFieldValue('targetBrowser', e.target.value)}
-                    error={touched.targetBrowser && Boolean(errors.targetBrowser)}
+                    onChange={(e) =>
+                      setFieldValue('targetBrowser', e.target.value)
+                    }
+                    error={
+                      touched.targetBrowser && Boolean(errors.targetBrowser)
+                    }
                     onBlur={handleBlur}
                   >
                     <MenuItem value={'modern_browser'}>Modern Browser</MenuItem>
@@ -501,14 +625,20 @@ export const HCaptchaJobRequestForm = () => {
               </Grid>
               <Grid item xs={12} sm={12} md={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="worker-location-select-label">Worker location</InputLabel>
+                  <InputLabel id="worker-location-select-label">
+                    Worker location
+                  </InputLabel>
                   <Select
                     labelId="worker-location-select-label"
                     id="worker-location-select"
                     label="Worker location"
                     value={values.workerLocation}
-                    onChange={(e) => setFieldValue('workerLocation', e.target.value)}
-                    error={touched.workerLocation && Boolean(errors.workerLocation)}
+                    onChange={(e) =>
+                      setFieldValue('workerLocation', e.target.value)
+                    }
+                    error={
+                      touched.workerLocation && Boolean(errors.workerLocation)
+                    }
                     onBlur={handleBlur}
                   >
                     {locations.map((loc) => (

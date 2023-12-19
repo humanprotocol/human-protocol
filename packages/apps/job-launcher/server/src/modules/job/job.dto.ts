@@ -33,22 +33,49 @@ import {
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
-
 export class JobCreateDto {
+  @ApiProperty({ enum: ChainId })
+  @IsEnum(ChainId)
+  @IsNotEmpty()
   public chainId: ChainId;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
   public userId: number;
+
+  @ApiProperty()
+  @IsUrl()
+  @IsNotEmpty()
   public manifestUrl: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
   public manifestHash: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
   public fee: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
   public fundAmount: number;
+
+  @ApiProperty({ enum: JobStatus })
+  @IsEnum(JobStatus)
+  @IsNotEmpty()
   public status: JobStatus;
+
+  @ApiProperty()
+  @IsDate()
   public waitUntil: Date;
 }
 
 export class JobDto {
-  @ApiProperty({
-    enum: ChainId,
-  })
+  @ApiProperty({ enum: ChainId, required: false })
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
@@ -101,7 +128,7 @@ export class JobCvatDto extends JobDto {
   @IsUrl()
   public userGuide: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
   type: JobRequestType;
 
@@ -124,9 +151,7 @@ export class JobIdDto {
 }
 
 export class JobUpdateDto {
-  @ApiPropertyOptional({
-    enum: JobStatus,
-  })
+  @ApiPropertyOptional({ enum: JobStatus })
   @IsEnum(JobStatus)
   public status: JobStatus;
 }
@@ -138,229 +163,310 @@ export class JobUpdateDataDto extends JobUpdateDto {
   @IsDate()
   public waitUntil: Date;
 }
+
 export class StakingDetails {
+  @ApiProperty({ description: 'Ethereum address of the staker' })
   @IsEthereumAddress()
-  staker: string;
+  public staker: string;
 
+  @ApiProperty({ description: 'Amount allocated' })
   @IsNumber()
   @Min(0)
-  allocated: number;
+  public allocated: number;
 
+  @ApiProperty({ description: 'Amount slashed' })
   @IsNumber()
   @Min(0)
-  slashed: number;
+  public slashed: number;
 }
 
 export class ManifestDetails {
+  @ApiProperty({ description: 'Chain ID' })
   @IsNumber()
   @Min(1)
-  chainId: number;
+  public chainId: number;
 
+  @ApiProperty({ description: 'Title (optional)' })
   @IsOptional()
   @IsString()
-  title?: string;
+  public title?: string;
 
+  @ApiProperty({ description: 'Description' })
   @IsNotEmpty()
   @IsString()
-  description?: string;
+  public description?: string;
 
+  @ApiProperty({ description: 'Submissions required' })
   @IsNumber()
-  submissionsRequired: number;
+  public submissionsRequired: number;
 
+  @ApiProperty({ description: 'Ethereum address of the token' })
   @IsEthereumAddress()
-  tokenAddress: string;
+  public tokenAddress: string;
 
+  @ApiProperty({ description: 'Amount of funds' })
   @IsNumber()
-  fundAmount: number;
+  public fundAmount: number;
 
+  @ApiProperty({ description: 'Ethereum address of the requester' })
   @IsEthereumAddress()
-  requesterAddress: string;
+  public requesterAddress: string;
 
+  @ApiProperty({ description: 'Request type' })
   @IsEnum(JobRequestType)
-  requestType: JobRequestType;
+  public requestType: JobRequestType;
 
+  @ApiProperty({ description: 'Address of the exchange oracle (optional)' })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  exchangeOracleAddress?: string;
+  public exchangeOracleAddress?: string;
 
+  @ApiProperty({ description: 'Address of the recording oracle (optional)' })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  recordingOracleAddress?: string;
+  public recordingOracleAddress?: string;
 
+  @ApiProperty({ description: 'Address of the reputation oracle (optional)' })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
-  reputationOracleAddress?: string;
+  public reputationOracleAddress?: string;
 }
 
 export class CommonDetails {
+  @ApiProperty({ description: 'Ethereum address of the escrow' })
   @IsEthereumAddress()
-  escrowAddress: string;
+  public escrowAddress: string;
 
+  @ApiProperty({ description: 'URL of the manifest' })
   @IsUrl()
-  manifestUrl: string;
+  public manifestUrl: string;
 
+  @ApiProperty({ description: 'Hash of the manifest' })
   @IsString()
-  manifestHash: string;
+  public manifestHash: string;
 
+  @ApiProperty({ description: 'Balance amount' })
   @IsNumber()
   @Min(0)
-  balance: number;
+  public balance: number;
 
+  @ApiProperty({ description: 'Amount paid out' })
   @IsNumber()
   @Min(0)
-  paidOut: number;
+  public paidOut: number;
 
+  @ApiProperty({ description: 'Number of tasks (optional)' })
   @IsNumber()
-  amountOfTasks?: number;
+  public amountOfTasks?: number;
 
+  @ApiProperty({ description: 'Status of the job' })
   @IsEnum(JobStatus)
-  status: JobStatus;
+  public status: JobStatus;
 }
 
 export class JobDetailsDto {
+  @ApiProperty({ description: 'Details of the job' })
   @IsNotEmpty()
-  details: CommonDetails;
+  public details: CommonDetails;
 
+  @ApiProperty({ description: 'Manifest details' })
   @IsNotEmpty()
-  manifest: ManifestDetails;
+  public manifest: ManifestDetails;
 
+  @ApiProperty({ description: 'Staking details' })
   @IsNotEmpty()
-  staking: StakingDetails;
+  public staking: StakingDetails;
+}
+
+export class SaveManifestDto {
+  @ApiProperty()
+  public manifestUrl: string;
+
+  @ApiProperty()
+  public manifestHash: string;
 }
 
 export class FortuneWebhookDto {
+  @ApiProperty({ enum: ChainId })
+  @IsEnum(ChainId)
+  public chainId: ChainId;
+
+  @ApiProperty()
   public escrowAddress: string;
-  public chainId: number;
+
+  @ApiProperty({ enum: EventType })
+  @IsEnum(EventType)
   public eventType: EventType;
 }
 
 export class CVATWebhookDto {
+  @ApiProperty()
   public escrow_address: string;
+
+  @ApiProperty({ enum: ChainId })
+  @IsEnum(ChainId)
   public chain_id: number;
+
+  @ApiProperty({ enum: EventType })
+  @IsEnum(EventType)
   public event_type: EventType;
 }
 
 export class FortuneManifestDto {
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  submissionsRequired: number;
+  public submissionsRequired: number;
 
+  @ApiProperty()
   @IsString()
-  requesterTitle: string;
+  public requesterTitle: string;
 
+  @ApiProperty()
   @IsString()
-  requesterDescription: string;
+  public requesterDescription: string;
 
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  fundAmount: number;
+  public fundAmount: number;
 
+  @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
-  requestType: JobRequestType;
+  public requestType: JobRequestType;
 }
 
 export class CvatData {
+  @ApiProperty()
   @IsString()
-  data_url: string;
+  public data_url: string;
 }
 
 export class Label {
+  @ApiProperty()
   @IsString()
-  name: string;
+  public name: string;
 }
 
 export class Annotation {
+  @ApiProperty()
   @IsArray()
-  labels: Label[];
+  public labels: Label[];
 
+  @ApiProperty()
   @IsString()
-  description: string;
+  public description: string;
 
+  @ApiProperty()
   @IsString()
-  user_guide: string;
+  public user_guide: string;
 
+  @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
-  type: JobRequestType;
+  public type: JobRequestType;
 
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  job_size: number;
+  public job_size: number;
 
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  max_time: number;
+  public max_time: number;
 }
 
 export class Validation {
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  min_quality: number;
+  public min_quality: number;
 
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
-  val_size: number;
+  public val_size: number;
 
+  @ApiProperty()
   @IsString()
-  gt_url: string;
+  public gt_url: string;
 }
 
 export class CvatManifestDto {
+  @ApiProperty()
   @IsObject()
-  data: CvatData;
+  public data: CvatData;
 
+  @ApiProperty()
   @IsObject()
-  annotation: Annotation;
+  public annotation: Annotation;
 
+  @ApiProperty()
   @IsObject()
-  validation: Validation;
+  public validation: Validation;
 
+  @ApiProperty()
   @IsString()
-  job_bounty: string;
+  public job_bounty: string;
 }
 
 export class FortuneFinalResultDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  workerAddress: string;
+  public workerAddress: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  solution: string;
+  public solution: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  error?: string;
+  public error?: string;
 }
 
 export class CvatFinalResultDto {
+  @ApiProperty()
   @IsString()
-  url: string;
+  public url: string;
 
+  @ApiProperty()
   @IsString()
-  final_answer: string;
+  public final_answer: string;
 
+  @ApiProperty()
   @IsArray()
-  correct: string[];
+  public correct: string[];
 
+  @ApiProperty()
   @IsArray()
-  wrong: string[];
+  public wrong: string[];
 }
 
 export class JobListDto {
-  jobId: number;
-  escrowAddress?: string;
-  network: string;
-  fundAmount: number;
-  status: JobStatus;
+  @ApiProperty()
+  public jobId: number;
+
+  @ApiProperty({ required: false })
+  public escrowAddress?: string;
+
+  @ApiProperty()
+  public network: string;
+
+  @ApiProperty()
+  public fundAmount: number;
+
+  @ApiProperty()
+  public status: JobStatus;
 }
 
 export class EscrowFailedWebhookDto {
-  @ApiProperty({
-    enum: ChainId,
-  })
+  @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
@@ -368,7 +474,7 @@ export class EscrowFailedWebhookDto {
   @IsString()
   public escrowAddress: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: EventType })
   @IsEnum(EventType)
   public eventType: EventType;
 
@@ -378,8 +484,11 @@ export class EscrowFailedWebhookDto {
 }
 
 export class EscrowCancelDto {
-  txHash: string;
-  amountRefunded: BigNumber;
+  @ApiProperty()
+  public txHash: string;
+
+  @ApiProperty()
+  public amountRefunded: BigNumber;
 }
 
 export class JobCaptchaAdvancedDto {

@@ -4,7 +4,7 @@
 | | | | |
 | --- | --- | --- | --- |
 | [![Lint Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-lint.yaml) | [![Protocol Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-core.yaml) | [![Python SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-python-sdk.yaml) | [![Node.js SDK Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-node-sdk.yaml) |
-| [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) | [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-escrow-dashboard.yaml) | [![Faucet Server Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml) |
+| [![Subgraph Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-subgraph.yaml) | [![Fortune Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-fortune.yaml) | [![Escrow Dashboard Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-dashboard-ui.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-dashboard-ui.yaml) | [![Faucet Server Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-faucet-server.yaml) |
 | [![Meta Code Verify Check](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/ci-test-meta-code-verify.yaml) |  |  |  |
 | [![Core NPM Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-core.yaml) | [![Python SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-python-sdk.yaml) | [![Node.js SDK Publish](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml/badge.svg?event=release)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-node-sdk.yaml) | [![Subgraph Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml/badge.svg?branch=main)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-subgraph.yaml) |
 | [![Contract Deploy](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml/badge.svg?event=workflow_dispatch)](https://github.com/humanprotocol/human-protocol/actions/workflows/cd-deploy-contracts.yaml) |  |  |  |
@@ -27,7 +27,7 @@ HUMAN is a permissionless protocol to facilitate the exchange of HUMAN work, kno
 
 ### Documentation
 
-For a more detailed description of the HUMAN Protocol architecture and vision see [here](https://github.com/humanprotocol/.github/wiki)
+For a more detailed description of the HUMAN Protocol architecture and vision see [here](https://tech-docs.humanprotocol.org/)
 
 ### Description
 
@@ -42,7 +42,9 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 ```raw
 ├── packages
 │   ├── apps
-│   │   ├── escrow-dashboard                 # A UI that queries The Graph for escrow data
+│   │   ├── dashboard
+│   │   │   ├── ui                           # A UI that queries The Graph for escrow data
+│   │   │   ├── admin                        # Dashboard content admin app
 │   │   ├── faucet-server                    # Faucet server
 │   │   ├── fortune                          # Fortune application
 │   │   ├── job-launcher                     # Job launcher server, and UI
@@ -61,6 +63,8 @@ The contribution guidelines are as per the CONTRIBUTING.MD file.
 │   │   │   ├── human-protocol-sdk           # Node.js SDK to interact with Human Protocol
 │   │   │   ├── subgraph                     # Human Protocol Subgraph
 ```
+### Smart contracts
+To access comprehensive information about the smart contracts, please visit the following URL: https://tech-docs.humanprotocol.org/contracts. This resource provides detailed documentation that covers various aspects of the smart contracts used within the Human Protocol ecosystem.
 
 ### How To Use This Repo
 

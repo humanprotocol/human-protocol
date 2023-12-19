@@ -4,7 +4,7 @@ import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
-import { Signer, ethers } from 'ethers';
+import { Overrides, Signer, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -99,14 +99,9 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the KVStore contract
-   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    */
-  constructor(
-    signerOrProvider: Signer | Provider,
-    networkData: NetworkData,
-    gasPriceMultiplier?: number
-  ) {
-    super(signerOrProvider, networkData, gasPriceMultiplier);
+  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
+    super(signerOrProvider, networkData);
 
     this.contract = KVStore__factory.connect(
       networkData.kvstoreAddress,
@@ -118,16 +113,12 @@ export class KVStoreClient extends BaseEthersClient {
    * Creates an instance of KVStoreClient from a Signer or Provider.
    *
    * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
-   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
    *
    * @returns {Promise<KVStoreClient>} - An instance of KVStoreClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(
-    signerOrProvider: Signer | Provider,
-    gasPriceMultiplier?: number
-  ) {
+  public static async build(signerOrProvider: Signer | Provider) {
     let network: Network;
     if (Signer.isSigner(signerOrProvider)) {
       if (!signerOrProvider.provider) {
@@ -146,7 +137,7 @@ export class KVStoreClient extends BaseEthersClient {
       throw ErrorUnsupportedChainID;
     }
 
-    return new KVStoreClient(signerOrProvider, networkData, gasPriceMultiplier);
+    return new KVStoreClient(signerOrProvider, networkData);
   }
 
   /**
@@ -154,6 +145,7 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * @param {string} key Key of the key-value pair
    * @param {string} value Value of the key-value pair
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -176,13 +168,15 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async set(key: string, value: string): Promise<void> {
+  public async set(
+    key: string,
+    value: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
-      await this.contract?.set(key, value, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (await this.contract.set(key, value, txOptions)).wait();
     } catch (e) {
       if (e instanceof Error) throw Error(`Failed to set value: ${e.message}`);
     }
@@ -193,6 +187,7 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * @param {string[]} keys Array of keys (keys and value must have the same order)
    * @param {string[]} values Array of values
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -217,15 +212,17 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async setBulk(keys: string[], values: string[]): Promise<void> {
+  public async setBulk(
+    keys: string[],
+    values: string[],
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
     try {
-      await this.contract?.setBulk(keys, values, {
-        ...(await this.gasPriceOptions()),
-      });
+      await (await this.contract.setBulk(keys, values, txOptions)).wait();
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set bulk values: ${e.message}`);
@@ -237,6 +234,7 @@ export class KVStoreClient extends BaseEthersClient {
    *
    * @param {string} url URL to set
    * @param {string | undefined} urlKey Configurable URL key. `url` by default.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -258,7 +256,11 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   @requiresSigner
-  public async setURL(url: string, urlKey = 'url'): Promise<void> {
+  public async setURL(
+    url: string,
+    urlKey = 'url',
+    txOptions: Overrides = {}
+  ): Promise<void> {
     if (!Signer.isSigner(this.signerOrProvider)) {
       throw ErrorSigner;
     }
@@ -275,9 +277,13 @@ export class KVStoreClient extends BaseEthersClient {
     const hashKey = urlKey + 'Hash';
 
     try {
-      await this.contract.setBulk([urlKey, hashKey], [url, contentHash], {
-        ...(await this.gasPriceOptions()),
-      });
+      await (
+        await this.contract.setBulk(
+          [urlKey, hashKey],
+          [url, contentHash],
+          txOptions
+        )
+      ).wait();
     } catch (e) {
       if (e instanceof Error)
         throw Error(`Failed to set URL and hash: ${e.message}`);
