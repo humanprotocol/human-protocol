@@ -100,6 +100,7 @@ import {
   HCAPTCHA_NOT_PRESENTED_LABEL,
 } from '../../common/constants';
 import { WebhookService } from '../webhook/webhook.service';
+import { WebhookService } from '../webhook/webhook.service';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({

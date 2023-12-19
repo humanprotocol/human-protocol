@@ -117,3 +117,4 @@ export const MOCK_HCAPTCHA_IMAGE_URL =
 export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
 export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
 export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';
+export const MOCK_MAX_RETRY_COUNT = 5;

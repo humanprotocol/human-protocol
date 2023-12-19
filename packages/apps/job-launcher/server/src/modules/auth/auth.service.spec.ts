@@ -45,7 +45,6 @@ describe('AuthService', () => {
   let authRepository: AuthRepository;
   let jwtService: JwtService;
   let sendGridService: SendGridService;
-  let apiKeyRepository: ApiKeyRepository;
 
   beforeAll(async () => {
     const mockConfigService: Partial<ConfigService> = {

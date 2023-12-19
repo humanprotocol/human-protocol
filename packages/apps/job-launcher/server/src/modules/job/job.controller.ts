@@ -31,6 +31,7 @@ import {
   JobIdDto,
   FortuneFinalResultDto,
   JobCaptchaDto,
+  FortuneFinalResultDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
