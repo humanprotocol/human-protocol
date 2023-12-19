@@ -5,7 +5,7 @@
 export default {
   getTasksStats: async (ctx, next) => {
     try {
-      const service = strapi.service("api::stats.stats") as any;
+      const service = strapi.service('api::stats.stats') as any;
       const data = await service.getTasksStats(ctx.query);
       ctx.body = data;
     } catch (err) {
@@ -14,7 +14,7 @@ export default {
   },
   getWorkersStats: async (ctx, next) => {
     try {
-      const service = strapi.service("api::stats.stats") as any;
+      const service = strapi.service('api::stats.stats') as any;
       const data = await service.getWorkersStats(ctx.query);
       ctx.body = data;
     } catch (err) {
