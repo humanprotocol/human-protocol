@@ -57,6 +57,7 @@ import {
   MOCK_SUBMISSION_REQUIRED,
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
+  MOCK_STORAGE_DATA,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -81,6 +82,7 @@ import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
 import { WebhookService } from '../webhook/webhook.service';
+import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -88,7 +90,7 @@ jest.mock('@human-protocol/sdk', () => ({
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
-      setup: jest.fn().mockResolvedValue(null)
+      setup: jest.fn().mockResolvedValue(null),
     })),
   },
   EscrowUtils: {
@@ -224,7 +226,9 @@ describe('JobService', () => {
 
     storageService.download = jest.fn();
 
-    web3Service.calculateGasPrice = jest.fn().mockReturnValue(BigNumber.from(1000));
+    web3Service.calculateGasPrice = jest
+      .fn()
+      .mockReturnValue(BigNumber.from(1000));
   });
 
   describe('createJob', () => {
@@ -383,12 +387,12 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      dataUrl: MOCK_FILE_URL,
+      data: MOCK_STORAGE_DATA,
       labels: ['cat', 'dog'],
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       minQuality: 0.95,
       fundAmount: 10,
-      gtUrl: '',
+      groundTruth: MOCK_STORAGE_DATA,
       userGuide: MOCK_FILE_URL,
       type: JobRequestType.IMAGE_POINTS,
     };
