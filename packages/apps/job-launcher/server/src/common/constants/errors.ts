@@ -101,6 +101,9 @@ export enum ErrorBucket {
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
   InvalidProvider = 'Invalid storage provider',
+  EmptyRegion = 'Region cannot be empty for this storage provider',
+  InvalidRegion = 'Invalid region for the storage provider',
+  EmptyBucket = 'bucketName cannot be empty',
 }
 
 /**

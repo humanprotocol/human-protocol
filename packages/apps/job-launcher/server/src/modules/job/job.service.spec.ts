@@ -464,7 +464,7 @@ describe('JobService', () => {
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
 
-      const MOCK_STORAGE_DATA: StorageDataDto = {
+      const storageDataMock: StorageDataDto = {
         provider: StorageProviders.GCS,
         region: AWSRegions.EU_CENTRAL_1,
         bucketName: 'bucket',
@@ -473,12 +473,12 @@ describe('JobService', () => {
 
       const imageLabelBinaryJobDto: JobCvatDto = {
         chainId: MOCK_CHAIN_ID,
-        data: MOCK_STORAGE_DATA,
+        data: storageDataMock,
         labels: ['cat', 'dog'],
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         minQuality: 0.95,
         fundAmount: 10,
-        groundTruth: MOCK_STORAGE_DATA,
+        groundTruth: storageDataMock,
         userGuide: MOCK_FILE_URL,
         type: JobRequestType.IMAGE_POINTS,
       };
@@ -490,6 +490,106 @@ describe('JobService', () => {
           imageLabelBinaryJobDto,
         ),
       ).rejects.toThrowError(ErrorBucket.InvalidProvider);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for invalid region', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        region: 'test-region',
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.InvalidRegion);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for empty region', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.EmptyRegion);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for empty bucket', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.EU_CENTRAL_1,
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.EmptyBucket);
 
       expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
