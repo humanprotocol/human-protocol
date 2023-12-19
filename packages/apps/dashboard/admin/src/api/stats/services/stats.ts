@@ -2,10 +2,10 @@
  * stats service
  */
 
-import { ChainId, IStatisticsParams, NETWORKS } from "@human-protocol/sdk";
-import { GET_PAYOUTS_QUERY, IMData, PayoutData } from "@human-protocol/sdk/dist/graphql";
-import gqlFetch from "graphql-request";
-import axios from "axios";
+import { ChainId, IStatisticsParams, NETWORKS } from '@human-protocol/sdk';
+import { GET_PAYOUTS_QUERY, IMData, PayoutData } from '@human-protocol/sdk/dist/graphql';
+import gqlFetch from 'graphql-request';
+import axios from 'axios';
 
 const getIMData = async (params: IStatisticsParams): Promise<IMData> => {
   const now = new Date();
@@ -30,9 +30,9 @@ const getIMData = async (params: IStatisticsParams): Promise<IMData> => {
   return await Promise.all(
     chunks.map(({ from, to }) =>
       axios
-        .get("/support/summary-stats", {
-          baseURL: "https://foundation-accounts.hmt.ai",
-          method: "GET",
+        .get('/support/summary-stats', {
+          baseURL: 'https://foundation-accounts.hmt.ai',
+          method: 'GET',
           params: {
             start_date: from.toISOString().slice(0, 10),
             end_date: to.toISOString().slice(0, 10),

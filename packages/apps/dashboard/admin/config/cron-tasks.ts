@@ -1,5 +1,5 @@
-import { ChainId, NETWORKS, StatisticsClient } from "@human-protocol/sdk";
-import { createPublicClient, http } from "viem";
+import { ChainId, NETWORKS, StatisticsClient } from '@human-protocol/sdk';
+import { createPublicClient, http } from 'viem';
 import {
   bsc,
   bscTestnet,
@@ -11,8 +11,8 @@ import {
   moonbaseAlpha,
   celo,
   celoAlfajores,
-} from "viem/chains";
-import { formatUnits, parseUnits } from "viem/utils";
+} from 'viem/chains';
+import { formatUnits, parseUnits } from 'viem/utils';
 
 const SUPPORTED_CHAINS = {
   [ChainId.MAINNET]: mainnet,
@@ -52,19 +52,19 @@ const fetchData = async () => {
       abi: [
         {
           inputs: [],
-          name: "totalSupply",
+          name: 'totalSupply',
           outputs: [
             {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
+              internalType: 'uint256',
+              name: '',
+              type: 'uint256',
             },
           ],
-          stateMutability: "view",
-          type: "function",
+          stateMutability: 'view',
+          type: 'function',
         },
       ],
-      functionName: "totalSupply",
+      functionName: 'totalSupply',
     });
 
     return {
@@ -93,11 +93,11 @@ export default {
   syncDashboardData: {
     task: async ({ strapi }) => {
       try {
-        console.log("sync started...");
+        console.log('sync started...');
         const dataItems = await fetchData();
 
         const allNetworkDataItem = { ...dataItems[0] };
-        allNetworkDataItem.chainId = "-1";
+        allNetworkDataItem.chainId = '-1';
         for (let i = 1; i < dataItems.length; i++) {
           const dataItem = dataItems[i];
           dataItem.dailyHMTData.forEach((hmtDayData) => {
@@ -149,10 +149,10 @@ export default {
         );
 
         const networkDataItems = [allNetworkDataItem, ...dataItems];
-        const uid = "api::network-data-item.network-data-item";
+        const uid = 'api::network-data-item.network-data-item';
         for (const dataItem of networkDataItems) {
           const entries = await strapi.entityService.findMany(uid, {
-            fields: ["chainId"],
+            fields: ['chainId'],
             filters: { chainId: Number(dataItem.chainId) },
           });
           console.log(dataItem.chainId);
@@ -164,14 +164,14 @@ export default {
             await strapi.entityService.create(uid, { data: dataItem });
           }
         }
-        console.log("sync ended...");
+        console.log('sync ended...');
       } catch (err) {
         console.log(err);
       }
     },
     options: {
       // Every 1 minute
-      rule: "*/1 * * * *",
+      rule: '*/1 * * * *',
     },
   },
 };
