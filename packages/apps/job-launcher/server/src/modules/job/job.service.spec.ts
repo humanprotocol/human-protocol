@@ -87,7 +87,8 @@ jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn().mockImplementation(() => ({
-      createAndSetupEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
+      setup: jest.fn().mockResolvedValue(null)
     })),
   },
   EscrowUtils: {
@@ -222,6 +223,8 @@ describe('JobService', () => {
     });
 
     storageService.download = jest.fn();
+
+    web3Service.calculateGasPrice = jest.fn().mockReturnValue(BigNumber.from(1000));
   });
 
   describe('createJob', () => {

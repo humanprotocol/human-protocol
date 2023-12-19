@@ -3,6 +3,7 @@ import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useNetwork, useSwitchNetwork } from 'wagmi';
 import { NetworkSelect } from '../../../components/NetworkSelect';
+import { IS_MAINNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { JobType, PayMethod } from '../../../types';
 import { CvatJobRequestForm } from './CvatJobRequestForm';
@@ -59,9 +60,13 @@ export const CreateJob = () => {
               })
             }
           >
-            <MenuItem value={JobType.Fortune}>Fortune</MenuItem>
+            <MenuItem value={JobType.Fortune} disabled={IS_MAINNET}>
+              Fortune
+            </MenuItem>
             <MenuItem value={JobType.CVAT}>CVAT</MenuItem>
-            <MenuItem value={JobType.HCAPTCHA}>hCaptcha</MenuItem>
+            <MenuItem value={JobType.HCAPTCHA} disabled={IS_MAINNET}>
+              hCaptcha
+            </MenuItem>
           </Select>
         </FormControl>
         <NetworkSelect

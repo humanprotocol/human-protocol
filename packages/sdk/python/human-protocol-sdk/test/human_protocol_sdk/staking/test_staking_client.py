@@ -83,7 +83,11 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.approve_stake(100)
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Approve stake", mock_function.return_value, StakingClientError
+                self.w3,
+                "Approve stake",
+                mock_function.return_value,
+                StakingClientError,
+                None,
             )
             mock_function.assert_called_once_with(
                 NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
@@ -93,6 +97,27 @@ class TestStakingClient(unittest.TestCase):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.approve_stake(-1)
         self.assertEqual("Amount to approve must be greater than 0", str(cm.exception))
+
+    def test_approve_stake_with_tx_options(self):
+        mock_function = MagicMock()
+        self.staking_client.hmtoken_contract.functions.approve = mock_function
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.approve_stake(100, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Approve stake",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+            mock_function.assert_called_once_with(
+                NETWORKS[ChainId.LOCALHOST]["staking_address"], 100
+            )
 
     def test_stake(self):
         mock_function = MagicMock()
@@ -104,7 +129,11 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.stake(100)
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Stake HMT", mock_function.return_value, StakingClientError
+                self.w3,
+                "Stake HMT",
+                mock_function.return_value,
+                StakingClientError,
+                None,
             )
             mock_function.assert_called_once_with(100)
 
@@ -112,6 +141,25 @@ class TestStakingClient(unittest.TestCase):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.stake(-1)
         self.assertEqual("Amount to stake must be greater than 0", str(cm.exception))
+
+    def test_stake_with_tx_options(self):
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.stake = mock_function
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.stake(100, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Stake HMT",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+            mock_function.assert_called_once_with(100)
 
     def test_allocate(self):
         escrow_address = "escrow1"
@@ -126,7 +174,11 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.allocate(escrow_address, 10)
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Allocate HMT", mock_function.return_value, StakingClientError
+                self.w3,
+                "Allocate HMT",
+                mock_function.return_value,
+                StakingClientError,
+                None,
             )
             mock_function.assert_called_once_with(escrow_address, 10)
 
@@ -146,6 +198,29 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.allocate(escrow_address, 10)
         self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
+    def test_allocate_with_tx_options(self):
+        escrow_address = "escrow1"
+        self.staking_client._is_valid_escrow = MagicMock(return_value=True)
+
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.allocate = mock_function
+
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.allocate(escrow_address, 10, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Allocate HMT",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+            mock_function.assert_called_once_with(escrow_address, 10)
+
     def test_close_allocation(self):
         escrow_address = "escrow1"
         self.staking_client._is_valid_escrow = MagicMock(return_value=True)
@@ -163,6 +238,7 @@ class TestStakingClient(unittest.TestCase):
                 "Close allocation",
                 mock_function.return_value,
                 StakingClientError,
+                None,
             )
         mock_function.assert_called_once_with(escrow_address)
 
@@ -174,6 +250,29 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.close_allocation(escrow_address)
         self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
+    def test_close_allocation_with_tx_options(self):
+        escrow_address = "escrow1"
+        self.staking_client._is_valid_escrow = MagicMock(return_value=True)
+
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.closeAllocation = mock_function
+
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.close_allocation(escrow_address, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Close allocation",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+        mock_function.assert_called_once_with(escrow_address)
+
     def test_unstake(self):
         mock_function = MagicMock()
         self.staking_client.staking_contract.functions.unstake = mock_function
@@ -184,7 +283,11 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.unstake(100)
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Unstake HMT", mock_function.return_value, StakingClientError
+                self.w3,
+                "Unstake HMT",
+                mock_function.return_value,
+                StakingClientError,
+                None,
             )
         mock_function.assert_called_once_with(100)
 
@@ -192,6 +295,25 @@ class TestStakingClient(unittest.TestCase):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.unstake(-1)
         self.assertEqual("Amount to unstake must be greater than 0", str(cm.exception))
+
+    def test_unstake_with_tx_options(self):
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.unstake = mock_function
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.unstake(100, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Unstake HMT",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+        mock_function.assert_called_once_with(100)
 
     def test_withdraw(self):
         mock_function = MagicMock()
@@ -203,7 +325,30 @@ class TestStakingClient(unittest.TestCase):
             self.staking_client.withdraw()
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Withdraw HMT", mock_function.return_value, StakingClientError
+                self.w3,
+                "Withdraw HMT",
+                mock_function.return_value,
+                StakingClientError,
+                None,
+            )
+            mock_function.assert_called_once()
+
+    def test_withdraw_with_tx_options(self):
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.withdraw = mock_function
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.withdraw(tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Withdraw HMT",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
             )
             mock_function.assert_called_once()
 
@@ -227,7 +372,11 @@ class TestStakingClient(unittest.TestCase):
             )
 
             mock_handle_transaction.assert_called_once_with(
-                self.w3, "Slash HMT", mock_function.return_value, StakingClientError
+                self.w3,
+                "Slash HMT",
+                mock_function.return_value,
+                StakingClientError,
+                None,
             )
             mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
 
@@ -255,6 +404,36 @@ class TestStakingClient(unittest.TestCase):
             )
         self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
 
+    def test_slash_with_tx_options(self):
+        slasher = "SLASHER"
+        staker = "STAKER"
+        escrow_address = "escrow1"
+        self.staking_client._is_valid_escrow = MagicMock(return_value=True)
+
+        mock_function = MagicMock()
+        self.staking_client.staking_contract.functions.slash = mock_function
+        tx_options = {"gas": 50000}
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.slash(
+                slasher=slasher,
+                staker=staker,
+                escrow_address=escrow_address,
+                amount=50,
+                tx_options=tx_options,
+            )
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Slash HMT",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+            mock_function.assert_called_once_with(slasher, staker, escrow_address, 50)
+
     def test_distribute_reward(self):
         escrow_address = "escrow1"
         self.staking_client._is_valid_escrow = MagicMock(return_value=True)
@@ -274,6 +453,7 @@ class TestStakingClient(unittest.TestCase):
                 "Distribute reward",
                 mock_function.return_value,
                 StakingClientError,
+                None,
             )
             mock_function.assert_called_once_with(escrow_address)
 
@@ -284,6 +464,30 @@ class TestStakingClient(unittest.TestCase):
         with self.assertRaises(StakingClientError) as cm:
             self.staking_client.distribute_reward(escrow_address)
         self.assertEqual("Invalid escrow address: invalid_escrow", str(cm.exception))
+
+    def test_distribute_reward_with_tx_options(self):
+        escrow_address = "escrow1"
+        self.staking_client._is_valid_escrow = MagicMock(return_value=True)
+        tx_options = {"gas": 50000}
+
+        mock_function = MagicMock()
+        self.staking_client.reward_pool_contract.functions.distributeReward = (
+            mock_function
+        )
+
+        with patch(
+            "human_protocol_sdk.staking.staking_client.handle_transaction"
+        ) as mock_handle_transaction:
+            self.staking_client.distribute_reward(escrow_address, tx_options)
+
+            mock_handle_transaction.assert_called_once_with(
+                self.w3,
+                "Distribute reward",
+                mock_function.return_value,
+                StakingClientError,
+                tx_options,
+            )
+            mock_function.assert_called_once_with(escrow_address)
 
     def test_get_allocation(self):
         escrow_address = "0x1234567890123456789012345678901234567891"
