@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Request,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -30,6 +31,7 @@ import {
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
+  JobCaptchaDto,
 } from './job.dto';
 import { JobService } from './job.service';
 import { JobRequestType, JobStatusFilter } from '../../common/enums/job';
@@ -100,6 +102,19 @@ export class JobController {
     @Body() data: JobCvatDto,
   ): Promise<number> {
     return this.jobService.createJob(req.user.id, data.type, data);
+  }
+
+  @Post('/hCaptcha')
+  public async createCaptchaJob(
+    @Request() req: RequestWithUser,
+    @Body() data: JobCaptchaDto,
+  ): Promise<number> {
+    throw new UnauthorizedException('Hcaptcha jobs disabled temporally');
+    return this.jobService.createJob(
+      req.user.id,
+      JobRequestType.HCAPTCHA,
+      data,
+    );
   }
 
   @ApiOperation({

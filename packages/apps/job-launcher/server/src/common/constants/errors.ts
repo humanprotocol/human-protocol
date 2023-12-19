@@ -14,6 +14,9 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+  TaskDataNotFound = 'Task data not found',
+  HCaptchaInvalidJobType = 'hCaptcha invalid job type',
+  GroundThuthValidationFailed = 'Ground thuth validation failed',
 }
 
 /**
@@ -100,6 +103,7 @@ export enum ErrorBucket {
   NotExist = 'Bucket does not exist',
   NotPublic = 'Bucket is not public',
   UnableSaveFile = 'Unable to save file',
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents',
 }
 
 /**

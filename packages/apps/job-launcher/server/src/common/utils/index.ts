@@ -117,3 +117,22 @@ export function hashStream(stream: Readable): Promise<string> {
     });
   });
 }
+
+export function hashString(data: string): string {
+  return crypto.createHash('sha1').update(data).digest('hex');
+}
+
+export function isValidJSON(str: string): boolean {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isPGPMessage(str: string): boolean {
+  const pattern =
+    /-----BEGIN PGP MESSAGE-----\n\n[\s\S]+?\n-----END PGP MESSAGE-----/;
+  return pattern.test(str);
+}
