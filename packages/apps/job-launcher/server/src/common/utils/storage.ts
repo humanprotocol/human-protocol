@@ -1,5 +1,7 @@
+import { BadRequestException } from '@nestjs/common';
 import { StorageDataDto } from '../../modules/job/job.dto';
 import { StorageProviders } from '../enums/storage';
+import { ErrorBucket } from '../constants/errors';
 
 export function generateBucketUrl(s3Data: StorageDataDto): string {
   switch (s3Data.provider) {
@@ -12,6 +14,6 @@ export function generateBucketUrl(s3Data: StorageDataDto): string {
     //     s3Data.path ? `/${s3Data.path}` : ''
     //   }`;
     default:
-      throw Error('Invalid provider');
+      throw new BadRequestException(ErrorBucket.InvalidProvider);
   }
 }

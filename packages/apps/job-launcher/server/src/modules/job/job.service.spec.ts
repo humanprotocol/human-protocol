@@ -68,6 +68,7 @@ import {
   JobFortuneDto,
   JobCvatDto,
   JobDetailsDto,
+  StorageDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -82,7 +83,7 @@ import { BigNumber, ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
 import { WebhookService } from '../webhook/webhook.service';
-import { AWSRegions, StorageProviders } from 'src/common/enums/storage';
+import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -457,6 +458,40 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         waitUntil: expect.any(Date),
       });
+    });
+
+    it('should throw an error for invalid storage provider', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const MOCK_STORAGE_DATA: StorageDataDto = {
+        provider: StorageProviders.GCS,
+        region: AWSRegions.EU_CENTRAL_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: MOCK_STORAGE_DATA,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: MOCK_STORAGE_DATA,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.InvalidProvider);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
     });
 
     it('should create a fortune job successfully on network selected from round robin logic', async () => {
