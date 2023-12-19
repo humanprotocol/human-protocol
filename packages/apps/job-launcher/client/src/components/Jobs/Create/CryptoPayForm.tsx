@@ -80,12 +80,12 @@ export const CryptoPayForm = ({
           const contract = new ethers.Contract(
             tokenAddress,
             HMTokenABI,
-            signer
+            signer,
           );
 
           const tx = await contract.transfer(
             import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
-            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18)
+            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18),
           );
 
           await tx.wait();
@@ -109,7 +109,7 @@ export const CryptoPayForm = ({
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
-            fundAmount
+            fundAmount,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
@@ -117,7 +117,7 @@ export const CryptoPayForm = ({
           await jobService.createHCaptchaJob(
             chainId,
             hCaptchaRequest,
-            fundAmount
+            fundAmount,
           );
         }
         onFinish();

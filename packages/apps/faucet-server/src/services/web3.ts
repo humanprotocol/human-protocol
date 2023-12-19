@@ -1,5 +1,7 @@
 import hmtAbi from '@human-protocol/core/abis/HMToken.json';
 import Web3 from 'web3';
+import { HttpProvider } from 'web3-core';
+
 import { ChainId } from '../constants/networks';
 import {
   AnonymousParams,
@@ -48,7 +50,7 @@ export const sendFunds = async (
       (await web3.eth.getChainId()).toString() === ChainId.SKALE.toString() &&
       faucetAddress
     ) {
-      const currentProvider = web3.currentProvider as any;
+      const currentProvider = web3.currentProvider as HttpProvider;
       const skalePOW = new AnonymousPoW({
         rpcUrl: currentProvider.host,
       } as AnonymousParams);

@@ -70,7 +70,7 @@ const { chains, provider, webSocketProvider } = configureChains(
     moonbeam,
     moonbaseAlpha,
   ],
-  [publicProvider()]
+  [publicProvider()],
 );
 
 const projectId = import.meta.env.VITE_APP_WALLETCONNECT_PROJECT_ID;
@@ -108,7 +108,7 @@ loadStripe(publishableKey).then((stripePromise) => {
       signIn({
         accessToken,
         refreshToken,
-      })
+      }),
     );
     store.dispatch(fetchUserBalanceAsync());
   }
@@ -129,7 +129,7 @@ loadStripe(publishableKey).then((stripePromise) => {
           </ThemeProvider>
         </Provider>
       </WagmiConfig>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 });
 

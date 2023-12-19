@@ -148,7 +148,9 @@ describe('WebhookService', () => {
     reputationService = moduleRef.get(ReputationService);
     storageService = moduleRef.get(StorageService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
-    web3Service.calculateGasPrice = jest.fn().mockReturnValue(BigNumber.from(1000));
+    web3Service.calculateGasPrice = jest
+      .fn()
+      .mockReturnValue(BigNumber.from(1000));
   });
 
   afterEach(() => {

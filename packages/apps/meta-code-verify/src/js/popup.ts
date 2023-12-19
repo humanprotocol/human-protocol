@@ -158,8 +158,8 @@ async function attachTable(data, what) {
       result1.length > 1
         ? ((await getExtensionName(result1[1])) as string)
         : KNOWN_EXTENSION_HASHES_MAP.has(key)
-        ? KNOWN_EXTENSION_HASHES_MAP.get(key)
-        : '';
+          ? KNOWN_EXTENSION_HASHES_MAP.get(key)
+          : '';
     row.appendChild(extensionCell);
 
     // Source code cell
