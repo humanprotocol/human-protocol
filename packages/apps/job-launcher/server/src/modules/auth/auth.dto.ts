@@ -24,10 +24,6 @@ export class SignInDto {
 }
 
 export class ValidatePasswordDto {
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/, {
-    message:
-      'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~\-])',
-  })
   @ApiProperty()
   @IsPassword()
   public password: string;

@@ -57,6 +57,7 @@ export enum ErrorAuth {
   UserNotActive = 'User not active',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~\-])'
 }
 
 /**
