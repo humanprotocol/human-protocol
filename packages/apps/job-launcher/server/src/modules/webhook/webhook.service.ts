@@ -137,9 +137,8 @@ export class WebhookService {
 
     // Build the escrow client and get the exchange oracle address.
     const escrowClient = await EscrowClient.build(signer);
-    const exchangeAddress = await escrowClient.getExchangeOracleAddress(
-      escrowAddress,
-    );
+    const exchangeAddress =
+      await escrowClient.getExchangeOracleAddress(escrowAddress);
 
     // Build the KVStore client and get the webhook URL.
     const kvStoreClient = await KVStoreClient.build(signer);

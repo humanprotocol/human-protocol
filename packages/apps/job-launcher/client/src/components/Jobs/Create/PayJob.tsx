@@ -27,7 +27,7 @@ export const PayJob = () => {
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
       openSnackbar(
         'Insufficient token amount or the gas limit is too low',
-        'error'
+        'error',
       );
     } else if (err.code === 'ACTION_REJECTED') {
       openSnackbar('The transaction was rejected', 'error');

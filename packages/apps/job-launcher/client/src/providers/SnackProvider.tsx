@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 export const SnackbarContext = createContext({
   openSnackbar: (
     message: string,
-    severity: 'success' | 'error' | 'warning' | 'info'
+    severity: 'success' | 'error' | 'warning' | 'info',
   ) => {},
 });
 
@@ -17,7 +17,7 @@ const SnackbarProvider = ({ children }: { children: React.ReactElement }) => {
 
   const openSnackbar = (
     message: string,
-    severity: 'success' | 'error' | 'warning' | 'info'
+    severity: 'success' | 'error' | 'warning' | 'info',
   ) => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);

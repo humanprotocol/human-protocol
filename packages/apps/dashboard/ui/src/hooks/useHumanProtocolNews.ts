@@ -33,6 +33,7 @@ export const useHumanProtocolNews = () => {
           image: data?.data?.attributes?.image?.data?.attributes?.url,
         });
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log(err);
       }
       setIsLoading(false);

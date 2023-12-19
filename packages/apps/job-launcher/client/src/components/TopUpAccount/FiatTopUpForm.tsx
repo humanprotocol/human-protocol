@@ -35,6 +35,7 @@ export const FiatTopUpForm = () => {
     if (!stripe || !elements) {
       // Stripe.js has not yet loaded.
       // Make sure to disable form submission until Stripe.js has loaded.
+      // eslint-disable-next-line no-console
       console.error('Stripe.js has not yet loaded.');
       return;
     }

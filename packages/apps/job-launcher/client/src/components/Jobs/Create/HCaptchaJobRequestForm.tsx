@@ -150,6 +150,7 @@ export const HCaptchaJobRequestForm = () => {
     ) {
       setFieldValue('type', type);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

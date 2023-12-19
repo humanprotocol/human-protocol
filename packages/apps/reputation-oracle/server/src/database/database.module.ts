@@ -59,7 +59,8 @@ import { UserEntity } from '../modules/user/user.entity';
           keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
           migrationsRun: false,
           ssl:
-            configService.get<string>('POSTGRES_SSL')!.toLowerCase() === 'true',
+            configService.get<string>('POSTGRES_SSL', '').toLowerCase() ===
+            'true',
         };
       },
     }),

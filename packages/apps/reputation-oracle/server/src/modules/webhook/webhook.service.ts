@@ -413,9 +413,8 @@ export class WebhookService {
           webhookEntity.escrowAddress,
         );
 
-        const finalResults = await this.storageService.download(
-          finalResultsUrl,
-        );
+        const finalResults =
+          await this.storageService.download(finalResultsUrl);
 
         if (finalResults.length === 0) {
           this.logger.log(

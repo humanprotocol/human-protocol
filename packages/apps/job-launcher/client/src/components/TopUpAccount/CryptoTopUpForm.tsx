@@ -51,7 +51,7 @@ export const CryptoTopUpForm = () => {
 
       const tx = await contract.transfer(
         import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
-        tokenAmount
+        tokenAmount,
       );
 
       await tx.wait();

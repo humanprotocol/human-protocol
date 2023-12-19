@@ -1,4 +1,4 @@
-import { ChainId, StorageClient } from '@human-protocol/sdk';
+import { StorageClient } from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import { S3ConfigType, s3ConfigKey } from '../../common/config';

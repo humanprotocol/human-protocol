@@ -565,9 +565,8 @@ export class JobService {
       for (const fortune of result) {
         const fortuneDtoCheck = new FortuneFinalResultDto();
         Object.assign(fortuneDtoCheck, fortune);
-        const fortuneValidationErrors: ValidationError[] = await validate(
-          fortuneDtoCheck,
-        );
+        const fortuneValidationErrors: ValidationError[] =
+          await validate(fortuneDtoCheck);
         allFortuneValidationErrors.push(...fortuneValidationErrors);
       }
 
@@ -669,9 +668,8 @@ export class JobService {
     if (!jobEntity) return;
 
     if (jobEntity.escrowAddress) {
-      const { amountRefunded } = await this.processEscrowCancellation(
-        jobEntity,
-      );
+      const { amountRefunded } =
+        await this.processEscrowCancellation(jobEntity);
       await this.paymentService.createRefundPayment({
         refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
         userId: jobEntity.userId,
