@@ -49,6 +49,7 @@ class JobRequest(Base):
     id: Mapped[UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, index=True, default=uuid4
     )
+    type: Mapped[str] = mapped_column(default="text_label_multiple_span_select")
     escrow_address: Mapped[str] = mapped_column(String(42), nullable=False)
     chain_id: Mapped[int] = mapped_column(nullable=False)
     status: Mapped[Statuses] = mapped_column(

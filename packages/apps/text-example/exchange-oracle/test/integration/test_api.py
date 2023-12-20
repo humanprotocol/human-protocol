@@ -225,13 +225,17 @@ class APITest(unittest.TestCase):
             session.add_all(jobs)
             session.commit()
 
-        response = self.client.get(Endpoints.JOB_LIST, headers=self.human_signature)
+        response = self.client.get(
+            Endpoints.JOB_LIST + f"?chainId={self.chain_id}",
+            headers=self.human_signature,
+        )
 
         assert response.status_code == HTTPStatus.OK
-
-        job_ids = response.json()
-        assert len(job_ids) == n_returned_jobs
-        assert all(is_valid_uuid(job_id) for job_id in job_ids)
+        jobs = response.json()
+        assert len(jobs) == n_returned_jobs
+        assert all(
+            is_valid_uuid(job["jobId"]) and job["jobType"] is not None for job in jobs
+        )
 
     def test_register_user(self):
         """When a valid user registration is posted:
@@ -348,10 +352,13 @@ class APITest(unittest.TestCase):
         mock_get_manifest_url.assert_called_once()
 
         # make sure job was created and all projects have been created successfully
-        response = self.client.get(Endpoints.JOB_LIST, headers=self.human_signature)
+        response = self.client.get(
+            Endpoints.JOB_LIST + f"?chainId={self.chain_id}",
+            headers=self.human_signature,
+        )
         available_jobs = response.json()
         assert len(available_jobs) == 1
-        job_id = available_jobs[0]
+        job_id = available_jobs[0]["jobId"]
         with Session() as session:
             job = session.query(JobRequest).where(JobRequest.id == job_id).one()
             projects = job.projects
@@ -535,7 +542,9 @@ class APITest(unittest.TestCase):
         job_application = {"worker_id": worker_address, "job_id": job_id}
         header = {"Signature": "nonsense"}
 
-        response = self.client.get(Endpoints.JOB_LIST, headers=header)
+        response = self.client.get(
+            Endpoints.JOB_LIST + f"?chainId={self.chain_id}", headers=header
+        )
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 
         response = self.client.post(

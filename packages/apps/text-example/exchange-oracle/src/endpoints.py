@@ -39,7 +39,7 @@ router = APIRouter()
 
 class Endpoints:
     JOB_REQUEST = "/webhook"
-    JOB_LIST = "/job/list"
+    JOB_LIST = "/jobs"
     JOB_APPLY = "/job/apply"
     USER_REGISTER = "/user/register"
 
@@ -161,10 +161,11 @@ async def register_job_request(
 
 @router.get(Endpoints.JOB_LIST)
 async def list_available_jobs(
+    chainId: int,
     signature: str = Header(description="Calling service signature"),
 ):
     """Lists available jobs."""
-    logger.debug(f"GET {Endpoints.JOB_LIST} called.")
+    logger.debug(f"GET {Endpoints.JOB_LIST}?chainId={chainId} called.")
 
     if not validate_human_app_signature(signature):
         logger.exception("Invalid signature.")
@@ -172,9 +173,12 @@ async def list_available_jobs(
 
     with Session() as session:
         return [
-            job.id
+            {"jobId": job.id, "jobType": job.type}
             for job in session.query(JobRequest)
-            .where(JobRequest.status == Statuses.in_progress.value)
+            .where(
+                (JobRequest.status == Statuses.in_progress.value)
+                & (JobRequest.chain_id == chainId)
+            )
             .all()
         ]
 
