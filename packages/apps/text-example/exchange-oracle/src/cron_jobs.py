@@ -57,6 +57,12 @@ def process_pending_job_requests():
                     logger.info(
                         f"Updated expiration date for {job_request.id} to {job_request.expires_at}"
                     )
+
+                job_request.description = manifest.requester_description
+                job_request.reward_amount = (
+                    manifest.task_bid_price
+                )  # todo: double check: is this per task or per batch of tasks?
+                logger.debug(f"Updated task details for for {job_request.id}.")
                 stage_success(job_request)
             except Exception:
                 logger.exception(

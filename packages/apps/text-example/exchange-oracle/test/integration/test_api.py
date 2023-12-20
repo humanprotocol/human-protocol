@@ -202,7 +202,8 @@ class APITest(unittest.TestCase):
 
     def test_list_available_jobs(self):
         """When a list of available jobs is requested:
-        - a list of uuids (v4) representing job ids of Jobs in progress should be returned with the response
+        - a list of job information for jobs in progress should be returned
+        - each information object should contain the job id and the job type
         """
         n_statuses = len(Statuses) - 1  # one will be valid, so deduct it
         n_returned_jobs = 3
@@ -236,6 +237,42 @@ class APITest(unittest.TestCase):
         assert all(
             is_valid_uuid(job["jobId"]) and job["jobType"] is not None for job in jobs
         )
+
+    def test_job_details(self):
+        """When details for an available job are requested:
+        - job details should be returned
+        - details should include the job's id, type, description, reward and reward token.
+        """
+        job_id = add_job_request(Statuses.in_progress)
+
+        response = self.client.get(
+            Endpoints.JOB_DETAIL + f"?jobId={job_id}", headers=self.human_signature
+        )
+        assert response.status_code == HTTPStatus.OK
+
+        details: dict = response.json()
+        assert all(
+            key in details
+            for key in [
+                "jobId",
+                "jobType",
+                "jobDescription",
+                "rewardAmount",
+                "rewardToken",
+            ]
+        )
+
+    def test_job_details_due_to_missing_job(self):
+        """When details for a job that is not availabel are requested:
+        - an appropriate error response should be raised
+        """
+        job_id = add_job_request(Statuses.pending)
+
+        response = self.client.get(
+            Endpoints.JOB_DETAIL + f"?jobId={job_id}", headers=self.human_signature
+        )
+
+        assert_http_error_response(response, Errors.NOTHING_FOUND)
 
     def test_register_user(self):
         """When a valid user registration is posted:
@@ -544,6 +581,11 @@ class APITest(unittest.TestCase):
 
         response = self.client.get(
             Endpoints.JOB_LIST + f"?chainId={self.chain_id}", headers=header
+        )
+        assert_http_error_response(response, Errors.SIGNATURE_INVALID)
+
+        response = self.client.get(
+            Endpoints.JOB_DETAIL + f"?jobId={job_id}", headers=header
         )
         assert_http_error_response(response, Errors.SIGNATURE_INVALID)
 

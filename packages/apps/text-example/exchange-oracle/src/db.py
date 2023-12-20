@@ -50,6 +50,11 @@ class JobRequest(Base):
         UUID(as_uuid=True), primary_key=True, index=True, default=uuid4
     )
     type: Mapped[str] = mapped_column(default="text_label_multiple_span_select")
+    description: Mapped[str] = mapped_column(
+        default="Annotate spans of text that correspond to the given labels."
+    )
+    reward_token: Mapped[str] = mapped_column(default="HMT")
+    reward_amount: Mapped[float] = mapped_column(nullable=True)
     escrow_address: Mapped[str] = mapped_column(String(42), nullable=False)
     chain_id: Mapped[int] = mapped_column(nullable=False)
     status: Mapped[Statuses] = mapped_column(

@@ -32,6 +32,7 @@ from src.db import (
     AnnotationProject,
     stage_success,
 )
+from src.storage import download_manifest
 
 logger = Config.logging.get_logger()
 router = APIRouter()
@@ -40,7 +41,8 @@ router = APIRouter()
 class Endpoints:
     JOB_REQUEST = "/webhook"
     JOB_LIST = "/jobs"
-    JOB_APPLY = "/job/apply"
+    JOB_DETAIL = "/jobs/details"
+    JOB_APPLY = "/jobs/apply"
     USER_REGISTER = "/user/register"
 
 
@@ -67,6 +69,7 @@ class Errors:
     JOB_UNAVAILABLE = HTTPException(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Job is not available."
     )
+    NOTHING_FOUND = HTTPException(status_code=HTTPStatus.NOT_FOUND)
     TASKS_UNAVAILABLE = HTTPException(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         detail="No tasks available for worker.",
@@ -181,6 +184,39 @@ async def list_available_jobs(
             )
             .all()
         ]
+
+
+@router.get(Endpoints.JOB_DETAIL)
+async def job_details(
+    jobId: str, signature: str = Header(description="Calling service signature")
+):
+    """Returns job details for the requested job."""
+    logger.info(f"GET {Endpoints.JOB_DETAIL} called with {jobId}.")
+
+    if not validate_human_app_signature(signature):
+        logger.exception("Invalid signature.")
+        raise Errors.SIGNATURE_INVALID
+
+    with Session() as session:
+        try:
+            job = (
+                session.query(JobRequest)
+                .where(
+                    (JobRequest.id == jobId)
+                    & (JobRequest.status == Statuses.in_progress)
+                )
+                .one()
+            )
+            return {
+                "jobId": job.id,
+                "jobType": job.type,
+                "jobDescription": job.description,
+                "rewardAmount": job.reward_amount,
+                "rewardToken": job.reward_token,
+            }
+        except NoResultFound:
+            logger.exception(f"No result found for requested job {jobId}.")
+            raise Errors.NOTHING_FOUND
 
 
 @router.post(Endpoints.USER_REGISTER)
