@@ -9,7 +9,7 @@ from string import ascii_letters
 from uuid import uuid4
 
 from fastapi import HTTPException
-from src.chain import sign_message
+from src.chain import sign_message, EventType, EscrowInfo
 from src.config import Config
 from src.db import AnnotationProject, JobRequest, Session, Statuses
 from src.storage import upload_data
@@ -43,12 +43,16 @@ def random_username(seed=None):
     return "TEST_USER_" + "".join(random.choices(ascii_letters, k=16))
 
 
-def random_escrow_info(seed=None):
+def random_escrow_info(event_type: EventType = EventType.ESCROW_CREATED, seed=None):
     if seed is not None:
         random.seed(seed)
     escrow_address = random_address()
     chain_id = Config.localhost.chain_id
-    info = {"escrow_address": escrow_address, "chain_id": chain_id}
+    info = json.loads(
+        EscrowInfo(
+            escrow_address=escrow_address, chain_id=chain_id, event_type=event_type
+        ).json()
+    )
     return info, escrow_address, chain_id
 
 
@@ -69,9 +73,18 @@ def is_valid_uuid(obj):
 
 
 def add_job_request(
-    status: Statuses = Statuses.pending, expiration_date=None, attempts=0
+    status: Statuses = Statuses.pending,
+    expiration_date=None,
+    attempts=0,
+    escrow_address=None,
+    chain_id=None,
 ):
-    _, escrow_address, chain_id = random_escrow_info()
+    if escrow_address is None:
+        escrow_address = random_address()
+
+    if chain_id is None:
+        chain_id = Config.localhost.chain_id
+
     job_id = str(uuid4())
 
     with Session() as session:

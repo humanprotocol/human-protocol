@@ -9,7 +9,7 @@ from src.annotation import (
     download_annotations,
     is_done,
 )
-from src.chain import EscrowInfo, get_manifest_url
+from src.chain import EscrowInfo, get_manifest_url, EventType
 from src.config import Config
 from src.db import (
     AnnotationProject,
@@ -78,7 +78,9 @@ def process_pending_job_requests():
 def set_up_projects_for_job(job_request: JobRequest):
     """Creates a new job."""
     escrow_info = EscrowInfo(
-        escrow_address=job_request.escrow_address, chain_id=job_request.chain_id
+        escrow_address=job_request.escrow_address,
+        chain_id=job_request.chain_id,
+        event_type=EventType.ESCROW_CREATED,
     )
 
     # get manifest from escrow url

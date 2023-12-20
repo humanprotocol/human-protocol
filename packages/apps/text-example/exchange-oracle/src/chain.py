@@ -2,6 +2,7 @@
 
 import json
 from ast import literal_eval
+from enum import Enum
 from typing import Any
 
 from eth_account.messages import encode_defunct
@@ -15,16 +16,23 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
 
+class EventType(str, Enum):
+    ESCROW_CREATED = "escrow_created"
+    ESCROW_CANCELED = "escrow_canceled"
+
+
 class EscrowInfo(BaseModel):
     """Specifies an escrow location.
 
     Attributes:
         chain_id: The id of the chain on which the escrow is located.
         escrow_address: The address of the escrow on the given chain.
+        event_type: The type of event.
     """
 
     chain_id: int
     escrow_address: str
+    event_type: EventType
 
 
 def get_web3(chain_id: int):

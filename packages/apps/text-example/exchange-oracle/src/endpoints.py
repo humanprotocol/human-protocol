@@ -21,16 +21,24 @@ from src.chain import (
     validate_escrow,
     validate_job_launcher_signature,
     validate_human_app_signature,
+    EventType,
 )
 from src.config import Config
-from src.db import Session, JobRequest, Statuses, Worker, AnnotationProject
+from src.db import (
+    Session,
+    JobRequest,
+    Statuses,
+    Worker,
+    AnnotationProject,
+    stage_success,
+)
 
 logger = Config.logging.get_logger()
 router = APIRouter()
 
 
 class Endpoints:
-    JOB_REQUEST = "/job/request"
+    JOB_REQUEST = "/webhook"
     JOB_LIST = "/job/list"
     JOB_APPLY = "/job/apply"
     USER_REGISTER = "/user/register"
@@ -83,6 +91,7 @@ class Errors:
         detail="Worker could not be verified.",
     )
     SIGNATURE_INVALID = HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
+    REQUEST_FAILED = HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 
 @router.post(Endpoints.JOB_REQUEST)
@@ -105,6 +114,7 @@ async def register_job_request(
     if escrow is None:
         logger.error(Errors.ESCROW_NOT_FOUND.detail + f" {escrow_info}")
         raise Errors.ESCROW_NOT_FOUND
+
     try:
         validate_escrow(escrow)
     except ValueError:
@@ -118,19 +128,35 @@ async def register_job_request(
         logger.error(f"Signature invalid for {escrow_info} with signature {signature}")
         raise Errors.SIGNATURE_INVALID
 
-    # add job once all validations were successful
-    with Session() as session:
-        id = str(uuid4())
-        job_request = JobRequest(
-            id=id,
-            escrow_address=escrow_info.escrow_address,
-            chain_id=escrow_info.chain_id,
-        )
-        session.add(job_request)
-        session.commit()
-
-    logger.info(f"Successfully added new job. Id: {id}")
-    return {"id": id}
+    match escrow_info.event_type:
+        # add new job
+        case EventType.ESCROW_CREATED:
+            with Session() as session:
+                id = str(uuid4())
+                job_request = JobRequest(
+                    id=id,
+                    escrow_address=escrow_info.escrow_address,
+                    chain_id=escrow_info.chain_id,
+                )
+                session.add(job_request)
+                session.commit()
+                logger.info(f"Successfully added new job. Id: {id}")
+        # initiate job completion
+        case EventType.ESCROW_CANCELED:
+            with Session() as session:
+                job_request = (
+                    session.query(JobRequest)
+                    .where(
+                        (JobRequest.escrow_address == escrow_info.escrow_address)
+                        & (JobRequest.chain_id == escrow_info.chain_id)
+                    )
+                    .one()
+                )
+                job_request.status = Statuses.completed
+                job_request.attempts = 0
+                id = job_request.id
+                session.commit()
+            logger.info(f"Job {id} cancelled. Initiated job completion")
 
 
 @router.get(Endpoints.JOB_LIST)

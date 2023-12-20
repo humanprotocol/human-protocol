@@ -1,24 +1,13 @@
 import unittest
 import uuid
 from http import HTTPStatus
-from test.constants import JOB_LAUNCHER
-from test.utils import (
-    assert_http_error_response,
-    assert_no_entries_in_db,
-    get_web3_from_private_key,
-    is_valid_uuid,
-    random_address,
-    random_escrow_info,
-    random_userinfo,
-    random_username,
-    upload_manifest_and_task_data,
-)
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
+
 from src.annotation import get_client
-from src.chain import sign_message
+from src.chain import EscrowInfo, EventType
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests
 from src.db import (
@@ -30,8 +19,20 @@ from src.db import (
     Worker,
     engine,
 )
-from src.main import exchange_oracle
 from src.endpoints import Endpoints, Errors
+from src.main import exchange_oracle
+from test.constants import JOB_LAUNCHER
+from test.utils import (
+    assert_http_error_response,
+    assert_no_entries_in_db,
+    is_valid_uuid,
+    random_address,
+    random_escrow_info,
+    random_userinfo,
+    random_username,
+    upload_manifest_and_task_data,
+    add_job_request,
+)
 
 get_escrow_path = "human_protocol_sdk.escrow.EscrowUtils.get_escrow"
 get_manifest_url_path = "src.cron_jobs.get_manifest_url"
@@ -78,16 +79,12 @@ class APITest(unittest.TestCase):
             headers=self.job_launcher_signature,
         )
 
-        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
         assert response.status_code == HTTPStatus.OK
+        mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
 
         # check db status
         with Session() as session:
-            job = (
-                session.query(JobRequest)
-                .where(JobRequest.id == response.json()["id"])
-                .one()
-            )
+            job = session.query(JobRequest).one()
 
         assert job is not None
         assert job.status == Statuses.pending
@@ -166,7 +163,7 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
         assert_no_entries_in_db(JobRequest)
 
-        # wrong status
+        # escrow with wrong status should fail in validation
         mock_escrow.balance = 1
         mock_escrow.status = Status.Complete.name
         response = self.client.post(
@@ -177,6 +174,31 @@ class APITest(unittest.TestCase):
 
         assert_http_error_response(response, Errors.ESCROW_VALIDATION_FAILED)
         assert_no_entries_in_db(JobRequest)
+
+    @patch(get_escrow_path)
+    def test_cancel_job_request(self, mock_get_escrow: MagicMock):
+        add_job_request(
+            status=Statuses.in_progress,
+            escrow_address=self.escrow_address,
+            chain_id=self.chain_id,
+        )
+        mock_get_escrow.return_value = self.mock_escrow
+
+        message = self.message.copy()
+        message["event_type"] = EventType.ESCROW_CANCELED
+        header = {"Signature": self.job_launcher.sign(message)}
+
+        response = self.client.post(
+            Endpoints.JOB_REQUEST,
+            json=message,
+            headers=header,
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+        with Session() as session:
+            job = session.query(JobRequest).one()
+            assert job.status == Statuses.completed
 
     def test_list_available_jobs(self):
         """When a list of available jobs is requested:
@@ -306,7 +328,6 @@ class APITest(unittest.TestCase):
             Endpoints.USER_REGISTER, json=user_info, headers=self.human_signature
         )
         assert response.status_code == HTTPStatus.OK
-        authentication = response.json()
 
         # job registration, adds job to db
         mock_get_escrow.return_value = self.mock_escrow
@@ -317,7 +338,6 @@ class APITest(unittest.TestCase):
         )
         mock_get_escrow.assert_called_once_with(self.chain_id, self.escrow_address)
         assert response.status_code == HTTPStatus.OK
-        job_id = response.json()["id"]
 
         # upload manifest and data
         manifest_s3_url = upload_manifest_and_task_data()
@@ -327,15 +347,14 @@ class APITest(unittest.TestCase):
         process_pending_job_requests()
         mock_get_manifest_url.assert_called_once()
 
-        # make sure all projects have been created successfully
+        # make sure job was created and all projects have been created successfully
         response = self.client.get(Endpoints.JOB_LIST, headers=self.human_signature)
         available_jobs = response.json()
-
-        assert job_id in available_jobs
+        assert len(available_jobs) == 1
+        job_id = available_jobs[0]
         with Session() as session:
             job = session.query(JobRequest).where(JobRequest.id == job_id).one()
             projects = job.projects
-
             assert job.status == Statuses.in_progress
             assert len(projects) != 0
 

@@ -1,4 +1,12 @@
 from test.utils import Signer
+from enum import Enum
+
+
+class Environments(str, Enum):
+    TEST = "test"
+    PROD = "production"
+    DEV = "development"
+
 
 JOB_LAUNCHER = Signer(
     address="0x514b41D62325CF7f73f5D54cC3f58dEe72d80f8B",
