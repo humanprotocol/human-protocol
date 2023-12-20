@@ -80,6 +80,7 @@ import {
   JobCvatDto,
   JobDetailsDto,
   JobCaptchaDto,
+  CvatManifestDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -100,6 +101,10 @@ import {
   HCAPTCHA_NOT_PRESENTED_LABEL,
 } from '../../common/constants';
 import { WebhookService } from '../webhook/webhook.service';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobEntity } from '../cron-job/cron-job.entity';
+import { CronJobType } from '../../common/enums/cron-job';
+import { DeepPartial } from 'typeorm';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -108,6 +113,7 @@ jest.mock('@human-protocol/sdk', () => ({
     build: jest.fn().mockImplementation(() => ({
       createEscrow: jest.fn().mockResolvedValue(MOCK_ADDRESS),
       setup: jest.fn().mockResolvedValue(null),
+      fund: jest.fn().mockResolvedValue(null),
     })),
   },
   EscrowUtils: {
@@ -156,7 +162,8 @@ describe('JobService', () => {
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
     storageService: StorageService,
-    webhookService: WebhookService;
+    webhookService: WebhookService,
+    cronJobService: CronJobService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -243,6 +250,10 @@ describe('JobService', () => {
           provide: RoutingProtocolService,
           useValue: createMock<RoutingProtocolService>(),
         },
+        {
+          provide: CronJobService,
+          useValue: createMock<CronJobService>(),
+        },
       ],
     }).compile();
 
@@ -255,6 +266,7 @@ describe('JobService', () => {
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     storageService = moduleRef.get<StorageService>(StorageService);
     webhookService = moduleRef.get<WebhookService>(WebhookService);
+    cronJobService = moduleRef.get<CronJobService>(CronJobService);
 
     storageService.uploadFile = jest.fn().mockResolvedValue({
       url: MOCK_FILE_URL,
@@ -1176,10 +1188,10 @@ describe('JobService', () => {
     });
   });
 
-  describe('launchJob', () => {
+  describe('createEscrow', () => {
     const chainId = ChainId.LOCALHOST;
 
-    it('should launch a job successfully', async () => {
+    it('should create an escrow successfully', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -1189,7 +1201,57 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         fee,
         fundAmount,
-        status: JobStatus.PENDING,
+        status: JobStatus.PAID,
+        save: jest.fn().mockResolvedValue(true),
+        userId: 1,
+      };
+
+      const jobEntityResult = await jobService.createEscrow(
+        mockJobEntity as JobEntity,
+      );
+
+      mockJobEntity.status = JobStatus.CREATING;
+      expect(mockJobEntity.save).toHaveBeenCalled();
+
+      mockJobEntity.status = JobStatus.LAUNCHING;
+      mockJobEntity.escrowAddress = MOCK_ADDRESS;
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
+      expect(mockJobEntity.save).toHaveBeenCalled();
+    });
+
+    it('should handle error during job creation', async () => {
+      (EscrowClient.build as any).mockImplementationOnce(() => ({
+        createEscrow: jest.fn().mockRejectedValue(new Error()),
+      }));
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        status: JobStatus.PAID,
+        save: jest.fn().mockResolvedValue(true),
+      };
+
+      await expect(
+        jobService.createEscrow(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('setupEscrow', () => {
+    const chainId = ChainId.LOCALHOST;
+
+    it('should setup escrow and update the status to funding', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        fee,
+        fundAmount,
+        status: JobStatus.LAUNCHING,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1204,42 +1266,16 @@ describe('JobService', () => {
 
       storageService.download = jest.fn().mockReturnValue(manifest);
 
-      const jobEntityResult = await jobService.launchJob(
+      const jobEntityResult = await jobService.setupEscrow(
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.escrowAddress = MOCK_ADDRESS;
-      expect(jobEntityResult).toMatchObject(mockJobEntity);
+      mockJobEntity.status = JobStatus.FUNDING;
       expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
 
-    it('should handle error during job launch', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        createAndSetupEscrow: jest.fn().mockRejectedValue(new Error()),
-      }));
-
-      const mockJobEntity: Partial<JobEntity> = {
-        chainId: 1,
-        manifestUrl: MOCK_FILE_URL,
-        manifestHash: MOCK_FILE_HASH,
-        status: JobStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true),
-      };
-
-      await expect(
-        jobService.launchJob(mockJobEntity as JobEntity),
-      ).rejects.toThrow();
-    });
-  });
-
-  describe('fundJob', () => {
-    const chainId = ChainId.LOCALHOST;
-
-    it('should fund a job successfully', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
-        fund: jest.fn(),
-      }));
-
+    it('should validate manifest before setup', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -1249,22 +1285,84 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         fee,
         fundAmount,
-        status: JobStatus.PAID,
+        status: JobStatus.LAUNCHING,
+        save: jest.fn().mockResolvedValue(true),
+        userId: 1,
+      };
+
+      const manifest: Partial<FortuneManifestDto> = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      storageService.download = jest.fn().mockReturnValue(manifest);
+
+      await expect(
+        jobService.setupEscrow(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
+    });
+
+    it('should handle error during job setup', async () => {
+      (EscrowClient.build as any).mockImplementationOnce(() => ({
+        setup: jest.fn().mockRejectedValue(new Error()),
+      }));
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        status: JobStatus.LAUNCHING,
         save: jest.fn().mockResolvedValue(true),
       };
 
-      const jobEntityResult = await jobService.fundJob(
+      const fundAmount = 10;
+      const manifest: FortuneManifestDto = {
+        submissionsRequired: 10,
+        requesterTitle: MOCK_REQUESTER_TITLE,
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        fundAmount,
+        requestType: JobRequestType.FORTUNE,
+      };
+
+      storageService.download = jest.fn().mockReturnValue(manifest);
+
+      await expect(
+        jobService.setupEscrow(mockJobEntity as JobEntity),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('fundEscrow', () => {
+    const chainId = ChainId.LOCALHOST;
+
+    it('should fund escrow and update the status to launched', async () => {
+      const fundAmount = 10;
+      const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
+
+      const mockJobEntity: Partial<JobEntity> = {
+        chainId,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        fee,
+        fundAmount,
+        status: JobStatus.FUNDING,
+        save: jest.fn().mockResolvedValue(true),
+        userId: 1,
+      };
+
+      const jobEntityResult = await jobService.fundEscrow(
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.escrowAddress = MOCK_ADDRESS;
-      expect(jobEntityResult).toMatchObject(mockJobEntity);
-      expect(jobEntityResult.status).toBe(JobStatus.LAUNCHED);
+      mockJobEntity.status = JobStatus.LAUNCHED;
       expect(mockJobEntity.save).toHaveBeenCalled();
+      expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
 
     it('should handle error during job fund', async () => {
-      (EscrowClient.build as any).mockImplementation(() => ({
+      (EscrowClient.build as any).mockImplementationOnce(() => ({
         fund: jest.fn().mockRejectedValue(new Error()),
       }));
 
@@ -1272,12 +1370,12 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        status: JobStatus.PENDING,
+        status: JobStatus.FUNDING,
         save: jest.fn().mockResolvedValue(true),
       };
 
       await expect(
-        jobService.fundJob(mockJobEntity as JobEntity),
+        jobService.fundEscrow(mockJobEntity as JobEntity),
       ).rejects.toThrow();
     });
   });
@@ -1356,6 +1454,330 @@ describe('JobService', () => {
         jobService.requestToCancelJob(userId, jobId),
       ).rejects.toThrow(
         new ConflictException(ErrorJob.InvalidStatusCancellation),
+      );
+    });
+  });
+
+  describe('createEscrowCronJob', () => {
+    let createEscrowMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntityMock1: Partial<JobEntity>, jobEntityMock2: Partial<JobEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.CreateEscrow,
+        createdAt: new Date(),
+      };
+
+      jobEntityMock1 = {
+        status: JobStatus.PAID,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jobEntityMock2 = {
+        status: JobStatus.PAID,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jest
+        .spyOn(jobRepository, 'find')
+        .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
+
+      createEscrowMock = jest.spyOn(jobService, 'createEscrow');
+      createEscrowMock.mockResolvedValue(true);
+
+      jest.spyOn(cronJobService, 'isCronJobRunning').mockResolvedValue(false);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if the cron job is already running', async () => {
+      jest
+        .spyOn(cronJobService, 'isCronJobRunning')
+        .mockResolvedValueOnce(true);
+
+      await jobService.createEscrowCronJob();
+
+      expect(createEscrowMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity on database to lock', async () => {
+      jest
+        .spyOn(cronJobService, 'createCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.createEscrowCronJob();
+
+      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+        CronJobType.CreateEscrow,
+      );
+    });
+
+    it('should run createEscrow for all of the jobs with status PAID', async () => {
+      await jobService.createEscrowCronJob();
+
+      expect(createEscrowMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should increase retriesCount by 1, if the job creation fails', async () => {
+      createEscrowMock.mockRejectedValueOnce(new Error('creation failed'));
+
+      await jobService.createEscrowCronJob();
+
+      expect(createEscrowMock).toHaveBeenCalledTimes(2);
+      expect(jobEntityMock1.retriesCount).toBe(2);
+      expect(jobEntityMock2.retriesCount).toBe(1);
+    });
+
+    it('should complete the cron job entity on database to unlock', async () => {
+      jest
+        .spyOn(cronJobService, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.createEscrowCronJob();
+
+      expect(cronJobService.completeCronJob).toHaveBeenCalledWith(
+        CronJobType.CreateEscrow,
+      );
+    });
+  });
+
+  describe('setupEscrowCronJob', () => {
+    let setupEscrowMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntityMock1: Partial<JobEntity>, jobEntityMock2: Partial<JobEntity>;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.SetupEscrow,
+        createdAt: new Date(),
+      };
+
+      jobEntityMock1 = {
+        status: JobStatus.LAUNCHING,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jobEntityMock2 = {
+        status: JobStatus.LAUNCHING,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jest
+        .spyOn(jobRepository, 'find')
+        .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
+
+      setupEscrowMock = jest.spyOn(jobService, 'setupEscrow');
+      setupEscrowMock.mockResolvedValue(true);
+
+      jest.spyOn(cronJobService, 'isCronJobRunning').mockResolvedValue(false);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if the cron job is already running', async () => {
+      jest
+        .spyOn(cronJobService, 'isCronJobRunning')
+        .mockResolvedValueOnce(true);
+
+      await jobService.setupEscrowCronJob();
+
+      expect(setupEscrowMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity on database to lock', async () => {
+      jest
+        .spyOn(cronJobService, 'createCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.setupEscrowCronJob();
+
+      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+        CronJobType.SetupEscrow,
+      );
+    });
+
+    it('should run setupEscrow for all of the jobs with status LAUNCHING', async () => {
+      await jobService.setupEscrowCronJob();
+
+      expect(setupEscrowMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should increase retriesCount by 1, if the job setup fails', async () => {
+      setupEscrowMock.mockRejectedValueOnce(new Error('setup failed'));
+
+      await jobService.setupEscrowCronJob();
+
+      expect(setupEscrowMock).toHaveBeenCalledTimes(2);
+      expect(jobEntityMock1.retriesCount).toBe(2);
+      expect(jobEntityMock2.retriesCount).toBe(1);
+    });
+
+    it('should complete the cron job entity on database to unlock', async () => {
+      jest
+        .spyOn(cronJobService, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.setupEscrowCronJob();
+
+      expect(cronJobService.completeCronJob).toHaveBeenCalledWith(
+        CronJobType.SetupEscrow,
+      );
+    });
+  });
+
+  describe('fundEscrowCronJob', () => {
+    let fundEscrowMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let jobEntityMock1: Partial<JobEntity>, jobEntityMock2: Partial<JobEntity>;
+    let createWebhookMock: any;
+
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.FundEscrow,
+        createdAt: new Date(),
+      };
+
+      jobEntityMock1 = {
+        status: JobStatus.FUNDING,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jobEntityMock2 = {
+        status: JobStatus.FUNDING,
+        fundAmount: 100,
+        userId: 1,
+        id: 1,
+        manifestUrl: MOCK_FILE_URL,
+        manifestHash: MOCK_FILE_HASH,
+        escrowAddress: MOCK_ADDRESS,
+        chainId: ChainId.LOCALHOST,
+        retriesCount: 1,
+        save: jest.fn(),
+      };
+
+      jest
+        .spyOn(jobRepository, 'find')
+        .mockResolvedValue([jobEntityMock1 as any, jobEntityMock2 as any]);
+
+      fundEscrowMock = jest.spyOn(jobService, 'fundEscrow');
+      fundEscrowMock.mockResolvedValue(true);
+
+      jest.spyOn(cronJobService, 'isCronJobRunning').mockResolvedValue(false);
+
+      createWebhookMock = jest.spyOn(webhookService, 'createWebhook');
+
+      const cvatManifestMock: DeepPartial<CvatManifestDto> = {
+        data: {
+          data_url: MOCK_FILE_URL,
+        },
+        annotation: {
+          type: JobRequestType.IMAGE_POINTS,
+        },
+      };
+      jest
+        .spyOn(storageService, 'download')
+        .mockResolvedValue(cvatManifestMock);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not run if the cron job is already running', async () => {
+      jest
+        .spyOn(cronJobService, 'isCronJobRunning')
+        .mockResolvedValueOnce(true);
+
+      await jobService.fundEscrowCronJob();
+
+      expect(fundEscrowMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity on database to lock', async () => {
+      jest
+        .spyOn(cronJobService, 'createCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.fundEscrowCronJob();
+
+      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+        CronJobType.FundEscrow,
+      );
+    });
+
+    it('should run fundEscrow for all of the jobs with status FUNDING, and trigger webhook', async () => {
+      await jobService.fundEscrowCronJob();
+
+      expect(fundEscrowMock).toHaveBeenCalledTimes(2);
+      expect(createWebhookMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should increase retriesCount by 1, if the job fund fails', async () => {
+      fundEscrowMock.mockRejectedValueOnce(new Error('fund failed'));
+
+      await jobService.fundEscrowCronJob();
+
+      expect(fundEscrowMock).toHaveBeenCalledTimes(2);
+      expect(jobEntityMock1.retriesCount).toBe(2);
+      expect(jobEntityMock2.retriesCount).toBe(1);
+
+      expect(createWebhookMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should complete the cron job entity on database to unlock', async () => {
+      jest
+        .spyOn(cronJobService, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await jobService.fundEscrowCronJob();
+
+      expect(cronJobService.completeCronJob).toHaveBeenCalledWith(
+        CronJobType.FundEscrow,
       );
     });
   });

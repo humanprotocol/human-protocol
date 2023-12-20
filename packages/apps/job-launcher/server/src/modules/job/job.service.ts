@@ -7,14 +7,12 @@ import {
   EscrowUtils,
   NETWORKS,
   StakingClient,
-  StorageClient,
   KVStoreKeys,
   Encryption,
   EncryptionUtils,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   Inject,
@@ -26,10 +24,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
-import { IsNull, LessThanOrEqual, Not, QueryFailedError } from 'typeorm';
+import { LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
-  ErrorBucket,
   ErrorEscrow,
   ErrorJob,
   ErrorPayment,
@@ -108,6 +105,8 @@ import { StorageService } from '../storage/storage.service';
 import { WebhookService } from '../webhook/webhook.service';
 import stringify from 'json-stable-stringify';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobType } from '../../common/enums/cron-job';
 
 @Injectable()
 export class JobService {
@@ -123,6 +122,7 @@ export class JobService {
     private readonly routingProtocolService: RoutingProtocolService,
     private readonly storageService: StorageService,
     private readonly webhookService: WebhookService,
+    private readonly cronJobService: CronJobService,
   ) {}
 
   public async createCvatManifest(
@@ -545,7 +545,36 @@ export class JobService {
     );
   }
 
-  public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
+  public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    jobEntity.status = JobStatus.CREATING;
+    await jobEntity.save();
+
+    const escrowAddress = await escrowClient.createEscrow(
+      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
+      [],
+      jobEntity.userId.toString(),
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
+    );
+
+    if (!escrowAddress) {
+      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
+      throw new NotFoundException(ErrorEscrow.NotCreated);
+    }
+
+    jobEntity.status = JobStatus.LAUNCHING;
+    jobEntity.escrowAddress = escrowAddress;
+    await jobEntity.save();
+
+    return jobEntity;
+  }
+
+  public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -566,7 +595,6 @@ export class JobService {
 
     let recordingOracleConfigKey;
     let exchangeOracleConfigKey;
-    let trustedHandlers;
 
     if (
       (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
@@ -614,37 +642,17 @@ export class JobService {
       manifestHash: jobEntity.manifestHash,
     };
 
-    jobEntity.status = JobStatus.LAUNCHING;
-    await jobEntity.save();
-
-    const escrowAddress = await escrowClient.createEscrow(
-      NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
-      [],
-      jobEntity.userId.toString(),
-      {
-        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
-      },
-    );
-
-    await escrowClient.setup(escrowAddress, escrowConfig, {
+    await escrowClient.setup(jobEntity.escrowAddress, escrowConfig, {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    if (!escrowAddress) {
-      this.logger.log(ErrorEscrow.NotCreated, JobService.name);
-      throw new NotFoundException(ErrorEscrow.NotCreated);
-    }
-
-    jobEntity.escrowAddress = escrowAddress;
+    jobEntity.status = JobStatus.FUNDING;
     await jobEntity.save();
 
     return jobEntity;
   }
 
-  public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
-    jobEntity.status = JobStatus.FUNDING;
-    await jobEntity.save();
-
+  public async fundEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -901,18 +909,27 @@ export class JobService {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  public async launchCronJob() {
-    this.logger.log('Launch jobs START');
-    try {
-      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-      let jobEntity;
+  public async createEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.CreateEscrow,
+    );
 
-      jobEntity = await this.jobRepository.findOne(
+    if (isCronJobRunning) {
+      this.logger.log('Previous cron job is not completed yet');
+      return;
+    }
+
+    this.logger.log('Create escrow START');
+    const cronJob = await this.cronJobService.createCronJob(
+      CronJobType.CreateEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
         {
-          status: JobStatus.LAUNCHING,
+          status: JobStatus.PAID,
           retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
-          escrowAddress: Not(IsNull()),
         },
         {
           order: {
@@ -921,49 +938,135 @@ export class JobService {
         },
       );
 
-      if (!jobEntity) {
-        jobEntity = await this.jobRepository.findOne(
-          {
-            status: JobStatus.PAID,
-            retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-            waitUntil: LessThanOrEqual(new Date()),
-          },
-          {
-            order: {
-              waitUntil: SortDirection.ASC,
-            },
-          },
-        );
-      }
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.createEscrow(jobEntity);
+        } catch (err) {
+          this.logger.error(`Error creating escrow: ${err.message}`);
 
-      if (!jobEntity) return;
-
-      const manifest = await this.storageService.download(
-        jobEntity.manifestUrl,
-      );
-
-      if (!jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
-        jobEntity = await this.launchJob(jobEntity);
-      }
-      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHING) {
-        jobEntity = await this.fundJob(jobEntity);
-      }
-      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
-        if ((manifest as CvatManifestDto)?.annotation?.type) {
-          await this.webhookService.createWebhook({
-            escrowAddress: jobEntity.escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CREATED,
-            oracleType: OracleType.CVAT,
-            hasSignature: false,
-          });
+          jobEntity.retriesCount += 1;
+          await jobEntity.save();
         }
       }
     } catch (e) {
       this.logger.error(e);
       return;
     }
-    this.logger.log('Launch jobs STOP');
+
+    this.logger.log('Create escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async setupEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.SetupEscrow,
+    );
+
+    if (isCronJobRunning) {
+      this.logger.log('Previous cron job is not completed yet');
+      return;
+    }
+
+    this.logger.log('Setup escrow START');
+    const cronJob = await this.cronJobService.createCronJob(
+      CronJobType.SetupEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.LAUNCHING,
+          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.setupEscrow(jobEntity);
+        } catch (err) {
+          this.logger.error(`Error setting up escrow: ${err.message}`);
+
+          jobEntity.retriesCount += 1;
+          await jobEntity.save();
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      return;
+    }
+
+    this.logger.log('Setup escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async fundEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.FundEscrow,
+    );
+
+    if (isCronJobRunning) {
+      this.logger.log('Previous cron job is not completed yet');
+      return;
+    }
+
+    this.logger.log('Fund escrow START');
+    const cronJob = await this.cronJobService.createCronJob(
+      CronJobType.FundEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.FUNDING,
+          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.fundEscrow(jobEntity);
+
+          const manifest = await this.storageService.download(
+            jobEntity.manifestUrl,
+          );
+
+          if ((manifest as CvatManifestDto)?.annotation?.type) {
+            await this.webhookService.createWebhook({
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CREATED,
+              oracleType: OracleType.CVAT,
+              hasSignature: false,
+            });
+          }
+        } catch (err) {
+          this.logger.error(`Error funding escrow: ${err.message}`);
+
+          jobEntity.retriesCount += 1;
+          await jobEntity.save();
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+      return;
+    }
+
+    this.logger.log('Fund escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)

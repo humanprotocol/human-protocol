@@ -1,0 +1,157 @@
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { CronJobType } from '../../common/enums/cron-job';
+
+import { CronJobService } from './cron-job.service';
+import { CronJobRepository } from './cron-job.repository';
+import { CronJobEntity } from './cron-job.entity';
+import { createMock } from '@golevelup/ts-jest';
+
+describe('CronJobService', () => {
+  let service: CronJobService;
+  let repository: CronJobRepository;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        CronJobService,
+        {
+          provide: CronJobRepository,
+          useValue: createMock<CronJobRepository>(),
+        },
+      ],
+    }).compile();
+
+    service = module.get<CronJobService>(CronJobService);
+    repository = module.get<CronJobRepository>(CronJobRepository);
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  describe('createCronJob', () => {
+    it('should create a cron job', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+
+      const createSpy = jest
+        .spyOn(repository, 'create')
+        .mockResolvedValue(cronJobEntity);
+
+      const result = await service.createCronJob(cronJobType);
+
+      expect(createSpy).toHaveBeenCalledWith(cronJobType);
+      expect(result).toEqual(cronJobEntity);
+    });
+  });
+
+  describe('isCronJobRunning', () => {
+    it('should return false if no cron job is running', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+
+      const findOneSpy = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(null);
+
+      const result = await service.isCronJobRunning(cronJobType);
+
+      expect(findOneSpy).toHaveBeenCalledWith(
+        {
+          cronJobType,
+        },
+        {
+          order: {
+            createdAt: 'DESC',
+          },
+        },
+      );
+      expect(result).toEqual(false);
+    });
+
+    it('should return false if last cron job is completed', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+      cronJobEntity.completedAt = new Date();
+
+      const findOneSpy = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(cronJobEntity);
+
+      const result = await service.isCronJobRunning(cronJobType);
+
+      expect(findOneSpy).toHaveBeenCalledWith(
+        {
+          cronJobType,
+        },
+        {
+          order: {
+            createdAt: 'DESC',
+          },
+        },
+      );
+      expect(result).toEqual(false);
+    });
+
+    it('should return true if last cron job is not completed', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+
+      const findOneSpy = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(cronJobEntity);
+
+      const result = await service.isCronJobRunning(cronJobType);
+      expect(findOneSpy).toHaveBeenCalledWith(
+        {
+          cronJobType,
+        },
+        {
+          order: {
+            createdAt: 'DESC',
+          },
+        },
+      );
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('completeCronJob', () => {
+    it('should complete a cron job', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+
+      const completedAt = new Date();
+
+      const saveSpy = jest
+        .spyOn(cronJobEntity, 'save')
+        .mockResolvedValue(cronJobEntity);
+
+      const result = await service.completeCronJob(cronJobEntity);
+
+      expect(saveSpy).toHaveBeenCalled();
+      expect(cronJobEntity.completedAt).toEqual(completedAt);
+      expect(result).toEqual(cronJobEntity);
+    });
+
+    it('should throw an error if cron job is already completed', async () => {
+      const cronJobType = CronJobType.CreateEscrow;
+      const cronJobEntity = new CronJobEntity();
+      cronJobEntity.cronJobType = cronJobType;
+      cronJobEntity.completedAt = new Date();
+
+      const saveSpy = jest
+        .spyOn(cronJobEntity, 'save')
+        .mockResolvedValue(cronJobEntity);
+
+      await expect(service.completeCronJob(cronJobEntity)).rejects.toThrow();
+      expect(saveSpy).not.toHaveBeenCalled();
+    });
+  });
+});
