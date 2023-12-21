@@ -1,5 +1,4 @@
 import AddIcon from '@mui/icons-material/Add';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudIcon from '@mui/icons-material/Cloud';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -18,53 +17,22 @@ import {
   TextField,
   Tooltip,
 } from '@mui/material';
-import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
-import MuiAccordionDetails from '@mui/material/AccordionDetails';
-import MuiAccordionSummary, {
-  AccordionSummaryProps,
-} from '@mui/material/AccordionSummary';
-import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '../../../components/Accordion';
 import { CollectionsFilledIcon } from '../../../components/Icons/CollectionsFilledIcon';
 import languages from '../../../data/languages.json';
 import locations from '../../../data/locations.json';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { HCaptchaJobType } from '../../../types';
 import { HCaptchaJobRequesteValidationSchema } from './schema';
-
-const Accordion = styled((props: AccordionProps) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({ theme }) => ({
-  marginBottom: '42px',
-  '&:not(:last-child)': {
-    borderBottom: 0,
-  },
-  '&:before': {
-    display: 'none',
-  },
-}));
-
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
-  <MuiAccordionSummary
-    expandIcon={<ArrowDropDownIcon sx={{ fontSize: '2rem' }} color="primary" />}
-    {...props}
-  />
-))(({ theme }) => ({
-  backgroundColor: `rgba(20, 6, 178, 0.08)`,
-  borderRadius: '12px',
-  padding: '8px 32px',
-  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-    transform: 'rotate(180deg)',
-  },
-}));
-
-const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-  padding: '42px 0px 22px',
-}));
 
 export const HCaptchaJobRequestForm = () => {
   const { jobRequest, updateJobRequest, goToPrevStep, goToNextStep } =
@@ -309,10 +277,7 @@ export const HCaptchaJobRequestForm = () => {
           expanded={expanded === 'panel2'}
           onChange={handleChange('panel2')}
         >
-          <AccordionSummary
-            aria-controls="panel2d -content"
-            id="panel2d-header"
-          >
+          <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
             <CollectionsFilledIcon />
             <Typography variant="body2" fontWeight={700} ml={2}>
               Job annotation details

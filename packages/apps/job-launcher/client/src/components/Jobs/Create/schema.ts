@@ -3,10 +3,14 @@ import * as Yup from 'yup';
 export const CvatJobRequestValidationSchema = Yup.object().shape({
   labels: Yup.array().of(Yup.string()).min(1, 'At least one label is required'),
   description: Yup.string().required('Description is required'),
-  dataUrl: Yup.string().required('Data URL is required').url('Invalid URL'),
-  groundTruthUrl: Yup.string()
-    .required('Ground Truth URL is required')
-    .url('Invalid URL'),
+  dataProvider: Yup.string().required('Data provider is required'),
+  dataRegion: Yup.string().required('Data region is required'),
+  dataBucketName: Yup.string().required('Data bucket name is required'),
+  dataPath: Yup.string().required('Data path is required'),
+  gtProvider: Yup.string().required('Ground truth provider is required'),
+  gtRegion: Yup.string().required('Ground truth region is required'),
+  gtBucketName: Yup.string().required('Ground truth bucket name is required'),
+  gtPath: Yup.string().required('Ground truth path is required'),
   userGuide: Yup.string()
     .required('User Guide URL is required')
     .url('Invalid URL'),
