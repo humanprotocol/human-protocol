@@ -163,9 +163,9 @@ export class JobService {
     jobType: JobCaptchaShapeType,
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
-    const objectsInBucket = await this.storageService.listObjectsInBucket(
-      jobDto.dataUrl,
-    );
+    const dataUrl = generateBucketUrl(jobDto.data);
+    const objectsInBucket =
+      await this.storageService.listObjectsInBucket(dataUrl);
 
     const commonManifestProperties = {
       job_mode: JobCaptchaMode.BATCH,
@@ -180,7 +180,7 @@ export class JobService {
       job_total_tasks: objectsInBucket.length,
       task_bid_price: jobDto.annotations.taskBidPrice,
       taskdata_uri: await this.generateAndUploadTaskData(
-        jobDto.dataUrl,
+        dataUrl,
         objectsInBucket,
       ),
       public_results: true,
@@ -414,7 +414,7 @@ export class JobService {
       // hCaptcha
       dto = dto as JobCaptchaDto;
       const objectsInBucket = await this.storageService.listObjectsInBucket(
-        dto.dataUrl,
+        generateBucketUrl(dto.data),
       );
       fundAmount = div(
         dto.annotations.taskBidPrice * objectsInBucket.length,
@@ -448,7 +448,6 @@ export class JobService {
     if (requestType === JobRequestType.HCAPTCHA) {
       // hCaptcha
       dto = dto as JobCaptchaDto;
-      dto.dataUrl = dto.dataUrl.replace(/\/$/, '');
       manifestOrigin = await this.createHCaptchaManifest(
         dto.annotations.typeOfJob,
         dto,
@@ -567,7 +566,6 @@ export class JobService {
 
     let recordingOracleConfigKey;
     let exchangeOracleConfigKey;
-    let trustedHandlers;
 
     if (
       (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE

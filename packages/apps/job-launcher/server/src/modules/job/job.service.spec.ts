@@ -485,8 +485,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.COMPARISON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -540,8 +540,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.CATEGORIZATION;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -613,8 +613,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -687,8 +687,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POINT;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -759,8 +759,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.BOUNDING_BOX;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -823,8 +823,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -1164,7 +1164,7 @@ describe('JobService', () => {
     const jobId = 123;
 
     const hCaptchaJobDto: JobCaptchaDto = {
-      dataUrl: MOCK_FILE_URL,
+      data: MOCK_STORAGE_DATA,
       accuracyTarget: 0.9,
       completionDate: new Date(),
       minRequests: 1,

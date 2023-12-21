@@ -3,20 +3,22 @@ import { StorageDataDto } from '../../modules/job/job.dto';
 import { AWSRegions, StorageProviders } from '../enums/storage';
 import { ErrorBucket } from '../constants/errors';
 
-export function generateBucketUrl(s3Data: StorageDataDto): string {
-  if (!s3Data.bucketName) {
+export function generateBucketUrl(storageData: StorageDataDto): string {
+  if (!storageData.bucketName) {
     throw new BadRequestException(ErrorBucket.EmptyBucket);
   }
-  switch (s3Data.provider) {
+  switch (storageData.provider) {
     case StorageProviders.AWS:
-      if (!s3Data.region) {
+      if (!storageData.region) {
         throw new BadRequestException(ErrorBucket.EmptyRegion);
       }
-      if (!isRegion(s3Data.region)) {
+      if (!isRegion(storageData.region)) {
         throw new BadRequestException(ErrorBucket.InvalidRegion);
       }
-      return `https://${s3Data.bucketName}.s3.${s3Data.region}.amazonaws.com${
-        s3Data.path ? `/${s3Data.path}` : ''
+      return `https://${storageData.bucketName}.s3.${
+        storageData.region
+      }.amazonaws.com${
+        storageData.path ? `/${storageData.path.replace(/\/$/, '')}` : ''
       }`;
     // case StorageProviders.GCS:
     //   return `https://${s3Data.bucketName}.storage.googleapis.com${

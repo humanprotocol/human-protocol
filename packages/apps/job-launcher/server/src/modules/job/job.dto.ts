@@ -565,7 +565,7 @@ export class JobCaptchaAnnotationsDto {
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
   @IsUrl()
-  dataUrl: string;
+  data: StorageDataDto;
 
   @ApiProperty()
   @IsNumber()
