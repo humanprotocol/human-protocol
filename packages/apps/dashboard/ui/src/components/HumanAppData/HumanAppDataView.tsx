@@ -81,7 +81,7 @@ export const HumanAppDataView: FC = () => {
   const getTooltipTitle = (button: ViewButton) => {
     switch (button) {
       case ViewButton.Tasks:
-        return TOOLTIPS.TASKS;
+        return TOOLTIPS.SOLVED_TASKS;
       case ViewButton.Payments:
         return TOOLTIPS.PAYMENTS;
       case ViewButton.Transactions:

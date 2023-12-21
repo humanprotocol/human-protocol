@@ -41,7 +41,7 @@ export const TasksView = () => {
       }
       title="Tasks"
     >
-      <TooltipIcon title={TOOLTIPS.TASKS} />
+      <TooltipIcon title={TOOLTIPS.SOLVED_TASKS} />
     </ChartContainer>
   );
 };
