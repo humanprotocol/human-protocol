@@ -20,6 +20,7 @@ export const CreateJob = () => {
     if (payMethod === PayMethod.Crypto && chainId !== chain?.id) {
       switchNetworkAsync?.(chainId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payMethod, chainId]);
 
   return (

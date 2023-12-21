@@ -2,7 +2,7 @@ import axios from 'axios';
 import { parseString } from 'xml2js';
 
 export const listObjectsInBucket = async (
-  bucketUrl: string
+  bucketUrl: string,
 ): Promise<string[]> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -15,7 +15,7 @@ export const listObjectsInBucket = async (
           }
 
           const objectKeys = result.ListBucketResult.Contents.map(
-            (item: any) => item.Key
+            (item: any) => item.Key,
           );
           resolve(objectKeys.flat());
         });

@@ -3,12 +3,13 @@
 import * as fs from 'fs';
 import path from 'path';
 import react from '@vitejs/plugin-react';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import generateMerkleTree from './scripts/generateMerkleTree';
 
 dotenv.config();
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   return {

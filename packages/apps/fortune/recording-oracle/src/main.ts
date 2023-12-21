@@ -56,6 +56,7 @@ async function bootstrap() {
   app.use(helmet());
 
   await app.listen(port, host, async () => {
+    // eslint-disable-next-line no-console
     console.info(`API server is running on http://${host}:${port}`);
   });
 }

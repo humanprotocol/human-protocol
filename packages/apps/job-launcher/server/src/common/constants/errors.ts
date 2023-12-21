@@ -14,6 +14,9 @@ export enum ErrorJob {
   InvalidEventType = 'Invalid event type',
   InvalidStatusCancellation = 'Job has an invalid status for cancellation',
   NotLaunched = 'Not launched',
+  TaskDataNotFound = 'Task data not found',
+  HCaptchaInvalidJobType = 'hCaptcha invalid job type',
+  GroundThuthValidationFailed = 'Ground thuth validation failed',
 }
 
 /**
@@ -104,6 +107,7 @@ export enum ErrorBucket {
   EmptyRegion = 'Region cannot be empty for this storage provider',
   InvalidRegion = 'Invalid region for the storage provider',
   EmptyBucket = 'bucketName cannot be empty',
+  FailedToFetchBucketContents = 'Failed to fetch bucket contents',
 }
 
 /**

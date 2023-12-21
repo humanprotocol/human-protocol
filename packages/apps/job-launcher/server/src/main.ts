@@ -18,10 +18,10 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>(
-    ConfigNames.FE_URL,
-    'http://localhost:3005',
-  );
+  // const baseUrl = configService.get<string>(
+  //   ConfigNames.FE_URL,
+  //   'http://localhost:3005',
+  // );
 
   // app.enableCors({
   //   origin:

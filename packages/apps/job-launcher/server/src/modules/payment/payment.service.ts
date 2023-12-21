@@ -48,20 +48,24 @@ export class PaymentService {
     private configService: ConfigService,
   ) {
     this.stripe = new Stripe(
-      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
+      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY, ''),
       {
         apiVersion: this.configService.get<any>(
           ConfigNames.STRIPE_API_VERSION,
-        )!,
+          '',
+        ),
         appInfo: {
           name: this.configService.get<string>(
             ConfigNames.STRIPE_APP_NAME,
             'Fortune',
-          )!,
+          ),
           version: this.configService.get<string>(
             ConfigNames.STRIPE_APP_VERSION,
-          )!,
-          url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
+          ),
+          url: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_INFO_URL,
+            '',
+          ),
         },
       },
     );

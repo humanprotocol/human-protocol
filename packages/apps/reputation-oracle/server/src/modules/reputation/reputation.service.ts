@@ -20,11 +20,13 @@ export class ReputationService {
   public getReputationLevel(reputationPoints: number): ReputationLevel {
     const reputationLevelLow = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_LOW,
-    )!;
+      300,
+    );
 
     const reputationLevelHigh = this.configService.get<number>(
       ConfigNames.REPUTATION_LEVEL_HIGH,
-    )!;
+      700,
+    );
 
     if (reputationPoints <= reputationLevelLow) {
       return ReputationLevel.LOW;

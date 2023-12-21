@@ -71,6 +71,7 @@ export const AuthHeader = () => {
         await authServices.signOut(refreshToken);
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.log(err);
     }
     dispatch(signOut());

@@ -2064,9 +2064,8 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero
       );
 
-      const exchangeOracleAddress = await escrowClient.getExchangeOracleAddress(
-        escrowAddress
-      );
+      const exchangeOracleAddress =
+        await escrowClient.getExchangeOracleAddress(escrowAddress);
 
       expect(exchangeOracleAddress).toEqual(ethers.constants.AddressZero);
       expect(escrowClient.escrowContract.exchangeOracle).toHaveBeenCalledWith();
@@ -2115,9 +2114,8 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero
       );
 
-      const jobLauncherAddress = await escrowClient.getJobLauncherAddress(
-        escrowAddress
-      );
+      const jobLauncherAddress =
+        await escrowClient.getJobLauncherAddress(escrowAddress);
 
       expect(jobLauncherAddress).toEqual(ethers.constants.AddressZero);
       expect(escrowClient.escrowContract.launcher).toHaveBeenCalledWith();
@@ -2164,9 +2162,8 @@ describe('EscrowClient', () => {
         ethers.constants.AddressZero
       );
 
-      const escrowFactoryAddress = await escrowClient.getFactoryAddress(
-        escrowAddress
-      );
+      const escrowFactoryAddress =
+        await escrowClient.getFactoryAddress(escrowAddress);
 
       expect(escrowFactoryAddress).toEqual(ethers.constants.AddressZero);
       expect(escrowClient.escrowContract.escrowFactory).toHaveBeenCalledWith();

@@ -26,10 +26,11 @@ export const CreateJobView = () => {
           jobType === 'fortune'
             ? JobType.Fortune
             : jobType === 'cvat'
-            ? JobType.CVAT
-            : JobType.HCAPTCHA,
+              ? JobType.CVAT
+              : JobType.HCAPTCHA,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

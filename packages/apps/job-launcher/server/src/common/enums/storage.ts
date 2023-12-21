@@ -79,3 +79,13 @@ export enum GCSRegions {
   US_WEST3 = 'us-west3', // Salt Lake City
   US_WEST4 = 'us-west4', // Las Vegas
 }
+
+export enum ContentType {
+  TEXT_PLAIN = 'text/plain',
+  APPLICATION_JSON = 'application/json',
+}
+
+export enum Extension {
+  JSON = '.json',
+  ZIP = '.zip',
+}

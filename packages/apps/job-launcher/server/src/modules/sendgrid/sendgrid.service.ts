@@ -18,7 +18,8 @@ export class SendGridService {
   ) {
     const apiKey = this.configService.get<string>(
       ConfigNames.SENDGRID_API_KEY,
-    )!;
+      '',
+    );
 
     if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
       throw new Error(ErrorSendGrid.InvalidApiKey);
@@ -28,10 +29,12 @@ export class SendGridService {
 
     this.defaultFromEmail = this.configService.get<string>(
       ConfigNames.SENDGRID_FROM_EMAIL,
-    )!;
+      '',
+    );
     this.defaultFromName = this.configService.get<string>(
       ConfigNames.SENDGRID_FROM_NAME,
-    )!;
+      '',
+    );
   }
 
   async sendEmail({
