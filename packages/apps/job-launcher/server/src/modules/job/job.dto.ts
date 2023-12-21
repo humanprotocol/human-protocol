@@ -33,6 +33,7 @@ import {
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
+import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
@@ -101,14 +102,30 @@ export class JobFortuneDto extends JobDto {
   public fundAmount: number;
 }
 
+export class StorageDataDto {
+  @ApiProperty({ enum: StorageProviders })
+  @IsEnum(StorageProviders)
+  public provider: StorageProviders;
+  @ApiProperty({ enum: AWSRegions })
+  @IsEnum(AWSRegions)
+  public region: AWSRegions | null;
+  @ApiProperty()
+  @IsString()
+  public bucketName: string;
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  public path: string;
+}
+
 export class JobCvatDto extends JobDto {
   @ApiProperty()
   @IsString()
   public requesterDescription: string;
 
   @ApiProperty()
-  @IsUrl()
-  public dataUrl: string;
+  @IsObject()
+  public data: StorageDataDto;
 
   @ApiProperty()
   @IsArray()
@@ -121,8 +138,8 @@ export class JobCvatDto extends JobDto {
   public minQuality: number;
 
   @ApiProperty()
-  @IsString()
-  public gtUrl: string;
+  @IsObject()
+  public groundTruth: StorageDataDto;
 
   @ApiProperty()
   @IsUrl()
@@ -548,7 +565,7 @@ export class JobCaptchaAnnotationsDto {
 export class JobCaptchaDto extends JobDto {
   @ApiProperty()
   @IsUrl()
-  dataUrl: string;
+  data: StorageDataDto;
 
   @ApiProperty()
   @IsNumber()
