@@ -56,7 +56,7 @@ async function main() {
     'Reward Pool Implementation Address: ',
     await upgrades.erc1967.getImplementationAddress(rewardPoolContract.address)
   );
-
+  
   // Configure RewardPool in Staking
   await stakingContract.setRewardPool(rewardPoolContract.address);
 }
