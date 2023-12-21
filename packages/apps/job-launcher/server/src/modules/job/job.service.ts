@@ -24,7 +24,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
-import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
   ErrorEscrow,
@@ -927,8 +927,7 @@ export class JobService {
     try {
       const jobEntities = await this.jobRepository.find(
         {
-          status: JobStatus.PAID,
-          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          status: In([JobStatus.PAID, JobStatus.CREATING]),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -939,6 +938,12 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
+        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
+          jobEntity.status = JobStatus.FAILED;
+          await jobEntity.save();
+          continue;
+        }
+
         try {
           await this.createEscrow(jobEntity);
         } catch (err) {
@@ -977,7 +982,6 @@ export class JobService {
       const jobEntities = await this.jobRepository.find(
         {
           status: JobStatus.LAUNCHING,
-          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -988,6 +992,12 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
+        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
+          jobEntity.status = JobStatus.FAILED;
+          await jobEntity.save();
+          continue;
+        }
+
         try {
           await this.setupEscrow(jobEntity);
         } catch (err) {
@@ -1026,7 +1036,6 @@ export class JobService {
       const jobEntities = await this.jobRepository.find(
         {
           status: JobStatus.FUNDING,
-          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -1037,6 +1046,12 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
+        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
+          jobEntity.status = JobStatus.FAILED;
+          await jobEntity.save();
+          continue;
+        }
+
         try {
           await this.fundEscrow(jobEntity);
 
