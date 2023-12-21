@@ -4,6 +4,7 @@ from string import ascii_letters, punctuation
 from typing import List
 from uuid import uuid4
 
+import jwt
 from doccano_client.exceptions import DoccanoAPIError
 from fastapi import APIRouter, HTTPException, Header
 from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
@@ -20,7 +21,6 @@ from src.chain import (
     EscrowInfo,
     validate_escrow,
     validate_job_launcher_signature,
-    validate_human_app_signature,
     EventType,
 )
 from src.config import Config
@@ -30,9 +30,7 @@ from src.db import (
     Statuses,
     Worker,
     AnnotationProject,
-    stage_success,
 )
-from src.storage import download_manifest
 
 logger = Config.logging.get_logger()
 router = APIRouter()
@@ -51,6 +49,7 @@ class Errors:
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         detail="Address is not a valid address.",
     )
+    AUTH_SIGNATURE_INVALID = HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
     ESCROW_INFO_INVALID = HTTPException(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         detail="Escrow info contains invalid information.",
@@ -62,6 +61,9 @@ class Errors:
     ESCROW_VALIDATION_FAILED = HTTPException(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Escrow invalid."
     )
+    INVALID_REQUEST = HTTPException(status_code=HTTPStatus.BAD_REQUEST)
+    INVALID_TOKEN = HTTPException(HTTPStatus.UNAUTHORIZED)
+    INSUFFICIENT_SCOPE = HTTPException(HTTPStatus.FORBIDDEN)
     JOB_OR_WORKER_MISSING = HTTPException(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         detail="Could not register worker for job.",
@@ -69,7 +71,7 @@ class Errors:
     JOB_UNAVAILABLE = HTTPException(
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Job is not available."
     )
-    NOTHING_FOUND = HTTPException(status_code=HTTPStatus.NOT_FOUND)
+    NOT_FOUND = HTTPException(status_code=HTTPStatus.NOT_FOUND)
     TASKS_UNAVAILABLE = HTTPException(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         detail="No tasks available for worker.",
@@ -93,8 +95,41 @@ class Errors:
         status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
         detail="Worker could not be verified.",
     )
-    SIGNATURE_INVALID = HTTPException(status_code=HTTPStatus.UNAUTHORIZED)
     REQUEST_FAILED = HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
+
+
+def authenticate(bearer_token: str, key: str = Config.human.reputation_oracle_key):
+    try:
+        scheme, token = bearer_token.split()
+    except ValueError:
+        logger.error(f"Authentication request used wrong scheme: {bearer_token}")
+        raise Errors.INVALID_REQUEST
+
+    if scheme != "Bearer":
+        logger.error(f"Authentication request used wrong scheme: {scheme}")
+        raise Errors.INVALID_REQUEST
+
+    try:
+        claimset = jwt.decode(token, key, algorithms=["HS256"])
+    except jwt.DecodeError:
+        logger.exception(f"Token validation failed for {token}")
+        raise Errors.INVALID_TOKEN
+    except jwt.ExpiredSignatureError:
+        logger.exception(f"Token {token} expired.")
+        raise Errors.INVALID_TOKEN
+
+    if not all(key in claimset for key in ["email", "address", "kycStatus"]):
+        logger.error(f"claimset {claimset} missing required keys.")
+        raise Errors.INVALID_TOKEN
+
+    kyc_status = claimset["kycStatus"]
+    if kyc_status != "APPROVED":
+        logger.error(
+            f"User {claimset['email']} is not fully kyced. Current status: {kyc_status}"
+        )
+        raise Errors.INVALID_TOKEN
+
+    return claimset
 
 
 @router.post(Endpoints.JOB_REQUEST)
@@ -129,7 +164,7 @@ async def register_job_request(
     )
     if not signature_valid:
         logger.error(f"Signature invalid for {escrow_info} with signature {signature}")
-        raise Errors.SIGNATURE_INVALID
+        raise Errors.AUTH_SIGNATURE_INVALID
 
     match escrow_info.event_type:
         # add new job
@@ -163,16 +198,11 @@ async def register_job_request(
 
 
 @router.get(Endpoints.JOB_LIST)
-async def list_available_jobs(
-    chainId: int,
-    signature: str = Header(description="Calling service signature"),
-):
+async def list_available_jobs(chainId: int, authorization: str = Header()):
     """Lists available jobs."""
     logger.debug(f"GET {Endpoints.JOB_LIST}?chainId={chainId} called.")
 
-    if not validate_human_app_signature(signature):
-        logger.exception("Invalid signature.")
-        raise Errors.SIGNATURE_INVALID
+    authenticate(authorization)
 
     with Session() as session:
         return [
@@ -187,15 +217,11 @@ async def list_available_jobs(
 
 
 @router.get(Endpoints.JOB_DETAIL)
-async def job_details(
-    jobId: str, signature: str = Header(description="Calling service signature")
-):
+async def job_details(jobId: str, authorization: str = Header()):
     """Returns job details for the requested job."""
     logger.info(f"GET {Endpoints.JOB_DETAIL} called with {jobId}.")
 
-    if not validate_human_app_signature(signature):
-        logger.exception("Invalid signature.")
-        raise Errors.SIGNATURE_INVALID
+    authenticate(authorization)
 
     with Session() as session:
         try:
@@ -216,74 +242,67 @@ async def job_details(
             }
         except NoResultFound:
             logger.exception(f"No result found for requested job {jobId}.")
-            raise Errors.NOTHING_FOUND
+            raise Errors.NOT_FOUND
 
 
 @router.post(Endpoints.USER_REGISTER)
 async def register_worker(
-    user_info: UserRegistrationInfo,
-    signature: str = Header(description="Calling service signature"),
+    authorization: str = Header(description="Calling service signature"),
 ):
     """Registers a new user with the given wallet address."""
-    logger.info(f"POST {Endpoints.USER_REGISTER} called with {user_info}.")
+    logger.info(f"POST {Endpoints.USER_REGISTER} called.")
 
-    if not validate_human_app_signature(signature):
-        logger.exception("Invalid signature.")
-        raise Errors.SIGNATURE_INVALID
-
-    if not await validate_worker(user_info.worker_address):
-        logger.exception(Errors.WORKER_VALIDATION_FAILED.detail + f" {user_info}")
-        raise Errors.WORKER_VALIDATION_FAILED
+    payload = authenticate(authorization)
+    worker_address = payload["address"]
+    name = payload["email"]
 
     with Session() as session:
         # check if wallet is already registered
         if (
-            session.query(Worker)
-            .where(Worker.id == user_info.worker_address)
-            .one_or_none()
+            session.query(Worker).where(Worker.id == worker_address).one_or_none()
             is not None
         ):
-            logger.error(Errors.WORKER_ALREADY_REGISTERED.detail + f" {user_info}")
+            logger.error(Errors.WORKER_ALREADY_REGISTERED.detail + f" {worker_address}")
             raise Errors.WORKER_ALREADY_REGISTERED
 
         try:
             password = "".join(choices(ascii_letters + punctuation, k=16))
             worker = Worker(
-                id=user_info.worker_address,
+                id=worker_address,
                 password=password,
                 is_validated=True,
-                username=user_info.name,
+                username=name,
             )
-            create_user(user_info.name, worker.password)
+            create_user(name, worker.password)
             session.add(worker)
             session.commit()
         except DoccanoAPIError:
             session.rollback()
-            logger.exception(Errors.WORKER_CREATION_FAILED.detail + f" {user_info}")
+            logger.exception(Errors.WORKER_CREATION_FAILED.detail + f" {name}")
             raise Errors.WORKER_CREATION_FAILED
         except IntegrityError:
             session.rollback()
-            logger.exception(Errors.WORKER_CREATION_FAILED.detail + f" {user_info}")
+            logger.exception(
+                Errors.WORKER_CREATION_FAILED.detail + f"{worker_address} {name}"
+            )
             raise Errors.WORKER_CREATION_FAILED
 
-    logger.info(f"Successfully registered worker {user_info}")
-    return {"username": user_info.name, "password": password}
+    logger.info(f"Successfully registered worker {name}")
+    return {"username": name, "password": password}
 
 
 @router.post(Endpoints.JOB_APPLY)
 async def apply_for_job(
     job_application: JobApplication,
-    signature: str = Header(description="Calling service signature"),
+    authorization: str = Header(),
 ):
     """Applies the given worker for the job. Registers and validates them if necessary"""
     logger.info(f"POST {Endpoints.JOB_APPLY} called with {job_application}.")
 
-    worker_id = job_application.worker_id
-    job_id = job_application.job_id
+    payload = authenticate(authorization)
 
-    if not validate_human_app_signature(signature):
-        logger.error(f"Invalid signature: {signature}")
-        raise Errors.SIGNATURE_INVALID
+    worker_id = payload["address"]
+    job_id = job_application.jobId
 
     with Session() as session:
         # get worker and job, make sure they exist
@@ -299,15 +318,12 @@ async def apply_for_job(
             raise Errors.JOB_OR_WORKER_MISSING
 
         if not worker.is_validated:
-            logger.error(
-                Errors.WORKER_NOT_VALIDATED.detail + f" {job_application.worker_id}"
-            )
+            logger.error(Errors.WORKER_NOT_VALIDATED.detail + f" {worker_id}")
             raise Errors.WORKER_NOT_VALIDATED
 
         if job.status != Statuses.in_progress:
             logger.error(
-                Errors.JOB_UNAVAILABLE.detail
-                + f" {job_application.job_id}. Wrong status: {job.status}"
+                Errors.JOB_UNAVAILABLE.detail + f" {job_id}. Wrong status: {job.status}"
             )
             raise Errors.JOB_UNAVAILABLE
 

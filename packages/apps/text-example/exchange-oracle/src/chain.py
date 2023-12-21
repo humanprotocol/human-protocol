@@ -15,6 +15,8 @@ from web3 import Web3
 from web3.middleware import construct_sign_and_send_raw_middleware
 from web3.providers.rpc import HTTPProvider
 
+import jwt
+
 
 class EventType(str, Enum):
     ESCROW_CREATED = "escrow_created"
@@ -91,10 +93,6 @@ def validate_escrow(
         raise ValueError("Escrow doesn't have funds")
 
     return True
-
-
-def validate_human_app_signature(signature: str):
-    return signature == Config.human.human_app_signature
 
 
 async def validate_job_launcher_signature(

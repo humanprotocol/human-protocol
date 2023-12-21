@@ -16,8 +16,7 @@ EtheriumAddress = constr(
 
 
 class JobApplication(BaseModel):
-    worker_id: EtheriumAddress
-    job_id: str
+    jobId: str
 
 
 class UserRegistrationInfo(BaseModel):

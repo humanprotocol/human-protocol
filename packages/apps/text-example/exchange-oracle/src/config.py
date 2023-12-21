@@ -174,6 +174,7 @@ class HumanConfig:
     recording_oracle_url = os.environ.get("RECORDING_ORACLE_ENDPOINT_URL")
     human_app_signature = os.environ.get("HUMAN_APP_SIGNATURE")
     job_launcher_address = os.environ.get("JOB_LAUNCHER_ADDRESS")
+    reputation_oracle_key = os.environ.get("REPUTATION_ORACLE_KEY")
 
 
 class Config:
