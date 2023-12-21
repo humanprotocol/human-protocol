@@ -18,7 +18,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
-import { ErrorJob, ErrorWeb3 } from '../../common/constants/errors';
+import {
+  ErrorBucket,
+  ErrorJob,
+  ErrorWeb3,
+} from '../../common/constants/errors';
 import {
   PaymentSource,
   PaymentStatus,
@@ -61,6 +65,7 @@ import {
   MOCK_SUBMISSION_REQUIRED,
   MOCK_TRANSACTION_HASH,
   MOCK_USER_ID,
+  MOCK_STORAGE_DATA,
   MOCK_CVAT_JOB_SIZE,
   MOCK_CVAT_MAX_TIME,
   MOCK_CVAT_VAL_SIZE,
@@ -70,6 +75,7 @@ import {
   MOCK_HCAPTCHA_REPO_URI,
   MOCK_HCAPTCHA_RO_URI,
   MOCK_FILE_KEY,
+  MOCK_BUCKET_FILE,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
@@ -79,6 +85,7 @@ import {
   JobFortuneDto,
   JobCvatDto,
   JobDetailsDto,
+  StorageDataDto,
   JobCaptchaDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
@@ -100,6 +107,7 @@ import {
   HCAPTCHA_NOT_PRESENTED_LABEL,
 } from '../../common/constants';
 import { WebhookService } from '../webhook/webhook.service';
+import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 
 const rate = 1.5;
 jest.mock('@human-protocol/sdk', () => ({
@@ -416,13 +424,13 @@ describe('JobService', () => {
         .spyOn(jobService, 'calculateJobBounty')
         .mockResolvedValueOnce(jobBounty);
 
-      const dto = {
-        dataUrl: MOCK_FILE_URL,
+      const dto: JobCvatDto = {
+        data: MOCK_STORAGE_DATA,
         labels: ['label1', 'label2'],
         requesterDescription: MOCK_REQUESTER_DESCRIPTION,
         userGuide: MOCK_FILE_URL,
         minQuality: 0.8,
-        gtUrl: MOCK_FILE_URL,
+        groundTruth: MOCK_STORAGE_DATA,
         type: JobRequestType.IMAGE_BOXES,
         fundAmount: 10,
       };
@@ -438,7 +446,7 @@ describe('JobService', () => {
 
       expect(result).toEqual({
         data: {
-          data_url: MOCK_FILE_URL,
+          data_url: MOCK_BUCKET_FILE,
         },
         annotation: {
           labels: [{ name: 'label1' }, { name: 'label2' }],
@@ -451,7 +459,7 @@ describe('JobService', () => {
         validation: {
           min_quality: 0.8,
           val_size: 2,
-          gt_url: MOCK_FILE_URL,
+          gt_url: MOCK_BUCKET_FILE,
         },
         job_bounty: jobBounty,
       });
@@ -477,8 +485,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.COMPARISON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -532,8 +540,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.CATEGORIZATION;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -605,8 +613,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -679,8 +687,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POINT;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -751,8 +759,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.BOUNDING_BOX;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -815,8 +823,8 @@ describe('JobService', () => {
       jest.spyOn(storageService, 'download').mockResolvedValueOnce(fileContent);
 
       const jobType = JobCaptchaShapeType.POLYGON;
-      const jobDto = {
-        dataUrl: MOCK_FILE_URL,
+      const jobDto: JobCaptchaDto = {
+        data: MOCK_STORAGE_DATA,
         accuracyTarget: 0.9,
         minRequests: 1,
         maxRequests: 10,
@@ -858,12 +866,12 @@ describe('JobService', () => {
 
     const imageLabelBinaryJobDto: JobCvatDto = {
       chainId: MOCK_CHAIN_ID,
-      dataUrl: MOCK_FILE_URL,
+      data: MOCK_STORAGE_DATA,
       labels: ['cat', 'dog'],
       requesterDescription: MOCK_REQUESTER_DESCRIPTION,
       minQuality: 0.95,
       fundAmount: 10,
-      gtUrl: '',
+      groundTruth: MOCK_STORAGE_DATA,
       userGuide: MOCK_FILE_URL,
       type: JobRequestType.IMAGE_POINTS,
     };
@@ -933,7 +941,141 @@ describe('JobService', () => {
       });
     });
 
-    it('should create a job successfully on network selected from round robin logic', async () => {
+    it('should throw an error for invalid storage provider', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: StorageDataDto = {
+        provider: StorageProviders.GCS,
+        region: AWSRegions.EU_CENTRAL_1,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.InvalidProvider);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for invalid region', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        region: 'test-region',
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.InvalidRegion);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for empty region', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        bucketName: 'bucket',
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.EmptyRegion);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should throw an error for empty bucket', async () => {
+      const userBalance = 25;
+      getUserBalanceMock.mockResolvedValue(userBalance);
+
+      const storageDataMock: any = {
+        provider: StorageProviders.AWS,
+        region: AWSRegions.EU_CENTRAL_1,
+        path: 'folder/test',
+      };
+
+      const imageLabelBinaryJobDto: JobCvatDto = {
+        chainId: MOCK_CHAIN_ID,
+        data: storageDataMock,
+        labels: ['cat', 'dog'],
+        requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+        minQuality: 0.95,
+        fundAmount: 10,
+        groundTruth: storageDataMock,
+        userGuide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+      };
+
+      await expect(
+        jobService.createJob(
+          userId,
+          JobRequestType.IMAGE_POINTS,
+          imageLabelBinaryJobDto,
+        ),
+      ).rejects.toThrowError(ErrorBucket.EmptyBucket);
+
+      expect(paymentService.getUserBalance).toHaveBeenCalledWith(userId);
+    });
+
+    it('should create a fortune job successfully on network selected from round robin logic', async () => {
       const fundAmount = imageLabelBinaryJobDto.fundAmount;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
 
@@ -1022,7 +1164,7 @@ describe('JobService', () => {
     const jobId = 123;
 
     const hCaptchaJobDto: JobCaptchaDto = {
-      dataUrl: MOCK_FILE_URL,
+      data: MOCK_STORAGE_DATA,
       accuracyTarget: 0.9,
       completionDate: new Date(),
       minRequests: 1,

@@ -1,5 +1,6 @@
+import { AWSRegions, StorageProviders } from '../src/common/enums/storage';
 import { JobRequestType } from '../src/common/enums/job';
-import { FortuneManifestDto } from '../src/modules/job/job.dto';
+import { FortuneManifestDto, StorageDataDto } from '../src/modules/job/job.dto';
 
 export const MOCK_REQUESTER_TITLE = 'Mock job title';
 export const MOCK_REQUESTER_DESCRIPTION = 'Mock job description';
@@ -117,3 +118,11 @@ export const MOCK_HCAPTCHA_IMAGE_LABEL = 'cat';
 export const MOCK_HCAPTCHA_REPO_URI = 'http://recoracle:3000';
 export const MOCK_HCAPTCHA_RO_URI = 'http://recoracle:3000';
 export const MOCK_MAX_RETRY_COUNT = 5;
+export const MOCK_STORAGE_DATA: StorageDataDto = {
+  provider: StorageProviders.AWS,
+  region: AWSRegions.EU_CENTRAL_1,
+  bucketName: 'bucket',
+  path: 'folder/test',
+};
+export const MOCK_BUCKET_FILE =
+  'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
