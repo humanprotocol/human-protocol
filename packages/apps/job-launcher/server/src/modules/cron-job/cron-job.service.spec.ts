@@ -127,7 +127,10 @@ describe('CronJobService', () => {
       const cronJobEntity = new CronJobEntity();
       cronJobEntity.cronJobType = cronJobType;
 
-      const completedAt = new Date();
+      const mockDate = new Date(2023, 12, 23);
+
+      jest.useFakeTimers();
+      jest.setSystemTime(mockDate);
 
       const saveSpy = jest
         .spyOn(cronJobEntity, 'save')
@@ -136,8 +139,10 @@ describe('CronJobService', () => {
       const result = await service.completeCronJob(cronJobEntity);
 
       expect(saveSpy).toHaveBeenCalled();
-      expect(cronJobEntity.completedAt).toEqual(completedAt);
+      expect(cronJobEntity.completedAt).toEqual(mockDate);
       expect(result).toEqual(cronJobEntity);
+
+      jest.useRealTimers();
     });
 
     it('should throw an error if cron job is already completed', async () => {
