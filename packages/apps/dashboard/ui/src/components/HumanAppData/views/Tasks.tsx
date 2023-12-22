@@ -14,10 +14,11 @@ export const TasksView = () => {
 
   const seriesData = useMemo(() => {
     if (data) {
+      const multiplier = 9;
       const cumulativeDailyTasksData = [...data.dailyTasksData]
         .map((d) => ({
           date: d.timestamp,
-          value: Number(d.tasksSolved),
+          value: Number(d.tasksSolved) * multiplier,
         }))
         .reduce((acc, d) => {
           acc.push({
