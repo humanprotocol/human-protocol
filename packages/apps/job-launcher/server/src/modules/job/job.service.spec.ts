@@ -1322,9 +1322,6 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.CREATING;
-      expect(mockJobEntity.save).toHaveBeenCalled();
-
       mockJobEntity.status = JobStatus.LAUNCHING;
       mockJobEntity.escrowAddress = MOCK_ADDRESS;
       expect(jobEntityResult).toMatchObject(mockJobEntity);

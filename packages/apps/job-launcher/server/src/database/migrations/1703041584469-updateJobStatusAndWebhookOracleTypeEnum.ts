@@ -14,7 +14,6 @@ export class UpdateJobStatusAndWebhookOracleTypeEnum1703041584469
             CREATE TYPE "hmt"."jobs_status_enum" AS ENUM(
                 'PENDING',
                 'PAID',
-                'CREATING',
                 'LAUNCHING',
                 'FUNDING',
                 'LAUNCHED',

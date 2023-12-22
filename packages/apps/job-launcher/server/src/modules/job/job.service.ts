@@ -554,9 +554,6 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    jobEntity.status = JobStatus.CREATING;
-    await jobEntity.save();
-
     const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
@@ -931,7 +928,7 @@ export class JobService {
     try {
       const jobEntities = await this.jobRepository.find(
         {
-          status: In([JobStatus.PAID, JobStatus.CREATING]),
+          status: In([JobStatus.PAID]),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
