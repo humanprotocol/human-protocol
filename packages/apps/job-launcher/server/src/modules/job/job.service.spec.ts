@@ -161,6 +161,11 @@ jest.mock('../../common/utils', () => ({
   }),
 }));
 
+jest.mock('../../common/utils/storage', () => ({
+  ...jest.requireActual('../../common/utils/storage'),
+  listObjectsInBucket: jest.fn().mockImplementation(() => MOCK_BUCKET_FILES),
+}));
+
 describe('JobService', () => {
   let jobService: JobService,
     jobRepository: JobRepository,
@@ -406,9 +411,6 @@ describe('JobService', () => {
         .spyOn(paymentService, 'getUserBalance')
         .mockResolvedValue(userBalance);
 
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
       getUserBalanceMock.mockResolvedValue(userBalance);
 
       await expect(
@@ -479,12 +481,7 @@ describe('JobService', () => {
   });
 
   describe('createHCaptchaManifest', () => {
-    const listObjectsInBucket = ['example1.jpg', 'example2.jpg'];
-
     beforeEach(() => {
-      jest
-        .spyOn(storageService, 'listObjectsInBucket')
-        .mockResolvedValueOnce(listObjectsInBucket);
       jest
         .spyOn(jobService, 'generateAndUploadTaskData')
         .mockResolvedValueOnce(MOCK_FILE_URL);
@@ -506,7 +503,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
         },
         completionDate: new Date(),
@@ -531,7 +528,7 @@ describe('JobService', () => {
         requester_max_repeats: 10,
         requester_min_repeats: 1,
         requester_question: { en: MOCK_REQUESTER_DESCRIPTION },
-        job_total_tasks: 2,
+        job_total_tasks: 6,
         task_bid_price: 0.5,
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
@@ -541,7 +538,7 @@ describe('JobService', () => {
         request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
         groundtruth_uri: MOCK_FILE_URL,
         requester_restricted_answer_set: {},
-        requester_question_example: listObjectsInBucket,
+        requester_question_example: MOCK_BUCKET_FILES,
       });
     });
 
@@ -561,7 +558,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
         },
         completionDate: new Date(),
@@ -586,7 +583,7 @@ describe('JobService', () => {
         requester_max_repeats: 10,
         requester_min_repeats: 1,
         requester_question: { en: MOCK_REQUESTER_DESCRIPTION },
-        job_total_tasks: 2, // Mocked length of objectsInBucket
+        job_total_tasks: 6, // Mocked length
         task_bid_price: 0.5,
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
@@ -634,7 +631,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
           label: MOCK_HCAPTCHA_IMAGE_LABEL,
         },
@@ -668,7 +665,7 @@ describe('JobService', () => {
         requester_max_repeats: 10,
         requester_min_repeats: 1,
         requester_question: { en: MOCK_REQUESTER_DESCRIPTION },
-        job_total_tasks: 2, // Mocked length of objectsInBucket
+        job_total_tasks: 6, // Mocked length
         task_bid_price: 0.5,
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
@@ -680,7 +677,7 @@ describe('JobService', () => {
         requester_restricted_answer_set: {
           [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL },
         },
-        requester_question_example: listObjectsInBucket,
+        requester_question_example: MOCK_BUCKET_FILES,
       });
     });
 
@@ -708,7 +705,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
           label: MOCK_HCAPTCHA_IMAGE_LABEL,
         },
@@ -740,7 +737,7 @@ describe('JobService', () => {
         requester_max_repeats: 10,
         requester_min_repeats: 1,
         requester_question: { en: MOCK_REQUESTER_DESCRIPTION },
-        job_total_tasks: 2, // Mocked length of objectsInBucket
+        job_total_tasks: 6, // Mocked length
         task_bid_price: 0.5,
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
@@ -752,7 +749,7 @@ describe('JobService', () => {
         requester_restricted_answer_set: {
           [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL },
         },
-        requester_question_example: listObjectsInBucket,
+        requester_question_example: MOCK_BUCKET_FILES,
       });
     });
 
@@ -780,7 +777,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
           label: MOCK_HCAPTCHA_IMAGE_LABEL,
         },
@@ -812,7 +809,7 @@ describe('JobService', () => {
         requester_max_repeats: 10,
         requester_min_repeats: 1,
         requester_question: { en: MOCK_REQUESTER_DESCRIPTION },
-        job_total_tasks: 2, // Mocked length of objectsInBucket
+        job_total_tasks: 6, // Mocked length
         task_bid_price: 0.5,
         taskdata_uri: MOCK_FILE_URL,
         public_results: true,
@@ -824,7 +821,7 @@ describe('JobService', () => {
         requester_restricted_answer_set: {
           [MOCK_HCAPTCHA_IMAGE_LABEL]: { en: MOCK_HCAPTCHA_IMAGE_LABEL },
         },
-        requester_question_example: listObjectsInBucket,
+        requester_question_example: MOCK_BUCKET_FILES,
       });
     });
 
@@ -844,7 +841,7 @@ describe('JobService', () => {
           typeOfJob: jobType,
           labelingPrompt: MOCK_REQUESTER_DESCRIPTION,
           groundTruths: MOCK_FILE_URL,
-          exampleImages: listObjectsInBucket,
+          exampleImages: MOCK_BUCKET_FILES,
           taskBidPrice: 0.5,
         },
         completionDate: new Date(),
@@ -859,14 +856,8 @@ describe('JobService', () => {
 
   describe('calculateJobBounty', () => {
     it('should calculate the job bounty correctly', async () => {
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
       const tokenFundAmount = 0.013997056833333334;
-      const result = await jobService['calculateJobBounty'](
-        MOCK_FILE_URL,
-        tokenFundAmount,
-      );
+      const result = await jobService['calculateJobBounty'](6, tokenFundAmount);
 
       expect(result).toEqual('0.002332842805555555');
     });
@@ -905,9 +896,6 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       const mockJobEntity: Partial<JobEntity> = {
         id: jobId,
@@ -1093,9 +1081,6 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -1155,9 +1140,6 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 
@@ -1229,9 +1211,6 @@ describe('JobService', () => {
       };
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       await jobService.createJob(
         userId,
@@ -1271,9 +1250,6 @@ describe('JobService', () => {
 
       const userBalance = 25;
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest
         .spyOn(routingProtocolService, 'selectNetwork')
@@ -1305,9 +1281,6 @@ describe('JobService', () => {
         .mockResolvedValue(userBalance);
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       await expect(
         jobService.createJob(userId, JobRequestType.HCAPTCHA, hCaptchaJobDto),
@@ -1318,9 +1291,6 @@ describe('JobService', () => {
       const userBalance = 100;
 
       getUserBalanceMock.mockResolvedValue(userBalance);
-      storageService.listObjectsInBucket = jest
-        .fn()
-        .mockResolvedValue(MOCK_BUCKET_FILES);
 
       jest.spyOn(jobRepository, 'create').mockResolvedValue(undefined!);
 

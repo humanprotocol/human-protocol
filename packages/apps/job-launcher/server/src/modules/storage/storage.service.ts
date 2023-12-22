@@ -8,6 +8,9 @@ import { parseString } from 'xml2js';
 import stringify from 'json-stable-stringify';
 import { ContentType, Extension } from '../../common/enums/storage';
 import { UploadedFile } from '../../common/interfaces';
+import { generateBucketUrl } from '../../common/utils/storage';
+import { StorageDataDto } from '../job/job.dto';
+import { JobRequestType } from '../../common/enums/job';
 
 @Injectable()
 export class StorageService {
@@ -64,30 +67,5 @@ export class StorageService {
     } catch (e) {
       throw new BadRequestException('File not uploaded');
     }
-  }
-
-  public async listObjectsInBucket(bucketUrl: string): Promise<string[]> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await axios.get(bucketUrl);
-
-        if (response.status === 200 && response.data) {
-          parseString(response.data, (err: any, result: any) => {
-            if (err) {
-              reject(err);
-            }
-
-            const objectKeys = result.ListBucketResult.Contents.map(
-              (item: any) => item.Key,
-            );
-            resolve(objectKeys.flat());
-          });
-        } else {
-          reject(ErrorBucket.FailedToFetchBucketContents);
-        }
-      } catch (err) {
-        reject(err);
-      }
-    });
   }
 }

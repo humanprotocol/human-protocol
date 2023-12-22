@@ -71,6 +71,7 @@ import {
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   RestrictedAudience,
+  StorageDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -107,7 +108,10 @@ import stringify from 'json-stable-stringify';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CronJobService } from '../cron-job/cron-job.service';
 import { CronJobType } from '../../common/enums/cron-job';
-import { generateBucketUrl } from '../../common/utils/storage';
+import {
+  generateBucketUrl,
+  listObjectsInBucket,
+} from '../../common/utils/storage';
 
 @Injectable()
 export class JobService {
@@ -131,10 +135,11 @@ export class JobService {
     requestType: JobRequestType,
     tokenFundAmount: number,
   ): Promise<CvatManifestDto> {
-    const data_url = generateBucketUrl(dto.data);
+    const elementsCount = (await listObjectsInBucket(dto.data, requestType))
+      .length;
     return {
       data: {
-        data_url,
+        data_url: generateBucketUrl(dto.data, requestType),
       },
       annotation: {
         labels: dto.labels.map((item) => ({ name: item })),
@@ -153,9 +158,9 @@ export class JobService {
         val_size: Number(
           this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
         ),
-        gt_url: generateBucketUrl(dto.groundTruth),
+        gt_url: generateBucketUrl(dto.groundTruth, requestType),
       },
-      job_bounty: await this.calculateJobBounty(data_url, tokenFundAmount),
+      job_bounty: await this.calculateJobBounty(elementsCount, tokenFundAmount),
     };
   }
 
@@ -163,9 +168,11 @@ export class JobService {
     jobType: JobCaptchaShapeType,
     jobDto: JobCaptchaDto,
   ): Promise<HCaptchaManifestDto> {
-    const dataUrl = generateBucketUrl(jobDto.data);
-    const objectsInBucket =
-      await this.storageService.listObjectsInBucket(dataUrl);
+    const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
+    const objectsInBucket = await listObjectsInBucket(
+      jobDto.data,
+      JobRequestType.HCAPTCHA,
+    );
 
     const commonManifestProperties = {
       job_mode: JobCaptchaMode.BATCH,
@@ -413,8 +420,9 @@ export class JobService {
     if (requestType === JobRequestType.HCAPTCHA) {
       // hCaptcha
       dto = dto as JobCaptchaDto;
-      const objectsInBucket = await this.storageService.listObjectsInBucket(
-        generateBucketUrl(dto.data),
+      const objectsInBucket = await listObjectsInBucket(
+        dto.data,
+        JobRequestType.HCAPTCHA,
       );
       fundAmount = div(
         dto.annotations.taskBidPrice * objectsInBucket.length,
@@ -526,16 +534,12 @@ export class JobService {
   }
 
   public async calculateJobBounty(
-    endpointUrl: string,
+    elementsCount: number,
     fundAmount: number,
   ): Promise<string> {
-    const totalImages = (
-      await this.storageService.listObjectsInBucket(endpointUrl)
-    ).length;
-
     const totalJobs = Math.ceil(
       div(
-        totalImages,
+        elementsCount,
         Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
       ),
     );
