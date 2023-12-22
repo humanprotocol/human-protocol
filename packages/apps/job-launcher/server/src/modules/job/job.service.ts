@@ -77,7 +77,7 @@ import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import {
   CANCEL_JOB_STATUSES,
-  JOB_RETRIES_COUNT_THRESHOLD,
+  DEFAULT_MAX_RETRY_COUNT,
   HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
   HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
   HCAPTCHA_IMMO_MAX_LENGTH,
@@ -915,7 +915,6 @@ export class JobService {
     );
 
     if (isCronJobRunning) {
-      this.logger.log('Previous cron job is not completed yet');
       return;
     }
 
@@ -928,6 +927,12 @@ export class JobService {
       const jobEntities = await this.jobRepository.find(
         {
           status: In([JobStatus.PAID]),
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -938,24 +943,15 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
-        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
-          jobEntity.status = JobStatus.FAILED;
-          await jobEntity.save();
-          continue;
-        }
-
         try {
           await this.createEscrow(jobEntity);
         } catch (err) {
           this.logger.error(`Error creating escrow: ${err.message}`);
-
-          jobEntity.retriesCount += 1;
-          await jobEntity.save();
+          await this.handleProcessJobFailure(jobEntity);
         }
       }
     } catch (e) {
       this.logger.error(e);
-      return;
     }
 
     this.logger.log('Create escrow STOP');
@@ -969,7 +965,6 @@ export class JobService {
     );
 
     if (isCronJobRunning) {
-      this.logger.log('Previous cron job is not completed yet');
       return;
     }
 
@@ -982,6 +977,12 @@ export class JobService {
       const jobEntities = await this.jobRepository.find(
         {
           status: JobStatus.CREATED,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -992,24 +993,15 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
-        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
-          jobEntity.status = JobStatus.FAILED;
-          await jobEntity.save();
-          continue;
-        }
-
         try {
           await this.setupEscrow(jobEntity);
         } catch (err) {
           this.logger.error(`Error setting up escrow: ${err.message}`);
-
-          jobEntity.retriesCount += 1;
-          await jobEntity.save();
+          await this.handleProcessJobFailure(jobEntity);
         }
       }
     } catch (e) {
       this.logger.error(e);
-      return;
     }
 
     this.logger.log('Setup escrow STOP');
@@ -1023,7 +1015,6 @@ export class JobService {
     );
 
     if (isCronJobRunning) {
-      this.logger.log('Previous cron job is not completed yet');
       return;
     }
 
@@ -1036,6 +1027,12 @@ export class JobService {
       const jobEntities = await this.jobRepository.find(
         {
           status: JobStatus.SET_UP,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -1046,12 +1043,6 @@ export class JobService {
       );
 
       for (const jobEntity of jobEntities) {
-        if (jobEntity.retriesCount >= JOB_RETRIES_COUNT_THRESHOLD) {
-          jobEntity.status = JobStatus.FAILED;
-          await jobEntity.save();
-          continue;
-        }
-
         try {
           await this.fundEscrow(jobEntity);
 
@@ -1070,14 +1061,11 @@ export class JobService {
           }
         } catch (err) {
           this.logger.error(`Error funding escrow: ${err.message}`);
-
-          jobEntity.retriesCount += 1;
-          await jobEntity.save();
+          await this.handleProcessJobFailure(jobEntity);
         }
       }
     } catch (e) {
       this.logger.error(e);
-      return;
     }
 
     this.logger.log('Fund escrow STOP');
@@ -1086,57 +1074,102 @@ export class JobService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   public async cancelCronJob() {
-    this.logger.log('Cancel jobs START');
-    const jobEntity = await this.jobRepository.findOne(
-      {
-        status: JobStatus.TO_CANCEL,
-        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-        waitUntil: LessThanOrEqual(new Date()),
-      },
-      {
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      },
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.FundEscrow,
     );
-    if (!jobEntity) return;
 
-    if (jobEntity.escrowAddress) {
-      const { amountRefunded } =
-        await this.processEscrowCancellation(jobEntity);
-      await this.paymentService.createRefundPayment({
-        refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
-    } else {
-      await this.paymentService.createRefundPayment({
-        refundAmount: jobEntity.fundAmount,
-        userId: jobEntity.userId,
-        jobId: jobEntity.id,
-      });
-    }
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
-
-    const manifest = await this.storageService.download(jobEntity.manifestUrl);
-
-    const oracleType = this.getOracleType(manifest);
-    if (oracleType !== OracleType.HCAPTCHA) {
-      await this.webhookService.createWebhook({
-        escrowAddress: jobEntity.escrowAddress,
-        chainId: jobEntity.chainId,
-        eventType: EventType.ESCROW_CANCELED,
-        oracleType: this.getOracleType(manifest),
-        hasSignature:
-          (manifest as FortuneManifestDto).requestType ===
-          JobRequestType.FORTUNE,
-      });
+    if (isCronJobRunning) {
+      return;
     }
 
+    this.logger.log('Cancel jobs START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.CancelEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.TO_CANCEL,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          if (jobEntity.escrowAddress) {
+            const { amountRefunded } =
+              await this.processEscrowCancellation(jobEntity);
+            await this.paymentService.createRefundPayment({
+              refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
+              userId: jobEntity.userId,
+              jobId: jobEntity.id,
+            });
+          } else {
+            await this.paymentService.createRefundPayment({
+              refundAmount: jobEntity.fundAmount,
+              userId: jobEntity.userId,
+              jobId: jobEntity.id,
+            });
+          }
+          jobEntity.status = JobStatus.CANCELED;
+          await jobEntity.save();
+
+          const manifest = await this.storageService.download(
+            jobEntity.manifestUrl,
+          );
+
+          const oracleType = this.getOracleType(manifest);
+          if (oracleType !== OracleType.HCAPTCHA) {
+            await this.webhookService.createWebhook({
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CANCELED,
+              oracleType: this.getOracleType(manifest),
+              hasSignature:
+                (manifest as FortuneManifestDto).requestType ===
+                JobRequestType.FORTUNE,
+            });
+          }
+        } catch (err) {
+          this.logger.error(`Error canceling escrow: ${err.message}`);
+          await this.handleProcessJobFailure(jobEntity);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+    await this.cronJobService.completeCronJob(cronJob);
     this.logger.log('Cancel jobs STOP');
     return true;
   }
+
+  private handleProcessJobFailure = async (jobEntity: JobEntity) => {
+    if (
+      jobEntity.retriesCount <
+      this.configService.get(
+        ConfigNames.MAX_RETRY_COUNT,
+        DEFAULT_MAX_RETRY_COUNT,
+      )
+    ) {
+      jobEntity.retriesCount += 1;
+    } else {
+      jobEntity.status = JobStatus.FAILED;
+    }
+
+    await jobEntity.save();
+  };
 
   private getOracleType(manifest: any): OracleType {
     if (

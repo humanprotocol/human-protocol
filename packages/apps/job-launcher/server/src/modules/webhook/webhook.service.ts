@@ -14,14 +14,18 @@ import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
 import { CVATWebhookDto, FortuneWebhookDto } from '../job/job.dto';
 import { firstValueFrom } from 'rxjs';
-import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import {
+  DEFAULT_MAX_RETRY_COUNT,
+  HEADER_SIGNATURE_KEY,
+} from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
 import { OracleType, WebhookStatus } from '../../common/enums/webhook';
 import { ErrorWebhook } from '../../common/constants/errors';
-import { SortDirection } from '../../common/enums/collection';
 import { WebhookEntity } from './webhook.entity';
 import { WebhookDto } from './webhook.dto';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobType } from '../../common/enums/cron-job';
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
@@ -32,6 +36,7 @@ export class WebhookService {
     private readonly webhookRepository: WebhookRepository,
     public readonly configService: ConfigService,
     public readonly httpService: HttpService,
+    private readonly cronJobService: CronJobService,
   ) {}
 
   /**
@@ -156,39 +161,51 @@ export class WebhookService {
    */
   @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingCronJob(): Promise<void> {
-    this.logger.log('Pending webhooks START');
-    const webhookEntity = await this.webhookRepository.findOne(
-      {
-        status: WebhookStatus.PENDING,
-        retriesCount: LessThanOrEqual(
-          this.configService.get(ConfigNames.MAX_RETRY_COUNT)!,
-        ),
-        waitUntil: LessThanOrEqual(new Date()),
-      },
-      {
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      },
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.ProcessPending,
     );
 
-    if (!webhookEntity) {
-      this.logger.log('Pending webhooks STOP');
+    if (isCronJobRunning) {
       return;
     }
+
+    this.logger.log('Pending webhooks START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.ProcessPending,
+    );
+
     try {
-      await this.sendWebhook(webhookEntity);
-      await this.webhookRepository.updateOne(
-        { id: webhookEntity.id },
-        {
-          status: WebhookStatus.COMPLETED,
-          retriesCount: 0,
-        },
-      );
-      this.logger.log('Pending webhooks STOP');
+      const webhookEntities = await this.webhookRepository.find({
+        status: WebhookStatus.PENDING,
+        retriesCount: LessThanOrEqual(
+          this.configService.get(
+            ConfigNames.MAX_RETRY_COUNT,
+            DEFAULT_MAX_RETRY_COUNT,
+          ),
+        ),
+        waitUntil: LessThanOrEqual(new Date()),
+      });
+
+      for (const webhookEntity of webhookEntities) {
+        try {
+          await this.sendWebhook(webhookEntity);
+          await this.webhookRepository.updateOne(
+            { id: webhookEntity.id },
+            {
+              status: WebhookStatus.COMPLETED,
+            },
+          );
+        } catch (err) {
+          this.logger.error(`Error sending webhook: ${err.message}`);
+          await this.handleWebhookError(webhookEntity, err);
+        }
+      }
     } catch (e) {
-      await this.handleWebhookError(webhookEntity, e);
+      this.logger.error(e);
     }
+
+    this.logger.log('Pending webhooks STOP');
+    await this.cronJobService.completeCronJob(cronJob);
   }
 
   /**
@@ -204,7 +221,10 @@ export class WebhookService {
   ): Promise<void> {
     if (
       webhookEntity.retriesCount >=
-      this.configService.get(ConfigNames.MAX_RETRY_COUNT)!
+      this.configService.get(
+        ConfigNames.MAX_RETRY_COUNT,
+        DEFAULT_MAX_RETRY_COUNT,
+      )
     ) {
       await this.webhookRepository.updateOne(
         { id: webhookEntity.id },

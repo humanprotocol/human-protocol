@@ -23,6 +23,9 @@ import { WebhookRepository } from './webhook.repository';
 import { WebhookService } from './webhook.service';
 import { of } from 'rxjs';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobEntity } from '../cron-job/cron-job.entity';
+import { CronJobType } from '../../common/enums/cron-job';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
@@ -38,7 +41,8 @@ describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     web3Service: Web3Service,
-    httpService: HttpService;
+    httpService: HttpService,
+    cronJobService: CronJobService;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -76,6 +80,10 @@ describe('WebhookService', () => {
         },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: HttpService, useValue: createMock<HttpService>() },
+        {
+          provide: CronJobService,
+          useValue: createMock<CronJobService>(),
+        },
       ],
     }).compile();
 
@@ -83,6 +91,7 @@ describe('WebhookService', () => {
     webhookRepository = moduleRef.get(WebhookRepository);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
     httpService = moduleRef.get<HttpService>(HttpService);
+    cronJobService = moduleRef.get<CronJobService>(CronJobService);
   });
 
   afterEach(() => {
@@ -285,50 +294,127 @@ describe('WebhookService', () => {
   });
 
   describe('processPendingCronJob', () => {
-    const webhookEntity: Partial<WebhookEntity> = {
-      id: 1,
-      chainId: ChainId.LOCALHOST,
-      escrowAddress: MOCK_ADDRESS,
-      status: WebhookStatus.PENDING,
-      waitUntil: new Date(),
-    };
+    let sendWebhookMock: any;
+    let cronJobEntityMock: Partial<CronJobEntity>;
+    let webhookEntity1: Partial<WebhookEntity>,
+      webhookEntity2: Partial<WebhookEntity>;
 
-    it('should not execute anything if no pending webhook is found', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(null);
-      jest.spyOn(webhookService as any, 'sendWebhook');
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).sendWebhook).not.toBeCalled();
-    });
+    beforeEach(() => {
+      cronJobEntityMock = {
+        cronJobType: CronJobType.ProcessPending,
+        startedAt: new Date(),
+      };
 
-    it('should handle error if any exception is thrown', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
+      webhookEntity1 = {
+        id: 1,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
 
-      jest.spyOn(webhookService as any, 'handleWebhookError');
+      webhookEntity2 = {
+        id: 2,
+        chainId: ChainId.LOCALHOST,
+        escrowAddress: MOCK_ADDRESS,
+        status: WebhookStatus.PENDING,
+        waitUntil: new Date(),
+        retriesCount: 0,
+      };
 
       jest
-        .spyOn(webhookService as any, 'sendWebhook')
-        .mockImplementation(() => {
-          throw new Error();
-        });
+        .spyOn(webhookRepository, 'find')
+        .mockResolvedValue([webhookEntity1 as any, webhookEntity2 as any]);
 
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).handleWebhookError).toBeCalled();
+      sendWebhookMock = jest.spyOn(webhookService as any, 'sendWebhook');
+      sendWebhookMock.mockResolvedValue(true);
+
+      jest.spyOn(cronJobService, 'isCronJobRunning').mockResolvedValue(false);
     });
 
-    it('should successfully process a webhook', async () => {
-      webhookRepository.findOne = jest.fn().mockReturnValue(webhookEntity);
-      jest
-        .spyOn(webhookService as any, 'sendWebhook')
-        .mockResolvedValue(undefined);
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
 
-      expect(await webhookService.processPendingCronJob()).toBe(undefined);
-      expect((webhookService as any).sendWebhook).toBeCalled();
+    it('should not run if cron job is already running', async () => {
+      jest
+        .spyOn(cronJobService, 'isCronJobRunning')
+        .mockResolvedValueOnce(true);
+
+      const startCronJobMock = jest.spyOn(cronJobService, 'startCronJob');
+
+      await (webhookService as any).processPendingCronJob();
+
+      expect(startCronJobMock).not.toHaveBeenCalled();
+    });
+
+    it('should create cron job entity to lock the process', async () => {
+      jest
+        .spyOn(cronJobService, 'startCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await (webhookService as any).processPendingCronJob();
+
+      expect(cronJobService.startCronJob).toHaveBeenCalledWith(
+        CronJobType.ProcessPending,
+      );
+    });
+
+    it('should send webhook for all of the pending webhooks', async () => {
+      await (webhookService as any).processPendingCronJob();
+
+      expect(sendWebhookMock).toHaveBeenCalledTimes(2);
+      expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity1);
+      expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity2);
+
+      expect(webhookRepository.updateOne).toHaveBeenCalledTimes(2);
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
-        { id: 1 },
+        { id: webhookEntity1.id },
+        { status: WebhookStatus.COMPLETED },
+      );
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
+        { id: webhookEntity2.id },
+        { status: WebhookStatus.COMPLETED },
+      );
+    });
+
+    it('should increase retriesCount by 1 if sending webhook fails', async () => {
+      sendWebhookMock.mockRejectedValueOnce(new Error());
+
+      await (webhookService as any).processPendingCronJob();
+
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
+        { id: webhookEntity1.id },
         {
-          status: WebhookStatus.COMPLETED,
-          retriesCount: 0,
+          retriesCount: 1,
+          waitUntil: expect.any(Date),
         },
+      );
+    });
+
+    it('should mark webhook as failed if retriesCount exceeds threshold', async () => {
+      sendWebhookMock.mockRejectedValueOnce(new Error());
+
+      webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
+
+      await (webhookService as any).processPendingCronJob();
+
+      expect(webhookRepository.updateOne).toHaveBeenCalledWith(
+        { id: webhookEntity1.id },
+        { status: WebhookStatus.FAILED },
+      );
+    });
+
+    it('should complete the cron job entity to unlock', async () => {
+      jest
+        .spyOn(cronJobService, 'completeCronJob')
+        .mockResolvedValueOnce(cronJobEntityMock as any);
+
+      await (webhookService as any).processPendingCronJob();
+
+      expect(cronJobService.completeCronJob).toHaveBeenCalledWith(
+        cronJobEntityMock as any,
       );
     });
   });
