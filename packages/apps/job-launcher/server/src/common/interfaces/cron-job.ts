@@ -3,6 +3,6 @@ import { IBase } from './base';
 
 export interface ICronJob extends IBase {
   cronJobType: CronJobType;
-  createdAt: Date;
-  completedAt?: Date;
+  startedAt: Date;
+  completedAt?: Date | null;
 }

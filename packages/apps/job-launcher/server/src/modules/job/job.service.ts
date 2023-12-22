@@ -71,7 +71,6 @@ import {
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   RestrictedAudience,
-  StorageDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -568,7 +567,7 @@ export class JobService {
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
-    jobEntity.status = JobStatus.LAUNCHING;
+    jobEntity.status = JobStatus.CREATED;
     jobEntity.escrowAddress = escrowAddress;
     await jobEntity.save();
 
@@ -647,7 +646,7 @@ export class JobService {
       gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
     });
 
-    jobEntity.status = JobStatus.FUNDING;
+    jobEntity.status = JobStatus.SET_UP;
     await jobEntity.save();
 
     return jobEntity;
@@ -921,7 +920,7 @@ export class JobService {
     }
 
     this.logger.log('Create escrow START');
-    const cronJob = await this.cronJobService.createCronJob(
+    const cronJob = await this.cronJobService.startCronJob(
       CronJobType.CreateEscrow,
     );
 
@@ -975,14 +974,14 @@ export class JobService {
     }
 
     this.logger.log('Setup escrow START');
-    const cronJob = await this.cronJobService.createCronJob(
+    const cronJob = await this.cronJobService.startCronJob(
       CronJobType.SetupEscrow,
     );
 
     try {
       const jobEntities = await this.jobRepository.find(
         {
-          status: JobStatus.LAUNCHING,
+          status: JobStatus.CREATED,
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -1029,14 +1028,14 @@ export class JobService {
     }
 
     this.logger.log('Fund escrow START');
-    const cronJob = await this.cronJobService.createCronJob(
+    const cronJob = await this.cronJobService.startCronJob(
       CronJobType.FundEscrow,
     );
 
     try {
       const jobEntities = await this.jobRepository.find(
         {
-          status: JobStatus.FUNDING,
+          status: JobStatus.SET_UP,
           waitUntil: LessThanOrEqual(new Date()),
         },
         {

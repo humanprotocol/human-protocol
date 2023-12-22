@@ -1322,7 +1322,7 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.LAUNCHING;
+      mockJobEntity.status = JobStatus.CREATED;
       mockJobEntity.escrowAddress = MOCK_ADDRESS;
       expect(jobEntityResult).toMatchObject(mockJobEntity);
       expect(mockJobEntity.save).toHaveBeenCalled();
@@ -1360,7 +1360,7 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         fee,
         fundAmount,
-        status: JobStatus.LAUNCHING,
+        status: JobStatus.CREATED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1379,7 +1379,7 @@ describe('JobService', () => {
         mockJobEntity as JobEntity,
       );
 
-      mockJobEntity.status = JobStatus.FUNDING;
+      mockJobEntity.status = JobStatus.SET_UP;
       expect(mockJobEntity.save).toHaveBeenCalled();
       expect(jobEntityResult).toMatchObject(mockJobEntity);
     });
@@ -1394,7 +1394,7 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         fee,
         fundAmount,
-        status: JobStatus.LAUNCHING,
+        status: JobStatus.CREATED,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1422,7 +1422,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        status: JobStatus.LAUNCHING,
+        status: JobStatus.CREATED,
         save: jest.fn().mockResolvedValue(true),
       };
 
@@ -1456,7 +1456,7 @@ describe('JobService', () => {
         manifestHash: MOCK_FILE_HASH,
         fee,
         fundAmount,
-        status: JobStatus.FUNDING,
+        status: JobStatus.SET_UP,
         save: jest.fn().mockResolvedValue(true),
         userId: 1,
       };
@@ -1479,7 +1479,7 @@ describe('JobService', () => {
         chainId: 1,
         manifestUrl: MOCK_FILE_URL,
         manifestHash: MOCK_FILE_HASH,
-        status: JobStatus.FUNDING,
+        status: JobStatus.SET_UP,
         save: jest.fn().mockResolvedValue(true),
       };
 
@@ -1630,12 +1630,12 @@ describe('JobService', () => {
 
     it('should create cron job entity on database to lock', async () => {
       jest
-        .spyOn(cronJobService, 'createCronJob')
+        .spyOn(cronJobService, 'startCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await jobService.createEscrowCronJob();
 
-      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+      expect(cronJobService.startCronJob).toHaveBeenCalledWith(
         CronJobType.CreateEscrow,
       );
     });
@@ -1681,7 +1681,7 @@ describe('JobService', () => {
       };
 
       jobEntityMock1 = {
-        status: JobStatus.LAUNCHING,
+        status: JobStatus.CREATED,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -1694,7 +1694,7 @@ describe('JobService', () => {
       };
 
       jobEntityMock2 = {
-        status: JobStatus.LAUNCHING,
+        status: JobStatus.CREATED,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -1732,12 +1732,12 @@ describe('JobService', () => {
 
     it('should create cron job entity on database to lock', async () => {
       jest
-        .spyOn(cronJobService, 'createCronJob')
+        .spyOn(cronJobService, 'startCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await jobService.setupEscrowCronJob();
 
-      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+      expect(cronJobService.startCronJob).toHaveBeenCalledWith(
         CronJobType.SetupEscrow,
       );
     });
@@ -1784,7 +1784,7 @@ describe('JobService', () => {
       };
 
       jobEntityMock1 = {
-        status: JobStatus.FUNDING,
+        status: JobStatus.SET_UP,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -1797,7 +1797,7 @@ describe('JobService', () => {
       };
 
       jobEntityMock2 = {
-        status: JobStatus.FUNDING,
+        status: JobStatus.SET_UP,
         fundAmount: 100,
         userId: 1,
         id: 1,
@@ -1849,12 +1849,12 @@ describe('JobService', () => {
 
     it('should create cron job entity on database to lock', async () => {
       jest
-        .spyOn(cronJobService, 'createCronJob')
+        .spyOn(cronJobService, 'startCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
       await jobService.fundEscrowCronJob();
 
-      expect(cronJobService.createCronJob).toHaveBeenCalledWith(
+      expect(cronJobService.startCronJob).toHaveBeenCalledWith(
         CronJobType.FundEscrow,
       );
     });

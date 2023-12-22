@@ -17,6 +17,7 @@ export class CronJobRepository {
     return this.cronJobEntityRepository
       .create({
         cronJobType,
+        startedAt: new Date(),
       })
       .save();
   }

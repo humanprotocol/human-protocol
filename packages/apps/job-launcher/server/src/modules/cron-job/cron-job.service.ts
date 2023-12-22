@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { CronJobType } from '../../common/enums/cron-job';
 import { ErrorCronJob } from '../../common/constants/errors';
@@ -17,33 +12,39 @@ export class CronJobService {
 
   constructor(private readonly cronJobRepository: CronJobRepository) {}
 
-  public async createCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
-    const cronJob = this.cronJobRepository.create(cronJobType);
+  public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
+    const cronJob = await this.cronJobRepository.findOne({
+      cronJobType,
+    });
 
     if (!cronJob) {
-      this.logger.error(ErrorCronJob.NotCreated, CronJobService.name);
-      throw new NotFoundException(ErrorCronJob.NotCreated);
+      const cronJob = await this.cronJobRepository.create(cronJobType);
+
+      return cronJob;
+    } else {
+      if (!cronJob.completedAt) {
+        this.logger.error(ErrorCronJob.NotCompleted, CronJobService.name);
+        throw new BadRequestException(ErrorCronJob.NotCompleted);
+      }
+
+      cronJob.startedAt = new Date();
+      cronJob.completedAt = null;
+      await cronJob.save();
     }
 
     return cronJob;
   }
 
   public async isCronJobRunning(cronJobType: CronJobType): Promise<boolean> {
-    const lastCronJob = await this.cronJobRepository.findOne(
-      {
-        cronJobType,
-      },
-      {
-        order: {
-          createdAt: 'DESC',
-        },
-      },
-    );
+    const lastCronJob = await this.cronJobRepository.findOne({
+      cronJobType,
+    });
 
     if (!lastCronJob || lastCronJob.completedAt) {
       return false;
     }
 
+    this.logger.log('Previous cron job is not completed yet');
     return true;
   }
 
@@ -51,8 +52,8 @@ export class CronJobService {
     cronJobEntity: CronJobEntity,
   ): Promise<CronJobEntity> {
     if (cronJobEntity.completedAt) {
-      this.logger.error(ErrorCronJob.AlreadyCompleted, CronJobService.name);
-      throw new BadRequestException(ErrorCronJob.AlreadyCompleted);
+      this.logger.error(ErrorCronJob.Completed, CronJobService.name);
+      throw new BadRequestException(ErrorCronJob.Completed);
     }
 
     cronJobEntity.completedAt = new Date();

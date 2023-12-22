@@ -146,5 +146,6 @@ export enum ErrorPostgres {
  */
 export enum ErrorCronJob {
   NotCreated = 'Cron job has not been created',
-  AlreadyCompleted = 'Cron job has already been completed',
+  NotCompleted = 'Cron job is not completed',
+  Completed = 'Cron job is completed',
 }
