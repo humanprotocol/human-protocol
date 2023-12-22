@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, Index } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { NS } from '../../common/constants';
 import { BaseEntity } from '../../database/base.entity';
@@ -13,12 +13,6 @@ export class CronJobEntity extends BaseEntity implements ICronJob {
     enum: CronJobType,
   })
   public cronJobType: CronJobType;
-
-  @CreateDateColumn({
-    type: 'timestamptz',
-    default: () => 'CURRENT_TIMESTAMP(6)',
-  })
-  public createdAt: Date;
 
   @Column({ type: 'timestamptz', nullable: true })
   public completedAt?: Date;
