@@ -41,7 +41,7 @@ jest.mock('minio', () => {
 
 jest.mock('axios');
 
-describe('Web3Service', () => {
+describe('StorageService', () => {
   let storageService: StorageService;
 
   beforeAll(async () => {
