@@ -3,20 +3,21 @@ import React, { useMemo } from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
-import { useWorkerStats } from 'src/hooks/useWorkerStats';
+import { TOOLTIPS } from 'src/constants/tooltips';
+import { useTaskStats } from 'src/hooks/useTaskStats';
 import { useChainId, useDays } from 'src/state/humanAppData/hooks';
 
 export const TasksView = () => {
   const days = useDays();
   const chainId = useChainId();
-  const { data, isLoading } = useWorkerStats();
+  const { data, isLoading } = useTaskStats();
 
   const seriesData = useMemo(() => {
     if (data) {
-      const cumulativeDailyWorkersData = [...data.dailyWorkersData]
+      const cumulativeDailyTasksData = [...data.dailyTasksData]
         .map((d) => ({
           date: d.timestamp,
-          value: Number(d.averageJobsSolved),
+          value: Number(d.tasksSolved),
         }))
         .reduce((acc, d) => {
           acc.push({
@@ -26,7 +27,7 @@ export const TasksView = () => {
           return acc;
         }, [] as any[]);
 
-      return cumulativeDailyWorkersData.slice(-days);
+      return cumulativeDailyTasksData.slice(-days);
     }
     return [];
   }, [data, days]);
@@ -40,7 +41,7 @@ export const TasksView = () => {
       }
       title="Tasks"
     >
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon title={TOOLTIPS.SOLVED_TASKS} />
     </ChartContainer>
   );
 };

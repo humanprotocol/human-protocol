@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ChartContainer } from './Container';
 import { TooltipIcon } from 'src/components/TooltipIcon';
+import { TOOLTIPS } from 'src/constants/tooltips';
 
 export const PaymentsView = ({
   isLoading,
@@ -12,7 +13,7 @@ export const PaymentsView = ({
 }) => {
   return (
     <ChartContainer isLoading={isLoading} data={data} title="Payments">
-      <TooltipIcon title="Sorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, mattis tellus. Sed dignissim." />
+      <TooltipIcon title={TOOLTIPS.PAYMENTS} />
     </ChartContainer>
   );
 };
