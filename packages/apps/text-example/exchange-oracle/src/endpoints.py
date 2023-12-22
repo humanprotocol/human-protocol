@@ -12,7 +12,6 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from starlette.requests import Request
 
 from src.annotation import (
-    UserRegistrationInfo,
     create_user,
     JobApplication,
     register_annotator,
@@ -136,7 +135,7 @@ def authenticate(bearer_token: str, key: str = Config.human.reputation_oracle_ke
 async def register_job_request(
     escrow_info: EscrowInfo,
     request: Request,
-    signature: str = Header(description="Calling service signature"),
+    human_signature: str = Header(),
 ):
     """Adds a job request to the database, to be processed later."""
     # validate escrow info
@@ -160,10 +159,12 @@ async def register_job_request(
         raise Errors.ESCROW_VALIDATION_FAILED
 
     signature_valid = await validate_job_launcher_signature(
-        escrow_info, request, signature, escrow
+        escrow_info, request, human_signature, escrow
     )
     if not signature_valid:
-        logger.error(f"Signature invalid for {escrow_info} with signature {signature}")
+        logger.error(
+            f"Signature invalid for {escrow_info} with signature {human_signature}"
+        )
         raise Errors.AUTH_SIGNATURE_INVALID
 
     match escrow_info.event_type:
@@ -247,7 +248,7 @@ async def job_details(jobId: str, authorization: str = Header()):
 
 @router.post(Endpoints.USER_REGISTER)
 async def register_worker(
-    authorization: str = Header(description="Calling service signature"),
+    authorization: str = Header(),
 ):
     """Registers a new user with the given wallet address."""
     logger.info(f"POST {Endpoints.USER_REGISTER} called.")

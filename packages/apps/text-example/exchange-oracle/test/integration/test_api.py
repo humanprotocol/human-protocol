@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from human_protocol_sdk.constants import Status
 
 from src.annotation import get_client
-from src.chain import EscrowInfo, EventType
+from src.chain import EventType
 from src.config import Config
 from src.cron_jobs import process_pending_job_requests
 from src.db import (
@@ -49,10 +49,10 @@ class APITest(unittest.TestCase):
         self.chain_id = chain_id
         self.message = escrow_info
 
-        self.human_signature = {"Signature": Config.human.human_app_signature}
+        self.human_signature = {"human-signature": Config.human.human_app_signature}
         self.job_launcher = JOB_LAUNCHER
         self.job_launcher_signature = {
-            "Signature": self.job_launcher.sign(self.message)
+            "human-signature": self.job_launcher.sign(self.message)
         }
 
         self.user_name = random_username()
@@ -108,7 +108,9 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=invalid_message,
-            headers={"Signature": self.job_launcher.sign(message=invalid_message)},
+            headers={
+                "human-signature": self.job_launcher.sign(message=invalid_message)
+            },
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
@@ -119,7 +121,9 @@ class APITest(unittest.TestCase):
         response = self.client.post(
             Endpoints.JOB_REQUEST,
             json=invalid_message,
-            headers={"Signature": self.job_launcher.sign(message=invalid_message)},
+            headers={
+                "human-signature": self.job_launcher.sign(message=invalid_message)
+            },
         )
 
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
@@ -192,7 +196,7 @@ class APITest(unittest.TestCase):
 
         message = self.message.copy()
         message["event_type"] = EventType.ESCROW_CANCELED
-        header = {"Signature": self.job_launcher.sign(message)}
+        header = {"human-signature": self.job_launcher.sign(message)}
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
@@ -582,7 +586,7 @@ class APITest(unittest.TestCase):
         # job launcher endpoint
         mock_get_escrow.return_value = self.mock_escrow
         header = {
-            "Signature": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "human-signature": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         }
         response = self.client.post(
             Endpoints.JOB_REQUEST, json=self.message, headers=header
