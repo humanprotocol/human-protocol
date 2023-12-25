@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@human-protocol/core": "*",
-    "aws-sdk": "^2.1255.0",
+    "aws-sdk": "^2.1525.0",
     "axios": "^1.4.0",
     "crypto": "^1.0.1",
     "ethers": "^5.7.2",
