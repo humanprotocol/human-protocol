@@ -1,11 +1,15 @@
 import json
 import unittest
-import uuid
+from unittest.mock import patch, MagicMock
 
 from src.config import Config
-from src.cron_jobs import process_pending_requests, upload_intermediate_results
+from src.cron_jobs import (
+    process_pending_requests,
+    upload_intermediate_results,
+    notify_reputation_oracle,
+)
 from src.db import Base, engine, Session, ResultsProcessingRequest, Statuses
-from test.utils import random_address, add_processing_request
+from test.utils import add_processing_request
 
 
 class APITest(unittest.TestCase):
@@ -33,7 +37,7 @@ class APITest(unittest.TestCase):
         assert request.status == Statuses.awaiting_upload
 
     def test_upload_intermediate_results(self):
-        """When are uploaded successfully:
+        """When intermediate results are uploaded successfully:
         - intermediate results
         - The request's status should be set to "completed"
         - A file with the intermediate results should be deleted.
@@ -57,3 +61,18 @@ class APITest(unittest.TestCase):
             )
             is not None
         )
+
+    @patch("src.cron_jobs.Config.http.request")
+    def test_notify_reputation_oracle(self, mock_request: MagicMock):
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_request.return_value = mock_response
+
+        id = add_processing_request(status=Statuses.awaiting_closure)
+
+        notify_reputation_oracle()
+
+        with Session() as session:
+            request = session.query(ResultsProcessingRequest).one()
+
+        assert request.status == Statuses.closed

@@ -90,7 +90,7 @@ class StorageConfig:
         )
 
     @classmethod
-    def results_s3_url(cls, job_id, extension=".jsonl"):
+    def results_s3_url(cls, job_id, extension=".json"):
         return "/".join([cls.endpoint_url, cls.results_bucket_name, job_id]) + extension
 
 

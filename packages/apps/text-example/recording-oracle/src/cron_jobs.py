@@ -1,5 +1,7 @@
 import json
 
+from urllib3.exceptions import MaxRetryError
+
 from src.config import Config
 from src.db import (
     Session,
@@ -55,6 +57,8 @@ def upload_intermediate_results():
                 upload_data(path, content_type="application/json")
                 path.unlink()
 
+                # todo: update escrow
+
                 logger.info(
                     f"Successfully uploaded intermediate results of request {request.id}."
                 )
@@ -65,3 +69,47 @@ def upload_intermediate_results():
                 )
                 stage_failure(request)
         session.commit()
+
+
+def notify_reputation_oracle():
+    with Session() as session:
+        requests = session.query(ResultsProcessingRequest).where(
+            ResultsProcessingRequest.status == Statuses.awaiting_closure
+        )
+        for request in requests:
+            s3_url = Config.storage_config.results_s3_url(str(request.id))
+            try:
+                # TODO: double check what payload needs to look like
+                # TODO: signature
+                payload = {
+                    "escrow_address": request.escrow_address,
+                    "chain_id": request.chain_id,
+                    "s3_url": s3_url,
+                }
+                logger.debug(
+                    f"Notifying recording oracle about job {request.id}. payload: {payload}"
+                )
+                response = Config.http.request(
+                    method="POST", url=Config.human.reputation_oracle_url, json=payload
+                )
+                if response.status == 200:
+                    stage_success(request)
+                    logger.info(
+                        f"Recording oracle notified about job {request.id}. Job is complete."
+                    )
+                else:
+                    logger.exception(
+                        f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}"
+                    )
+                    stage_failure(request)
+            except MaxRetryError:
+                logger.exception(
+                    f"Could not notify recording oracle about job {request.id}"
+                )
+                stage_failure(request)
+            except Exception:
+                logger.exception(
+                    f"Could not notify recording oracle about job {request.id}"
+                )
+                stage_failure(request)
+            session.commit()
