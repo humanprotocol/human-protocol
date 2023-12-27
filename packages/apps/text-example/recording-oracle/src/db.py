@@ -51,6 +51,8 @@ class ResultsProcessingRequest(Base):
     chain_id: Mapped[int] = mapped_column(nullable=False)
     type: Mapped[str] = mapped_column(default="text_label_multiple_span_select")
 
+    solution_url: Mapped[str]
+
     status: Mapped[Statuses] = mapped_column(
         String, server_default=Statuses.pending.value
     )

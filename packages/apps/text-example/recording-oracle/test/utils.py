@@ -71,6 +71,24 @@ def is_valid_uuid(obj):
         return False
 
 
+def add_processing_request():
+    id = str(uuid.uuid4())
+    chain_id = Config.localhost.chain_id
+    escrow_address = random_address()
+    solution_url = f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/raw_results.jsonl"
+
+    with Session() as session:
+        request = ResultsProcessingRequest(
+            id=id,
+            chain_id=chain_id,
+            escrow_address=escrow_address,
+            solution_url=solution_url,
+        )
+        session.add(request)
+        session.commit()
+    return id
+
+
 def upload_manifest_and_annotations():
     data_dir = Path(__file__).parent / "data"
     manifest_filepath = data_dir / "manifest.json"

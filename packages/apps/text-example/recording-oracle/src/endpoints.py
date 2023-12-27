@@ -82,6 +82,7 @@ async def register_raw_results(
             id=id,
             escrow_address=webhook.escrow_address,
             chain_id=webhook.chain_id,
+            solution_url=webhook.solution_url,
         )
         session.add(request)
         session.commit()

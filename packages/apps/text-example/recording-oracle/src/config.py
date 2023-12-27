@@ -96,7 +96,7 @@ class StorageConfig:
 
 class LoggingConfig:
     _ready = False
-    root_logger_name = "app"
+    root_logger_name = "recording_oracle"
     log_level = os.environ.get("LOG_LEVEL")
 
     @classmethod

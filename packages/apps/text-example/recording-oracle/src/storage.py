@@ -1,6 +1,7 @@
 """Module for interaction with S3 storage."""
 import json
 from dataclasses import dataclass
+from io import StringIO, BytesIO
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -32,6 +33,12 @@ def download_object(s3_url):
 def download_manifest(manifest_url):
     manifest = download_object(manifest_url)
     return Manifest(**json.loads(manifest.data))
+
+
+def download_raw_results(results_url):
+    res = download_object(results_url)
+    with BytesIO(res.data) as f:
+        return [json.loads(line) for line in f.readlines()]
 
 
 def upload_data(
