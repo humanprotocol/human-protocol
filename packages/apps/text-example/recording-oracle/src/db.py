@@ -23,6 +23,7 @@ Session = sessionmaker(autocommit=False, bind=engine)
 class Statuses(str, Enum):
     pending = "pending"
     awaiting_upload = "awaiting_upload"
+    awaiting_closure = "awaiting_closure"
     closed = "closed"
     failed = "failed"
 

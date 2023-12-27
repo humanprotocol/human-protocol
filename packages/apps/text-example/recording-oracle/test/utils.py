@@ -71,7 +71,7 @@ def is_valid_uuid(obj):
         return False
 
 
-def add_processing_request():
+def add_processing_request(status: Statuses = Statuses.pending):
     id = str(uuid.uuid4())
     chain_id = Config.localhost.chain_id
     escrow_address = random_address()
@@ -83,6 +83,7 @@ def add_processing_request():
             chain_id=chain_id,
             escrow_address=escrow_address,
             solution_url=solution_url,
+            status=status,
         )
         session.add(request)
         session.commit()
