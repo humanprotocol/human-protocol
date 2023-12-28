@@ -12,6 +12,7 @@ import "./wormhole/IWormholeRelayer.sol";
 import "./wormhole/IWormholeReceiver.sol";
 import "./magistrate/Magistrate.sol";
 
+
 /**
   @title MetaHumanGovernor
   @dev MetaHumanGovernor is a contract that serves as a governance system for MetaHuman-related operations. It extends multiple contracts to incorporate various functionalities.
@@ -23,10 +24,52 @@ import "./magistrate/Magistrate.sol";
 contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCountingSimple,
     GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl, Magistrate, IWormholeReceiver {
 
+     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
+    /*                       CUSTOM ERRORS                        */
+    /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
+
+    /// @dev 
+    error AlreadyProcessed(bytes32 _hash);
+
+    /// @dev Only relayer allowed
+    error RelayerOnly(address sender, address relayer);
+
+    /// @dev Only messages from spoke contracts are received
+    error OnlySpokeMessages(bytes32 source, uint16 chainId); 
+
+    /// @dev Cross chain propose only to create a proposal 
+    error CrossChainProposeOnly(); 
+
+    /// @dev Spoke votes are already initialized 
+    error InitDone(); 
+
+    /// @dev Spoke votes are already initialized
+    error AlreadyInitialized(uint256 proposalId, bytes32 emitterAddress, uint16 emitterChainId); 
+
+    /// @dev Only the relayer is allowed
+    error OnlyRelayerAllowed(); 
+
+    /// @dev Only the spoke is allowed 
+    error OnlySpokeAllowed(); 
+
+    /// @dev  
+    error CollectionStarted(uint256 proposalId); 
+
+    /// @dev 
+    error PeriodNotOver(uint256 proposalId); 
+
+    /// @dev 
+    error CollectionUnfinished(uint256 proposalId); 
+
+    
     IWormholeRelayer immutable public wormholeRelayer;
-    uint16 public nonce = 0;
-    uint256 constant internal GAS_LIMIT = 500_000;
     uint16 immutable public chainId;
+    uint256 constant internal GAS_LIMIT = 500_000;
+    uint256 initialVotingDelay; 
+    uint256 initialVotingPeriod; 
+    uint256 initialProposalThreshold; 
+    uint256 quorumFraction; 
+
 
     mapping(bytes32 => bool) public processedMessages;
     mapping(uint256 => bool) public collectionStarted;
@@ -42,9 +85,9 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
     */
     constructor(IVotes _token, TimelockController _timelock, CrossChainAddress[] memory _spokeContracts, uint16 _chainId, address _wormholeRelayerAddress, address _magistrateAddress)
     Governor("MetaHumanGovernor")
-    GovernorSettings(1 /* 1 block */, 20 * 15 /* 20 blocks per minute * 15 minutes (polygon mumbai) */, 0) //TODO:prod in production voting delay, voting period, proposal threshold needs to be changed to value of choice. Depending on block time on selected hub chain and desired period
+    GovernorSettings(initialVotingDelay, initialVotingPeriod, initialProposalThreshold) 
     GovernorVotes(_token)
-    GovernorVotesQuorumFraction(4)//TODO:prod change quorum fraction to value of choice
+    GovernorVotesQuorumFraction(quorumFraction)
     GovernorTimelockControl(_timelock)
     CrossChainGovernorCountingSimple(_spokeContracts)
     Magistrate(_magistrateAddress)
@@ -69,12 +112,17 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
         uint16 sourceChain,
         bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
     ) public payable override {
-        require(msg.sender == address(wormholeRelayer), "Only relayer allowed");
+        if (msg.sender != address(wormholeRelayer)) {
+            revert RelayerOnly(msg.sender, address(wormholeRelayer)); 
+        } 
 
-        require(spokeContractsMapping[sourceAddress][sourceChain],
-            "Only messages from the spoke contracts can be received!");
+        if (!spokeContractsMapping[sourceAddress][sourceChain]) {
+            revert OnlySpokeMessages(sourceAddress, sourceChain);
+        }
 
-        require(!processedMessages[deliveryHash], "Message already processed");
+        if (processedMessages[deliveryHash]){
+            revert AlreadyProcessed(deliveryHash);
+        }
 
         (
         address intendedRecipient,
@@ -83,8 +131,12 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
         bytes memory decodedMessage
         ) = abi.decode(payload, (address, uint16, address, bytes));
 
-        require(intendedRecipient == address(this));
-
+    
+        assembly {
+            if iszero(eq(intendedRecipient, address())) {
+                revert(0, 0)
+            }
+        }
         processedMessages[deliveryHash] = true;
         // Gets a function selector option
         uint16 option;
@@ -113,7 +165,7 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
         ) = abi.decode(payload, (uint16, uint256, uint256, uint256, uint256));
         // As long as the received data isn't already initialized...
         if (spokeVotes[_proposalId][emitterAddress][emitterChainId].initialized) {
-            revert("Already initialized!");
+            revert AlreadyInitialized(_proposalId, emitterAddress, emitterChainId);
         } else {
             // Add it to the map (while setting initialized true)
             spokeVotes[_proposalId][emitterAddress][emitterChainId] = SpokeProposalVote(
@@ -144,10 +196,9 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
     ) internal override {
         _finishCollectionPhase(proposalId);
 
-        require(
-            collectionFinished[proposalId],
-            "Collection phase for this proposal is unfinished!"
-        );
+        if (!collectionFinished[proposalId]){
+            revert CollectionUnfinished(proposalId); 
+        }
 
         super._beforeExecute(proposalId, targets, values, calldatas, descriptionHash);
     }
@@ -173,14 +224,14 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
      @param proposalId The ID of the proposal.
     */
     function requestCollections(uint256 proposalId) public {
-        require(
-            block.number > proposalDeadline(proposalId),
-            "Cannot request for vote collection until after the vote period is over!"
-        );
-        require(
-            !collectionStarted[proposalId],
-            "Collection phase for this proposal has already started!"
-        );
+
+        if (block.number <= proposalDeadline(proposalId)) {
+            revert PeriodNotOver(proposalId); 
+        }
+
+        if (collectionStarted[proposalId]) {
+            revert CollectionStarted(proposalId); 
+        }
 
         collectionStarted[proposalId] = true;
 
@@ -208,8 +259,11 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
                 address(uint160(uint256(spokeContracts[i-1].contractAddress))),
                 payload,
                 sendMessageToHubCost, // send value to enable the spoke to send back vote result
-                GAS_LIMIT
+                GAS_LIMIT,
+                spokeContracts[i-1].chainId,
+                msg.sender
             );
+
         }
     }
 
@@ -253,7 +307,9 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
                     address(uint160(uint256(spokeContracts[i-1].contractAddress))),
                     payload,
                     0, // no receiver value needed
-                    GAS_LIMIT
+                    GAS_LIMIT,
+                    spokeContracts[i-1].chainId, 
+                    msg.sender 
                 );
             }
         }
@@ -266,48 +322,6 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
     */
     function quoteCrossChainMessage(uint16 targetChain, uint256 valueToSend) internal view returns (uint256 cost) {
         (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, valueToSend, GAS_LIMIT);
-    }
-
-    // The following functions are overrides required by Solidity.
-
-    /**
-     @dev Retrieves the voting delay period.
-     @return The duration of the voting delay in seconds.
-    */
-    function votingDelay()
-    public
-    view
-    override(IGovernor, GovernorSettings)
-    returns (uint256)
-    {
-        return super.votingDelay();
-    }
-
-    /**
-     @dev Retrieves the voting period duration.
-     @return The duration of the voting period in seconds.
-    */
-    function votingPeriod()
-    public
-    view
-    override(IGovernor, GovernorSettings)
-    returns (uint256)
-    {
-        return super.votingPeriod();
-    }
-
-    /**
-     @dev Retrieves the quorum required for voting.
-     @param blockNumber The block number to calculate the quorum for.
-     @return The required quorum percentage.
-    */
-    function quorum(uint256 blockNumber)
-    public
-    view
-    override(IGovernor, GovernorVotesQuorumFraction)
-    returns (uint256)
-    {
-        return super.quorum(blockNumber);
     }
 
     /**
@@ -337,7 +351,7 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
     override(Governor, IGovernor)
     returns (uint256)
     {
-        revert("Please use crossChainPropose instead.");
+        revert CrossChainProposeOnly(); 
     }
 
     /**
@@ -353,122 +367,7 @@ contract MetaHumanGovernor is Governor, GovernorSettings, CrossChainGovernorCoun
         return super.proposalThreshold();
     }
 
-    /**
-     * @dev See {IGovernor-castVote}.
-     */
-    function castVote(uint256 proposalId, uint8 support)
-    public
-    virtual
-    override(Governor, IGovernor)
-    returns (uint256) {
-        address voter = _msgSender();
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        return super._castVote(proposalId, voter, support, "");
-    }
-
-    /**
-     * @dev See {IGovernor-castVoteWithReason}.
-     */
-    function castVoteWithReason(
-        uint256 proposalId,
-        uint8 support,
-        string calldata reason
-    ) public virtual override(Governor, IGovernor) returns (uint256) {
-        address voter = _msgSender();
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        return super._castVote(proposalId, voter, support, reason);
-    }
-
-    /**
-     * @dev See {IGovernor-castVoteWithReasonAndParams}.
-     */
-    function castVoteWithReasonAndParams(
-        uint256 proposalId,
-        uint8 support,
-        string calldata reason,
-        bytes memory params
-    )
-    public
-    virtual
-    override(Governor, IGovernor)
-    returns (uint256) {
-        address voter = _msgSender();
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        return _castVote(proposalId, voter, support, reason, params);
-    }
-
-    /**
-     * @dev See {IGovernor-castVoteBySig}.
-     */
-    function castVoteBySig(
-        uint256 proposalId,
-        uint8 support,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    )
-    public
-    virtual
-    override(Governor, IGovernor)
-    returns (uint256) {
-        address voter = ECDSA.recover(
-            _hashTypedDataV4(keccak256(abi.encode(BALLOT_TYPEHASH, proposalId, support))),
-            v,
-            r,
-            s
-        );
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        return _castVote(proposalId, voter, support, "");
-    }
-
-    /**
-     * @dev See {IGovernor-castVoteWithReasonAndParamsBySig}.
-     */
-    function castVoteWithReasonAndParamsBySig(
-        uint256 proposalId,
-        uint8 support,
-        string calldata reason,
-        bytes memory params,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public virtual override(Governor, IGovernor) returns (uint256) {
-        address voter = ECDSA.recover(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        EXTENDED_BALLOT_TYPEHASH,
-                        proposalId,
-                        support,
-                        keccak256(bytes(reason)),
-                        keccak256(params)
-                    )
-                )
-            ),
-            v,
-            r,
-            s
-        );
-        require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-        return super._castVote(proposalId, voter, support, reason, params);
-    }
-
-    /**
-     * @dev Function to queue a proposal to the timelock.
-     */
-    function queue(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) public virtual override returns (uint256) {
-        uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
-
-        require(state(proposalId) == ProposalState.Succeeded, "Governor: proposal not successful");
-
-        return super.queue(targets, values, calldatas, descriptionHash);
-    }
-
+    
     /**
      @dev Executes a proposal.
      @param proposalId The ID of the proposal.

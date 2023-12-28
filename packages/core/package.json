@@ -97,6 +97,7 @@
   },
   "dependencies": {
     "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@openzeppelin/contracts": "4.8.3",
     "solc": "^0.8.23-fixed"
   }
 }
