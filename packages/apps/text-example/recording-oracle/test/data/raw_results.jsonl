@@ -2,7 +2,7 @@
 {"task_key": "0a955f4d-b165-4a8b-8531-0e4d2d6cb81b", "annotator_id": "0x1449661652245977133903865323203678925587", "annotation_id": 1, "value": {"span": [155, 170], "label": "Plot"}}
 {"task_key": "3a0b46b3-64d0-4bd5-8a5d-757ca519732d", "annotator_id": "0x1449661652245977133903865323203678925587", "annotation_id": 2, "value": {"span": [3, 27], "label": "Acting"}}
 {"task_key": "3a0b46b3-64d0-4bd5-8a5d-757ca519732d", "annotator_id": "0x1449661652245977133903865323203678925587", "annotation_id": 3, "value": {"span": [135, 239], "label": "Story"}}
-{"task_key": "0a955f4d-b165-4a8b-8531-0e4d2d6cb81b", "annotator_id": "0x0594930528720799410790382420672275083417", "annotation_id": 4, "value": {"span": [0, 39], "label": "Acting"}}
+{"task_key": "0a955f4d-b165-4a8b-8531-0e4d2d6cb81b", "annotator_id": "0x0594930528720799410790382420672275083417", "annotation_id": 4, "value": {"span": [0, 39], "label": "Story"}}
 {"task_key": "0a955f4d-b165-4a8b-8531-0e4d2d6cb81b", "annotator_id": "0x0594930528720799410790382420672275083417", "annotation_id": 5, "value": {"span": [50, 76], "label": "Plot"}}
 {"task_key": "0a955f4d-b165-4a8b-8531-0e4d2d6cb81b", "annotator_id": "0x0594930528720799410790382420672275083417", "annotation_id": 6, "value": {"span": [158, 184], "label": "Story"}}
 {"task_key": "3b8bfc73-fcd4-4bd3-a203-3e35c9d8be4f", "annotator_id": "0x0594930528720799410790382420672275083417", "annotation_id": 7, "value": {"span": [16, 49], "label": "Acting"}}

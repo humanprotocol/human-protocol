@@ -3,6 +3,7 @@ FROM python:3.10
 WORKDIR /app
 
 RUN apt-get update -y && \
+    apt-get install coinor-libcbc-dev -y && \
     pip install poetry
 
 

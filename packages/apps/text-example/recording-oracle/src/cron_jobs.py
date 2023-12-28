@@ -13,6 +13,7 @@ from src.db import (
     Statuses,
 )
 from src.storage import download_raw_results, upload_data
+from src.annotation import calculate_intermediate_results
 
 logger = Config.logging.get_logger()
 
@@ -26,9 +27,15 @@ def process_pending_requests():
             .limit(Config.cron_config.task_chunk_size)
         ):
             try:
+                # transform raw results to intermediate results
                 results = download_raw_results(request.solution_url)
+                intermediate_results = calculate_intermediate_results(results)
 
-                process_raw_results(results, request.id)
+                # store results to disk
+                Config.storage_config.dataset_dir.mkdir(parents=True, exist_ok=True)
+                outpath = Config.storage_config.dataset_dir / f"{request.id}.json"
+                with open(outpath, "w") as f:
+                    json.dump(intermediate_results, fp=f)
 
                 logger.info(f"Successfully processed results of request {request.id}.")
                 stage_success(request)
@@ -36,15 +43,6 @@ def process_pending_requests():
                 logger.exception(f"Failed to process results of request {request.id}.")
                 stage_failure(request)
         session.commit()
-
-
-def process_raw_results(results, id):
-    # TODO: replace with actual implementation
-    Config.storage_config.dataset_dir.mkdir(parents=True, exist_ok=True)
-    outpath = Config.storage_config.dataset_dir / f"{id}.json"
-    with open(outpath, "w") as f:
-        json.dump({"annotations": results}, fp=f)
-    return outpath
 
 
 def upload_intermediate_results():

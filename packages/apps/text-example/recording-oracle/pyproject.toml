@@ -18,6 +18,7 @@ cryptography = "^41.0.7"
 pyjwt = "^2.8.0"
 human-protocol-sdk = "^1.1.19"
 hmt-basemodels = "^0.2.7"
+pygamma-agreement = {extras = ["cbc"], version = "^0.5.6"}
 
 
 [tool.poetry.group.dev.dependencies]
