@@ -2,6 +2,7 @@ import json
 
 from urllib3.exceptions import MaxRetryError
 
+from src.chain import sign_message, get_web3
 from src.config import Config
 from src.db import (
     Session,
@@ -77,29 +78,35 @@ def notify_reputation_oracle():
             ResultsProcessingRequest.status == Statuses.awaiting_closure
         )
         for request in requests:
-            s3_url = Config.storage_config.results_s3_url(str(request.id))
             try:
-                # TODO: double check what payload needs to look like
-                # TODO: signature
+                logger.debug(f"Notifying reputation oracle about job {request.id}.")
+
                 payload = {
                     "escrow_address": request.escrow_address,
                     "chain_id": request.chain_id,
-                    "s3_url": s3_url,
+                    "event_type": "task_completed",
                 }
-                logger.debug(
-                    f"Notifying recording oracle about job {request.id}. payload: {payload}"
-                )
+                cfg = Config.blockchain_config_from_id(request.chain_id)
+                headers = {
+                    "Human-Signature": sign_message(
+                        payload, get_web3(request.chain_id), cfg.private_key
+                    )[0]
+                }
+
                 response = Config.http.request(
-                    method="POST", url=Config.human.reputation_oracle_url, json=payload
+                    method="POST",
+                    url=Config.human.reputation_oracle_url,
+                    json=payload,
+                    headers=headers,
                 )
                 if response.status == 200:
                     stage_success(request)
                     logger.info(
-                        f"Recording oracle notified about job {request.id}. Job is complete."
+                        f"Reputation oracle notified about job {request.id}. Job is complete."
                     )
                 else:
                     logger.exception(
-                        f"Could not notify recording oracle about job {request.id}. Response: {response.status}. {response.json()}"
+                        f"Could not notify reputation oracle about job {request.id}. Response: {response.status}. {response.json()}"
                     )
                     stage_failure(request)
             except MaxRetryError:
