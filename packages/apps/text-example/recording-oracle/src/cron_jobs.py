@@ -1,5 +1,6 @@
 import json
 
+from human_protocol_sdk.escrow import EscrowClient, EscrowClientError
 from urllib3.exceptions import MaxRetryError
 
 from src.chain import sign_message, get_web3
@@ -54,16 +55,25 @@ def upload_intermediate_results():
             .limit(Config.cron_config.task_chunk_size)
         ):
             try:
+                # upload files to s3
                 path = Config.storage_config.dataset_dir / f"{request.id}.json"
                 upload_data(path, content_type="application/json")
                 path.unlink()
 
-                # todo: update escrow
+                # update escrow
+                client = EscrowClient(get_web3(request.chain_id))
+                client.store_results(
+                    request.escrow_address,
+                    Config.storage_config.results_s3_url(str(request.id)),
+                )
 
                 logger.info(
                     f"Successfully uploaded intermediate results of request {request.id}."
                 )
                 stage_success(request)
+            except EscrowClientError:
+                logger.exception("Failed to update escrow.")
+                stage_failure(request)
             except Exception:
                 logger.exception(
                     f"Failed to upload intermediate results of request {request.id}."

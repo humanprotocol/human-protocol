@@ -9,10 +9,10 @@ from src.cron_jobs import (
     notify_reputation_oracle,
 )
 from src.db import Base, engine, Session, ResultsProcessingRequest, Statuses
-from test.utils import add_processing_request
+from test.utils import add_processing_request, get_web3_from_private_key
 
 
-class APITest(unittest.TestCase):
+class CronJobTest(unittest.TestCase):
     def setUp(self):
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
@@ -36,7 +36,8 @@ class APITest(unittest.TestCase):
         assert (Config.storage_config.dataset_dir / f"{id}.json").exists()
         assert request.status == Statuses.awaiting_upload
 
-    def test_upload_intermediate_results(self):
+    @patch("src.cron_jobs.EscrowClient")
+    def test_upload_intermediate_results(self, mock_escrow_client: MagicMock):
         """When intermediate results are uploaded successfully:
         - intermediate results
         - The request's status should be set to "completed"
