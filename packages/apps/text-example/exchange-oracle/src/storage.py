@@ -119,6 +119,7 @@ def convert_annotations_to_raw_results(
                             start, end, label = span
                             record = {
                                 "task_key": annotation["task_key"],
+                                "datapoint_uri": annotation["datapoint_uri"],
                                 "annotator_id": annotator_name_map.get(
                                     username, username
                                 ),
