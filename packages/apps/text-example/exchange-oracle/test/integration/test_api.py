@@ -103,7 +103,7 @@ class APITest(unittest.TestCase):
         - NO Job Request should be added to the database.
         """
         invalid_message = self.message.copy()
-        invalid_message["chain_id"] = -100
+        invalid_message["chainId"] = -100
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
@@ -116,7 +116,7 @@ class APITest(unittest.TestCase):
         assert_http_error_response(response, Errors.ESCROW_INFO_INVALID)
 
         invalid_message = self.message.copy()
-        invalid_message["escrow_address"] = "not_a_valid_adress"
+        invalid_message["escrowAddress"] = "not_a_valid_adress"
 
         response = self.client.post(
             Endpoints.JOB_REQUEST,
@@ -195,7 +195,7 @@ class APITest(unittest.TestCase):
         mock_get_escrow.return_value = self.mock_escrow
 
         message = self.message.copy()
-        message["event_type"] = EventType.ESCROW_CANCELED
+        message["eventType"] = EventType.ESCROW_CANCELED
         header = {"human-signature": self.job_launcher.sign(message)}
 
         response = self.client.post(

@@ -27,14 +27,14 @@ class EscrowInfo(BaseModel):
     """Specifies an escrow location.
 
     Attributes:
-        chain_id: The id of the chain on which the escrow is located.
-        escrow_address: The address of the escrow on the given chain.
-        event_type: The type of event.
+        chainId: The id of the chain on which the escrow is located.
+        escrowAddress: The address of the escrow on the given chain.
+        eventType: The type of event.
     """
 
-    chain_id: int
-    escrow_address: str
-    event_type: EventType
+    chainId: int
+    escrowAddress: str
+    eventType: EventType
 
 
 def get_web3(chain_id: int):
@@ -76,8 +76,8 @@ def validate_address(escrow_address: str) -> str:
 
 
 def get_manifest_url(info: EscrowInfo) -> str:
-    escrow_client = EscrowClient(get_web3(chain_id=info.chain_id))
-    return escrow_client.get_manifest_url(info.escrow_address)
+    escrow_client = EscrowClient(get_web3(chain_id=info.chainId))
+    return escrow_client.get_manifest_url(info.escrowAddress)
 
 
 def validate_escrow(
@@ -100,6 +100,6 @@ async def validate_job_launcher_signature(
 ):
     data: bytes = await request.body()
     message: dict = literal_eval(data.decode("utf-8"))
-    w3 = get_web3(escrow_info.chain_id)
+    w3 = get_web3(escrow_info.chainId)
     signer = recover_signer(message, signature, w3)
     return signer.lower() == escrow.launcher.lower()

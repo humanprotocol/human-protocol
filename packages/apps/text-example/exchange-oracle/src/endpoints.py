@@ -142,7 +142,7 @@ async def register_job_request(
     logger.info(f"POST {Endpoints.JOB_REQUEST} called with {escrow_info}.")
     try:
         escrow = EscrowUtils.get_escrow(
-            escrow_info.chain_id, escrow_info.escrow_address.lower()
+            escrow_info.chainId, escrow_info.escrowAddress.lower()
         )
     except EscrowClientError:
         logger.exception(Errors.ESCROW_INFO_INVALID.detail + f" {escrow_info}")
@@ -167,15 +167,15 @@ async def register_job_request(
         )
         raise Errors.AUTH_SIGNATURE_INVALID
 
-    match escrow_info.event_type:
+    match escrow_info.eventType:
         # add new job
         case EventType.ESCROW_CREATED:
             with Session() as session:
                 id = str(uuid4())
                 job_request = JobRequest(
                     id=id,
-                    escrow_address=escrow_info.escrow_address,
-                    chain_id=escrow_info.chain_id,
+                    escrow_address=escrow_info.escrowAddress,
+                    chain_id=escrow_info.chainId,
                 )
                 session.add(job_request)
                 session.commit()
@@ -186,8 +186,8 @@ async def register_job_request(
                 job_request = (
                     session.query(JobRequest)
                     .where(
-                        (JobRequest.escrow_address == escrow_info.escrow_address)
-                        & (JobRequest.chain_id == escrow_info.chain_id)
+                        (JobRequest.escrow_address == escrow_info.escrowAddress)
+                        & (JobRequest.chain_id == escrow_info.chainId)
                     )
                     .one()
                 )

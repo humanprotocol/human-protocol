@@ -51,7 +51,7 @@ def random_escrow_info(event_type: EventType = EventType.ESCROW_CREATED, seed=No
     chain_id = Config.localhost.chain_id
     info = json.loads(
         EscrowInfo(
-            escrow_address=escrow_address, chain_id=chain_id, event_type=event_type
+            escrowAddress=escrow_address, chainId=chain_id, eventType=event_type
         ).json()
     )
     return info, escrow_address, chain_id

@@ -84,9 +84,9 @@ def process_pending_job_requests():
 def set_up_projects_for_job(job_request: JobRequest):
     """Creates a new job."""
     escrow_info = EscrowInfo(
-        escrow_address=job_request.escrow_address,
-        chain_id=job_request.chain_id,
-        event_type=EventType.ESCROW_CREATED,
+        escrowAddress=job_request.escrow_address,
+        chainId=job_request.chain_id,
+        eventType=EventType.ESCROW_CREATED,
     )
 
     # get manifest from escrow url
