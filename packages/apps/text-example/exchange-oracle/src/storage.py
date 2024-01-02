@@ -120,7 +120,7 @@ def convert_annotations_to_raw_results(
                             record = {
                                 "task_key": annotation["task_key"],
                                 "annotator_id": annotator_name_map.get(
-                                    username, "UNKNOWN"
+                                    username, username
                                 ),
                                 "annotation_id": next(anno_ids),
                                 "value": {"span": [start, end], "label": label},
