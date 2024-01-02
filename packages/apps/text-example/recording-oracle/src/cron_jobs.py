@@ -12,7 +12,7 @@ from src.db import (
     stage_failure,
     Statuses,
 )
-from src.storage import download_raw_results, upload_data
+from src.storage import download_raw_results, upload_data, hash_file_content
 from src.annotation import calculate_intermediate_results
 
 logger = Config.logging.get_logger()
@@ -55,20 +55,21 @@ def upload_intermediate_results():
             try:
                 # upload files to s3
                 path = Config.storage_config.dataset_dir / f"{request.id}.json"
+                content_hash = hash_file_content(path)
                 upload_data(path, content_type="application/json")
-                path.unlink()
 
                 # update escrow
-                client = EscrowClient(get_web3(request.chain_id))
-                client.store_results(
+                EscrowClient(get_web3(request.chain_id)).store_results(
                     request.escrow_address,
                     Config.storage_config.results_s3_url(str(request.id)),
+                    content_hash,
                 )
 
+                path.unlink()
+                stage_success(request)
                 logger.info(
                     f"Successfully uploaded intermediate results of request {request.id}."
                 )
-                stage_success(request)
             except EscrowClientError:
                 logger.exception("Failed to update escrow.")
                 stage_failure(request)

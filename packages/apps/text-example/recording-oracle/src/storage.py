@@ -1,6 +1,7 @@
 """Module for interaction with S3 storage."""
 import json
 from dataclasses import dataclass
+from hashlib import sha256
 from io import StringIO, BytesIO
 from pathlib import Path
 from urllib.parse import urlparse
@@ -39,6 +40,13 @@ def download_raw_results(results_url):
     res = download_object(results_url)
     with BytesIO(res.data) as f:
         return [json.loads(line) for line in f.readlines()]
+
+
+def hash_file_content(path: Path, encoding="utf-8"):
+    with open(path, mode="r", encoding=encoding) as f:
+        content = f.read()
+    byte_content = str.encode(content, encoding=encoding)
+    return sha256(byte_content).hexdigest()
 
 
 def upload_data(
