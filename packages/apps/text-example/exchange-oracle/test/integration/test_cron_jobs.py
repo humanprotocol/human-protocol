@@ -7,6 +7,7 @@ from test.utils import (
     add_projects_to_job_request,
     random_address,
     upload_manifest_and_task_data,
+    get_web3_from_private_key,
 )
 from unittest.mock import MagicMock, patch
 
@@ -279,27 +280,40 @@ class CRONJobTest(unittest.TestCase):
             assert projects[-1].status == Statuses.failed
             assert job.status == Statuses.awaiting_upload
 
+    @patch("src.cron_jobs.get_web3")
     @patch("src.cron_jobs.Config.http.request")
-    def test_notify_recording_oracle(self, mock_request: MagicMock):
+    def test_notify_recording_oracle(
+        self, mock_request: MagicMock, mock_get_web3: MagicMock
+    ):
         """When a job is awaiting closure:
         - the recording oracle should receive the processed data via a request to the appropriate endpoint
         - if the request is successful the job should be set to closed
         """
+        mock_web3 = get_web3_from_private_key(Config.localhost.private_key)
+        mock_get_web3.return_value = mock_web3
+
         mock_response = MagicMock()
         mock_response.status = 200
         mock_request.return_value = mock_response
 
         job_id = add_job_request(Statuses.awaiting_closure)
+
         notify_recording_oracle()
 
         with Session() as session:
             job = session.query(JobRequest).where(JobRequest.id == job_id).one()
             assert job.status == Statuses.closed
 
-    def test_notify_recording_oracle_failing_due_to_unreachable_recording_oracle(self):
+    @patch("src.cron_jobs.get_web3")
+    def test_notify_recording_oracle_failing_due_to_unreachable_recording_oracle(
+        self, mock_get_web3: MagicMock
+    ):
         """When a job is awaiting closure and the recording oracle cannot be notified:
         - the job should be set to failed
         """
+        mock_web3 = get_web3_from_private_key(Config.localhost.private_key)
+        mock_get_web3.return_value = mock_web3
+
         job_id = add_job_request(Statuses.awaiting_closure)
         notify_recording_oracle()
 

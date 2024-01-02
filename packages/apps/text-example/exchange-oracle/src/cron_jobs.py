@@ -9,7 +9,7 @@ from src.annotation import (
     download_annotations,
     is_done,
 )
-from src.chain import EscrowInfo, get_manifest_url, EventType
+from src.chain import EscrowInfo, get_manifest_url, EventType, get_web3, sign_message
 from src.config import Config
 from src.db import (
     AnnotationProject,
@@ -213,17 +213,28 @@ def notify_recording_oracle():
         )
         for request in requests:
             s3_url = Config.storage_config.results_s3_url(str(request.id))
+            cfg = Config.blockchain_config_from_id(request.chain_id)
             try:
                 payload = {
                     "escrow_address": request.escrow_address,
                     "chain_id": request.chain_id,
-                    "s3_url": s3_url,
+                    "solution_url": s3_url,
                 }
+
+                # generate human signature
+                w3 = get_web3(cfg.chain_id)
+                signature, _ = sign_message(payload, w3, cfg.private_key)
+
+                headers = {"Human-Signature": signature}
+
                 logger.debug(
                     f"Notifying recording oracle about job {request.id}. payload: {payload}"
                 )
                 response = Config.http.request(
-                    method="POST", url=Config.human.recording_oracle_url, json=payload
+                    method="POST",
+                    url=Config.human.recording_oracle_url,
+                    json=payload,
+                    headers=headers,
                 )
                 if response.status == 200:
                     stage_success(request)
