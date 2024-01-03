@@ -81,7 +81,7 @@ export const HumanAppDataView: FC = () => {
   const getTooltipTitle = (button: ViewButton) => {
     switch (button) {
       case ViewButton.Tasks:
-        return TOOLTIPS.TASKS;
+        return TOOLTIPS.SOLVED_TASKS;
       case ViewButton.Payments:
         return TOOLTIPS.PAYMENTS;
       case ViewButton.Transactions:
@@ -136,7 +136,7 @@ export const HumanAppDataView: FC = () => {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
-      <Box mt={3} sx={{ overflow: 'auto' }}>
+      <Box mt={3} mb={3} sx={{ overflow: 'auto' }}>
         {viewButton === ViewButton.Transactions && (
           <TransactionsView isLoading={isLoading} data={transactionsSeries} />
         )}
