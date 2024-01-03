@@ -32,7 +32,6 @@ import {
   WorkerLocation,
 } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
-import { BigNumber } from 'ethers';
 import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
@@ -505,7 +504,7 @@ export class EscrowCancelDto {
   public txHash: string;
 
   @ApiProperty()
-  public amountRefunded: BigNumber;
+  public amountRefunded: bigint;
 }
 
 export class JobCaptchaAdvancedDto {

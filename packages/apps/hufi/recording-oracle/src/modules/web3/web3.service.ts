@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Wallet, providers } from 'ethers';
+import { Wallet, ethers } from 'ethers';
 import { Web3ConfigType, web3ConfigKey } from '../../common/config';
 import { networkMap } from '../../common/constants/networks';
 
@@ -15,7 +15,7 @@ export class Web3Service {
 
     for (const networkKey of Object.keys(networkMap)) {
       const network = networkMap[networkKey];
-      const provider = new providers.JsonRpcProvider(network.rpcUrl);
+      const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
   }

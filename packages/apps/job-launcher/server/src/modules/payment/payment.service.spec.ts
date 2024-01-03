@@ -11,7 +11,6 @@ import {
   ErrorPostgres,
   ErrorSignature,
 } from '../../common/constants/errors';
-import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import {
   Currency,
   PaymentSource,
@@ -322,7 +321,7 @@ describe('PaymentService', () => {
       };
 
       jest
-        .spyOn(ethers.providers, 'JsonRpcProvider')
+        .spyOn(ethers, 'JsonRpcProvider')
         .mockReturnValue(jsonRpcProviderMock as any);
 
       jest
@@ -347,11 +346,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -362,8 +361,8 @@ describe('PaymentService', () => {
             logIndex: 123,
           },
         ],
-        transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        hash: MOCK_TRANSACTION_HASH,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -407,11 +406,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -423,7 +422,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -446,11 +445,11 @@ describe('PaymentService', () => {
 
       const unsupportedToken = 'doge';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -462,7 +461,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -486,10 +485,10 @@ describe('PaymentService', () => {
         throw new ConflictException(ErrorSignature.SignatureNotVerified);
       });
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [],
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -522,10 +521,10 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [],
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -544,11 +543,11 @@ describe('PaymentService', () => {
         transactionHash: MOCK_TRANSACTION_HASH,
       };
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -560,7 +559,9 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD - 1,
+        confirmations: jest
+          .fn()
+          .mockResolvedValue(TX_CONFIRMATION_TRESHOLD - 1),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(
@@ -583,11 +584,11 @@ describe('PaymentService', () => {
 
       const token = 'hmt';
 
-      const transactionReceipt: Partial<TransactionReceipt> = {
+      const transactionReceipt = {
         from: MOCK_ADDRESS,
         logs: [
           {
-            data: ethers.utils.parseUnits('10').toString(),
+            data: ethers.parseUnits('10').toString(),
             blockNumber: 123,
             blockHash: '123',
             transactionIndex: 123,
@@ -599,7 +600,7 @@ describe('PaymentService', () => {
           },
         ],
         transactionHash: MOCK_TRANSACTION_HASH,
-        confirmations: TX_CONFIRMATION_TRESHOLD,
+        confirmations: jest.fn().mockResolvedValue(TX_CONFIRMATION_TRESHOLD),
       };
 
       jsonRpcProviderMock.getTransactionReceipt.mockResolvedValue(

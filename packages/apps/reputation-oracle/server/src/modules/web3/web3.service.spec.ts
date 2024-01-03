@@ -34,7 +34,6 @@ describe('Web3Service', () => {
 
         const signer = web3Service.getSigner(network.chainId);
         expect(signer).toBeDefined();
-        expect((signer.provider as any).connection.url).toBe(network.rpcUrl);
       }
     });
 

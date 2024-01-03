@@ -1,34 +1,33 @@
-import { BigNumber } from 'ethers';
 import { EscrowStatus } from './types';
 import { ChainId } from './enums';
 
 export interface IAllocation {
   escrowAddress: string;
   staker: string;
-  tokens: BigNumber;
-  createdAt: BigNumber;
-  closedAt: BigNumber;
+  tokens: bigint;
+  createdAt: bigint;
+  closedAt: bigint;
 }
 
 export interface IReward {
   escrowAddress: string;
-  amount: BigNumber;
+  amount: bigint;
 }
 
 export interface ILeader {
   id: string;
   address: string;
-  amountStaked: BigNumber;
-  amountAllocated: BigNumber;
-  amountLocked: BigNumber;
-  lockedUntilTimestamp: BigNumber;
-  amountWithdrawn: BigNumber;
-  amountSlashed: BigNumber;
-  reputation: BigNumber;
-  reward: BigNumber;
-  amountJobsLaunched: BigNumber;
+  amountStaked: bigint;
+  amountAllocated: bigint;
+  amountLocked: bigint;
+  lockedUntilTimestamp: bigint;
+  amountWithdrawn: bigint;
+  amountSlashed: bigint;
+  reputation: bigint;
+  reward: bigint;
+  amountJobsLaunched: bigint;
   role?: string;
-  fee?: BigNumber;
+  fee?: bigint;
   publicKey?: string;
   webhookUrl?: string;
   url?: string;
@@ -54,9 +53,9 @@ export interface IEscrowConfig {
   recordingOracle: string;
   reputationOracle: string;
   exchangeOracle: string;
-  recordingOracleFee: BigNumber;
-  reputationOracleFee: BigNumber;
-  exchangeOracleFee: BigNumber;
+  recordingOracleFee: bigint;
+  reputationOracleFee: bigint;
+  exchangeOracleFee: bigint;
   manifestUrl: string;
   manifestHash: string;
 }

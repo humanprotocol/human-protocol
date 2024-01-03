@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { ethers, providers } from 'ethers';
+import { ethers } from 'ethers';
 import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -30,7 +30,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3/Web3Service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
@@ -170,7 +170,7 @@ export class PaymentService {
     const network = Object.values(networkMap).find(
       (item) => item.chainId === dto.chainId,
     );
-    const provider = new providers.JsonRpcProvider(network?.rpcUrl);
+    const provider = new ethers.JsonRpcProvider(network?.rpcUrl);
 
     const transaction = await provider.getTransactionReceipt(
       dto.transactionHash,
@@ -188,7 +188,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.InvalidTransactionData);
     }
 
-    if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
+    if ((await transaction.confirmations()) < TX_CONFIRMATION_TRESHOLD) {
       this.logger.error(
         `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
       );
@@ -200,15 +200,14 @@ export class PaymentService {
     const signer = this.web3Service.getSigner(dto.chainId);
 
     const recipientAddress = transaction.logs[0].topics.some(
-      (topic) =>
-        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
+      (topic) => ethers.hexlify(topic) === ethers.hexlify(signer.address),
     );
     if (!recipientAddress) {
       this.logger.error(ErrorPayment.InvalidRecipient);
       throw new ConflictException(ErrorPayment.InvalidRecipient);
     }
 
-    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
+    const amount = Number(ethers.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
@@ -226,7 +225,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transaction: transaction.transactionHash,
+      transaction: transaction.hash,
       chainId: dto.chainId,
     });
 
@@ -272,24 +271,30 @@ export class PaymentService {
     const rate = await getRate(TokenId.HMT, Currency.USD);
 
     try {
-        await this.paymentRepository.create({
-            userId: dto.userId,
-            jobId: dto.jobId,
-            source: PaymentSource.BALANCE,
-            type: PaymentType.REFUND,
-            amount: dto.refundAmount,
-            currency: TokenId.HMT,
-            rate,
-            status: PaymentStatus.SUCCEEDED,
-        });
+      await this.paymentRepository.create({
+        userId: dto.userId,
+        jobId: dto.jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.REFUND,
+        amount: dto.refundAmount,
+        currency: TokenId.HMT,
+        rate,
+        status: PaymentStatus.SUCCEEDED,
+      });
     } catch (error) {
-        if (error instanceof QueryFailedError && error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())) {
-            this.logger.log(ErrorPostgres.NumericFieldOverflow, PaymentService.name);
-            throw new ConflictException(ErrorPayment.IncorrectAmount);
-        } else {
-            this.logger.log(error, PaymentService.name);
-            throw new ConflictException(ErrorPayment.NotSuccess);
-        }
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
+        this.logger.log(
+          ErrorPostgres.NumericFieldOverflow,
+          PaymentService.name,
+        );
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, PaymentService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
     }
   }
 }

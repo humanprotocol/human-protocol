@@ -1,10 +1,8 @@
-import { Provider } from '@ethersproject/abstract-provider';
-import { Network } from '@ethersproject/networks';
 import {
   KVStore,
   KVStore__factory,
 } from '@human-protocol/core/typechain-types';
-import { Overrides, Signer, ethers } from 'ethers';
+import { ContractRunner, Overrides, ethers } from 'ethers';
 import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
@@ -16,7 +14,6 @@ import {
   ErrorKVStoreArrayLength,
   ErrorKVStoreEmptyKey,
   ErrorProviderDoesNotExist,
-  ErrorSigner,
   ErrorUnsupportedChainID,
 } from './error';
 import { NetworkData } from './types';
@@ -27,11 +24,11 @@ import { isValidUrl } from './utils';
  *
  * This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
  *
- * Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+ * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(signerOrProvider: Signer | Provider);
+ * static async build(runner: ContractRunner);
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -97,47 +94,42 @@ export class KVStoreClient extends BaseEthersClient {
   /**
    * **KVStoreClient constructor**
    *
-   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the KVStore contract
    */
-  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
-    super(signerOrProvider, networkData);
+  constructor(runner: ContractRunner, networkData: NetworkData) {
+    super(runner, networkData);
 
     this.contract = KVStore__factory.connect(
       networkData.kvstoreAddress,
-      signerOrProvider
+      runner
     );
   }
 
   /**
-   * Creates an instance of KVStoreClient from a Signer or Provider.
+   * Creates an instance of KVStoreClient from a runner.
    *
-   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
    *
    * @returns {Promise<KVStoreClient>} - An instance of KVStoreClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
-    let network: Network;
-    if (Signer.isSigner(signerOrProvider)) {
-      if (!signerOrProvider.provider) {
-        throw ErrorProviderDoesNotExist;
-      }
-
-      network = await signerOrProvider.provider.getNetwork();
-    } else {
-      network = await signerOrProvider.getNetwork();
+  public static async build(runner: ContractRunner) {
+    if (!runner.provider) {
+      throw ErrorProviderDoesNotExist;
     }
 
-    const chainId: ChainId = network.chainId;
+    const network = await runner.provider?.getNetwork();
+
+    const chainId: ChainId = Number(network?.chainId);
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
 
-    return new KVStoreClient(signerOrProvider, networkData);
+    return new KVStoreClient(runner, networkData);
   }
 
   /**
@@ -173,7 +165,6 @@ export class KVStoreClient extends BaseEthersClient {
     value: string,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (key === '') throw ErrorKVStoreEmptyKey;
     try {
       await (await this.contract.set(key, value, txOptions)).wait();
@@ -217,7 +208,6 @@ export class KVStoreClient extends BaseEthersClient {
     values: string[],
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) throw ErrorSigner;
     if (keys.length !== values.length) throw ErrorKVStoreArrayLength;
     if (keys.includes('')) throw ErrorKVStoreEmptyKey;
 
@@ -261,18 +251,12 @@ export class KVStoreClient extends BaseEthersClient {
     urlKey = 'url',
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!Signer.isSigner(this.signerOrProvider)) {
-      throw ErrorSigner;
-    }
-
     if (!isValidUrl(url)) {
       throw ErrorInvalidUrl;
     }
 
     const content = await fetch(url).then((res) => res.text());
-    const contentHash = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(content)
-    );
+    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
 
     const hashKey = urlKey + 'Hash';
 
@@ -316,7 +300,7 @@ export class KVStoreClient extends BaseEthersClient {
    */
   public async get(address: string, key: string): Promise<string> {
     if (key === '') throw ErrorKVStoreEmptyKey;
-    if (!ethers.utils.isAddress(address)) throw ErrorInvalidAddress;
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
 
     try {
       const result = await this.contract?.get(address, key);
@@ -354,7 +338,7 @@ export class KVStoreClient extends BaseEthersClient {
    * ```
    */
   public async getURL(address: string, urlKey = 'url'): Promise<string> {
-    if (!ethers.utils.isAddress(address)) throw ErrorInvalidAddress;
+    if (!ethers.isAddress(address)) throw ErrorInvalidAddress;
     const hashKey = urlKey + 'Hash';
 
     let url = '',
@@ -378,9 +362,7 @@ export class KVStoreClient extends BaseEthersClient {
     }
 
     const content = await fetch(url).then((res) => res.text());
-    const contentHash = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(content)
-    );
+    const contentHash = ethers.keccak256(ethers.toUtf8Bytes(content));
 
     if (hash !== contentHash) {
       throw ErrorInvalidHash;

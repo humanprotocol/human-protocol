@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Provider } from '@ethersproject/abstract-provider';
-import { Network } from '@ethersproject/networks';
 import {
   Escrow,
   EscrowFactory,
@@ -9,7 +7,7 @@ import {
   HMToken,
   HMToken__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, ContractReceipt, Overrides, Signer, ethers } from 'ethers';
+import { ContractRunner, EventLog, Overrides, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 import { BaseEthersClient } from './base';
 import { DEFAULT_TX_ID, NETWORKS } from './constants';
@@ -21,43 +19,43 @@ import {
   ErrorEscrowAddressIsNotProvidedByFactory,
   ErrorEscrowDoesNotHaveEnoughBalance,
   ErrorHashIsEmptyString,
-  ErrorProviderDoesNotExist,
-  ErrorUnsupportedChainID,
   ErrorInvalidAddress,
   ErrorInvalidEscrowAddressProvided,
+  ErrorInvalidExchangeOracleAddressProvided,
   ErrorInvalidRecordingOracleAddressProvided,
   ErrorInvalidReputationOracleAddressProvided,
   ErrorInvalidTokenAddress,
   ErrorInvalidUrl,
   ErrorLaunchedEventIsNotEmitted,
   ErrorListOfHandlersCannotBeEmpty,
+  ErrorProviderDoesNotExist,
   ErrorRecipientAndAmountsMustBeSameLength,
   ErrorRecipientCannotBeEmptyArray,
   ErrorTotalFeeMustBeLessThanHundred,
+  ErrorTransferEventNotFoundInTransactionLogs,
+  ErrorUnsupportedChainID,
   ErrorUrlIsEmptyString,
   InvalidEthereumAddressError,
-  ErrorInvalidExchangeOracleAddressProvided,
-  ErrorTransferEventNotFoundInTransactionLogs,
 } from './error';
-import { IEscrowConfig, IEscrowsFilter } from './interfaces';
-import { EscrowCancel, EscrowStatus, NetworkData } from './types';
-import { isValidUrl, throwError } from './utils';
 import {
   EscrowData,
   GET_ESCROWS_QUERY,
   GET_ESCROW_BY_ADDRESS_QUERY,
 } from './graphql';
+import { IEscrowConfig, IEscrowsFilter } from './interfaces';
+import { EscrowCancel, EscrowStatus, NetworkData } from './types';
+import { isValidUrl, throwError } from './utils';
 
 /**
  * ## Introduction
  *
  * This client enables to perform actions on Escrow contracts and obtain information from both the contracts and subgraph.
  *
- * Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+ * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(signerOrProvider: Signer | Provider);
+ * static async build(runner: ContractRunner);
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -123,47 +121,42 @@ export class EscrowClient extends BaseEthersClient {
   /**
    * **EscrowClient constructor**
    *
-   * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner The Runner object to interact with the Ethereum network
    * @param {NetworkData} network The network information required to connect to the Escrow contract
    */
-  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
-    super(signerOrProvider, networkData);
+  constructor(runner: ContractRunner, networkData: NetworkData) {
+    super(runner, networkData);
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
       networkData.factoryAddress,
-      signerOrProvider
+      runner
     );
   }
 
   /**
-   * Creates an instance of EscrowClient from a Signer or Provider.
+   * Creates an instance of EscrowClient from a Runner.
    *
-   * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner The Runner object to interact with the Ethereum network
    *
    * @returns {Promise<EscrowClient>} An instance of EscrowClient
    * @throws {ErrorProviderDoesNotExist} Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
-    let network: Network;
-    if (Signer.isSigner(signerOrProvider)) {
-      if (!signerOrProvider.provider) {
-        throw ErrorProviderDoesNotExist;
-      }
-
-      network = await signerOrProvider.provider.getNetwork();
-    } else {
-      network = await signerOrProvider.getNetwork();
+  public static async build(runner: ContractRunner) {
+    if (!runner.provider) {
+      throw ErrorProviderDoesNotExist;
     }
 
-    const chainId: ChainId = network.chainId;
+    const network = await runner.provider?.getNetwork();
+
+    const chainId: ChainId = Number(network?.chainId);
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
 
-    return new EscrowClient(signerOrProvider, networkData);
+    return new EscrowClient(runner, networkData);
   }
 
   /**
@@ -173,7 +166,7 @@ export class EscrowClient extends BaseEthersClient {
    */
   private getEscrowContract(escrowAddress: string): Escrow {
     try {
-      return Escrow__factory.connect(escrowAddress, this.signerOrProvider);
+      return Escrow__factory.connect(escrowAddress, this.runner);
     } catch (e) {
       return throwError(e);
     }
@@ -217,18 +210,18 @@ export class EscrowClient extends BaseEthersClient {
     jobRequesterId: string,
     txOptions: Overrides = {}
   ): Promise<string> {
-    if (!ethers.utils.isAddress(tokenAddress)) {
+    if (!ethers.isAddress(tokenAddress)) {
       throw ErrorInvalidTokenAddress;
     }
 
     trustedHandlers.forEach((trustedHandler) => {
-      if (!ethers.utils.isAddress(trustedHandler)) {
+      if (!ethers.isAddress(trustedHandler)) {
         throw new InvalidEthereumAddressError(trustedHandler);
       }
     });
 
     try {
-      const result: ContractReceipt = await (
+      const result = await (
         await this.escrowFactoryContract.createEscrow(
           tokenAddress,
           trustedHandlers,
@@ -237,8 +230,10 @@ export class EscrowClient extends BaseEthersClient {
         )
       ).wait();
 
-      const event = result.events?.find(({ topics }) =>
-        topics.includes(ethers.utils.id('LaunchedV2(address,address,string)'))
+      const event = (
+        result?.logs?.find(({ topics }) =>
+          topics.includes(ethers.id('LaunchedV2(address,address,string)'))
+        ) as EventLog
       )?.args;
 
       if (!event) {
@@ -280,9 +275,9 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    reputationOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    exchangeOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    recordingOracleFee: BigNumber.from('10'),
-   *    reputationOracleFee: BigNumber.from('10'),
-   *    exchangeOracleFee: BigNumber.from('10'),
+   *    recordingOracleFee: bigint.from('10'),
+   *    reputationOracleFee: bigint.from('10'),
+   *    exchangeOracleFee: bigint.from('10'),
    *    manifestUrl: 'htttp://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
@@ -306,33 +301,31 @@ export class EscrowClient extends BaseEthersClient {
       manifestHash,
     } = escrowConfig;
 
-    if (!ethers.utils.isAddress(recordingOracle)) {
+    if (!ethers.isAddress(recordingOracle)) {
       throw ErrorInvalidRecordingOracleAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(reputationOracle)) {
+    if (!ethers.isAddress(reputationOracle)) {
       throw ErrorInvalidReputationOracleAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(exchangeOracle)) {
+    if (!ethers.isAddress(exchangeOracle)) {
       throw ErrorInvalidExchangeOracleAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
     if (
-      recordingOracleFee.lte(0) ||
-      reputationOracleFee.lte(0) ||
-      exchangeOracleFee.lte(0)
+      recordingOracleFee <= 0 ||
+      reputationOracleFee <= 0 ||
+      exchangeOracleFee <= 0
     ) {
       throw ErrorAmountMustBeGreaterThanZero;
     }
 
-    if (
-      recordingOracleFee.add(reputationOracleFee).add(exchangeOracleFee).gt(100)
-    ) {
+    if (recordingOracleFee + reputationOracleFee + exchangeOracleFee > 100) {
       throw ErrorTotalFeeMustBeLessThanHundred;
     }
 
@@ -406,9 +399,9 @@ export class EscrowClient extends BaseEthersClient {
    *    recordingOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    reputationOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
    *    exchangeOracle: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-   *    recordingOracleFee: BigNumber.from('10'),
-   *    reputationOracleFee: BigNumber.from('10'),
-   *    exchangeOracleFee: BigNumber.from('10'),
+   *    recordingOracleFee: bigint.from('10'),
+   *    reputationOracleFee: bigint.from('10'),
+   *    exchangeOracleFee: bigint.from('10'),
    *    manifestUrl: 'htttp://localhost/manifest.json',
    *    manifestHash: 'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079',
    * };
@@ -442,7 +435,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function adds funds of the chosen token to the escrow.
    *
    * @param {string} escrowAddress Address of the escrow to fund.
-   * @param {BigNumber} amount Amount to be added as funds.
+   * @param {bigint} amount Amount to be added as funds.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
@@ -460,21 +453,21 @@ export class EscrowClient extends BaseEthersClient {
    * const signer = new Wallet(privateKey, provider);
    * const escrowClient = await EscrowClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await escrowClient.fund('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
    * ```
    */
   @requiresSigner
   async fund(
     escrowAddress: string,
-    amount: BigNumber,
+    amount: bigint,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
-    if (amount.lte(0)) {
+    if (amount <= 0n) {
       throw ErrorAmountMustBeGreaterThanZero;
     }
 
@@ -489,7 +482,7 @@ export class EscrowClient extends BaseEthersClient {
 
       const tokenContract: HMToken = HMToken__factory.connect(
         tokenAddress,
-        this.signerOrProvider
+        this.runner
       );
       await (
         await tokenContract.transfer(escrowAddress, amount, txOptions)
@@ -536,7 +529,7 @@ export class EscrowClient extends BaseEthersClient {
     hash: string,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -598,7 +591,7 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -621,7 +614,7 @@ export class EscrowClient extends BaseEthersClient {
    *
    * @param {string} escrowAddress Escrow address to payout.
    * @param {string[]} recipients Array of recipient addresses.
-   * @param {BigNumber[]} amounts Array of amounts the recipients will receive.
+   * @param {bigint[]} amounts Array of amounts the recipients will receive.
    * @param {string} finalResultsUrl Final results file url.
    * @param {string} finalResultsHash Final results file hash.
    * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
@@ -644,7 +637,7 @@ export class EscrowClient extends BaseEthersClient {
    * const escrowClient = await EscrowClient.build(signer);
    *
    * const recipients = ['0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'];
-   * const amounts = [ethers.utils.parseUnits(5, 'ether'), ethers.utils.parseUnits(10, 'ether')];
+   * const amounts = [ethers.parseUnits(5, 'ether'), ethers.parseUnits(10, 'ether')];
    * const resultsUrl = 'http://localhost/results.json';
    * const resultsHash'b5dad76bf6772c0f07fd5e048f6e75a5f86ee079';
    *
@@ -655,12 +648,12 @@ export class EscrowClient extends BaseEthersClient {
   async bulkPayOut(
     escrowAddress: string,
     recipients: string[],
-    amounts: BigNumber[],
+    amounts: bigint[],
     finalResultsUrl: string,
     finalResultsHash: string,
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -677,7 +670,7 @@ export class EscrowClient extends BaseEthersClient {
     }
 
     recipients.forEach((recipient) => {
-      if (!ethers.utils.isAddress(recipient)) {
+      if (!ethers.isAddress(recipient)) {
         throw new InvalidEthereumAddressError(recipient);
       }
     });
@@ -696,12 +689,12 @@ export class EscrowClient extends BaseEthersClient {
 
     const balance = await this.getBalance(escrowAddress);
 
-    let totalAmount = BigNumber.from(0);
+    let totalAmount = 0n;
     amounts.forEach((amount) => {
-      totalAmount = totalAmount.add(amount);
+      totalAmount = totalAmount + amount;
     });
 
-    if (balance.lt(totalAmount)) {
+    if (balance < totalAmount) {
       throw ErrorEscrowDoesNotHaveEnoughBalance;
     }
 
@@ -759,7 +752,7 @@ export class EscrowClient extends BaseEthersClient {
     escrowAddress: string,
     txOptions: Overrides = {}
   ): Promise<EscrowCancel> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -774,32 +767,35 @@ export class EscrowClient extends BaseEthersClient {
         await escrowContract.cancel(txOptions)
       ).wait();
 
-      let amountTransferred: BigNumber | undefined = undefined;
+      let amountTransferred: bigint | undefined = undefined;
       const tokenAddress = await escrowContract.token();
 
       const tokenContract: HMToken = HMToken__factory.connect(
         tokenAddress,
-        this.signerOrProvider
+        this.runner
       );
+      if (transactionReceipt)
+        for (const log of transactionReceipt.logs) {
+          if (log.address === tokenAddress) {
+            const parsedLog = tokenContract.interface.parseLog({
+              topics: log.topics as string[],
+              data: log.data,
+            });
 
-      for (const log of transactionReceipt.logs) {
-        if (log.address === tokenAddress) {
-          const parsedLog = tokenContract.interface.parseLog(log);
-
-          const from = parsedLog.args[0];
-          if (parsedLog.name === 'Transfer' && from === escrowAddress) {
-            amountTransferred = parsedLog.args[2];
-            break;
+            const from = parsedLog?.args[0];
+            if (parsedLog?.name === 'Transfer' && from === escrowAddress) {
+              amountTransferred = parsedLog?.args[2];
+              break;
+            }
           }
         }
-      }
 
       if (amountTransferred === undefined) {
         throw ErrorTransferEventNotFoundInTransactionLogs;
       }
 
       const escrowCancelData: EscrowCancel = {
-        txHash: transactionReceipt.transactionHash,
+        txHash: transactionReceipt?.hash || '',
         amountRefunded: amountTransferred,
       };
 
@@ -837,7 +833,7 @@ export class EscrowClient extends BaseEthersClient {
    */
   @requiresSigner
   async abort(escrowAddress: string, txOptions: Overrides = {}): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -889,7 +885,7 @@ export class EscrowClient extends BaseEthersClient {
     trustedHandlers: string[],
     txOptions: Overrides = {}
   ): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -898,7 +894,7 @@ export class EscrowClient extends BaseEthersClient {
     }
 
     trustedHandlers.forEach((trustedHandler) => {
-      if (!ethers.utils.isAddress(trustedHandler)) {
+      if (!ethers.isAddress(trustedHandler)) {
         throw new InvalidEthereumAddressError(trustedHandler);
       }
     });
@@ -923,7 +919,7 @@ export class EscrowClient extends BaseEthersClient {
    * This function returns the balance for a specified escrow address.
    *
    * @param {string} escrowAddress Address of the escrow.
-   * @returns {BigNumber} Balance of the escrow in the token used to fund it.
+   * @returns {bigint} Balance of the escrow in the token used to fund it.
    *
    * **Code example**
    *
@@ -939,8 +935,8 @@ export class EscrowClient extends BaseEthersClient {
    * const balance = await escrowClient.getBalance('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
-  async getBalance(escrowAddress: string): Promise<BigNumber> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+  async getBalance(escrowAddress: string): Promise<bigint> {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -978,7 +974,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getManifestHash(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1016,7 +1012,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getManifestUrl(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1054,7 +1050,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getResultsUrl(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1092,7 +1088,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getIntermediateResultsUrl(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1130,7 +1126,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getTokenAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1168,7 +1164,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getStatus(escrowAddress: string): Promise<EscrowStatus> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1179,7 +1175,7 @@ export class EscrowClient extends BaseEthersClient {
     try {
       const escrowContract = this.getEscrowContract(escrowAddress);
 
-      return escrowContract.status();
+      return Number(await escrowContract.status());
     } catch (e) {
       return throwError(e);
     }
@@ -1206,7 +1202,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getRecordingOracleAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1244,7 +1240,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getJobLauncherAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1282,7 +1278,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getReputationOracleAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1320,7 +1316,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getExchangeOracleAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1358,7 +1354,7 @@ export class EscrowClient extends BaseEthersClient {
    * ```
    */
   async getFactoryAddress(escrowAddress: string): Promise<string> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
+    if (!ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidEscrowAddressProvided;
     }
 
@@ -1511,28 +1507,19 @@ export class EscrowUtils {
     if (!filter?.networks?.length) {
       throw ErrorUnsupportedChainID;
     }
-    if (filter.launcher && !ethers.utils.isAddress(filter.launcher)) {
+    if (filter.launcher && !ethers.isAddress(filter.launcher)) {
       throw ErrorInvalidAddress;
     }
 
-    if (
-      filter.recordingOracle &&
-      !ethers.utils.isAddress(filter.recordingOracle)
-    ) {
+    if (filter.recordingOracle && !ethers.isAddress(filter.recordingOracle)) {
       throw ErrorInvalidAddress;
     }
 
-    if (
-      filter.reputationOracle &&
-      !ethers.utils.isAddress(filter.reputationOracle)
-    ) {
+    if (filter.reputationOracle && !ethers.isAddress(filter.reputationOracle)) {
       throw ErrorInvalidAddress;
     }
 
-    if (
-      filter.exchangeOracle &&
-      !ethers.utils.isAddress(filter.exchangeOracle)
-    ) {
+    if (filter.exchangeOracle && !ethers.isAddress(filter.exchangeOracle)) {
       throw ErrorInvalidAddress;
     }
 
@@ -1652,7 +1639,7 @@ export class EscrowUtils {
       throw ErrorUnsupportedChainID;
     }
 
-    if (escrowAddress && !ethers.utils.isAddress(escrowAddress)) {
+    if (escrowAddress && !ethers.isAddress(escrowAddress)) {
       throw ErrorInvalidAddress;
     }
 

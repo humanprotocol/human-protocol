@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constants';
 import { ErrorWeb3 } from '../../common/constants/errors';
 import { Web3Env } from '../../common/enums/web3';
-import { Web3Service } from './web3.service';
+import { Web3Service } from './Web3Service';
 
 describe('Web3Service', () => {
   let mockConfigService: Partial<ConfigService>;

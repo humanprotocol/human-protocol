@@ -23,7 +23,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { IsNull, LessThanOrEqual, Not, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
@@ -71,7 +71,6 @@ import {
   JobCaptchaAdvancedDto,
   JobCaptchaDto,
   RestrictedAudience,
-  StorageDataDto,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
@@ -541,8 +540,8 @@ export class JobService {
       ),
     );
 
-    return ethers.utils.formatEther(
-      ethers.utils.parseUnits(fundAmount.toString(), 'ether').div(totalJobs),
+    return ethers.formatEther(
+      ethers.parseUnits(fundAmount.toString(), 'ether') / BigInt(totalJobs),
     );
   }
 
@@ -649,7 +648,7 @@ export class JobService {
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const weiAmount = ethers.utils.parseUnits(
+    const weiAmount = ethers.parseUnits(
       jobEntity.fundAmount.toString(),
       'ether',
     );
@@ -762,7 +761,7 @@ export class JobService {
             limit,
           );
           const escrowAddresses = escrows.map((escrow) =>
-            ethers.utils.getAddress(escrow.address),
+            ethers.getAddress(escrow.address),
           );
 
           jobs = await this.jobRepository.findJobsByEscrowAddresses(
@@ -987,7 +986,7 @@ export class JobService {
       const { amountRefunded } =
         await this.processEscrowCancellation(jobEntity);
       await this.paymentService.createRefundPayment({
-        refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
+        refundAmount: Number(ethers.formatEther(amountRefunded)),
         userId: jobEntity.userId,
         jobId: jobEntity.id,
       });
@@ -1055,7 +1054,7 @@ export class JobService {
     }
 
     const balance = await escrowClient.getBalance(escrowAddress);
-    if (balance.eq(0)) {
+    if (balance === 0n) {
       this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
       throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
     }
@@ -1148,15 +1147,12 @@ export class JobService {
 
     const baseManifestDetails = {
       chainId,
-      tokenAddress: escrow ? escrow.token : ethers.constants.AddressZero,
+      tokenAddress: escrow ? escrow.token : ethers.ZeroAddress,
       requesterAddress: signer.address,
       fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
-      exchangeOracleAddress:
-        escrow?.exchangeOracle || ethers.constants.AddressZero,
-      recordingOracleAddress:
-        escrow?.recordingOracle || ethers.constants.AddressZero,
-      reputationOracleAddress:
-        escrow?.reputationOracle || ethers.constants.AddressZero,
+      exchangeOracleAddress: escrow?.exchangeOracle || ethers.ZeroAddress,
+      recordingOracleAddress: escrow?.recordingOracle || ethers.ZeroAddress,
+      reputationOracleAddress: escrow?.reputationOracle || ethers.ZeroAddress,
     };
 
     let specificManifestDetails;
@@ -1194,7 +1190,7 @@ export class JobService {
     if (!escrowAddress) {
       return {
         details: {
-          escrowAddress: ethers.constants.AddressZero,
+          escrowAddress: ethers.ZeroAddress,
           manifestUrl,
           manifestHash,
           balance: 0,
@@ -1203,7 +1199,7 @@ export class JobService {
         },
         manifest: manifestDetails,
         staking: {
-          staker: ethers.constants.AddressZero,
+          staker: ethers.ZeroAddress,
           allocated: 0,
           slashed: 0,
         },
@@ -1215,14 +1211,14 @@ export class JobService {
         escrowAddress,
         manifestUrl,
         manifestHash,
-        balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
+        balance: Number(ethers.formatEther(escrow?.balance || 0)),
         paidOut: Number(escrow?.amountPaid || 0),
         status: jobEntity.status,
       },
       manifest: manifestDetails,
       staking: {
         staker: allocation?.staker as string,
-        allocated: allocation?.tokens.toNumber() as number,
+        allocated: Number(allocation?.tokens),
         slashed: 0, // TODO: Retrieve slash tokens
       },
     };
@@ -1237,12 +1233,12 @@ export class JobService {
     const signer = this.web3Service.getSigner(chainId);
     const filter = {
       address: tokenAddress,
-      topics: [ethers.utils.id('Transfer(address,address,uint256)')],
+      topics: [ethers.id('Transfer(address,address,uint256)')],
       fromBlock: fromBlock,
       toBlock: toBlock,
     };
 
-    return signer.provider.getLogs(filter);
+    return signer.provider?.getLogs(filter);
   }
 
   public async getPaidOutAmount(
@@ -1259,13 +1255,16 @@ export class JobService {
     const logs = await this.getTransferLogs(chainId, tokenAddress, 0, 'latest');
     let paidOutAmount = new Decimal(0);
 
-    logs.forEach((log) => {
-      const parsedLog = tokenContract.interface.parseLog(log);
-      const from = parsedLog.args[0];
-      const amount = parsedLog.args[2];
+    logs?.forEach((log) => {
+      const parsedLog = tokenContract.interface.parseLog({
+        topics: log.topics as string[],
+        data: log.data,
+      });
+      const from = parsedLog?.args[0];
+      const amount = parsedLog?.args[2];
 
       if (from === escrowAddress) {
-        paidOutAmount = paidOutAmount.add(ethers.utils.formatEther(amount));
+        paidOutAmount = paidOutAmount.add(ethers.formatEther(amount));
       }
     });
 
@@ -1275,14 +1274,14 @@ export class JobService {
   private async getOracleFee(
     oracleAddress: string,
     chainId: ChainId,
-  ): Promise<BigNumber> {
+  ): Promise<bigint> {
     const signer = this.web3Service.getSigner(chainId);
 
     const kvStoreClient = await KVStoreClient.build(signer);
 
     const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
 
-    return BigNumber.from(feeValue ? feeValue : 1);
+    return BigInt(feeValue ? feeValue : 1);
   }
 
   private async updateCompletedStatus(

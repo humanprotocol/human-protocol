@@ -97,7 +97,7 @@ import { PaymentRepository } from '../payment/payment.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
 import { EventType } from '../../common/enums/webhook';
 import { PaymentEntity } from '../payment/payment.entity';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { HMToken__factory } from '@human-protocol/core/typechain-types';
 import { StorageService } from '../storage/storage.service';
 import {
@@ -276,9 +276,7 @@ describe('JobService', () => {
 
     storageService.download = jest.fn();
 
-    web3Service.calculateGasPrice = jest
-      .fn()
-      .mockReturnValue(BigNumber.from(1000));
+    web3Service.calculateGasPrice = jest.fn().mockReturnValue(1000n);
   });
 
   describe('createJob', () => {
@@ -1522,7 +1520,7 @@ describe('JobService', () => {
         .spyOn(jobService, 'processEscrowCancellation')
         .mockResolvedValueOnce({
           txHash: MOCK_TRANSACTION_HASH,
-          amountRefunded: BigNumber.from(1),
+          amountRefunded: 1n,
         });
 
       (EscrowClient.build as any).mockImplementation(() => ({
@@ -1604,7 +1602,7 @@ describe('JobService', () => {
     it('should throw bad request exception if escrow balance is zero', async () => {
       (EscrowClient.build as any).mockImplementation(() => ({
         getStatus: jest.fn().mockResolvedValue(EscrowStatus.Launched),
-        getBalance: jest.fn().mockResolvedValue({ eq: () => true }),
+        getBalance: jest.fn().mockResolvedValue(0n),
       }));
 
       await expect(
@@ -1891,11 +1889,11 @@ describe('JobService', () => {
     it('should return job details with escrow address successfully', async () => {
       const balance = '1';
       const allocationMock: IAllocation = {
-        escrowAddress: ethers.constants.AddressZero,
-        staker: ethers.constants.AddressZero,
-        tokens: BigNumber.from('1'),
-        createdAt: BigNumber.from('1'),
-        closedAt: BigNumber.from('1'),
+        escrowAddress: ethers.ZeroAddress,
+        staker: ethers.ZeroAddress,
+        tokens: 1n,
+        createdAt: 1n,
+        closedAt: 1n,
       };
 
       const manifestMock: FortuneManifestDto = {
@@ -1992,7 +1990,7 @@ describe('JobService', () => {
 
       const expectedJobDetailsDto: JobDetailsDto = {
         details: {
-          escrowAddress: ethers.constants.AddressZero,
+          escrowAddress: ethers.ZeroAddress,
           manifestUrl: MOCK_FILE_URL,
           manifestHash: MOCK_FILE_HASH,
           balance: 0,
@@ -2004,13 +2002,13 @@ describe('JobService', () => {
           title: MOCK_REQUESTER_TITLE,
           description: MOCK_REQUESTER_DESCRIPTION,
           submissionsRequired: expect.any(Number),
-          tokenAddress: ethers.constants.AddressZero,
+          tokenAddress: ethers.ZeroAddress,
           fundAmount: expect.any(Number),
           requesterAddress: MOCK_ADDRESS,
           requestType: JobRequestType.FORTUNE,
-          exchangeOracleAddress: ethers.constants.AddressZero,
-          recordingOracleAddress: ethers.constants.AddressZero,
-          reputationOracleAddress: ethers.constants.AddressZero,
+          exchangeOracleAddress: ethers.ZeroAddress,
+          recordingOracleAddress: ethers.ZeroAddress,
+          reputationOracleAddress: ethers.ZeroAddress,
         },
         staking: {
           staker: expect.any(String),
@@ -2049,7 +2047,7 @@ describe('JobService', () => {
 
       await jobService.getTransferLogs(chainId, MOCK_ADDRESS, 0, 'latest');
       expect(
-        web3Service.getSigner(chainId).provider.getLogs,
+        web3Service.getSigner(chainId).provider?.getLogs,
       ).toHaveBeenCalled();
     });
   });
@@ -2057,7 +2055,7 @@ describe('JobService', () => {
   describe('getPaidOutAmount', () => {
     it('should calculate the paid out amount', async () => {
       const chainId = ChainId.LOCALHOST;
-      const amount = ethers.utils.parseEther('1.5');
+      const amount = ethers.parseEther('1.5');
       const mockLogs = [
         {
           data: 'mockData',
@@ -2120,8 +2118,8 @@ describe('JobService', () => {
         ChainId.LOCALHOST,
       );
 
-      expect(result.toNumber()).toBe(MOCK_ORACLE_FEE);
-      expect(result).toBeInstanceOf(BigNumber);
+      expect(Number(result)).toBe(MOCK_ORACLE_FEE);
+      expect(typeof result).toBe('bigint');
     });
   });
 });
