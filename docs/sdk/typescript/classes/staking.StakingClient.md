@@ -8,11 +8,11 @@
 
 This client enables to perform actions on staking contracts and obtain staking information from both the contracts and subgraph.
 
-Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+Internally, the SDK will use one network or another according to the network ID of the `runner`.
 To use this client, it is recommended to initialize it using the static `build` method.
 
 ```ts
-static async build(signerOrProvider: Signer | Provider);
+static async build(runner: ContractRunner);
 ```
 
 A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -89,7 +89,7 @@ const stakingClient = await StakingClient.build(provider);
 - [escrowFactoryContract](staking.StakingClient.md#escrowfactorycontract)
 - [networkData](staking.StakingClient.md#networkdata)
 - [rewardPoolContract](staking.StakingClient.md#rewardpoolcontract)
-- [signerOrProvider](staking.StakingClient.md#signerorprovider)
+- [runner](staking.StakingClient.md#runner)
 - [stakingContract](staking.StakingClient.md#stakingcontract)
 - [tokenContract](staking.StakingClient.md#tokencontract)
 
@@ -114,7 +114,7 @@ const stakingClient = await StakingClient.build(provider);
 
 ### constructor
 
-• **new StakingClient**(`signerOrProvider`, `networkData`): [`StakingClient`](staking.StakingClient.md)
+• **new StakingClient**(`runner`, `networkData`): [`StakingClient`](staking.StakingClient.md)
 
 **StakingClient constructor**
 
@@ -122,7 +122,7 @@ const stakingClient = await StakingClient.build(provider);
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 | `networkData` | `NetworkData` | - |
 
 #### Returns
@@ -135,7 +135,7 @@ const stakingClient = await StakingClient.build(provider);
 
 #### Defined in
 
-[staking.ts:118](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L118)
+[staking.ts:116](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L116)
 
 ## Properties
 
@@ -145,7 +145,7 @@ const stakingClient = await StakingClient.build(provider);
 
 #### Defined in
 
-[staking.ts:109](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L109)
+[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
 
 ___
 
@@ -159,7 +159,7 @@ ___
 
 #### Defined in
 
-[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
@@ -169,21 +169,21 @@ ___
 
 #### Defined in
 
-[staking.ts:110](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L110)
+[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
 
 ___
 
-### signerOrProvider
+### runner
 
-• `Protected` **signerOrProvider**: `Signer` \| `Provider`
+• `Protected` **runner**: `ContractRunner`
 
 #### Inherited from
 
-[BaseEthersClient](base.BaseEthersClient.md).[signerOrProvider](base.BaseEthersClient.md#signerorprovider)
+[BaseEthersClient](base.BaseEthersClient.md).[runner](base.BaseEthersClient.md#runner)
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ___
 
@@ -193,7 +193,7 @@ ___
 
 #### Defined in
 
-[staking.ts:108](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L108)
+[staking.ts:106](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L106)
 
 ___
 
@@ -203,7 +203,7 @@ ___
 
 #### Defined in
 
-[staking.ts:107](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L107)
+[staking.ts:105](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L105)
 
 ## Methods
 
@@ -220,7 +220,7 @@ This function allocates a portion of the staked tokens to a specific escrow.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `escrowAddress` | `string` | Address of the escrow contract to allocate in. |
-| `amount` | `BigNumber` | Amount in WEI of tokens to allocate. |
+| `amount` | `bigint` | Amount in WEI of tokens to allocate. |
 | `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
@@ -242,13 +242,13 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
 #### Defined in
 
-[staking.ts:473](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L473)
+[staking.ts:463](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L463)
 
 ___
 
@@ -262,7 +262,7 @@ This function approves the staking contract to transfer a specified amount of to
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `amount` | `BigNumber` | Amount in WEI of tokens to approve for stake. |
+| `amount` | `bigint` | Amount in WEI of tokens to approve for stake. |
 | `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
@@ -284,13 +284,13 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.approveStake(amount);
 ```
 
 #### Defined in
 
-[staking.ts:215](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L215)
+[staking.ts:208](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L208)
 
 ___
 
@@ -312,7 +312,7 @@ Check if escrow exists
 
 #### Defined in
 
-[staking.ts:179](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L179)
+[staking.ts:172](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L172)
 
 ___
 
@@ -356,7 +356,7 @@ await stakingClient.closeAllocation('0x62dD51230A30401C455c8398d06F85e4EaB6309f'
 
 #### Defined in
 
-[staking.ts:526](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L526)
+[staking.ts:516](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L516)
 
 ___
 
@@ -399,7 +399,7 @@ await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f
 
 #### Defined in
 
-[staking.ts:569](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L569)
+[staking.ts:559](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L559)
 
 ___
 
@@ -437,7 +437,7 @@ const allocationInfo = await stakingClient.getAllocation('0x62dD51230A30401C455c
 
 #### Defined in
 
-[staking.ts:680](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L680)
+[staking.ts:670](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L670)
 
 ___
 
@@ -475,7 +475,7 @@ const leaders = await stakingClient.getLeaders();
 
 #### Defined in
 
-[staking.ts:606](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L606)
+[staking.ts:596](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L596)
 
 ___
 
@@ -513,7 +513,7 @@ const leader = await stakingClient.getLeader('0x62dD51230A30401C455c8398d06F85e4
 
 #### Defined in
 
-[staking.ts:645](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L645)
+[staking.ts:635](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L635)
 
 ___
 
@@ -551,7 +551,7 @@ const rewards = await stakingClient.getRewards('0x62dD51230A30401C455c8398d06F85
 
 #### Defined in
 
-[staking.ts:712](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L712)
+[staking.ts:702](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L702)
 
 ___
 
@@ -568,7 +568,7 @@ This function reduces the allocated amount by an staker in an escrow and transfe
 | `slasher` | `string` | Wallet address from who requested the slash |
 | `staker` | `string` | Wallet address from who is going to be slashed |
 | `escrowAddress` | `string` | Address of the escrow which allocation will be slashed |
-| `amount` | `BigNumber` | Amount in WEI of tokens to unstake. |
+| `amount` | `bigint` | Amount in WEI of tokens to unstake. |
 | `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
@@ -590,13 +590,13 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
 ```
 
 #### Defined in
 
-[staking.ts:402](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L402)
+[staking.ts:392](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L392)
 
 ___
 
@@ -612,7 +612,7 @@ This function stakes a specified amount of tokens on a specific network.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `amount` | `BigNumber` | Amount in WEI of tokens to stake. |
+| `amount` | `bigint` | Amount in WEI of tokens to stake. |
 | `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
@@ -634,14 +634,14 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.approveStake(amount); // if it was already approved before, this is not necessary
 await stakingClient.approveStake(amount);
 ```
 
 #### Defined in
 
-[staking.ts:270](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L270)
+[staking.ts:263](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L263)
 
 ___
 
@@ -657,7 +657,7 @@ This function unstakes tokens from staking contract. The unstaked tokens stay lo
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `amount` | `BigNumber` | Amount in WEI of tokens to unstake. |
+| `amount` | `bigint` | Amount in WEI of tokens to unstake. |
 | `txOptions?` | `Overrides` | Additional transaction parameters (optional, defaults to an empty object). |
 
 #### Returns
@@ -679,13 +679,13 @@ const provider = new providers.JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const stakingClient = await StakingClient.build(signer);
 
-const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
 await stakingClient.unstake(amount);
 ```
 
 #### Defined in
 
-[staking.ts:318](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L318)
+[staking.ts:308](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L308)
 
 ___
 
@@ -727,21 +727,21 @@ await stakingClient.withdraw();
 
 #### Defined in
 
-[staking.ts:364](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L364)
+[staking.ts:354](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L354)
 
 ___
 
 ### build
 
-▸ **build**(`signerOrProvider`): `Promise`\<[`StakingClient`](staking.StakingClient.md)\>
+▸ **build**(`runner`): `Promise`\<[`StakingClient`](staking.StakingClient.md)\>
 
-Creates an instance of StakingClient from a Signer or Provider.
+Creates an instance of StakingClient from a Runner.
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 
 #### Returns
 
@@ -759,4 +759,4 @@ Creates an instance of StakingClient from a Signer or Provider.
 
 #### Defined in
 
-[staking.ts:152](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L152)
+[staking.ts:150](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/staking.ts#L150)

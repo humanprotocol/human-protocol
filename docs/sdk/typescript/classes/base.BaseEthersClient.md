@@ -27,13 +27,13 @@ This class is used as a base class for other clients making on-chain calls.
 ### Properties
 
 - [networkData](base.BaseEthersClient.md#networkdata)
-- [signerOrProvider](base.BaseEthersClient.md#signerorprovider)
+- [runner](base.BaseEthersClient.md#runner)
 
 ## Constructors
 
 ### constructor
 
-• **new BaseEthersClient**(`signerOrProvider`, `networkData`): [`BaseEthersClient`](base.BaseEthersClient.md)
+• **new BaseEthersClient**(`runner`, `networkData`): [`BaseEthersClient`](base.BaseEthersClient.md)
 
 **BaseClient constructor**
 
@@ -41,7 +41,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Signer or Provider object to interact with the Ethereum network |
 | `networkData` | `NetworkData` | The network information required to connect to the contracts |
 
 #### Returns
@@ -50,7 +50,7 @@ This class is used as a base class for other clients making on-chain calls.
 
 #### Defined in
 
-[base.ts:21](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L21)
+[base.ts:20](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L20)
 
 ## Properties
 
@@ -60,14 +60,14 @@ This class is used as a base class for other clients making on-chain calls.
 
 #### Defined in
 
-[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
-### signerOrProvider
+### runner
 
-• `Protected` **signerOrProvider**: `Signer` \| `Provider`
+• `Protected` **runner**: `ContractRunner`
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
