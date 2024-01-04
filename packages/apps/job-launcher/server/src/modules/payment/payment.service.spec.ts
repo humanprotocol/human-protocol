@@ -684,7 +684,7 @@ describe('PaymentService', () => {
     });
 
     it('should throw IncorrectAmount error when overflow occurs', async () => {
-      const mockError = new QueryFailedError('', [], '');
+      const mockError = new QueryFailedError('', [], new Error(''));
       mockError.message = ErrorPostgres.NumericFieldOverflow.toLowerCase();
       jest.spyOn(paymentRepository, 'create').mockRejectedValueOnce(mockError);
 
