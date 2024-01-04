@@ -26,7 +26,7 @@ def s3_info_from_url(s3_url):
     return S3Info(host, bucket_name, object_name)
 
 
-def download_manifest(manifest_url):
+def download_manifest(manifest_url) -> Manifest:
     client = Config.storage_config.client()
     s3_info = s3_info_from_url(manifest_url)
     manifest = client.get_object(s3_info.bucket_name, s3_info.object_name)
@@ -98,10 +98,16 @@ def convert_taskdata_to_doccano(job_dir: Path, client=Config.storage_config.clie
 
 
 def convert_annotations_to_raw_results(
-    job_dir: Path, job_id: str, annotator_name_map: dict[str, str] = None
+    job_dir: Path,
+    job_id: str,
+    annotator_name_map: dict[str, str] = None,
+    reverse_label_map: dict = None,
 ):
     if annotator_name_map is None:
         annotator_name_map = {}
+
+    if reverse_label_map is None:
+        reverse_label_map = {}
 
     outfile = job_dir / f"{job_id}.jsonl"
     anno_ids = count()
@@ -124,7 +130,10 @@ def convert_annotations_to_raw_results(
                                     username, username
                                 ),
                                 "annotation_id": next(anno_ids),
-                                "value": {"span": [start, end], "label": label},
+                                "value": {
+                                    "span": [start, end],
+                                    "label": reverse_label_map.get(label, label),
+                                },
                             }
                             json_line = json.dumps(record) + "\n"
                             of.write(json_line)

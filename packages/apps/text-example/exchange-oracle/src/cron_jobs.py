@@ -171,6 +171,23 @@ def process_completed_job_requests():
         session.commit()
 
 
+def _reverse_label_map(label_set: dict[str, dict[str, str]]):
+    """Returns a mapping from label text to label id, given a requester_restricted_answer_set.
+    See test/data/manifest.json for details.
+    Args:
+        label_set: A dictionary mapping label ids to a mapping from language codes to label texts.
+
+    Example:
+        >>> labels = { "0": { "en":  "Acting" }, "1": { "en":  "Story" }, "2": { "en":  "Plot" }}
+        >>> print(_reverse_label_map(labels))
+        {'Acting': '0', 'Story': '1', 'Plot': '2'}
+    """
+    reverse_map = {}
+    for label_id, language_dict in label_set.items():
+        reverse_map.update({label: label_id for label in language_dict.values()})
+    return reverse_map
+
+
 def upload_completed_job_requests():
     """Converts data of completed job requests in the correct format for the recording oracle and uploads it to s3."""
     logger.info(f"Uploading data for completed job requests.")
@@ -185,9 +202,20 @@ def upload_completed_job_requests():
                 id = str(request.id)
                 data_dir = Config.storage_config.dataset_dir / id
 
+                # create reverse label map
+                info = EscrowInfo(
+                    chainId=request.chain_id,
+                    escrowAddress=request.escrow_address,
+                    eventType=EventType.ESCROW_CREATED,
+                )
+                manifest = download_manifest(get_manifest_url(info))
+
                 # convert doccano annotations into raw results format
                 raw_results_file = convert_annotations_to_raw_results(
-                    data_dir, id, username_to_worker_address_map()
+                    data_dir,
+                    id,
+                    username_to_worker_address_map(),
+                    _reverse_label_map(manifest.requester_restricted_answer_set),
                 )
 
                 # upload to s3

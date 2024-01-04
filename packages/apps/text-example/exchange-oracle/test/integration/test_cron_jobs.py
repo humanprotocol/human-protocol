@@ -8,6 +8,7 @@ from test.utils import (
     random_address,
     upload_manifest_and_task_data,
     get_web3_from_private_key,
+    upload_manifest,
 )
 from unittest.mock import MagicMock, patch
 
@@ -157,13 +158,16 @@ class CRONJobTest(unittest.TestCase):
             assert job.status == Statuses.in_progress
             assert not all(project.status == Statuses.completed for project in projects)
 
-    def test_upload_completed_job_requests(self):
+    @patch("src.cron_jobs.get_manifest_url")
+    def test_upload_completed_job_requests(self, mock_get_manifest_url: MagicMock):
         """When a job is awaiting upload:
         - all its annotations should be converted into the raw results format
         - the raw results should be uploaded to the appropriate s3 bucket
         - local data should be deleted
         - the job status should be set to awaiting closure
         """
+        mock_get_manifest_url.return_value = upload_manifest()
+
         job_id = add_job_request(Statuses.awaiting_upload)
 
         # add workers with usernames in the test data

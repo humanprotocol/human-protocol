@@ -121,6 +121,12 @@ def add_projects_to_job_request(job_id: str, n_projects: int, status: Statuses):
     return projects
 
 
+def upload_manifest():
+    manifest_filepath = Path(__file__).parent / "data" / "manifest.json"
+    upload_data(manifest_filepath, content_type="application/json")
+    return f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/{manifest_filepath.name}"
+
+
 def upload_manifest_and_task_data():
     data_dir = Path(__file__).parent / "data"
     manifest_filepath = data_dir / "manifest.json"
