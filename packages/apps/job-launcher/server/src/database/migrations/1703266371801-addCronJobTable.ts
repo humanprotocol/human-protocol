@@ -10,7 +10,7 @@ export class AddCronJobTable1703266371801 implements MigrationInterface {
                 'setup-escrow',
                 'fund-escrow',
                 'cancel-escrow',
-                'process-pending'
+                'process-pending-webhook'
             )
         `);
     await queryRunner.query(`

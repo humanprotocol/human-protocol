@@ -13,20 +13,13 @@ export class CronJobService {
   constructor(private readonly cronJobRepository: CronJobRepository) {}
 
   public async startCronJob(cronJobType: CronJobType): Promise<CronJobEntity> {
-    const cronJob = await this.cronJobRepository.findOne({
+    let cronJob = await this.cronJobRepository.findOne({
       cronJobType,
     });
 
     if (!cronJob) {
-      const cronJob = await this.cronJobRepository.create(cronJobType);
-
-      return cronJob;
+      cronJob = await this.cronJobRepository.create(cronJobType);
     } else {
-      if (!cronJob.completedAt) {
-        this.logger.error(ErrorCronJob.NotCompleted, CronJobService.name);
-        throw new BadRequestException(ErrorCronJob.NotCompleted);
-      }
-
       cronJob.startedAt = new Date();
       cronJob.completedAt = null;
       await cronJob.save();

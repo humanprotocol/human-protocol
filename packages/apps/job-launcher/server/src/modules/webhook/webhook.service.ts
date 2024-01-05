@@ -162,7 +162,7 @@ export class WebhookService {
   @Cron(CronExpression.EVERY_10_MINUTES)
   public async processPendingCronJob(): Promise<void> {
     const isCronJobRunning = await this.cronJobService.isCronJobRunning(
-      CronJobType.ProcessPending,
+      CronJobType.ProcessPendingWebhook,
     );
 
     if (isCronJobRunning) {
@@ -171,7 +171,7 @@ export class WebhookService {
 
     this.logger.log('Pending webhooks START');
     const cronJob = await this.cronJobService.startCronJob(
-      CronJobType.ProcessPending,
+      CronJobType.ProcessPendingWebhook,
     );
 
     try {

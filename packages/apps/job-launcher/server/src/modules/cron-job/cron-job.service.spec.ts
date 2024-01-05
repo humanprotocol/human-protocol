@@ -76,22 +76,6 @@ describe('CronJobService', () => {
 
       jest.useRealTimers();
     });
-
-    it('should throw an error if cron job is not completed', async () => {
-      const cronJobType = CronJobType.CreateEscrow;
-      const cronJobEntity = new CronJobEntity();
-      cronJobEntity.cronJobType = cronJobType;
-      cronJobEntity.startedAt = new Date();
-
-      const findOneSpy = jest
-        .spyOn(repository, 'findOne')
-        .mockResolvedValue(cronJobEntity);
-
-      await expect(service.startCronJob(cronJobType)).rejects.toThrow();
-      expect(findOneSpy).toHaveBeenCalledWith({
-        cronJobType,
-      });
-    });
   });
 
   describe('isCronJobRunning', () => {

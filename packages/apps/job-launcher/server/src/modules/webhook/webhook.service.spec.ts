@@ -301,7 +301,7 @@ describe('WebhookService', () => {
 
     beforeEach(() => {
       cronJobEntityMock = {
-        cronJobType: CronJobType.ProcessPending,
+        cronJobType: CronJobType.ProcessPendingWebhook,
         startedAt: new Date(),
       };
 
@@ -357,7 +357,7 @@ describe('WebhookService', () => {
       await (webhookService as any).processPendingCronJob();
 
       expect(cronJobService.startCronJob).toHaveBeenCalledWith(
-        CronJobType.ProcessPending,
+        CronJobType.ProcessPendingWebhook,
       );
     });
 
