@@ -19,6 +19,7 @@ pyjwt = "^2.8.0"
 human-protocol-sdk = "^1.1.19"
 hmt-basemodels = "^0.2.7"
 pygamma-agreement = {extras = ["cbc"], version = "^0.5.6"}
+pandas = "^2.1.4"
 
 
 [tool.poetry.group.dev.dependencies]

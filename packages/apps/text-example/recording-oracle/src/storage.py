@@ -36,10 +36,16 @@ def download_manifest(manifest_url):
     return Manifest(**json.loads(manifest.data))
 
 
-def download_raw_results(results_url):
+def download_raw_results(results_url) -> list[dict]:
     res = download_object(results_url)
     with BytesIO(res.data) as f:
         return [json.loads(line) for line in f.readlines()]
+
+
+def download_ground_truth(gt_url) -> dict:
+    res = download_object(gt_url)
+    with BytesIO(res.data) as f:
+        return json.load(f)
 
 
 def hash_file_content(path: Path, encoding="utf-8"):
