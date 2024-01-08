@@ -15,7 +15,7 @@ import howToHumanSvg from 'src/assets/how-to-human.svg';
 import nextArrowSvg from 'src/assets/next-arrow.svg';
 import prevArrowSvg from 'src/assets/prev-arrow.svg';
 import { PageWrapper, ViewTitle } from 'src/components';
-import HOW_TO_HUMAN_DATA from 'src/constants/how-to-human';
+import { HOW_TO_HUMAN_DATA } from 'src/constants/how-to-human';
 
 export const HowToHuman = () => {
   const [value, setValue] = useState(0);
@@ -151,7 +151,7 @@ export const HowToHuman = () => {
               sx={{ cursor: 'pointer' }}
               onClick={() => setValue(Math.max(0, value - 1))}
             >
-              <img src={prevArrowSvg} />
+              <img src={prevArrowSvg} alt="prev" />
             </Box>
             <Box
               sx={{ cursor: 'pointer' }}
@@ -159,7 +159,7 @@ export const HowToHuman = () => {
                 setValue(Math.min(HOW_TO_HUMAN_DATA.length - 1, value + 1))
               }
             >
-              <img src={nextArrowSvg} />
+              <img src={nextArrowSvg} alt="next" />
             </Box>
           </Box>
         )}

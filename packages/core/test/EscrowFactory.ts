@@ -190,9 +190,8 @@ describe('EscrowFactory', function () {
     });
 
     it('Owner should upgrade correctly', async () => {
-      const EscrowFactoryV0 = await ethers.getContractFactory(
-        'EscrowFactoryV0'
-      );
+      const EscrowFactoryV0 =
+        await ethers.getContractFactory('EscrowFactoryV0');
       const oldImplementationAddress =
         await upgrades.erc1967.getImplementationAddress(escrowFactory.address);
 
@@ -224,9 +223,8 @@ describe('EscrowFactory', function () {
       const oldImplementationAddress =
         await upgrades.erc1967.getImplementationAddress(escrowFactory.address);
 
-      const EscrowFactoryV0 = await ethers.getContractFactory(
-        'EscrowFactoryV0'
-      );
+      const EscrowFactoryV0 =
+        await ethers.getContractFactory('EscrowFactoryV0');
       await upgrades.upgradeProxy(escrowFactory.address, EscrowFactoryV0);
 
       expect(

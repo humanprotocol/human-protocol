@@ -85,7 +85,8 @@ describe('WebhookService', () => {
   let webhookService: WebhookService,
     webhookRepository: WebhookRepository,
     reputationService: ReputationService,
-    storageService: StorageService;
+    storageService: StorageService,
+    web3Service: Web3Service;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -146,6 +147,10 @@ describe('WebhookService', () => {
     webhookRepository = moduleRef.get(WebhookRepository);
     reputationService = moduleRef.get(ReputationService);
     storageService = moduleRef.get(StorageService);
+    web3Service = moduleRef.get<Web3Service>(Web3Service);
+    web3Service.calculateGasPrice = jest
+      .fn()
+      .mockReturnValue(BigNumber.from(1000));
   });
 
   afterEach(() => {

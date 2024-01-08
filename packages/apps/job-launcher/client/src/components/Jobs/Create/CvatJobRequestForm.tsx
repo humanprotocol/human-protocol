@@ -80,6 +80,7 @@ export const CvatJobRequestForm = () => {
     if (type && Object.values(CvatJobType).includes(type as CvatJobType)) {
       setFieldValue('type', type);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

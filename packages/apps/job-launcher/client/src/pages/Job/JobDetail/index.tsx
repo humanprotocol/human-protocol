@@ -44,7 +44,7 @@ export default function JobDetail() {
     } catch (err: any) {
       openSnackbar(
         err?.response?.data?.message ?? 'Job cancellation failed.',
-        'error'
+        'error',
       );
     }
     setIsCancelling(false);
@@ -128,7 +128,7 @@ export default function JobDetail() {
                 <CardTextRow
                   label="Staked HMT"
                   value={`${formatAmount(
-                    data.staking.allocated.toString()
+                    data.staking.allocated.toString(),
                   )} HMT`}
                 />
                 <CardTextRow
@@ -171,7 +171,7 @@ export default function JobDetail() {
                     <CardTextRow
                       label="Fund Amount"
                       value={`${formatAmount(
-                        data.manifest.fundAmount.toString()
+                        data.manifest.fundAmount.toString(),
                       )} HMT`}
                     />
                     <CardTextRow

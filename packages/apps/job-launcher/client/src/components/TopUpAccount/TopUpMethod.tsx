@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import fundCryptoImg from '../../assets/fund-crypto.png';
 import fundFiatImg from '../../assets/fund-fiat.png';
+import { IS_MAINNET, IS_TESTNET } from '../../constants/chains';
 import { PayMethod } from '../../types';
 import WalletModal from '../WalletModal';
 
@@ -42,11 +43,7 @@ export const TopUpMethod = ({
         }}
       >
         <Grid container spacing={4}>
-          <Grid
-            item
-            xs={12}
-            md={import.meta.env.VITE_APP_NETWORK === 'mainnet' ? 12 : 6}
-          >
+          <Grid item xs={12} md={IS_MAINNET ? 12 : 6}>
             <Box
               sx={{
                 width: '100%',
@@ -79,7 +76,7 @@ export const TopUpMethod = ({
               </Button>
             </Box>
           </Grid>
-          {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
+          {IS_TESTNET && (
             <Grid item xs={12} md={6}>
               <Box
                 sx={{

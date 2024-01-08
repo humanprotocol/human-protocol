@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { StyledTabs, StyledTab } from '../../../components/Tabs';
+import { IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
 import { useSnackbar } from '../../../providers/SnackProvider';
 import { PayMethod } from '../../../types';
@@ -26,7 +27,7 @@ export const PayJob = () => {
     if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
       openSnackbar(
         'Insufficient token amount or the gas limit is too low',
-        'error'
+        'error',
       );
     } else if (err.code === 'ACTION_REJECTED') {
       openSnackbar('The transaction was rejected', 'error');
@@ -64,9 +65,7 @@ export const PayJob = () => {
         }}
       >
         <StyledTab value={PayMethod.Crypto} label="Crypto" />
-        {import.meta.env.VITE_APP_NETWORK !== 'mainnet' && (
-          <StyledTab value={PayMethod.Fiat} label="Fiat" />
-        )}
+        {IS_TESTNET && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
       </StyledTabs>
       <Box
         display="flex"

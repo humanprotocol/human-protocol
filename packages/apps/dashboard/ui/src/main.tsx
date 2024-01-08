@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import TagManager from 'react-gtm-module';
 import { Provider } from 'react-redux';
 import './index.css';
 import { App } from './components';
@@ -7,6 +8,10 @@ import reportWebVitals from './reportWebVitals';
 import { store } from './state';
 
 import 'react-loading-skeleton/dist/skeleton.css';
+
+TagManager.initialize({
+  gtmId: 'G-GQBK13YSRS',
+});
 
 const container = document.getElementById('root');
 

@@ -95,14 +95,18 @@ export class StorageService {
    */
   public async copyFileFromURLToBucket(url: string): Promise<UploadedFile> {
     try {
-      const { data } = await axios.get(url, { responseType: 'stream' });
-      const stream = new PassThrough();
-      data.pipe(stream);
+      const { data: hStream } = await axios.get(url, {
+        responseType: 'stream',
+      });
+      const hash = await hashStream(hStream);
 
-      const hash = await hashStream(data);
       const key = `s3${hash}.zip`;
 
-      await this.minioClient.putObject(this.s3Config.bucket, key, stream, {
+      // Creating a second readable stream for uploading a file to the bucket
+      const { data: uStream } = await axios.get(url, {
+        responseType: 'stream',
+      });
+      await this.minioClient.putObject(this.s3Config.bucket, key, uStream, {
         'Cache-Control': 'no-store',
       });
 

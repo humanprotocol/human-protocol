@@ -24,8 +24,9 @@
     "openpgp": "^5.10.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-gtm-module": "^2.0.11",
     "react-loading-skeleton": "^3.3.1",
-    "react-redux": "^8.0.5",
+    "react-redux": "^9.0.4",
     "react-router-dom": "^6.4.3",
     "react-test-renderer": "^18.2.0",
     "recharts": "2.9.0",
@@ -43,6 +44,7 @@
     "@types/numeral": "^2.0.2",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.14",
+    "@types/react-gtm-module": "^2.0.3",
     "@types/react-test-renderer": "^18.0.0",
     "@vitejs/plugin-react": "^3.1.0",
     "crypto-js": "^4.2.0",
@@ -91,5 +93,14 @@
       "prettier --write",
       "eslint --fix"
     ]
+  },
+  "resolutions": {
+    "ejs": "^3.1.8",
+    "gluegun": "^5.0.0",
+    "mocha": "^10.0.0",
+    "node-fetch": "^2.6.7",
+    "node-forge": "^1.0.0",
+    "qrcode": "^1.5.0",
+    "semver": "^7.5.2"
   }
 }

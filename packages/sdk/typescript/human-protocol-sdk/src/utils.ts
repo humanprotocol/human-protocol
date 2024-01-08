@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Provider } from '@ethersproject/abstract-provider';
-import { BigNumber, Signer, ethers } from 'ethers';
+import { ethers } from 'ethers';
 
 import {
   ContractExecutionError,
-  ErrorMissingGasPrice,
   EthereumError,
   InvalidArgumentError,
   NonceExpired,
@@ -72,30 +70,4 @@ export const isValidUrl = (url: string) => {
   } catch (err) {
     return false;
   }
-};
-
-/**
- * Increase/Decrease gas price
- *
- * @returns {Promise<BigNumber>} Returns the adjusted gas price
- */
-export const gasPriceAdjusted = async (
-  signerOrProvider: Signer | Provider,
-  gasPriceMultiplier: number
-): Promise<BigNumber> => {
-  let gasPrice;
-
-  if (Signer.isSigner(signerOrProvider)) {
-    gasPrice = (await signerOrProvider.provider?.getFeeData())?.gasPrice;
-  } else {
-    gasPrice = (await signerOrProvider.getFeeData()).gasPrice;
-  }
-
-  if (!gasPrice) {
-    throw ErrorMissingGasPrice;
-  }
-
-  return gasPrice
-    .mul(ethers.utils.parseEther(gasPriceMultiplier.toString()))
-    .div(ethers.utils.parseEther('1'));
 };

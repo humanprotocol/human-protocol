@@ -117,13 +117,14 @@ Gets the URL value of the given entity.
 * **Return type:**
   `str`
 
-#### set(key, value)
+#### set(key, value, tx_options=None)
 
 Sets the value of a key-value pair in the contract.
 
 * **Parameters:**
   * **key** (`str`) – The key of the key-value pair to set
   * **value** (`str`) – The value of the key-value pair to set
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -152,13 +153,14 @@ Sets the value of a key-value pair in the contract.
   kvstore_client.set('Role', 'RecordingOracle')
   ```
 
-#### set_bulk(keys, values)
+#### set_bulk(keys, values, tx_options=None)
 
 Sets multiple key-value pairs in the contract.
 
 * **Parameters:**
   * **keys** (`List`[`str`]) – A list of keys to set
   * **values** (`List`[`str`]) – A list of values to set
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**
@@ -190,14 +192,14 @@ Sets multiple key-value pairs in the contract.
   kvstore_client.set_bulk(keys, values)
   ```
 
-#### set_url(url, key='url')
+#### set_url(url, key='url', tx_options=None)
 
 Sets a URL value for the address that submits the transaction.
 
 * **Parameters:**
-  **url** (`str`) – URL to set
-* **Key:**
-  Configurable URL key. url by default.
+  * **url** (`str`) – URL to set
+  * **key** (`Optional`[`str`]) – Configurable URL key. url by default.
+  * **tx_options** (`Optional`[`TxParams`]) – (Optional) Additional transaction parameters
 * **Return type:**
   `None`
 * **Returns:**

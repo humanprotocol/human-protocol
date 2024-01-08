@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'path';
 import { NFTStorage } from 'nft.storage';
-import sinon from 'sinon';
+import { stub, restore } from 'sinon';
 import tmp from 'tmp';
 import { test, assert } from 'vitest';
 import generateMerkleTree from '../generateMerkleTree';
@@ -25,7 +25,7 @@ test('generateMerkleTree should return a valid Merkle tree JSON', async () => {
 
   // Mock NFTStorage.storeBlob method
   const fakeCid = 'bafybeih42y6g7zkr76j6ax7z6wjc5d56xazsrtxzp6f7j6fsk67djnppmq';
-  sinon.stub(NFTStorage.prototype, 'storeBlob').resolves(fakeCid);
+  stub(NFTStorage.prototype, 'storeBlob').resolves(fakeCid);
 
   const origin = 'https://example.com';
 
@@ -38,7 +38,7 @@ test('generateMerkleTree should return a valid Merkle tree JSON', async () => {
 
   // Cleanup and restore the actual file system and NFTStorage.storeBlob method
   fs.rmdirSync(tmpDir.name, { recursive: true });
-  sinon.restore();
+  restore();
 
   // Assertions
   assert(

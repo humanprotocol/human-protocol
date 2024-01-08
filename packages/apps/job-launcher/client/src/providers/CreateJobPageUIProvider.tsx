@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { IS_MAINNET } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
 
 export type CreateJobPageUIType = {
@@ -39,7 +40,7 @@ export const CreateJobPageUIProvider = ({
   const [step, setStep] = useState<CreateJobStep>(CreateJobStep.FundingMethod);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
-    jobType: JobType.Fortune,
+    jobType: IS_MAINNET ? JobType.CVAT : JobType.Fortune,
   });
 
   const goToPrevStep = () => {

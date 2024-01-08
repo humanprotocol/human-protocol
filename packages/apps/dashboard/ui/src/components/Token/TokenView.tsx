@@ -117,9 +117,9 @@ export const TokenView: FC = () => {
       <Grid container spacing={{ xs: 2, sm: 2, md: 3, lg: 4, xl: 5 }}>
         <Grid item xs={12} md={4}>
           <CardTextBlock
-            title="Total transfers"
+            title="Total transactions"
             value={transferCount}
-            tooltipTitle={TOOLTIPS.TOTAL_TRANSFERS}
+            tooltipTitle={TOOLTIPS.TOTAL_TRANSACTIONS}
           />
         </Grid>
         <Grid item xs={12} md={4}>

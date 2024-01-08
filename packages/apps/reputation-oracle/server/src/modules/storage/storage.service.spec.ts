@@ -222,14 +222,18 @@ describe('StorageService', () => {
 
   describe('copyFileFromURLToBucket', () => {
     it('should copy a file from a valid URL to a bucket', async () => {
-      const streamResponseData = new stream.Readable();
-      streamResponseData.push(JSON.stringify(MOCK_MANIFEST));
-      streamResponseData.push(null);
-      (axios.get as any).mockResolvedValueOnce({ data: streamResponseData });
+      const hashStreamData = new stream.Readable();
+      hashStreamData.push(JSON.stringify(MOCK_MANIFEST));
+      hashStreamData.push(null);
+      const uploadStreamData = new stream.Readable();
+      uploadStreamData.push(JSON.stringify(MOCK_MANIFEST));
+      uploadStreamData.push(null);
+      (axios.get as any)
+        .mockResolvedValueOnce({ data: hashStreamData })
+        .mockResolvedValueOnce({ data: uploadStreamData });
 
-      const uploadedFile = await storageService.copyFileFromURLToBucket(
-        MOCK_FILE_URL,
-      );
+      const uploadedFile =
+        await storageService.copyFileFromURLToBucket(MOCK_FILE_URL);
 
       expect(
         uploadedFile.url.includes(

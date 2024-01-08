@@ -15,7 +15,7 @@ import api from '../utils/api';
 export const createFortuneJob = async (
   chainId: number,
   data: FortuneRequest,
-  amount: number | string
+  amount: number | string,
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
@@ -30,7 +30,7 @@ export const createFortuneJob = async (
 export const createCvatJob = async (
   chainId: number,
   data: CvatRequest,
-  amount: number | string
+  amount: number | string,
 ) => {
   const body: CreateCvatJobRequest = {
     chainId,
@@ -49,7 +49,7 @@ export const createCvatJob = async (
 export const createHCaptchaJob = async (
   chainId: number,
   data: HCaptchaRequest,
-  amount: number | string
+  amount: number | string,
 ) => {
   await api.post('/job/hCaptcha', {
     chainId,

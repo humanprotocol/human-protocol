@@ -7,17 +7,33 @@ import {
   IsString,
   IsUrl,
   IsDate,
+  IsDateString,
   IsOptional,
   IsObject,
   IsNumberString,
   Min,
+  Max,
   IsNotEmpty,
   IsEthereumAddress,
+  ValidateNested,
+  IsDefined,
+  IsNotEmptyObject,
+  ArrayMinSize,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ChainId } from '@human-protocol/sdk';
-import { JobRequestType, JobStatus } from '../../common/enums/job';
+import {
+  JobCaptchaRequestType,
+  JobCaptchaShapeType,
+  JobRequestType,
+  JobStatus,
+  WorkerBrowser,
+  WorkerLanguage,
+  WorkerLocation,
+} from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
 import { BigNumber } from 'ethers';
+import { AWSRegions, StorageProviders } from '../../common/enums/storage';
 export class JobCreateDto {
   @ApiProperty({ enum: ChainId })
   @IsEnum(ChainId)
@@ -64,15 +80,6 @@ export class JobDto {
   @IsEnum(ChainId)
   @IsOptional()
   public chainId?: ChainId;
-
-  @ApiProperty()
-  @IsString()
-  public requesterDescription: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsPositive()
-  public fundAmount: number;
 }
 
 export class JobFortuneDto extends JobDto {
@@ -81,18 +88,48 @@ export class JobFortuneDto extends JobDto {
   public requesterTitle: string;
 
   @ApiProperty()
+  @IsString()
+  public requesterDescription: string;
+
+  @ApiProperty()
   @IsNumber()
   @IsPositive()
   public submissionsRequired: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
+}
+
+export class StorageDataDto {
+  @ApiProperty({ enum: StorageProviders })
+  @IsEnum(StorageProviders)
+  public provider: StorageProviders;
+  @ApiProperty({ enum: AWSRegions })
+  @IsEnum(AWSRegions)
+  public region: AWSRegions | null;
+  @ApiProperty()
+  @IsString()
+  public bucketName: string;
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  public path: string;
 }
 
 export class JobCvatDto extends JobDto {
   @ApiProperty()
-  @IsUrl()
-  public dataUrl: string;
+  @IsString()
+  public requesterDescription: string;
+
+  @ApiProperty()
+  @IsObject()
+  public data: StorageDataDto;
 
   @ApiProperty()
   @IsArray()
+  @ArrayMinSize(1)
   public labels: string[];
 
   @ApiProperty()
@@ -101,8 +138,8 @@ export class JobCvatDto extends JobDto {
   public minQuality: number;
 
   @ApiProperty()
-  @IsString()
-  public gtUrl: string;
+  @IsObject()
+  public groundTruth: StorageDataDto;
 
   @ApiProperty()
   @IsUrl()
@@ -110,7 +147,12 @@ export class JobCvatDto extends JobDto {
 
   @ApiProperty({ enum: JobRequestType })
   @IsEnum(JobRequestType)
-  public type: JobRequestType;
+  type: JobRequestType;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  public fundAmount: number;
 }
 
 export class JobCancelDto {
@@ -464,4 +506,257 @@ export class EscrowCancelDto {
 
   @ApiProperty()
   public amountRefunded: BigNumber;
+}
+
+export class JobCaptchaAdvancedDto {
+  @ApiProperty({
+    enum: WorkerLanguage,
+  })
+  @IsEnum(WorkerLanguage)
+  @IsOptional()
+  workerLanguage?: WorkerLanguage;
+
+  @ApiProperty({
+    enum: WorkerLocation,
+  })
+  @IsEnum(WorkerLocation)
+  @IsOptional()
+  workerLocation?: WorkerLocation;
+
+  @ApiProperty({
+    enum: WorkerBrowser,
+  })
+  @IsEnum(WorkerBrowser)
+  @IsOptional()
+  targetBrowser?: WorkerBrowser;
+}
+
+export class JobCaptchaAnnotationsDto {
+  @ApiProperty({
+    enum: JobCaptchaShapeType,
+  })
+  @IsEnum(JobCaptchaShapeType)
+  typeOfJob: JobCaptchaShapeType;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  taskBidPrice: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  label?: string;
+
+  @ApiProperty()
+  @IsString()
+  labelingPrompt: string;
+
+  @ApiProperty()
+  @IsString()
+  groundTruths: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  exampleImages?: string[];
+}
+
+export class JobCaptchaDto extends JobDto {
+  @ApiProperty()
+  @IsUrl()
+  data: StorageDataDto;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  accuracyTarget: number;
+
+  @ApiProperty()
+  @IsDateString()
+  @IsOptional()
+  completionDate: Date;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  minRequests: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsPositive()
+  @Max(100)
+  maxRequests: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmptyObject()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => JobCaptchaAdvancedDto)
+  advanced: JobCaptchaAdvancedDto;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmptyObject()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => JobCaptchaAnnotationsDto)
+  annotations: JobCaptchaAnnotationsDto;
+}
+
+export class RestrictedAudience {
+  @IsObject()
+  sitekey?: Record<string, { score: number }>[];
+
+  @IsObject()
+  lang?: Record<string, { score: number }>[];
+
+  @IsObject()
+  browser?: Record<string, { score: number }>[];
+
+  @IsObject()
+  country?: Record<string, { score: number }>[];
+}
+
+class RequesterRestrictedAnswer {
+  @IsString()
+  en?: string;
+
+  @IsUrl()
+  answer_example_uri?: string;
+}
+
+class RequestConfig {
+  @IsEnum(JobCaptchaShapeType)
+  shape_type?: JobCaptchaShapeType;
+
+  @IsNumber()
+  @IsPositive()
+  min_shapes_per_image?: number;
+
+  @IsNumber()
+  @IsPositive()
+  max_shapes_per_image?: number;
+
+  @IsNumber()
+  @IsPositive()
+  min_points?: number;
+
+  @IsNumber()
+  @IsPositive()
+  max_points?: number;
+
+  @IsNumber()
+  @IsPositive()
+  minimum_selection_area_per_shape?: number;
+
+  @IsNumber()
+  @IsPositive()
+  multiple_choice_max_choices?: number;
+
+  @IsNumber()
+  @IsPositive()
+  multiple_choice_min_choices?: number;
+
+  @IsString()
+  answer_type?: string;
+
+  overlap_threshold?: any;
+
+  @IsNumber()
+  @IsPositive()
+  max_length?: number;
+
+  @IsNumber()
+  @IsPositive()
+  min_length?: number;
+}
+
+export class HCaptchaManifestDto {
+  @IsString()
+  job_mode: string;
+
+  @IsEnum(JobCaptchaRequestType)
+  request_type: JobCaptchaRequestType;
+
+  @IsObject()
+  @ValidateNested()
+  request_config: RequestConfig;
+
+  @IsNumber()
+  requester_accuracy_target: number;
+
+  @IsNumber()
+  requester_max_repeats: number;
+
+  @IsNumber()
+  requester_min_repeats: number;
+
+  @IsArray()
+  @IsUrl({}, { each: true })
+  @IsOptional()
+  requester_question_example?: string[];
+
+  @IsObject()
+  requester_question: Record<string, string>;
+
+  @IsUrl()
+  taskdata_uri: string;
+
+  @IsNumber()
+  job_total_tasks: number;
+
+  @IsNumber()
+  task_bid_price: number;
+
+  @IsUrl()
+  groundtruth_uri?: string;
+
+  public_results: boolean;
+
+  @IsNumber()
+  oracle_stake: number;
+
+  @IsString()
+  repo_uri: string;
+
+  @IsString()
+  ro_uri: string;
+
+  @IsObject()
+  @ValidateNested()
+  restricted_audience: RestrictedAudience;
+
+  @IsObject()
+  @ValidateNested({ each: true })
+  requester_restricted_answer_set: RequesterRestrictedAnswer;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  taskdata?: TaskData[];
+}
+
+class DatapointText {
+  @IsString()
+  en: string;
+}
+
+class TaskData {
+  @IsString()
+  task_key: string;
+
+  @IsOptional()
+  @IsString()
+  datapoint_uri?: string;
+
+  @IsString()
+  datapoint_hash: string;
+
+  @IsObject()
+  @IsOptional()
+  datapoint_text?: DatapointText;
 }
