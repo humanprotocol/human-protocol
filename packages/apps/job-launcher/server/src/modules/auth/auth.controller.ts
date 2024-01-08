@@ -34,7 +34,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
-import { PasswordValidationPipe } from 'src/common/pipes';
+import { PasswordValidationPipe } from '../../common/pipes';
 
 @ApiTags('Auth')
 @Controller('/auth')

@@ -6,7 +6,7 @@ import {
   ValidationPipe,
   ValidationPipeOptions,
 } from '@nestjs/common';
-import { ValidatePasswordDto } from 'src/modules/auth/auth.dto';
+import { ValidatePasswordDto } from '../../modules/auth/auth.dto';
 import { ErrorAuth } from '../constants/errors';
 
 @Injectable()
@@ -35,7 +35,8 @@ export class PasswordValidationPipe implements PipeTransform {
   }
 
   private isValidPassword(password: string): boolean {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/;
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}\|'"/`[\]:;<>,.?~\\-]).*$/;
     return regex.test(password);
   }
 }
