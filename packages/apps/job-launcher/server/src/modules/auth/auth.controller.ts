@@ -9,6 +9,7 @@ import {
   Request,
   UnprocessableEntityException,
   Logger,
+  UsePipes,
 } from '@nestjs/common';
 
 import {
@@ -33,6 +34,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards';
 import { RequestWithUser } from '../../common/types';
 import { ErrorAuth } from '../../common/constants/errors';
+import { PasswordValidationPipe } from '../../common/pipes';
 
 @ApiTags('Auth')
 @Controller('/auth')
@@ -41,6 +43,7 @@ export class AuthJwtController {
 
   constructor(private readonly authService: AuthService) {}
 
+  @UsePipes(new PasswordValidationPipe())
   @Public()
   @Post('/signup')
   @UseInterceptors(ClassSerializerInterceptor)
