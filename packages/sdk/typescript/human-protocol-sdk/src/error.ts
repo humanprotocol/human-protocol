@@ -168,6 +168,13 @@ export const ErrorEscrowAddressIsNotProvidedByFactory = new Error(
 );
 
 /**
+ * @constant {Error} - Transfer event not found in transaction logs.
+ */
+export const ErrorTransferEventNotFoundInTransactionLogs = new Error(
+  'Transfer event not found in transaction logs'
+);
+
+/**
  * @constant {Error} - Manifest file does not exist.
  */
 export const ErrorManifestFileDoesNotExist = new Error(
@@ -323,3 +330,7 @@ export class InvalidEthereumAddressError extends Error {
     super(`Invalid ethereum address error: ${address}`);
   }
 }
+/**
+ * @constant {Error} - The Hash does not match
+ */
+export const ErrorInvalidHash = new Error('Invalid hash');

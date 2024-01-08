@@ -14,6 +14,4 @@ query GetRewardAddedEvents($slasherAddress: String!) {{
     }}
 }}
 {reward_added_event_fragment}
-""".format(
-    reward_added_event_fragment=reward_added_event_fragment
-)
+""".format(reward_added_event_fragment=reward_added_event_fragment)

@@ -40,7 +40,7 @@ const StripeElement = styled(Box)<BoxProps & { disabled?: boolean }>(
     '&:focus-within': {
       borderColor: '#32108D',
     },
-  })
+  }),
 );
 
 export const FiatPayForm = ({
@@ -93,7 +93,7 @@ export const FiatPayForm = ({
 
   const handlePaymentDataFormFieldChange = (
     fieldName: string,
-    fieldValue: any
+    fieldValue: any,
   ) => {
     setPaymentData({ ...paymentData, [fieldName]: fieldValue });
   };
@@ -102,6 +102,7 @@ export const FiatPayForm = ({
     if (!stripe || !elements) {
       // Stripe.js has not yet loaded.
       // Make sure to disable form submission until Stripe.js has loaded.
+      // eslint-disable-next-line no-console
       console.error('Stripe.js has not yet loaded.');
       return;
     }
@@ -154,7 +155,7 @@ export const FiatPayForm = ({
 
         // confirm payment
         const success = await paymentService.confirmFiatPayment(
-          paymentIntent.id
+          paymentIntent.id,
         );
 
         if (!success) {
@@ -163,13 +164,20 @@ export const FiatPayForm = ({
       }
 
       // create job
-      const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
+      const { jobType, chainId, fortuneRequest, cvatRequest, hCaptchaRequest } =
+        jobRequest;
       if (!chainId) return;
 
       if (jobType === JobType.Fortune && fortuneRequest) {
         await jobService.createFortuneJob(chainId, fortuneRequest, fundAmount);
       } else if (jobType === JobType.CVAT && cvatRequest) {
         await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
+      } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+        await jobService.createHCaptchaJob(
+          chainId,
+          hCaptchaRequest,
+          fundAmount,
+        );
       }
 
       dispatch(fetchUserBalanceAsync());

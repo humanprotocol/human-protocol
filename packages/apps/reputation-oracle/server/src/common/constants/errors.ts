@@ -22,6 +22,7 @@ export enum ErrorResults {
   IntermediateResultsURLNotSet = 'Intermediate results URL is not set',
   NoIntermediateResultsFound = 'No intermediate results found',
   NoResultsHaveBeenVerified = 'No results have been verified',
+  NotAllRequiredSolutionsHaveBeenSent = 'Not all required solutions have been sent',
 }
 
 /**
@@ -29,7 +30,7 @@ export enum ErrorResults {
  */
 export enum ErrorManifest {
   ManifestUrlDoesNotExist = 'Manifest url does not exist',
-  UnsupportedManifestType = 'Unsupported manifest type'
+  UnsupportedManifestType = 'Unsupported manifest type',
 }
 
 /**
@@ -38,4 +39,40 @@ export enum ErrorManifest {
 export enum ErrorSignature {
   SignatureNotVerified = 'Signature not verified',
   InvalidSignature = 'Invalid signature',
+}
+
+/**
+ * Represents error messages related to user.
+ */
+export enum ErrorUser {
+  NotFound = 'User not found',
+  AccountCannotBeRegistered = 'Account cannot be registered',
+  BalanceCouldNotBeRetreived = 'User balance could not be retrieved',
+  InvalidCredentials = 'Invalid credentials',
+}
+
+/**
+ * Represents error messages related to auth.
+ */
+export enum ErrorAuth {
+  NotFound = 'Auth not found',
+  InvalidEmailOrPassword = 'Invalid email or password',
+  RefreshTokenHasExpired = 'Refresh token has expired',
+  UserNotActive = 'User not active',
+  InvalidSignature = 'Invalid signature',
+}
+
+/**
+ * Represents error messages related to token.
+ */
+export enum ErrorToken {
+  NotFound = 'Token not found',
+}
+
+/**
+ * Represents error messages related to send grid.
+ */
+export enum ErrorSendGrid {
+  EmailNotSent = 'Email was not sent',
+  InvalidApiKey = 'Invalid SendGrid API key',
 }

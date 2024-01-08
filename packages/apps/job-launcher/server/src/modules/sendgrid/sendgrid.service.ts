@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired, MailService } from '@sendgrid/mail';
 import { ConfigNames } from '../../common/config';
@@ -23,7 +18,8 @@ export class SendGridService {
   ) {
     const apiKey = this.configService.get<string>(
       ConfigNames.SENDGRID_API_KEY,
-    )!;
+      '',
+    );
 
     if (!SENDGRID_API_KEY_REGEX.test(apiKey)) {
       throw new Error(ErrorSendGrid.InvalidApiKey);
@@ -33,26 +29,31 @@ export class SendGridService {
 
     this.defaultFromEmail = this.configService.get<string>(
       ConfigNames.SENDGRID_FROM_EMAIL,
-    )!;
+      '',
+    );
     this.defaultFromName = this.configService.get<string>(
       ConfigNames.SENDGRID_FROM_NAME,
-    )!;
+      '',
+    );
   }
 
   async sendEmail({
-    text = '',
     from = {
       email: this.defaultFromEmail,
       name: this.defaultFromName,
     },
+    templateId = '',
+    personalizations,
     ...emailData
   }: Partial<MailDataRequired>): Promise<void> {
     try {
       await this.mailService.send({
         from,
-        text,
+        templateId,
+        personalizations,
         ...emailData,
       });
+
       this.logger.log('Email sent successfully');
       return;
     } catch (error) {

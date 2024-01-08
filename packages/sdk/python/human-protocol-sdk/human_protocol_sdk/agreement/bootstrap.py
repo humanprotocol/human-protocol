@@ -20,22 +20,38 @@ def confidence_intervals(
 ) -> Tuple[Tuple[float, float], np.ndarray]:
     """Returns a tuple, containing the confidence interval for the boostrap estimates of the given statistic and statistics of the bootstrap samples.
 
-    Args:
-        data: Data to estimate the statistic.
-        statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
-        n_iterations: Number of bootstrap samples to use for the estimate.
-        n_sample: If provided, determines the size of each bootstrap sample
-            drawn from the data. If omitted, is equal to the length of the
-            data.
-        confidence_level: Size of the confidence interval.
-        algorithm: Which algorithm to use for the confidence interval
-            estimation. "bca" uses the "Bias Corrected Bootstrap with
-            Acceleration", "percentile" simply takes the appropriate
-            percentiles from the bootstrap distribution.
-        seed: Random seed to use.
+    :param data: Data to estimate the statistic.
+    :param statistic_fn: Function to calculate the statistic. statistic_fn(data) must return a number.
+    :param n_iterations: Number of bootstrap samples to use for the estimate.
+    :param n_sample: If provided, determines the size of each bootstrap sample
+        drawn from the data. If omitted, is equal to the length of the data.
+    :param confidence_level: Size of the confidence interval.
+    :param algorithm: Which algorithm to use for the confidence interval
+        estimation. "bca" uses the "Bias Corrected Bootstrap with
+        Acceleration", "percentile" simply takes the appropriate
+        percentiles from the bootstrap distribution.
+    :param seed: Random seed to use.
 
-    Returns:
-        Confidence interval and bootstrap distribution.
+    :return: Confidence interval and bootstrap distribution.
+
+    :example:
+        .. code-block:: python
+
+                from human_protocol_sdk.agreement.bootstrap import confidence_interval
+                import numpy as np
+
+                np.random.seed(42)
+                data = np.random.randn(10_000)
+                fn = np.mean
+                sample_mean = fn(data)
+                print(f"Sample mean is {sample_mean:.3f}")
+                # Sample mean is -0.002
+
+                cl = 0.99
+                ci, _ = confidence_interval(data, fn, confidence_level=cl)
+                print(f"Population mean is between {ci[0]:.2f} and {ci[1]:.2f} with a probablity of {cl}")
+                # Population mean is between -0.02 and 0.02 with a probablity of 0.99
+
     """
     # set random seed for reproducibility
     if seed is not None:
@@ -71,6 +87,7 @@ def confidence_intervals(
         idx = np.random.randint(n_data - 1, size=(n_sample,))
         sample = data[idx]
         theta_b[i] = statistic_fn(sample)
+    theta_b = theta_b[~np.isnan(theta_b)]
 
     match algorithm:
         case "percentile":
@@ -86,6 +103,7 @@ def confidence_intervals(
                 theta_jn[i] = (n_data - 1) * (
                     theta_hat - statistic_fn(data[jn_idxs[i]])
                 )
+            theta_jn = theta_jn[~np.isnan(theta_jn)]
 
             a = (np.sum(theta_jn**3) / np.sum(theta_jn**2, axis=-1) ** 1.5) / 6
 

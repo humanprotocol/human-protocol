@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import datetime
+from datetime import datetime
 
 from typing import List, Optional
 
@@ -24,33 +24,32 @@ class EscrowFilter:
 
     def __init__(
         self,
-        networks: [List[ChainId]],
+        networks: List[ChainId],
         launcher: Optional[str] = None,
         reputation_oracle: Optional[str] = None,
         recording_oracle: Optional[str] = None,
         exchange_oracle: Optional[str] = None,
         job_requester_id: Optional[str] = None,
         status: Optional[Status] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
     ):
         """
         Initializes a EscrowFilter instance.
 
-        Args:
-            networks (List[ChainId]): Networks to request data
-            launcher (Optional[str]): Launcher address
-            reputation_oracle (Optional[str]): Reputation oracle address
-            recording_oracle (Optional[str]): Recording oracle address
-            exchange_oracle (Optional[str]): Exchange oracle address
-            job_requester_id (Optional[str]): Job requester id
-            status (Optional[Status]): Escrow status
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
+        :param networks: Networks to request data
+        :param launcher: Launcher address
+        :param reputation_oracle: Reputation oracle address
+        :param recording_oracle: Recording oracle address
+        :param exchange_oracle: Exchange oracle address
+        :param job_requester_id: Job requester id
+        :param status: Escrow status
+        :param date_from: Created from date
+        :param date_to: Created to date
         """
 
         if not networks or any(
-            network not in set(chain_id.value for chain_id in ChainId)
+            network.value not in set(chain_id.value for chain_id in ChainId)
             for network in networks
         ):
             raise FilterError(f"Invalid ChainId")
@@ -92,17 +91,16 @@ class PayoutFilter:
         self,
         escrow_address: Optional[str] = None,
         recipient: Optional[str] = None,
-        date_from: Optional[datetime.datetime] = None,
-        date_to: Optional[datetime.datetime] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
     ):
         """
         Initializes a PayoutFilter instance.
 
-        Args:
-            escrow_address (Optional[str]): Escrow address
-            recipient (Optional[str]): Recipient address
-            date_from (Optional[datetime.datetime]): Created from date
-            date_to (Optional[datetime.datetime]): Created to date
+        :param escrow_address: Escrow address
+        :param recipient: Recipient address
+        :param date_from: Created from date
+        :param date_to: Created to date
         """
 
         if escrow_address and not Web3.is_address(escrow_address):

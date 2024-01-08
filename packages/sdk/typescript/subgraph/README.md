@@ -73,4 +73,6 @@ You can find networks configuration in the directory `config`. Each JSON file is
 - https://api.thegraph.com/subgraphs/name/humanprotocol/goerli
 - https://api.thegraph.com/subgraphs/name/humanprotocol/bsctest
 - https://api.thegraph.com/subgraphs/name/humanprotocol/bsc
+- https://api.thegraph.com/subgraphs/name/humanprotocol/celo
+- https://api.thegraph.com/subgraphs/name/humanprotocol/celo-alfajores
 - https://graph-skale.humanprotocol.org/subgraphs/name/skale-human

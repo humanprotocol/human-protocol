@@ -1,9 +1,11 @@
 import { ChainId } from '@human-protocol/sdk';
 
-export const SUPPORTED_CHAIN_IDS =
-  import.meta.env.VITE_APP_NETWORK === 'mainnet'
-    ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
-    : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
+export const IS_MAINNET = import.meta.env.VITE_APP_NETWORK === 'mainnet';
+export const IS_TESTNET = !IS_MAINNET;
+
+export const SUPPORTED_CHAIN_IDS = IS_MAINNET
+  ? [ChainId.POLYGON] // ? [ChainId.BSC_MAINNET, ChainId.POLYGON, ChainId.MOONBEAM]
+  : [ChainId.BSC_TESTNET, ChainId.POLYGON_MUMBAI, ChainId.GOERLI];
 
 export const CHAIN_ID_BY_NAME: Record<string, number> = {
   'Polygon Mumbai': ChainId.POLYGON_MUMBAI,
@@ -27,4 +29,6 @@ export const RPC_URLS: {
   [ChainId.AVALANCHE_TESTNET]: 'https://api.avax-test.network/ext/C/rpc',
   [ChainId.AVALANCHE]: 'https://api.avax.network/ext/bc/C/rpc',
   [ChainId.SKALE]: 'https://mainnet.skalenodes.com/v1/wan-red-ain',
+  [ChainId.CELO_ALFAJORES]: 'https://alfajores-forno.celo-testnet.org',
+  [ChainId.CELO]: 'https://forno.celo.org',
 };

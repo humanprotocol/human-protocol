@@ -1,36 +1,94 @@
-import { Body, Controller, Get, Headers, Param, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiHeader,
+  ApiBody,
+} from '@nestjs/swagger';
+import { HEADER_SIGNATURE_KEY } from '../../common/constants';
+import { SignatureAuthGuard } from '../../common/guards';
 import { Public } from '../../common/decorators';
-import { WebhookService } from './webhook.service';
 import { WebhookIncomingDto } from './webhook.dto';
-import { SignatureAuthGuard } from 'src/common/guards';
-import { HEADER_SIGNATURE_KEY } from 'src/common/constants';
+import { WebhookService } from './webhook.service';
+import { Role } from '../../common/enums/role';
 
 @Public()
 @ApiTags('Webhook')
 @Controller('/webhook')
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
-  
-  @Public()
-  @UseGuards(SignatureAuthGuard)
+
+  @UseGuards(new SignatureAuthGuard([Role.Recording]))
   @Post('/')
+  @ApiOperation({
+    summary: 'Create Incoming Webhook',
+    description: 'Endpoint to create an incoming webhook.',
+  })
+  @ApiHeader({
+    name: HEADER_SIGNATURE_KEY,
+    description: 'Signature for webhook authentication.',
+    required: true,
+  })
+  @ApiBody({ type: WebhookIncomingDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Incoming webhook created successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request. Invalid input parameters.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Missing or invalid credentials.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found. Could not find the requested content.',
+  })
   public async createIncomingWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
     @Body() data: WebhookIncomingDto,
-  ): Promise<boolean> {
-    return this.webhookService.createIncomingWebhook(data);
+  ): Promise<void> {
+    await this.webhookService.createIncomingWebhook(data);
+    return;
   }
 
   @Public()
   @Get('/cron/pending')
-  public async processPendingCronJob(): Promise<any> {
-    return this.webhookService.processPendingCronJob();
+  @ApiOperation({
+    summary: 'Process Pending Cron Job',
+    description: 'Endpoint to process pending cron jobs.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pending cron jobs processed successfully',
+  })
+  public async processPendingCronJob(): Promise<void> {
+    await this.webhookService.processPendingCronJob();
+    return;
   }
 
   @Public()
   @Get('/cron/paid')
-  public async processPaidCronJob(): Promise<any> {
-    return this.webhookService.processPaidCronJob();
+  @ApiOperation({
+    summary: 'Process Paid Cron Job',
+    description: 'Endpoint to process paid cron jobs.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paid cron jobs processed successfully',
+  })
+  public async processPaidCronJob(): Promise<void> {
+    await this.webhookService.processPaidCronJob();
+    return;
   }
 }

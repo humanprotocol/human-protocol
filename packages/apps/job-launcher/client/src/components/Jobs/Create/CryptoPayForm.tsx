@@ -18,7 +18,6 @@ import { ethers } from 'ethers';
 import React, { useMemo, useState } from 'react';
 import { useAccount, useNetwork, useSigner } from 'wagmi';
 import { TokenSelect } from '../../../components/TokenSelect';
-import { JOB_LAUNCHER_OPERATOR_ADDRESS } from '../../../constants/addresses';
 import { JOB_LAUNCHER_FEE } from '../../../constants/payment';
 import { useTokenRate } from '../../../hooks/useTokenRate';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
@@ -81,33 +80,45 @@ export const CryptoPayForm = ({
           const contract = new ethers.Contract(
             tokenAddress,
             HMTokenABI,
-            signer
+            signer,
           );
 
           const tx = await contract.transfer(
-            JOB_LAUNCHER_OPERATOR_ADDRESS,
-            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18)
+            import.meta.env.VITE_APP_JOB_LAUNCHER_ADDRESS,
+            ethers.utils.parseUnits(tokenAmount.toFixed(2), 18),
           );
 
           await tx.wait();
 
           // create crypto payment record
-          await paymentService.createCryptoPayment({
+          await paymentService.createCryptoPayment(signer, {
             chainId: jobRequest.chainId,
             transactionHash: tx.hash,
           });
         }
 
         // create job
-        const { jobType, chainId, fortuneRequest, cvatRequest } = jobRequest;
+        const {
+          jobType,
+          chainId,
+          fortuneRequest,
+          cvatRequest,
+          hCaptchaRequest,
+        } = jobRequest;
         if (jobType === JobType.Fortune && fortuneRequest) {
           await jobService.createFortuneJob(
             chainId,
             fortuneRequest,
-            fundAmount
+            fundAmount,
           );
         } else if (jobType === JobType.CVAT && cvatRequest) {
           await jobService.createCvatJob(chainId, cvatRequest, fundAmount);
+        } else if (jobType === JobType.HCAPTCHA && hCaptchaRequest) {
+          await jobService.createHCaptchaJob(
+            chainId,
+            hCaptchaRequest,
+            fundAmount,
+          );
         }
         onFinish();
       } catch (err) {

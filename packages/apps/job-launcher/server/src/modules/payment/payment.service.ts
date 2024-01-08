@@ -8,12 +8,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { ethers, providers } from 'ethers';
-import { ErrorPayment } from '../../common/constants/errors';
+import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
   PaymentCryptoCreateDto,
   PaymentFiatConfirmDto,
   PaymentFiatCreateDto,
+  PaymentRefundCreateDto,
 } from './payment.dto';
 import {
   Currency,
@@ -21,6 +22,7 @@ import {
   PaymentStatus,
   PaymentType,
   StripePaymentStatus,
+  TokenId,
 } from '../../common/enums/payment';
 import { TX_CONFIRMATION_TRESHOLD } from '../../common/constants';
 import { ConfigNames, networkMap } from '../../common/config';
@@ -32,6 +34,8 @@ import { Web3Service } from '../web3/web3.service';
 import { CoingeckoTokenId } from '../../common/constants/payment';
 import { getRate } from '../../common/utils';
 import { add, div, mul } from '../../common/utils/decimal';
+import { QueryFailedError } from 'typeorm';
+import { verifySignature } from '../../common/utils/signature';
 
 @Injectable()
 export class PaymentService {
@@ -44,20 +48,24 @@ export class PaymentService {
     private configService: ConfigService,
   ) {
     this.stripe = new Stripe(
-      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
+      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY, ''),
       {
         apiVersion: this.configService.get<any>(
           ConfigNames.STRIPE_API_VERSION,
-        )!,
+          '',
+        ),
         appInfo: {
           name: this.configService.get<string>(
             ConfigNames.STRIPE_APP_NAME,
             'Fortune',
-          )!,
+          ),
           version: this.configService.get<string>(
             ConfigNames.STRIPE_APP_VERSION,
-          )!,
-          url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
+          ),
+          url: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_INFO_URL,
+            '',
+          ),
         },
       },
     );
@@ -136,7 +144,7 @@ export class PaymentService {
 
     if (!paymentEntity) {
       this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new BadRequestException(ErrorPayment.NotFound);
+      throw new NotFoundException(ErrorPayment.NotFound);
     }
 
     if (
@@ -160,6 +168,7 @@ export class PaymentService {
   public async createCryptoPayment(
     userId: number,
     dto: PaymentCryptoCreateDto,
+    signature: string,
   ): Promise<boolean> {
     this.web3Service.validateChainId(dto.chainId);
     const network = Object.values(networkMap).find(
@@ -176,6 +185,8 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.TransactionNotFoundByHash);
     }
 
+    verifySignature(dto, signature, [transaction.from]);
+
     if (!transaction.logs[0] || !transaction.logs[0].data) {
       this.logger.error(ErrorPayment.InvalidTransactionData);
       throw new NotFoundException(ErrorPayment.InvalidTransactionData);
@@ -191,24 +202,24 @@ export class PaymentService {
     }
 
     const signer = this.web3Service.getSigner(dto.chainId);
-
-    const recipientAddress = transaction.logs[0].topics.some(
-      (topic) =>
-        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
-    );
-    if (!recipientAddress) {
-      this.logger.error(ErrorPayment.InvalidRecipient);
-      throw new ConflictException(ErrorPayment.InvalidRecipient);
-    }
-
-    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
       signer,
     );
+
+    if (
+      ethers.utils.hexValue(
+        tokenContract.interface.parseLog(transaction.logs[0]).args['_to'],
+      ) !== ethers.utils.hexValue(signer.address)
+    ) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const tokenId = (await tokenContract.symbol()).toLowerCase();
+    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
 
     if (
       network?.tokens[tokenId] != tokenAddress ||
@@ -259,5 +270,36 @@ export class PaymentService {
     }, 0);
 
     return totalAmount;
+  }
+
+  public async createRefundPayment(dto: PaymentRefundCreateDto) {
+    const rate = await getRate(TokenId.HMT, Currency.USD);
+
+    try {
+      await this.paymentRepository.create({
+        userId: dto.userId,
+        jobId: dto.jobId,
+        source: PaymentSource.BALANCE,
+        type: PaymentType.REFUND,
+        amount: dto.refundAmount,
+        currency: TokenId.HMT,
+        rate,
+        status: PaymentStatus.SUCCEEDED,
+      });
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        error.message.includes(ErrorPostgres.NumericFieldOverflow.toLowerCase())
+      ) {
+        this.logger.log(
+          ErrorPostgres.NumericFieldOverflow,
+          PaymentService.name,
+        );
+        throw new ConflictException(ErrorPayment.IncorrectAmount);
+      } else {
+        this.logger.log(error, PaymentService.name);
+        throw new ConflictException(ErrorPayment.NotSuccess);
+      }
+    }
   }
 }

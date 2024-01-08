@@ -18,25 +18,25 @@ async function bootstrap() {
 
   const configService: ConfigService = app.get(ConfigService);
 
-  const baseUrl = configService.get<string>(
-    ConfigNames.FE_URL,
-    'http://localhost:3005',
-  );
+  // const baseUrl = configService.get<string>(
+  //   ConfigNames.FE_URL,
+  //   'http://localhost:3005',
+  // );
 
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging'
-        ? [
-            `http://localhost:3001`,
-            `http://127.0.0.1:3001`,
-            `http://0.0.0.0:3001`,
-            baseUrl,
-          ]
-        : [baseUrl],
-    credentials: true,
-    exposedHeaders: ['Content-Disposition'],
-  });
+  // app.enableCors({
+  //   origin:
+  //     process.env.NODE_ENV === 'development' ||
+  //     process.env.NODE_ENV === 'staging'
+  //       ? [
+  //           `http://localhost:3001`,
+  //           `http://127.0.0.1:3001`,
+  //           `http://0.0.0.0:3001`,
+  //           baseUrl,
+  //         ]
+  //       : [baseUrl],
+  //   credentials: true,
+  //   exposedHeaders: ['Content-Disposition'],
+  // });
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -64,15 +64,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document, {
-    customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui-bundle.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui-standalone-preset.min.js',
-    ],
-    customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.7.2/swagger-ui.min.css',
-    ],
-  });
+  SwaggerModule.setup('swagger', app, document);
 
   const host = configService.get<string>(ConfigNames.HOST, 'localhost');
   const port = +configService.get<string>(ConfigNames.PORT, '5000');

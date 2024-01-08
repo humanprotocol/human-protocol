@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as gqlFetch from 'graphql-request';
-import { BigNumber, Signer, ethers } from 'ethers';
+import { BigNumber, Overrides, Signer, ethers } from 'ethers';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { ChainId } from '../src/enums';
 import {
@@ -17,10 +17,7 @@ import { StakingClient } from '../src/staking';
 import {
   DEFAULT_GAS_PAYER_PRIVKEY,
   FAKE_AMOUNT,
-  FAKE_BLOCK_NUMBER,
   FAKE_NEGATIVE_AMOUNT,
-  FAKE_TRANSACTION_CONFIRMATIONS,
-  FAKE_TRANSACTION_HASH,
 } from './utils/constants';
 import {
   GET_LEADERS_QUERY,
@@ -42,7 +39,8 @@ describe('StakingClient', () => {
     mockSigner: any,
     mockStakingContract: any,
     mockEscrowFactoryContract: any,
-    mockTokenContract: any;
+    mockTokenContract: any,
+    mockRewardPoolContract: any;
 
   beforeEach(async () => {
     mockProvider = {
@@ -64,12 +62,11 @@ describe('StakingClient', () => {
       slash: vi.fn(),
       allocate: vi.fn(),
       closeAllocation: vi.fn(),
-      distributeRewards: vi.fn(),
+      distributeReward: vi.fn(),
       getRewards: vi.fn(),
       getStaker: vi.fn(),
       getListOfStakers: vi.fn(),
       getAllocation: vi.fn(),
-      rewardPool: vi.fn().mockResolvedValueOnce(ethers.constants.AddressZero),
       address: ethers.constants.AddressZero,
     };
 
@@ -82,10 +79,15 @@ describe('StakingClient', () => {
       approve: vi.fn(),
     };
 
+    mockRewardPoolContract = {
+      distributeReward: vi.fn(),
+    };
+
     stakingClient = await StakingClient.build(mockSigner);
     stakingClient.stakingContract = mockStakingContract;
     stakingClient.tokenContract = mockTokenContract;
     stakingClient.escrowFactoryContract = mockEscrowFactoryContract;
+    stakingClient.rewardPoolContract = mockRewardPoolContract;
   });
 
   afterEach(() => {
@@ -149,16 +151,39 @@ describe('StakingClient', () => {
     test('should not fail and return void if the allowance is sufficient and the approval is successful', async () => {
       stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
 
-      mockTokenContract.approve = vi.fn().mockResolvedValue({
-        hash: FAKE_TRANSACTION_HASH,
-        blockNumber: FAKE_BLOCK_NUMBER,
-        confirmations: FAKE_TRANSACTION_CONFIRMATIONS,
-      });
+      const approveSpy = vi
+        .spyOn(mockTokenContract, 'approve')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
-      await expect(stakingClient.approveStake(amount)).resolves.toBeUndefined();
-      expect(mockTokenContract.approve).toBeCalledWith(
+      await expect(await stakingClient.approveStake(amount)).toBeUndefined();
+      expect(approveSpy).toBeCalledWith(
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
+      );
+      expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
+    });
+
+    test('should not fail and return void if the allowance is sufficient and the approval is successful with transaction options', async () => {
+      stakingClient.isAllowance = vi.fn().mockResolvedValue(true);
+
+      const approveSpy = vi
+        .spyOn(mockTokenContract, 'approve')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await expect(
+        await stakingClient.approveStake(amount, txOptions)
+      ).toBeUndefined();
+      expect(approveSpy).toBeCalledWith(
+        ethers.constants.AddressZero,
+        amount,
+        txOptions
       );
       expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
     });
@@ -171,7 +196,8 @@ describe('StakingClient', () => {
       await expect(stakingClient.approveStake(amount)).rejects.toThrow();
       expect(mockTokenContract.approve).toBeCalledWith(
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
       );
       expect(mockTokenContract.approve).toHaveBeenCalledTimes(1);
     });
@@ -197,11 +223,32 @@ describe('StakingClient', () => {
 
     test('should call the stake function on the staking contract with the given amount', async () => {
       mockTokenContract.allowance.mockResolvedValueOnce(amount);
+      const stakeSpy = vi
+        .spyOn(mockStakingContract, 'stake')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       await stakingClient.stake(amount);
 
-      expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
-      expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
+      expect(stakeSpy).toHaveBeenCalledWith(amount, {});
+      expect(stakeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call the stake function on the staking contract with transaction options', async () => {
+      mockTokenContract.allowance.mockResolvedValueOnce(amount);
+      const stakeSpy = vi
+        .spyOn(mockStakingContract, 'stake')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.stake(amount, txOptions);
+
+      expect(stakeSpy).toHaveBeenCalledWith(amount, txOptions);
+      expect(stakeSpy).toHaveBeenCalledTimes(1);
     });
 
     test('should throw an error if the stake function on the staking contract fails', async () => {
@@ -210,7 +257,7 @@ describe('StakingClient', () => {
       mockStakingContract.stake.mockRejectedValueOnce(new Error());
 
       await expect(stakingClient.stake(amount)).rejects.toThrow();
-      expect(mockStakingContract.stake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.stake).toHaveBeenCalledWith(amount, {});
       expect(mockStakingContract.stake).toHaveBeenCalledTimes(1);
     });
   });
@@ -234,17 +281,37 @@ describe('StakingClient', () => {
     });
 
     test('should call the unstake function on the staking contract with the given amount', async () => {
+      const unstakeSpy = vi
+        .spyOn(mockStakingContract, 'unstake')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
       await stakingClient.unstake(amount);
 
-      expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount);
-      expect(mockStakingContract.unstake).toHaveBeenCalledTimes(1);
+      expect(unstakeSpy).toHaveBeenCalledWith(amount, {});
+      expect(unstakeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call the unstake function on the staking contract with transaction options', async () => {
+      const unstakeSpy = vi
+        .spyOn(mockStakingContract, 'unstake')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.unstake(amount, txOptions);
+
+      expect(unstakeSpy).toHaveBeenCalledWith(amount, txOptions);
+      expect(unstakeSpy).toHaveBeenCalledTimes(1);
     });
 
     test('should throw an error if the unstake function on the staking contract fails', async () => {
       mockStakingContract.unstake.mockRejectedValueOnce(new Error());
 
       await expect(stakingClient.unstake(amount)).rejects.toThrow();
-      expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount);
+      expect(mockStakingContract.unstake).toHaveBeenCalledWith(amount, {});
       expect(mockStakingContract.unstake).toHaveBeenCalledTimes(1);
     });
   });
@@ -252,16 +319,38 @@ describe('StakingClient', () => {
   describe('withdraw', () => {
     test('should call the withdraw method with the correct parameters', async () => {
       mockStakingContract.withdraw.mockResolvedValueOnce();
+      const withdrawSpy = vi
+        .spyOn(mockStakingContract, 'withdraw')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.withdraw(txOptions);
+
+      expect(withdrawSpy).toHaveBeenCalledWith(txOptions);
+      expect(withdrawSpy).toHaveBeenCalledTimes(1);
+    });
+    test('should call the withdraw method with transaction options', async () => {
+      mockStakingContract.withdraw.mockResolvedValueOnce();
+      const withdrawSpy = vi
+        .spyOn(mockStakingContract, 'withdraw')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       await stakingClient.withdraw();
 
-      expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
+      expect(withdrawSpy).toHaveBeenCalledWith({});
+      expect(withdrawSpy).toHaveBeenCalledTimes(1);
     });
 
     test('should throw an error if the withdraw method of the staking contract fails', async () => {
       mockStakingContract.withdraw.mockRejectedValueOnce(new Error());
 
       await expect(stakingClient.withdraw()).rejects.toThrow();
+      expect(mockStakingContract.withdraw).toHaveBeenCalledWith({});
       expect(mockStakingContract.withdraw).toHaveBeenCalledTimes(1);
     });
   });
@@ -362,14 +451,19 @@ describe('StakingClient', () => {
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
       );
       expect(mockStakingContract.slash).toHaveBeenCalledTimes(1);
     });
 
     test('calls the staking contract to slash the given amount', async () => {
       mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
-      mockStakingContract.slash.mockResolvedValueOnce();
+      const slashSpy = vi
+        .spyOn(mockStakingContract, 'slash')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       await stakingClient.slash(
         ethers.constants.AddressZero,
@@ -378,13 +472,42 @@ describe('StakingClient', () => {
         amount
       );
 
-      expect(mockStakingContract.slash).toHaveBeenCalledWith(
+      expect(slashSpy).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
       );
-      expect(mockStakingContract.slash).toHaveBeenCalledTimes(1);
+      expect(slashSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('calls the staking contract to slash the given amount with transaction options', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const slashSpy = vi
+        .spyOn(mockStakingContract, 'slash')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.slash(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        amount,
+        txOptions
+      );
+
+      expect(slashSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        ethers.constants.AddressZero,
+        amount,
+        txOptions
+      );
+      expect(slashSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -425,13 +548,43 @@ describe('StakingClient', () => {
 
     test('should call the allocate method with the correct parameters', async () => {
       mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const allocateSpy = vi
+        .spyOn(mockStakingContract, 'allocate')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
       await stakingClient.allocate(ethers.constants.AddressZero, amount);
 
-      expect(mockStakingContract.allocate).toHaveBeenCalledWith(
+      expect(allocateSpy).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
       );
-      expect(mockStakingContract.allocate).toHaveBeenCalledTimes(1);
+      expect(allocateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call the allocate method with with transaction options', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const allocateSpy = vi
+        .spyOn(mockStakingContract, 'allocate')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.allocate(
+        ethers.constants.AddressZero,
+        amount,
+        txOptions
+      );
+
+      expect(allocateSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        amount,
+        txOptions
+      );
+      expect(allocateSpy).toHaveBeenCalledTimes(1);
     });
 
     test('should throw an error if the allocate method fails', async () => {
@@ -443,7 +596,8 @@ describe('StakingClient', () => {
       ).rejects.toThrow();
       expect(mockStakingContract.allocate).toHaveBeenCalledWith(
         ethers.constants.AddressZero,
-        amount
+        amount,
+        {}
       );
       expect(mockStakingContract.allocate).toHaveBeenCalledTimes(1);
     });
@@ -477,54 +631,108 @@ describe('StakingClient', () => {
       ).rejects.toThrow();
 
       expect(mockStakingContract.closeAllocation).toHaveBeenCalledWith(
-        ethers.constants.AddressZero
+        ethers.constants.AddressZero,
+        {}
       );
       expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(1);
     });
 
     test('should call the closeAllocation method with the correct parameters', async () => {
       mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
-      mockStakingContract.closeAllocation.mockResolvedValueOnce();
+      const closeAllocationSpy = vi
+        .spyOn(mockStakingContract, 'closeAllocation')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
 
       await stakingClient.closeAllocation(ethers.constants.AddressZero);
 
-      expect(mockStakingContract.closeAllocation).toHaveBeenCalledWith(
-        ethers.constants.AddressZero
+      expect(closeAllocationSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        {}
       );
-      expect(mockStakingContract.closeAllocation).toHaveBeenCalledTimes(1);
+      expect(closeAllocationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call the closeAllocation method with transaction options', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const closeAllocationSpy = vi
+        .spyOn(mockStakingContract, 'closeAllocation')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.closeAllocation(
+        ethers.constants.AddressZero,
+        txOptions
+      );
+
+      expect(closeAllocationSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        txOptions
+      );
+      expect(closeAllocationSpy).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('distributeRewards', () => {
+  describe('distributeReward', () => {
     const invalidAddress = 'InvalidAddress';
 
     test('should throw an error if an invalid escrow address is provided', async () => {
       await expect(
-        stakingClient.distributeRewards(invalidAddress)
+        stakingClient.distributeReward(invalidAddress)
       ).rejects.toThrow(ErrorInvalidEscrowAddressProvided);
-      expect(mockStakingContract.distributeRewards).toHaveBeenCalledTimes(0);
+      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledTimes(0);
     });
 
     test('throws an error if escrow address is not provided by the factory', async () => {
       mockEscrowFactoryContract.hasEscrow.mockRejectedValueOnce(new Error());
 
       await expect(
-        stakingClient.distributeRewards(ethers.constants.AddressZero)
+        stakingClient.distributeReward(ethers.constants.AddressZero)
       ).rejects.toThrow();
-      expect(mockStakingContract.distributeRewards).toHaveBeenCalledTimes(0);
+      expect(mockRewardPoolContract.distributeReward).toHaveBeenCalledTimes(0);
     });
 
     test('should call distributeReward on the reward pool contract', async () => {
       mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
-      vi.spyOn(stakingClient, 'distributeRewards').mockImplementation(() =>
-        Promise.resolve(undefined)
+      const distributeRewardSpy = vi
+        .spyOn(mockRewardPoolContract, 'distributeReward')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      await stakingClient.distributeReward(ethers.constants.AddressZero);
+
+      expect(distributeRewardSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        {}
+      );
+      expect(distributeRewardSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test('should call distributeReward on the reward pool contract with transaction options', async () => {
+      mockEscrowFactoryContract.hasEscrow.mockResolvedValueOnce(true);
+      const distributeRewardSpy = vi
+        .spyOn(mockRewardPoolContract, 'distributeReward')
+        .mockImplementation(() => ({
+          wait: vi.fn().mockResolvedValue(true),
+        }));
+
+      const txOptions: Overrides = { gasLimit: 45000 };
+
+      await stakingClient.distributeReward(
+        ethers.constants.AddressZero,
+        txOptions
       );
 
-      const results = await stakingClient.distributeRewards(
-        ethers.constants.AddressZero
+      expect(distributeRewardSpy).toHaveBeenCalledWith(
+        ethers.constants.AddressZero,
+        txOptions
       );
-
-      expect(results).toBeUndefined();
+      expect(distributeRewardSpy).toHaveBeenCalledTimes(1);
     });
   });
 

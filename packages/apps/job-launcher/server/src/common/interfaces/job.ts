@@ -1,4 +1,4 @@
-import { JobRequestType, JobStatus } from '../enums/job';
+import { JobStatus } from '../enums/job';
 import { IBase } from './base';
 
 export interface IJob extends IBase {
@@ -10,6 +10,7 @@ export interface IJob extends IBase {
   manifestUrl: string;
   manifestHash: string;
   status: JobStatus;
+  failedReason?: string;
   retriesCount?: number;
   waitUntil: Date;
 }

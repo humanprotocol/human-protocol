@@ -13,6 +13,12 @@ export const MOCK_LABEL_NEGATIVE = '';
 export const MOCK_JOB_LAUNCHER_FEE = 5;
 export const MOCK_RECORDING_ORACLE_FEE = 5;
 export const MOCK_REPUTATION_ORACLE_FEE = 5;
+export const MOCK_JOB_LAUNCHER_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C441';
+export const MOCK_EXCHANGE_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C441';
+export const MOCK_RECORDING_ORACLE_ADDRESS =
+  '0xCf88b3f1992458C2f5a229573c768D0E9F70C442';
 export const MOCK_MANIFEST: IFortuneManifest = {
   submissionsRequired: 2,
   requesterTitle: 'Fortune',
@@ -171,6 +177,54 @@ export const MOCK_IMAGE_BINARY_LABEL_JOB_RESULTS: ImageLabelBinaryJobResults = {
     },
   ],
 };
-export const MOCK_BUCKET_NAME = 'bucket-name';
 export const MOCK_PRIVATE_KEY =
   'd334daf65a631f40549cc7de126d5a0016f32a2d00c49f94563f9737f7135e55';
+export const MOCK_EMAIL = 'test@example.com';
+export const MOCK_PASSWORD = 'password123';
+export const MOCK_HASHED_PASSWORD = 'hashedPassword';
+export const MOCK_ACCESS_TOKEN = 'access_token';
+export const MOCK_REFRESH_TOKEN = 'refresh_token';
+export const MOCK_ACCESS_TOKEN_HASHED = 'access_token_hashed';
+export const MOCK_REFRESH_TOKEN_HASHED = 'refresh_token_hashed';
+export const MOCK_EXPIRES_IN = 1000000000000000;
+export const MOCK_SENDGRID_API_KEY =
+  'SG.xxxxxxxxxxxxxxxxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+export const MOCK_SENDGRID_FROM_EMAIL = 'info@hmt.ai';
+export const MOCK_SENDGRID_FROM_NAME = 'John Doe';
+
+export const MOCK_S3_ENDPOINT = 'localhost';
+export const MOCK_S3_PORT = 9000;
+export const MOCK_S3_ACCESS_KEY = 'access_key';
+export const MOCK_S3_SECRET_KEY = 'secret_key';
+export const MOCK_S3_BUCKET = 'solution';
+export const MOCK_S3_USE_SSL = false;
+
+export const MOCK_ENCRYPTION_PRIVATE_KEY = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+xVgEZS6w6BYJKwYBBAHaRw8BAQdAXRzFR1ROwdb4Bu7RKYXcBvJsH6JmBxiT
+Zwbnk3KUBiUAAP9N8d16MWV/M+yggH6cTODDCNCDV/Ic012RP0fTI4VEjhFF
+zRtKb2IgTGF1bmNoZXIgPGFkbWluQGhtdC5haT7CjAQQFgoAPgWCZS6w6AQL
+CQcICZBAfiPaLRaJeAMVCAoEFgACAQIZAQKbAwIeARYhBNvDQnyGS7m0aAs+
+BUB+I9otFol4AACYcAEA/c1peyz3aWsB9NkvOfy/erdqkNAAHfikCKzGRKtD
+sKcA/Rk9IHYRBzrvXyXXpFYkeFR1H6dXTUYzoZy8xoFleSIOx10EZS6w6BIK
+KwYBBAGXVQEFAQEHQPOpvDe3nptX0ZqcFsUz/K7HHnSSOIn/aGYfrZfKAwQ1
+AwEIBwAA/3fQjUAKIaoDAQTB2Jufw9g1JBybjMXSb3YCWunTB6ZgD5vCeAQY
+FggAKgWCZS6w6AmQQH4j2i0WiXgCmwwWIQTbw0J8hku5tGgLPgVAfiPaLRaJ
+eAAAYHMBAPI7LdZ8k4lQBvlXjVMV3hlkQGtKp+EXHd3BaT1hpniVAP4wecxi
+7jxPB0Thko1w1Ro6ZYsFtlOB52qocYtduLJkCA==
+=qV+I
+-----END PGP PRIVATE KEY BLOCK-----`;
+
+export const MOCK_ENCRYPTION_PUBLIC_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+xjMEZS6w6BYJKwYBBAHaRw8BAQdAXRzFR1ROwdb4Bu7RKYXcBvJsH6JmBxiT
+Zwbnk3KUBiXNG0pvYiBMYXVuY2hlciA8YWRtaW5AaG10LmFpPsKMBBAWCgA+
+BYJlLrDoBAsJBwgJkEB+I9otFol4AxUICgQWAAIBAhkBApsDAh4BFiEE28NC
+fIZLubRoCz4FQH4j2i0WiXgAAJhwAQD9zWl7LPdpawH02S85/L96t2qQ0AAd
++KQIrMZEq0OwpwD9GT0gdhEHOu9fJdekViR4VHUfp1dNRjOhnLzGgWV5Ig7O
+OARlLrDoEgorBgEEAZdVAQUBAQdA86m8N7eem1fRmpwWxTP8rscedJI4if9o
+Zh+tl8oDBDUDAQgHwngEGBYIACoFgmUusOgJkEB+I9otFol4ApsMFiEE28NC
+fIZLubRoCz4FQH4j2i0WiXgAAGBzAQDyOy3WfJOJUAb5V41TFd4ZZEBrSqfh
+Fx3dwWk9YaZ4lQD+MHnMYu48TwdE4ZKNcNUaOmWLBbZTgedqqHGLXbiyZAg=
+=IMAe
+-----END PGP PUBLIC KEY BLOCK-----`;

@@ -3,17 +3,16 @@ import {
   ChainId,
   EscrowClient,
   EscrowStatus,
+  KVStoreClient,
   EscrowUtils,
   NETWORKS,
   StakingClient,
-  StorageClient,
-  StorageCredentials,
-  StorageParams,
-  UploadFile,
+  KVStoreKeys,
+  Encryption,
+  EncryptionUtils,
 } from '@human-protocol/sdk';
-import { HttpService } from '@nestjs/axios';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   Inject,
@@ -25,11 +24,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { validate } from 'class-validator';
 import { BigNumber, ethers } from 'ethers';
-import { firstValueFrom } from 'rxjs';
-import { LessThanOrEqual, QueryFailedError } from 'typeorm';
+import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
-  ErrorBucket,
   ErrorEscrow,
   ErrorJob,
   ErrorPayment,
@@ -39,6 +36,9 @@ import {
   JobRequestType,
   JobStatus,
   JobStatusFilter,
+  JobCaptchaMode,
+  JobCaptchaRequestType,
+  JobCaptchaShapeType,
 } from '../../common/enums/job';
 import {
   Currency,
@@ -47,14 +47,19 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import { getRate, parseUrl } from '../../common/utils';
+import {
+  isPGPMessage,
+  getRate,
+  hashString,
+  isValidJSON,
+} from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
 import { Web3Service } from '../web3/web3.service';
 import {
-  CvatFinalResultDto,
   CvatManifestDto,
+  EscrowCancelDto,
   EscrowFailedWebhookDto,
   FortuneFinalResultDto,
   FortuneManifestDto,
@@ -62,15 +67,33 @@ import {
   JobDetailsDto,
   JobFortuneDto,
   JobListDto,
-  SaveManifestDto,
-  SendWebhookDto,
+  HCaptchaManifestDto,
+  JobCaptchaAdvancedDto,
+  JobCaptchaDto,
+  RestrictedAudience,
 } from './job.dto';
 import { JobEntity } from './job.entity';
 import { JobRepository } from './job.repository';
 import { RoutingProtocolService } from './routing-protocol.service';
-import { JOB_RETRIES_COUNT_THRESHOLD } from '../../common/constants';
+import {
+  CANCEL_JOB_STATUSES,
+  DEFAULT_MAX_RETRY_COUNT,
+  HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
+  HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+  HCAPTCHA_IMMO_MAX_LENGTH,
+  HCAPTCHA_IMMO_MIN_LENGTH,
+  HCAPTCHA_LANDMARK_MAX_POINTS,
+  HCAPTCHA_LANDMARK_MIN_POINTS,
+  HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+  HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+  HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+  HCAPTCHA_NOT_PRESENTED_LABEL,
+  HCAPTCHA_ORACLE_STAKE,
+  HCAPTCHA_POLYGON_MAX_POINTS,
+  HCAPTCHA_POLYGON_MIN_POINTS,
+} from '../../common/constants';
 import { SortDirection } from '../../common/enums/collection';
-import { EventType } from '../../common/enums/webhook';
+import { EventType, OracleType } from '../../common/enums/webhook';
 import {
   HMToken,
   HMToken__factory,
@@ -78,13 +101,20 @@ import {
 import Decimal from 'decimal.js';
 import { EscrowData } from '@human-protocol/sdk/dist/graphql';
 import { filterToEscrowStatus } from '../../common/utils/status';
+import { StorageService } from '../storage/storage.service';
+import { WebhookService } from '../webhook/webhook.service';
+import stringify from 'json-stable-stringify';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { CronJobService } from '../cron-job/cron-job.service';
+import { CronJobType } from '../../common/enums/cron-job';
+import {
+  generateBucketUrl,
+  listObjectsInBucket,
+} from '../../common/utils/storage';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
-  public readonly storageClient: StorageClient;
-  public readonly storageParams: StorageParams;
-  public readonly bucket: string;
 
   constructor(
     @Inject(Web3Service)
@@ -92,47 +122,321 @@ export class JobService {
     public readonly jobRepository: JobRepository,
     private readonly paymentRepository: PaymentRepository,
     private readonly paymentService: PaymentService,
-    public readonly httpService: HttpService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
-  ) {
-    const storageCredentials: StorageCredentials = {
-      accessKey: this.configService.get<string>(ConfigNames.S3_ACCESS_KEY)!,
-      secretKey: this.configService.get<string>(ConfigNames.S3_SECRET_KEY)!,
+    private readonly storageService: StorageService,
+    private readonly webhookService: WebhookService,
+    private readonly cronJobService: CronJobService,
+  ) {}
+
+  public async createCvatManifest(
+    dto: JobCvatDto,
+    requestType: JobRequestType,
+    tokenFundAmount: number,
+  ): Promise<CvatManifestDto> {
+    const elementsCount = (await listObjectsInBucket(dto.data, requestType))
+      .length;
+    return {
+      data: {
+        data_url: generateBucketUrl(dto.data, requestType),
+      },
+      annotation: {
+        labels: dto.labels.map((item) => ({ name: item })),
+        description: dto.requesterDescription,
+        user_guide: dto.userGuide,
+        type: requestType,
+        job_size: Number(
+          this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
+        ),
+        max_time: Number(
+          this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
+        ),
+      },
+      validation: {
+        min_quality: dto.minQuality,
+        val_size: Number(
+          this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
+        ),
+        gt_url: generateBucketUrl(dto.groundTruth, requestType),
+      },
+      job_bounty: await this.calculateJobBounty(elementsCount, tokenFundAmount),
     };
+  }
 
-    const useSSL =
-      this.configService.get<string>(ConfigNames.S3_USE_SSL) === 'true';
-    this.storageParams = {
-      endPoint: this.configService.get<string>(ConfigNames.S3_ENDPOINT)!,
-      port: Number(this.configService.get<number>(ConfigNames.S3_PORT)!),
-      useSSL,
-    };
-
-    this.bucket = this.configService.get<string>(ConfigNames.S3_BUCKET)!;
-
-    this.storageClient = new StorageClient(
-      this.storageParams,
-      storageCredentials,
+  public async createHCaptchaManifest(
+    jobType: JobCaptchaShapeType,
+    jobDto: JobCaptchaDto,
+  ): Promise<HCaptchaManifestDto> {
+    const dataUrl = generateBucketUrl(jobDto.data, JobRequestType.HCAPTCHA);
+    const objectsInBucket = await listObjectsInBucket(
+      jobDto.data,
+      JobRequestType.HCAPTCHA,
     );
+
+    const commonManifestProperties = {
+      job_mode: JobCaptchaMode.BATCH,
+      requester_accuracy_target: jobDto.accuracyTarget,
+      request_config: {},
+      restricted_audience: this.buildHCaptchaRestrictedAudience(
+        jobDto.advanced,
+      ),
+      requester_max_repeats: jobDto.maxRequests,
+      requester_min_repeats: jobDto.minRequests,
+      requester_question: { en: jobDto.annotations.labelingPrompt },
+      job_total_tasks: objectsInBucket.length,
+      task_bid_price: jobDto.annotations.taskBidPrice,
+      taskdata_uri: await this.generateAndUploadTaskData(
+        dataUrl,
+        objectsInBucket,
+      ),
+      public_results: true,
+      oracle_stake: HCAPTCHA_ORACLE_STAKE,
+      repo_uri: this.configService.get<string>(
+        ConfigNames.HCAPTCHA_REPUTATION_ORACLE_URI,
+      )!,
+      ro_uri: this.configService.get<string>(
+        ConfigNames.HCAPTCHA_RECORDING_ORACLE_URI,
+      )!,
+    };
+
+    let groundTruthsData;
+    if (jobDto.annotations.groundTruths) {
+      groundTruthsData = await this.storageService.download(
+        jobDto.annotations.groundTruths,
+      );
+
+      if (isValidJSON(groundTruthsData)) {
+        groundTruthsData = JSON.parse(groundTruthsData);
+      }
+    }
+
+    switch (jobType) {
+      case JobCaptchaShapeType.COMPARISON:
+        return {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_BINARY,
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set: {},
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
+
+      case JobCaptchaShapeType.CATEGORIZATION:
+        return {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_MULTIPLE_CHOICE,
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set:
+            this.buildHCaptchaRestrictedAnswerSet(groundTruthsData),
+        };
+
+      case JobCaptchaShapeType.POLYGON:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const polygonManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: JobCaptchaShapeType.POLYGON,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_POLYGON_MIN_POINTS,
+            max_points: HCAPTCHA_POLYGON_MAX_POINTS,
+            minimum_selection_area_per_shape:
+              HCAPTCHA_MINIMUM_SELECTION_AREA_PER_SHAPE,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
+
+        return polygonManifest;
+
+      case JobCaptchaShapeType.POINT:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const pointManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: jobType,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_LANDMARK_MIN_POINTS,
+            max_points: HCAPTCHA_LANDMARK_MAX_POINTS,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
+
+        return pointManifest;
+      case JobCaptchaShapeType.BOUNDING_BOX:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const boundingBoxManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.IMAGE_LABEL_AREA_SELECT,
+          request_config: {
+            shape_type: jobType,
+            min_shapes_per_image: HCAPTCHA_MIN_SHAPES_PER_IMAGE,
+            max_shapes_per_image: HCAPTCHA_MAX_SHAPES_PER_IMAGE,
+            min_points: HCAPTCHA_BOUNDING_BOX_MIN_POINTS,
+            max_points: HCAPTCHA_BOUNDING_BOX_MAX_POINTS,
+          },
+          groundtruth_uri: jobDto.annotations.groundTruths,
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          requester_question_example: jobDto.annotations.exampleImages || [],
+        };
+
+        return boundingBoxManifest;
+      case JobCaptchaShapeType.IMMO:
+        if (!jobDto.annotations.label) {
+          this.logger.log(ErrorJob.JobParamsValidationFailed, JobService.name);
+          throw new BadRequestException(ErrorJob.JobParamsValidationFailed);
+        }
+
+        const immoManifest = {
+          ...commonManifestProperties,
+          request_type: JobCaptchaRequestType.TEXT_FREEE_NTRY,
+          request_config: {
+            multiple_choice_max_choices: 1,
+            multiple_choice_min_choices: 1,
+            overlap_threshold: null,
+            answer_type: 'str',
+            max_length: HCAPTCHA_IMMO_MAX_LENGTH,
+            min_length: HCAPTCHA_IMMO_MIN_LENGTH,
+          },
+          requester_restricted_answer_set: {
+            [jobDto.annotations.label!]: { en: jobDto.annotations.label },
+          },
+          taskdata: [],
+        };
+
+        return immoManifest;
+
+      default:
+        this.logger.log(ErrorJob.HCaptchaInvalidJobType, JobService.name);
+        throw new ConflictException(ErrorJob.HCaptchaInvalidJobType);
+    }
+  }
+
+  private buildHCaptchaRestrictedAudience(advanced: JobCaptchaAdvancedDto) {
+    const restrictedAudience: RestrictedAudience = {};
+
+    restrictedAudience.sitekey = [
+      {
+        [this.configService.get<number>(ConfigNames.HCAPTCHA_SITE_KEY)!]: {
+          score: 1,
+        },
+      },
+    ];
+
+    if (advanced.workerLanguage) {
+      restrictedAudience.lang = [{ [advanced.workerLanguage]: { score: 1 } }];
+    }
+
+    if (advanced.workerLocation) {
+      restrictedAudience.country = [
+        { [advanced.workerLocation]: { score: 1 } },
+      ];
+    }
+
+    if (advanced.targetBrowser) {
+      restrictedAudience.browser = [{ [advanced.targetBrowser]: { score: 1 } }];
+    }
+
+    return restrictedAudience;
+  }
+
+  private buildHCaptchaRestrictedAnswerSet(groundTruthsData: any) {
+    const maxElements = 3;
+    const outputObject: any = {};
+
+    let elementCount = 0;
+
+    for (const key of Object.keys(groundTruthsData)) {
+      if (elementCount >= maxElements) {
+        break;
+      }
+
+      const value = groundTruthsData[key][0][0];
+      outputObject[value] = { en: value, answer_example_uri: key };
+      elementCount++;
+    }
+
+    // Default case
+    outputObject['0'] = { en: HCAPTCHA_NOT_PRESENTED_LABEL };
+
+    return outputObject;
+  }
+
+  public async generateAndUploadTaskData(
+    dataUrl: string,
+    objectNames: string[],
+  ) {
+    const data = objectNames.map((objectName) => {
+      return {
+        datapoint_uri: `${dataUrl}/${objectName}`,
+        datapoint_hash: 'undefined-hash',
+        task_key: uuidv4(),
+      };
+    });
+
+    const hash = hashString(stringify(data));
+    const { url } = await this.storageService.uploadFile(data, hash);
+    return url;
   }
 
   public async createJob(
     userId: number,
     requestType: JobRequestType,
-    dto: JobFortuneDto | JobCvatDto,
+    dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
-    let manifestUrl, manifestHash;
-    const { chainId, fundAmount } = dto;
+    const { chainId } = dto;
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
     }
 
-    const userBalance = await this.paymentService.getUserBalance(userId);
-
+    let manifestOrigin, manifestEncrypted, fundAmount;
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
+    if (requestType === JobRequestType.HCAPTCHA) {
+      // hCaptcha
+      dto = dto as JobCaptchaDto;
+      const objectsInBucket = await listObjectsInBucket(
+        dto.data,
+        JobRequestType.HCAPTCHA,
+      );
+      fundAmount = div(
+        dto.annotations.taskBidPrice * objectsInBucket.length,
+        rate,
+      );
+    } else if (requestType === JobRequestType.FORTUNE) {
+      // Fortune
+      dto = dto as JobFortuneDto;
+      fundAmount = dto.fundAmount;
+    } else {
+      // CVAT
+      dto = dto as JobCvatDto;
+      fundAmount = dto.fundAmount;
+    }
+    const userBalance = await this.paymentService.getUserBalance(userId);
     const feePercentage = this.configService.get<number>(
       ConfigNames.JOB_LAUNCHER_FEE,
     )!;
@@ -148,46 +452,45 @@ export class JobService {
     const tokenFee = mul(fee, rate);
     const tokenTotalAmount = add(tokenFundAmount, tokenFee);
 
-    if (requestType == JobRequestType.FORTUNE) {
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        ...(dto as JobFortuneDto),
-        requestType,
-        fundAmount: tokenFundAmount,
-      }));
+    if (requestType === JobRequestType.HCAPTCHA) {
+      // hCaptcha
+      dto = dto as JobCaptchaDto;
+      manifestOrigin = await this.createHCaptchaManifest(
+        dto.annotations.typeOfJob,
+        dto,
+      );
+
+      manifestEncrypted = await EncryptionUtils.encrypt(
+        stringify(manifestOrigin),
+        [
+          this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
+          this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!,
+        ],
+      );
+    } else if (requestType == JobRequestType.FORTUNE) {
+      // Fortune
+      dto = dto as JobFortuneDto;
+      manifestOrigin = { ...dto, requestType, fundAmount: tokenTotalAmount };
     } else {
+      // CVAT
       dto = dto as JobCvatDto;
-      ({ manifestUrl, manifestHash } = await this.saveManifest({
-        data: {
-          data_url: dto.dataUrl,
-        },
-        annotation: {
-          labels: dto.labels.map((item) => ({ name: item })),
-          description: dto.requesterDescription,
-          user_guide: dto.userGuide,
-          type: requestType,
-          job_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!,
-          ),
-          max_time: Number(
-            this.configService.get<number>(ConfigNames.CVAT_MAX_TIME)!,
-          ),
-        },
-        validation: {
-          min_quality: dto.minQuality,
-          val_size: Number(
-            this.configService.get<number>(ConfigNames.CVAT_VAL_SIZE)!,
-          ),
-          gt_url: dto.gtUrl,
-        },
-        job_bounty: await this.calculateJobBounty(dto.dataUrl, fundAmount),
-      }));
+      manifestOrigin = await this.createCvatManifest(
+        dto,
+        requestType,
+        tokenFundAmount,
+      );
     }
+    const hash = hashString(stringify(manifestOrigin));
+    const { url } = await this.storageService.uploadFile(
+      manifestEncrypted || manifestOrigin,
+      hash,
+    );
 
     const jobEntity = await this.jobRepository.create({
       chainId: chainId ?? this.routingProtocolService.selectNetwork(),
       userId,
-      manifestUrl,
-      manifestHash,
+      manifestUrl: url,
+      manifestHash: hash,
       fee: tokenFee,
       fundAmount: tokenFundAmount,
       status: JobStatus.PENDING,
@@ -229,23 +532,13 @@ export class JobService {
     return jobEntity.id;
   }
 
-  private async calculateJobBounty(
-    endpointUrl: string,
+  public async calculateJobBounty(
+    elementsCount: number,
     fundAmount: number,
   ): Promise<string> {
-    const storageData = parseUrl(endpointUrl);
-    const storageClient = new StorageClient({
-      endPoint: storageData.endPoint,
-      port: storageData.port,
-      useSSL: false,
-    });
-
-    const totalImages = (await storageClient.listObjects(storageData.bucket))
-      .length;
-
     const totalJobs = Math.ceil(
       div(
-        totalImages,
+        elementsCount,
         Number(this.configService.get<number>(ConfigNames.CVAT_JOB_SIZE)!),
       ),
     );
@@ -255,49 +548,18 @@ export class JobService {
     );
   }
 
-  public async launchJob(jobEntity: JobEntity): Promise<JobEntity> {
+  public async createEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
 
-    const manifest = await this.getManifest(jobEntity.manifestUrl);
-
-    const recordingOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS
-        : ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
-
-    const exchangeOracleConfigKey =
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS
-        : ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
-
-    const escrowConfig = {
-      recordingOracle: this.configService.get<string>(
-        recordingOracleConfigKey,
-      )!,
-      reputationOracle: this.configService.get<string>(
-        ConfigNames.REPUTATION_ORACLE_ADDRESS,
-      )!,
-      exchangeOracle: this.configService.get<string>(exchangeOracleConfigKey)!,
-      recordingOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.RECORDING_ORACLE_FEE)!,
-      ),
-      reputationOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.REPUTATION_ORACLE_FEE)!,
-      ),
-      exchangeOracleFee: BigNumber.from(
-        this.configService.get<number>(ConfigNames.EXCHANGE_ORACLE_FEE)!,
-      ),
-      manifestUrl: jobEntity.manifestUrl,
-      manifestHash: jobEntity.manifestHash,
-    };
-
-    const escrowAddress = await escrowClient.createAndSetupEscrow(
+    const escrowAddress = await escrowClient.createEscrow(
       NETWORKS[jobEntity.chainId as ChainId]!.hmtAddress,
       [],
       jobEntity.userId.toString(),
-      escrowConfig,
+      {
+        gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+      },
     );
 
     if (!escrowAddress) {
@@ -305,13 +567,92 @@ export class JobService {
       throw new NotFoundException(ErrorEscrow.NotCreated);
     }
 
+    jobEntity.status = JobStatus.CREATED;
     jobEntity.escrowAddress = escrowAddress;
     await jobEntity.save();
 
     return jobEntity;
   }
 
-  public async fundJob(jobEntity: JobEntity): Promise<JobEntity> {
+  public async setupEscrow(jobEntity: JobEntity): Promise<JobEntity> {
+    const signer = this.web3Service.getSigner(jobEntity.chainId);
+
+    const escrowClient = await EscrowClient.build(signer);
+
+    let manifest = await this.storageService.download(jobEntity.manifestUrl);
+    if (typeof manifest === 'string' && isPGPMessage(manifest)) {
+      const encription = await Encryption.build(
+        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
+      );
+      manifest = await encription.decrypt(manifest as any);
+    }
+
+    if (isValidJSON(manifest)) {
+      manifest = JSON.parse(manifest);
+    }
+
+    await this.validateManifest(manifest);
+
+    let recordingOracleConfigKey;
+    let exchangeOracleConfigKey;
+
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
+      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
+      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+    } else {
+      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    }
+
+    const recordingOracleAddress = this.configService.get<string>(
+      recordingOracleConfigKey,
+    )!;
+
+    const reputationOracleAddress = this.configService.get<string>(
+      ConfigNames.REPUTATION_ORACLE_ADDRESS,
+    )!;
+
+    const exchangeOracleAddress = this.configService.get<string>(
+      exchangeOracleConfigKey,
+    )!;
+    const escrowConfig = {
+      recordingOracle: recordingOracleAddress,
+      reputationOracle: recordingOracleAddress,
+      exchangeOracle: exchangeOracleAddress,
+      recordingOracleFee: await this.getOracleFee(
+        recordingOracleAddress,
+        jobEntity.chainId,
+      ),
+      reputationOracleFee: await this.getOracleFee(
+        reputationOracleAddress,
+        jobEntity.chainId,
+      ),
+      exchangeOracleFee: await this.getOracleFee(
+        exchangeOracleAddress,
+        jobEntity.chainId,
+      ),
+      manifestUrl: jobEntity.manifestUrl,
+      manifestHash: jobEntity.manifestHash,
+    };
+
+    await escrowClient.setup(jobEntity.escrowAddress, escrowConfig, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
+
+    jobEntity.status = JobStatus.SET_UP;
+    await jobEntity.save();
+
+    return jobEntity;
+  }
+
+  public async fundEscrow(jobEntity: JobEntity): Promise<JobEntity> {
     const signer = this.web3Service.getSigner(jobEntity.chainId);
 
     const escrowClient = await EscrowClient.build(signer);
@@ -320,7 +661,9 @@ export class JobService {
       jobEntity.fundAmount.toString(),
       'ether',
     );
-    await escrowClient.fund(jobEntity.escrowAddress, weiAmount);
+    await escrowClient.fund(jobEntity.escrowAddress, weiAmount, {
+      gasPrice: await this.web3Service.calculateGasPrice(jobEntity.chainId),
+    });
 
     jobEntity.status = JobStatus.LAUNCHED;
     await jobEntity.save();
@@ -328,10 +671,7 @@ export class JobService {
     return jobEntity;
   }
 
-  public async requestToCancelJob(
-    userId: number,
-    id: number,
-  ): Promise<boolean> {
+  public async requestToCancelJob(userId: number, id: number): Promise<void> {
     const jobEntity = await this.jobRepository.findOne({ id, userId });
 
     if (!jobEntity) {
@@ -339,39 +679,44 @@ export class JobService {
       throw new NotFoundException(ErrorJob.NotFound);
     }
 
-    jobEntity.status = JobStatus.TO_CANCEL;
-    jobEntity.retriesCount = 0;
-    await jobEntity.save();
-
-    return true;
-  }
-
-  public async saveManifest(
-    manifest: FortuneManifestDto | CvatManifestDto,
-  ): Promise<SaveManifestDto> {
-    const uploadedFiles: UploadFile[] = await this.storageClient.uploadFiles(
-      [manifest],
-      this.bucket,
-    );
-
-    if (!uploadedFiles[0]) {
-      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
+    if (!CANCEL_JOB_STATUSES.includes(jobEntity.status)) {
+      this.logger.log(ErrorJob.InvalidStatusCancellation, JobService.name);
+      throw new ConflictException(ErrorJob.InvalidStatusCancellation);
     }
 
-    const { url, hash } = uploadedFiles[0];
-    const manifestUrl = url;
-
-    return { manifestUrl, manifestHash: hash };
+    if (
+      jobEntity.status === JobStatus.PENDING ||
+      jobEntity.status === JobStatus.PAID
+    ) {
+      await this.paymentService.createRefundPayment({
+        refundAmount: jobEntity.fundAmount,
+        userId: jobEntity.userId,
+        jobId: jobEntity.id,
+      });
+      jobEntity.status = JobStatus.CANCELED;
+    } else {
+      jobEntity.status = JobStatus.TO_CANCEL;
+    }
+    jobEntity.retriesCount = 0;
+    await jobEntity.save();
   }
 
   private async validateManifest(
-    manifest: FortuneManifestDto | CvatManifestDto,
+    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
   ): Promise<boolean> {
-    const dtoCheck =
-      (manifest as FortuneManifestDto).requestType == JobRequestType.FORTUNE
-        ? new FortuneManifestDto()
-        : new CvatManifestDto();
+    let dtoCheck;
+
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
+      dtoCheck = new FortuneManifestDto();
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
+      dtoCheck = new HCaptchaManifestDto();
+    } else {
+      dtoCheck = new CvatManifestDto();
+    }
 
     Object.assign(dtoCheck, manifest);
 
@@ -388,34 +733,6 @@ export class JobService {
     return true;
   }
 
-  public async getManifest(
-    manifestUrl: string,
-  ): Promise<FortuneManifestDto | CvatManifestDto> {
-    const manifest = await StorageClient.downloadFileFromUrl(manifestUrl);
-
-    if (!manifest) {
-      throw new NotFoundException(ErrorJob.ManifestNotFound);
-    }
-
-    return manifest;
-  }
-
-  public async sendWebhook(
-    webhookUrl: string,
-    webhookData: SendWebhookDto,
-  ): Promise<boolean> {
-    const { data } = await firstValueFrom(
-      await this.httpService.post(webhookUrl, webhookData),
-    );
-
-    if (!data) {
-      this.logger.log(ErrorJob.WebhookWasNotSent, JobService.name);
-      throw new NotFoundException(ErrorJob.WebhookWasNotSent);
-    }
-
-    return true;
-  }
-
   public async getJobsByStatus(
     networks: ChainId[],
     userId: number,
@@ -427,9 +744,14 @@ export class JobService {
       let jobs: JobEntity[] = [];
       let escrows: EscrowData[] | undefined;
 
+      networks.forEach((chainId) =>
+        this.web3Service.validateChainId(Number(chainId)),
+      );
+
       switch (status) {
         case JobStatusFilter.FAILED:
         case JobStatusFilter.PENDING:
+        case JobStatusFilter.CANCELED:
           jobs = await this.jobRepository.findJobsByStatusFilter(
             networks,
             userId,
@@ -438,17 +760,18 @@ export class JobService {
             limit,
           );
           break;
-        case JobStatusFilter.CANCELED:
         case JobStatusFilter.LAUNCHED:
         case JobStatusFilter.COMPLETED:
-          const escrows = await this.findEscrowsByStatus(
+          escrows = await this.findEscrowsByStatus(
             networks,
             userId,
             status,
             skip,
             limit,
           );
-          const escrowAddresses = escrows.map((escrow) => escrow.address);
+          const escrowAddresses = escrows.map((escrow) =>
+            ethers.utils.getAddress(escrow.address),
+          );
 
           jobs = await this.jobRepository.findJobsByEscrowAddresses(
             userId,
@@ -459,7 +782,6 @@ export class JobService {
 
       return this.transformJobs(jobs, escrows);
     } catch (error) {
-      console.error(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -471,39 +793,57 @@ export class JobService {
     skip: number,
     limit: number,
   ): Promise<EscrowData[]> {
-    const escrows = await EscrowUtils.getEscrows({
-      networks,
-      jobRequesterId: userId.toString(),
-      status: filterToEscrowStatus(status),
-    });
+    const escrows: EscrowData[] = [];
+    const statuses = filterToEscrowStatus(status);
+
+    for (const escrowStatus of statuses) {
+      escrows.push(
+        ...(await EscrowUtils.getEscrows({
+          networks,
+          jobRequesterId: userId.toString(),
+          status: escrowStatus,
+          launcher: this.web3Service.signerAddress,
+        })),
+      );
+    }
+
+    if (statuses.length > 1) {
+      escrows.sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+    }
 
     return escrows.slice(skip, limit);
   }
 
-  private transformJobs(
+  private async transformJobs(
     jobs: JobEntity[],
     escrows: EscrowData[] | undefined,
-  ): JobListDto[] {
-    return jobs.map((job) => ({
-      jobId: job.id,
-      escrowAddress: job.escrowAddress,
-      network: NETWORKS[job.chainId as ChainId]!.title,
-      fundAmount: job.fundAmount,
-      status: this.mapJobStatus(job, escrows),
-    }));
+  ): Promise<JobListDto[]> {
+    const jobPromises = jobs.map(async (job) => {
+      return {
+        jobId: job.id,
+        escrowAddress: job.escrowAddress,
+        network: NETWORKS[job.chainId as ChainId]!.title,
+        fundAmount: job.fundAmount,
+        status: await this.mapJobStatus(job, escrows),
+      };
+    });
+
+    return Promise.all(jobPromises);
   }
 
-  private mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
+  private async mapJobStatus(job: JobEntity, escrows?: EscrowData[]) {
     if (job.status === JobStatus.PAID) {
       return JobStatus.PENDING;
     }
 
     if (escrows) {
       const escrow = escrows.find(
-        (escrow) => escrow.address === job.escrowAddress,
+        (escrow) =>
+          escrow.address.toLowerCase() === job.escrowAddress.toLowerCase(),
       );
       if (escrow) {
-        return (<any>JobStatus)[escrow.status.toUpperCase()];
+        const newJob = await this.updateCompletedStatus(job, escrow);
+        return newJob.status;
       }
     }
 
@@ -513,11 +853,10 @@ export class JobService {
   public async getResult(
     userId: number,
     jobId: number,
-  ): Promise<FortuneFinalResultDto | CvatFinalResultDto> {
+  ): Promise<FortuneFinalResultDto[] | string> {
     const jobEntity = await this.jobRepository.findOne({
       id: jobId,
       userId,
-      status: JobStatus.LAUNCHED,
     });
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -536,47 +875,64 @@ export class JobService {
       throw new NotFoundException(ErrorJob.ResultNotFound);
     }
 
-    const result = await StorageClient.downloadFileFromUrl(finalResultUrl);
-
-    if (!result) {
-      throw new NotFoundException(ErrorJob.ResultNotFound);
-    }
-
-    const fortuneDtoCheck = new FortuneFinalResultDto();
-    const imageLabelBinaryDtoCheck = new CvatFinalResultDto();
-
-    Object.assign(fortuneDtoCheck, result);
-    Object.assign(imageLabelBinaryDtoCheck, result);
-
-    const fortuneValidationErrors: ValidationError[] = await validate(
-      fortuneDtoCheck,
-    );
-    const imageLabelBinaryValidationErrors: ValidationError[] = await validate(
-      imageLabelBinaryDtoCheck,
-    );
+    const manifest = await this.storageService.download(jobEntity.manifestUrl);
     if (
-      fortuneValidationErrors.length > 0 &&
-      imageLabelBinaryValidationErrors.length > 0
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
     ) {
-      this.logger.log(
-        ErrorJob.ResultValidationFailed,
-        JobService.name,
-        fortuneValidationErrors,
-        imageLabelBinaryValidationErrors,
-      );
-      throw new NotFoundException(ErrorJob.ResultValidationFailed);
-    }
+      const result = await this.storageService.download(finalResultUrl);
 
-    return result;
+      if (!result) {
+        throw new NotFoundException(ErrorJob.ResultNotFound);
+      }
+
+      const allFortuneValidationErrors: ValidationError[] = [];
+
+      for (const fortune of result) {
+        const fortuneDtoCheck = new FortuneFinalResultDto();
+        Object.assign(fortuneDtoCheck, fortune);
+        const fortuneValidationErrors: ValidationError[] =
+          await validate(fortuneDtoCheck);
+        allFortuneValidationErrors.push(...fortuneValidationErrors);
+      }
+
+      if (allFortuneValidationErrors.length > 0) {
+        this.logger.log(
+          ErrorJob.ResultValidationFailed,
+          JobService.name,
+          allFortuneValidationErrors,
+        );
+        throw new NotFoundException(ErrorJob.ResultValidationFailed);
+      }
+      return result;
+    }
+    return finalResultUrl;
   }
 
-  public async launchCronJob() {
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async createEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.CreateEscrow,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Create escrow START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.CreateEscrow,
+    );
+
     try {
-      // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-      let jobEntity = await this.jobRepository.findOne(
+      const jobEntities = await this.jobRepository.find(
         {
-          status: JobStatus.PAID,
-          retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
+          status: In([JobStatus.PAID]),
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
           waitUntil: LessThanOrEqual(new Date()),
         },
         {
@@ -586,127 +942,281 @@ export class JobService {
         },
       );
 
-      if (!jobEntity) return;
-
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-      await this.validateManifest(manifest);
-
-      if (!jobEntity.escrowAddress) {
-        jobEntity = await this.launchJob(jobEntity);
-      }
-      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.PAID) {
-        jobEntity = await this.fundJob(jobEntity);
-      }
-      if (jobEntity.escrowAddress && jobEntity.status === JobStatus.LAUNCHED) {
-        if ((manifest as CvatManifestDto)?.annotation?.type) {
-          await this.sendWebhook(
-            this.configService.get<string>(
-              ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-            )!,
-            {
-              escrowAddress: jobEntity.escrowAddress,
-              chainId: jobEntity.chainId,
-              eventType: EventType.ESCROW_CREATED,
-            },
-          );
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.createEscrow(jobEntity);
+        } catch (err) {
+          this.logger.error(`Error creating escrow: ${err.message}`);
+          await this.handleProcessJobFailure(jobEntity);
         }
       }
     } catch (e) {
-      console.log(e);
       this.logger.error(e);
-      return;
     }
+
+    this.logger.log('Create escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
   }
 
-  public async cancelCronJob() {
-    // TODO: Add retry policy and process failure requests https://github.com/humanprotocol/human-protocol/issues/334
-    const jobEntity = await this.jobRepository.findOne(
-      {
-        status: JobStatus.TO_CANCEL,
-        retriesCount: LessThanOrEqual(JOB_RETRIES_COUNT_THRESHOLD),
-        waitUntil: LessThanOrEqual(new Date()),
-      },
-      {
-        order: {
-          waitUntil: SortDirection.ASC,
-        },
-      },
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async setupEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.SetupEscrow,
     );
 
-    if (!jobEntity) return;
-
-    const { escrowAddress } = jobEntity;
-    if (escrowAddress) {
-      const signer = this.web3Service.getSigner(jobEntity.chainId);
-      const escrowClient = await EscrowClient.build(signer);
-
-      const escrowStatus = await escrowClient.getStatus(escrowAddress);
-      if (
-        escrowStatus === EscrowStatus.Complete ||
-        escrowStatus === EscrowStatus.Paid
-      ) {
-        this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
-        throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
-      }
-
-      const balance = await escrowClient.getBalance(escrowAddress);
-      if (balance.eq(0)) {
-        this.logger.log(
-          ErrorEscrow.InvalidBalanceCancellation,
-          JobService.name,
-        );
-        throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
-      }
-
-      await escrowClient.cancel(escrowAddress);
-
-      const manifest = await this.getManifest(jobEntity.manifestUrl);
-      if (
-        (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-      ) {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.FORTUNE_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      } else {
-        await this.sendWebhook(
-          this.configService.get<string>(
-            ConfigNames.CVAT_EXCHANGE_ORACLE_WEBHOOK_URL,
-          )!,
-          {
-            escrowAddress,
-            chainId: jobEntity.chainId,
-            eventType: EventType.ESCROW_CANCELED,
-          },
-        );
-      }
+    if (isCronJobRunning) {
+      return;
     }
 
-    const paymentEntity = await this.paymentRepository.findOne({
-      jobId: jobEntity.id,
-      type: PaymentType.WITHDRAWAL,
-      status: PaymentStatus.SUCCEEDED,
-    });
-    if (paymentEntity) {
-      paymentEntity.status = PaymentStatus.FAILED;
-      await paymentEntity.save();
+    this.logger.log('Setup escrow START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.SetupEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.CREATED,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.setupEscrow(jobEntity);
+        } catch (err) {
+          this.logger.error(`Error setting up escrow: ${err.message}`);
+          await this.handleProcessJobFailure(jobEntity);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
     }
 
-    jobEntity.status = JobStatus.CANCELED;
-    await jobEntity.save();
+    this.logger.log('Setup escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
+  }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async fundEscrowCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.FundEscrow,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Fund escrow START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.FundEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.SET_UP,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          await this.fundEscrow(jobEntity);
+
+          const manifest = await this.storageService.download(
+            jobEntity.manifestUrl,
+          );
+
+          if ((manifest as CvatManifestDto)?.annotation?.type) {
+            await this.webhookService.createWebhook({
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CREATED,
+              oracleType: OracleType.CVAT,
+              hasSignature: false,
+            });
+          }
+        } catch (err) {
+          this.logger.error(`Error funding escrow: ${err.message}`);
+          await this.handleProcessJobFailure(jobEntity);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    this.logger.log('Fund escrow STOP');
+    await this.cronJobService.completeCronJob(cronJob);
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  public async cancelCronJob() {
+    const isCronJobRunning = await this.cronJobService.isCronJobRunning(
+      CronJobType.FundEscrow,
+    );
+
+    if (isCronJobRunning) {
+      return;
+    }
+
+    this.logger.log('Cancel jobs START');
+    const cronJob = await this.cronJobService.startCronJob(
+      CronJobType.CancelEscrow,
+    );
+
+    try {
+      const jobEntities = await this.jobRepository.find(
+        {
+          status: JobStatus.TO_CANCEL,
+          retriesCount: LessThanOrEqual(
+            this.configService.get(
+              ConfigNames.MAX_RETRY_COUNT,
+              DEFAULT_MAX_RETRY_COUNT,
+            ),
+          ),
+          waitUntil: LessThanOrEqual(new Date()),
+        },
+        {
+          order: {
+            waitUntil: SortDirection.ASC,
+          },
+        },
+      );
+
+      for (const jobEntity of jobEntities) {
+        try {
+          if (jobEntity.escrowAddress) {
+            const { amountRefunded } =
+              await this.processEscrowCancellation(jobEntity);
+            await this.paymentService.createRefundPayment({
+              refundAmount: Number(ethers.utils.formatEther(amountRefunded)),
+              userId: jobEntity.userId,
+              jobId: jobEntity.id,
+            });
+          } else {
+            await this.paymentService.createRefundPayment({
+              refundAmount: jobEntity.fundAmount,
+              userId: jobEntity.userId,
+              jobId: jobEntity.id,
+            });
+          }
+          jobEntity.status = JobStatus.CANCELED;
+          await jobEntity.save();
+
+          const manifest = await this.storageService.download(
+            jobEntity.manifestUrl,
+          );
+
+          const oracleType = this.getOracleType(manifest);
+          if (oracleType !== OracleType.HCAPTCHA) {
+            await this.webhookService.createWebhook({
+              escrowAddress: jobEntity.escrowAddress,
+              chainId: jobEntity.chainId,
+              eventType: EventType.ESCROW_CANCELED,
+              oracleType: this.getOracleType(manifest),
+              hasSignature:
+                (manifest as FortuneManifestDto).requestType ===
+                JobRequestType.FORTUNE,
+            });
+          }
+        } catch (err) {
+          this.logger.error(`Error canceling escrow: ${err.message}`);
+          await this.handleProcessJobFailure(jobEntity);
+        }
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+    await this.cronJobService.completeCronJob(cronJob);
+    this.logger.log('Cancel jobs STOP');
     return true;
   }
 
-  public async escrowFailedWebhook(
-    dto: EscrowFailedWebhookDto,
-  ): Promise<boolean> {
+  private handleProcessJobFailure = async (jobEntity: JobEntity) => {
+    if (
+      jobEntity.retriesCount <
+      this.configService.get(
+        ConfigNames.MAX_RETRY_COUNT,
+        DEFAULT_MAX_RETRY_COUNT,
+      )
+    ) {
+      jobEntity.retriesCount += 1;
+    } else {
+      jobEntity.status = JobStatus.FAILED;
+    }
+
+    await jobEntity.save();
+  };
+
+  private getOracleType(manifest: any): OracleType {
+    if (
+      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+    ) {
+      return OracleType.FORTUNE;
+    } else if (
+      (manifest as CvatManifestDto)?.annotation?.type ===
+        JobRequestType.IMAGE_BOXES ||
+      (manifest as CvatManifestDto)?.annotation?.type ===
+        JobRequestType.IMAGE_POINTS
+    ) {
+      return OracleType.CVAT;
+    }
+    return OracleType.HCAPTCHA;
+  }
+
+  public async processEscrowCancellation(
+    jobEntity: JobEntity,
+  ): Promise<EscrowCancelDto> {
+    const { chainId, escrowAddress } = jobEntity;
+
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+
+    const escrowStatus = await escrowClient.getStatus(escrowAddress);
+    if (
+      escrowStatus === EscrowStatus.Complete ||
+      escrowStatus === EscrowStatus.Paid ||
+      escrowStatus === EscrowStatus.Cancelled
+    ) {
+      this.logger.log(ErrorEscrow.InvalidStatusCancellation, JobService.name);
+      throw new BadRequestException(ErrorEscrow.InvalidStatusCancellation);
+    }
+
+    const balance = await escrowClient.getBalance(escrowAddress);
+    if (balance.eq(0)) {
+      this.logger.log(ErrorEscrow.InvalidBalanceCancellation, JobService.name);
+      throw new BadRequestException(ErrorEscrow.InvalidBalanceCancellation);
+    }
+
+    return escrowClient.cancel(escrowAddress, {
+      gasPrice: await this.web3Service.calculateGasPrice(chainId),
+    });
+  }
+
+  public async escrowFailedWebhook(dto: EscrowFailedWebhookDto): Promise<void> {
     if (dto.eventType !== EventType.TASK_CREATION_FAILED) {
       this.logger.log(ErrorJob.InvalidEventType, JobService.name);
       throw new BadRequestException(ErrorJob.InvalidEventType);
@@ -728,16 +1238,15 @@ export class JobService {
     }
 
     jobEntity.status = JobStatus.FAILED;
+    jobEntity.failedReason = dto.reason;
     await jobEntity.save();
-
-    return true;
   }
 
   public async getDetails(
     userId: number,
     jobId: number,
   ): Promise<JobDetailsDto> {
-    const jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
+    let jobEntity = await this.jobRepository.findOne({ id: jobId, userId });
 
     if (!jobEntity) {
       this.logger.log(ErrorJob.NotFound, JobService.name);
@@ -754,43 +1263,79 @@ export class JobService {
 
       escrow = await EscrowUtils.getEscrow(chainId, escrowAddress);
       allocation = await stakingClient.getAllocation(escrowAddress);
+      jobEntity = await this.updateCompletedStatus(jobEntity, escrow);
     }
 
-    const manifestData = await this.getManifest(manifestUrl);
+    let manifestData = await this.storageService.download(manifestUrl);
+
     if (!manifestData) {
       throw new NotFoundException(ErrorJob.ManifestNotFound);
     }
 
-    const manifest =
+    let manifest;
+    if (typeof manifestData === 'string' && isPGPMessage(manifestData)) {
+      const encription = await Encryption.build(
+        this.configService.get<string>(ConfigNames.PGP_PRIVATE_KEY)!,
+      );
+      manifestData = await encription.decrypt(manifestData as any);
+    }
+
+    if (isValidJSON(manifestData)) {
+      manifestData = JSON.parse(manifestData);
+    }
+
+    if (
       (manifestData as FortuneManifestDto).requestType ===
       JobRequestType.FORTUNE
-        ? (manifestData as FortuneManifestDto)
-        : (manifestData as CvatManifestDto);
+    ) {
+      manifest = manifestData as FortuneManifestDto;
+    } else if (
+      (manifestData as HCaptchaManifestDto)?.job_mode === JobCaptchaMode.BATCH
+    ) {
+      manifest = manifestData as HCaptchaManifestDto;
+    } else {
+      manifest = manifestData as CvatManifestDto;
+    }
 
     const baseManifestDetails = {
       chainId,
       tokenAddress: escrow ? escrow.token : ethers.constants.AddressZero,
-      fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
       requesterAddress: signer.address,
-      exchangeOracleAddress: escrow?.exchangeOracle,
-      recordingOracleAddress: escrow?.recordingOracle,
-      reputationOracleAddress: escrow?.reputationOracle,
+      fundAmount: escrow ? Number(escrow.totalFundedAmount) : 0,
+      exchangeOracleAddress:
+        escrow?.exchangeOracle || ethers.constants.AddressZero,
+      recordingOracleAddress:
+        escrow?.recordingOracle || ethers.constants.AddressZero,
+      reputationOracleAddress:
+        escrow?.reputationOracle || ethers.constants.AddressZero,
     };
 
-    const specificManifestDetails =
+    let specificManifestDetails;
+    if (
       (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-        ? {
-            title: (manifest as FortuneManifestDto).requesterTitle,
-            description: (manifest as FortuneManifestDto).requesterDescription,
-            requestType: JobRequestType.FORTUNE,
-            submissionsRequired: (manifest as FortuneManifestDto)
-              .submissionsRequired,
-          }
-        : {
-            requestType: (manifest as CvatManifestDto).annotation.type,
-            submissionsRequired: (manifest as CvatManifestDto).annotation
-              .job_size,
-          };
+    ) {
+      manifest = manifest as FortuneManifestDto;
+      specificManifestDetails = {
+        title: manifest.requesterTitle,
+        description: manifest.requesterDescription,
+        requestType: JobRequestType.FORTUNE,
+        submissionsRequired: manifest.submissionsRequired,
+      };
+    } else if (
+      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
+    ) {
+      manifest = manifest as HCaptchaManifestDto;
+      specificManifestDetails = {
+        requestType: JobRequestType.HCAPTCHA,
+        submissionsRequired: manifest.job_total_tasks,
+      };
+    } else {
+      manifest = manifest as CvatManifestDto;
+      specificManifestDetails = {
+        requestType: manifest.annotation.type,
+        submissionsRequired: manifest.annotation.job_size,
+      };
+    }
 
     const manifestDetails = {
       ...baseManifestDetails,
@@ -805,6 +1350,7 @@ export class JobService {
           manifestHash,
           balance: 0,
           paidOut: 0,
+          status: jobEntity.status,
         },
         manifest: manifestDetails,
         staking: {
@@ -822,6 +1368,7 @@ export class JobService {
         manifestHash,
         balance: Number(ethers.utils.formatEther(escrow?.balance || 0)),
         paidOut: Number(escrow?.amountPaid || 0),
+        status: jobEntity.status,
       },
       manifest: manifestDetails,
       staking: {
@@ -874,5 +1421,34 @@ export class JobService {
     });
 
     return Number(paidOutAmount);
+  }
+
+  private async getOracleFee(
+    oracleAddress: string,
+    chainId: ChainId,
+  ): Promise<BigNumber> {
+    const signer = this.web3Service.getSigner(chainId);
+
+    const kvStoreClient = await KVStoreClient.build(signer);
+
+    const feeValue = await kvStoreClient.get(oracleAddress, KVStoreKeys.fee);
+
+    return BigNumber.from(feeValue ? feeValue : 1);
+  }
+
+  private async updateCompletedStatus(
+    job: JobEntity,
+    escrow: EscrowData,
+  ): Promise<JobEntity> {
+    let updatedJob = job;
+    if (
+      escrow.status === EscrowStatus[EscrowStatus.Complete] &&
+      job.status !== JobStatus.COMPLETED
+    )
+      updatedJob = await this.jobRepository.updateOne(
+        { id: job.id },
+        { status: JobStatus.COMPLETED },
+      );
+    return updatedJob;
   }
 }

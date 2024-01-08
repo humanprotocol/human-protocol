@@ -3,11 +3,10 @@ import { Test } from '@nestjs/testing';
 
 import { ReputationController } from './reputation.controller';
 import { ReputationService } from './reputation.service';
-import { ReputationEntity } from './reputation.entity';
 import { ReputationRepository } from './reputation.repository';
 import { ReputationLevel } from '../../common/enums';
 import { ConfigNames } from '../../common/config';
-import { IReputation } from 'src/common/interfaces';
+import { ReputationDto } from './reputation.dto';
 
 const OPERATOR_ADDRESS = 'TEST_OPERATOR_ADDRESS';
 const CHAIN_ID = 1;
@@ -61,7 +60,7 @@ describe('ReputationController', () => {
 
       jest
         .spyOn(reputationService, 'getAllReputations')
-        .mockResolvedValueOnce(results as IReputation[]);
+        .mockResolvedValueOnce(results as ReputationDto[]);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')
@@ -75,11 +74,15 @@ describe('ReputationController', () => {
 
   describe('getReputation', () => {
     it('should call service', async () => {
-      const result = { chainId: CHAIN_ID, address: OPERATOR_ADDRESS, reputation: ReputationLevel.LOW }
+      const result = {
+        chainId: CHAIN_ID,
+        address: OPERATOR_ADDRESS,
+        reputation: ReputationLevel.LOW,
+      };
 
       jest
         .spyOn(reputationService, 'getReputation')
-        .mockResolvedValueOnce(result as IReputation);
+        .mockResolvedValueOnce(result as ReputationDto);
 
       jest
         .spyOn(reputationService, 'getReputationLevel')

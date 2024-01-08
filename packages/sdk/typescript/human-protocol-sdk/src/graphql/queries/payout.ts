@@ -19,8 +19,11 @@ export const GET_PAYOUTS_QUERY = (filter: IPayoutFilter) => {
       ${escrowAddress ? `escrowAddress: $escrowAddress` : ''}
       ${recipient ? `recipient: $recipient` : ''}
       ${from ? `createdAt_gte: $from` : ''}
-      ${to ? `createdAt_lte: $to` : ''}
+      ${to ? `createdAt_lt: $to` : ''}
     }
+  `;
+  const LIMIT_CLAUSE = `
+    first: 1000
   `;
 
   return gql`
@@ -32,6 +35,9 @@ export const GET_PAYOUTS_QUERY = (filter: IPayoutFilter) => {
     ) {
       payouts(
         ${WHERE_CLAUSE}
+        orderBy: createdAt,
+        orderDirection: desc,
+        ${LIMIT_CLAUSE}
       ) {
         ...PayoutFields
       }

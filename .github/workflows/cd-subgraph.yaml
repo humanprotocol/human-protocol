@@ -32,6 +32,14 @@ jobs:
             graph: moonbase-alpha-v2
           - name: mainnet
             graph: mainnet-v2
+          - name: fuji
+            graph: fuji-v2
+          - name: avalanche
+            graph: avalanche-v2
+          - name: celo
+            graph: celo
+          - name: celo-alfajores
+            graph: celo-alfajores
       fail-fast: true
       max-parallel: 3
     steps:

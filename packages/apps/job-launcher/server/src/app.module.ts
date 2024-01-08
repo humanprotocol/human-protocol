@@ -13,6 +13,10 @@ import { JobModule } from './modules/job/job.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { StorageModule } from './modules/storage/storage.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   providers: [
@@ -40,6 +44,15 @@ import { envValidator } from './common/config';
     JobModule,
     PaymentModule,
     Web3Module,
+    StorageModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(
+        __dirname,
+        '../../../../../',
+        'node_modules/swagger-ui-dist',
+      ),
+    }),
+    CronJobModule,
   ],
   controllers: [AppController],
 })

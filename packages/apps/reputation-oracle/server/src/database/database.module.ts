@@ -8,6 +8,9 @@ import { NS } from '../common/constants';
 import { TypeOrmLoggerModule, TypeOrmLoggerService } from './typeorm';
 import { WebhookIncomingEntity } from '../modules/webhook/webhook-incoming.entity';
 import { ReputationEntity } from '../modules/reputation/reputation.entity';
+import { AuthEntity } from '../modules/auth/auth.entity';
+import { TokenEntity } from '../modules/auth/token.entity';
+import { UserEntity } from '../modules/user/user.entity';
 
 @Module({
   imports: [
@@ -22,7 +25,13 @@ import { ReputationEntity } from '../modules/reputation/reputation.entity';
         return {
           name: 'default',
           type: 'postgres',
-          entities: [WebhookIncomingEntity, ReputationEntity],
+          entities: [
+            WebhookIncomingEntity,
+            ReputationEntity,
+            AuthEntity,
+            TokenEntity,
+            UserEntity,
+          ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
           // Run migrations automatically,
@@ -50,7 +59,8 @@ import { ReputationEntity } from '../modules/reputation/reputation.entity';
           keepConnectionAlive: configService.get<string>('NODE_ENV') === 'test',
           migrationsRun: false,
           ssl:
-            configService.get<string>('POSTGRES_SSL')!.toLowerCase() === 'true',
+            configService.get<string>('POSTGRES_SSL', '').toLowerCase() ===
+            'true',
         };
       },
     }),

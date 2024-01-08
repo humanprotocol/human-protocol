@@ -61,3 +61,14 @@ export class GetRateDto {
   @IsString()
   public to: string;
 }
+
+export class PaymentRefundCreateDto {
+  @IsNumber()
+  public refundAmount: number;
+
+  @IsNumber()
+  public userId: number;
+
+  @IsNumber()
+  public jobId: number;
+}

@@ -33,6 +33,14 @@ type Leader @entity {
   publicKey: String
   webhookUrl: String
   url: String
+  urls: [LeaderURL!]! @derivedFrom(field: "leader")
+}
+
+type LeaderURL @entity {
+  id: ID!
+  key: String
+  url: String
+  leader: Leader!
 }
 
 type Escrow @entity {
@@ -66,6 +74,13 @@ type Payout @entity {
   recipient: Bytes! # address
   amount: BigInt!
   createdAt: BigInt!
+}
+
+type DailyWorker @entity {
+  id: ID!
+  timestamp: BigInt!
+  address: Bytes! # address
+  escrowAddress: Bytes! # address
 }
 
 ##################################################

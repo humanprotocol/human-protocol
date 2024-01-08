@@ -26,9 +26,8 @@ export class ReputationRepository {
     where: FindOptionsWhere<ReputationEntity>,
     dto: Partial<ReputationUpdateDto>,
   ): Promise<ReputationEntity> {
-    const reputationEntity = await this.reputationEntityRepository.findOneBy(
-      where,
-    );
+    const reputationEntity =
+      await this.reputationEntityRepository.findOneBy(where);
 
     if (!reputationEntity) {
       this.logger.log(ErrorReputation.NotFound, ReputationRepository.name);
