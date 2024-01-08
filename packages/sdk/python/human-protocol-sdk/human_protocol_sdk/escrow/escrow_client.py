@@ -63,8 +63,10 @@ from human_protocol_sdk.utils import (
     handle_transaction,
 )
 from web3 import Web3, contract
+from web3 import eth
 from web3.middleware import geth_poa_middleware
 from web3.types import TxParams
+from eth_utils import abi
 
 from human_protocol_sdk.utils import validate_url
 
@@ -703,9 +705,8 @@ class EscrowClient:
             An instance of the EscrowCancel class containing details of the cancellation transaction,
             including the transaction hash and the amount refunded.
 
-        :raise
-            EscrowClientError: If an error occurs while checking the parameters
-            EscrowClientError: If the transfer event associated with the cancellation
+        :raise EscrowClientError: If an error occurs while checking the parameters
+        :raise EscrowClientError: If the transfer event associated with the cancellation
                                 is not found in the transaction logs
 
 
@@ -732,7 +733,7 @@ class EscrowClient:
                 (w3, gas_payer) = get_w3_with_priv_key('YOUR_PRIVATE_KEY')
                 escrow_client = EscrowClient(w3)
 
-                transaction_hash = escrow_client.cancel(
+                escrow_cancel_data = escrow_client.cancel(
                     "0x62dD51230A30401C455c8398d06F85e4EaB6309f"
                 )
         """
@@ -756,21 +757,20 @@ class EscrowClient:
 
         for log in transaction_receipt["logs"]:
             if log["address"] == token_address:
-                parsed_log = token_contract.events.Transfer().processLog(log)
+                processed_log = token_contract.events.Transfer().process_log(log)
 
-                from_address = parsed_log[0]["args"]["from"]
                 if (
-                    parsed_log[0]["event"] == "Transfer"
-                    and from_address == escrow_address
+                    processed_log["event"] == "Transfer"
+                    and processed_log["args"]["from"] == escrow_address
                 ):
-                    amount_transferred = parsed_log[0]["args"]["value"]
+                    amount_transferred = processed_log["args"]["value"]
                     break
 
         if amount_transferred is None:
             raise EscrowClientError("Transfer Event Not Found in Transaction Logs")
 
         escrow_cancel_data = EscrowCancel(
-            tx_hash=transaction_receipt["transactionHash"],
+            tx_hash=transaction_receipt["transactionHash"].hex(),
             amount_refunded=amount_transferred,
         )
 
