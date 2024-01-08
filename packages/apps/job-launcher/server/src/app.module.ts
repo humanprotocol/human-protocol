@@ -16,6 +16,7 @@ import { envValidator } from './common/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { StorageModule } from './modules/storage/storage.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   providers: [
@@ -51,6 +52,7 @@ import { StorageModule } from './modules/storage/storage.module';
         'node_modules/swagger-ui-dist',
       ),
     }),
+    CronJobModule,
   ],
   controllers: [AppController],
 })
