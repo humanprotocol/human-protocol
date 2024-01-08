@@ -248,7 +248,6 @@ export const CvatJobRequestForm = () => {
                       onBlur={handleBlur}
                     >
                       <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
-                      <MenuItem value={StorageProviders.GCS}>GCS</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -339,7 +338,6 @@ export const CvatJobRequestForm = () => {
                       onBlur={handleBlur}
                     >
                       <MenuItem value={StorageProviders.AWS}>AWS</MenuItem>
-                      <MenuItem value={StorageProviders.GCS}>GCS</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
