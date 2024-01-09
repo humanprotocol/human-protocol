@@ -12,7 +12,6 @@ import { WebhookIncomingDto, liquidityDto } from './webhook.dto';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookRepository } from './webhook.repository';
 import { RETRIES_COUNT_THRESHOLD } from '../../common/constants';
-import { BigNumber } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import {
   EventType,
@@ -160,26 +159,26 @@ export class WebhookService {
   }
 
   public calculateCampaignPayoutAmounts(
-    totalAmount: BigNumber,
+    totalAmount: bigint,
     results: liquidityDto[],
-  ): BigNumber[] {
-    // Convert the liquidity scores to BigNumber for precision in calculations.
+  ): bigint[] {
+    // Convert the liquidity scores to bigint for precision in calculations.
     const bigNumberResults = results.map((result) => ({
       ...result,
-      liquidityScore: BigNumber.from(result.liquidityScore),
+      liquidityScore: BigInt(result.liquidityScore),
     }));
 
     // Calculate the total liquidity score as a BigNumber.
     const totalLiquidityScore = bigNumberResults.reduce(
-      (total, item) => total.add(item.liquidityScore),
-      BigNumber.from(0),
+      (total, item) => total + item.liquidityScore,
+      0n,
     );
 
     // Map through each result, calculate each recipient's payout, and return the array.
     const payouts = bigNumberResults.map((result) => {
       const participantScore = result.liquidityScore;
-      const participantPercentage = participantScore.div(totalLiquidityScore);
-      return totalAmount.mul(participantPercentage);
+      const participantPercentage = participantScore / totalLiquidityScore;
+      return totalAmount * participantPercentage;
     });
 
     return payouts;
@@ -283,8 +282,8 @@ export class WebhookService {
           ReputationEntityType.REPUTATION_ORACLE,
         );
 
-        const balance = BigNumber.from(escrow.balance);
-        if (balance.isZero()) {
+        const balance = BigInt(escrow.balance);
+        if (balance === 0n) {
           await escrowClient.complete(webhookEntity.escrowAddress);
         }
         await this.webhookRepository.updateOne(

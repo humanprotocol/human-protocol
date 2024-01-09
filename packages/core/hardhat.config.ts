@@ -1,9 +1,7 @@
 import * as dotenv from 'dotenv';
 
 import { HardhatUserConfig, task } from 'hardhat/config';
-import '@nomiclabs/hardhat-ethers';
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@nomiclabs/hardhat-etherscan';
 import '@typechain/hardhat';
 import 'xdeployer';
 import 'hardhat-gas-reporter';
@@ -13,7 +11,6 @@ import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
 import 'hardhat-dependency-compiler';
-import 'hardhat-celo';
 
 dotenv.config();
 

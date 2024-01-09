@@ -13,7 +13,6 @@ import {
 import { EventType, SolutionError, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
-import { BigNumber } from 'ethers';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -162,7 +161,7 @@ export class ProcessingResultDto {
   /**
    * Corresponding amounts to be paid out to recipients.
    */
-  amounts: BigNumber[];
+  amounts: bigint[];
 
   /**
    * URL to the stored results.

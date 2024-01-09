@@ -8,11 +8,11 @@
 
 This client enables to perform actions on KVStore contract and obtain information from both the contracts and subgraph.
 
-Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+Internally, the SDK will use one network or another according to the network ID of the `runner`.
 To use this client, it is recommended to initialize it using the static `build` method.
 
 ```ts
-static async build(signerOrProvider: Signer | Provider);
+static async build(runner: ContractRunner);
 ```
 
 A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -88,7 +88,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 - [contract](kvstore.KVStoreClient.md#contract)
 - [networkData](kvstore.KVStoreClient.md#networkdata)
-- [signerOrProvider](kvstore.KVStoreClient.md#signerorprovider)
+- [runner](kvstore.KVStoreClient.md#runner)
 
 ### Methods
 
@@ -103,7 +103,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 ### constructor
 
-• **new KVStoreClient**(`signerOrProvider`, `networkData`): [`KVStoreClient`](kvstore.KVStoreClient.md)
+• **new KVStoreClient**(`runner`, `networkData`): [`KVStoreClient`](kvstore.KVStoreClient.md)
 
 **KVStoreClient constructor**
 
@@ -111,7 +111,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 | `networkData` | `NetworkData` | - |
 
 #### Returns
@@ -124,7 +124,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:103](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L103)
+[kvstore.ts:100](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L100)
 
 ## Properties
 
@@ -134,7 +134,7 @@ const kvstoreClient = await KVStoreClient.build(signer);
 
 #### Defined in
 
-[kvstore.ts:95](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L95)
+[kvstore.ts:92](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L92)
 
 ___
 
@@ -148,21 +148,21 @@ ___
 
 #### Defined in
 
-[base.ts:13](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L13)
+[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
 
 ___
 
-### signerOrProvider
+### runner
 
-• `Protected` **signerOrProvider**: `Signer` \| `Provider`
+• `Protected` **runner**: `ContractRunner`
 
 #### Inherited from
 
-[BaseEthersClient](base.BaseEthersClient.md).[signerOrProvider](base.BaseEthersClient.md#signerorprovider)
+[BaseEthersClient](base.BaseEthersClient.md).[runner](base.BaseEthersClient.md#runner)
 
 #### Defined in
 
-[base.ts:12](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L12)
+[base.ts:11](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/base.ts#L11)
 
 ## Methods
 
@@ -203,7 +203,7 @@ const value = await kvstoreClient.get('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb9226
 
 #### Defined in
 
-[kvstore.ts:317](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L317)
+[kvstore.ts:301](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L301)
 
 ___
 
@@ -246,7 +246,7 @@ const linkedinUrl = await kvstoreClient.getURL(
 
 #### Defined in
 
-[kvstore.ts:356](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L356)
+[kvstore.ts:340](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L340)
 
 ___
 
@@ -290,7 +290,7 @@ await kvstoreClient.set('Role', 'RecordingOracle');
 
 #### Defined in
 
-[kvstore.ts:171](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L171)
+[kvstore.ts:163](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L163)
 
 ___
 
@@ -336,7 +336,7 @@ await kvstoreClient.set(keys, values);
 
 #### Defined in
 
-[kvstore.ts:215](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L215)
+[kvstore.ts:206](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L206)
 
 ___
 
@@ -379,21 +379,21 @@ await kvstoreClient.setURL('linkedin.com/example', 'linkedinUrl);
 
 #### Defined in
 
-[kvstore.ts:259](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L259)
+[kvstore.ts:249](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L249)
 
 ___
 
 ### build
 
-▸ **build**(`signerOrProvider`): `Promise`\<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
+▸ **build**(`runner`): `Promise`\<[`KVStoreClient`](kvstore.KVStoreClient.md)\>
 
-Creates an instance of KVStoreClient from a Signer or Provider.
+Creates an instance of KVStoreClient from a runner.
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `signerOrProvider` | `Signer` \| `Provider` | The Signer or Provider object to interact with the Ethereum network |
+| `runner` | `ContractRunner` | The Runner object to interact with the Ethereum network |
 
 #### Returns
 
@@ -411,4 +411,4 @@ Creates an instance of KVStoreClient from a Signer or Provider.
 
 #### Defined in
 
-[kvstore.ts:121](https://github.com/humanprotocol/human-protocol/blob/47ca9511/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L121)
+[kvstore.ts:118](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/kvstore.ts#L118)

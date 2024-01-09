@@ -14,7 +14,6 @@ import {
 } from './webhook.dto';
 import { ChainId, EscrowClient, StorageClient } from '@human-protocol/sdk';
 import { WebhookIncomingEntity } from './webhook-incoming.entity';
-import { BigNumber } from 'ethers';
 import { ReputationRepository } from '../reputation/reputation.repository';
 import { ErrorResults, ErrorWebhook } from '../../common/constants/errors';
 import {
@@ -54,7 +53,7 @@ jest.mock('@human-protocol/sdk', () => ({
       getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
       bulkPayOut: jest.fn().mockResolvedValue(true),
-      getBalance: jest.fn().mockResolvedValue(BigNumber.from(10)),
+      getBalance: jest.fn().mockResolvedValue(10n),
     })),
   },
   StorageClient: jest.fn().mockImplementation(() => ({
@@ -148,9 +147,7 @@ describe('WebhookService', () => {
     reputationService = moduleRef.get(ReputationService);
     storageService = moduleRef.get(StorageService);
     web3Service = moduleRef.get<Web3Service>(Web3Service);
-    web3Service.calculateGasPrice = jest
-      .fn()
-      .mockReturnValue(BigNumber.from(1000));
+    web3Service.calculateGasPrice = jest.fn().mockReturnValue(1000n);
   });
 
   afterEach(() => {
@@ -247,7 +244,7 @@ describe('WebhookService', () => {
 
     const results: ProcessingResultDto = {
       recipients: [MOCK_ADDRESS],
-      amounts: [BigNumber.from(10)],
+      amounts: [10n],
       url: MOCK_FILE_URL,
       hash: MOCK_FILE_HASH,
       checkPassed: true,
@@ -314,7 +311,7 @@ describe('WebhookService', () => {
         getManifestUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
         getResultsUrl: jest.fn().mockResolvedValue(MOCK_FILE_URL),
         bulkPayOut: jest.fn().mockResolvedValue(true),
-        getBalance: jest.fn().mockResolvedValue(BigNumber.from(0)),
+        getBalance: jest.fn().mockResolvedValue(0n),
       }));
 
       expect(await webhookService.processPendingCronJob()).toBeUndefined();

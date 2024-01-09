@@ -1,5 +1,4 @@
-import { Provider } from '@ethersproject/abstract-provider';
-import { Signer } from 'ethers';
+import { ContractRunner } from 'ethers';
 import { NetworkData } from './types';
 
 /**
@@ -9,17 +8,17 @@ import { NetworkData } from './types';
  *
  */
 export abstract class BaseEthersClient {
-  protected signerOrProvider: Signer | Provider;
+  protected runner: ContractRunner;
   public networkData: NetworkData;
 
   /**
    * **BaseClient constructor**
    *
-   * @param {Signer | Provider} signerOrProvider The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner The Signer or Provider object to interact with the Ethereum network
    * @param {NetworkData} networkData The network information required to connect to the contracts
    */
-  constructor(signerOrProvider: Signer | Provider, networkData: NetworkData) {
+  constructor(runner: ContractRunner, networkData: NetworkData) {
     this.networkData = networkData;
-    this.signerOrProvider = signerOrProvider;
+    this.runner = runner;
   }
 }
