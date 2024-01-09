@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { Public } from '../../common/decorators';
 import { ApiTags } from '@nestjs/swagger';
-import { Web3Service } from './web3.service';
+import { Web3Service } from './Web3Service';
 import { ChainId } from '@human-protocol/sdk';
 
 @ApiTags('Web3')

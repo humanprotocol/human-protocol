@@ -7,10 +7,8 @@ import {
   InvalidArgumentError,
   NonceExpired,
   NumericFault,
-  OutOfGasError,
   ReplacementUnderpriced,
   TransactionReplaced,
-  UnpredictableGasLimit,
 } from './error';
 
 /**
@@ -35,22 +33,18 @@ export const getRevertReason = (error: any): string => {
  * @returns
  */
 export const throwError = (e: any) => {
-  if (e.code === ethers.utils.Logger.errors.INVALID_ARGUMENT) {
+  if (ethers.isError(e, 'INVALID_ARGUMENT')) {
     throw new InvalidArgumentError(e.message);
-  } else if (e.code === 'OUT_OF_GAS') {
-    throw new OutOfGasError(e.message);
-  } else if (e.code === ethers.utils.Logger.errors.CALL_EXCEPTION) {
+  } else if (ethers.isError(e, 'CALL_EXCEPTION')) {
     const reason = getRevertReason(e.data);
     throw new ContractExecutionError(reason);
-  } else if (e.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
-    throw new UnpredictableGasLimit(e.message);
-  } else if (e.code === ethers.utils.Logger.errors.TRANSACTION_REPLACED) {
+  } else if (ethers.isError(e, 'TRANSACTION_REPLACED')) {
     throw new TransactionReplaced(e.message);
-  } else if (e.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
+  } else if (ethers.isError(e, 'REPLACEMENT_UNDERPRICED')) {
     throw new ReplacementUnderpriced(e.message);
-  } else if (e.code === ethers.utils.Logger.errors.NUMERIC_FAULT) {
+  } else if (ethers.isError(e, 'NUMERIC_FAULT')) {
     throw new NumericFault(e.message);
-  } else if (e.code === ethers.utils.Logger.errors.NONCE_EXPIRED) {
+  } else if (ethers.isError(e, 'NONCE_EXPIRED')) {
     throw new NonceExpired(e.message);
   } else {
     throw new EthereumError(e.message);

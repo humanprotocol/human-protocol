@@ -41,12 +41,12 @@ export function recoverSigner(
   }
 
   try {
-    return ethers.utils.verifyMessage(message, signature);
+    return ethers.verifyMessage(message, signature);
   } catch (e) {
     throw new ConflictException(ErrorSignature.InvalidSignature);
   }
 }
 
 export function getNonce(): string {
-  return Buffer.from(ethers.utils.randomBytes(16)).toString('hex');
+  return Buffer.from(ethers.randomBytes(16)).toString('hex');
 }

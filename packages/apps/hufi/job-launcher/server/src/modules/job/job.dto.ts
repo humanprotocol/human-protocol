@@ -16,7 +16,6 @@ import {
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType, JobStatus } from '../../common/enums/job';
 import { EventType } from '../../common/enums/webhook';
-import { BigNumber } from 'ethers';
 import { Exchange } from '../../common/enums/exchange';
 
 export class JobCreateDto {
@@ -303,7 +302,7 @@ export class EscrowFailedWebhookDto {
 
 export class EscrowCancelDto {
   txHash: string;
-  amountRefunded: BigNumber;
+  amountRefunded: bigint;
 }
 
 export class CampaignFinalResultDto {

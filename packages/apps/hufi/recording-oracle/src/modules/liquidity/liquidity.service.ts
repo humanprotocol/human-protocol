@@ -12,7 +12,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import * as Minio from 'minio';
 
 import {
@@ -36,7 +36,7 @@ import { ConfigService } from '@nestjs/config';
 import { signMessage } from '../../common/utils/signature';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { GraphQLClient, gql } from 'graphql-request';
-import crypto from "crypto";
+import crypto from 'crypto';
 import { CEX, DEX } from '../../common/constants/exchange';
 
 @Injectable()
@@ -121,7 +121,7 @@ export class LiquidityService {
     await this.httpService.post(url, body, {
       headers: { [HEADER_SIGNATURE_KEY]: signedBody },
     });
-  }  
+  }
 
   public async getLiquidityScore(
     liquidityRequest: liquidityRequestDto,
@@ -191,16 +191,16 @@ export class LiquidityService {
         await escrowClient.getRecordingOracleAddress(
           liquidityRequest.escrowAddress,
         );
-      
+
       if (
-        ethers.utils.getAddress(recordingOracleAddress) !==
+        ethers.getAddress(recordingOracleAddress) !==
         (await signer.getAddress())
       ) {
         this.logger.log(ErrorJob.AddressMismatches, LiquidityService.name);
         throw new BadRequestException(ErrorJob.AddressMismatches);
       }
 
-      let [exchange, chain] = manifest.exchangeName.split('-');
+      const [exchange, chain] = manifest.exchangeName.split('-');
       const variables = {
         user: liquidityRequest.liquidityProvider,
         startTime: manifest.startBlock,
@@ -211,9 +211,11 @@ export class LiquidityService {
         chain,
       };
 
-      if (CEX.includes(manifest.exchangeName)) 
-      {
-        if (!liquidityRequest.liquidityProviderAPISecret || !liquidityRequest.liquidityProviderAPIKEY) {
+      if (CEX.includes(manifest.exchangeName)) {
+        if (
+          !liquidityRequest.liquidityProviderAPISecret ||
+          !liquidityRequest.liquidityProviderAPIKEY
+        ) {
           throw new Error('Empty API keys');
         }
         const queryString = `symbol=${manifest.tokenA}${
@@ -255,12 +257,14 @@ export class LiquidityService {
           }
           return liquidityScore;
         }
-      throw new Error('No data received from server');
-      }
-      else {
-        const client = this.getGraphQLClient(variables.chain, variables.exchange);
+        throw new Error('No data received from server');
+      } else {
+        const client = this.getGraphQLClient(
+          variables.chain,
+          variables.exchange,
+        );
         const result: any = await client.request(UniswapQuery, variables);
-        let positionSnapshots = result?.positionSnapshots;
+        const positionSnapshots = result?.positionSnapshots;
 
         const filteredSnapshots = this.filterObjectsByInputTokenSymbol(
           positionSnapshots,
@@ -287,7 +291,7 @@ export class LiquidityService {
           liquidityProvider: liquidityRequest.liquidityProvider,
         };
         return response;
-      }  
+      }
     } catch (error: any) {
       console.error(`Error in getLiquidityScore: ${error.message}`);
       throw error;
@@ -295,7 +299,7 @@ export class LiquidityService {
   }
 
   public calculateLiquidityScore(snapshots: any[]): string {
-    let totalScore = BigNumber.from(0);
+    let totalScore = 0n;
 
     // Check for no snapshots
     if (snapshots.length === 0) {
@@ -321,27 +325,25 @@ export class LiquidityService {
    * Calculate score for a single snapshot.
    *
    * @param snapshot - The liquidity snapshot.
-   * @returns The liquidity score as a BigNumber.
+   * @returns The liquidity score as a BigInt.
    */
-  private calculateSingleSnapshotScore(snapshot: any): BigNumber {
-    const totalLiquidity = BigNumber.from(
-      snapshot.position.pool.totalLiquidity,
-    );
-    const liquidityAmount = BigNumber.from(snapshot.position.liquidity);
-    const currentTime = BigNumber.from(Math.floor(Date.now() / 1000));
-    const timeWithheld = currentTime.sub(snapshot.timestamp);
+  private calculateSingleSnapshotScore(snapshot: any): bigint {
+    const totalLiquidity = BigInt(snapshot.position.pool.totalLiquidity);
+    const liquidityAmount = BigInt(snapshot.position.liquidity);
+    const currentTime = BigInt(Math.floor(Date.now() / 1000));
+    const timeWithheld = currentTime - snapshot.timestamp;
 
-    return liquidityAmount.mul(timeWithheld).div(totalLiquidity);
+    return (liquidityAmount * timeWithheld) / totalLiquidity;
   }
 
   /**
    * Calculate score for multiple snapshots.
    *
    * @param snapshots - Array of liquidity snapshots.
-   * @returns The cumulative liquidity score as a BigNumber.
+   * @returns The cumulative liquidity score as a bigint.
    */
-  private calculateMultipleSnapshotsScore(snapshots: any[]): BigNumber {
-    let totalScore = BigNumber.from(0);
+  private calculateMultipleSnapshotsScore(snapshots: any[]): bigint {
+    let totalScore = 0n;
 
     for (let i = 1; i < snapshots.length; i++) {
       const snapshot = snapshots[i];
@@ -353,19 +355,15 @@ export class LiquidityService {
         continue;
       }
 
-      const totalLiquidity = BigNumber.from(
-        snapshot.position.pool.totalLiquidity,
-      );
-      const liquidityAmount = BigNumber.from(snapshot.position.liquidity);
-      const timeWithheld = BigNumber.from(snapshot.timestamp).sub(
-        prevSnapshot.timestamp,
-      );
+      const totalLiquidity = BigInt(snapshot.position.pool.totalLiquidity);
+      const liquidityAmount = BigInt(snapshot.position.liquidity);
+      const timeWithheld = BigInt(snapshot.timestamp) - prevSnapshot.timestamp;
 
-      const PRECISION = BigNumber.from((10 ** 3).toString()); // Let's try with a higher precision to keep more decimals
+      const PRECISION = BigInt((10 ** 3).toString()); // Let's try with a higher precision to keep more decimals
 
-      const adjustedLiquidity = liquidityAmount.mul(PRECISION);
-      const multipliedLiquidity = adjustedLiquidity.mul(timeWithheld);
-      const rawScore = multipliedLiquidity.div(totalLiquidity);
+      const adjustedLiquidity = liquidityAmount * PRECISION;
+      const multipliedLiquidity = adjustedLiquidity * timeWithheld;
+      const rawScore = multipliedLiquidity / totalLiquidity;
       const snapshotScore = rawScore;
       console.log(snapshot);
       // Log all steps to find out what's going wrong
@@ -379,28 +377,31 @@ export class LiquidityService {
       console.log('Liquidity Amount:', liquidityAmount.toString());
       console.log('Time Withheld:', timeWithheld.toString());
 
-      totalScore = totalScore.add(snapshotScore);
+      totalScore = totalScore + snapshotScore;
       console.log('total score', snapshotScore.toString());
     }
 
     return totalScore;
   }
 
-  public calculateCentralizedLiquidityScore(orders: { cummulativeQuoteQty: number; time: number; updateTime: number; }[]): string {
+  public calculateCentralizedLiquidityScore(
+    orders: { cummulativeQuoteQty: number; time: number; updateTime: number }[],
+  ): string {
     if (orders.length === 0) {
       return '0';
     }
-  
+
     const totalScore = orders.reduce((acc, order) => {
       console.log('Order: ', order);
       const liquidityAmount = order.cummulativeQuoteQty;
-      const timeWithheld = order.time === order.updateTime ? 1 : order.updateTime - order.time;
+      const timeWithheld =
+        order.time === order.updateTime ? 1 : order.updateTime - order.time;
       const score = liquidityAmount * timeWithheld;
       acc += score;
       console.log('Total Score: ', acc);
       return acc;
     }, 0);
-  
+
     return totalScore.toString();
   }
 
@@ -429,11 +430,16 @@ export class LiquidityService {
     const escrowClient = await EscrowClient.build(signer);
 
     let liquidities: liquidityDto[];
-    const existingLiquiditiesURL: string = await escrowClient.getIntermediateResultsUrl(escrowAddress);
+    const existingLiquiditiesURL: string =
+      await escrowClient.getIntermediateResultsUrl(escrowAddress);
     if (existingLiquiditiesURL) {
-      liquidities = JSON.parse(await this.storageService.download(existingLiquiditiesURL));
+      liquidities = JSON.parse(
+        await this.storageService.download(existingLiquiditiesURL),
+      );
       if (liquidities) {
-        const exisitingLiquidity = liquidities.find((liq) => liq.liquidityProvider === liquidityProvider);
+        const exisitingLiquidity = liquidities.find(
+          (liq) => liq.liquidityProvider === liquidityProvider,
+        );
         if (exisitingLiquidity) {
           exisitingLiquidity.liquidityScore = score;
         } else {
@@ -446,15 +452,14 @@ export class LiquidityService {
       } else {
         throw new NotFoundException(ErrorJob.NotFoundIntermediateResults);
       }
-
     } else {
       liquidities = [
         {
           chainId,
           liquidityProvider,
           liquidityScore: score,
-        }
-      ]
+        },
+      ];
     }
 
     const saveLiquidityResult = await this.storageService.uploadLiquidities(
@@ -462,7 +467,7 @@ export class LiquidityService {
       chainId,
       liquidities,
     );
-    
+
     if (!existingLiquiditiesURL) {
       await escrowClient.storeResults(
         escrowAddress,

@@ -41,7 +41,7 @@ export function recoverSigner(
   }
 
   try {
-    return ethers.utils.verifyMessage(message, signature);
+    return ethers.verifyMessage(message, signature);
   } catch (e) {
     throw new ConflictException(ErrorSignature.InvalidSignature);
   }

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Wallet, providers } from 'ethers';
+import { Wallet, ethers } from 'ethers';
 import { ConfigNames, networks } from '../../common/config';
 import { ChainId } from '@human-protocol/sdk';
 import { MAINNET_CHAIN_IDS, TESTNET_CHAIN_IDS } from '../../common/constant';
@@ -20,7 +20,7 @@ export class Web3Service {
       validChains.includes(network.chainId),
     );
     for (const network of validNetworks) {
-      const provider = new providers.JsonRpcProvider(network.rpcUrl);
+      const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       this.signers[network.chainId] = new Wallet(privateKey, provider);
     }
     this.signerAddress = this.signers[validChains[0]].address;

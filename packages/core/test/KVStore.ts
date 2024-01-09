@@ -51,8 +51,8 @@ describe('KVStore', function () {
   });
 
   it('outputs an address on deployment', async () => {
-    expect(typeof kvStore.address).equal('string');
-    expect(kvStore.address.length).greaterThanOrEqual(10);
+    expect(typeof (await kvStore.getAddress())).equal('string');
+    expect((await kvStore.getAddress()).length).greaterThanOrEqual(10);
   });
 
   it('store public key and its ipfs hash on smart contract', async () => {
