@@ -30,7 +30,7 @@ import {
   RETRIES_COUNT_THRESHOLD,
 } from '../../common/constants';
 import { ReputationService } from '../reputation/reputation.service';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import { Web3Service } from '../web3/web3.service';
 import {
   EventType,
@@ -133,7 +133,7 @@ export class WebhookService {
 
       let results: {
         recipients: string[];
-        amounts: BigNumber[];
+        amounts: bigint[];
         url: string;
         hash: string;
         checkPassed: boolean;
@@ -228,9 +228,9 @@ export class WebhookService {
     const recipients = intermediateResults
       .filter((result) => !result.error)
       .map((item) => item.workerAddress);
-    const payoutAmount = BigNumber.from(
-      ethers.utils.parseUnits(manifest.fundAmount.toString(), 'ether'),
-    ).div(recipients.length);
+    const payoutAmount =
+      BigInt(ethers.parseUnits(manifest.fundAmount.toString(), 'ether')) /
+      BigInt(recipients.length);
     const amounts = new Array(recipients.length).fill(payoutAmount);
 
     return { recipients, amounts, url, hash, checkPassed: true }; // Assuming checkPassed is true for this case
@@ -259,15 +259,11 @@ export class WebhookService {
       `${intermediateResultsUrl}/${CVAT_VALIDATION_META_FILENAME}`,
     );
 
-    const bountyValue = ethers.utils.parseUnits(manifest.job_bounty, 18);
+    const bountyValue = ethers.parseUnits(manifest.job_bounty, 18);
     const accumulatedBounties = annotations.results.reduce((accMap, curr) => {
       if (curr.annotation_quality >= manifest.validation.min_quality) {
-        const existingValue =
-          accMap.get(curr.annotator_wallet_address) || BigNumber.from(0);
-        accMap.set(
-          curr.annotator_wallet_address,
-          existingValue.add(bountyValue),
-        );
+        const existingValue = accMap.get(curr.annotator_wallet_address) || 0n;
+        accMap.set(curr.annotator_wallet_address, existingValue + bountyValue);
       }
       return accMap;
     }, new Map<string, typeof bountyValue>());

@@ -60,7 +60,7 @@ import {
   MOCK_USER_ID,
 } from '../../../test/constants';
 import { PaymentService } from '../payment/payment.service';
-import { Web3Service } from '../web3/web3.service';
+import { Web3Service } from '../web3/Web3Service';
 import {
   FortuneFinalResultDto,
   FortuneManifestDto,
@@ -1477,7 +1477,7 @@ describe('JobService', () => {
   describe('getPaidOutAmount', () => {
     it('should calculate the paid out amount', async () => {
       const chainId = ChainId.LOCALHOST;
-      const amount = ethers.utils.parseEther('1.5');
+      const amount = ethers.parseEther('1.5');
       const mockLogs = [
         {
           data: 'mockData',

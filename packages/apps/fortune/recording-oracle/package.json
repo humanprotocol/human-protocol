@@ -1,5 +1,5 @@
 {
-  "name": "@human-protocol/fortune-v3-recording-oracle",
+  "name": "@human-protocol/fortune-recording-oracle",
   "version": "1.0.0",
   "description": "Fortune Recording Oracle",
   "author": "Human Protocol",
@@ -32,7 +32,6 @@
     "body-parser": "^1.20.2",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
-    "ethers": "^5.7.2",
     "helmet": "^7.1.0",
     "reflect-metadata": "^0.1.13"
   },

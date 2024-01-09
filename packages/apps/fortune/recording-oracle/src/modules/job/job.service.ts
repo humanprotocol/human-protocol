@@ -104,8 +104,7 @@ export class JobService {
       jobSolution.escrowAddress,
     );
     if (
-      ethers.utils.getAddress(recordingOracleAddress) !==
-      (await signer.getAddress())
+      ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
     ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
       throw new BadRequestException(ErrorJob.AddressMismatches);

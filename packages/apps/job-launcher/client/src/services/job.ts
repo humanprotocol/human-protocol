@@ -36,10 +36,10 @@ export const createCvatJob = async (
     chainId,
     requesterDescription: data.description,
     fundAmount: Number(amount),
-    dataUrl: data.dataUrl,
+    data: data.data,
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
-    gtUrl: data.groundTruthUrl,
+    groundTruth: data.groundTruth,
     userGuide: data.userGuide,
     type: data.type,
   };
