@@ -60,6 +60,7 @@ export enum ErrorAuth {
   UserNotActive = 'User not active',
   ApiKeyCouldNotBeCreatedOrUpdated = 'API key could not be created or updated',
   ApiKeyNotFound = 'API key not found',
+  PasswordIsNotStrongEnough = 'Password is not strong enough. Password must be at least eight characters long and contain 1 upper, 1 lowercase, 1 number and 1 special character. (!@#$%^&*()_+={}|\'"/`[]:;<>,.?~-])',
 }
 
 /**
@@ -139,4 +140,13 @@ export enum ErrorSignature {
  */
 export enum ErrorPostgres {
   NumericFieldOverflow = 'Numeric field overflow',
+}
+
+/**
+ * Represents error messages associated with a cron job.
+ */
+export enum ErrorCronJob {
+  NotCreated = 'Cron job has not been created',
+  NotCompleted = 'Cron job is not completed',
+  Completed = 'Cron job is completed',
 }

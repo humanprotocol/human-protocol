@@ -5,7 +5,7 @@ export const SERVICE_NAME = 'Job Launcher';
 export const NS = 'hmt';
 export const COINGECKO_API_URL =
   'https://api.coingecko.com/api/v3/simple/price';
-export const JOB_RETRIES_COUNT_THRESHOLD = 3;
+export const DEFAULT_MAX_RETRY_COUNT = 3;
 export const TX_CONFIRMATION_TRESHOLD = 1;
 
 export const JWT_PREFIX = 'bearer ';

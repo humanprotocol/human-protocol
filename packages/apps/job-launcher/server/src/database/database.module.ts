@@ -15,6 +15,7 @@ import { ConfigNames } from '../common/config';
 import { ApiKeyEntity } from '../modules/auth/apikey.entity';
 import { WebhookEntity } from '../modules/webhook/webhook.entity';
 import { LoggerOptions } from 'typeorm';
+import { CronJobEntity } from '../modules/cron-job/cron-job.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { LoggerOptions } from 'typeorm';
             JobEntity,
             PaymentEntity,
             WebhookEntity,
+            CronJobEntity,
           ],
           // We are using migrations, synchronize should be set to false.
           synchronize: false,
