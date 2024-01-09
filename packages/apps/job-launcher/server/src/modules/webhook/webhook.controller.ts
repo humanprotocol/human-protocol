@@ -9,9 +9,9 @@ import { WebhookService } from './webhook.service';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
   @Public()
-  @Get('/cron/launch')
-  public async processPendingCronJob(): Promise<any> {
-    await this.webhookService.processPendingCronJob();
+  @Get('/cron')
+  public async processPendingWebhooks(): Promise<any> {
+    await this.webhookService.processPendingWebhooks();
     return;
   }
 }
