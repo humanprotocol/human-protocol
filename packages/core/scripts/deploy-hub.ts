@@ -44,7 +44,8 @@ async function main() {
     spokeContracts,
     chainId,
     utils.hubAutomaticRelayerAddress,
-    utils.magistrateAddress
+    utils.magistrateAddress,
+    12
   )) as MetaHumanGovernor;
 
   const PROPOSER_ROLE = ethers.utils.id('PROPOSER_ROLE');
