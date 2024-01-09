@@ -137,53 +137,53 @@ contract MetaHumanGovernor is
         (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, valueToSend, GAS_LIMIT);
     }
 
-    //  /**
-    //  @dev Requests the voting data from all of the spoke chains.
-    //  @param proposalId The ID of the proposal.
-    // */
-    // function requestCollections(uint256 proposalId) public {
+     /**
+     @dev Requests the voting data from all of the spoke chains.
+     @param proposalId The ID of the proposal.
+    */
+    function requestCollections(uint256 proposalId) public {
 
-    //     if (block.number <= proposalDeadline(proposalId)) {
-    //         revert Errors.PeriodNotOver(); 
-    //     }
+        if (block.number <= proposalDeadline(proposalId)) {
+            revert Errors.PeriodNotOver(); 
+        }
 
-    //     if (collectionStarted[proposalId]) {
-    //         revert Errors.CollectionStarted(); 
-    //     }
+        if (collectionStarted[proposalId]) {
+            revert Errors.CollectionStarted(); 
+        }
 
-    //     collectionStarted[proposalId] = true;
+        collectionStarted[proposalId] = true;
 
 
-    //     uint spokeContractsLength = spokeContracts.length;
-    //     // Get a price of sending the message back to hub
-    //     uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
+        uint spokeContractsLength = spokeContracts.length;
+        // Get a price of sending the message back to hub
+        uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
 
-    //     // Sends an empty message to each of the aggregators.
-    //     // If they receive a message, it is their cue to send data back
-    //     for (uint16 i = 1; i <= spokeContractsLength; ++i) {
-    //         // Using "1" as the function selector
-    //         bytes memory message = abi.encode(1, proposalId);
-    //         bytes memory payload = abi.encode(
-    //             spokeContracts[i-1].contractAddress,
-    //             spokeContracts[i-1].chainId,
-    //             msg.sender,
-    //             message
-    //         );
+        // Sends an empty message to each of the aggregators.
+        // If they receive a message, it is their cue to send data back
+        for (uint16 i = 1; i <= spokeContractsLength; ++i) {
+            // Using "1" as the function selector
+            bytes memory message = abi.encode(1, proposalId);
+            bytes memory payload = abi.encode(
+                spokeContracts[i-1].contractAddress,
+                spokeContracts[i-1].chainId,
+                msg.sender,
+                message
+            );
 
-    //         uint256 cost = quoteCrossChainMessage(spokeContracts[i-1].chainId, sendMessageToHubCost);
+            uint256 cost = quoteCrossChainMessage(spokeContracts[i-1].chainId, sendMessageToHubCost);
 
-    //         wormholeRelayer.sendPayloadToEvm{value: cost}(
-    //             spokeContracts[i-1].chainId,
-    //             address(uint160(uint256(spokeContracts[i-1].contractAddress))),
-    //             payload,
-    //             sendMessageToHubCost, // send value to enable the spoke to send back vote result
-    //             GAS_LIMIT,
-    //             spokeContracts[i-1].chainId,
-    //             msg.sender
-    //         );
+            wormholeRelayer.sendPayloadToEvm{value: cost}(
+                spokeContracts[i-1].chainId,
+                address(uint160(uint256(spokeContracts[i-1].contractAddress))),
+                payload,
+                sendMessageToHubCost, // send value to enable the spoke to send back vote result
+                GAS_LIMIT,
+                spokeContracts[i-1].chainId,
+                msg.sender
+            );
 
-    //     }
-    // }
+        }
+    }
 
      /**
      * @dev Estimates timestamp when given block number should be the current block.
@@ -358,7 +358,7 @@ contract MetaHumanGovernor is
     ) internal override(Governor, GovernorTimelockControl) {
         super._execute(proposalId, targets, values, calldatas, descriptionHash);
     }
-
+    
     /**
      * @dev Cancels a proposal.
      *  @param targets The array of target addresses.
