@@ -7,10 +7,12 @@ import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
 import "./CrossChainGovernorCountingSimple.sol";
-import "./DAOSpokeContract.sol";
 import "./wormhole/IWormholeRelayer.sol";
 import "./wormhole/IWormholeReceiver.sol";
 import "./magistrate/Magistrate.sol";
+import "./libs/WormholeMessageHandler.sol";
+
+import "./Errors.sol";
 
 /**
  * @title MetaHumanGovernor
@@ -30,29 +32,7 @@ contract MetaHumanGovernor is
     Magistrate,
     IWormholeReceiver
 {
-    /// CUSTOM ERRORS ///
-    error AlreadyProcessed();
-
-    error RelayerOnly();
-
-    error OnlySpokeMessages();
-
-    error CrossChainProposeOnly();
-
-    error InitDone();
-
-    error AlreadyInitialized();
-
-    error OnlyRelayerAllowed();
-
-    error OnlySpokeAllowed();
-
-    error CollectionStarted();
-
-    error PeriodNotOver();
-
-    error CollectionUnfinished();
-
+    
     IWormholeRelayer public immutable wormholeRelayer;
     uint256 internal constant GAS_LIMIT = 500_000;
     uint256 public immutable secondsPerBlock;
@@ -99,87 +79,26 @@ contract MetaHumanGovernor is
         payable(msg.sender).transfer(address(this).balance);
     }
 
-     /**
-     @dev Receives messages from the Wormhole protocol's relay mechanism and processes them accordingly.
-     This function is intended to be called only by the designated Wormhole relayer.
-     @param payload The payload of the received message.
-     @param additionalVaas An array of additional data (not used in this function).
-     @param sourceAddress The address that initiated the message transmission (HelloWormhole contract address).
-     @param sourceChain The chain ID of the source contract.
-     @param deliveryHash A unique hash representing the delivery of the message to prevent duplicate processing.
-    */
     function receiveWormholeMessages(
-        bytes memory payload,
-        bytes[] memory additionalVaas, // additionalVaas
-        bytes32 sourceAddress, // address that called 'sendPayloadToEvm' (HelloWormhole contract address)
-        uint16 sourceChain,
-        bytes32 deliveryHash // this can be stored in a mapping deliveryHash => bool to prevent duplicate deliveries
+    bytes memory payload,
+    bytes[] memory additionalVaas,
+    bytes32 sourceAddress,
+    uint16 sourceChain,
+    bytes32 deliveryHash
     ) public payable override {
-        if (msg.sender != address(wormholeRelayer)) {
-            revert RelayerOnly(); 
-        } 
-
-        if (!spokeContractsMapping[sourceAddress][sourceChain]) {
-            revert OnlySpokeMessages();
-        }
-
-        if (processedMessages[deliveryHash]){
-            revert AlreadyProcessed();
-        }
-
-        (
-        address intendedRecipient,
-        ,//chainId
-        ,//sender
-        bytes memory decodedMessage
-        ) = abi.decode(payload, (address, uint16, address, bytes));
-
-    
-        assembly {
-            if iszero(eq(intendedRecipient, address())) {
-                revert(0, 0)
-            }
-        }
-        processedMessages[deliveryHash] = true;
-        // Gets a function selector option
-        uint16 option;
-        assembly {
-            option := mload(add(decodedMessage, 32))
-        }
-
-        if (option == 0) {
-            onReceiveSpokeVotingData(sourceChain, sourceAddress, decodedMessage);
-        }
-    }
-
-    /**
-     * @dev Processes the received voting data from the spoke contracts.
-     * @param emitterChainId The chain ID of the emitter contract.
-     * @param emitterAddress The address of the emitter contract.
-     * @param payload The message payload.
-     */
-    function onReceiveSpokeVotingData(uint16 emitterChainId, bytes32 emitterAddress, bytes memory payload) internal virtual {
-        (
-        , // uint16 option
-        uint256 _proposalId,
-        uint256 _for,
-        uint256 _against,
-        uint256 _abstain
-        ) = abi.decode(payload, (uint16, uint256, uint256, uint256, uint256));
-        // As long as the received data isn't already initialized...
-        if (spokeVotes[_proposalId][emitterAddress][emitterChainId].initialized) {
-            revert AlreadyInitialized();
-        } else {
-            // Add it to the map (while setting initialized true)
-            spokeVotes[_proposalId][emitterAddress][emitterChainId] = SpokeProposalVote(
-                _for,
-                _against,
-                _abstain,
-                true
-            );
-
-            _finishCollectionPhase(_proposalId);
-        }
+        WormholeMessageHandler.receiveWormholeMessages(
+            wormholeRelayer,
+            processedMessages,
+            payload,
+            additionalVaas,
+            sourceAddress,
+            sourceChain,
+            deliveryHash,
+            spokeContractsMapping, 
+            spokeVotes, 
+            spokeContracts,
+            collectionFinished
+        );
     }
 
     /**
@@ -197,29 +116,13 @@ contract MetaHumanGovernor is
         bytes[] memory calldatas,
         bytes32 descriptionHash
     ) internal override {
-        _finishCollectionPhase(proposalId);
+        WormholeMessageHandler._finishCollectionPhase(spokeVotes, spokeContracts, collectionFinished, proposalId);
 
         if (!collectionFinished[proposalId]){
-            revert CollectionUnfinished(); 
+            revert Errors.CollectionUnfinished(); 
         }
 
         super._beforeExecute(proposalId, targets, values, calldatas, descriptionHash);
-    }
-
-     /**
-     @dev Checks if the collection phase for a proposal has finished.
-     @param proposalId The ID of the proposal.
-    */
-    function _finishCollectionPhase(uint256 proposalId) internal {
-        bool phaseFinished = true;
-        uint spokeContractsLength = spokeContracts.length;
-        for (uint16 i = 1; i <= spokeContractsLength && phaseFinished; ++i) {
-            phaseFinished =
-            phaseFinished &&
-            spokeVotes[proposalId][spokeContracts[i-1].contractAddress][spokeContracts[i-1].chainId].initialized;
-        }
-
-        collectionFinished[proposalId] = phaseFinished;
     }
 
     /**
@@ -234,53 +137,53 @@ contract MetaHumanGovernor is
         (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, valueToSend, GAS_LIMIT);
     }
 
-     /**
-     @dev Requests the voting data from all of the spoke chains.
-     @param proposalId The ID of the proposal.
-    */
-    function requestCollections(uint256 proposalId) public {
+    //  /**
+    //  @dev Requests the voting data from all of the spoke chains.
+    //  @param proposalId The ID of the proposal.
+    // */
+    // function requestCollections(uint256 proposalId) public {
 
-        if (block.number <= proposalDeadline(proposalId)) {
-            revert PeriodNotOver(); 
-        }
+    //     if (block.number <= proposalDeadline(proposalId)) {
+    //         revert Errors.PeriodNotOver(); 
+    //     }
 
-        if (collectionStarted[proposalId]) {
-            revert CollectionStarted(); 
-        }
+    //     if (collectionStarted[proposalId]) {
+    //         revert Errors.CollectionStarted(); 
+    //     }
 
-        collectionStarted[proposalId] = true;
+    //     collectionStarted[proposalId] = true;
 
 
-        uint spokeContractsLength = spokeContracts.length;
-        // Get a price of sending the message back to hub
-        uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
+    //     uint spokeContractsLength = spokeContracts.length;
+    //     // Get a price of sending the message back to hub
+    //     uint256 sendMessageToHubCost = quoteCrossChainMessage(chainId, 0);
 
-        // Sends an empty message to each of the aggregators.
-        // If they receive a message, it is their cue to send data back
-        for (uint16 i = 1; i <= spokeContractsLength; ++i) {
-            // Using "1" as the function selector
-            bytes memory message = abi.encode(1, proposalId);
-            bytes memory payload = abi.encode(
-                spokeContracts[i-1].contractAddress,
-                spokeContracts[i-1].chainId,
-                msg.sender,
-                message
-            );
+    //     // Sends an empty message to each of the aggregators.
+    //     // If they receive a message, it is their cue to send data back
+    //     for (uint16 i = 1; i <= spokeContractsLength; ++i) {
+    //         // Using "1" as the function selector
+    //         bytes memory message = abi.encode(1, proposalId);
+    //         bytes memory payload = abi.encode(
+    //             spokeContracts[i-1].contractAddress,
+    //             spokeContracts[i-1].chainId,
+    //             msg.sender,
+    //             message
+    //         );
 
-            uint256 cost = quoteCrossChainMessage(spokeContracts[i-1].chainId, sendMessageToHubCost);
+    //         uint256 cost = quoteCrossChainMessage(spokeContracts[i-1].chainId, sendMessageToHubCost);
 
-            wormholeRelayer.sendPayloadToEvm{value: cost}(
-                spokeContracts[i-1].chainId,
-                address(uint160(uint256(spokeContracts[i-1].contractAddress))),
-                payload,
-                sendMessageToHubCost, // send value to enable the spoke to send back vote result
-                GAS_LIMIT,
-                spokeContracts[i-1].chainId,
-                msg.sender
-            );
+    //         wormholeRelayer.sendPayloadToEvm{value: cost}(
+    //             spokeContracts[i-1].chainId,
+    //             address(uint160(uint256(spokeContracts[i-1].contractAddress))),
+    //             payload,
+    //             sendMessageToHubCost, // send value to enable the spoke to send back vote result
+    //             GAS_LIMIT,
+    //             spokeContracts[i-1].chainId,
+    //             msg.sender
+    //         );
 
-        }
-    }
+    //     }
+    // }
 
      /**
      * @dev Estimates timestamp when given block number should be the current block.
@@ -428,7 +331,7 @@ contract MetaHumanGovernor is
     override(Governor, IGovernor)
     returns (uint256)
     {
-        revert CrossChainProposeOnly(); 
+        revert Errors.CrossChainProposeOnly(); 
     }
 
     /**
