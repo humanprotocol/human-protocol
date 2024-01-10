@@ -243,7 +243,7 @@ describe('StorageService', () => {
         .mockResolvedValueOnce('encrypted');
       EncryptionUtils.isEncrypted = jest.fn().mockReturnValue(true);
       Encryption.build = jest.fn().mockResolvedValue({
-        decrypt: jest.fn().mockResolvedValue(JSON.stringify(expectedJobFile)),
+        decrypt: jest.fn().mockResolvedValue(expectedJobFile),
       });
 
       const solutionsFile = await storageService.download(MOCK_FILE_URL);

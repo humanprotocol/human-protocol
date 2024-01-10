@@ -65,25 +65,27 @@ export class StorageService {
     ]);
   }
 
+  private async decryptFile(fileContent: any): Promise<any> {
+    if (
+      typeof fileContent === 'string' &&
+      EncryptionUtils.isEncrypted(fileContent)
+    ) {
+      const encryption = await Encryption.build(
+        this.configService.get<string>(ConfigNames.ENCRYPTION_PRIVATE_KEY, ''),
+        this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
+      );
+
+      return await encryption.decrypt(fileContent);
+    } else {
+      return fileContent;
+    }
+  }
+
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
-      if (
-        typeof fileContent === 'string' &&
-        EncryptionUtils.isEncrypted(fileContent)
-      ) {
-        const encryption = await Encryption.build(
-          this.configService.get<string>(
-            ConfigNames.ENCRYPTION_PRIVATE_KEY,
-            '',
-          ),
-          this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
-        );
 
-        return JSON.parse(await encryption.decrypt(fileContent));
-      } else {
-        return fileContent;
-      }
+      return await this.decryptFile(fileContent);
     } catch (error) {
       Logger.error(`Error downloading ${url}:`, error);
       return [];
@@ -97,20 +99,6 @@ export class StorageService {
   ): Promise<UploadedFile> {
     if (!(await this.minioClient.bucketExists(this.s3Config.bucket))) {
       throw new BadRequestException('Bucket not found');
-    }
-
-    const signer = this.web3Service.getSigner(chainId);
-    const escrowClient = await EscrowClient.build(signer);
-    const stakingClient = await StakingClient.build(signer);
-
-    const jobLauncherAddress =
-      await escrowClient.getJobLauncherAddress(escrowAddress);
-
-    const reputationOracle = await stakingClient.getLeader(signer.address);
-    const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
-
-    if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
-      throw new BadRequestException('Missing public key');
     }
 
     try {
@@ -148,24 +136,9 @@ export class StorageService {
     try {
       // Download the content of the file from the bucket
       let fileContent = await StorageClient.downloadFileFromUrl(url);
-
-      if (
-        typeof fileContent === 'string' &&
-        EncryptionUtils.isEncrypted(fileContent)
-      ) {
-        const encryption = await Encryption.build(
-          this.configService.get<string>(
-            ConfigNames.ENCRYPTION_PRIVATE_KEY,
-            '',
-          ),
-          this.configService.get<string>(ConfigNames.ENCRYPTION_PASSPHRASE, ''),
-        );
-
-        fileContent = await encryption.decrypt(fileContent);
-      }
+      fileContent = await this.decryptFile(fileContent);
 
       // Encrypt for job launcher
-
       const content = await this.encryptFile(
         escrowAddress,
         chainId,
@@ -173,7 +146,6 @@ export class StorageService {
       );
 
       // Upload the encrypted file to the bucket
-
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
 
