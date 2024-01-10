@@ -69,7 +69,6 @@ def add_cvat_job_to_db(cvat_id: int, cvat_task_id: int, cvat_project_id: int, st
             cvat_task_id=cvat_task_id,
             cvat_project_id=cvat_project_id,
             status=status,
-            assignee="",
         )
 
         session.add(job)

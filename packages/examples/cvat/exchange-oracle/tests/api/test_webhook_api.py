@@ -51,8 +51,7 @@ def test_incoming_webhook_200(client: TestClient) -> None:
         assert webhook.signature == WEBHOOK_MESSAGE_SIGNED
 
 
-def test_incoming_webhook_400(client: TestClient) -> None:
-    # Missing field
+def test_incoming_webhook_400_missing_field(client: TestClient) -> None:
     data = {
         "escrow_address": escrow_address,
         "chain_id": 80001,
@@ -73,7 +72,9 @@ def test_incoming_webhook_400(client: TestClient) -> None:
             }
         ]
     }
-    # Invalid Address
+
+
+def test_incoming_webhook_400_invalid_address(client: TestClient) -> None:
     data = {
         "escrow_address": "bad_address",
         "chain_id": 80001,
@@ -96,7 +97,8 @@ def test_incoming_webhook_400(client: TestClient) -> None:
         ]
     }
 
-    # Invalid Chain Id
+
+def test_incoming_webhook_400_invalid_chain_id(client: TestClient) -> None:
     data = {
         "escrow_address": "0x12E66A452f95bff49eD5a30b0d06Ebc37C5A94B6",
         "chain_id": 1234,
@@ -121,7 +123,6 @@ def test_incoming_webhook_400(client: TestClient) -> None:
 
 
 def test_incoming_webhook_401(client: TestClient) -> None:
-    # Invalid signature
     with (
         patch("src.chain.web3.get_web3") as mock_get_web3,
         patch("src.chain.escrow.get_escrow") as mock_get_escrow,
