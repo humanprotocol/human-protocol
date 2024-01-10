@@ -9,7 +9,9 @@ export function useMonthlyTaskSummaries() {
     const from = dayjs().startOf('month').format('YYYY-MM-DD');
     const to = dayjs().endOf('month').format('YYYY-MM-DD');
     const [cachedData, thisMonthData] = await Promise.all([
-      axios.get(`${apiURL}/monthly-task-summaries`).then((res) => res.data),
+      axios
+        .get(`${apiURL}/monthly-task-summaries?sort=id`)
+        .then((res) => res.data),
       axios
         .get(`${apiURL}/stats/tasks?to=${to}&from=${from}`)
         .then((res) => res.data),
