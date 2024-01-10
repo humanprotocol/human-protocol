@@ -40,6 +40,31 @@ export class StorageService {
     }:${this.s3Config.port}/${this.s3Config.bucket}/${key}`;
   }
 
+  private async encryptFile(
+    escrowAddress: string,
+    chainId: ChainId,
+    content: any,
+  ) {
+    const signer = this.web3Service.getSigner(chainId);
+    const escrowClient = await EscrowClient.build(signer);
+    const stakingClient = await StakingClient.build(signer);
+
+    const jobLauncherAddress =
+      await escrowClient.getJobLauncherAddress(escrowAddress);
+
+    const reputationOracle = await stakingClient.getLeader(signer.address);
+    const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
+
+    if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
+      throw new BadRequestException('Missing public key');
+    }
+
+    return await EncryptionUtils.encrypt(content, [
+      reputationOracle.publicKey,
+      jobLauncher.publicKey,
+    ]);
+  }
+
   public async download(url: string): Promise<any> {
     try {
       const fileContent = await StorageClient.downloadFileFromUrl(url);
@@ -89,10 +114,11 @@ export class StorageService {
     }
 
     try {
-      const content = await EncryptionUtils.encrypt(JSON.stringify(solutions), [
-        reputationOracle.publicKey,
-        jobLauncher.publicKey,
-      ]);
+      const content = await this.encryptFile(
+        escrowAddress,
+        chainId,
+        JSON.stringify(solutions),
+      );
 
       const key = `${escrowAddress}-${chainId}.json`;
       const hash = crypto.createHash('sha1').update(content).digest('hex');
@@ -139,25 +165,14 @@ export class StorageService {
       }
 
       // Encrypt for job launcher
-      const signer = this.web3Service.getSigner(chainId);
-      const escrowClient = await EscrowClient.build(signer);
-      const stakingClient = await StakingClient.build(signer);
 
-      const jobLauncherAddress =
-        await escrowClient.getJobLauncherAddress(escrowAddress);
-
-      const reputationOracle = await stakingClient.getLeader(signer.address);
-      const jobLauncher = await stakingClient.getLeader(jobLauncherAddress);
-
-      if (!reputationOracle.publicKey || !jobLauncher.publicKey) {
-        throw new BadRequestException('Missing public key');
-      }
+      const content = await this.encryptFile(
+        escrowAddress,
+        chainId,
+        fileContent,
+      );
 
       // Upload the encrypted file to the bucket
-      const content = await EncryptionUtils.encrypt(fileContent, [
-        reputationOracle.publicKey,
-        jobLauncher.publicKey,
-      ]);
 
       const hash = crypto.createHash('sha1').update(content).digest('hex');
       const key = `s3${hash}.zip`;
