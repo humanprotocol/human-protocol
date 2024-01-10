@@ -19,12 +19,24 @@
   ],
   "crons": [
     {
-      "path": "/job/cron/launch",
-      "schedule": "*/1 * * * *"
+      "path": "/job/cron/create-escrow",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/job/cron/setup-escrow",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/job/cron/fund-escrow",
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/job/cron/cancel",
-      "schedule": "*/1 * * * *"
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/webhook/cron",
+      "schedule": "*/10 * * * *"
     }
   ],
   "ignoreCommand": "git diff HEAD^ HEAD --quiet ."

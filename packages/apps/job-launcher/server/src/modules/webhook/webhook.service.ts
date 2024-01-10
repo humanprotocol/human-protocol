@@ -160,7 +160,7 @@ export class WebhookService {
    * @returns {Promise<void>} - Returns a promise that resolves when the operation is complete.
    */
   @Cron(CronExpression.EVERY_10_MINUTES)
-  public async processPendingCronJob(): Promise<void> {
+  public async processPendingWebhooks(): Promise<void> {
     const isCronJobRunning = await this.cronJobService.isCronJobRunning(
       CronJobType.ProcessPendingWebhook,
     );

@@ -344,7 +344,7 @@ describe('WebhookService', () => {
 
       const startCronJobMock = jest.spyOn(cronJobService, 'startCronJob');
 
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(startCronJobMock).not.toHaveBeenCalled();
     });
@@ -354,7 +354,7 @@ describe('WebhookService', () => {
         .spyOn(cronJobService, 'startCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(cronJobService.startCronJob).toHaveBeenCalledWith(
         CronJobType.ProcessPendingWebhook,
@@ -362,7 +362,7 @@ describe('WebhookService', () => {
     });
 
     it('should send webhook for all of the pending webhooks', async () => {
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(sendWebhookMock).toHaveBeenCalledTimes(2);
       expect(sendWebhookMock).toHaveBeenCalledWith(webhookEntity1);
@@ -382,7 +382,7 @@ describe('WebhookService', () => {
     it('should increase retriesCount by 1 if sending webhook fails', async () => {
       sendWebhookMock.mockRejectedValueOnce(new Error());
 
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: webhookEntity1.id },
@@ -398,7 +398,7 @@ describe('WebhookService', () => {
 
       webhookEntity1.retriesCount = MOCK_MAX_RETRY_COUNT;
 
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(webhookRepository.updateOne).toHaveBeenCalledWith(
         { id: webhookEntity1.id },
@@ -411,7 +411,7 @@ describe('WebhookService', () => {
         .spyOn(cronJobService, 'completeCronJob')
         .mockResolvedValueOnce(cronJobEntityMock as any);
 
-      await (webhookService as any).processPendingCronJob();
+      await (webhookService as any).processPendingWebhooks();
 
       expect(cronJobService.completeCronJob).toHaveBeenCalledWith(
         cronJobEntityMock as any,

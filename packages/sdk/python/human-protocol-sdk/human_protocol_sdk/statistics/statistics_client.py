@@ -470,12 +470,12 @@ class StatisticsClient:
                     ),
                     total_amount_paid=int(event_day_data.get("dailyPayoutAmount", 0)),
                     total_count=int(event_day_data.get("dailyPayoutCount", 0)),
-                    average_amount_per_worker=int(
-                        event_day_data.get("dailyPayoutAmount", 0)
-                    )
-                    / int(event_day_data.get("dailyWorkerCount"))
-                    if event_day_data.get("dailyWorkerCount", "0") != "0"
-                    else 0,
+                    average_amount_per_worker=(
+                        int(event_day_data.get("dailyPayoutAmount", 0))
+                        / int(event_day_data.get("dailyWorkerCount"))
+                        if event_day_data.get("dailyWorkerCount", "0") != "0"
+                        else 0
+                    ),
                 )
                 for event_day_data in event_day_datas
             ],

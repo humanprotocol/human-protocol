@@ -36,6 +36,7 @@
     * [human_protocol_sdk.escrow.escrow_client module](human_protocol_sdk.escrow.escrow_client.md)
       * [Code Example](human_protocol_sdk.escrow.escrow_client.md#code-example)
       * [Module](human_protocol_sdk.escrow.escrow_client.md#module)
+      * [`EscrowCancel`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowCancel)
       * [`EscrowClient`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClient)
       * [`EscrowClientError`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowClientError)
       * [`EscrowConfig`](human_protocol_sdk.escrow.escrow_client.md#human_protocol_sdk.escrow.escrow_client.EscrowConfig)
