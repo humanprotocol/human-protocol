@@ -198,7 +198,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/create-escrow')
+  @Get('/cron/create-escrow')
   public async launchCreateEscrowCronJob(): Promise<void> {
     await this.jobService.createEscrowCronJob();
     return;
@@ -217,7 +217,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/setup-escrow')
+  @Get('/cron/setup-escrow')
   public async launchSetupEscrowCronJob(): Promise<void> {
     await this.jobService.setupEscrowCronJob();
     return;
@@ -236,7 +236,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/fund-escrow')
+  @Get('/cron/fund-escrow')
   public async launchFundEscrowCronJob(): Promise<void> {
     await this.jobService.fundEscrowCronJob();
     return;

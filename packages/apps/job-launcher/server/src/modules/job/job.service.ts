@@ -624,7 +624,7 @@ export class JobService {
     )!;
     const escrowConfig = {
       recordingOracle: recordingOracleAddress,
-      reputationOracle: recordingOracleAddress,
+      reputationOracle: reputationOracleAddress,
       exchangeOracle: exchangeOracleAddress,
       recordingOracleFee: await this.getOracleFee(
         recordingOracleAddress,
