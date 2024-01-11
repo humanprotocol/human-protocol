@@ -11,6 +11,9 @@ setuptools-pipfile = "*"
 hypothesis = "*"
 numpy = "*"
 pyerf = "*"
+sphinx = "*"
+sphinx-markdown-builder = "*"
+sphinx-autodoc-typehints = "*"
 
 [packages]
 cryptography = "*"

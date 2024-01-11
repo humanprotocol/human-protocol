@@ -1,9 +1,10 @@
 import { ChainId } from '@human-protocol/sdk';
 import { Box, Button, IconButton, Typography } from '@mui/material';
+import copy from 'copy-to-clipboard';
 import { Link, useNavigate } from 'react-router-dom';
 import { CopyLinkIcon } from '../../components/Icons/CopyLinkIcon';
 import { Table } from '../../components/Table';
-import { useJobs } from '../../state/jobs/hooks';
+import { useJobs } from '../../hooks/useJobs';
 import { JobStatus } from '../../types';
 
 export const JobTable = ({
@@ -20,14 +21,18 @@ export const JobTable = ({
     <Table
       columns={[
         {
-          id: 'address',
+          id: 'escrowAddress',
           label: 'Address',
           sortable: true,
-          render: ({ address }) =>
-            address ? (
+          render: ({ escrowAddress }) =>
+            escrowAddress ? (
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {address}
-                <IconButton color="primary" sx={{ ml: 3 }}>
+                {escrowAddress}
+                <IconButton
+                  color="primary"
+                  sx={{ ml: 3 }}
+                  onClick={() => copy(escrowAddress)}
+                >
                   <CopyLinkIcon />
                 </IconButton>
               </Box>
@@ -38,7 +43,7 @@ export const JobTable = ({
         { id: 'network', label: 'Network', sortable: true },
         {
           id: 'fundAmount',
-          label: 'Balance',
+          label: 'Fund Amount',
           sortable: true,
           render: ({ fundAmount }) => `${fundAmount} HMT`,
         },

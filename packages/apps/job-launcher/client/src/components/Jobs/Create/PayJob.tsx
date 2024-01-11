@@ -1,7 +1,9 @@
-import { Box, Snackbar, Alert } from '@mui/material';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { StyledTabs, StyledTab } from '../../../components/Tabs';
+import { IS_TESTNET } from '../../../constants/chains';
 import { useCreateJobPageUI } from '../../../providers/CreateJobPageUIProvider';
+import { useSnackbar } from '../../../providers/SnackProvider';
 import { PayMethod } from '../../../types';
 import { CryptoPayForm } from './CryptoPayForm';
 import { FiatPayForm } from './FiatPayForm';
@@ -10,7 +12,7 @@ import { LaunchJobProgress } from './LaunchJobProgress';
 export const PayJob = () => {
   const { payMethod, changePayMethod, goToNextStep } = useCreateJobPageUI();
   const [isPaying, setIsPaying] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { openSnackbar } = useSnackbar();
 
   const handleStart = () => {
     setIsPaying(true);
@@ -22,13 +24,20 @@ export const PayJob = () => {
   };
 
   const handleError = (err: any) => {
-    if (
-      err.code === 'UNPREDICTABLE_GAS_LIMIT' ||
-      err.code === 'ACTION_REJECTED'
-    ) {
-      setErrorMessage(err.code);
+    if (err.code === 'UNPREDICTABLE_GAS_LIMIT') {
+      openSnackbar(
+        'Insufficient token amount or the gas limit is too low',
+        'error',
+      );
+    } else if (err.code === 'ACTION_REJECTED') {
+      openSnackbar('The transaction was rejected', 'error');
     } else {
-      setErrorMessage(err?.response?.data?.message ?? err?.message);
+      const message = err?.response?.data?.message;
+      if (message && typeof message === 'string') {
+        openSnackbar(err?.response?.data?.message, 'error');
+      } else {
+        openSnackbar('Something went wrong', 'error');
+      }
     }
   };
 
@@ -56,7 +65,7 @@ export const PayJob = () => {
         }}
       >
         <StyledTab value={PayMethod.Crypto} label="Crypto" />
-        <StyledTab value={PayMethod.Fiat} label="Fiat" />
+        {IS_TESTNET && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
       </StyledTabs>
       <Box
         display="flex"
@@ -90,16 +99,6 @@ export const PayJob = () => {
           />
         )}
       </Box>
-      <Snackbar
-        open={errorMessage !== null}
-        autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setErrorMessage(null)} severity="error">
-          {errorMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   ) : (
     <LaunchJobProgress />

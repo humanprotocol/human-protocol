@@ -1,10 +1,17 @@
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+import { Box, Card, Grid, IconButton, Stack, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { CardTextRow } from '../../../components/CardTextRow';
 import { CopyAddressButton } from '../../../components/CopyAddressButton';
+import { CopyLinkIcon } from '../../../components/Icons/CopyLinkIcon';
+import { Table } from '../../../components/Table';
 import { useJobDetails } from '../../../hooks/useJobDetails';
+import { useSnackbar } from '../../../providers/SnackProvider';
+import * as jobService from '../../../services/job';
+import { JobStatus } from '../../../types';
+import { formatAmount } from '../../../utils/bignumber';
 
 const CardContainer = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
@@ -18,7 +25,36 @@ const CardContainer = styled(Card)(({ theme }) => ({
 
 export default function JobDetail() {
   const { jobId } = useParams();
-  const { data, isLoading, error } = useJobDetails(Number(jobId));
+  const { data, isLoading, error, mutate } = useJobDetails(Number(jobId));
+  const [isCancelling, setIsCancelling] = useState(false);
+  const { openSnackbar } = useSnackbar();
+
+  const handleCancel = async () => {
+    setIsCancelling(true);
+    try {
+      await jobService.cancelJob(Number(jobId));
+
+      if (data) {
+        mutate({
+          ...data,
+          details: { ...data.details, status: JobStatus.TO_CANCEL },
+        });
+      }
+      openSnackbar('Job canceled', 'success');
+    } catch (err: any) {
+      openSnackbar(
+        err?.response?.data?.message ?? 'Job cancellation failed.',
+        'error',
+      );
+    }
+    setIsCancelling(false);
+  };
+
+  const isCancellable =
+    data?.details.status === JobStatus.FAILED ||
+    data?.details.status === JobStatus.PAID ||
+    data?.details.status === JobStatus.PENDING ||
+    data?.details.status === JobStatus.LAUNCHED;
 
   if (isLoading) return <>Loading...</>;
 
@@ -33,6 +69,17 @@ export default function JobDetail() {
           </Typography>
           <CopyAddressButton address={data.details.escrowAddress} ml={6} />
         </Box>
+        {isCancellable && (
+          <LoadingButton
+            sx={{ mb: 2 }}
+            variant="contained"
+            color="primary"
+            loading={isCancelling}
+            onClick={handleCancel}
+          >
+            Cancel
+          </LoadingButton>
+        )}
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <CardContainer>
@@ -59,12 +106,9 @@ export default function JobDetail() {
                 />
                 <CardTextRow
                   label="Paid Out HMT"
-                  value={`${data.details.paidOut} HMT`}
+                  value={`${formatAmount(data.details.paidOut.toString())} HMT`}
                 />
-                <CardTextRow
-                  label="Amount of Jobs"
-                  value={data.details.amountOfTasks}
-                />
+                <CardTextRow label="Amount of Jobs" value="" />
                 <CardTextRow label="Workers assigned" value="" />
               </Stack>
             </CardContainer>
@@ -83,11 +127,13 @@ export default function JobDetail() {
                 <CardTextRow label="Staker" value={data.staking.staker} />
                 <CardTextRow
                   label="Staked HMT"
-                  value={`${data.staking.allocated} HMT`}
+                  value={`${formatAmount(
+                    data.staking.allocated.toString(),
+                  )} HMT`}
                 />
                 <CardTextRow
                   label="Slashed HMT"
-                  value={`${data.staking.slashed} HMT`}
+                  value={`${formatAmount(data.staking.slashed.toString())} HMT`}
                 />
               </Stack>
             </CardContainer>
@@ -124,7 +170,9 @@ export default function JobDetail() {
                     />
                     <CardTextRow
                       label="Fund Amount"
-                      value={`${data.manifest.fundAmount} HMT`}
+                      value={`${formatAmount(
+                        data.manifest.fundAmount.toString(),
+                      )} HMT`}
                     />
                     <CardTextRow
                       label="Job Requester"
@@ -156,50 +204,80 @@ export default function JobDetail() {
           </Grid>
         </Grid>
       </Box>
-      {/*
-      TODO: Add this back in when we have a way to fetch the job solution
-      <Box sx={{ mt: 10 }}>
-        <Typography variant="h4" fontWeight={600}>
-          Job solutions
-        </Typography>
-        <Box sx={{ mt: 7 }}>
-          <Table
-            columns={[
-              {
-                id: 'workerAddress',
-                label: 'Worker Address',
-                render: ({ workerAddress }) => (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    {workerAddress}
-                    <IconButton color="primary" sx={{ ml: 3 }}>
-                      <CopyLinkIcon />
-                    </IconButton>
-                  </Box>
-                ),
-              },
-              { id: 'fortune', label: 'Fortune' },
-            ]}
-            data={[
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-              {
-                workerAddress: '0x670bCc966ddc4fE7136c8793617a2C4D22849827',
-                fortune: '1',
-              },
-            ]}
-          />
+      {data.results && (
+        <Box sx={{ mt: 10 }}>
+          <Typography variant="h4" fontWeight={600}>
+            Job solutions
+          </Typography>
+          <Box sx={{ mt: 7 }}>
+            {data.manifest.requestType === 'FORTUNE' && (
+              <Table
+                columns={[
+                  {
+                    id: 'workerAddress',
+                    label: 'Worker Address',
+                    render: ({ workerAddress }) => (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {workerAddress}
+                        <IconButton color="primary" sx={{ ml: 3 }}>
+                          <CopyLinkIcon />
+                        </IconButton>
+                      </Box>
+                    ),
+                  },
+                  { id: 'solution', label: 'Fortune' },
+                  {
+                    id: 'error',
+                    label: 'Status',
+                    render: ({ error }) => (error ? 'Refused' : 'Accepted'),
+                  },
+                  { id: 'error', label: 'Refused reason' },
+                ]}
+                data={data.results}
+              />
+            )}
+            {data.manifest.requestType !== 'FORTUNE' && (
+              <Box
+                sx={{
+                  borderRadius: '16px',
+                  background: '#fff',
+                  boxShadow:
+                    '0px 1px 5px 0px rgba(233, 235, 250, 0.20), 0px 2px 2px 0px rgba(233, 235, 250, 0.50), 0px 3px 1px -2px #E9EBFA',
+                  p: '14px 42px 18px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Stack direction="row" spacing={3}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ minWidth: 130 }}
+                  >
+                    URL :
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="primary"
+                    sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    <Link
+                      style={{
+                        textDecoration: 'underline',
+                        alignItems: 'left',
+                      }}
+                      to={data.results as string}
+                    >
+                      {data.results as string}
+                    </Link>
+                  </Typography>
+                </Stack>
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Box> */}
+      )}
     </Box>
   );
 }

@@ -13,6 +13,8 @@ import { TokenRepository } from './token.repository';
 import { AuthRepository } from './auth.repository';
 import { ConfigNames } from '../../common/config';
 import { SendGridModule } from '../sendgrid/sendgrid.module';
+import { ApiKeyRepository } from './apikey.repository';
+import { ApiKeyEntity } from './apikey.entity';
 
 @Module({
   imports: [
@@ -31,10 +33,16 @@ import { SendGridModule } from '../sendgrid/sendgrid.module';
         },
       }),
     }),
-    TypeOrmModule.forFeature([AuthEntity, TokenEntity]),
+    TypeOrmModule.forFeature([AuthEntity, TokenEntity, ApiKeyEntity]),
     SendGridModule,
   ],
-  providers: [JwtHttpStrategy, AuthService, AuthRepository, TokenRepository],
+  providers: [
+    JwtHttpStrategy,
+    AuthService,
+    AuthRepository,
+    TokenRepository,
+    ApiKeyRepository,
+  ],
   controllers: [AuthJwtController],
   exports: [AuthService],
 })

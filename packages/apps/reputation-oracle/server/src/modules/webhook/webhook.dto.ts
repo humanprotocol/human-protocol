@@ -10,10 +10,9 @@ import {
   IsString,
   IsUrl,
 } from 'class-validator';
-import { EventType, WebhookStatus } from '../../common/enums';
+import { EventType, SolutionError, WebhookStatus } from '../../common/enums';
 import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
-import { BigNumber } from 'ethers';
 
 export class WebhookIncomingDto {
   @ApiProperty()
@@ -162,7 +161,7 @@ export class ProcessingResultDto {
   /**
    * Corresponding amounts to be paid out to recipients.
    */
-  amounts: BigNumber[];
+  amounts: bigint[];
 
   /**
    * URL to the stored results.
@@ -181,9 +180,9 @@ export class ProcessingResultDto {
 }
 
 export class FortuneFinalResult {
-  exchangeAddress: string;
   workerAddress: string;
   solution: string;
+  error?: SolutionError;
 }
 
 export class ImageLabelBinaryJobResults {

@@ -30,12 +30,12 @@ async function main() {
 
     console.log(
       'Escrow Factory Proxy Address: ',
-      escrowFactoryContract.address
+      await escrowFactoryContract.getAddress()
     );
     console.log(
       'New Escrow Factory Implementation Address: ',
       await upgrades.erc1967.getImplementationAddress(
-        escrowFactoryContract.address
+        await escrowFactoryContract.getAddress()
       )
     );
   }
@@ -52,10 +52,12 @@ async function main() {
       contract.deployTransaction.hash
     );
 
-    console.log('Staking Proxy Address: ', stakingContract.address);
+    console.log('Staking Proxy Address: ', await stakingContract.getAddress());
     console.log(
       'New Staking Implementation Address: ',
-      await upgrades.erc1967.getImplementationAddress(stakingContract.address)
+      await upgrades.erc1967.getImplementationAddress(
+        await stakingContract.getAddress()
+      )
     );
   }
 
@@ -71,11 +73,14 @@ async function main() {
       contract.deployTransaction.hash
     );
 
-    console.log('Reward Pool Proxy Address: ', rewardPoolContract.address);
+    console.log(
+      'Reward Pool Proxy Address: ',
+      await rewardPoolContract.getAddress()
+    );
     console.log(
       'New Reward Pool Implementation Address: ',
       await upgrades.erc1967.getImplementationAddress(
-        rewardPoolContract.address
+        await rewardPoolContract.getAddress()
       )
     );
   }

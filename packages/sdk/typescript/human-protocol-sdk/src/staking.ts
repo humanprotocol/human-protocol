@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Provider } from '@ethersproject/abstract-provider';
-import { Network } from '@ethersproject/networks';
 import {
   EscrowFactory,
   EscrowFactory__factory,
@@ -11,8 +9,9 @@ import {
   Staking,
   Staking__factory,
 } from '@human-protocol/core/typechain-types';
-import { BigNumber, Signer, ethers } from 'ethers';
+import { ContractRunner, Overrides, ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
+import { BaseEthersClient } from './base';
 import { NETWORKS } from './constants';
 import { requiresSigner } from './decorators';
 import { ChainId } from './enums';
@@ -38,11 +37,11 @@ import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
  *
  * This client enables to perform actions on staking contracts and obtain staking information from both the contracts and subgraph.
  *
- * Internally, the SDK will use one network or another according to the network ID of the `signerOrProvider`.
+ * Internally, the SDK will use one network or another according to the network ID of the `runner`.
  * To use this client, it is recommended to initialize it using the static `build` method.
  *
  * ```ts
- * static async build(signerOrProvider: Signer | Provider);
+ * static async build(runner: ContractRunner);
  * ```
  *
  * A `Signer` or a `Provider` should be passed depending on the use case of this module:
@@ -102,73 +101,89 @@ import { GET_LEADER_QUERY, GET_LEADERS_QUERY } from './graphql/queries/staking';
  * const stakingClient = await StakingClient.build(provider);
  * ```
  */
-export class StakingClient {
-  public signerOrProvider: Signer | Provider;
-  public network: NetworkData;
+export class StakingClient extends BaseEthersClient {
   public tokenContract: HMToken;
   public stakingContract: Staking;
   public escrowFactoryContract: EscrowFactory;
+  public rewardPoolContract: RewardPool;
 
   /**
    * **StakingClient constructor**
    *
-   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
    * @param {NetworkData} network - The network information required to connect to the Staking contract
    */
-  constructor(signerOrProvider: Signer | Provider, network: NetworkData) {
+  constructor(runner: ContractRunner, networkData: NetworkData) {
+    super(runner, networkData);
+
     this.stakingContract = Staking__factory.connect(
-      network.stakingAddress,
-      signerOrProvider
+      networkData.stakingAddress,
+      runner
     );
 
     this.escrowFactoryContract = EscrowFactory__factory.connect(
-      network.factoryAddress,
-      signerOrProvider
+      networkData.factoryAddress,
+      runner
     );
 
     this.tokenContract = HMToken__factory.connect(
-      network.hmtAddress,
-      signerOrProvider
+      networkData.hmtAddress,
+      runner
     );
 
-    this.signerOrProvider = signerOrProvider;
-    this.network = network;
+    this.rewardPoolContract = RewardPool__factory.connect(
+      networkData.rewardPoolAddress,
+      this.runner
+    );
   }
 
   /**
-   * Creates an instance of StakingClient from a Signer or Provider.
+   * Creates an instance of StakingClient from a Runner.
    *
-   * @param {Signer | Provider} signerOrProvider - The Signer or Provider object to interact with the Ethereum network
+   * @param {ContractRunner} runner - The Runner object to interact with the Ethereum network
+   * @param {number | undefined} gasPriceMultiplier - The multiplier to apply to the gas price
+   *
    * @returns {Promise<StakingClient>} - An instance of StakingClient
    * @throws {ErrorProviderDoesNotExist} - Thrown if the provider does not exist for the provided Signer
    * @throws {ErrorUnsupportedChainID} - Thrown if the network's chainId is not supported
    */
-  public static async build(signerOrProvider: Signer | Provider) {
-    let network: Network;
-    if (Signer.isSigner(signerOrProvider)) {
-      if (!signerOrProvider.provider) {
-        throw ErrorProviderDoesNotExist;
-      }
-
-      network = await signerOrProvider.provider.getNetwork();
-    } else {
-      network = await signerOrProvider.getNetwork();
+  public static async build(runner: ContractRunner) {
+    if (!runner.provider) {
+      throw ErrorProviderDoesNotExist;
     }
 
-    const chainId: ChainId = network.chainId;
+    const network = await runner.provider?.getNetwork();
+
+    const chainId: ChainId = Number(network?.chainId);
     const networkData = NETWORKS[chainId];
 
     if (!networkData) {
       throw ErrorUnsupportedChainID;
     }
 
-    return new StakingClient(signerOrProvider, networkData);
+    return new StakingClient(runner, networkData);
+  }
+
+  /**
+   * Check if escrow exists
+   *
+   * @param escrowAddress Escrow address to check against
+   */
+  private async checkValidEscrow(escrowAddress: string) {
+    if (!ethers.isAddress(escrowAddress)) {
+      throw ErrorInvalidEscrowAddressProvided;
+    }
+
+    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
+      throw ErrorEscrowAddressIsNotProvidedByFactory;
+    }
   }
 
   /**
    * This function approves the staking contract to transfer a specified amount of tokens when the user stakes. It increases the allowance for the staking contract.
    *
-   * @param {BigNumber} amount Amount in WEI of tokens to approve for stake.
+   * @param {bigint} amount Amount in WEI of tokens to approve for stake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -185,22 +200,31 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.approveStake(amount);
    * ```
    */
   @requiresSigner
-  public async approveStake(amount: BigNumber): Promise<void> {
-    if (!BigNumber.isBigNumber(amount)) {
+  public async approveStake(
+    amount: bigint,
+    txOptions: Overrides = {}
+  ): Promise<void> {
+    if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
 
-    if (amount.isNegative()) {
+    if (amount < 0n) {
       throw ErrorInvalidStakingValueSign;
     }
 
     try {
-      await this.tokenContract.approve(this.stakingContract.address, amount);
+      await (
+        await this.tokenContract.approve(
+          await this.stakingContract.getAddress(),
+          amount,
+          txOptions
+        )
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -212,7 +236,8 @@ export class StakingClient {
    *
    * > `approveStake` must be called before
    *
-   * @param {BigNumber} amount Amount in WEI of tokens to stake.
+   * @param {bigint} amount Amount in WEI of tokens to stake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -229,23 +254,23 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.approveStake(amount); // if it was already approved before, this is not necessary
    * await stakingClient.approveStake(amount);
    * ```
    */
   @requiresSigner
-  public async stake(amount: BigNumber): Promise<void> {
-    if (!BigNumber.isBigNumber(amount)) {
+  public async stake(amount: bigint, txOptions: Overrides = {}): Promise<void> {
+    if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
 
-    if (amount.isNegative()) {
+    if (amount < 0n) {
       throw ErrorInvalidStakingValueSign;
     }
 
     try {
-      await this.stakingContract.stake(amount);
+      await (await this.stakingContract.stake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -257,7 +282,8 @@ export class StakingClient {
    *
    * > Must have tokens available to unstake
    *
-   * @param {BigNumber} amount Amount in WEI of tokens to unstake.
+   * @param {bigint} amount Amount in WEI of tokens to unstake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -274,22 +300,25 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.unstake(amount);
    * ```
    */
   @requiresSigner
-  public async unstake(amount: BigNumber): Promise<void> {
-    if (!BigNumber.isBigNumber(amount)) {
+  public async unstake(
+    amount: bigint,
+    txOptions: Overrides = {}
+  ): Promise<void> {
+    if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
 
-    if (amount.isNegative()) {
+    if (amount < 0n) {
       throw ErrorInvalidStakingValueSign;
     }
 
     try {
-      await this.stakingContract.unstake(amount);
+      await (await this.stakingContract.unstake(amount, txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -301,6 +330,7 @@ export class StakingClient {
    *
    * > Must have tokens available to withdraw
    *
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -321,9 +351,9 @@ export class StakingClient {
    * ```
    */
   @requiresSigner
-  public async withdraw(): Promise<void> {
+  public async withdraw(txOptions: Overrides = {}): Promise<void> {
     try {
-      await this.stakingContract.withdraw();
+      await (await this.stakingContract.withdraw(txOptions)).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -336,7 +366,8 @@ export class StakingClient {
    * @param {string} slasher Wallet address from who requested the slash
    * @param {string} staker Wallet address from who is going to be slashed
    * @param {string} escrowAddress Address of the escrow which allocation will be slashed
-   * @param {BigNumber} amount Amount in WEI of tokens to unstake.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @param {bigint} amount Amount in WEI of tokens to unstake.
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -353,7 +384,7 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.slash('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', '0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
    * ```
    */
@@ -362,34 +393,37 @@ export class StakingClient {
     slasher: string,
     staker: string,
     escrowAddress: string,
-    amount: BigNumber
+    amount: bigint,
+    txOptions: Overrides = {}
   ): Promise<void> {
-    if (!BigNumber.isBigNumber(amount)) {
+    if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
 
-    if (amount.isNegative()) {
+    if (amount < 0n) {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!ethers.utils.isAddress(slasher)) {
+    if (!ethers.isAddress(slasher)) {
       throw ErrorInvalidSlasherAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(staker)) {
+    if (!ethers.isAddress(staker)) {
       throw ErrorInvalidStakerAddressProvided;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.slash(slasher, staker, escrowAddress, amount);
+      await (
+        await this.stakingContract.slash(
+          slasher,
+          staker,
+          escrowAddress,
+          amount,
+          txOptions
+        )
+      ).wait();
 
       return;
     } catch (e) {
@@ -403,7 +437,8 @@ export class StakingClient {
    * > Must have tokens staked
    *
    * @param {string} escrowAddress Address of the escrow contract to allocate in.
-   * @param {BigNumber} amount Amount in WEI of tokens to allocate.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
+   * @param {bigint} amount Amount in WEI of tokens to allocate.
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -420,33 +455,30 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * const amount = ethers.utils.parseUnits(5, 'ether'); //convert from ETH to WEI
+   * const amount = ethers.parseUnits(5, 'ether'); //convert from ETH to WEI
    * await stakingClient.allocate('0x62dD51230A30401C455c8398d06F85e4EaB6309f', amount);
    * ```
    */
   @requiresSigner
   public async allocate(
     escrowAddress: string,
-    amount: BigNumber
+    amount: bigint,
+    txOptions: Overrides = {}
   ): Promise<void> {
-    if (!BigNumber.isBigNumber(amount)) {
+    if (typeof amount !== 'bigint') {
       throw ErrorInvalidStakingValueType;
     }
 
-    if (amount.isNegative()) {
+    if (amount < 0n) {
       throw ErrorInvalidStakingValueSign;
     }
 
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.allocate(escrowAddress, amount);
+      await (
+        await this.stakingContract.allocate(escrowAddress, amount, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -460,6 +492,7 @@ export class StakingClient {
    * > The escrow must be cancelled or completed.
    *
    * @param {string} escrowAddress Address of the escrow contract to close allocation from.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -480,17 +513,16 @@ export class StakingClient {
    * ```
    */
   @requiresSigner
-  public async closeAllocation(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+  public async closeAllocation(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      await this.stakingContract.closeAllocation(escrowAddress);
+      await (
+        await this.stakingContract.closeAllocation(escrowAddress, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -503,6 +535,7 @@ export class StakingClient {
    * > The escrow must have rewards added
    *
    * @param {string} escrowAddress Escrow address from which rewards are distributed.
+   * @param {Overrides} [txOptions] - Additional transaction parameters (optional, defaults to an empty object).
    * @returns Returns void if successful. Throws error if any.
    *
    *
@@ -519,26 +552,20 @@ export class StakingClient {
    * const signer = new Wallet(privateKey, provider);
    * const stakingClient = await StakingClient.build(signer);
    *
-   * await stakingClient.distributeRewards('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
+   * await stakingClient.distributeReward('0x62dD51230A30401C455c8398d06F85e4EaB6309f');
    * ```
    */
   @requiresSigner
-  public async distributeRewards(escrowAddress: string): Promise<void> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+  public async distributeReward(
+    escrowAddress: string,
+    txOptions: Overrides = {}
+  ): Promise<void> {
+    await this.checkValidEscrow(escrowAddress);
 
     try {
-      const rewardPoolContract: RewardPool = RewardPool__factory.connect(
-        await this.stakingContract.rewardPool(),
-        this.signerOrProvider
-      );
-
-      await rewardPoolContract.distributeReward(escrowAddress);
+      (
+        await this.rewardPoolContract.distributeReward(escrowAddress, txOptions)
+      ).wait();
       return;
     } catch (e) {
       return throwError(e);
@@ -567,14 +594,14 @@ export class StakingClient {
    * ```
    */
   public async getLeader(address: string): Promise<ILeader> {
-    if (!ethers.utils.isAddress(address)) {
+    if (!ethers.isAddress(address)) {
       throw ErrorInvalidStakerAddressProvided;
     }
 
     try {
       const { leader } = await gqlFetch<{
         leader: ILeader;
-      }>(this.network.subgraphUrl, GET_LEADER_QUERY, {
+      }>(this.networkData.subgraphUrl, GET_LEADER_QUERY, {
         address: address.toLowerCase(),
       });
 
@@ -609,7 +636,7 @@ export class StakingClient {
     try {
       const { leaders } = await gqlFetch<{
         leaders: ILeader[];
-      }>(this.network.subgraphUrl, GET_LEADERS_QUERY(filter), {
+      }>(this.networkData.subgraphUrl, GET_LEADERS_QUERY(filter), {
         role: filter.role,
       });
 
@@ -641,13 +668,7 @@ export class StakingClient {
    * ```
    */
   public async getAllocation(escrowAddress: string): Promise<IAllocation> {
-    if (!ethers.utils.isAddress(escrowAddress)) {
-      throw ErrorInvalidEscrowAddressProvided;
-    }
-
-    if (!(await this.escrowFactoryContract.hasEscrow(escrowAddress))) {
-      throw ErrorEscrowAddressIsNotProvidedByFactory;
-    }
+    await this.checkValidEscrow(escrowAddress);
 
     try {
       const result = await this.stakingContract.getAllocation(escrowAddress);
@@ -679,14 +700,14 @@ export class StakingClient {
    * ```
    */
   public async getRewards(slasherAddress: string): Promise<IReward[]> {
-    if (!ethers.utils.isAddress(slasherAddress)) {
+    if (!ethers.isAddress(slasherAddress)) {
       throw ErrorInvalidSlasherAddressProvided;
     }
 
     try {
       const { rewardAddedEvents } = await gqlFetch<{
         rewardAddedEvents: RewardAddedEventData[];
-      }>(this.network.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
+      }>(this.networkData.subgraphUrl, GET_REWARD_ADDED_EVENTS_QUERY, {
         slasherAddress: slasherAddress.toLowerCase(),
       });
 

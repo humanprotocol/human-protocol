@@ -30,6 +30,7 @@ import { UserStatus } from '../../common/enums/user';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { ApiKeyRepository } from './apikey.repository';
 
 jest.mock('@human-protocol/sdk');
 
@@ -76,6 +77,7 @@ describe('AuthService', () => {
         { provide: HttpService, useValue: createMock<HttpService>() },
         { provide: PaymentService, useValue: createMock<PaymentService>() },
         { provide: SendGridService, useValue: createMock<SendGridService>() },
+        { provide: ApiKeyRepository, useValue: createMock<ApiKeyRepository>() },
       ],
     }).compile();
 

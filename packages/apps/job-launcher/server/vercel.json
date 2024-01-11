@@ -19,11 +19,23 @@
   ],
   "crons": [
     {
-      "path": "/job/cron/launch",
+      "path": "/job/cron/create-escrow",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/job/cron/setup-escrow",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/job/cron/fund-escrow",
       "schedule": "*/10 * * * *"
     },
     {
       "path": "/job/cron/cancel",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/webhook/cron",
       "schedule": "*/10 * * * *"
     }
   ],

@@ -4,6 +4,7 @@ import { StyledTab, StyledTabs } from '../../../components/Tabs';
 import { CryptoTopUpForm } from '../../../components/TopUpAccount/CryptoTopUpForm';
 import { FiatTopUpForm } from '../../../components/TopUpAccount/FiatTopUpForm';
 import { TopUpMethod } from '../../../components/TopUpAccount/TopUpMethod';
+import { IS_TESTNET } from '../../../constants/chains';
 import { PayMethod } from '../../../types';
 
 export default function TopUpAccount() {
@@ -35,7 +36,7 @@ export default function TopUpAccount() {
             onChange={(e, newValue) => setPayMethod(newValue)}
           >
             <StyledTab value={PayMethod.Crypto} label="Crypto" />
-            <StyledTab value={PayMethod.Fiat} label="Fiat" />
+            {IS_TESTNET && <StyledTab value={PayMethod.Fiat} label="Fiat" />}
           </StyledTabs>
           <Box
             display="flex"

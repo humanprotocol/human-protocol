@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
-import { ethers, providers } from 'ethers';
+import { ethers } from 'ethers';
 import { ErrorPayment, ErrorPostgres } from '../../common/constants/errors';
 import { PaymentRepository } from './payment.repository';
 import {
@@ -48,20 +48,24 @@ export class PaymentService {
     private configService: ConfigService,
   ) {
     this.stripe = new Stripe(
-      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY)!,
+      this.configService.get<string>(ConfigNames.STRIPE_SECRET_KEY, ''),
       {
         apiVersion: this.configService.get<any>(
           ConfigNames.STRIPE_API_VERSION,
-        )!,
+          '',
+        ),
         appInfo: {
           name: this.configService.get<string>(
             ConfigNames.STRIPE_APP_NAME,
             'Fortune',
-          )!,
+          ),
           version: this.configService.get<string>(
             ConfigNames.STRIPE_APP_VERSION,
-          )!,
-          url: this.configService.get<string>(ConfigNames.STRIPE_APP_INFO_URL)!,
+          ),
+          url: this.configService.get<string>(
+            ConfigNames.STRIPE_APP_INFO_URL,
+            '',
+          ),
         },
       },
     );
@@ -140,7 +144,7 @@ export class PaymentService {
 
     if (!paymentEntity) {
       this.logger.log(ErrorPayment.NotFound, PaymentRepository.name);
-      throw new BadRequestException(ErrorPayment.NotFound);
+      throw new NotFoundException(ErrorPayment.NotFound);
     }
 
     if (
@@ -170,7 +174,7 @@ export class PaymentService {
     const network = Object.values(networkMap).find(
       (item) => item.chainId === dto.chainId,
     );
-    const provider = new providers.JsonRpcProvider(network?.rpcUrl);
+    const provider = new ethers.JsonRpcProvider(network?.rpcUrl);
 
     const transaction = await provider.getTransactionReceipt(
       dto.transactionHash,
@@ -188,7 +192,7 @@ export class PaymentService {
       throw new NotFoundException(ErrorPayment.InvalidTransactionData);
     }
 
-    if (transaction.confirmations < TX_CONFIRMATION_TRESHOLD) {
+    if ((await transaction.confirmations()) < TX_CONFIRMATION_TRESHOLD) {
       this.logger.error(
         `Transaction has ${transaction.confirmations} confirmations instead of ${TX_CONFIRMATION_TRESHOLD}`,
       );
@@ -198,24 +202,27 @@ export class PaymentService {
     }
 
     const signer = this.web3Service.getSigner(dto.chainId);
-
-    const recipientAddress = transaction.logs[0].topics.some(
-      (topic) =>
-        ethers.utils.hexValue(topic) === ethers.utils.hexValue(signer.address),
-    );
-    if (!recipientAddress) {
-      this.logger.error(ErrorPayment.InvalidRecipient);
-      throw new ConflictException(ErrorPayment.InvalidRecipient);
-    }
-
-    const amount = Number(ethers.utils.formatEther(transaction.logs[0].data));
     const tokenAddress = transaction.logs[0].address;
 
     const tokenContract: HMToken = HMToken__factory.connect(
       tokenAddress,
       signer,
     );
+
+    if (
+      ethers.hexlify(
+        tokenContract.interface.parseLog({
+          topics: transaction.logs[0].topics as string[],
+          data: transaction.logs[0].data,
+        })?.args['_to'],
+      ) !== ethers.hexlify(signer.address)
+    ) {
+      this.logger.error(ErrorPayment.InvalidRecipient);
+      throw new ConflictException(ErrorPayment.InvalidRecipient);
+    }
+
     const tokenId = (await tokenContract.symbol()).toLowerCase();
+    const amount = Number(ethers.formatEther(transaction.logs[0].data));
 
     if (
       network?.tokens[tokenId] != tokenAddress ||
@@ -226,7 +233,7 @@ export class PaymentService {
     }
 
     const paymentEntity = await this.paymentRepository.findOne({
-      transaction: transaction.transactionHash,
+      transaction: transaction.hash,
       chainId: dto.chainId,
     });
 

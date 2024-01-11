@@ -1,6 +1,7 @@
-from web3 import Web3, HTTPProvider
-from web3.middleware import construct_sign_and_send_raw_middleware
 from human_protocol_sdk.kvstore import KVStoreClient
+from web3 import HTTPProvider, Web3
+from web3.middleware import construct_sign_and_send_raw_middleware
+
 from tests.utils.constants import REPUTATION_ORACLE_PRIV
 
 amount = Web3.toWei(1, "ether")

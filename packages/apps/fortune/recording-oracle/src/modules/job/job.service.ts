@@ -16,12 +16,8 @@ import {
   web3ConfigKey,
 } from '../../common/config';
 import { ErrorJob } from '../../common/constants/errors';
-import { JobRequestType } from '../../common/enums/job';
-import {
-  IManifest,
-  ISolution,
-  ISolutionsFile,
-} from '../../common/interfaces/job';
+import { JobRequestType, SolutionError } from '../../common/enums/job';
+import { IManifest, ISolution } from '../../common/interfaces/job';
 import { checkCurseWords } from '../../common/utils/curseWords';
 import { sendWebhook } from '../../common/utils/webhook';
 import { StorageService } from '../storage/storage.service';
@@ -54,27 +50,11 @@ export class JobService {
     const uniqueSolutions: ISolution[] = [];
 
     const filteredExchangeSolution = exchangeSolutions.filter(
-      (exchangeSolution) => !exchangeSolution.invalid,
+      (exchangeSolution) => !exchangeSolution.error,
     );
 
     filteredExchangeSolution.forEach((exchangeSolution) => {
       if (errorSolutions.includes(exchangeSolution)) return;
-      const duplicatedInExchange = filteredExchangeSolution.filter(
-        (solution) =>
-          solution.workerAddress === exchangeSolution.workerAddress ||
-          solution.solution === exchangeSolution.solution,
-      );
-      if (duplicatedInExchange.length > 1) {
-        duplicatedInExchange.forEach((duplicated) => {
-          if (
-            (duplicated.solution !== exchangeSolution.solution ||
-              duplicated.workerAddress !== exchangeSolution.workerAddress) &&
-            !errorSolutions.includes(duplicated)
-          ) {
-            errorSolutions.push(duplicated);
-          }
-        });
-      }
 
       const duplicatedInRecording = recordingSolutions.filter(
         (solution) =>
@@ -83,8 +63,30 @@ export class JobService {
       );
 
       if (duplicatedInRecording.length === 0) {
+        const duplicatedInExchange = filteredExchangeSolution.filter(
+          (solution) =>
+            solution.workerAddress === exchangeSolution.workerAddress ||
+            solution.solution === exchangeSolution.solution,
+        );
+        if (duplicatedInExchange.length > 1) {
+          duplicatedInExchange.forEach((duplicated) => {
+            if (
+              (duplicated.solution !== exchangeSolution.solution ||
+                duplicated.workerAddress !== exchangeSolution.workerAddress) &&
+              !errorSolutions.includes(duplicated)
+            ) {
+              errorSolutions.push({
+                ...duplicated,
+                error: SolutionError.Duplicated,
+              });
+            }
+          });
+        }
         if (checkCurseWords(exchangeSolution.solution))
-          errorSolutions.push(exchangeSolution);
+          errorSolutions.push({
+            ...exchangeSolution,
+            error: SolutionError.CurseWord,
+          });
         else uniqueSolutions.push(exchangeSolution);
       }
     });
@@ -102,8 +104,7 @@ export class JobService {
       jobSolution.escrowAddress,
     );
     if (
-      ethers.utils.getAddress(recordingOracleAddress) !==
-      (await signer.getAddress())
+      ethers.getAddress(recordingOracleAddress) !== (await signer.getAddress())
     ) {
       this.logger.log(ErrorJob.AddressMismatches, JobService.name);
       throw new BadRequestException(ErrorJob.AddressMismatches);
@@ -154,23 +155,24 @@ export class JobService {
       throw new BadRequestException(ErrorJob.AllSolutionsHaveAlreadyBeenSent);
     }
 
-    const exchangeJobSolutionsFile: ISolutionsFile =
+    const exchangeJobSolutions: ISolution[] =
       await this.storageService.download(jobSolution.solutionsUrl);
 
     const { errorSolutions, uniqueSolutions } = this.processSolutions(
-      exchangeJobSolutionsFile.solutions,
+      exchangeJobSolutions,
       existingJobSolutions,
     );
 
-    const newJobSolutions: ISolution[] = [
+    const recordingOracleSolutions: ISolution[] = [
       ...existingJobSolutions,
       ...uniqueSolutions,
+      ...errorSolutions,
     ];
 
     const jobSolutionUploaded = await this.storageService.uploadJobSolutions(
       jobSolution.escrowAddress,
       jobSolution.chainId,
-      newJobSolutions,
+      recordingOracleSolutions,
     );
 
     if (!existingJobSolutionsURL) {
@@ -187,7 +189,10 @@ export class JobService {
 
     // TODO: Remove this when KVStore is used
 
-    if (newJobSolutions.length >= submissionsRequired) {
+    if (
+      recordingOracleSolutions.filter((solution) => !solution.error).length >=
+      submissionsRequired
+    ) {
       await sendWebhook(
         this.httpService,
         this.logger,
@@ -203,8 +208,8 @@ export class JobService {
     }
     if (errorSolutions.length) {
       const exchangeOracleURL = (await kvstoreClient.get(
-        exchangeJobSolutionsFile.exchangeAddress,
-        'webhook_url',
+        await escrowClient.getExchangeOracleAddress(jobSolution.escrowAddress),
+        'webhookUrl',
       )) as string;
       for (const solution of errorSolutions) {
         await sendWebhook(

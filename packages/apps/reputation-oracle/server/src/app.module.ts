@@ -11,6 +11,8 @@ import { WebhookModule } from './modules/webhook/webhook.module';
 import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   providers: [
@@ -33,6 +35,13 @@ import { AuthModule } from './modules/auth/auth.module';
     WebhookModule,
     Web3Module,
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(
+        __dirname,
+        '../../../../../',
+        'node_modules/swagger-ui-dist',
+      ),
+    }),
   ],
   controllers: [AppController],
 })

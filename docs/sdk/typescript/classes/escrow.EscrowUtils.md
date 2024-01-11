@@ -49,13 +49,17 @@ const escrowAddresses = new EscrowUtils.getEscrows({
 
 ### constructor
 
-• **new EscrowUtils**()
+• **new EscrowUtils**(): [`EscrowUtils`](escrow.EscrowUtils.md)
+
+#### Returns
+
+[`EscrowUtils`](escrow.EscrowUtils.md)
 
 ## Methods
 
 ### getEscrow
 
-▸ `Static` **getEscrow**(`chainId`, `escrowAddress`): `Promise`<`EscrowData`\>
+▸ **getEscrow**(`chainId`, `escrowAddress`): `Promise`\<`EscrowData`\>
 
 This function returns the escrow data for a given address.
 
@@ -77,6 +81,8 @@ enum ChainId {
   MOONBASE_ALPHA = 1287,
   AVALANCHE = 43114,
   AVALANCHE_TESTNET = 43113,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
   LOCALHOST = 1338,
 }
@@ -118,7 +124,7 @@ type EscrowData = {
 
 #### Returns
 
-`Promise`<`EscrowData`\>
+`Promise`\<`EscrowData`\>
 
 Escrow data
 
@@ -132,13 +138,13 @@ const escrowData = new EscrowUtils.getEscrow(ChainId.POLYGON_MUMBAI, "0x12345678
 
 #### Defined in
 
-[escrow.ts:1631](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1631)
+[escrow.ts:1632](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1632)
 
 ___
 
 ### getEscrows
 
-▸ `Static` **getEscrows**(`filter`): `Promise`<`EscrowData`[]\>
+▸ **getEscrows**(`filter`): `Promise`\<`EscrowData`[]\>
 
 This function returns an array of escrows based on the specified filter parameters.
 
@@ -172,6 +178,8 @@ enum ChainId {
   MOONBASE_ALPHA = 1287,
   AVALANCHE = 43114,
   AVALANCHE_TESTNET = 43113,
+  CELO = 42220,
+  CELO_ALFAJORES = 44787,
   SKALE = 1273227453,
   LOCALHOST = 1338,
 }
@@ -223,7 +231,7 @@ type EscrowData = {
 
 #### Returns
 
-`Promise`<`EscrowData`[]\>
+`Promise`\<`EscrowData`[]\>
 
 List of escrows that match the filter.
 
@@ -243,4 +251,4 @@ const escrowDatas = await EscrowUtils.getEscrows(filters);
 
 #### Defined in
 
-[escrow.ts:1501](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1501)
+[escrow.ts:1504](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/escrow.ts#L1504)

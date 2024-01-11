@@ -40,18 +40,11 @@ export class JobRepository {
   public async findOne(
     where: FindOptionsWhere<JobEntity>,
     options?: FindOneOptions<JobEntity>,
-  ): Promise<JobEntity> {
-    const jobEntity = await this.jobEntityRepository.findOne({
+  ): Promise<JobEntity | null> {
+    return this.jobEntityRepository.findOne({
       where,
       ...options,
     });
-
-    if (!jobEntity) {
-      this.logger.log(ErrorJob.NotFound, JobRepository.name);
-      throw new NotFoundException(ErrorJob.NotFound);
-    }
-
-    return jobEntity;
   }
 
   public find(
@@ -79,7 +72,7 @@ export class JobRepository {
         ? In([JobStatus.PENDING, JobStatus.PAID])
         : In([status]);
 
-    return await this.find(
+    return this.find(
       { userId, status: statusFilter, chainId: In(chainIds) },
       { skip, take: limit },
     );
@@ -89,7 +82,7 @@ export class JobRepository {
     userId: number,
     escrowAddresses: string[],
   ): Promise<JobEntity[]> {
-    return await this.find({
+    return this.find({
       userId,
       escrowAddress: In(escrowAddresses),
     });

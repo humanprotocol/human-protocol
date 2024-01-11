@@ -1,3 +1,5 @@
+import { ChainId } from '@human-protocol/sdk';
+import { SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import {
   CreateFortuneJobRequest,
   CreateCvatJobRequest,
@@ -5,13 +7,15 @@ import {
   CvatRequest,
   JobStatus,
   JobDetailsResponse,
+  HCaptchaRequest,
+  FortuneFinalResult,
 } from '../types';
 import api from '../utils/api';
 
 export const createFortuneJob = async (
   chainId: number,
   data: FortuneRequest,
-  amount: number | string
+  amount: number | string,
 ) => {
   const body: CreateFortuneJobRequest = {
     chainId,
@@ -26,32 +30,62 @@ export const createFortuneJob = async (
 export const createCvatJob = async (
   chainId: number,
   data: CvatRequest,
-  amount: number | string
+  amount: number | string,
 ) => {
   const body: CreateCvatJobRequest = {
     chainId,
     requesterDescription: data.description,
     fundAmount: Number(amount),
-    dataUrl: data.dataUrl,
+    data: data.data,
     labels: data.labels,
     minQuality: Number(data.accuracyTarget) / 100,
-    gtUrl: data.groundTruthUrl,
+    groundTruth: data.groundTruth,
+    userGuide: data.userGuide,
     type: data.type,
   };
   await api.post('/job/cvat', body);
 };
 
-export const getJobList = async (status?: JobStatus) => {
-  const { data } = await api.get(`/job/list`, { params: { status } });
+export const createHCaptchaJob = async (
+  chainId: number,
+  data: HCaptchaRequest,
+  amount: number | string,
+) => {
+  await api.post('/job/hCaptcha', {
+    chainId,
+    ...data,
+  });
+};
+
+export const getJobList = async ({
+  chainId = ChainId.ALL,
+  status,
+}: {
+  chainId?: ChainId;
+  status?: JobStatus;
+}) => {
+  const { data } = await api.get(`/job/list`, {
+    params: {
+      networks: chainId === ChainId.ALL ? SUPPORTED_CHAIN_IDS : chainId,
+      status,
+    },
+  });
   return data;
 };
 
 export const getJobResult = async (jobId: number) => {
-  const { data } = await api.get(`/job/result`, { params: { jobId } });
+  const { data } = await api.get<FortuneFinalResult[] | string>(`/job/result`, {
+    params: { jobId },
+  });
   return data;
 };
 
 export const getJobDetails = async (jobId: number) => {
   const { data } = await api.get<JobDetailsResponse>(`/job/details/${jobId}`);
+  return data;
+};
+
+export const cancelJob = async (jobId: number) => {
+  const { data } = await api.patch<JobDetailsResponse>(`/job/cancel/${jobId}`);
   return data;
 };

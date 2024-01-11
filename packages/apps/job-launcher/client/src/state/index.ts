@@ -3,10 +3,9 @@ import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 
 import auth from './auth/reducer';
 import dashboard from './dashboard/reducer';
-import jobs from './jobs/reducer';
 
 export const store = configureStore({
-  reducer: { auth, dashboard, jobs },
+  reducer: { auth, dashboard },
 });
 
 export type AppState = ReturnType<typeof store.getState>;

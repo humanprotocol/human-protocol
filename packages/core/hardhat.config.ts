@@ -1,24 +1,18 @@
 import * as dotenv from 'dotenv';
 
 import { HardhatUserConfig, task } from 'hardhat/config';
-import '@nomiclabs/hardhat-ethers';
 import '@nomicfoundation/hardhat-chai-matchers';
-import '@nomiclabs/hardhat-etherscan';
 import '@typechain/hardhat';
 import 'xdeployer';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
-import * as tdly from '@tenderly/hardhat-tenderly';
 import 'hardhat-abi-exporter';
 import '@nomicfoundation/hardhat-toolbox';
 import '@openzeppelin/hardhat-upgrades';
 import 'hardhat-dependency-compiler';
 
 dotenv.config();
-
-// Turning off the automatic Tenderly verification
-tdly.setup({ automaticVerifications: false });
 
 task('accounts', 'Prints the list of accounts', async (_, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -70,9 +64,6 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       chainId: 1338,
-    },
-    tenderly: {
-      url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
     },
     mainnet: {
       chainId: 1,
@@ -151,6 +142,20 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    alfajores: {
+      chainId: 44787,
+      timeout: 2000000,
+      url: process.env.ETH_CELO_ALFAJORES_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    celo: {
+      chainId: 42220,
+      timeout: 2000000,
+      url: process.env.ETH_CELO_URL || '',
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -198,6 +203,8 @@ const config: HardhatUserConfig = {
       skale: process.env.SKALE_API_KEY || '',
       avalancheFujiTestnet: process.env.AVALANCHE_API_KEY || '',
       avalanche: process.env.AVALANCHE_API_KEY || '',
+      alfajores: process.env.CELOSCAN_API_KEY || '',
+      celo: process.env.CELOSCAN_API_KEY || '',
     },
     customChains: [
       {

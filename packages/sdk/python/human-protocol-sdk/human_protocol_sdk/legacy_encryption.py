@@ -1,3 +1,8 @@
+"""
+Legacy version of encryption module.
+Learn more about [encryption](human_protocol_sdk.encryption.md#human_protocol_sdk.encryption.Encryption).
+"""
+
 import hashlib
 import os
 import struct
@@ -60,6 +65,19 @@ class Encryption:
     def is_encrypted(data: bytes) -> bool:
         """
         Checks whether data is already encrypted by verifying ecies header.
+
+        :param data: Data to be checked.
+
+        :return: True if data is encrypted, False otherwise.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.legacy_encryption import Encryption
+
+                encrypted_message_str = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
+
+                is_encrypted = Encryption.is_encrypted(bytes.fromhex(encrypted_message_str))
         """
         return data[:1] == b"\x04"
 
@@ -76,14 +94,26 @@ class Encryption:
         3) generate R = rG [same op as generating a public key]
         4) 0x04 || R || AsymmetricEncrypt(shared-secret, plaintext) || tag
 
-        Args:
-            data (bytes): Data to be encrypted
-            public_key (eth_datatypes.PublicKey): Public to be used to encrypt
-                provided data.
-            shared_mac_data (bytes): shared mac additional data as suffix.
-        Returns:
-            bytes: Encrypted byte string
+        :param data: Data to be encrypted
+        :param public_key: Public to be used to encrypt provided data.
+        :param shared_mac_data: shared mac additional data as suffix.
+
+        :return: Encrypted byte string
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.legacy_encryption import Encryption
+                from eth_keys import datatypes
+
+                public_key_str = "0a1d228684bc8c8c7611df3264f04ebd823651acc46b28b3574d2e69900d5e34f04a26cf13237fa42ab23245b58060c239b356b0a276f57e8de1234c7100fcf9"
+
+                public_key = datatypes.PublicKey(bytes.fromhex(private_key_str))
+
+                encryption = Encryption()
+                encrypted_message = encryption.encrypt(b'your message', public_key)
         """
+
         # 1) generate r = random value
         ephemeral = self.generate_private_key()
 
@@ -134,14 +164,27 @@ class Encryption:
         ecdhAgree(r, recipientPublic) == ecdhAgree(recipientPrivate, R)
         [where R = r*G, and recipientPublic = recipientPrivate*G]
 
-        Args:
-            data (bytes): Data to be decrypted
-            private_key (eth_datatypes.PrivateKey):  Private key to be used in
-                agreement.
-            shared_mac_data (bytes): shared mac additional data as suffix.
-        Returns:
+        :param data: Data to be decrypted
+        :param private_key: Private key to be used in agreement.
+        :param shared_mac_data: shared mac additional data as suffix.
 
+        :return: Decrypted byte string
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.legacy_encryption import Encryption
+                from eth_keys import datatypes
+
+                private_key_str = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
+                encrypted_message_str = "0402f48d28d29ae3d681e4cbbe499be0803c2a9d94534d0a4501ab79fd531183fbd837a021c1c117f47737e71c430b9d33915615f68c8dcb5e2f4e4dda4c9415d20a8b5fad9770b14067f2dd31a141a8a8da1f56eb2577715409dbf3c39b9bfa7b90c1acd838fe147c95f0e1ca9359a4cfd52367a73a6d6c548b492faa"
+
+                private_key = datatypes.PrivateKey(bytes.fromhex(private_key_str))
+
+                encryption = Encryption()
+                encrypted_message = encryption.decrypt(bytes.fromhex(encrypted_message_str), private_key)
         """
+
         if self.is_encrypted(data) is False:
             raise DecryptionError("wrong ecies header")
 
@@ -202,18 +245,15 @@ class Encryption:
         material is a function of information contributed by two participants,
         so that no party can predetermine the value of the secret keying
         material independently from the contribut ions of the other parties.
-        Contrast with key transport.  
+        Contrast with key transport.
 
-        Args:
-            private_key (eth_datatypes.PrivateKey): Private key to be used in
-                agreement (the initiator).
-            public_key (eth_datatypes.PublicKey): Public key to be exchanged
-                (responder).
+        :param private_key: Private key to be used in agreement (the initiator).
+        :param public_key: Public key to be exchanged (responder).
 
-        Returns:
-            Key material resulted of the exchange between two keys, assuming
-                that they derive the same key material
-        """ ""
+        :return: Key material resulted of the exchange between two keys, assuming
+            that they derive the same key material
+        """
+
         private_key_int = int(t.cast(int, private_key))
         ec_private_key = ec.derive_private_key(private_key_int, self.ELLIPTIC_CURVE)
 
@@ -235,7 +275,20 @@ class Encryption:
             raise InvalidPublicKey(str(error)) from error
 
     def generate_private_key(self) -> eth_datatypes.PrivateKey:
-        """Generates a new SECP256K1 private key and return it"""
+        """
+        Generates a new SECP256K1 private key and return it
+
+        :return: New SECP256K1 private key.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.legacy_encryption import Encryption
+
+                encryption = Encryption()
+                private_key = encryption.generate_private_key()
+        """
+
         key = ec.generate_private_key(curve=self.ELLIPTIC_CURVE)
         big_key = int_to_big_endian(key.private_numbers().private_value)
         padded_key = self._pad32(big_key)
@@ -245,12 +298,21 @@ class Encryption:
     def generate_public_key(private_key: bytes) -> eth_keys.PublicKey:
         """
         Generates a public key with combination to private key provided.
-        Args:
-            private_key (bytes): Private to be used to create public key.
 
-        Returns:
-            Public key object.
+        :param private_key: Private to be used to create public key.
+
+        :return: Public key object.
+
+        :example:
+            .. code-block:: python
+
+                from human_protocol_sdk.legacy_encryption import Encryption
+
+                private_key_str = "9822f95dd945e373300f8c8459a831846eda97f314689e01f7cf5b8f1c2298b3"
+
+                public_key = Encryption.generate_public_key(bytes.fromhex(private_key_str))
         """
+
         private_key_obj = eth_keys.PrivateKey(private_key)
         return private_key_obj.public_key
 
@@ -265,15 +327,12 @@ class Encryption:
         Pretty much copied from geth's implementation:
         https://github.com/ethereum/go-ethereum/blob/673007d7aed1d2678ea3277eceb7b55dc29cf092/crypto/ecies/ecies.go#L167
 
-        Args:
-            key_material (bytes): Key material derived from ECDH
-                (shared secret) exchange and must be processed to deverive a
-                key secret.
+        :param key_material: Key material derived from ECDH (shared secret) exchange and
+            must be processed to deverive a key secret.
 
-        Returns:
-            Key secret derived - a called KDF
-
+        :return: Key secret derived - a called KDF
         """
+
         key = b""
         hash_ = hashes.SHA256()
 
@@ -292,6 +351,7 @@ class Encryption:
     @staticmethod
     def _hmac_sha256(key: bytes, msg: bytes) -> bytes:
         """Generates hash MAC using SHA256 Hash Algorithm"""
+
         mac = hmac.HMAC(key, hashes.SHA256())
         mac.update(msg)
         return mac.finalize()
@@ -299,10 +359,9 @@ class Encryption:
     @staticmethod
     def _pad32(value: bytes) -> bytes:
         """
-        Args:
-            value (bytes): Value to be add padding on the data.
+        :param value: Value to be add padding on the data.
 
-        Returns:
-            bytes: value with added code added.
+        :return: value with added code added.
         """
+
         return value.rjust(32, b"\x00")

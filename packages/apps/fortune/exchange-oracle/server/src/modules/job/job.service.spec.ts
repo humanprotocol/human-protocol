@@ -6,11 +6,14 @@ import { Web3Service } from '../web3/web3.service';
 import { JobService } from './job.service';
 import {
   EscrowClient,
-  KVStoreClient,
   StorageClient,
   EscrowUtils,
+  StakingClient,
+  Encryption,
 } from '@human-protocol/sdk';
 import {
+  JOB_LAUNCHER_WEBHOOK_URL,
+  MOCK_MANIFEST_URL,
   MOCK_PRIVATE_KEY,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
@@ -27,17 +30,21 @@ import {
 import { signMessage } from '../../common/utils/signature';
 import { ConfigModule, registerAs } from '@nestjs/config';
 import { StorageService } from '../storage/storage.service';
+import { ManifestDto } from './job.dto';
 
 jest.mock('@human-protocol/sdk', () => ({
   ...jest.requireActual('@human-protocol/sdk'),
   EscrowClient: {
     build: jest.fn(),
   },
-  KVStoreClient: {
+  StakingClient: {
     build: jest.fn(),
   },
   StorageClient: {
     downloadFileFromUrl: jest.fn(),
+  },
+  Encryption: {
+    build: jest.fn(),
   },
 }));
 jest.mock('minio', () => {
@@ -69,12 +76,9 @@ describe('JobService', () => {
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
   };
 
-  const reputationOracleURL = 'https://example.com/reputationoracle';
   const configServiceMock: Partial<ConfigService> = {
     get: jest.fn((key: string) => {
       switch (key) {
-        case 'REPUTATION_ORACLE_URL':
-          return reputationOracleURL;
         case 'WEB3_PRIVATE_KEY':
           return MOCK_PRIVATE_KEY;
       }
@@ -131,18 +135,55 @@ describe('JobService', () => {
   });
 
   describe('getDetails', () => {
-    it('should return job details', async () => {
-      const manifest = {
-        title: 'Example Title',
-        description: 'Example Description',
-        fortunesRequested: 5,
+    beforeAll(async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      }));
+    });
+
+    it('should return job details encrypted', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
         fundAmount: 100,
       };
 
-      httpService.axiosRef.get = jest.fn().mockResolvedValue({
-        status: 200,
-        data: { ...manifest, fortunesRequired: manifest.fortunesRequested },
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce('encrypted string');
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
+      const result = await jobService.getDetails(chainId, escrowAddress);
+
+      expect(result).toEqual({
+        escrowAddress,
+        chainId,
+        manifest,
       });
+    });
+
+    it('should return job details not encrypted', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(JSON.stringify(manifest));
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([]);
 
       const result = await jobService.getDetails(chainId, escrowAddress);
 
@@ -154,14 +195,16 @@ describe('JobService', () => {
     });
 
     it('should call job launcher webhook if manifest is empty', async () => {
-      const jobLauncherWebhookUrl = 'https://example.com/reputationoracle';
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getJobLauncherAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValueOnce(null);
+
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: JOB_LAUNCHER_WEBHOOK_URL,
+        }),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(jobLauncherWebhookUrl),
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(null),
       }));
 
       httpService.axiosRef.get = jest.fn().mockResolvedValue({
@@ -179,7 +222,7 @@ describe('JobService', () => {
         reason: 'Unable to get manifest',
       };
       expect(httpServicePostMock).toHaveBeenCalledWith(
-        jobLauncherWebhookUrl + ESCROW_FAILED_ENDPOINT,
+        JOB_LAUNCHER_WEBHOOK_URL + ESCROW_FAILED_ENDPOINT,
         expectedBody,
         {
           headers: {
@@ -192,16 +235,55 @@ describe('JobService', () => {
       );
     });
 
-    it('should fail if reputation oracle url is empty', async () => {
-      (configServiceMock as any).get.mockImplementationOnce((key: string) => {
-        if (key === 'REPUTATION_ORACLE_URL') {
-          return '';
-        }
-      });
+    it('should fail if job has already been completed', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 1,
+        fundAmount: 100,
+      };
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest);
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
 
       await expect(
         jobService.getDetails(chainId, escrowAddress),
-      ).rejects.toThrow('Unable to get Reputation Oracle URL');
+      ).rejects.toThrow('This job has already been completed');
+    });
+
+    it('should fail if encrypted manifest is invalid', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest)
+        .mockResolvedValueOnce([]);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockRejectedValue(new Error('Invalid manifest')),
+      }));
+
+      await expect(
+        jobService.getDetails(chainId, escrowAddress),
+      ).rejects.toThrow('Unable to decrypt manifest');
     });
   });
 
@@ -252,22 +334,49 @@ describe('JobService', () => {
   });
 
   describe('solveJob', () => {
+    beforeAll(async () => {
+      (EscrowClient.build as any).mockImplementation(() => ({
+        getManifestUrl: jest.fn().mockResolvedValue(MOCK_MANIFEST_URL),
+        getJobLauncherAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+        getRecordingOracleAddress: jest
+          .fn()
+          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      }));
+    });
+
     it('should solve a job', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 5,
+        fundAmount: 100,
+      };
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([]);
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
       const solutionsUrl =
         'http://localhost:9000/solution/0x1234567890123456789012345678901234567890-1.json';
 
       const recordingOracleURLMock = 'https://example.com/recordingoracle';
 
-      (EscrowClient.build as any).mockImplementation(() => ({
-        getRecordingOracleAddress: jest
-          .fn()
-          .mockResolvedValue('0x1234567890123456789012345678901234567893'),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: recordingOracleURLMock,
+        }),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(recordingOracleURLMock),
-      }));
-
-      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([]);
+      storageService.uploadJobSolutions = jest
+        .fn()
+        .mockResolvedValue(solutionsUrl);
 
       await jobService.solveJob(
         chainId,
@@ -295,6 +404,44 @@ describe('JobService', () => {
       );
     });
 
+    it('should fail if job has already been completed', async () => {
+      const manifest: ManifestDto = {
+        requesterTitle: 'Example Title',
+        requesterDescription: 'Example Description',
+        submissionsRequired: 1,
+        fundAmount: 100,
+      };
+
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValueOnce([
+        {
+          exchangeAddress: '0x1234567890123456789012345678901234567892',
+          workerAddress: '0x1234567890123456789012345678901234567892',
+          solution: 'test',
+        },
+      ]);
+
+      StorageClient.downloadFileFromUrl = jest
+        .fn()
+        .mockResolvedValueOnce(manifest);
+
+      (Encryption.build as any).mockImplementation(() => ({
+        decrypt: jest.fn().mockResolvedValue(JSON.stringify(manifest)),
+      }));
+
+      const recordingOracleURLMock = 'https://example.com/recordingoracle';
+
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: recordingOracleURLMock,
+        }),
+      }));
+
+      await expect(
+        jobService.solveJob(chainId, escrowAddress, workerAddress, 'solution'),
+      ).rejects.toThrow('This job has already been completed');
+      expect(web3Service.getSigner).toHaveBeenCalledWith(chainId);
+    });
+
     it('should fail if the escrow address is invalid', async () => {
       const escrowAddress = 'invalid_address';
       const solution = 'job-solution';
@@ -318,8 +465,10 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(''),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: '',
+        }),
       }));
 
       await expect(
@@ -336,11 +485,13 @@ describe('JobService', () => {
           .fn()
           .mockResolvedValue('0x1234567890123456789012345678901234567893'),
       }));
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue('https://example.com/recordingoracle'),
+      (StakingClient.build as any).mockImplementation(() => ({
+        getLeader: jest.fn().mockResolvedValue({
+          webhookUrl: 'https://example.com/recordingoracle',
+        }),
       }));
 
-      StorageClient.downloadFileFromUrl = jest.fn().mockResolvedValue([
+      storageService.downloadJobSolutions = jest.fn().mockResolvedValue([
         {
           exchangeAddress: '0x1234567890123456789012345678901234567892',
           workerAddress: '0x1234567890123456789012345678901234567891',
@@ -359,7 +510,6 @@ describe('JobService', () => {
 
   describe('processInvalidJob', () => {
     it('should mark a job solution as invalid', async () => {
-      const exchangeAddress = '0x1234567890123456789012345678901234567892';
       const workerAddress = '0x1234567890123456789012345678901234567891';
       const solution = 'test';
 
@@ -368,32 +518,27 @@ describe('JobService', () => {
         solution,
       };
       const existingJobSolutions = [jobSolution];
-      StorageClient.downloadFileFromUrl = jest
+      storageService.downloadJobSolutions = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
+      storageService.uploadJobSolutions = jest.fn();
+
       await jobService.processInvalidJobSolution({
         chainId,
         escrowAddress,
         workerAddress,
       });
 
-      expect(storageService.minioClient.putObject).toHaveBeenCalledWith(
-        MOCK_S3_BUCKET,
-        `${escrowAddress}-${chainId}.json`,
-        JSON.stringify({
-          exchangeAddress,
-          solutions: [
-            {
-              workerAddress,
-              solution,
-              invalid: true,
-            },
-          ],
-        }),
-
-        {
-          'Content-Type': 'application/json',
-        },
+      expect(storageService.uploadJobSolutions).toHaveBeenCalledWith(
+        escrowAddress,
+        chainId,
+        [
+          {
+            workerAddress,
+            solution,
+            error: true,
+          },
+        ],
       );
     });
 
@@ -408,7 +553,7 @@ describe('JobService', () => {
           solution: 'test',
         },
       ];
-      StorageClient.downloadFileFromUrl = jest
+      storageService.downloadJobSolutions = jest
         .fn()
         .mockResolvedValue(existingJobSolutions);
 

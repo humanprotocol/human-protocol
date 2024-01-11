@@ -8,6 +8,7 @@ import { WebhookController } from './webhook.controller';
 import { WebhookRepository } from './webhook.repository';
 import { ReputationModule } from '../reputation/reputation.module';
 import { Web3Module } from '../web3/web3.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Web3Module } from '../web3/web3.module';
     ConfigModule,
     ReputationModule,
     Web3Module,
+    StorageModule,
   ],
   controllers: [WebhookController],
   providers: [Logger, WebhookService, WebhookRepository],

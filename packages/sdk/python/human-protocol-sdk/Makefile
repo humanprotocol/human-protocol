@@ -28,3 +28,12 @@ publish-package:
 
 run-example:
 	pipenv run python3 example.py
+
+generate-autodoc:
+	pipenv run sphinx-apidoc -l -e -M -o ./docs ./human_protocol_sdk */gql && rm -rf ./docs/modules.rst
+
+clean-doc-md:
+	rm -rf docs/_build && rm -rf ../../../../docs/sdk/python/*
+
+generate-doc-md:
+	make clean-doc-md && cd docs && make markdown && cp -r _build/markdown/* ../../../../../docs/sdk/python

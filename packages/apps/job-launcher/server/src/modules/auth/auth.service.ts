@@ -27,6 +27,9 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { SendGridService } from '../sendgrid/sendgrid.service';
 import { SENDGRID_TEMPLATES, SERVICE_NAME } from '../../common/constants';
+import { generateHash } from '../../common/utils/crypto';
+import { ApiKeyRepository } from './apikey.repository';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +37,8 @@ export class AuthService {
   private readonly refreshTokenExpiresIn: string;
   private readonly salt: string;
   private readonly feURL: string;
+  private readonly iterations: number;
+  private readonly keyLength: number;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -42,6 +47,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly configService: ConfigService,
     private readonly sendgridService: SendGridService,
+    private readonly apiKeyRepository: ApiKeyRepository,
   ) {
     this.refreshTokenExpiresIn = this.configService.get<string>(
       ConfigNames.JWT_REFRESH_TOKEN_EXPIRES_IN,
@@ -55,6 +61,14 @@ export class AuthService {
     this.feURL = this.configService.get<string>(
       ConfigNames.FE_URL,
       'http://localhost:3005',
+    );
+    this.iterations = this.configService.get<number>(
+      ConfigNames.APIKEY_ITERATIONS,
+      1000,
+    );
+    this.keyLength = this.configService.get<number>(
+      ConfigNames.APIKEY_KEY_LENGTH,
+      64,
     );
   }
 
@@ -175,7 +189,7 @@ export class AuthService {
     });
   }
 
-  public async restorePassword(data: RestorePasswordDto): Promise<boolean> {
+  public async restorePassword(data: RestorePasswordDto): Promise<void> {
     const tokenEntity = await this.tokenRepository.findOne({
       uuid: data.token,
       tokenType: TokenType.PASSWORD,
@@ -199,8 +213,6 @@ export class AuthService {
     });
 
     await tokenEntity.remove();
-
-    return true;
   }
 
   public async emailVerification(data: VerifyEmailDto): Promise<void> {
@@ -262,5 +274,70 @@ export class AuthService {
 
   public compareToken(token: string, hashedToken: string): boolean {
     return this.hashToken(token) === hashedToken;
+  }
+
+  async createOrUpdateAPIKey(userId: number): Promise<string> {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const apiKey = crypto.randomBytes(32).toString('hex');
+    const hashedAPIKey = await generateHash(
+      apiKey,
+      salt,
+      this.iterations,
+      this.keyLength,
+    );
+
+    const apiKeyEntity = await this.apiKeyRepository.createOrUpdateAPIKey(
+      userId,
+      hashedAPIKey,
+      salt,
+    );
+
+    return `${apiKey}-${apiKeyEntity.id}`;
+  }
+
+  async validateAPIKey(userId: number, apiKey: string): Promise<boolean> {
+    const apiKeyEntity = await this.apiKeyRepository.findAPIKeyByUserId(userId);
+
+    if (!apiKeyEntity) {
+      this.logger.log('API Key Entity not found', AuthService.name);
+      throw new NotFoundException('API Key Entity not found');
+    }
+
+    const hash = await generateHash(
+      apiKey,
+      apiKeyEntity.salt,
+      this.iterations,
+      this.keyLength,
+    );
+
+    return hash === apiKeyEntity.hashedAPIKey;
+  }
+
+  async validateAPIKeyAndGetUser(
+    apiKeyId: number,
+    apiKey: string,
+  ): Promise<UserEntity | null> {
+    const apiKeyEntity = await this.apiKeyRepository.findAPIKeyById(apiKeyId);
+
+    if (!apiKeyEntity) {
+      this.logger.log('API Key Entity not found', AuthService.name);
+      throw new NotFoundException('API Key Entity not found');
+    }
+    const hash = await generateHash(
+      apiKey,
+      apiKeyEntity.salt,
+      this.iterations,
+      this.keyLength,
+    );
+
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(hash),
+      Buffer.from(apiKeyEntity.hashedAPIKey),
+    );
+    if (isValid) {
+      return apiKeyEntity.user;
+    }
+
+    return null;
   }
 }

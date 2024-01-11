@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BigNumber } from 'ethers';
+import { ethers } from 'ethers';
 import gqlFetch from 'graphql-request';
 
 import {
@@ -58,15 +58,15 @@ import { throwError } from './utils';
  * ```
  */
 export class StatisticsClient {
-  public network: NetworkData;
+  public networkData: NetworkData;
 
   /**
    * **StatisticsClient constructor**
    *
-   * @param {NetworkData} network - The network information required to connect to the Statistics contract
+   * @param {NetworkData} networkData - The network information required to connect to the Statistics contract
    */
-  constructor(network: NetworkData) {
-    this.network = network;
+  constructor(networkData: NetworkData) {
+    this.networkData = networkData;
   }
 
   /**
@@ -124,11 +124,11 @@ export class StatisticsClient {
     try {
       const { escrowStatistics } = await gqlFetch<{
         escrowStatistics: EscrowStatisticsData;
-      }>(this.network.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_ESCROW_STATISTICS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -199,7 +199,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -288,7 +288,7 @@ export class StatisticsClient {
     try {
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
@@ -296,14 +296,13 @@ export class StatisticsClient {
       return {
         dailyPaymentsData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalAmountPaid: BigNumber.from(eventDayData.dailyPayoutAmount),
+          totalAmountPaid: ethers.toBigInt(eventDayData.dailyPayoutAmount),
           totalCount: +eventDayData.dailyPayoutCount,
           averageAmountPerWorker:
             eventDayData.dailyWorkerCount === '0'
-              ? BigNumber.from(0)
-              : BigNumber.from(eventDayData.dailyPayoutAmount).div(
-                  eventDayData.dailyWorkerCount
-                ),
+              ? ethers.toBigInt(0)
+              : ethers.toBigInt(eventDayData.dailyPayoutAmount) /
+                ethers.toBigInt(eventDayData.dailyWorkerCount),
         })),
       };
     } catch (e: any) {
@@ -398,32 +397,32 @@ export class StatisticsClient {
     try {
       const { hmtokenStatistics } = await gqlFetch<{
         hmtokenStatistics: HMTStatisticsData;
-      }>(this.network.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_HMTOKEN_STATISTICS_QUERY);
 
       const { holders } = await gqlFetch<{
         holders: HMTHolderData[];
-      }>(this.network.subgraphUrl, GET_HOLDERS_QUERY);
+      }>(this.networkData.subgraphUrl, GET_HOLDERS_QUERY);
 
       const { eventDayDatas } = await gqlFetch<{
         eventDayDatas: EventDayData[];
-      }>(this.network.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
+      }>(this.networkData.subgraphUrl, GET_EVENT_DAY_DATA_QUERY(params), {
         from: params.from ? params.from.getTime() / 1000 : undefined,
         to: params.to ? params.to.getTime() / 1000 : undefined,
       });
 
       return {
-        totalTransferAmount: BigNumber.from(
+        totalTransferAmount: ethers.toBigInt(
           hmtokenStatistics.totalValueTransfered
         ),
         totalTransferCount: Number(hmtokenStatistics.totalTransferEventCount),
         totalHolders: +hmtokenStatistics.holders,
         holders: holders.map((holder) => ({
           address: holder.address,
-          balance: BigNumber.from(holder.balance),
+          balance: ethers.toBigInt(holder.balance),
         })),
         dailyHMTData: eventDayDatas.map((eventDayData) => ({
           timestamp: new Date(+eventDayData.timestamp * 1000),
-          totalTransactionAmount: BigNumber.from(
+          totalTransactionAmount: ethers.toBigInt(
             eventDayData.dailyHMTTransferAmount
           ),
           totalTransactionCount: +eventDayData.dailyHMTTransferCount,

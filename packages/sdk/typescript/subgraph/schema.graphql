@@ -33,6 +33,14 @@ type Leader @entity {
   publicKey: String
   webhookUrl: String
   url: String
+  urls: [LeaderURL!]! @derivedFrom(field: "leader")
+}
+
+type LeaderURL @entity {
+  id: ID!
+  key: String
+  url: String
+  leader: Leader!
 }
 
 type Escrow @entity {

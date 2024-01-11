@@ -48,7 +48,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 ### Properties
 
-- [network](statistics.StatisticsClient.md#network)
+- [networkData](statistics.StatisticsClient.md#networkdata)
 
 ### Methods
 
@@ -61,7 +61,7 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 ### constructor
 
-• **new StatisticsClient**(`network`)
+• **new StatisticsClient**(`networkData`): [`StatisticsClient`](statistics.StatisticsClient.md)
 
 **StatisticsClient constructor**
 
@@ -69,27 +69,31 @@ const statisticsClient = new StatisticsClient(NETWORKS[ChainId.POLYGON_MUMBAI]);
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `network` | `NetworkData` | The network information required to connect to the Statistics contract |
+| `networkData` | `NetworkData` | The network information required to connect to the Statistics contract |
+
+#### Returns
+
+[`StatisticsClient`](statistics.StatisticsClient.md)
 
 #### Defined in
 
-[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
+[statistics.ts:68](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L68)
 
 ## Properties
 
-### network
+### networkData
 
-• **network**: `NetworkData`
+• **networkData**: `NetworkData`
 
 #### Defined in
 
-[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
+[statistics.ts:61](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L61)
 
 ## Methods
 
 ### getEscrowStatistics
 
-▸ **getEscrowStatistics**(`params?`): `Promise`<`EscrowStatistics`\>
+▸ **getEscrowStatistics**(`params?`): `Promise`\<`EscrowStatistics`\>
 
 This function returns the statistical data of escrows.
 
@@ -127,7 +131,7 @@ type EscrowStatistics = {
 
 #### Returns
 
-`Promise`<`EscrowStatistics`\>
+`Promise`\<`EscrowStatistics`\>
 
 Escrow statistics data.
 
@@ -147,13 +151,13 @@ const escrowStatisticsApril = await statisticsClient.getEscrowStatistics({
 
 #### Defined in
 
-[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
+[statistics.ts:121](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L121)
 
 ___
 
 ### getHMTStatistics
 
-▸ **getHMTStatistics**(`params?`): `Promise`<`HMTStatistics`\>
+▸ **getHMTStatistics**(`params?`): `Promise`\<`HMTStatistics`\>
 
 This function returns the statistical data of HMToken.
 
@@ -196,7 +200,7 @@ type HMTStatistics = {
 
 #### Returns
 
-`Promise`<`HMTStatistics`\>
+`Promise`\<`HMTStatistics`\>
 
 HMToken statistics data.
 
@@ -243,13 +247,13 @@ console.log('HMT statistics from 5/8 - 6/8:', {
 
 #### Defined in
 
-[statistics.ts:395](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L395)
+[statistics.ts:394](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L394)
 
 ___
 
 ### getPaymentStatistics
 
-▸ **getPaymentStatistics**(`params?`): `Promise`<`PaymentStatistics`\>
+▸ **getPaymentStatistics**(`params?`): `Promise`\<`PaymentStatistics`\>
 
 This function returns the statistical data of payments.
 
@@ -284,7 +288,7 @@ type PaymentStatistics = {
 
 #### Returns
 
-`Promise`<`PaymentStatistics`\>
+`Promise`\<`PaymentStatistics`\>
 
 Payment statistics data.
 
@@ -325,13 +329,13 @@ console.log(
 
 #### Defined in
 
-[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
+[statistics.ts:285](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L285)
 
 ___
 
 ### getWorkerStatistics
 
-▸ **getWorkerStatistics**(`params?`): `Promise`<`WorkerStatistics`\>
+▸ **getWorkerStatistics**(`params?`): `Promise`\<`WorkerStatistics`\>
 
 This function returns the statistical data of workers.
 
@@ -364,7 +368,7 @@ type WorkerStatistics = {
 
 #### Returns
 
-`Promise`<`WorkerStatistics`\>
+`Promise`\<`WorkerStatistics`\>
 
 Worker statistics data.
 
@@ -384,4 +388,4 @@ const workerStatisticsApril = await statisticsClient.getWorkerStatistics({
 
 #### Defined in
 
-[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/d170338d/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)
+[statistics.ts:196](https://github.com/humanprotocol/human-protocol/blob/9bc762a5/packages/sdk/typescript/human-protocol-sdk/src/statistics.ts#L196)

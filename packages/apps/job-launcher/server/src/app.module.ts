@@ -15,6 +15,8 @@ import { Web3Module } from './modules/web3/web3.module';
 import { envValidator } from './common/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { StorageModule } from './modules/storage/storage.module';
+import { CronJobModule } from './modules/cron-job/cron-job.module';
 
 @Module({
   providers: [
@@ -42,6 +44,7 @@ import { join } from 'path';
     JobModule,
     PaymentModule,
     Web3Module,
+    StorageModule,
     ServeStaticModule.forRoot({
       rootPath: join(
         __dirname,
@@ -49,6 +52,7 @@ import { join } from 'path';
         'node_modules/swagger-ui-dist',
       ),
     }),
+    CronJobModule,
   ],
   controllers: [AppController],
 })
