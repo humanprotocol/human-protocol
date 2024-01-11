@@ -12,21 +12,6 @@ import {
 } from './error';
 
 /**
- * **Get specific error text.*
- *
- * @param {any} error - An error message.
- * @returns
- */
-export const getRevertReason = (error: any): string => {
-  const prefix = "reverted with reason string '";
-  const suffix = "'";
-  const message = error.data.substring(
-    error.data.indexOf(prefix) + prefix.length
-  );
-  return message.substring(0, message.indexOf(suffix));
-};
-
-/**
  * **Handle and throw the error.*
  *
  * @param {any} e
@@ -36,8 +21,7 @@ export const throwError = (e: any) => {
   if (ethers.isError(e, 'INVALID_ARGUMENT')) {
     throw new InvalidArgumentError(e.message);
   } else if (ethers.isError(e, 'CALL_EXCEPTION')) {
-    const reason = getRevertReason(e.data);
-    throw new ContractExecutionError(reason);
+    throw new ContractExecutionError(e.reason as string);
   } else if (ethers.isError(e, 'TRANSACTION_REPLACED')) {
     throw new TransactionReplaced(e.message);
   } else if (ethers.isError(e, 'REPLACEMENT_UNDERPRICED')) {
