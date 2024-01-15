@@ -170,22 +170,24 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
 
     # calculate reliability on ground truth set
     annotator_results = {}
-    if gt_annos is not None:
-        for annotator, annotator_df in gt_annos.groupby("annotator_id"):
-            uris = annotator_df["datapoint_uri"]
-            gt_df = pd.concat([annotator_df, gt.query(f"datapoint_uri in @uris")])
-            gammas = []
-            for uri, uri_df in gt_df.groupby("datapoint_uri"):
-                try:
-                    results = calculate_gamma_results(uri_df, alpha=None)
-                    gamma = results.gamma
-                    gammas.append(gamma)
-                except Exception:
-                    continue
-            annotator_results[annotator] = mean(gammas)
-    else:
-        # todo: implement fallback
-        raise NotImplementedError
+    if gt_annos is None:
+        gt = (
+            pd.DataFrame(data=all_annotations)
+            .drop(columns=["label_dist", "confidence"])
+            .rename(columns={"annotation": "value"})
+        )
+        gt[Fields.ANNOTATOR_ID.value] = GT_ANNOTATOR
+        gt_annos = task_annos.copy()
+
+    for annotator, annotator_df in gt_annos.groupby("annotator_id"):
+        uris = annotator_df["datapoint_uri"]
+        gt_df = pd.concat([annotator_df, gt.query(f"datapoint_uri in @uris")])
+        gammas = []
+        for uri, uri_df in gt_df.groupby("datapoint_uri"):
+            results = calculate_gamma_results(uri_df, alpha=None)
+            gamma = results.gamma
+            gammas.append(gamma)
+        annotator_results[annotator] = mean(gammas)
 
     intermediate_results["agreement"]["annotators"] = annotator_results
 
