@@ -45,6 +45,10 @@ export class StorageService {
     chainId: ChainId,
     content: any,
   ) {
+    if (!this.configService.get<boolean>(ConfigNames.PGP_ENCRYPT)) {
+      return content;
+    }
+
     const signer = this.web3Service.getSigner(chainId);
     const escrowClient = await EscrowClient.build(signer);
     const stakingClient = await StakingClient.build(signer);
