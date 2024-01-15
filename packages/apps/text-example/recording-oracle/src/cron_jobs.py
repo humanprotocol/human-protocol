@@ -26,14 +26,16 @@ logger = Config.logging.get_logger()
 
 def process_pending_requests():
     """Downloads raw results and evaluates them. Writes intermediate results to storage."""
+    logger.info("Processing pending requests.")
     with Session() as session:
         for request in (
             session.query(ResultsProcessingRequest)
             .where(ResultsProcessingRequest.status == Statuses.pending)
             .limit(Config.cron_config.task_chunk_size)
         ):
+            logger.info(f"Processing request {request.id}.")
             try:
-                # download raw results and ground truth
+                logger.info(f"Downloading required resources to process {request.id}.")
                 raw_results = download_raw_results(request.solution_url)
                 manifest = download_manifest(
                     get_manifest_url(
@@ -48,11 +50,12 @@ def process_pending_requests():
                 else:
                     ground_truth = download_ground_truth(manifest.groundtruth_uri)
 
+                logger.info(f"Calculating intermediate results for {request.id}.")
                 intermediate_results = calculate_intermediate_results(
                     raw_results, ground_truth
                 )
 
-                # store results to disk
+                logger.info(f"Storing intermediate results for {request.id}.")
                 Config.storage_config.dataset_dir.mkdir(parents=True, exist_ok=True)
                 outpath = Config.storage_config.dataset_dir / f"{request.id}.json"
                 with open(outpath, "w") as f:
@@ -67,6 +70,7 @@ def process_pending_requests():
 
 
 def upload_intermediate_results():
+    logger.info("Uploading intermediate results.")
     with Session() as session:
         for request in (
             session.query(ResultsProcessingRequest)
@@ -74,19 +78,23 @@ def upload_intermediate_results():
             .limit(Config.cron_config.task_chunk_size)
         ):
             try:
+                logger.info(f"Uploading intermediate results of {request.id}.")
                 # upload files to s3
                 path = Config.storage_config.dataset_dir / f"{request.id}.json"
                 content_hash = hash_file_content(path)
                 upload_data(path, content_type="application/json")
 
                 # update escrow
+                logger.info(f"Updating escrow of {request.id}.")
                 EscrowClient(get_web3(request.chain_id)).store_results(
                     request.escrow_address,
                     Config.storage_config.results_s3_url(str(request.id)),
                     content_hash,
                 )
 
+                logger.info(f"Cleaning up storage for {request.id}.")
                 path.unlink()
+
                 stage_success(request)
                 logger.info(
                     f"Successfully uploaded intermediate results of request {request.id}."
@@ -103,6 +111,7 @@ def upload_intermediate_results():
 
 
 def notify_reputation_oracle():
+    logger.info("Notifying reputation oracle.")
     with Session() as session:
         requests = session.query(ResultsProcessingRequest).where(
             ResultsProcessingRequest.status == Statuses.awaiting_closure

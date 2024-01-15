@@ -48,6 +48,7 @@ async def register_raw_results(
     logger.info(f"POST {Endpoints.WEBHOOK} called with {webhook}.")
 
     # run validations
+    logger.info(f"Validating payload {webhook} and header {human_signature}.")
     try:
         escrow = EscrowUtils.get_escrow(
             webhook.chain_id, webhook.escrow_address.lower()
@@ -76,6 +77,7 @@ async def register_raw_results(
         raise Errors.AUTH_SIGNATURE_INVALID
 
     # register request
+    logger.info(f"Adding new request for {webhook}.")
     with Session() as session:
         id = str(uuid4())
         request = ResultsProcessingRequest(
@@ -86,4 +88,4 @@ async def register_raw_results(
         )
         session.add(request)
         session.commit()
-        logger.info(f"Successfully added new request. Id: {id}")
+        logger.info(f"Successfully added new request for {webhook}. Id: {id}")
