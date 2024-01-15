@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
-import { IS_MAINNET } from '../constants/chains';
+import { useNetwork } from 'wagmi';
+import { IS_MAINNET, SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
+import { ChainId } from '@human-protocol/sdk';
 
 export type CreateJobPageUIType = {
   step: CreateJobStep;
@@ -37,10 +39,19 @@ export const CreateJobPageUIProvider = ({
 }: {
   children: React.ReactElement;
 }) => {
+  const { chain } = useNetwork();
   const [step, setStep] = useState<CreateJobStep>(CreateJobStep.FundingMethod);
   const [payMethod, setPayMethod] = useState<PayMethod>(PayMethod.Crypto);
   const [jobRequest, setJobRequest] = useState<JobRequest>({
     jobType: IS_MAINNET ? JobType.CVAT : JobType.Fortune,
+    chainId:
+      chain?.id && SUPPORTED_CHAIN_IDS.includes(chain?.id)
+        ? chain?.id
+        : !IS_MAINNET
+          ? !chain?.id
+            ? ChainId.POLYGON_MUMBAI
+            : undefined
+          : undefined,
   });
 
   const goToPrevStep = () => {
