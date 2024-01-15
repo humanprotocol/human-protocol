@@ -110,7 +110,8 @@ def upload_manifest_and_annotations():
         json.dump(manifest_json, f)
 
     upload_data(manifest_filepath, content_type="application/json")
-    upload_data(data_dir / "raw_results.json", content_type="application/json")
+    upload_data(data_dir / "raw_results.jsonl", content_type="application/json+jsonl")
+    upload_data(data_dir / "ground_truth.json", content_type="application/json")
 
     return f"http://{Config.storage_config.endpoint_url}/{Config.storage_config.results_bucket_name}/{manifest_filepath.name}"
 

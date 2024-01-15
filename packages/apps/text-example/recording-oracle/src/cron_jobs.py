@@ -3,7 +3,7 @@ import json
 from human_protocol_sdk.escrow import EscrowClient, EscrowClientError
 from urllib3.exceptions import MaxRetryError
 
-from src.chain import sign_message, get_web3
+from src.chain import sign_message, get_web3, EscrowInfo, get_manifest_url
 from src.config import Config
 from src.db import (
     Session,
@@ -12,7 +12,13 @@ from src.db import (
     stage_failure,
     Statuses,
 )
-from src.storage import download_raw_results, upload_data, hash_file_content
+from src.storage import (
+    download_raw_results,
+    upload_data,
+    hash_file_content,
+    download_manifest,
+    download_ground_truth,
+)
 from src.annotation import calculate_intermediate_results
 
 logger = Config.logging.get_logger()
@@ -27,9 +33,24 @@ def process_pending_requests():
             .limit(Config.cron_config.task_chunk_size)
         ):
             try:
-                # transform raw results to intermediate results
-                results = download_raw_results(request.solution_url)
-                intermediate_results = calculate_intermediate_results(results)
+                # download raw results and ground truth
+                raw_results = download_raw_results(request.solution_url)
+                manifest = download_manifest(
+                    get_manifest_url(
+                        EscrowInfo(
+                            chain_id=request.chain_id,
+                            escrow_address=request.escrow_address,
+                        )
+                    )
+                )
+                if manifest.groundtruth_uri is None:
+                    ground_truth = None
+                else:
+                    ground_truth = download_ground_truth(manifest.groundtruth_uri)
+
+                intermediate_results = calculate_intermediate_results(
+                    raw_results, ground_truth
+                )
 
                 # store results to disk
                 Config.storage_config.dataset_dir.mkdir(parents=True, exist_ok=True)

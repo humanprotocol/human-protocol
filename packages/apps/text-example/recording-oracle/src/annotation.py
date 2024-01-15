@@ -169,7 +169,8 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
     }
 
     # calculate reliability on ground truth set
-    annotator_results = {}
+
+    # use best annotation on task set if no ground truth is available
     if gt_annos is None:
         gt = (
             pd.DataFrame(data=all_annotations)
@@ -179,6 +180,7 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
         gt[Fields.ANNOTATOR_ID.value] = GT_ANNOTATOR
         gt_annos = task_annos.copy()
 
+    annotator_results = {}
     for annotator, annotator_df in gt_annos.groupby("annotator_id"):
         uris = annotator_df["datapoint_uri"]
         gt_df = pd.concat([annotator_df, gt.query(f"datapoint_uri in @uris")])
