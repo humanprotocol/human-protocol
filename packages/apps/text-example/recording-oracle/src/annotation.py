@@ -86,22 +86,28 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
     # annotation as data frame
     annotations = pd.DataFrame(data=annotations).drop(columns=Fields.ANNOTATION_ID)
 
-    # ground truth as data frame
-    gt_entries = []
-    for datapoint_uri, values in ground_truth.items():
-        for value in values:
-            entry = {
-                Fields.DATAPOINT_URI.value: datapoint_uri,
-                Fields.VALUE.value: value,
-                Fields.ANNOTATOR_ID.value: GT_ANNOTATOR,
-            }
-            gt_entries.append(entry)
-    gt = pd.DataFrame(gt_entries)
+    if ground_truth is not None:
+        # ground truth as data frame
+        gt_entries = []
+        for datapoint_uri, values in ground_truth.items():
+            for value in values:
+                entry = {
+                    Fields.DATAPOINT_URI.value: datapoint_uri,
+                    Fields.VALUE.value: value,
+                    Fields.ANNOTATOR_ID.value: GT_ANNOTATOR,
+                }
+                gt_entries.append(entry)
+        gt = pd.DataFrame(gt_entries)
 
-    is_gt = annotations[Fields.DATAPOINT_URI].isin(gt[Fields.DATAPOINT_URI])
+        is_gt = annotations[Fields.DATAPOINT_URI.value].isin(
+            gt[Fields.DATAPOINT_URI.value]
+        )
 
-    task_annos = annotations[~is_gt]
-    gt_annos = annotations[is_gt]
+        task_annos = annotations[~is_gt]
+        gt_annos = annotations[is_gt]
+    else:
+        task_annos = annotations.copy()
+        gt_annos = None
 
     # reliability analysis
     uris = []
@@ -162,39 +168,25 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
         },
     }
 
-    # calculate reliability on task set
-    all_gt_annos = pd.concat([gt_annos, gt])
-    uris = []
-    gammas = []
-    gammas_ci_low = []
-    gammas_ci_high = []
-    for uri, uri_df in all_gt_annos.groupby(Fields.DATAPOINT_URI):
-        task_key = uri_df[Fields.TASK_KEY.value].dropna().values[0]
+    # calculate reliability on ground truth set
+    annotator_results = {}
+    if gt_annos is not None:
+        for annotator, annotator_df in gt_annos.groupby("annotator_id"):
+            uris = annotator_df["datapoint_uri"]
+            gt_df = pd.concat([annotator_df, gt.query(f"datapoint_uri in @uris")])
+            gammas = []
+            for uri, uri_df in gt_df.groupby("datapoint_uri"):
+                try:
+                    results = calculate_gamma_results(uri_df, alpha=None)
+                    gamma = results.gamma
+                    gammas.append(gamma)
+                except Exception:
+                    continue
+            annotator_results[annotator] = mean(gammas)
+    else:
+        # todo: implement fallback
+        raise NotImplementedError
 
-        # compute gamma
-        results = calculate_gamma_results(uri_df, alpha=alpha)
-
-        gamma = results.gamma
-        ci_low, ci_high = results.approx_gamma_range
-
-        gammas.append(gamma)
-        gammas_ci_low.append(ci_low)
-        gammas_ci_high.append(ci_high)
-        uris.append(uri)
-
-    for annotator, annotator_df in gt_annos.groupby("annotator_id"):
-        uris = annotator_df["datapoint_uri"]
-        gt_df = pd.concat([annotator_df, gt.query(f"datapoint_uri in @uris")])
-        gammas = []
-        gammas_ci_low = []
-        gammas_ci_high = []
-        for uri, uri_df in gt_df.groupby("datapoint_uri"):
-            results = calculate_gamma_results(uri_df, alpha=alpha)
-            gamma = results.gamma
-            ci_low, ci_high = results.approx_gamma_range
-
-            gammas.append(gamma)
-            gammas_ci_low.append(ci_low)
-            gammas_ci_high.append(ci_high)
+    intermediate_results["agreement"]["annotators"] = annotator_results
 
     return intermediate_results
