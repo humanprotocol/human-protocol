@@ -161,14 +161,23 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
         "agreement": {
             "task_set": {
                 "measure": "gamma",
-                "score": mean(gammas),
-                "confidence_interval": [mean(gammas_ci_low), mean(gammas_ci_high)],
+                "score": np.mean(gammas),
+                "confidence_interval": [
+                    np.mean(gammas_ci_low),
+                    np.mean(gammas_ci_high),
+                ],
                 "confidence_level": 1 - alpha,
             }
         },
     }
 
+    ##
     # calculate reliability on ground truth set
+    ##
+
+    contributions_per_annotator = (
+        annotations.groupby("annotator_id")["task_key"].nunique().to_dict()
+    )
 
     # use best annotation on task set if no ground truth is available
     if gt_annos is None:
@@ -189,7 +198,10 @@ def calculate_intermediate_results(annotations: list[dict], ground_truth: dict =
             results = calculate_gamma_results(uri_df, alpha=None)
             gamma = results.gamma
             gammas.append(gamma)
-        annotator_results[annotator] = mean(gammas)
+        annotator_results[annotator] = {
+            "confidence": np.mean(gammas),
+            "contributions": contributions_per_annotator.get(annotator, 0),
+        }
 
     intermediate_results["agreement"]["annotators"] = annotator_results
 
