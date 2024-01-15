@@ -1,8 +1,8 @@
+import { ChainId } from '@human-protocol/sdk';
 import React, { createContext, useContext, useState } from 'react';
 import { useNetwork } from 'wagmi';
 import { IS_MAINNET, SUPPORTED_CHAIN_IDS } from '../constants/chains';
 import { CreateJobStep, JobRequest, JobType, PayMethod } from '../types';
-import { ChainId } from '@human-protocol/sdk';
 
 export type CreateJobPageUIType = {
   step: CreateJobStep;
