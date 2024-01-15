@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Header
 from human_protocol_sdk.escrow import EscrowUtils, EscrowClientError
+from human_protocol_sdk.constants import ChainId
 from starlette.requests import Request
 
 from src.chain import EscrowInfo, validate_escrow, validate_exchange_oracle_signature
@@ -51,9 +52,9 @@ async def register_raw_results(
     logger.info(f"Validating payload {webhook} and header {human_signature}.")
     try:
         escrow = EscrowUtils.get_escrow(
-            webhook.chain_id, webhook.escrow_address.lower()
+            ChainId(webhook.chain_id), webhook.escrow_address.lower()
         )
-    except EscrowClientError:
+    except (EscrowClientError, KeyError, ValueError):
         logger.exception(Errors.ESCROW_INFO_INVALID.detail + f" {webhook}")
         raise Errors.ESCROW_INFO_INVALID
 

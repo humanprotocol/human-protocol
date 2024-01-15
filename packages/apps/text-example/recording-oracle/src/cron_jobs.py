@@ -45,7 +45,8 @@ def process_pending_requests():
                         )
                     )
                 )
-                if manifest.groundtruth_uri is None:
+                uri = manifest.groundtruth_uri
+                if uri is None:
                     ground_truth = None
                 else:
                     ground_truth = download_ground_truth(manifest.groundtruth_uri)
@@ -78,8 +79,8 @@ def upload_intermediate_results():
             .limit(Config.cron_config.task_chunk_size)
         ):
             try:
-                logger.info(f"Uploading intermediate results of {request.id}.")
                 # upload files to s3
+                logger.info(f"Uploading intermediate results of {request.id}.")
                 path = Config.storage_config.dataset_dir / f"{request.id}.json"
                 content_hash = hash_file_content(path)
                 upload_data(path, content_type="application/json")
