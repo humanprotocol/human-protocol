@@ -13,7 +13,6 @@ import {
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  BadGatewayException,
   BadRequestException,
   ConflictException,
   Inject,
@@ -115,7 +114,6 @@ export class JobService {
   public readonly logger = new Logger(JobService.name);
   public readonly storageParams: StorageParams;
   public readonly bucket: string;
-  public publicKey: string;
 
   constructor(
     @Inject(Web3Service)
@@ -175,9 +173,6 @@ export class JobService {
       JobRequestType.HCAPTCHA,
     );
 
-    this.publicKey = this.configService.get<string>(
-      ConfigNames.PGP_PUBLIC_KEY,
-    )!;
     const commonManifestProperties = {
       job_mode: JobCaptchaMode.BATCH,
       requester_accuracy_target: jobDto.accuracyTarget,
@@ -704,35 +699,39 @@ export class JobService {
     manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
     chainId: ChainId,
   ): Promise<any> {
-    const signer = this.web3Service.getSigner(chainId);
-    const kvstore = await KVStoreClient.build(signer);
-    const publicKeys: string[] = [
-      this.configService.get(ConfigNames.PGP_PUBLIC_KEY)!,
-    ];
-    const oracleAddresses = this.getOracleAddresses(
-      (manifest as FortuneManifestDto).requestType,
-    );
-    for (const address in Object.values(oracleAddresses)) {
-      const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
-      if (publicKey) publicKeys.push(publicKey);
-    }
+    let manifestFile: any = manifest;
+    if (this.configService.get(ConfigNames.PGP_ENCRYPT)) {
+      const signer = this.web3Service.getSigner(chainId);
+      const kvstore = await KVStoreClient.build(signer);
+      const publicKeys: string[] = [
+        await kvstore.get(signer.address, KVStoreKeys.publicKey),
+      ];
+      const oracleAddresses = this.getOracleAddresses(
+        (manifest as FortuneManifestDto).requestType,
+      );
+      for (const address in Object.values(oracleAddresses)) {
+        const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
+        if (publicKey) publicKeys.push(publicKey);
+      }
 
-    const encryptedManifest = await this.encryption.signAndEncrypt(
-      JSON.stringify(manifest),
-      publicKeys,
-    );
+      const encryptedManifest = await this.encryption.signAndEncrypt(
+        JSON.stringify(manifest),
+        publicKeys,
+      );
+      manifestFile = encryptedManifest;
+    }
     const hash = crypto
       .createHash('sha1')
-      .update(stringify(encryptedManifest))
+      .update(stringify(manifestFile))
       .digest('hex');
     const uploadedFile = await this.storageService.uploadFile(
-      encryptedManifest,
+      manifestFile,
       hash,
     );
 
     if (!uploadedFile) {
       this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
-      throw new BadGatewayException(ErrorBucket.UnableSaveFile);
+      throw new BadRequestException(ErrorBucket.UnableSaveFile);
     }
 
     return uploadedFile;

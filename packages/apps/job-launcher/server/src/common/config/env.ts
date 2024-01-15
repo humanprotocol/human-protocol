@@ -21,7 +21,7 @@ export const ConfigNames = {
   WEB3_PRIVATE_KEY: 'WEB3_PRIVATE_KEY',
   GAS_PRICE_MULTIPLIER: 'GAS_PRICE_MULTIPLIER',
   PGP_PRIVATE_KEY: 'PGP_PRIVATE_KEY',
-  PGP_PUBLIC_KEY: 'PGP_PUBLIC_KEY',
+  PGP_ENCRYPT: 'PGP_ENCRYPT',
   JOB_LAUNCHER_FEE: 'JOB_LAUNCHER_FEE',
   RECORDING_ORACLE_FEE: 'RECORDING_ORACLE_FEE',
   REPUTATION_ORACLE_FEE: 'REPUTATION_ORACLE_FEE',
@@ -36,7 +36,6 @@ export const ConfigNames = {
   HCAPTCHA_RECORDING_ORACLE_URI: 'HCAPTCHA_RECORDING_ORACLE_URI',
   HCAPTCHA_REPUTATION_ORACLE_URI: 'HCAPTCHA_REPUTATION_ORACLE_URI',
   HCAPTCHA_ORACLE_ADDRESS: 'HCAPTCHA_ORACLE_ADDRESS',
-  HCAPTCHA_PGP_PUBLIC_KEY: 'HCAPTCHA_PGP_PUBLIC_KEY',
   HCAPTCHA_SITE_KEY: 'HCAPTCHA_SITE_KEY',
   S3_ENDPOINT: 'S3_ENDPOINT',
   S3_PORT: 'S3_PORT',
@@ -94,7 +93,6 @@ export const envValidator = Joi.object({
   HCAPTCHA_RECORDING_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_REPUTATION_ORACLE_URI: Joi.string().required(),
   HCAPTCHA_ORACLE_ADDRESS: Joi.string().required(),
-  HCAPTCHA_PGP_PUBLIC_KEY: Joi.string().required(),
   HCAPTCHA_SITE_KEY: Joi.string().required(),
   // S3
   S3_ENDPOINT: Joi.string().default('127.0.0.1'),
@@ -119,7 +117,7 @@ export const envValidator = Joi.object({
   CVAT_VAL_SIZE: Joi.string().default('2'),
   //PGP
   PGP_PRIVATE_KEY: Joi.string().required(),
-  PGP_PUBLIC_KEY: Joi.string().required(),
+  PGP_ENCRYPT: Joi.string().default(false),
   // APIKey
   APIKEY_ITERATIONS: Joi.number().default(1000),
   APIKEY_KEY_LENGTH: Joi.number().default(64),

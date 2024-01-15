@@ -53,7 +53,6 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_HCAPTCHA_ORACLE_ADDRESS,
-  MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
@@ -172,6 +171,8 @@ describe('JobService', () => {
     webhookService: WebhookService,
     cronJobService: CronJobService;
 
+  let encrypt = true;
+
   const signerMock = {
     address: MOCK_ADDRESS,
     getNetwork: jest.fn().mockResolvedValue({ chainId: 1 }),
@@ -211,10 +212,8 @@ describe('JobService', () => {
             return 1;
           case 'PGP_PRIVATE_KEY':
             return MOCK_PGP_PRIVATE_KEY;
-          case 'PGP_PUBLIC_KEY':
-            return MOCK_PGP_PUBLIC_KEY;
-          case 'HCAPTCHA_PGP_PUBLIC_KEY':
-            return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
+          case 'PGP_ENCRYPT':
+            return encrypt;
           case 'HCAPTCHA_ORACLE_ADDRESS':
             return MOCK_HCAPTCHA_ORACLE_ADDRESS;
           case 'HCAPTCHA_SITE_KEY':
@@ -2169,7 +2168,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('uploadManifest with fortune request type', () => {
+  describe('uploadManifest with fortune request type and encryption', () => {
     const chainId = ChainId.LOCALHOST;
     const fortuneManifestParams = {
       requestType: JobRequestType.FORTUNE,
@@ -2267,7 +2266,7 @@ describe('JobService', () => {
     });
   });
 
-  describe('uploadManifest with image label binary request type', () => {
+  describe('uploadManifest with image label binary request type and encryption', () => {
     const chainId = ChainId.LOCALHOST;
     const manifest: CvatManifestDto = {
       data: {
@@ -2370,6 +2369,97 @@ describe('JobService', () => {
           ),
         ),
       ).toEqual(manifest);
+    });
+  });
+
+  describe('uploadManifest without encryption', () => {
+    const chainId = ChainId.LOCALHOST;
+    const fortuneManifestParams = {
+      requestType: JobRequestType.FORTUNE,
+      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: 10,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+    };
+
+    let uploadFilesMock: any;
+
+    beforeEach(() => {
+      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+    });
+
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+      }));
+      encrypt = false;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    afterAll(() => {
+      encrypt = true;
+    });
+
+    it('should save the manifest and return the manifest URL and hash', async () => {
+      uploadFilesMock.mockResolvedValue([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      const result = await jobService.uploadManifest(
+        fortuneManifestParams,
+        chainId,
+      );
+
+      expect(result).toEqual([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
+    });
+
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
+    });
+
+    it('should rethrow any other errors encountered', async () => {
+      const errorMessage = 'Something went wrong';
+      const uploadError = new Error(errorMessage);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(new Error(errorMessage));
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
     });
   });
 
