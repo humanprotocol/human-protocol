@@ -22,7 +22,7 @@ export class UserDto extends UserCreateDto {
 }
 
 export class Web3UserCreateDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'evm_address' })
   @IsString()
   public evmAddress: string;
 

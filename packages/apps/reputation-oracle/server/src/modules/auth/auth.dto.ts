@@ -58,11 +58,11 @@ export class VerifyEmailDto {
 }
 
 export class AuthDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'refresh_token' })
   @IsString()
   public refreshToken: string;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'access_token' })
   @IsString()
   public accessToken: string;
 }
