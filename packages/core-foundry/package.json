@@ -1,0 +1,11 @@
+
+{
+    "name": "@human-foundry/core",
+    "description": "Human Protocol Core Smart Contracts",
+    "version": "0.0.1",
+    "devDependencies": {
+        "@openzeppelin/contracts": "^4.9.2",
+        "@openzeppelin/contracts-upgradeable": "^4.9.2"
+    }
+
+}

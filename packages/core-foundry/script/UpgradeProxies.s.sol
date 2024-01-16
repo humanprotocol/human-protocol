@@ -7,19 +7,14 @@ import "../src/Staking.sol";
 contract UpgradeProxiesScript is Script {
     address stakingProxy = vm.envAddress("STAKING_PROXY");
     address hmtAddress = vm.envAddress("HMT_ADDRESS");
+    address newImpl = vm.envAddress("NEW_IMPL");
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
+    
         vm.startBroadcast(deployerPrivateKey);
-
-        try this.upgradeStakingContract() {
-            console.logString("Staking contract upgraded successfully.");
-        } catch Error(string memory reason) {
-            console.logString(reason);
-        } catch (bytes memory lowLevelData) {
-            console.logBytes(lowLevelData);
-        }
-
+        this.upgradeStakingContract();
         vm.stopBroadcast();
     }
 
@@ -27,7 +22,7 @@ contract UpgradeProxiesScript is Script {
         require(stakingProxy != address(0), "Staking proxy address is not set");
 
         Staking proxyStaking = Staking(payable(stakingProxy));
-        address newAddress = address(new Staking());
-        proxyStaking.upgradeTo(newAddress);
+        console.logAddress(proxyStaking.owner());
+        proxyStaking.upgradeTo(newImpl);
     }
 }
