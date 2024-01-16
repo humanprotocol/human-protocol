@@ -15,15 +15,15 @@ import { ChainId } from '@human-protocol/sdk';
 import { JobRequestType } from '../../common/enums';
 
 export class WebhookIncomingDto {
-  @ApiProperty()
+  @ApiProperty({ name: 'chain_id' })
   @IsEnum(ChainId)
   public chainId: ChainId;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'event_type' })
   @IsEnum(EventType)
   public eventType: EventType;
 
-  @ApiProperty()
+  @ApiProperty({ name: 'escrow_address' })
   @IsString()
   public escrowAddress: string;
 }
