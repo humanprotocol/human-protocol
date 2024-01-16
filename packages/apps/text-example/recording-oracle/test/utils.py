@@ -8,7 +8,6 @@ from pathlib import Path
 from string import ascii_letters
 from uuid import uuid4
 
-import jwt
 from fastapi import HTTPException
 from src.chain import sign_message, EscrowInfo
 from src.config import Config
@@ -126,13 +125,6 @@ def get_web3_from_private_key(private_key: str):
     )
     w3.eth.default_account = gas_payer.address
     return w3
-
-
-def get_jwt(
-    email, address, kyc_status="APPROVED", key=Config.human.reputation_oracle_key
-):
-    payload = {"email": email, "address": address, "kycStatus": kyc_status}
-    return jwt.encode(payload, key, algorithm="HS256")
 
 
 @dataclass

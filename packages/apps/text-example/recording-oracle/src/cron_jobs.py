@@ -71,6 +71,7 @@ def process_pending_requests():
 
 
 def upload_intermediate_results():
+    """Uploads intermediate results to s3."""
     logger.info("Uploading intermediate results.")
     with Session() as session:
         for request in (
@@ -112,6 +113,7 @@ def upload_intermediate_results():
 
 
 def notify_reputation_oracle():
+    """Notifies reputation oracle about jobs that are done and ready to be processed."""
     logger.info("Notifying reputation oracle.")
     with Session() as session:
         requests = session.query(ResultsProcessingRequest).where(

@@ -2,8 +2,6 @@ import json
 import unittest
 from unittest.mock import patch, MagicMock
 
-import pytest
-from human_protocol_sdk.escrow import EscrowClientError
 from basemodels import Manifest
 
 from src.config import Config
@@ -15,7 +13,6 @@ from src.cron_jobs import (
 from src.db import Base, engine, Session, ResultsProcessingRequest, Statuses
 from test.utils import (
     add_processing_request,
-    get_web3_from_private_key,
     upload_manifest_and_annotations,
 )
 
