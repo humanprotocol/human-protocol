@@ -4,4 +4,8 @@ import "../src/Staking.sol";
 
 contract StakingTest {
     Staking public staking;
+
+    constructor() {
+        staking = new Staking();
+    }
 }

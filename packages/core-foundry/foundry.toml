@@ -2,10 +2,12 @@
 src = "src"
 out = "out"
 libs = ["lib"]
-via-ir=true
+via-ir=false
 build_info = true
 extra_output = ["storageLayout"]
 optimizer_runs = 10
+gas_reports = ["*"]
+
 
 [rpc_endpoints]
 default_network = "http://127.0.0.1:8545"
