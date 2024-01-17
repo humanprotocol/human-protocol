@@ -253,6 +253,8 @@ export class WebhookService {
       escrowAddress,
     );
     const { url, hash } = await this.storageService.copyFileFromURLToBucket(
+      escrowAddress,
+      chainId,
       `${intermediateResultsUrl}/${CVAT_RESULTS_ANNOTATIONS_FILENAME}`,
     );
     const annotations: CvatAnnotationMeta = await this.storageService.download(

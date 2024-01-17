@@ -32,6 +32,7 @@ export const ConfigNames = {
   REPUTATION_LEVEL_HIGH: 'REPUTATION_LEVEL_HIGH',
   ENCRYPTION_PRIVATE_KEY: 'ENCRYPTION_PRIVATE_KEY',
   ENCRYPTION_PASSPHRASE: 'ENCRYPTION_PASSPHRASE',
+  PGP_ENCRYPT: 'PGP_ENCRYPT',
 };
 
 export const envValidator = Joi.object({
@@ -75,4 +76,5 @@ export const envValidator = Joi.object({
   // Encryption
   ENCRYPTION_PRIVATE_KEY: Joi.string().default(''),
   ENCRYPTION_PASSPHRASE: Joi.string().default(''),
+  PGP_ENCRYPT: Joi.string().default(false),
 });
