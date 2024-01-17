@@ -6,7 +6,7 @@
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
-    "build": "strapi build",
+    "build": "yarn workspace @human-protocol/core build && strapi build",
     "strapi": "strapi"
   },
   "devDependencies": {},
