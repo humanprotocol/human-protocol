@@ -2818,6 +2818,25 @@
     "@babel/runtime" "^7.17.9"
     "@hcaptcha/loader" "^1.0.10"
 
+"@human-protocol/sdk@^1.1.19":
+  version "1.1.19"
+  resolved "https://registry.yarnpkg.com/@human-protocol/sdk/-/sdk-1.1.19.tgz#dfcc2eb22323f97290b25f4f64269b77d61058b5"
+  integrity sha512-loTOyGkldLBHfzM6bL+PS2mPP0SaDFJx31CLkzR/9BrJEF8WUXVELo1ivJbPADIW3KWjmx9B9PaC/npDoolPdg==
+  dependencies:
+    "@human-protocol/core" "*"
+    aws-sdk "^2.1255.0"
+    axios "^1.4.0"
+    crypto "^1.0.1"
+    ethers "^5.7.2"
+    graphql "^16.7.1"
+    graphql-request "^6.1.0"
+    graphql-tag "^2.12.6"
+    minio "^7.0.32"
+    openpgp "^5.10.2"
+    secp256k1 "^4.0.3"
+    vitest "^0.30.1"
+    winston "^3.8.2"
+
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.13"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.13.tgz#075dc9684f40a531d9b26b0822153c1e832ee297"
@@ -8589,6 +8608,22 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
+aws-sdk@^2.1255.0:
+  version "2.1537.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1537.0.tgz#9bac0ee7ff8f0713b0c196d77c2872660732adad"
+  integrity sha512-ILC4pSOA07XdkqbOVGJ4W2s1cBlmG5xQnVEgo4g5g0vhrjpuJm3jTSkBSGAOqpGuZ0TA/5uFCfsGnYnpoT2z0A==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.16.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    util "^0.12.4"
+    uuid "8.0.0"
+    xml2js "0.5.0"
+
 aws-sdk@^2.1528.0:
   version "2.1532.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1532.0.tgz#7c78054e53584ce6396406e87d3edfbadb0ffa81"
@@ -14048,7 +14083,7 @@ graphql@15.5.0:
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.5.0.tgz#39d19494dbe69d1ea719915b578bf920344a69d5"
   integrity sha512-OmaM7y0kaK31NKG31q4YbD2beNYa6jBBKtMFT6gLYJljHLJr42IqJ8KX08u3Li/0ifzTU5HjmoOOrwa5BRLeDA==
 
-graphql@^16.6.0, graphql@^16.8.1:
+graphql@^16.6.0, graphql@^16.7.1, graphql@^16.8.1:
   version "16.8.1"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.8.1.tgz#1930a965bef1170603702acdb68aedd3f3cf6f07"
   integrity sha512-59LZHPdGZVh695Ud9lRzPBVTtlX9ZCV150Er2W43ro37wVof0ctenSaskPPjN7lVTIN8mSZt8PHUNKZuNQUuxw==
