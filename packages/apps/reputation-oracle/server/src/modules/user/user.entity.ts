@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToOne } from 'typeorm';
 
 import { NS } from '../../common/constants';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { KYCStatus, UserStatus, UserType } from '../../common/enums/user';
 import { IUser } from '../../common/interfaces';
 import { BaseEntity } from '../../database/base.entity';
 import { AuthEntity } from '../auth/auth.entity';
@@ -31,6 +31,16 @@ export class UserEntity extends BaseEntity implements IUser {
     enum: UserStatus,
   })
   public status: UserStatus;
+
+  @Column({ type: 'varchar', nullable: true })
+  public kycSessionId: string;
+
+  @Column({
+    type: 'enum',
+    enum: KYCStatus,
+    default: KYCStatus.NONE,
+  })
+  public kycStatus: KYCStatus;
 
   @OneToOne(() => AuthEntity)
   public auth: AuthEntity;

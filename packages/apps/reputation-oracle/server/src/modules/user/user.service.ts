@@ -7,7 +7,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Not } from 'typeorm';
 import { ErrorUser } from '../../common/constants/errors';
-import { UserStatus, UserType } from '../../common/enums/user';
+import { KYCStatus, UserStatus, UserType } from '../../common/enums/user';
 import { getNonce } from '../../common/utils/signature';
 import { UserEntity } from './user.entity';
 import { UserCreateDto, UserUpdateDto } from './user.dto';
@@ -124,6 +124,27 @@ export class UserService {
 
   public async updateNonce(userEntity: UserEntity): Promise<UserEntity> {
     userEntity.nonce = getNonce();
+    return userEntity.save();
+  }
+
+  public async startKYC(userEntity: UserEntity, sessionId: string) {
+    userEntity.kycSessionId = sessionId;
+    return userEntity.save();
+  }
+
+  public async updateKYCStatus(
+    sessionId: string,
+    kycStatus: KYCStatus,
+  ): Promise<UserEntity> {
+    const userEntity = await this.userRepository.findOne({
+      kycSessionId: sessionId,
+    });
+
+    if (!userEntity) {
+      throw new NotFoundException(ErrorUser.NotFound);
+    }
+
+    userEntity.kycStatus = kycStatus;
     return userEntity.save();
   }
 }
