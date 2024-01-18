@@ -115,6 +115,3 @@ export const MOCK_STORAGE_DATA: StorageDataDto = {
 };
 export const MOCK_BUCKET_FILE =
   'https://bucket.s3.eu-central-1.amazonaws.com/folder/test';
-
-export const MOCK_ENCRYPTION_PRIVATE_KEY = 'private_key';
-export const MOCK_ENCRYPTION_PASSPHRASE = 'passphrase';

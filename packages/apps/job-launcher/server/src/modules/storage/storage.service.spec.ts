@@ -1,12 +1,15 @@
-import { Encryption, StorageClient } from '@human-protocol/sdk';
+import {
+  Encryption,
+  EncryptionUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { ConfigModule, ConfigService, registerAs } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import {
-  MOCK_ENCRYPTION_PASSPHRASE,
-  MOCK_ENCRYPTION_PRIVATE_KEY,
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_MANIFEST,
+  MOCK_PGP_PRIVATE_KEY,
   MOCK_S3_ACCESS_KEY,
   MOCK_S3_BUCKET,
   MOCK_S3_ENDPOINT,
@@ -27,6 +30,9 @@ jest.mock('@human-protocol/sdk', () => ({
   },
   Encryption: {
     build: jest.fn(),
+  },
+  EncryptionUtils: {
+    isEncrypted: jest.fn(),
   },
 }));
 
@@ -53,10 +59,8 @@ describe('StorageService', () => {
     const mockConfigService: Partial<ConfigService> = {
       get: jest.fn((key: string) => {
         switch (key) {
-          case 'ENCRYPTION_PRIVATE_KEY':
-            return MOCK_ENCRYPTION_PRIVATE_KEY;
-          case 'ENCRYPTION_PASSPHRASE':
-            return MOCK_ENCRYPTION_PASSPHRASE;
+          case 'MOCK_PGP_PRIVATE_KEY':
+            return MOCK_PGP_PRIVATE_KEY;
         }
       }),
     };
@@ -147,9 +151,10 @@ describe('StorageService', () => {
         ],
       };
 
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(false);
       StorageClient.downloadFileFromUrl = jest
         .fn()
-        .mockResolvedValueOnce(JSON.stringify(expectedJobFile));
+        .mockResolvedValueOnce(expectedJobFile);
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
     });
@@ -169,13 +174,12 @@ describe('StorageService', () => {
         ],
       };
 
+      EncryptionUtils.isEncrypted = jest.fn().mockReturnValueOnce(true);
       StorageClient.downloadFileFromUrl = jest
         .fn()
         .mockResolvedValueOnce('encrypted');
       Encryption.build = jest.fn().mockResolvedValueOnce({
-        decrypt: jest
-          .fn()
-          .mockResolvedValueOnce(JSON.stringify(expectedJobFile)),
+        decrypt: jest.fn().mockResolvedValueOnce(expectedJobFile),
       });
       const solutionsFile = await storageService.download(MOCK_FILE_URL);
       expect(solutionsFile).toStrictEqual(expectedJobFile);
