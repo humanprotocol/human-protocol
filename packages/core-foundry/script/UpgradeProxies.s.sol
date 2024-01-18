@@ -3,6 +3,9 @@ pragma solidity >=0.6.2 <0.9.0;
 
 import {Script, console} from "forge-std/Script.sol";
 import "../src/Staking.sol";
+import "../src/HMToken.sol";
+import "../src/EscrowFactory.sol";
+import "../src/RewardPool.sol";
 
 contract UpgradeProxiesScript is Script {
     address escrowFactoryProxy = vm.envAddress("ESCROW_FACTORY_PROXY");
@@ -15,13 +18,13 @@ contract UpgradeProxiesScript is Script {
         vm.startBroadcast(deployerPrivateKey);
         console.log("trying with address", vm.addr(deployerPrivateKey));
 
-        // Upgrade EscrowFactory 
+        // Upgrade EscrowFactory
         EscrowFactory proxyEscrowFactory = EscrowFactory(payable(escrowFactoryProxy));
         address newEscrowFactory = address(new EscrowFactory());
         proxyEscrowFactory.upgradeTo(newEscrowFactory);
-        console.log("Upgraded successfully to", newEscrowFactory); 
+        console.log("Upgraded successfully to", newEscrowFactory);
 
-        // Upgrade Staking 
+        // Upgrade Staking
         Staking proxyStaking = Staking(payable(stakingProxy));
         address newStaking = address(new Staking());
         proxyStaking.upgradeTo(newStaking);
@@ -32,9 +35,6 @@ contract UpgradeProxiesScript is Script {
         address newRewardPool = address(new RewardPool());
         proxyRewardPool.upgradeTo(newRewardPool);
         console.log("Upgraded successfully to", newRewardPool);
-
-
-
 
         vm.stopBroadcast();
     }
