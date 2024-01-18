@@ -8,10 +8,12 @@ import {
   IAllocation,
   EscrowUtils,
   NETWORKS,
+  Encryption,
   KVStoreClient,
 } from '@human-protocol/sdk';
 import { HttpService } from '@nestjs/axios';
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
   NotFoundException,
@@ -51,7 +53,6 @@ import {
   MOCK_FILE_HASH,
   MOCK_FILE_URL,
   MOCK_HCAPTCHA_ORACLE_ADDRESS,
-  MOCK_HCAPTCHA_PGP_PUBLIC_KEY,
   MOCK_JOB_ID,
   MOCK_JOB_LAUNCHER_FEE,
   MOCK_PGP_PRIVATE_KEY,
@@ -74,7 +75,6 @@ import {
   MOCK_HCAPTCHA_IMAGE_URL,
   MOCK_HCAPTCHA_REPO_URI,
   MOCK_HCAPTCHA_RO_URI,
-  MOCK_FILE_KEY,
   MOCK_BUCKET_FILE,
   MOCK_MAX_RETRY_COUNT,
 } from '../../../test/constants';
@@ -133,14 +133,6 @@ jest.mock('@human-protocol/sdk', () => ({
       getAllocation: jest.fn(),
     })),
   },
-  StorageClient: jest.fn().mockImplementation(() => ({
-    uploadFiles: jest
-      .fn()
-      .mockResolvedValue([
-        { key: MOCK_FILE_KEY, url: MOCK_FILE_URL, hash: MOCK_FILE_HASH },
-      ]),
-    listObjects: jest.fn().mockResolvedValue(MOCK_BUCKET_FILES),
-  })),
   KVStoreClient: {
     build: jest.fn().mockImplementation(() => ({
       get: jest.fn(),
@@ -174,9 +166,12 @@ describe('JobService', () => {
     createPaymentMock: any,
     routingProtocolService: RoutingProtocolService,
     web3Service: Web3Service,
+    encryption: Encryption,
     storageService: StorageService,
     webhookService: WebhookService,
     cronJobService: CronJobService;
+
+  let encrypt = true;
 
   const signerMock = {
     address: MOCK_ADDRESS,
@@ -217,10 +212,8 @@ describe('JobService', () => {
             return 1;
           case 'PGP_PRIVATE_KEY':
             return MOCK_PGP_PRIVATE_KEY;
-          case 'PGP_PUBLIC_KEY':
-            return MOCK_PGP_PUBLIC_KEY;
-          case 'HCAPTCHA_PGP_PUBLIC_KEY':
-            return MOCK_HCAPTCHA_PGP_PUBLIC_KEY;
+          case 'PGP_ENCRYPT':
+            return encrypt;
           case 'HCAPTCHA_ORACLE_ADDRESS':
             return MOCK_HCAPTCHA_ORACLE_ADDRESS;
           case 'HCAPTCHA_SITE_KEY':
@@ -244,6 +237,7 @@ describe('JobService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         JobService,
+        Encryption,
         {
           provide: Web3Service,
           useValue: {
@@ -293,6 +287,10 @@ describe('JobService', () => {
     web3Service.calculateGasPrice = jest.fn().mockReturnValue(1000n);
   });
 
+  beforeEach(async () => {
+    encryption = await Encryption.build(MOCK_PGP_PRIVATE_KEY);
+  });
+
   describe('createJob', () => {
     const userId = 1;
     const jobId = 123;
@@ -309,6 +307,12 @@ describe('JobService', () => {
     beforeEach(() => {
       getUserBalanceMock = jest.spyOn(paymentService, 'getUserBalance');
       createPaymentMock.mockResolvedValue(true);
+    });
+
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+      }));
     });
 
     afterEach(() => {
@@ -334,10 +338,6 @@ describe('JobService', () => {
         status: JobStatus.PENDING,
         save: jest.fn().mockResolvedValue(true),
       };
-
-      (KVStoreClient.build as any).mockImplementation(() => ({
-        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
-      }));
 
       jobRepository.create = jest.fn().mockResolvedValue(mockJobEntity);
 
@@ -1350,6 +1350,12 @@ describe('JobService', () => {
   describe('setupEscrow', () => {
     const chainId = ChainId.LOCALHOST;
 
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_ORACLE_FEE),
+      }));
+    });
+
     it('should setup escrow and update the status to funding', async () => {
       const fundAmount = 10;
       const fee = (MOCK_JOB_LAUNCHER_FEE / 100) * fundAmount;
@@ -2159,6 +2165,301 @@ describe('JobService', () => {
       await expect(
         jobService.processEscrowCancellation(jobEntityMock as any),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('uploadManifest with fortune request type and encryption', () => {
+    const chainId = ChainId.LOCALHOST;
+    const fortuneManifestParams = {
+      requestType: JobRequestType.FORTUNE,
+      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: 10,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+    };
+
+    let uploadFilesMock: any;
+
+    beforeEach(() => {
+      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+    });
+
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should save the manifest and return the manifest URL and hash', async () => {
+      uploadFilesMock.mockResolvedValue([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      const result = await jobService.uploadManifest(
+        fortuneManifestParams,
+        chainId,
+      );
+
+      expect(result).toEqual([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
+    });
+
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
+    });
+
+    it('should rethrow any other errors encountered', async () => {
+      const errorMessage = 'Something went wrong';
+      const uploadError = new Error(errorMessage);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(new Error(errorMessage));
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(fortuneManifestParams);
+    });
+  });
+
+  describe('uploadManifest with image label binary request type and encryption', () => {
+    const chainId = ChainId.LOCALHOST;
+    const manifest: CvatManifestDto = {
+      data: {
+        data_url: MOCK_FILE_URL,
+      },
+      annotation: {
+        labels: [{ name: 'label1' }],
+        description: MOCK_REQUESTER_DESCRIPTION,
+        user_guide: MOCK_FILE_URL,
+        type: JobRequestType.IMAGE_POINTS,
+        job_size: 10,
+        max_time: 300,
+      },
+      validation: {
+        min_quality: 1,
+        val_size: 2,
+        gt_url: '',
+      },
+      job_bounty: '1',
+    };
+
+    let uploadFilesMock: any;
+
+    beforeEach(() => {
+      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+    });
+
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should save the manifest and return the manifest URL and hash', async () => {
+      uploadFilesMock.mockResolvedValue([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      const result = await jobService.uploadManifest(manifest, chainId);
+
+      expect(result).toEqual([
+        {
+          hash: MOCK_FILE_HASH,
+          url: MOCK_FILE_URL,
+        },
+      ]);
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(manifest);
+    });
+
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(manifest, chainId),
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(manifest);
+    });
+
+    it('should rethrow any other errors encountered', async () => {
+      const errorMessage = 'Something went wrong';
+      const uploadError = new Error(errorMessage);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(manifest, chainId),
+      ).rejects.toThrowError(new Error(errorMessage));
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          await encryption.decrypt(
+            (storageService.uploadFile as any).mock.calls[0][0],
+          ),
+        ),
+      ).toEqual(manifest);
+    });
+  });
+
+  describe('uploadManifest without encryption', () => {
+    const chainId = ChainId.LOCALHOST;
+    const fortuneManifestParams = {
+      requestType: JobRequestType.FORTUNE,
+      submissionsRequired: MOCK_SUBMISSION_REQUIRED,
+      requesterDescription: MOCK_REQUESTER_DESCRIPTION,
+      fundAmount: 10,
+      requesterTitle: MOCK_REQUESTER_TITLE,
+    };
+
+    let uploadFilesMock: any;
+
+    beforeEach(() => {
+      uploadFilesMock = jest.spyOn(storageService, 'uploadFile');
+    });
+
+    beforeAll(() => {
+      (KVStoreClient.build as any).mockImplementation(() => ({
+        get: jest.fn().mockResolvedValue(MOCK_PGP_PUBLIC_KEY),
+      }));
+      encrypt = false;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    afterAll(() => {
+      encrypt = true;
+    });
+
+    it('should save the manifest and return the manifest URL and hash', async () => {
+      uploadFilesMock.mockResolvedValue([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      const result = await jobService.uploadManifest(
+        fortuneManifestParams,
+        chainId,
+      );
+
+      expect(result).toEqual([
+        {
+          url: MOCK_FILE_URL,
+          hash: MOCK_FILE_HASH,
+        },
+      ]);
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
+    });
+
+    it('should throw an error if the manifest file fails to upload', async () => {
+      const uploadError = new Error(ErrorBucket.UnableSaveFile);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(
+        new BadGatewayException(ErrorBucket.UnableSaveFile),
+      );
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
+    });
+
+    it('should rethrow any other errors encountered', async () => {
+      const errorMessage = 'Something went wrong';
+      const uploadError = new Error(errorMessage);
+
+      uploadFilesMock.mockRejectedValue(uploadError);
+
+      await expect(
+        jobService.uploadManifest(fortuneManifestParams, chainId),
+      ).rejects.toThrowError(new Error(errorMessage));
+
+      expect(storageService.uploadFile).toHaveBeenCalled();
+      expect((storageService.uploadFile as any).mock.calls[0][0]).toEqual(
+        fortuneManifestParams,
+      );
     });
   });
 

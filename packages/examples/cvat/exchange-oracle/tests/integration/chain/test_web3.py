@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import patch
 
@@ -68,8 +69,9 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signed_message = sign_message(ChainId.POLYGON.value, "message")
-            self.assertEqual(signed_message, SIGNATURE)
+                signature, serialized_message = sign_message(ChainId.POLYGON.value, "message")
+            self.assertEqual(signature, SIGNATURE)
+            self.assertEqual(serialized_message, json.dumps("message"))
 
     def test_sign_message_mumbai(self):
         with patch("src.chain.web3.get_web3") as mock_function:
@@ -78,8 +80,11 @@ class ServiceIntegrationTest(unittest.TestCase):
                 DEFAULT_GAS_PAYER_PRIV,
             ):
                 mock_function.return_value = self.w3
-                signed_message = sign_message(ChainId.POLYGON_MUMBAI.value, "message")
-            self.assertEqual(signed_message, SIGNATURE)
+                signature, serialized_message = sign_message(
+                    ChainId.POLYGON_MUMBAI.value, "message"
+                )
+            self.assertEqual(signature, SIGNATURE)
+            self.assertEqual(serialized_message, json.dumps("message"))
 
     def test_sign_message_invalid_chain_id(self):
         with self.assertRaises(ValueError) as error:

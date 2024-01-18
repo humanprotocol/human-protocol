@@ -1,0 +1,4 @@
+# dockerfiles/.dockerignore
+
+# Exclude the .env file in the src directory
+src/.env

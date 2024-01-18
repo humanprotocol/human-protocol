@@ -1,16 +1,16 @@
-import { StorageClient } from '@human-protocol/sdk';
+import {
+  Encryption,
+  EncryptionUtils,
+  StorageClient,
+} from '@human-protocol/sdk';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
-import { S3ConfigType, s3ConfigKey } from '../../common/config';
-import axios from 'axios';
+import { ConfigNames, S3ConfigType, s3ConfigKey } from '../../common/config';
 import { ErrorBucket } from '../../common/constants/errors';
-import { parseString } from 'xml2js';
 import stringify from 'json-stable-stringify';
 import { ContentType, Extension } from '../../common/enums/storage';
 import { UploadedFile } from '../../common/interfaces';
-import { generateBucketUrl } from '../../common/utils/storage';
-import { StorageDataDto } from '../job/job.dto';
-import { JobRequestType } from '../../common/enums/job';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class StorageService {
@@ -19,6 +19,7 @@ export class StorageService {
   constructor(
     @Inject(s3ConfigKey)
     private s3Config: S3ConfigType,
+    public readonly configService: ConfigService,
   ) {
     this.minioClient = new Minio.Client({
       endPoint: this.s3Config.endPoint,
@@ -36,7 +37,20 @@ export class StorageService {
 
   public async download(url: string): Promise<any> {
     try {
-      return await StorageClient.downloadFileFromUrl(url);
+      const fileContent = await StorageClient.downloadFileFromUrl(url);
+
+      if (
+        typeof fileContent === 'string' &&
+        EncryptionUtils.isEncrypted(fileContent)
+      ) {
+        const encryption = await Encryption.build(
+          this.configService.get<string>(ConfigNames.PGP_ENCRYPT, ''),
+        );
+
+        return await encryption.decrypt(fileContent);
+      } else {
+        return fileContent;
+      }
     } catch {
       return [];
     }

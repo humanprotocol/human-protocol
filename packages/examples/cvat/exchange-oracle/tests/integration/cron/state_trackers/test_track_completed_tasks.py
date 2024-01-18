@@ -42,7 +42,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=1,
             cvat_project_id=1,
             status=JobStatuses.completed.value,
-            assignee="John Doe",
         )
 
         self.session.add(project)
@@ -84,7 +83,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=1,
             cvat_project_id=1,
             status=JobStatuses.completed.value,
-            assignee="John Doe",
         )
         job_2 = Job(
             id=str(uuid.uuid4()),
@@ -92,7 +90,6 @@ class ServiceIntegrationTest(unittest.TestCase):
             cvat_task_id=1,
             cvat_project_id=1,
             status=JobStatuses.new.value,
-            assignee="John Doe",
         )
 
         self.session.add(project)

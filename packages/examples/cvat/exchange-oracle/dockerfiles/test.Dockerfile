@@ -3,7 +3,7 @@ FROM python:3.10
 WORKDIR /app
 
 RUN apt-get update -y && \
-    apt-get install -y jq && \
+    apt-get install -y jq ffmpeg libsm6 libxext6 && \
     pip install poetry
 
 COPY pyproject.toml poetry.lock ./
