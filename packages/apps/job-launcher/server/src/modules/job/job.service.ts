@@ -7,9 +7,9 @@ import {
   EscrowUtils,
   NETWORKS,
   StakingClient,
-  KVStoreKeys,
+  StorageParams,
   Encryption,
-  EncryptionUtils,
+  KVStoreKeys,
 } from '@human-protocol/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -27,6 +27,7 @@ import { ethers } from 'ethers';
 import { In, LessThanOrEqual, QueryFailedError } from 'typeorm';
 import { ConfigNames } from '../../common/config';
 import {
+  ErrorBucket,
   ErrorEscrow,
   ErrorJob,
   ErrorPayment,
@@ -47,12 +48,7 @@ import {
   PaymentType,
   TokenId,
 } from '../../common/enums/payment';
-import {
-  isPGPMessage,
-  getRate,
-  hashString,
-  isValidJSON,
-} from '../../common/utils';
+import { isPGPMessage, getRate, isValidJSON } from '../../common/utils';
 import { add, div, lt, mul } from '../../common/utils/decimal';
 import { PaymentRepository } from '../payment/payment.repository';
 import { PaymentService } from '../payment/payment.service';
@@ -111,10 +107,13 @@ import {
   generateBucketUrl,
   listObjectsInBucket,
 } from '../../common/utils/storage';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class JobService {
   public readonly logger = new Logger(JobService.name);
+  public readonly storageParams: StorageParams;
+  public readonly bucket: string;
 
   constructor(
     @Inject(Web3Service)
@@ -124,6 +123,7 @@ export class JobService {
     private readonly paymentService: PaymentService,
     public readonly configService: ConfigService,
     private readonly routingProtocolService: RoutingProtocolService,
+    private readonly encryption: Encryption,
     private readonly storageService: StorageService,
     private readonly webhookService: WebhookService,
     private readonly cronJobService: CronJobService,
@@ -397,7 +397,10 @@ export class JobService {
       };
     });
 
-    const hash = hashString(stringify(data));
+    const hash = crypto
+      .createHash('sha1')
+      .update(stringify(data))
+      .digest('hex');
     const { url } = await this.storageService.uploadFile(data, hash);
     return url;
   }
@@ -407,13 +410,15 @@ export class JobService {
     requestType: JobRequestType,
     dto: JobFortuneDto | JobCvatDto | JobCaptchaDto,
   ): Promise<number> {
-    const { chainId } = dto;
+    let { chainId } = dto;
 
     if (chainId) {
       this.web3Service.validateChainId(chainId);
+    } else {
+      chainId = this.routingProtocolService.selectNetwork();
     }
 
-    let manifestOrigin, manifestEncrypted, fundAmount;
+    let manifestOrigin, fundAmount;
     const rate = await getRate(Currency.USD, TokenId.HMT);
 
     if (requestType === JobRequestType.HCAPTCHA) {
@@ -459,14 +464,6 @@ export class JobService {
         dto.annotations.typeOfJob,
         dto,
       );
-
-      manifestEncrypted = await EncryptionUtils.encrypt(
-        stringify(manifestOrigin),
-        [
-          this.configService.get<string>(ConfigNames.PGP_PUBLIC_KEY)!,
-          this.configService.get<string>(ConfigNames.HCAPTCHA_PGP_PUBLIC_KEY)!,
-        ],
-      );
     } else if (requestType == JobRequestType.FORTUNE) {
       // Fortune
       dto = dto as JobFortuneDto;
@@ -480,14 +477,10 @@ export class JobService {
         tokenFundAmount,
       );
     }
-    const hash = hashString(stringify(manifestOrigin));
-    const { url } = await this.storageService.uploadFile(
-      manifestEncrypted || manifestOrigin,
-      hash,
-    );
+    const { url, hash } = await this.uploadManifest(manifestOrigin, chainId);
 
     const jobEntity = await this.jobRepository.create({
-      chainId: chainId ?? this.routingProtocolService.selectNetwork(),
+      chainId,
       userId,
       manifestUrl: url,
       manifestHash: hash,
@@ -593,49 +586,22 @@ export class JobService {
 
     await this.validateManifest(manifest);
 
-    let recordingOracleConfigKey;
-    let exchangeOracleConfigKey;
+    const oracleAddresses = this.getOracleAddresses(manifest);
 
-    if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
-    ) {
-      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
-    } else if (
-      (manifest as HCaptchaManifestDto).job_mode === JobCaptchaMode.BATCH
-    ) {
-      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
-    } else {
-      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
-      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
-    }
-
-    const recordingOracleAddress = this.configService.get<string>(
-      recordingOracleConfigKey,
-    )!;
-
-    const reputationOracleAddress = this.configService.get<string>(
-      ConfigNames.REPUTATION_ORACLE_ADDRESS,
-    )!;
-
-    const exchangeOracleAddress = this.configService.get<string>(
-      exchangeOracleConfigKey,
-    )!;
     const escrowConfig = {
-      recordingOracle: recordingOracleAddress,
-      reputationOracle: reputationOracleAddress,
-      exchangeOracle: exchangeOracleAddress,
+      recordingOracle: oracleAddresses.recordingOracle,
+      reputationOracle: oracleAddresses.recordingOracle,
+      exchangeOracle: oracleAddresses.exchangeOracle,
       recordingOracleFee: await this.getOracleFee(
-        recordingOracleAddress,
+        oracleAddresses.recordingOracle,
         jobEntity.chainId,
       ),
       reputationOracleFee: await this.getOracleFee(
-        reputationOracleAddress,
+        oracleAddresses.reputationOracle,
         jobEntity.chainId,
       ),
       exchangeOracleFee: await this.getOracleFee(
-        exchangeOracleAddress,
+        oracleAddresses.exchangeOracle,
         jobEntity.chainId,
       ),
       manifestUrl: jobEntity.manifestUrl,
@@ -699,6 +665,76 @@ export class JobService {
     }
     jobEntity.retriesCount = 0;
     await jobEntity.save();
+  }
+
+  private getOracleAddresses(manifest: any) {
+    let recordingOracleConfigKey;
+    let exchangeOracleConfigKey;
+    const oracleType = this.getOracleType(manifest);
+    if (oracleType === OracleType.FORTUNE) {
+      recordingOracleConfigKey = ConfigNames.FORTUNE_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.FORTUNE_EXCHANGE_ORACLE_ADDRESS;
+    } else if (oracleType === OracleType.HCAPTCHA) {
+      recordingOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.HCAPTCHA_ORACLE_ADDRESS;
+    } else {
+      recordingOracleConfigKey = ConfigNames.CVAT_RECORDING_ORACLE_ADDRESS;
+      exchangeOracleConfigKey = ConfigNames.CVAT_EXCHANGE_ORACLE_ADDRESS;
+    }
+
+    const exchangeOracle = this.configService.get<string>(
+      exchangeOracleConfigKey,
+    )!;
+    const recordingOracle = this.configService.get<string>(
+      recordingOracleConfigKey,
+    )!;
+    const reputationOracle = this.configService.get<string>(
+      ConfigNames.REPUTATION_ORACLE_ADDRESS,
+    )!;
+
+    return { exchangeOracle, recordingOracle, reputationOracle };
+  }
+
+  public async uploadManifest(
+    manifest: FortuneManifestDto | CvatManifestDto | HCaptchaManifestDto,
+    chainId: ChainId,
+  ): Promise<any> {
+    let manifestFile: any = manifest;
+    if (this.configService.get(ConfigNames.PGP_ENCRYPT)) {
+      const signer = this.web3Service.getSigner(chainId);
+      const kvstore = await KVStoreClient.build(signer);
+      const publicKeys: string[] = [
+        await kvstore.get(signer.address, KVStoreKeys.publicKey),
+      ];
+      const oracleAddresses = this.getOracleAddresses(
+        (manifest as FortuneManifestDto).requestType,
+      );
+      for (const address in Object.values(oracleAddresses)) {
+        const publicKey = await kvstore.get(address, KVStoreKeys.publicKey);
+        if (publicKey) publicKeys.push(publicKey);
+      }
+
+      const encryptedManifest = await this.encryption.signAndEncrypt(
+        JSON.stringify(manifest),
+        publicKeys,
+      );
+      manifestFile = encryptedManifest;
+    }
+    const hash = crypto
+      .createHash('sha1')
+      .update(stringify(manifestFile))
+      .digest('hex');
+    const uploadedFile = await this.storageService.uploadFile(
+      manifestFile,
+      hash,
+    );
+
+    if (!uploadedFile) {
+      this.logger.log(ErrorBucket.UnableSaveFile, JobService.name);
+      throw new BadRequestException(ErrorBucket.UnableSaveFile);
+    }
+
+    return uploadedFile;
   }
 
   private async validateManifest(
@@ -1173,7 +1209,7 @@ export class JobService {
 
   private getOracleType(manifest: any): OracleType {
     if (
-      (manifest as FortuneManifestDto).requestType === JobRequestType.FORTUNE
+      (manifest as FortuneManifestDto)?.requestType === JobRequestType.FORTUNE
     ) {
       return OracleType.FORTUNE;
     } else if (
