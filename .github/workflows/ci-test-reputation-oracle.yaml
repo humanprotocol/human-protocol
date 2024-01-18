@@ -7,7 +7,6 @@ on:
   pull_request:
     paths:
       - "packages/core/**"
-      - "!packages/core/mx/**"
       - "packages/sdk/typescript/human-protocol-sdk/**"
       - "packages/apps/reputation-oracle/**"
   workflow_dispatch:

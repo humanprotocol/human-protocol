@@ -12,7 +12,6 @@ import { ConfigService } from '@nestjs/config';
 import { ConfigNames } from '../../common/config';
 import { signMessage } from '../../common/utils/signature';
 import { WebhookRepository } from './webhook.repository';
-import { CVATWebhookDto, FortuneWebhookDto } from '../job/job.dto';
 import { firstValueFrom } from 'rxjs';
 import {
   DEFAULT_MAX_RETRY_COUNT,
@@ -20,12 +19,13 @@ import {
 } from '../../common/constants';
 import { HttpService } from '@nestjs/axios';
 import { Web3Service } from '../web3/web3.service';
-import { OracleType, WebhookStatus } from '../../common/enums/webhook';
+import { WebhookStatus } from '../../common/enums/webhook';
 import { ErrorWebhook } from '../../common/constants/errors';
 import { WebhookEntity } from './webhook.entity';
-import { WebhookDto } from './webhook.dto';
 import { CronJobService } from '../cron-job/cron-job.service';
 import { CronJobType } from '../../common/enums/cron-job';
+import { WebhookDataDto, WebhookDto } from './webhook.dto';
+import { CaseConverter } from '../../common/utils/case-converter';
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
@@ -90,18 +90,11 @@ export class WebhookService {
     }
 
     // Build the webhook data object based on the oracle type.
-    const webhookData =
-      webhook.oracleType === OracleType.FORTUNE
-        ? ({
-            escrowAddress: webhook.escrowAddress,
-            chainId: webhook.chainId,
-            eventType: webhook.eventType,
-          } as FortuneWebhookDto)
-        : ({
-            escrow_address: webhook.escrowAddress,
-            chain_id: webhook.chainId,
-            event_type: webhook.eventType,
-          } as CVATWebhookDto);
+    const webhookData = CaseConverter.transformToSnakeCase({
+      escrowAddress: webhook.escrowAddress,
+      chainId: webhook.chainId,
+      eventType: webhook.eventType,
+    } as WebhookDataDto);
 
     // Add the signature to the request body if necessary.
     if (webhook.hasSignature) {

@@ -27,7 +27,6 @@ import {
   JobCvatDto,
   JobListDto,
   JobCancelDto,
-  EscrowFailedWebhookDto,
   JobDetailsDto,
   JobIdDto,
   FortuneFinalResultDto,
@@ -39,6 +38,7 @@ import { Public, ApiKey } from '../../common/decorators';
 import { HEADER_SIGNATURE_KEY } from '../../common/constants';
 import { ChainId } from '@human-protocol/sdk';
 import { Role } from '../../common/enums/role';
+import { WebhookDataDto } from '../webhook/webhook.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -180,7 +180,7 @@ export class JobController {
   @Get('/result')
   public async getResult(
     @Request() req: RequestWithUser,
-    @Query('jobId') jobId: number,
+    @Query('job_id') jobId: number,
   ): Promise<FortuneFinalResultDto[] | string> {
     return this.jobService.getResult(req.user.id, jobId);
   }
@@ -198,7 +198,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/create-escrow')
+  @Get('/cron/create-escrow')
   public async launchCreateEscrowCronJob(): Promise<void> {
     await this.jobService.createEscrowCronJob();
     return;
@@ -217,7 +217,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/setup-escrow')
+  @Get('/cron/setup-escrow')
   public async launchSetupEscrowCronJob(): Promise<void> {
     await this.jobService.setupEscrowCronJob();
     return;
@@ -236,7 +236,7 @@ export class JobController {
     status: 404,
     description: 'Not Found. Could not find the requested content.',
   })
-  @Post('/cron/fund-escrow')
+  @Get('/cron/fund-escrow')
   public async launchFundEscrowCronJob(): Promise<void> {
     await this.jobService.fundEscrowCronJob();
     return;
@@ -303,7 +303,7 @@ export class JobController {
   @Post('/escrow-failed-webhook')
   public async handleEscrowFailedWebhook(
     @Headers(HEADER_SIGNATURE_KEY) _: string,
-    @Body() data: EscrowFailedWebhookDto,
+    @Body() data: WebhookDataDto,
   ): Promise<void> {
     await this.jobService.escrowFailedWebhook(data);
     return;

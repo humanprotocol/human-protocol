@@ -207,9 +207,9 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrowAddress: webhookEntity.escrowAddress,
-          chainId: webhookEntity.chainId,
-          eventType: webhookEntity.eventType,
+          escrow_address: webhookEntity.escrowAddress,
+          chain_id: webhookEntity.chainId,
+          event_type: webhookEntity.eventType,
         },
         {},
       );
@@ -258,9 +258,9 @@ describe('WebhookService', () => {
       expect(httpService.post).toHaveBeenCalledWith(
         MOCK_EXCHANGE_ORACLE_WEBHOOK_URL,
         {
-          escrowAddress: webhookEntity.escrowAddress,
-          chainId: webhookEntity.chainId,
-          eventType: webhookEntity.eventType,
+          escrow_address: webhookEntity.escrowAddress,
+          chain_id: webhookEntity.chainId,
+          event_type: webhookEntity.eventType,
         },
         { headers: { [HEADER_SIGNATURE_KEY]: expect.any(String) } },
       );

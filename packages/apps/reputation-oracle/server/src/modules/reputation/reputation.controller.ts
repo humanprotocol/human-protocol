@@ -27,7 +27,7 @@ export class ReputationController {
     description: 'Endpoint to get all reputations.',
   })
   @ApiQuery({
-    name: 'chainId',
+    name: 'chain_id',
     description: 'Chain ID for filtering reputations.',
     type: Number,
     required: true,
@@ -57,7 +57,7 @@ export class ReputationController {
     required: true,
   })
   @ApiQuery({
-    name: 'chainId',
+    name: 'chain_id',
     description: 'Chain ID for filtering the reputation.',
     type: Number,
     required: true,
